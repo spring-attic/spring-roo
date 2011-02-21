@@ -80,18 +80,19 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		Document pom;
 		try {
 			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "standard-project-template.xml"));
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 
-		Element rootElement = pom.getDocumentElement();
-		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(projectName);
-		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
-		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
+		Element root = pom.getDocumentElement();
+		
+		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(projectName);
+		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
 
-		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", rootElement);
-		for (Element e : versionElements) {
-			e.setTextContent("1." + majorJavaVersion);
+		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", root);
+		for (Element versionElement : versionElements) {
+			versionElement.setTextContent("1." + majorJavaVersion);
 		}
 
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
@@ -111,7 +112,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties")).getOutputStream());
-		} catch (IOException e1) {
+		} catch (IOException e) {
 			logger.warning("Unable to install log4j logging configuration");
 		}
 	}

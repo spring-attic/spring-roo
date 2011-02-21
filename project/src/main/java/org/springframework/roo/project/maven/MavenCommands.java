@@ -38,7 +38,7 @@ public class MavenCommands implements CommandMarker {
 		return mavenOperations.isCreateProjectAvailable();
 	}
 
-	@CliCommand(value = "project", help = "Creates a new project")
+	@CliCommand(value = "project", help = "Creates a new Maven project")
 	public void createProject(
 		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage, 
 		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName, 

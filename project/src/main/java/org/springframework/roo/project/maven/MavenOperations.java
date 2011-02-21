@@ -8,7 +8,6 @@ import org.springframework.roo.project.ProjectOperations;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface MavenOperations extends ProjectOperations {
 
