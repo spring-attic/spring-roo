@@ -91,7 +91,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(entityFields, "Entity fields required");
-		Assert.notNull(entityMethods, "EntityW methods required");
+		Assert.notNull(entityMethods, "Entity methods required");
 		Assert.notNull(identifierFields, "Identifier fields required");
 		Assert.notNull(managedEntities, "Managed entities required");
 		Assert.notNull(database, "Database required");
