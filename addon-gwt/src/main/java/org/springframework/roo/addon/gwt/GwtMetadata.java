@@ -71,10 +71,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private MethodMetadata findEntriesMethod;
 
 	private Map<GwtType, JavaType> mirrorTypeMap;
-
 	private ClassOrInterfaceTypeDetails governorTypeDetails;
 	private Path mirrorTypePath;
-
 	private Map<JavaSymbolName, GwtProxyProperty> orderedProxyFields;
 	private Map<JavaType, JavaType> gwtTypeMap;
 
@@ -85,7 +83,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		this.mirrorTypePath = mirrorTypePath;
 		this.entityMetadata = entityMetadata;
 		this.gwtTypeMap = gwtTypeMap;
-
 		this.orderedProxyFields = fieldTypeMap;
 
 		// We know GwtMetadataProvider already took care of all the necessary checks. So we can just re-create fresh representations of the types we're responsible for
@@ -93,43 +90,52 @@ public class GwtMetadata extends AbstractMetadataItem {
 	}
 
 	private void resolveEntityInformation() {
-		if (entityMetadata != null && entityMetadata.isValid()) {
-			// Lookup special fields
-			FieldMetadata versionField = entityMetadata.getVersionField();
-			FieldMetadata idField = entityMetadata.getIdentifierField();
-			Assert.notNull(versionField, "Version unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
-			Assert.notNull(idField, "Id unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
-			JavaSymbolName versionPropertyName = versionField.getFieldName();
-			JavaSymbolName idPropertyName = idField.getFieldName();
-
-			// Lookup the "find all" method and store it
-			findAllMethod = entityMetadata.getFindAllMethod();
-			findMethod = entityMetadata.getFindMethod();
-			findEntriesMethod = entityMetadata.getFindEntriesMethod();
-			countMethod = entityMetadata.getCountMethod();
-			Assert.notNull(findAllMethod, "Find all method unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
-			Assert.isTrue("id".equals(idPropertyName.getSymbolName()), "Id property must be named \"id\" (found \"" + idPropertyName + "\") for " + governorTypeDetails.getName() + " - required for GWT support");
-			Assert.isTrue("version".equals(versionPropertyName.getSymbolName()), "Version property must be named \"version\" (found \"" + versionPropertyName + "\") for " + governorTypeDetails.getName() + " - required for GWT support");
-			Assert.notNull(findAllMethod, "Find all method unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
+		if (entityMetadata == null || !entityMetadata.isValid()) {
+			return;
 		}
+		
+		// Lookup special fields
+		String typeName = governorTypeDetails.getName().getFullyQualifiedTypeName();
+
+		FieldMetadata idField = entityMetadata.getIdentifierField();
+		Assert.notNull(idField, "GWT support requires an @Id field for " + typeName);
+		JavaSymbolName idPropertyName = idField.getFieldName();
+		Assert.isTrue("id".equals(idPropertyName.getSymbolName()), "GWT support requires that an @Id field be named \"id\" (found \"" + idPropertyName + "\") for " + typeName);
+
+		FieldMetadata versionField = entityMetadata.getVersionField();
+		Assert.notNull(versionField, "GWT support requires an @Version field for " + typeName);
+		JavaSymbolName versionPropertyName = versionField.getFieldName();
+		Assert.isTrue("version".equals(versionPropertyName.getSymbolName()), "GWT support requires that an @Version field be named \"version\" (found \"" + versionPropertyName + "\") for " + typeName);
+
+		// Lookup the find and count methods and store them
+		findAllMethod = entityMetadata.getFindAllMethod();
+		Assert.notNull(findAllMethod, "GWT support requires a findAll method for " + typeName);
+
+		findMethod = entityMetadata.getFindMethod();
+		Assert.notNull(findMethod, "GWT support requires a find method for " + typeName);
+
+		findEntriesMethod = entityMetadata.getFindEntriesMethod();
+		Assert.notNull(findEntriesMethod, "GWT support requires a findEntries method for " + typeName);
+
+		countMethod = entityMetadata.getCountMethod();
+		Assert.notNull(countMethod, "GWT support requires a count method for " + typeName);
 	}
 
 	private ClassOrInterfaceTypeDetails buildProxy() {
-
 		String destinationMetadataId = getDestinationMetadataId(GwtType.PROXY);
 
-		//Get the Proxy's PhysicalTypeMetaData representation of the on disk Proxy
+		// Get the proxy's PhysicalTypeMetaData representation of the on disk proxy
 		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
 
-		//Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will be overridden if the Proxy has already been created
+		// Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will be overridden if the Proxy has already been created
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(destinationMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
 
 		List<AnnotationMetadataBuilder> typeAnnotations = createAnnotations();
 
-		// @ProxyFor(Employee.class)
+		// Add @ProxyForName("com.foo.bar.Foo") annotation
 		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.ProxyForName")));
 
-		//Only add annotations that don't already exist on the target
+		// Only add annotations that don't already exist on the target
 		for (AnnotationMetadataBuilder annotationBuilder : typeAnnotations) {
 			boolean exists = false;
 			for (AnnotationMetadataBuilder existingAnnotation : typeDetailsBuilder.getAnnotations()) {
@@ -144,8 +150,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			}
 		}
 
-		// extends EntityProxy
-		//Only inherit from EntityProxy if extension is not already defined
+		// Only inherit from EntityProxy if extension is not already defined
 		if (!typeDetailsBuilder.getExtendsTypes().contains(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"))) {
 			typeDetailsBuilder.addExtendsTypes(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"));
 		}
@@ -155,7 +160,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		 * processing, but order proxy getters alphabetically by name.
 		 */
 
-		// Getter methods for EmployeeProxy
+		// Getter methods for proxy
 		for (JavaSymbolName propertyName : orderedProxyFields.keySet()) {
 			JavaType methodReturnType = orderedProxyFields.get(propertyName).getPropertyType();
 			JavaSymbolName methodName = new JavaSymbolName("get" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
@@ -163,7 +168,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>();
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, new InvocableMemberBodyBuilder());
 
-			//Only add a method if it isn't already present, this leaves the user defined methods in play
+			// Only add a method if it isn't already present, this leaves the user defined methods in play
 			boolean match = false;
 			for (MethodMetadataBuilder builder : typeDetailsBuilder.getDeclaredMethods()) {
 				if (GwtUtils.methodBuildersEqual(methodBuilder, builder)) {
@@ -177,15 +182,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 			}
 		}
 
-		// Setter methods for EmployeeProxy
 		/*
-		* The methods in the proxy will be sorted alphabetically, which makes sense
-		* for the Java type. However, we want to process them in the order the
-		* fields are declared, such that the first database field is the first
-		* field we add to the dataDictionary. This affects the order of the
-		* properties in the desktop client, as well as the primary/secondary
-		* properties in the mobile client.
-		*/
+		 * Setter methods for proxy
+		 * 
+		 * The methods in the proxy will be sorted alphabetically, which makes sense
+		 * for the Java type. However, we want to process them in the order the
+		 * fields are declared, such that the first database field is the first
+		 * field we add to the dataDictionary. This affects the order of the
+		 * properties in the desktop client, as well as the primary/secondary
+		 * properties in the mobile client.
+		 */
 		for (JavaSymbolName propertyName : orderedProxyFields.keySet()) {
 			JavaType methodReturnType = JavaType.VOID_PRIMITIVE;
 			JavaSymbolName methodName = new JavaSymbolName("set" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
@@ -193,7 +199,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			List<JavaSymbolName> methodParameterNames = Collections.singletonList(propertyName);
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, new InvocableMemberBodyBuilder());
 
-			//Only add a method if it isn't already present, this leaves the user defined methods in play
+			// Only add a method if it isn't already present, this leaves the user defined methods in play
 			boolean match = false;
 			for (MethodMetadataBuilder builder : typeDetailsBuilder.getDeclaredMethods()) {
 				if (GwtUtils.methodBuildersEqual(methodBuilder, builder)) {
@@ -223,7 +229,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 	}
 
 	public String buildUiXml(String templateContents, String destFile) {
-
 		try {
 			Transformer transformer = XmlUtils.createIndentingTransformer();
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
@@ -251,7 +256,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			Element templateHoldingElement = XmlUtils.findFirstElement("//*[@id='" + "boundElementHolder" + "']", templateDocument.getDocumentElement());
 
 			if (existingHoldingElement != null) {
-
 				HashMap<String, Element> templateElementMap = new LinkedHashMap<String, Element>();
 				for (Element element : XmlUtils.findElements("//*[@id]", templateHoldingElement)) {
 					templateElementMap.put(element.getAttribute("id"), element);

@@ -60,32 +60,33 @@ public class GwtUtils {
 	}
 
 	public static boolean hasRequiredEntityMethods(EntityMetadata entityMetadata) {
+		String typeName = entityMetadata.getMemberHoldingTypeDetails().getName().getFullyQualifiedTypeName();
 		if (entityMetadata.getFindAllMethod() == null) {
-			logger.severe("The GWT Add-On requires that a proxied entity has a Find All Method.");
+			logger.severe("GWT support requires that a proxied entity has a findAll method for type " + typeName);
 			return false;
 		}
 		if (entityMetadata.getFindEntriesMethod() == null) {
-			logger.severe("The GWT Add-On requires that a proxied entity has a Find Entries method.");
+			logger.severe("GWT support requires that a proxied entity has a findEntries method for type " + typeName);
 			return false;
 		}
 		if (entityMetadata.getCountMethod() == null) {
-			logger.severe("The GWT Add-On requires that a proxied entity has a Count method.");
+			logger.severe("GWT support requires that a proxied entity has a count method for type " + typeName);
 			return false;
 		}
 		if (entityMetadata.getPersistMethod() == null) {
-			logger.severe("The GWT Add-On requires that a proxied entity has a Persist method.");
+			logger.severe("GWT support requires that a proxied entity has a persist method for type " + typeName);
 			return false;
 		}
 		if (entityMetadata.getRemoveMethod() == null) {
-			logger.severe("The GWT Add-On requires that a proxied entity has a Remove method.");
+			logger.severe("GWT support requires that a proxied entity has a remove method for type " + typeName);
 			return false;
 		}
 		if (entityMetadata.getVersionAccessor() == null) {
-			logger.severe("The GWT Add-On requires that a proxied entity has a Version accessor method.");
+			logger.severe("GWT support that a proxied entity has an @Version field accessor method for type " + typeName);
 			return false;
 		}
 		if (entityMetadata.getIdentifierAccessor() == null) {
-			logger.severe("The GWT Add-On requires that a proxied entity has an Identifier accessor method.");
+			logger.severe("GWT support requires that a proxied entity has an @Id field accessor method for type " + typeName);
 			return false;
 		}
 		return true;
