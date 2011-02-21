@@ -32,12 +32,10 @@ import org.springframework.roo.project.Path;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
-	
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 
 	protected void activate(ComponentContext context) {
@@ -69,14 +67,14 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 		
 		// Abort if we don't have getter information available
-		if (entityMetadata == null) {
+		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
 		}
 		
 		String beanPlural = javaType.getSimpleTypeName() + "s";
-		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
-		if (plural != null) {
-			beanPlural = plural.getPlural();
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
+		if (pluralMetadata != null && pluralMetadata.isValid()) {
+			beanPlural = pluralMetadata.getPlural();
 		}
 		
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(SolrMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
