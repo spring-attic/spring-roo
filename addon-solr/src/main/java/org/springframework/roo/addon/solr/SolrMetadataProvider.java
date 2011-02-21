@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.solr;
 
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -80,7 +80,7 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 		}
 		
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(SolrMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
-		Map<MethodMetadata, FieldMetadata> accessorDetails = new HashMap<MethodMetadata, FieldMetadata>();
+		Map<MethodMetadata, FieldMetadata> accessorDetails = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		for (MethodMetadata methodMetadata : MemberFindingUtils.getMethods(memberDetails)) {
 			if (isMethodOfInterest(methodMetadata)) {
 				FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(methodMetadata));
