@@ -104,8 +104,6 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		javaLangSimpleTypeNames.add("VerifyError");
 		javaLangSimpleTypeNames.add("VirtualMachineError");
 	}
-
-	
 	
 	public ImportRegistrationResolverImpl(JavaPackage compilationUnitPackage) {
 		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
@@ -145,7 +143,7 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 				return false;
 			}
 		}
-
+		
 		return true;
 	}
 	
