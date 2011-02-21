@@ -8,14 +8,13 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.AbstractProjectOperations;
-import org.springframework.roo.project.maven.pom.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.maven.pom.Dependency;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -38,9 +37,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private ApplicationContextOperations applicationContextOperations;
-
-	protected void activate(ComponentContext context) {
-	}
 
 	public boolean isCreateProjectAvailable() {
 		return !isProjectAvailable();
