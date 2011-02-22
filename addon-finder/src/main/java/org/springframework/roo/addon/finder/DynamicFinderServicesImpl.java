@@ -78,6 +78,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			tokens = tokenize(memberDetails, finderName, plural);
 		} catch (FinderFieldTokenMissingException e) {
 			return null;
+		} catch (InvalidFinderException ife) {
+			return null;
 		}
 
 		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
@@ -262,7 +264,15 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		String finder = finderName.getSymbolName();
 
 		// Just in case it starts with findBy we can remove it here
-		finder = finder.replace("find" + plural + "By", "");
+		String findBy = "find" + plural + "By";
+		if (finder.startsWith(findBy)) {
+			finder = finder.substring(finder.indexOf(findBy));
+		}
+		
+		// if finder still contains the findBy sequence it is most likely a wrong finder (ie someone pasted the finder string accidentally twice
+		if (finder.contains(findBy)) {
+			throw new InvalidFinderException("Dynamic finder definition for '" + finder + "' in " + simpleTypeName + ".java is invalid");
+		}
 
 		SortedSet<FieldToken> fieldTokens = new TreeSet<FieldToken>();
 		for (MethodMetadata methodMetadata : getLocatedMutators(memberDetails)) {
