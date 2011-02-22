@@ -4,7 +4,6 @@ import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
-import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
 import com.google.gwt.activity.shared.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -126,8 +125,10 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 		ScaffoldPlaceHistoryMapper mapper = GWT.create(ScaffoldPlaceHistoryMapper.class);
 		mapper.setFactory(placeHistoryFactory);
 		PlaceHistoryHandler placeHistoryHandler = new PlaceHistoryHandler(mapper);
-		ProxyListPlace defaultPlace = getTopPlaces().iterator().next();
-		placeHistoryHandler.register(placeController, eventBus, defaultPlace);
-		placeHistoryHandler.handleCurrentHistory();
+		if (getTopPlaces().iterator().hasNext()) {
+			ProxyListPlace defaultPlace = getTopPlaces().iterator().next();
+			placeHistoryHandler.register(placeController, eventBus, defaultPlace);
+			placeHistoryHandler.handleCurrentHistory();
+		}
 	}
 }
