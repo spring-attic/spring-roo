@@ -3,8 +3,10 @@ package org.springframework.roo.addon.gwt;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -14,6 +16,7 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -77,7 +80,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		// Start by converting the MID into something more useful (we still use the concept of a governor, given the MID refers to the governor)
 		JavaType governorTypeName = GwtMetadata.getJavaType(metadataIdentificationString);
 		Path governorTypePath = GwtMetadata.getPath(metadataIdentificationString);
-
 		// Abort if this is for a .java file that is not on the main source path
 		if (!governorTypePath.equals(Path.SRC_MAIN_JAVA)) {
 			return null;
@@ -117,9 +119,13 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		JavaType keyTypeName = gwtTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(GwtType.PROXY, projectMetadata, governorTypeName);
 		Path keyTypePath = Path.SRC_MAIN_JAVA;
 
+		metadataDependencyRegistry.registerDependency(entityMetadata.getId(), metadataIdentificationString);
+
 		// Lookup any existing proxy type and verify it is mapped to this governor MID (ie detect name collisions and abort if necessary)
 		// We do this before deleting, to verify we don't get into a delete-create-delete type case if there are name collisions
 		PhysicalTypeMetadata keyPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath));
+
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath), metadataIdentificationString);
 
 		if (keyPhysicalTypeMetadata != null && keyPhysicalTypeMetadata.isValid() && keyPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			// The key presently exists, so do a sanity check
@@ -138,10 +144,24 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
 
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTypeService.getClientSideTypeMap(memberHoldingTypeDetails, gwtClientTypeMap);
-		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(governorTypeDetails);
 
 		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeMap, governorTypeDetails, keyTypePath, entityMetadata, clientSideTypeMap, gwtClientTypeMap);
+		if (keyPhysicalTypeMetadata == null) {
+			DefaultPhysicalTypeMetadata defaultPhysicalTypeMetadata = new DefaultPhysicalTypeMetadata(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath), keyTypePath.toString(), gwtMetadata.buildProxy());
+			Set<JavaSymbolName> proxyFields = new HashSet<JavaSymbolName>();
+			for (JavaSymbolName symbolName : clientSideTypeMap.keySet()) {
+				if (clientSideTypeMap.get(symbolName).getValueType().equals(mirrorTypeMap.get(GwtType.PROXY))) {
+					proxyFields.add(symbolName);
+				}
+			}
+			for (JavaSymbolName symbolName : proxyFields) {
+				GwtProxyProperty proxyProperty = clientSideTypeMap.get(symbolName);
+				GwtProxyProperty newProxyProperty = new GwtProxyProperty(getProjectMetadata(), proxyProperty.getPropertyType(), defaultPhysicalTypeMetadata, proxyProperty.getName(), proxyProperty.getGetter());
+				clientSideTypeMap.put(symbolName, newProxyProperty);
+			}
+		}
 
+		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(governorTypeDetails, clientSideTypeMap);
 		Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new HashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
 		Map<String, String> xmlToBeWritten = new HashMap<String, String>();
 		for (GwtType gwtType : mirrorTypeMap.keySet()) {
@@ -186,6 +206,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
+
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		if (projectMetadata == null) {
 			return;

@@ -78,8 +78,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 	public GwtMetadata(String identifier, Map<GwtType, JavaType> mirrorTypeMap, ClassOrInterfaceTypeDetails governorTypeDetails, Path mirrorTypePath, EntityMetadata entityMetadata, Map<JavaSymbolName, GwtProxyProperty> fieldTypeMap, Map<JavaType, JavaType> gwtTypeMap) {
 		super(identifier);
-		this.mirrorTypeMap = mirrorTypeMap;
+		Assert.notNull(governorTypeDetails, "Governor details are required");
+		Assert.notNull(mirrorTypeMap, "Mirror Type Map is required");
+		Assert.notNull(mirrorTypePath, "Mirror Type Path is required");
+		Assert.notNull(governorTypeDetails, "Governor details are required");
+		Assert.notNull(entityMetadata, "Entity Metadata is required");
+		Assert.notNull(gwtTypeMap, "GWT Type Map is required");
+		Assert.notNull(fieldTypeMap, "Field Type Map is required");
+
 		this.governorTypeDetails = governorTypeDetails;
+		this.mirrorTypeMap = mirrorTypeMap;
 		this.mirrorTypePath = mirrorTypePath;
 		this.entityMetadata = entityMetadata;
 		this.gwtTypeMap = gwtTypeMap;
@@ -121,7 +129,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		Assert.notNull(countMethod, "GWT support requires a count method for " + typeName);
 	}
 
-	private ClassOrInterfaceTypeDetails buildProxy() {
+	public ClassOrInterfaceTypeDetails buildProxy() {
 		String destinationMetadataId = getDestinationMetadataId(GwtType.PROXY);
 
 		// Get the proxy's PhysicalTypeMetaData representation of the on disk proxy

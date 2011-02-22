@@ -51,19 +51,15 @@ import java.util.logging.Logger;
 @Component
 @Service
 public class GwtTemplatingServiceImpl implements GwtTemplatingService {
-	private static Logger logger = HandlerUtils.getLogger(GwtTemplatingServiceImpl.class);
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private GwtTypeService gwtTypeService;
 
-	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails) {
+	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		JavaType governorTypeName = governorTypeDetails.getName();
 		Path governorTypePath = PhysicalTypeIdentifier.getPath(governorTypeDetails.getDeclaredByMetadataId());
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtTemplatingServiceImpl.class.getName(), governorTypeDetails).getDetails();
-		Map<JavaType, JavaType> clientTypeMap = gwtTypeService.getClientTypeMap(governorTypeDetails);
-		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTypeService.getClientSideTypeMap(memberHoldingTypeDetails, clientTypeMap);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
