@@ -275,6 +275,7 @@ public abstract class WebMetadataUtils {
 		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {
+			registerDependency(metadataDependencyRegistry, finderMetadataKey, metadataIdentificationString);
 			for (MethodMetadata method: finderMetadata.getAllDynamicFinders()) {
 				List<JavaSymbolName> paramNames = method.getParameterNames();
 				List<JavaType> paramTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
@@ -293,7 +294,6 @@ public abstract class WebMetadataUtils {
 						fields.add(fieldMd.build());
 					}
 				}
-				registerDependency(metadataDependencyRegistry, method.getDeclaredByMetadataId(), metadataIdentificationString);
 				FinderMetadataDetails details = new FinderMetadataDetails(method.getMethodName().getSymbolName(), method, fields);
 				finderMetadataDetails.add(details);
 			}
