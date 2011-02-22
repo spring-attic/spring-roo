@@ -23,10 +23,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Metadata for {@link RooEntity}.
- * 
- * <p>
- * Any getter produced by this metadata is automatically included in the {@link BeanInfoMetadata}.
+ * Metadata for {@link RooEntity#finders()}.
  * 
  * @author Stefan Schmidt
  * @author Ben Alex

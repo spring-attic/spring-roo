@@ -15,11 +15,10 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Provides utility methods historically in BeanInfoMetadata.
+ * Provides utility methods for querying JavaBeans.
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public abstract class BeanInfoUtils {
 
