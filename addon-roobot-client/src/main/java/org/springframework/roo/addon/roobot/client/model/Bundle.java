@@ -112,7 +112,7 @@ public class Bundle {
 		Collections.sort(bundles, new Comparator<Bundle>() {
 			public int compare(Bundle o1, Bundle o2) {
 				if (o1.getRanking() == o2.getRanking()) return 0;
-				else if (o1.getRanking() > o2.getRanking()) return 1;
+				else if (o1.getRanking() < o2.getRanking()) return 1;
 				else return -1;
 			}});
 		return Collections.unmodifiableList(bundles);
@@ -126,7 +126,7 @@ public class Bundle {
 				//order by ranking if search relevance is equal
 				else {
 					if (o1.getRanking() == o2.getRanking()) return 0;
-					else if (o1.getRanking() > o2.getRanking()) return 1;
+					else if (o1.getRanking() < o2.getRanking()) return 1;
 					else return -1;	
 				}
 			}});
