@@ -47,7 +47,7 @@ public abstract class BeanInfoUtils {
 	 * <p>
 	 * Not every JavaBean getter or setter actually backs to a field with an identical name. In such cases, null will be returned.
 	 * 
-	 * @param memberHoldingTypeDetails the member holders to scan (required)
+	 * @param memberDetails the member holders to scan (required)
 	 * @param propertyName the property name (required)
 	 * @return the field if found, or null if it could not be found
 	 */

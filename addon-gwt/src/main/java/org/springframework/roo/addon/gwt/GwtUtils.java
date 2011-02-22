@@ -82,7 +82,7 @@ public class GwtUtils {
 			return false;
 		}
 		if (entityMetadata.getVersionAccessor() == null) {
-			logger.severe("GWT support that a proxied entity has an @Version field accessor method for type " + typeName);
+			logger.severe("GWT support requires that a proxied entity has an @Version field accessor method for type " + typeName);
 			return false;
 		}
 		if (entityMetadata.getIdentifierAccessor() == null) {

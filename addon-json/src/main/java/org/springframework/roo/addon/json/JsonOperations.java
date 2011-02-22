@@ -26,7 +26,7 @@ public interface JsonOperations {
 	void annotateType(JavaType type, String rootName);
 	
 	/**
-	 * Annotate all types in the project which are annotated with @{@link RooJavaBean}.
+	 * Annotate all types in the project which are annotated with @{@link org.springframework.roo.addon.javabean.RooJavaBean}.
 	 */
 	void annotateAll();
 }

@@ -20,7 +20,7 @@ public interface AddOnSearch {
 	 * not been downloaded or installed by the user.
 	 * 
 	 * <p>
-	 * Information is optionally emitted to the console via {@link Logger.info}.
+	 * Information is optionally emitted to the console via {@link Logger#info}.
 	 * 
 	 * @param showFeedback if false will never output any messages to the console (required)
 	 * @param searchTerms comma separated list of search terms (required)

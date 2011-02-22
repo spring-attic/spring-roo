@@ -41,13 +41,13 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	/**
 	 * Return the type arg for the client side method, given the domain method return type.
-	 * if domainMethodReturnType is List<Integer> or Set<Integer>, returns the same.
-	 * if domainMethodReturnType is List<Employee>, return List<EmployeeProxy>
+	 * If domainMethodReturnType is List<Integer> or Set<Integer>, returns the same.
+	 * If domainMethodReturnType is List<Employee>, return List<EmployeeProxy>
 	 *
 	 * @param type
 	 * @param projectMetadata
 	 * @param governorType
-	 * @return
+	 * @return the GWT side leaf type as a JavaType
 	 */
 	public JavaType getGwtSideLeafType(JavaType type, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType) {
 		if (type.isPrimitive()) {

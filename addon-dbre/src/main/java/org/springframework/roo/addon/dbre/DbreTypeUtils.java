@@ -61,7 +61,7 @@ public abstract class DbreTypeUtils {
 	 * 
 	 * <p>
 	 * The search for the table names starts on the @Table annotation and if not present, the
-	 * @RooEntity "table" attribute is checked. If not present on either, the method returns null.
+	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
 	 * 
 	 * @param classOrInterfaceTypeDetails the type to search.
 	 * @return the table name (if known) or null (if not found).

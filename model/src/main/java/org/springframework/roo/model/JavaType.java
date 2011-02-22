@@ -24,7 +24,7 @@ import org.springframework.roo.support.util.StringUtils;
  * <p>
  * This class is used whenever a formal reference to a Java type is required.
  * It provides convenient ways to determine the type's simple name and package name.
- * A related {@link Converter} is also offered.
+ * A related {@link org.springframework.core.convert.converter.Converter} is also offered.
  * 
  * @author Ben Alex
  * @since 1.0

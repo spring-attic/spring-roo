@@ -15,7 +15,6 @@ public interface GitOperations {
 	 * (works like 'git commmit -a -m {message}')
 	 * 
 	 * @param message Commit message
-	 * @return Container for Git commit Id and message
 	 */
 	void commitAllChanges(String message);
 	
@@ -24,7 +23,6 @@ public interface GitOperations {
 	 * 
 	 * @param noOfCommitsToRevert number of commits to revert (HEAD - n)
 	 * @param message Commit message
-	 * @return Container for Git commit Id and message
 	 */
 	void revertCommit(int noOfCommitsToRevert, String message);
 	

@@ -65,7 +65,6 @@ public interface DbreModelService {
 	 * available.
 	 * 
 	 * @param schema the schema to refresh (required)
-	 * @param excludeTables a set of tables to exclude
 	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
 	Database refreshDatabase(Schema schema);

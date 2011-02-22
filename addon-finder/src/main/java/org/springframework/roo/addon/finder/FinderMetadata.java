@@ -83,7 +83,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * It is required that the requested name was defined in the {@link RooEntity#finders()}. If it is not
 	 * present, an exception is thrown.
 	 * 
-	 * @param the dynamic finder method name
+	 * @param finderName the dynamic finder method name
 	 * @return the user-defined method, or an ITD-generated method (never returns null)
 	 */
 	public MethodMetadata getDynamicFinderMethod(JavaSymbolName finderName) {

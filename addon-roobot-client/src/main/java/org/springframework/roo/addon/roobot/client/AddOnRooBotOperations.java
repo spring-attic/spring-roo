@@ -17,17 +17,17 @@ public interface AddOnRooBotOperations extends AddOnSearch {
 
 	/**
 	 * Display information for a given ({@link AddOnBundleSymbolicName}. 
-	 * Information is piped to standard JDK {@link Logger.info}
+	 * Information is piped to standard JDK {@link Logger#info}
 	 * 
-	 * @param the bundle symbolic name (required)
+	 * @param bsn the bundle symbolic name (required)
 	 */
 	void addOnInfo(AddOnBundleSymbolicName bsn);
 	
 	/**
 	 * Display information for a given bundle ID. 
-	 * Information is piped to standard JDK {@link Logger.info}
+	 * Information is piped to standard JDK {@link Logger#info}
 	 * 
-	 * @param the bundle ID (required)
+	 * @param bundleId the bundle ID (required)
 	 */
 	void addOnInfo(String bundleId);
 	

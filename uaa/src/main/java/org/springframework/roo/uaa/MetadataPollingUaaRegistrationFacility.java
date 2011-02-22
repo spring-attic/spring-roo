@@ -11,13 +11,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataLogger;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 
 /**
- * Regularly polls {@link MetadataDependencyRegistry#getTimings()} and incorporates all timings into UAA
+ * Regularly polls {@link MetadataLogger#getTimings()} and incorporates all timings into UAA
  * feature use statistics. 
  * 
  * @author Ben Alex

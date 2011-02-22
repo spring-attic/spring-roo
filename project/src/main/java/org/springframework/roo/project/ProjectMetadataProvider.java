@@ -29,7 +29,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param dependency the dependency to add (required)
+	 * @param dependencies the dependencies to add (required)
 	 */
 	void addDependencies(List<Dependency> dependencies);
 	

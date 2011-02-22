@@ -28,7 +28,6 @@ public interface JpaOperations {
 	 * @param userName the username to connect to the database
 	 * @param password the password to connect to the database
 	 * @param persistenceUnit the name of the persistence unit defined in the persistence.xml file
-	 * @param persistenceUnit2 
 	 */
 	void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String persistenceUnit);
 	

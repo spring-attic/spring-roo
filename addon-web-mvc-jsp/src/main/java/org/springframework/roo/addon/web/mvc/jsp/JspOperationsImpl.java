@@ -168,8 +168,10 @@ public class JspOperationsImpl implements JspOperations {
 	/**
 	 * Creates a new Spring MVC static view.
 	 * 
-	 * @param path the static view to create in (required, ie '/foo/blah')
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
+	 * @param folderName the folder name
+	 * @param category the category
+	 * @param registerStaticController whether to register a static controller
 	 */
 	private void installView(JavaSymbolName viewName, String folderName, String title, String category, boolean registerStaticController) {
 		// Probe if common web artifacts exist, and install them if needed
@@ -392,8 +394,8 @@ public class JspOperationsImpl implements JspOperations {
 	/**
 	 * This method will copy the contents of a directory to another if the resource does not already exist in the target directory
 	 * 
-	 * @param sourceAntPath directory
-	 * @param target directory
+	 * @param sourceAntPath the source path
+	 * @param targetDirectory the target directory
 	 */
 	private void copyDirectoryContents(String sourceAntPath, String targetDirectory) {
 		Assert.hasText(sourceAntPath, "Source path required");

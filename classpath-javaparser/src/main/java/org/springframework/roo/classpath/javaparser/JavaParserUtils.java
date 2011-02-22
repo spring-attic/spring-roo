@@ -555,8 +555,7 @@ public class JavaParserUtils  {
 	 * If a simple name is passed to this method, the corresponding import will be evaluated if its simple name matches.
 	 * This therefore reflects the normal Java semantics for using simple type names that have been imported.
 	 *
-	 * @param imports the compilation unit's imports (required)
-	 * @param typesInCompilationUnit the types in the compilation unit (required)
+	 * @param compilationUnitServices the types in the compilation unit (required)
 	 * @param nameExpr the expression to locate an import for (which would generally be a {@link NameExpr} and thus not have a package identifier; required)
 	 * @return the relevant import, or null if there is no import for the expression
 	 */

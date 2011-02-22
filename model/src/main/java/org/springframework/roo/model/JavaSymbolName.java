@@ -32,7 +32,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * The name will be enforced as follows:
 	 * 
 	 * <ul>
-	 * <li>The rules listed in {link {@link JavaTypeUtils#assertJavaNameLegal(String)}}
+	 * <li>The rules listed in {@link #assertJavaNameLegal(String)}
 	 * </ul>
      *
 	 * @param symbolName the name (mandatory)

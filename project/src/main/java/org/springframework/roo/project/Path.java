@@ -36,7 +36,6 @@ public class Path implements Comparable<Path> {
 	 * identification string tokenization.
 	 * 
 	 * @param name the name (required and cannot contain a "?" character)
-	 * @param autoCreate a flag which if set cause the path to be created on first contact
 	 */
 	public Path(String name) {
 		Assert.hasText(name, "Name required");

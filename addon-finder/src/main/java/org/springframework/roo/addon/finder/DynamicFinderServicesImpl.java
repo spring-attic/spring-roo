@@ -368,7 +368,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	 * Returns the {@link JavaType} from the specified {@link MemberDetails} object;
 	 * 
 	 * <p>
-	 * If the found type is abstract the next {@link MemberHoldingTypeDetails) is searched.
+	 * If the found type is abstract the next {@link MemberHoldingTypeDetails} is searched.
 	 * 
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return the first non-abstract JavaType, or null if not found
