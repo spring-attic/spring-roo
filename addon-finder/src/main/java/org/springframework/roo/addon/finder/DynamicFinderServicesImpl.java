@@ -266,12 +266,12 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		// Just in case it starts with findBy we can remove it here
 		String findBy = "find" + plural + "By";
 		if (finder.startsWith(findBy)) {
-			finder = finder.substring(finder.indexOf(findBy));
+			finder = finder.substring(findBy.length());
 		}
 		
 		// if finder still contains the findBy sequence it is most likely a wrong finder (ie someone pasted the finder string accidentally twice
 		if (finder.contains(findBy)) {
-			throw new InvalidFinderException("Dynamic finder definition for '" + finder + "' in " + simpleTypeName + ".java is invalid");
+			throw new InvalidFinderException("Dynamic finder definition for '" + finderName.getSymbolName() + "' in " + simpleTypeName + ".java is invalid");
 		}
 
 		SortedSet<FieldToken> fieldTokens = new TreeSet<FieldToken>();
