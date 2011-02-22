@@ -270,7 +270,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			attributesToDeleteIfPresent.add(new JavaSymbolName(IDENTIFIER_TYPE));
 
 			// We don't need a PK class, so we just tell the EntityMetadataProvider via IdentifierService the column name, field type and field name to use
-			List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table.getPrimaryKeys());
+			List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table.getName(), table.getPrimaryKeys());
 			identifierResults.put(javaType, identifiers);
 		} else if (pkCount == 0 || pkCount > 1) {
 			// Table has either no primary keys or more than one primary key so create a composite key
@@ -284,7 +284,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 			// We need a PK class, so we tell the IdentifierMetadataProvider via IdentifierService the various column names, field types and field names to use
 			// For tables with no primary keys, create a composite key using all the table's columns
-			List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table.getColumns()) : getIdentifiersFromPrimaryKeys(table.getPrimaryKeys());
+			List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table.getName(), table.getColumns()) : getIdentifiersFromPrimaryKeys(table.getName(), table.getPrimaryKeys());
 			identifierResults.put(identifierType, identifiers);
 		}
 	}
@@ -318,17 +318,22 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 	}
 
-	private List<Identifier> getIdentifiersFromPrimaryKeys(Set<Column> primaryKeys) {
-		return getIdentifiersFromColumns(primaryKeys);
+	private List<Identifier> getIdentifiersFromPrimaryKeys(String tableName, Set<Column> primaryKeys) {
+		return getIdentifiersFromColumns(tableName, primaryKeys);
 	}
 
-	private List<Identifier> getIdentifiersFromColumns(Set<Column> columns) {
+	private List<Identifier> getIdentifiersFromColumns(String tableName, Set<Column> columns) {
 		List<Identifier> result = new ArrayList<Identifier>();
 
 		// Add fields to the identifier class
 		for (Column column : columns) {
 			String columnName = column.getName();
-			JavaSymbolName fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(columnName));
+			JavaSymbolName fieldName;
+			try {
+				fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(columnName));
+			} catch (RuntimeException e) {
+				throw new IllegalArgumentException("Failed to create field name for column '" + columnName + "' in table '" + tableName + "': " + e.getMessage());
+			}
 			JavaType fieldType = column.getJavaType();
 			result.add(new Identifier(fieldName, fieldType, columnName));
 		}
