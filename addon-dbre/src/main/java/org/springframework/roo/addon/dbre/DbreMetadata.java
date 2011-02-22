@@ -788,7 +788,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private MethodMetadata getBooleanPrimitiveAccessor(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 		String fieldName = field.getFieldName().getSymbolName();
-		String methodBody = "return this." + fieldName + " == null ? false : this." + fieldName + ".booleanValue();";
+		String methodBody = "return this." + fieldName + " != null && this." + fieldName + ";";
 		return getAccessor(JavaType.BOOLEAN_PRIMITIVE, getBooleanPrimitiveAccessorName(field), methodBody);
 	}
 
