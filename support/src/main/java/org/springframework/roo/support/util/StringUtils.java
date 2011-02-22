@@ -1171,4 +1171,21 @@ public abstract class StringUtils {
 		String ts = trimWhitespace(str);
 		return !hasText(ts) ? "" : ts;
 	}
+
+	/**
+	 * Returns either the passed in String, or if the String is empty or null, the value of defaultStr. 
+	 * 
+	 * <ul>
+	 * <li><code>StringUtils.defaultIfEmpty(null, "NULL") = "NULL"</code></li>
+	 * <li><code>StringUtils.defaultIfEmpty("", "NULL") = "NULL"</code></li>
+	 * <li><code>StringUtils.defaultIfEmpty("bat", "NULL") = "bat"</code></li>
+	 * </ul>
+	 * 
+	 * @param str the String to check, may be null
+	 * @param defaultStr the default String to return if the input is empty ("") or null, may be null 
+	 * @return the passed in String, or the default
+	 */
+	public static String defaultIfEmpty(String str, String defaultStr) {
+		return hasText(str) ? str : defaultStr;
+	}
 }
