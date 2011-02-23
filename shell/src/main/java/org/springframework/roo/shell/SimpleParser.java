@@ -302,79 +302,21 @@ public class SimpleParser implements Parser {
 	}
 
 	static String isMatch(String buffer, String command, boolean strictMatching) {
-		if ("".equals(buffer.trim())) {
-			return "";
+		String commandNameBuffer = buffer.trim();
+		String bufferToReturn = "";
+		if (buffer.contains(" --")) {
+			commandNameBuffer = StringUtils.split(commandNameBuffer, " --")[0];
+			bufferToReturn = buffer.substring(buffer.indexOf(" --")).trim();
 		}
-		String[] commandWords = StringUtils.delimitedListToStringArray(command, " ");
-		int lastCommandWordUsed = 0;
-		Assert.notEmpty(commandWords, "Command required");
-
-		String bufferToReturn = null;
-		String lastWord = null;
-
-		next_buffer_loop: for (int bufferIndex = 0; bufferIndex < buffer.length(); bufferIndex++) {
-			String bufferSoFarIncludingThis = buffer.substring(0, bufferIndex + 1);
-			String bufferRemaining = buffer.substring(bufferIndex + 1);
-
-			int bufferLastIndexOfWord = bufferSoFarIncludingThis.lastIndexOf(" ");
-			String wordSoFarIncludingThis = bufferSoFarIncludingThis;
-			if (bufferLastIndexOfWord != -1) {
-				wordSoFarIncludingThis = bufferSoFarIncludingThis.substring(bufferLastIndexOfWord);
+		if (StringUtils.startsWithIgnoreCase(command, commandNameBuffer)) {
+			if (buffer.contains(" --") && !StringUtils.startsWithIgnoreCase(commandNameBuffer, command)) {
+				// Needed this check if user began entering options. If so we actually need to check
+				// if the commandNameBuffer starts with the command
+				return null;
 			}
-
-			if (wordSoFarIncludingThis.equals(" ") || bufferIndex == buffer.length() - 1) {
-				if (bufferIndex == buffer.length() - 1 && !"".equals(wordSoFarIncludingThis.trim())) {
-					lastWord = wordSoFarIncludingThis.trim();
-				}
-
-				// At end of word or buffer. Let's see if a word matched or not
-				for (int candidate = lastCommandWordUsed; candidate < commandWords.length; candidate++) {
-					if (lastWord != null && lastWord.length() > 0 && commandWords[candidate].startsWith(lastWord)) {
-						if (bufferToReturn == null) {
-							// This is the first match, so ensure the intended match really represents the start of a command and not a later word within it
-							if (lastCommandWordUsed == 0 && candidate > 0) {
-								// This is not a valid match
-								bufferToReturn = null;
-								break next_buffer_loop;
-							}
-						}
-
-						if (bufferToReturn != null) {
-							// We already matched something earlier, so ensure we didn't skip any word
-							if (candidate != lastCommandWordUsed + 1) {
-								// User has skipped a word
-								bufferToReturn = null;
-								break next_buffer_loop;
-							}
-						}
-
-						bufferToReturn = bufferRemaining;
-						lastCommandWordUsed = candidate;
-						if (candidate + 1 == commandWords.length) {
-							// This was a match for the final word in the command, so abort
-							break next_buffer_loop;
-						}
-						// There are more words left to potentially match, so continue
-						continue next_buffer_loop;
-					}
-				}
-
-				// This word is unrecognised as part of a command, so abort
-				bufferToReturn = null;
-				break next_buffer_loop;
-			}
-
-			lastWord = wordSoFarIncludingThis.trim();
+			return bufferToReturn;
 		}
-
-		// We only consider it a match if ALL words were actually used
-		if (bufferToReturn != null) {
-			if (!strictMatching || lastCommandWordUsed + 1 == commandWords.length) {
-				return bufferToReturn;
-			}
-		}
-
-		return null; // Not a match
+		return null;
 	}
 
 	public int complete(String buffer, int cursor, List<String> candidates) {
