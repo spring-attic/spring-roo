@@ -268,8 +268,8 @@ PREREQUISITES:
 
    * GPG setup (probably already setup if you followed notes above)
    * Git push privileges (if you can commit, you have this)
-   * VPN access for SSH into static.springframework.org
-   * SSH keypair for auto login into static.springframework.org
+   * VPN access for SSH into static.springsource.org
+   * SSH keypair for auto login into static.springsource.org
    * s3cmd setup (so "s3cmd ls" lists spring-roo-repository.s2.org)
    * ~/.m2/settings.xml for spring-roo-repository-release and
      spring-roo-repository-snapshot IDs with S3 username/password

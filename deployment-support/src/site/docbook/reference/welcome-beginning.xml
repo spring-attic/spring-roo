@@ -261,8 +261,7 @@ As such, you're ready to press ENTER to execute the command.
 
 Once JPA is installed, type 'hint' and ENTER for the next suggestion.
 com.springsource.roo.pizzashop roo&gt;
-com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE ↩
-                                        --database HYPERSONIC_IN_MEMORY</emphasis> 
+com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis> 
 Created SRC_MAIN_RESOURCES/META-INF/persistence.xml
 Created SRC_MAIN_RESOURCES/META-INF/spring/database.properties
 Managed SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml

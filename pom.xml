@@ -142,6 +142,13 @@
             <organization>VMware</organization>
             <timezone>+10</timezone>
         </developer>
+        <developer>
+            <name>James Tyrrell</name>
+            <id>jtyrrell</id>
+            <email>jtyrrell at vmware.com</email>
+            <organization>VMware</organization>
+            <timezone>+10</timezone>
+        </developer>
     </developers>
 
     <dependencies>
