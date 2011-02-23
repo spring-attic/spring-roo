@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven;
+package org.springframework.roo.project;
 
 import java.io.InputStream;
 
@@ -8,9 +8,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;

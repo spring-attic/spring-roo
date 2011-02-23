@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven;
+package org.springframework.roo.project;
 
 import java.io.InputStream;
 import java.util.HashSet;
@@ -20,20 +20,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.maven.pom.Dependency;
-import org.springframework.roo.project.maven.pom.DependencyScope;
-import org.springframework.roo.project.maven.pom.DependencyType;
-import org.springframework.roo.project.maven.pom.Execution;
-import org.springframework.roo.project.maven.pom.Filter;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.maven.pom.Plugin;
-import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.project.ProjectMetadataProvider;
-import org.springframework.roo.project.ProjectType;
-import org.springframework.roo.project.maven.pom.Property;
-import org.springframework.roo.project.maven.pom.Repository;
-import org.springframework.roo.project.maven.pom.Resource;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;

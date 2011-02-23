@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven;
+package org.springframework.roo.project;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,9 +8,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.MonitoringRequest;
-import org.springframework.roo.project.AbstractPathResolver;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathInformation;
 
 /**
  * Resolves paths using the typical Maven directory conventions.

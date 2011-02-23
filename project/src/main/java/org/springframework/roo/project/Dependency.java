@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven.pom;
+package org.springframework.roo.project;
 
 import java.util.ArrayList;
 import java.util.List;

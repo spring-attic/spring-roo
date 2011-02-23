@@ -9,7 +9,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.project.maven.pom.Property;
 
 /**
  * Automatically upgrades a Spring Roo annotation JAR to the current version of Roo.

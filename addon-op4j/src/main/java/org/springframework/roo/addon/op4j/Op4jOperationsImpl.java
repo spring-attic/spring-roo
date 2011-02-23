@@ -15,7 +15,7 @@ import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDeta
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.maven.pom.Dependency;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;

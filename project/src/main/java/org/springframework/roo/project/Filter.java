@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven.pom;
+package org.springframework.roo.project;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;

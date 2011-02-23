@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven;
+package org.springframework.roo.project;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,10 +17,6 @@ import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.project.AbstractProjectOperations;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.maven.pom.Dependency;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;

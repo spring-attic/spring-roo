@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven.pom;
+package org.springframework.roo.project;
 
 import org.springframework.roo.support.util.Assert;
 import org.w3c.dom.Element;

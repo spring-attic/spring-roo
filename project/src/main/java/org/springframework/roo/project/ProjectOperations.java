@@ -1,17 +1,12 @@
 package org.springframework.roo.project;
 
-import org.springframework.roo.project.maven.pom.Dependency;
-import org.springframework.roo.project.maven.pom.DependencyListener;
-import org.springframework.roo.project.maven.pom.Filter;
-import org.springframework.roo.project.maven.pom.Plugin;
-import org.springframework.roo.project.maven.pom.PluginListener;
-import org.springframework.roo.project.maven.pom.Property;
-import org.springframework.roo.project.maven.pom.PropertyListener;
-import org.springframework.roo.project.maven.pom.Repository;
-import org.springframework.roo.project.maven.pom.RepositoryListener;
-import org.springframework.roo.project.maven.pom.Resource;
 
 import java.util.List;
+
+import org.springframework.roo.project.listeners.DependencyListener;
+import org.springframework.roo.project.listeners.PluginListener;
+import org.springframework.roo.project.listeners.PropertyListener;
+import org.springframework.roo.project.listeners.RepositoryListener;
 
 /**
  * Specifies methods for various project-related operations.

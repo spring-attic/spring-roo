@@ -1,4 +1,4 @@
-package org.springframework.roo.project.maven;
+package org.springframework.roo.project;
 
 /**
  * Interface to methods available in {@link ApplicationContextOperationsImpl}.

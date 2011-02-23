@@ -1,9 +1,8 @@
-package org.springframework.roo.project.maven;
+package org.springframework.roo.project;
 
 import java.io.IOException;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Provides Maven project operations.

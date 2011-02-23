@@ -1,4 +1,6 @@
-package org.springframework.roo.project.maven.pom;
+package org.springframework.roo.project.listeners;
+
+import org.springframework.roo.project.Resource;
 
 /**
  * Resource listener interface that clients can implement in order
