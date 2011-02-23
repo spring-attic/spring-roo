@@ -475,7 +475,7 @@ public class JspOperationsImpl implements JspOperations {
 				footerFile = fileManager.updateFile(footerFileLocation);
 				footer = XmlUtils.getDocumentBuilder().parse(footerFile.getInputStream());
 			} else {
-				new IllegalStateException("Could not aquire the footer.jspx file");
+				throw new IllegalStateException("Could not aquire the footer.jspx file");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

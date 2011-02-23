@@ -265,6 +265,10 @@ public class JspViewManager {
 			} else {
 				fieldElement = document.createElement("field:input");
 			}
+			
+			if (fieldElement == null) {
+				fieldElement = document.createElement("field:input");
+			}
 
 			addCommonAttributes(field, fieldElement);
 			fieldElement.setAttribute("disableFormBinding", "true");

@@ -203,10 +203,10 @@ public class JavaParserUtils  {
 		if (o1 != null && o2 == null) {
 			return false;
 		}
-		if (!o1.getName().equals(o2.getName())) {
+		if (o1 != null && !o1.getName().equals(o2.getName())) {
 			return false;
 		}
-		return o1.toString().equals(o2.toString());
+		return o1 != null && o1.toString().equals(o2.toString());
 	}
 
 	/**
