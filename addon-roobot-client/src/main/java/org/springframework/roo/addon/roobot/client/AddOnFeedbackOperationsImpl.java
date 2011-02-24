@@ -16,6 +16,8 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
+import org.springframework.uaa.client.TransmissionAwareUaaService;
+import org.springframework.uaa.client.UaaService;
 
 /**
  * Implementation of {@link AddOnFeedbackOperations}.
@@ -30,6 +32,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 
 	@Reference private UaaRegistrationService registrationService;
 	@Reference private UrlInputStreamService urlInputStreamService;
+	@Reference private UaaService uaaService;
 	private BundleContext bundleContext;
 	private static final Logger log = Logger.getLogger(AddOnFeedbackOperationsImpl.class.getName());
 	
@@ -79,16 +82,11 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		registrationService.registerBundleSymbolicNameUse(BundleFindingUtils.findFirstBundleForTypeName(bundleContext, AddOnRooBotOperations.class.getName()), customJson);
 		
 		// Push the feedback up to the server now if possible
-		try {
-			// We don't want the actual empty file; this is just to deliver data to a UAA destination ASAP
-			urlInputStreamService.openConnection(httpUrl);
-			log.info("Upload successful. Feedback takes up to 60 minutes to become visible.");
-		} catch (Exception maybeOffline) {
-			// This doesn't matter, it just means the feedback will be sent later
-			log.info("We have recorded your feedback but we're unable to send it at this time.");
-			log.info("When you next start Spring Roo your feedback will be sent automatically.");
+		if (uaaService instanceof TransmissionAwareUaaService) {
+			TransmissionAwareUaaService ta = (TransmissionAwareUaaService) uaaService;
+			ta.requestTransmission();
 		}
-
+		
 		log.info("Thanks for sharing your feedback.");
 	}
 

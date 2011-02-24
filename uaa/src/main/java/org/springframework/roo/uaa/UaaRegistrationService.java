@@ -1,6 +1,5 @@
 package org.springframework.roo.uaa;
 
-import org.springframework.uaa.client.DetectedProducts;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
@@ -37,7 +36,7 @@ public interface UaaRegistrationService {
 	 * Static representation of the Spring Roo product that should be used by any modules
 	 * requiring a product representation.
 	 */
-	public static final Product SPRING_ROO = VersionHelper.getProductFromManifest(UaaRegistrationServiceImpl.class, DetectedProducts.SPRING_ROO.getProductName());
+	public static final Product SPRING_ROO = VersionHelper.getProductFromManifest(UaaRegistrationServiceImpl.class, "Spring Roo");
 
 	/**
 	 * Registers a new "feature use" within UAA. This method requires every feature to be a bundle
@@ -76,5 +75,4 @@ public interface UaaRegistrationService {
 	 * to the service. If the privacy level does not support this, the buffer should be preserved.
 	 */
 	void flushIfPossible();
-	
 }

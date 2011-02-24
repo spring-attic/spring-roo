@@ -25,9 +25,9 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
-import org.springframework.uaa.client.DetectedProducts;
-import org.springframework.uaa.client.DetectedProducts.ProductInfo;
+import org.springframework.uaa.client.UaaDetectedProducts;
 import org.springframework.uaa.client.VersionHelper;
+import org.springframework.uaa.client.UaaDetectedProducts.ProductInfo;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -54,6 +54,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private Shell shell;
 	@Reference private UaaRegistrationService uaaRegistrationService;
+	@Reference private UaaDetectedProducts uaaDetectedProducts;
 	private String pom;
 
 	protected void activate(ComponentContext context) {
@@ -151,12 +152,12 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		uaaRegistrationService.registerProject(UaaRegistrationService.SPRING_ROO, topLevelPackage.getFullyQualifiedPackageName());
 
 		// Update UAA with the well-known Spring-related open source dependencies
-		for (ProductInfo productInfo : DetectedProducts.getProducts()) {
-			if (productInfo.getProductName().equals(DetectedProducts.SPRING_ROO.getProductName())) {
+		for (ProductInfo productInfo : uaaDetectedProducts.getDetectedProductInfos()) {
+			if (productInfo.getProductName().equals(UaaRegistrationService.SPRING_ROO.getName())) {
 				// No need to register with a less robust pom.xml-declared dependency metadata when we did it ourselves with a proper bundle version number lookup a moment ago...
 				continue;
 			}
-			if (productInfo.getProductName().equals(DetectedProducts.SPRING_UAA.getProductName())) {
+			if (productInfo.getProductName().equals(UaaDetectedProducts.SPRING_UAA.getProductName())) {
 				// No need to register Spring UAA as this happens automatically internal to UAA
 				continue;
 			}

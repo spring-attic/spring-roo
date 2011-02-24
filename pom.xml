@@ -291,7 +291,7 @@
         <dependency>
             <groupId>org.springframework.uaa</groupId>
             <artifactId>org.springframework.uaa.client</artifactId>
-            <version>1.0.0.RELEASE</version>
+            <version>1.0.1.RELEASE</version>
         </dependency>
         <!-- Wrapped JARs -->
         <dependency>
