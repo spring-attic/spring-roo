@@ -147,12 +147,15 @@ public class GitOperationsImpl implements GitOperations {
 	}
 
 	public void setup() {
-		Repository repository = getRepository();
+		if (hasDotGit()) {
+			logger.info("Git is already configured");
+			return;
+		}
 		if (person == null) {
 			person = new PersonIdent("Roo Git Add-On", "s2-roo@vmware.com");
 		}
 		try {
-			repository = new FileRepositoryBuilder().readEnvironment().setGitDir(new File(".", Constants.DOT_GIT)).build();
+			Repository repository = new FileRepositoryBuilder().readEnvironment().setGitDir(new File(".", Constants.DOT_GIT)).build();
 			repository.create();
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not initialize Git repository", e);
