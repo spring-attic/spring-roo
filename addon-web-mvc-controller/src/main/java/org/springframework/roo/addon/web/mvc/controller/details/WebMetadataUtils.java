@@ -137,7 +137,6 @@ public abstract class WebMetadataUtils {
 			}
 			registerDependency(metadataDependencyRegistry, method.getDeclaredByMetadataId(), metadataIdentificationString);
 			if (!fields.containsKey(propertyName)) {
-				System.out.println("adding " + propertyName);
 				fields.put(propertyName, field);
 			}
 		}
