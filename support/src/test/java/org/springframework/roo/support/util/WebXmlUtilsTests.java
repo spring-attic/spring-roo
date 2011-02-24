@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilder;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.springframework.roo.support.util.WebXmlUtils.WebXmlParam;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -20,7 +21,6 @@ import org.w3c.dom.Element;
  * @since 1.1.1
  */
 public class WebXmlUtilsTests {
-	
 	private static Document webXml;
 
 	@BeforeClass
@@ -102,7 +102,7 @@ public class WebXmlUtilsTests {
 
 	@Test
 	public void testAddFilterAtPosition() {
-		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN, "filter2", "filter1", "filter3", Integer.class.getName(), "/test2", webXml, null, null);
+		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN, "filter2", "filter1", "filter3", Integer.class.getName(), "/test2", webXml, null, (WebXmlParam[]) null);
 	
 		List<Element> filters = XmlUtils.findElements("filter", webXml.getDocumentElement());
 		assertEquals(3, filters.size());
