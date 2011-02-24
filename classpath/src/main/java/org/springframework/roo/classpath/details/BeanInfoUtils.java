@@ -102,13 +102,13 @@ public abstract class BeanInfoUtils {
 		Assert.notNull(field, "Field metadata required");
 		Assert.notNull(memberDetails, "Member details required");
 		String capitalizedFieldName = StringUtils.capitalize(field.getFieldName().getSymbolName());
-		for (MemberHoldingTypeDetails holder : memberDetails.getDetails()) {
-			if ((MemberFindingUtils.getDeclaredMethod(holder, new JavaSymbolName("get" + capitalizedFieldName), new ArrayList<JavaType>()) != null
-					|| MemberFindingUtils.getDeclaredMethod(holder, new JavaSymbolName("is" + capitalizedFieldName), new ArrayList<JavaType>()) != null)
-					&& MemberFindingUtils.getDeclaredMethod(holder, new JavaSymbolName("set" + capitalizedFieldName), Arrays.asList(field.getFieldType())) != null) {
-				return true;
-			}
+
+		if ((MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("get" + capitalizedFieldName), new ArrayList<JavaType>()) != null
+				|| MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("is" + capitalizedFieldName), new ArrayList<JavaType>()) != null)
+				&& MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("set" + capitalizedFieldName), Arrays.asList(field.getFieldType())) != null) {
+			return true;
 		}
+	
 		return false;
 	}
 
