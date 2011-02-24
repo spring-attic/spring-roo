@@ -121,7 +121,7 @@ public abstract class WebMetadataUtils {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
 		
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
+		Map<JavaSymbolName, FieldMetadata> fields = new HashMap<JavaSymbolName, FieldMetadata>();
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
@@ -136,9 +136,12 @@ public abstract class WebMetadataUtils {
 				continue;
 			}
 			registerDependency(metadataDependencyRegistry, method.getDeclaredByMetadataId(), metadataIdentificationString);
-			fields.add(field);
+			if (!fields.containsKey(propertyName)) {
+				System.out.println("adding " + propertyName);
+				fields.put(propertyName, field);
+			}
 		}
-		return Collections.unmodifiableList(fields);
+		return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields.values()));
 	}
 	
 	public static JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(JavaType javaType, MetadataService metadataService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
