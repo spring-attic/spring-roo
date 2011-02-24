@@ -18,10 +18,10 @@ controller class ~.web.PublicVoteController --preferredMapping /public
 web mvc install language --code de
 web mvc install language --code es
 
-logging setup --level DEBUG --package WEB
+logging setup --level WARN --package WEB
 
 security setup
 
 finder list --class com.springsource.vote.domain.Vote --depth 2 --filter reg,betw,IpEq
 
-logging setup --level DEBUG
+logging setup --level INFO
