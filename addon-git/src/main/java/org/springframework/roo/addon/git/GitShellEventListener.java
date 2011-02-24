@@ -12,6 +12,7 @@ import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.ShellStatus;
@@ -30,6 +31,7 @@ public class GitShellEventListener implements ShellStatusListener, FileEventList
 	@Reference private GitOperations gitOperations;
 	@Reference private Shell shell;
 	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	private boolean isDirty = false;
 
@@ -57,7 +59,7 @@ public class GitShellEventListener implements ShellStatusListener, FileEventList
 	}
 	
 	private boolean matchesIgnore(FileDetails details) {
-		String projectRoot = projectOperations.getPathResolver().getIdentifier(Path.ROOT, ".");
+		String projectRoot = pathResolver.getIdentifier(Path.ROOT, ".");
 		for (String exclusion: gitOperations.getExclusions()) {
 			if (details.matchesAntPath(projectRoot) || details.matchesAntPath(projectRoot + File.separator + exclusion)) { 
 				return true;
@@ -67,6 +69,6 @@ public class GitShellEventListener implements ShellStatusListener, FileEventList
 	}
 	
 	private boolean isGitEnabled() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.ROOT, Constants.DOT_GIT));
+		return fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
 	}
 }
