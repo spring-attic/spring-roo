@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.2.BUILD-SNAPSHOT [rev 3984ee4].</para>
+    <para>This appendix was automatically built from Roo 1.1.2.RELEASE [rev 6fd10ea].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -297,165 +297,6 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section xml:id="command-index-dod">
-            <title>dod</title>
-            <para>Creates a new data on demand for the specified entity</para>
-            <programlisting><![CDATA[dod]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--entity</term>
-                    <listitem>
-                        <para>The entity which this data on demand class will create and modify as required; default if option not present: '*'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand'); no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--permitReservedWords</term>
-                    <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-embeddable">
-            <title>embeddable</title>
-            <para>Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA</para>
-            <programlisting><![CDATA[embeddable --class]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>The name of the class to create; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--serializable</term>
-                    <listitem>
-                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--permitReservedWords</term>
-                    <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-entity">
-            <title>entity</title>
-            <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
-            <programlisting><![CDATA[entity --class]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>Name of the entity to create; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--extends</term>
-                    <listitem>
-                        <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--abstract</term>
-                    <listitem>
-                        <para>Whether the generated class should be marked as abstract; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--testAutomatically</term>
-                    <listitem>
-                        <para>Create automatic integration tests for this entity; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--table</term>
-                    <listitem>
-                        <para>The JPA table name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--schema</term>
-                    <listitem>
-                        <para>The JPA table schema name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--catalog</term>
-                    <listitem>
-                        <para>The JPA table catalog name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--identifierField</term>
-                    <listitem>
-                        <para>The JPA identifier field name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--identifierColumn</term>
-                    <listitem>
-                        <para>The JPA identifier field column to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--identifierType</term>
-                    <listitem>
-                        <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long); default: 'java.lang.Long'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--versionField</term>
-                    <listitem>
-                        <para>The JPA version field name to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--versionColumn</term>
-                    <listitem>
-                        <para>The JPA version field column to use for this entity; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--inheritanceType</term>
-                    <listitem>
-                        <para>The JPA @Inheritance value; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--mappedSuperclass</term>
-                    <listitem>
-                        <para>Apply @MappedSuperclass for this entity; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--serializable</term>
-                    <listitem>
-                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--persistenceUnit</term>
-                    <listitem>
-                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--permitReservedWords</term>
-                    <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
         <section xml:id="command-index-enum-constant">
             <title>enum constant</title>
             <para>Inserts a new enum constant into an enum</para>
@@ -534,25 +375,6 @@
                     <term>--path</term>
                     <listitem>
                         <para>Source directory to create the interface in; default: 'SRC_MAIN_JAVA'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--permitReservedWords</term>
-                    <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-test-integration">
-            <title>test integration</title>
-            <para>Creates a new integration test for the specified entity</para>
-            <programlisting><![CDATA[test integration]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--entity</term>
-                    <listitem>
-                        <para>The name of the entity to create an integration test for; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -812,7 +634,7 @@
         </section>
         <section xml:id="command-index-database-reverse-engineer">
             <title>database reverse engineer</title>
-            <para>Create and updates entities based on te database metadata</para>
+            <para>Create and update entities based on database metadata</para>
             <programlisting><![CDATA[database reverse engineer --schema]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -1054,6 +876,188 @@
                     <term>--viewName</term>
                     <listitem>
                         <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-entity-commands">
+        <title>Entity Commands</title>
+        <para>Entity Commands are contained in org.springframework.roo.addon.entity.EntityCommands.</para>
+        <section xml:id="command-index-dod">
+            <title>dod</title>
+            <para>Creates a new data on demand for the specified entity</para>
+            <programlisting><![CDATA[dod]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The entity which this data on demand class will create and modify as required; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand'); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-embeddable">
+            <title>embeddable</title>
+            <para>Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA</para>
+            <programlisting><![CDATA[embeddable --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to create; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--serializable</term>
+                    <listitem>
+                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-entity">
+            <title>entity</title>
+            <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
+            <programlisting><![CDATA[entity --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>Name of the entity to create; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--extends</term>
+                    <listitem>
+                        <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--abstract</term>
+                    <listitem>
+                        <para>Whether the generated class should be marked as abstract; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--testAutomatically</term>
+                    <listitem>
+                        <para>Create automatic integration tests for this entity; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--table</term>
+                    <listitem>
+                        <para>The JPA table name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--schema</term>
+                    <listitem>
+                        <para>The JPA table schema name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--catalog</term>
+                    <listitem>
+                        <para>The JPA table catalog name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierField</term>
+                    <listitem>
+                        <para>The JPA identifier field name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierColumn</term>
+                    <listitem>
+                        <para>The JPA identifier field column to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierType</term>
+                    <listitem>
+                        <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long); default: 'java.lang.Long'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--versionField</term>
+                    <listitem>
+                        <para>The JPA version field name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--versionColumn</term>
+                    <listitem>
+                        <para>The JPA version field column to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--inheritanceType</term>
+                    <listitem>
+                        <para>The JPA @Inheritance value; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--mappedSuperclass</term>
+                    <listitem>
+                        <para>Apply @MappedSuperclass for this entity; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--serializable</term>
+                    <listitem>
+                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--persistenceUnit</term>
+                    <listitem>
+                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-test-integration">
+            <title>test integration</title>
+            <para>Creates a new integration test for the specified entity</para>
+            <programlisting><![CDATA[test integration]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The name of the entity to create an integration test for; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2123,7 +2127,7 @@
         </section>
         <section xml:id="command-index-finder-list">
             <title>finder list</title>
-            <para>List all finders for a given target (must be an entity</para>
+            <para>List all finders for a given target (must be an entity)</para>
             <programlisting><![CDATA[finder list]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -2145,111 +2149,6 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
-        </section>
-    </section>
-    <section xml:id="command-index-git-commands">
-        <title>Git Commands</title>
-        <para>Git Commands are contained in org.springframework.roo.addon.git.GitCommands.</para>
-        <section xml:id="command-index-git-commit-all">
-            <title>git commit all</title>
-            <para>Trigger a commit manually for the project</para>
-            <programlisting><![CDATA[git commit all --message]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--message</term>
-                    <listitem>
-                        <para>The commit message; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-git-config">
-            <title>git config</title>
-            <para>Git revision control configuration (.git/config)</para>
-            <programlisting><![CDATA[git config]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--userName</term>
-                    <listitem>
-                        <para>The user name; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--email</term>
-                    <listitem>
-                        <para>The user email; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--repoUrl</term>
-                    <listitem>
-                        <para>The URL of the remote repository; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--colorCoding</term>
-                    <listitem>
-                        <para>Enable color coding of commands in OS shell; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-git-log">
-            <title>git log</title>
-            <para>Commit log</para>
-            <programlisting><![CDATA[git log]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--maxMessages</term>
-                    <listitem>
-                        <para>Number of commit messages to display; no default value</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-git-revert-commit">
-            <title>git revert commit</title>
-            <para>Roll project back to a specific commit</para>
-            <programlisting><![CDATA[git revert commit --revString --message]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--revString</term>
-                    <listitem>
-                        <para>Commit id; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--message</term>
-                    <listitem>
-                        <para>The commit message; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-git-revert-last">
-            <title>git revert last</title>
-            <para>Revert (last x) commit(s)</para>
-            <programlisting><![CDATA[git revert last --message]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--commitCount</term>
-                    <listitem>
-                        <para>Number of commits to revert; no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--message</term>
-                    <listitem>
-                        <para>The commit message; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-git-setup">
-            <title>git setup</title>
-            <para>Setup Git revision control</para>
-            <programlisting><![CDATA[git setup]]></programlisting>
-            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-gwt-commands">
@@ -2781,7 +2680,7 @@
     </section>
     <section xml:id="command-index-maven-commands">
         <title>Maven Commands</title>
-        <para>Maven Commands are contained in org.springframework.roo.project.maven.MavenCommands.</para>
+        <para>Maven Commands are contained in org.springframework.roo.project.MavenCommands.</para>
         <section xml:id="command-index-dependency-add">
             <title>dependency add</title>
             <para>Adds a new dependency to the Maven project object model (POM)</para>
@@ -2877,7 +2776,7 @@
         </section>
         <section xml:id="command-index-project">
             <title>project</title>
-            <para>Creates a new project</para>
+            <para>Creates a new Maven project</para>
             <programlisting><![CDATA[project --topLevelPackage]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -2961,29 +2860,6 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
-        </section>
-    </section>
-    <section xml:id="command-index-op4j-commands">
-        <title>Op4j Commands</title>
-        <para>Op4j Commands are contained in org.springframework.roo.addon.op4j.Op4jCommands.</para>
-        <section xml:id="command-index-op4j-add">
-            <title>op4j add</title>
-            <para>Some helpful description</para>
-            <programlisting><![CDATA[op4j add]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>The java type to apply the RooOp4j annotation to; default if option not present: '*'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-op4j-setup">
-            <title>op4j setup</title>
-            <para>Setup Op4j addon</para>
-            <programlisting><![CDATA[op4j setup]]></programlisting>
-            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-pgp-commands">

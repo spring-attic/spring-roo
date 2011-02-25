@@ -277,6 +277,7 @@ PREREQUISITES:
    * forum.springsource.org moderator privileges
    * www.springsource.org editor privileges
    * JIRA project administrator privileges
+   * Close down your IDE before proceeding
 
 RELEASE PROCEDURE:
 
@@ -284,10 +285,13 @@ RELEASE PROCEDURE:
 
    cd $ROO_HOME
    git pull
-   mvn clean package
+   cd $ROO_HOME/deployment-support
+  ./roo-deploy.sh -c next -n 4.5.6.RELEASE (use -v for logging)
+   cd $ROO_HOME
+   mvn clean install
    cd $ROO_HOME/deployment-support
    mvn clean site
-   ./roo-deploy -c assembly -tv (use -t for extra tests)
+   ./roo-deploy.sh -c assembly -tv (use -t for extra tests)
 
 2. Verify the assembly ZIP looks good:
 
@@ -342,7 +346,7 @@ RELEASE PROCEDURE:
 10. Increment the version number to the next BUILD-SNAPSHOT number:
 
     cd $ROO_HOME/deployment-support
-    ./roo-deploy -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
+    ./roo-deploy.sh -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
     cd $ROO_HOME
     mvn clean install eclipse:clean eclipse:eclipse
     cd ~/some-directory; roo-dev script clinic.roo; mvn test
