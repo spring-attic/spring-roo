@@ -150,12 +150,12 @@ fi
 
 # Setup correct options for a dry run vs normal run
 if [[ "$DRY_RUN" = "0" ]]; then
-    MAVEN_MAIN_OPTS='-e -B clean package'
+    MAVEN_MAIN_OPTS='-e -B clean install'
     MAVEN_SITE_OPTS='-e -B clean site site:deploy'
     MAVEN_DEPLOY_OPTS='-e -B deploy'
     ROO_DEPLOY_OPTS=''
 else
-    MAVEN_MAIN_OPTS='-e -B clean package'
+    MAVEN_MAIN_OPTS='-e -B clean install'
     MAVEN_SITE_OPTS='-e -B clean site'
     MAVEN_DEPLOY_OPTS='never_invoked'
     ROO_DEPLOY_OPTS='-d'

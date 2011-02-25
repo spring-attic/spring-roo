@@ -342,7 +342,7 @@ RELEASE PROCEDURE:
    cd $ROO_HOME
    mvn deploy
    cd $ROO_HOME/deployment-support
-   ./roo-deploy -c deploy (use -dv for a dry-run and verbose logging)
+   ./roo-deploy.sh -c deploy (use -dv for a dry-run and verbose logging)
 
 10. Increment the version number to the next BUILD-SNAPSHOT number:
 
