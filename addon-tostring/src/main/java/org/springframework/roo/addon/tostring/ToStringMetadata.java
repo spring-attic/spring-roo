@@ -104,7 +104,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			for (MethodMetadata accessor : publicAccessors) {
 				String accessorName = accessor.getMethodName().getSymbolName();
 				String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-				if (!excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
+				if (!excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName)) && !map.containsKey(fieldName)) {
 					String accessorText = accessorName + "()";
 					if (accessor.getReturnType().isCommonCollectionType()) {
 						accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
