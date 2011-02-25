@@ -298,7 +298,8 @@ RELEASE PROCEDURE:
    * Assembly ZIP unzips and is of a sensible size
    * Assembly ZIP contains both PDF and HTML documentation
    * Assembly ZIP runs correctly when installed on major platforms
-   * Run the "reference guide" command, copy the resulting XML file
+   * Create Jira Task ticket "Release Spring Roo x.y.z.aaaaaa"
+   * Run the "reference guide" command in the Roo shell, copy the resulting XML file
      into $ROO_HOME/deployment-support/src/site/docbook/reference,
      git commit and then git push (so the appendix is updated)
 
@@ -325,7 +326,7 @@ RELEASE PROCEDURE:
    very helpful for our users:
 
    cd $ROO_HOME/deployment-support
-   ./roo-deploy -c assembly -Tv (-T means Maven tests with empty repo)
+   ./roo-deploy.sh -c assembly -Tv (-T means Maven tests with empty repo)
 
 7. Repeat the verification tests on the assembly ZIP (see above). See
    note below if coordinating a release with the STS team.
