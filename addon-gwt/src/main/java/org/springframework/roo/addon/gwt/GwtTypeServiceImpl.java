@@ -269,7 +269,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 						}
 					}
 					if (!inSourcePath && !isCommonType(propertyType) && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(propertyType.getFullyQualifiedTypeName())) {
-						System.out.println(propertyType.getNameIncludingTypeParameters());
 						displayWarning("The path to type " + returnType.getFullyQualifiedTypeName() + " which is used in type " + governorTypeDetails.getName() + " by the field '" + method.getMethodName().getSymbolName() + "' needs to be added to the module's gwt.xml file in order to be used in a Proxy.");
 						continue;
 					}
