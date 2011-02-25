@@ -15,7 +15,7 @@ public interface GwtTypeService {
 
 	List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType);
 
-	Map<JavaSymbolName, GwtProxyProperty> getClientSideTypeMap(List<MemberHoldingTypeDetails> memberHoldingTypeDetails, Map<JavaType, JavaType> gwtClientTypeMap);
+	Map<JavaSymbolName, GwtProxyProperty> getClientSideTypeMap(ClassOrInterfaceTypeDetails governorTypeDetails);
 
 	Map<JavaType, JavaType> getClientTypeMap(ClassOrInterfaceTypeDetails governorTypeDetails);
 }

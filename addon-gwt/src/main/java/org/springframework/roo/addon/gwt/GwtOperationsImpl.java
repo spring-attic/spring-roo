@@ -1,15 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -35,6 +25,16 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides GWT installation services.
@@ -87,7 +87,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		// Add GWT natures and builder names to maven eclipse plugin
 		updateMavenEclipsePlugin();
-		
+
 		if (isGaeEnabled) {
 			updateDataNulcueusPlugin();
 		}
@@ -97,7 +97,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		// Add dependencies
 		updateDependencies(configuration);
-		
+
 		// Add POM plugin
 		updatePlugins(configuration);
 
@@ -127,7 +127,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	private void updateDependencies(Element configuration) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
-		
+
 		List<Element> gwtDependencies = XmlUtils.findElements("/configuration/gwt/dependencies/dependency", configuration);
 		for (Element dependencyElement : gwtDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
@@ -162,7 +162,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
 		}
 	}
-	
+
 	private void updateDataNulcueusPlugin() {
 		String pomXml = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Assert.isTrue(fileManager.exists(pomXml), "pom.xml not found; cannot continue");

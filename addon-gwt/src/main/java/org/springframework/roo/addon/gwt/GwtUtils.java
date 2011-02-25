@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.gwt;
 
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -151,6 +152,10 @@ public class GwtUtils {
 		return type;
 	}
 
+	public static boolean isAllowableReturnType(JavaType type) {
+		return isCommonType(type) || (isCollectionType(type) && type.getParameters().size() == 1 && isAllowableReturnType(type.getParameters().get(0)));
+	}
+
 	public static boolean isCommonType(JavaType type) {
 		return JavaType.BOOLEAN_OBJECT.equals(type) ||
 				JavaType.CHAR_OBJECT.equals(type) ||
@@ -161,27 +166,28 @@ public class GwtUtils {
 				JavaType.FLOAT_OBJECT.equals(type) ||
 				JavaType.DOUBLE_OBJECT.equals(type) ||
 				JavaType.STRING_OBJECT.equals(type) ||
+				new JavaType("java.util.Date").equals(type) ||
+				new JavaType("java.math.BigDecimal").equals(type) ||
 				type.isPrimitive() && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(type.getFullyQualifiedTypeName());
 	}
 
 	public static boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
-
-		boolean isEnum = ptmd != null
-				&& ptmd.getMemberHoldingTypeDetails() != null
-				&& ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
-
-		return !isEnum
+		return !isEnum(ptmd)
 				&& isEntity(ptmd)
 				&& !(isRequestFactoryCompatible(returnType))
 				&& !(isCollectionType(returnType))
 				&& !isEmbeddable(ptmd);
 	}
 
+	public static boolean isEnum(PhysicalTypeMetadata ptmd) {
+		return ptmd != null && ptmd.getMemberHoldingTypeDetails() != null && ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
+	}
+
 	public static boolean isEntity(PhysicalTypeMetadata ptmd) {
 		if (ptmd == null) {
 			return false;
 		}
-		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), new JavaType("org.springframework.roo.addon.entity.RooEntity"));
+		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), new JavaType(RooEntity.class.getName()));
 		return annotationMetadata != null;
 	}
 
@@ -198,10 +204,7 @@ public class GwtUtils {
 	}
 
 	public static boolean isRequestFactoryCompatible(JavaType type) {
-		return isCommonType(type) ||
-				isCollectionType(type) ||
-				new JavaType("java.util.Date").equals(type) ||
-				new JavaType("java.math.BigDecimal").equals(type);
+		return isCommonType(type) || isCollectionType(type);
 	}
 
 	public static boolean methodBuildersEqual(MethodMetadataBuilder m1, MethodMetadataBuilder m2) {

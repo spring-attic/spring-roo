@@ -1,23 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -50,6 +32,23 @@ import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Metadata for GWT.
@@ -101,7 +100,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return;
 		}
-		
+
 		// Lookup special fields
 		String typeName = governorTypeDetails.getName().getFullyQualifiedTypeName();
 
@@ -409,7 +408,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 	 * @param gwtType the mirror class we're producing (required)
 	 * @return the Java type the mirror class applicable for the current governor (never null)
 	 */
-	@SuppressWarnings("unused") 
+	@SuppressWarnings("unused")
 	private JavaType getDestinationJavaType(GwtType gwtType) {
 		return PhysicalTypeIdentifier.getJavaType(getDestinationMetadataId(gwtType));
 	}

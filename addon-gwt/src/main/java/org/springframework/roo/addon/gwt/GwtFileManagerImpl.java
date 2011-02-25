@@ -49,7 +49,8 @@ public class GwtFileManagerImpl implements GwtFileManager {
 			String existing = null;
 			try {
 				existing = FileCopyUtils.copyToString(new FileReader(f));
-			} catch (IOException ignored) {}
+			} catch (IOException ignored) {
+			}
 
 			if (!newContents.equals(existing)) {
 				mutableFile = fileManager.updateFile(destFile);
@@ -66,7 +67,7 @@ public class GwtFileManagerImpl implements GwtFileManager {
 				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 			}
 		}
-		
+
 		// If mutableFile is null, that means the source == destination content
 	}
 
