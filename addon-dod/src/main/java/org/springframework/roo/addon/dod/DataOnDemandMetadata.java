@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dod;
 
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -326,8 +327,18 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else if (field.getFieldType().equals(JavaType.CHAR_OBJECT) || field.getFieldType().equals(JavaType.CHAR_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine("obj." + mutatorName + "('N');");
 			} else if (isDecimalFieldType(field)) {
-				// Check for @DecimalMin and @DecimalMax
-				doDecimalMinAndDecimalMax(field, bodyBuilder, mutatorName, initializer, suffix);
+				// Check for @Digits, @DecimalMax, @DecimalMin
+				AnnotationMetadata digitsAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Digits"));
+				AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin"));
+				AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax"));
+
+				if (digitsAnnotation != null) {
+					doDigits(field, digitsAnnotation, bodyBuilder, mutatorName, initializer, suffix);
+				} else if (decimalMinAnnotation != null || decimalMaxAnnotation != null) {
+					doDecimalMinAndDecimalMax(field, decimalMinAnnotation, decimalMaxAnnotation, bodyBuilder, mutatorName, initializer, suffix);
+				} else {
+					bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + initializer + ");");					
+				}
 			} else if (isIntegerFieldType(field)) {
 				// Check for @Min and @Max
 				doMinAndMax(field, bodyBuilder, mutatorName, initializer, suffix);
@@ -342,12 +353,34 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 
-	private void doDecimalMinAndDecimalMax(FieldMetadata field, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
+	private void doDigits(FieldMetadata field, AnnotationMetadata digitsAnnotation, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
 		String fieldType = field.getFieldType().getFullyQualifiedTypeName();
 		String fieldName = field.getFieldName().getSymbolName();
+
+		Integer integerValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("integer")).getValue();
+		Integer fractionValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("fraction")).getValue();
+
+		bodyBuilder.appendFormalLine(fieldType + " " + fieldName + " = " + initializer + ";");
+		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", integerValue, '9') + "." + StringUtils.padRight("9", fractionValue, '9'));
+		if (field.getFieldType().equals(BIG_DECIMAL)) {
+			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+		} else {
+			bodyBuilder.appendFormalLine("if (" + fieldName + " > " + maxValue.doubleValue() + suffix + ") {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine(fieldName + " = " + maxValue.doubleValue() + suffix + ";");
+		}
+
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + fieldName + ");");
+	}
+
+	private void doDecimalMinAndDecimalMax(FieldMetadata field, AnnotationMetadata decimalMinAnnotation, AnnotationMetadata decimalMaxAnnotation, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
+		String fieldType = field.getFieldType().getFullyQualifiedTypeName();
+		String fieldName = field.getFieldName().getSymbolName() + "1";
 		
-		AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin"));
-		AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax"));
 		if (decimalMinAnnotation != null && decimalMaxAnnotation == null) {
 			String minValue = (String) decimalMinAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
 
@@ -403,9 +436,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 			bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + fieldName + ");");
-		} else {
-			bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + initializer + ");");
-		}		
+		}
 	}
 
 	private void doMinAndMax(FieldMetadata field, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {

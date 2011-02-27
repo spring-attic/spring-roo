@@ -605,12 +605,10 @@ public abstract class StringUtils {
 			String element = pathArray[i];
 			if (CURRENT_PATH.equals(element)) {
 				// Points to current directory - drop it.
-			}
-			else if (TOP_PATH.equals(element)) {
+			} else if (TOP_PATH.equals(element)) {
 				// Registering top path found.
 				tops++;
-			}
-			else {
+			} else {
 				if (tops > 0) {
 					// Merging path element with element corresponding to top path.
 					tops--;
@@ -876,11 +874,11 @@ public abstract class StringUtils {
 	 * or <code>null</code> if the array to process was <code>null</code> or empty
 	 */
 	public static Properties splitArrayElementsIntoProperties(
-			String[] array, String delimiter, String charsToDelete) {
-
+		String[] array, String delimiter, String charsToDelete) {
 		if (ObjectUtils.isEmpty(array)) {
 			return null;
 		}
+		
 		Properties result = new Properties();
 		for (int i = 0; i < array.length; i++) {
 			String element = array[i];
@@ -935,11 +933,11 @@ public abstract class StringUtils {
 	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(
-			String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
-
+		String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
 		if (str == null) {
 			return null;
 		}
+		
 		StringTokenizer st = new StringTokenizer(str, delimiters);
 		List<String> tokens = new ArrayList<String>();
 		while (st.hasMoreTokens()) {
@@ -1187,5 +1185,54 @@ public abstract class StringUtils {
 	 */
 	public static String defaultIfEmpty(String str, String defaultStr) {
 		return hasText(str) ? str : defaultStr;
+	}
+	
+	/**
+	 * Right pads the presented string with the delim character.
+	 * 
+	 * @param str the string to pad
+	 * @param size the size to pad to
+	 * @param padChar the padding character
+	 * @return the right padded string
+	 */
+	public static String padRight(String str, int size, char padChar) {
+		if (str == null) {
+			return null;
+		}
+		int pads = size - str.length();
+		if (pads <= 0) {
+			return str; 
+		}
+		return str.concat(padding(pads, padChar));
+	}
+
+	/**
+	 * Left pads the presented string with the delim character.
+	 * 
+	 * @param str the string to pad
+	 * @param size the size to pad to
+	 * @param padChar the padding character
+	 * @return the left padded string
+	 */
+	public static String padLeft(String str, int size, char padChar) {
+		if (str == null) {
+			return null;
+		}
+		int pads = size - str.length();
+		if (pads <= 0) {
+			return str;  
+		}
+		return padding(pads, padChar).concat(str);
+	}
+	
+	private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
+		if (repeat < 0) {
+			throw new IndexOutOfBoundsException("Cannot pad a negative amount: " + repeat);
+		}
+		final char[] buf = new char[repeat];
+		for (int i = 0; i < buf.length; i++) {
+			buf[i] = padChar;
+		}
+		return new String(buf);
 	}
 }
