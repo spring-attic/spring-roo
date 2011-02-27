@@ -77,10 +77,20 @@ public class BundleVersion {
 		return presentationName + "; " + description + "; " + pgpDescriptions + "; " + commands.toString();
 	}
 
+	/**
+	 * Returns a {@link List} of {@link BundleVersion} objects in ascending
+	 * version order, i.e. the object with the smallest version is in position
+	 * 0 and the object with the highest version is in position n-1. This
+	 * method does not take into  account release types, that is a 0.1.0.GA
+	 * is seen as an earlier version than a 0.1.0.M1 version.
+	 *
+	 * @param versions
+	 * @return a {@link List} of {@link BundleVersion} objects in ascending order
+	 */
 	public static List<BundleVersion> orderByVersion(List<BundleVersion> versions) {
 		Collections.sort(versions, new Comparator<BundleVersion> () {
 			public int compare(BundleVersion o1, BundleVersion o2) {
-				return o1.getVersion().compareToIgnoreCase(o1.getVersion());
+				return o1.getVersion().compareToIgnoreCase(o2.getVersion());
 			}
 		});
 		return Collections.unmodifiableList(versions);

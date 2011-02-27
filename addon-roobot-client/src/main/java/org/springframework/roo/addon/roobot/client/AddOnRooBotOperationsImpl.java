@@ -126,14 +126,14 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			sb.append(" [available versions: ");
 			for (BundleVersion version: BundleVersion.orderByVersion(new ArrayList<BundleVersion>(bundle.getVersions()))) {
 				sb.append(version.getVersion()).append(", ");
-			};
+			}
 			sb.delete(sb.length() - 2, sb.length()).append("]");
 		}
 		logInfo("Name", bundleVersion.getPresentationName());
 		logInfo("BSN", bundle.getSymbolicName());
 		logInfo("Version", sb.toString());
 		logInfo("Roo Version", bundleVersion.getRooVersion());
-		logInfo("Ranking", new Float(bundle.getRanking()).toString());
+		logInfo("Ranking", Float.toString(bundle.getRanking()));
 		logInfo("JAR Size", bundleVersion.getSize() + " bytes");
 		logInfo("PGP Signature", bundleVersion.getPgpKey() + " signed by " + bundleVersion.getPgpDescriptions());
 		logInfo("OBR URL", bundleVersion.getObrUrl());
@@ -574,7 +574,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 					for (Element commentElement: XmlUtils.findElements("comments/comment", bundleElement)) {
 						comments.add(new Comment(Rating.fromInt(new Integer(commentElement.getAttribute("rating"))), commentElement.getAttribute("comment"), dateFormat.parse(commentElement.getAttribute("date"))));
 					}
-					Bundle bundle = new Bundle(bundleElement.getAttribute("bsn"), new Float(bundleElement.getAttribute("uaa-ranking")).floatValue(), comments);
+					Bundle bundle = new Bundle(bundleElement.getAttribute("bsn"), new Float(bundleElement.getAttribute("uaa-ranking")), comments);
 						
 					for (Element versionElement: XmlUtils.findElements("versions/version", bundleElement)) {
 						if (bsn != null && bsn.length() > 0 && versionElement != null) {
