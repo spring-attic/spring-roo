@@ -635,7 +635,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					// initializer = "new java.util.Date()";
 				}
 			} else if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
-				if (fieldInitializer != null) {
+				if (fieldInitializer != null && fieldInitializer.contains("\"")) {
 					int offset = fieldInitializer.indexOf("\"");
 					initializer = fieldInitializer.substring(offset + 1, fieldInitializer.lastIndexOf("\""));
 				} else {
