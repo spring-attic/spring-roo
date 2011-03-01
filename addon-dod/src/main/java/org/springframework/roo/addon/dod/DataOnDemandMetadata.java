@@ -131,6 +131,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		builder.addMethod(getNewTransientEntityMethod());
+		for (MethodMetadata fieldInitializerMethod : getFieldInitializerMethods()) {
+			builder.addMethod(fieldInitializerMethod);
+		}
 		builder.addMethod(getSpecificPersistentEntityMethod());
 		builder.addMethod(getRandomPersistentEntityMethod());
 		builder.addMethod(getModifyMethod());
@@ -276,8 +279,40 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getFullyQualifiedTypeName() + " obj = new " + entityType.getFullyQualifiedTypeName() + "();");
 
 		for (MethodMetadata mutator : mandatoryMutators.keySet()) {
-			String initializer = mandatoryMutators.get(mutator);
+			bodyBuilder.appendFormalLine(mutator.getMethodName() + "(obj, index);");
+		}
+
+		bodyBuilder.appendFormalLine("return obj;");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		return methodBuilder.build();
+	}
+	
+	public List<MethodMetadata> getFieldInitializerMethods() {
+		List<MethodMetadata> fieldInitializerMethods = new LinkedList<MethodMetadata>();
+
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(entityType);
+		paramTypes.add(JavaType.INT_PRIMITIVE);
+		
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("obj"));
+		paramNames.add(new JavaSymbolName("index"));
+
+		for (MethodMetadata mutator : mandatoryMutators.keySet()) {
 			String mutatorName = mutator.getMethodName().getSymbolName();
+			JavaSymbolName methodName = new JavaSymbolName(mutatorName);
+			
+			// Locate user-defined method
+			if (MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes) != null) {
+				// Method found in governor so do not create method in ITD
+				continue;
+			}
+
+			// Method not on governor so need to create it
+			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+			String initializer = mandatoryMutators.get(mutator);
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutatorName);
 
 			FieldMetadata field = locatedMutators.get(mutator).getField();
@@ -345,12 +380,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else {
 				bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + initializer + ");");
 			}
+
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+			fieldInitializerMethods.add(methodBuilder.build());
 		}
 
-		bodyBuilder.appendFormalLine("return obj;");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-		return methodBuilder.build();
+		return fieldInitializerMethods;
 	}
 
 	private void doDigits(FieldMetadata field, AnnotationMetadata digitsAnnotation, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
