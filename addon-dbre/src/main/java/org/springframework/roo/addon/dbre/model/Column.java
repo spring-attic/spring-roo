@@ -54,7 +54,7 @@ public class Column implements Serializable {
 					javaType = JavaType.STRING_OBJECT;
 				} else {
 					jdbcType = "CHAR";
-					javaType = JavaType.CHAR_OBJECT;					
+					javaType = JavaType.CHAR_OBJECT;
 				}
 				break;
 			case Types.VARCHAR:

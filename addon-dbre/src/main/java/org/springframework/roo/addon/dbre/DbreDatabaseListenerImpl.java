@@ -335,7 +335,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				throw new IllegalArgumentException("Failed to create field name for column '" + columnName + "' in table '" + tableName + "': " + e.getMessage());
 			}
 			JavaType fieldType = column.getJavaType();
-			result.add(new Identifier(fieldName, fieldType, columnName));
+			result.add(new Identifier(fieldName, fieldType, columnName, column.getColumnSize(), column.getScale(), column.getTypeName()));
 		}
 
 		return result;
