@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -121,7 +122,7 @@ public abstract class WebMetadataUtils {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
 		
-		Map<JavaSymbolName, FieldMetadata> fields = new HashMap<JavaSymbolName, FieldMetadata>();
+		Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
