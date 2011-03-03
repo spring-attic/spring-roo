@@ -49,10 +49,8 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		
 		//loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
 		for (JavaType type: new TreeSet<JavaType>(domainJavaTypes.keySet())) {
-			String converterMethodName = "get" + type.getSimpleTypeName() + "Converter";
-			if (getGovernorMethod(converterMethodName, new ArrayList<AnnotatedJavaType>()) == null) {
-				builder.addMethod(getConverterMethod(type, domainJavaTypes.get(type), converterMethodName));
-			}
+			JavaSymbolName converterMethodName = new JavaSymbolName("get" + type.getSimpleTypeName() + "Converter");
+			builder.addMethod(getConverterMethod(type, domainJavaTypes.get(type), converterMethodName));
 			installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + converterMethodName + "());");
 		}
 		MethodMetadata installMethod = installMethodBuilder.build();
@@ -64,12 +62,16 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		new ItdSourceFileComposer(itdTypeDetails);
 	}
 
-	private MethodMetadata getConverterMethod(JavaType type, List<MethodMetadata> methods, String methodName) {
-		List<JavaType> params = new ArrayList<JavaType>();
-		params.add(type);
-		params.add(JavaType.STRING_OBJECT);
-		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, params);
-
+	private MethodMetadata getConverterMethod(JavaType type, List<MethodMetadata> methods, JavaSymbolName methodName) {
+		if (getGovernorMethod(methodName, new ArrayList<AnnotatedJavaType>()) != null) {
+			return null;
+		}
+		List<JavaType> parameters = new ArrayList<JavaType>();
+		parameters.add(type);
+		parameters.add(JavaType.STRING_OBJECT);
+		
+		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "() {");
 		bodyBuilder.indent();
@@ -96,39 +98,43 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("};");
 		
-		return (new MethodMetadataBuilder(getId(), 0, new JavaSymbolName(methodName), converterJavaType, bodyBuilder)).build();
+		return (new MethodMetadataBuilder(getId(), 0, methodName, converterJavaType, bodyBuilder)).build();
 	}
 	
 	private MethodMetadataBuilder getInstallMethodBuilder() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
 		parameters.add(new AnnotatedJavaType(new JavaType("org.springframework.format.FormatterRegistry"), null));
-		if (getGovernorMethod(methodName.getSymbolName(), parameters) != null) {
-			throw new IllegalStateException("Did not expect to find installLabelConverters method in " + governorTypeDetails.getName());
+		
+		MethodMetadata method = getGovernorMethod(methodName, parameters);
+		if (getGovernorMethod(methodName, parameters) != null) {
+			return new MethodMetadataBuilder(method);
 		}
+		
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		parameterNames.add(new JavaSymbolName("registry"));
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameters, parameterNames, new InvocableMemberBodyBuilder());
 	}
 
-	private MethodMetadata getAfterPropertiesSetMethod(MethodMetadata installConvertersMethod) {
+	private MethodMetadataBuilder getAfterPropertiesSetMethod(MethodMetadata installConvertersMethod) {
 		JavaSymbolName methodName = new JavaSymbolName("afterPropertiesSet");
 		
 		List<AnnotatedJavaType> parameters = Collections.emptyList();
 		List<JavaSymbolName> parameterNames = Collections.emptyList();
 
-		if (getGovernorMethod(methodName.getSymbolName(), parameters) != null) {
-			return null;
+		MethodMetadata method = getGovernorMethod(methodName, parameters);
+		if (method != null) {
+			return new MethodMetadataBuilder(method);
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super.afterPropertiesSet();");
 		bodyBuilder.appendFormalLine(installConvertersMethod.getMethodName().getSymbolName() + "(getObject());");
 
-		return (new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameters, parameterNames, bodyBuilder)).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameters, parameterNames, bodyBuilder);
 	}
 
-	private MethodMetadata getGovernorMethod(String methodName, List<AnnotatedJavaType> parameters) {
-		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, new JavaSymbolName(methodName), AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+	private MethodMetadata getGovernorMethod(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
+		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
 	}
 }
