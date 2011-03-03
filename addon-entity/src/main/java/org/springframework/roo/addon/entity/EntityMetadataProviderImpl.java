@@ -83,7 +83,6 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
 
 		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
-		
 		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, pluralMetadata.getPlural(), projectMetadata, memberDetails, identifierServiceResult);
 	}
 	

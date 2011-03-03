@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -275,6 +276,48 @@ public abstract class MemberFindingUtils {
 		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			result.addAll(memberHoldingTypeDetails.getDeclaredMethods());
+		}
+		return result;
+	}
+	
+	/**
+	 * Searches all {@link MemberDetails} and returns all methods which contain a given
+	 * {@link CustomData} tag.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param tagKey the {@link CustomData} key to search for
+	 * @return zero or more methods (never null)
+	 */
+	public static final List<MethodMetadata> getMethodsWithTag(MemberDetails memberDetails, Object tagKey) {
+		Assert.notNull(memberDetails, "Member details required");
+		Assert.notNull(tagKey, "Custom data key required");
+		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
+		for (MethodMetadata method: getMethods(memberDetails)) {
+			if (method.getCustomData().keySet().contains(tagKey)) {
+				result.add(method);
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Searches all {@link MemberDetails} and returns all fields which contain a given
+	 * {@link CustomData} tag.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param tagKey the {@link CustomData} key to search for
+	 * @return zero or more fields (never null)
+	 */
+	public static final List<FieldMetadata> getFieldsWithTag(MemberDetails memberDetails, Object tagKey) {
+		Assert.notNull(memberDetails, "Member details required");
+		Assert.notNull(tagKey, "Custom data key required");
+		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
+		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
+			for (FieldMetadata field: mhtd.getDeclaredFields()) {
+				if (field.getCustomData().keySet().contains(tagKey)) {
+					result.add(field);
+				}
+			}
 		}
 		return result;
 	}

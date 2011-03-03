@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -28,6 +29,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -167,6 +169,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getFindAllMethod());
 		builder.addMethod(getFindMethod());
 		builder.addMethod(getFindEntriesMethod());
+		
+		builder.setCustomData(getCustomData(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES, getDynamicFinders()));
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -344,6 +348,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		constructorBuilder.setModifier(Modifier.PUBLIC);
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
+		constructorBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.NO_ARG_CONSTRUCTOR, null));
 		return constructorBuilder.build();
 	}
 	
@@ -451,6 +456,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType);
+		fieldBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.IDENTIFIER_FIELD, null));
 		return fieldBuilder.build();
 	}
 	
@@ -497,6 +503,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), bodyBuilder);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD, null));
 		return methodBuilder.build();
 	}
 	
@@ -615,6 +622,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, verField, versionType);
+		fieldBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.VERSION_FIELD, null));
 		return fieldBuilder.build();
 	}
 
@@ -665,6 +673,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return this." + version.getFieldName().getSymbolName() + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), version.getFieldType(), bodyBuilder);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD, null));
 		return methodBuilder.build();
 	}
 	
@@ -732,7 +741,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(persistMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(persistMethod), "persist");
+		return getDelegateMethod(new JavaSymbolName(persistMethod), "persist", getCustomData(CustomDataPersistenceTags.PERSIST_METHOD, null));
 	}
 	
 	/**
@@ -748,7 +757,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(removeMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(removeMethod), "remove");
+		return getDelegateMethod(new JavaSymbolName(removeMethod), "remove", getCustomData(CustomDataPersistenceTags.REMOVE_METHOD, null));
 	}
 	
 	/**
@@ -764,7 +773,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(flushMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(flushMethod), "flush");
+		return getDelegateMethod(new JavaSymbolName(flushMethod), "flush", getCustomData(CustomDataPersistenceTags.FLUSH_METHOD, null));
 	}
 	
 	/**
@@ -780,7 +789,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(clearMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(clearMethod), "clear");
+		return getDelegateMethod(new JavaSymbolName(clearMethod), "clear", getCustomData(CustomDataPersistenceTags.CLEAR_METHOD, null));
 	}
 
 	/**
@@ -796,10 +805,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(mergeMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(mergeMethod), "merge");
+		return getDelegateMethod(new JavaSymbolName(mergeMethod), "merge", getCustomData(CustomDataPersistenceTags.MERGE_METHOD, null));
 	}
 	
-	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String entityManagerDelegate) {
+	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String entityManagerDelegate, CustomDataBuilder customData) {
 		// Method definition to find or build
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		
@@ -854,6 +863,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(customData);
 		return methodBuilder.build();
 	}
 
@@ -967,6 +977,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.COUNT_ALL_METHOD, null));
 		return methodBuilder.build();
 	}
 	
@@ -1009,6 +1020,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.FIND_ALL_METHOD, null));
 		return methodBuilder.build();
 	}
 
@@ -1057,6 +1069,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.FIND_METHOD, null));
 		return methodBuilder.build();
 	}
 
@@ -1124,6 +1137,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.FIND_ENTRIES_METHOD, null));
 		return methodBuilder.build();
 	}
 
@@ -1182,5 +1196,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+	
+	private CustomDataBuilder getCustomData(Object key, Object value) {
+		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+		customDataBuilder.put(key, value);
+		return customDataBuilder;
 	}
 }
