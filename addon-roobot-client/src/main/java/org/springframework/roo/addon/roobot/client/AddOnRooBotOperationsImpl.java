@@ -181,14 +181,16 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 	
 	private void installAddon(BundleVersion bundleVersion, String bsn) {
-		if (installOrUpgradeAddOn(bundleVersion, bsn, true).equals(InstallOrUpgradeStatus.SUCCESS)) {
+		InstallOrUpgradeStatus status = installOrUpgradeAddOn(bundleVersion, bsn, true);
+		if (status.equals(InstallOrUpgradeStatus.SUCCESS)) {
 			log.info("Successfully installed add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
 			log.warning("[Hint] Please consider rating this add-on with the following command:");
 			log.warning("[Hint] addon feedback bundle --bundleSymbolicName " + bsn.substring(0, bsn.indexOf(";") != -1 ? bsn.indexOf(";") : bsn.length()) + " --rating ... --comment \"...\"");
+		} else if (status.equals(InstallOrUpgradeStatus.SHELL_RESTART_NEEDED)){
+			log.warning("You have upgraded a Roo core addon. To complete this installation please restart the Roo shell.");
 		} else {
 			log.warning("Unable to install add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
 		}
-		
 	}
 
 	private InstallOrUpgradeStatus installOrUpgradeAddOn(BundleVersion bundleVersion, String bsn, boolean install) {
@@ -206,6 +208,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 		if (!shell.executeCommand("osgi obr start --bundleSymbolicName " + bsn)) {
 			success = false;
+		}
+		if (shell == null) { // workaround for ROO-2190
+			return InstallOrUpgradeStatus.SHELL_RESTART_NEEDED;
 		}
 		if (!shell.executeCommand("osgi obr url remove --url " + bundleVersion.getObrUrl())) {
 			success = false;
@@ -796,6 +801,6 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 	
 	private enum InstallOrUpgradeStatus {
-		SUCCESS, FAILED, INVALID_OBR_URL, PGP_VERIFICATION_NEEDED
+		SUCCESS, FAILED, INVALID_OBR_URL, PGP_VERIFICATION_NEEDED, SHELL_RESTART_NEEDED;
 	}
 }
