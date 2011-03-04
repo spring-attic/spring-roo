@@ -185,7 +185,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				continue; 
 			}
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
-			if (WebMetadataUtils.isRooIdentifier(method.getReturnType(), metadataService)) {
+			if (WebMetadataUtils.isApplicationType(method.getReturnType(), metadataService) && WebMetadataUtils.isRooIdentifier(method.getReturnType(), WebMetadataUtils.getMemberDetails(method.getReturnType(), metadataService, memberDetailsScanner))) {
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(method.getReturnType(), WebMetadataUtils.getMemberDetails(method.getReturnType(), metadataService, memberDetailsScanner), metadataService, metadataIdentificationString, metadataDependencyRegistry);
 				if (typePersistenceMetadataDetails != null) {
 					for (FieldMetadata f : typePersistenceMetadataDetails.getRooIdentifierFields()) {

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -23,6 +24,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -99,6 +101,11 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Add equals and hashCode methods
 		builder.addMethod(getEqualsMethod());
 		builder.addMethod(getHashCodeMethod());
+		
+		// Add custom data tag for Roo Identifier type
+		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+		customDataBuilder.put(CustomDataPersistenceTags.ROO_IDENTIFIER_TYPE, null);
+		builder.setCustomData(customDataBuilder);
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -132,6 +139,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				annotations.add(getColumnBuilder(identifier));
 				
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType());
+				CustomDataBuilder customData = new CustomDataBuilder();
+				customData.put(CustomDataPersistenceTags.ROO_IDENTIFIER_FIELD, null);
+				fieldBuilder.setCustomData(customData);
 				FieldMetadata idField = fieldBuilder.build();
 				
 				// Only add field to ITD if not declared on governor

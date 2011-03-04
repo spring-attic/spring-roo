@@ -321,4 +321,22 @@ public abstract class MemberFindingUtils {
 		}
 		return result;
 	}
+	
+	/**
+	 * Searches all {@link MemberDetails} and returns all {@link MemberHoldingTypeDetails} which contains a given
+	 * {@link CustomData} tag.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param tagKey the {@link CustomData} key to search for
+	 * @return zero or more {@link MemberHoldingTypeDetails} (never null)
+	 */
+	public static List<MemberHoldingTypeDetails> getMemberHoldingTypeDetailsWithTag(MemberDetails memberDetails, Object tagKey) {
+		List<MemberHoldingTypeDetails> result = new ArrayList<MemberHoldingTypeDetails>();
+		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
+			if (mhtd.getCustomData().keySet().contains(tagKey)) {
+				result.add(mhtd);
+			}
+		}
+		return result;
+	}
 }
