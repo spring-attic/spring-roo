@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -36,6 +38,7 @@ import org.springframework.roo.support.util.Assert;
 public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataProvider implements WebScaffoldMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
+	private final Logger log = Logger.getLogger(WebScaffoldMetadataProviderImpl.class.getName());
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -51,6 +54,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		
 		// Lookup the form backing object's metadata
 		JavaType formBackingType = annotationValues.formBackingObject;
+		
 		Path path = Path.SRC_MAIN_JAVA;
 		String entityMetadataKey = EntityMetadata.createIdentifier(formBackingType, path);
 		
@@ -59,6 +63,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		
 		// We need to abort if we couldn't find dependent metadata
 		if (entityMetadata == null || !entityMetadata.isValid()) {
+			log.warning("Aborting - the form backing object for Roo MVC scaffolded controllers need to be @RooEntity persistent types at this time");
 			return null;
 		}
 		
