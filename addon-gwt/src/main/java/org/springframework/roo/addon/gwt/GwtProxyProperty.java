@@ -3,7 +3,6 @@ package org.springframework.roo.addon.gwt;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -17,19 +16,7 @@ class GwtProxyProperty {
 	private final String name;
 	private final String getter;
 	private final JavaType type;
-
 	private PhysicalTypeMetadata ptmd;
-
-	public GwtProxyProperty(ProjectMetadata projectMetadata, MethodMetadata getterMethod, PhysicalTypeMetadata ptmd) {
-		this.projectMetadata = projectMetadata;
-		this.type = getterMethod.getReturnType();
-		this.ptmd = ptmd;
-		this.getter = getterMethod.getMethodName().getSymbolName();
-
-		String prefix = "get";
-
-		this.name = getter.substring(prefix.length(), prefix.length() + 1).toLowerCase() + getter.substring(prefix.length() + 1);
-	}
 
 	public GwtProxyProperty(ProjectMetadata projectMetadata, JavaType type, PhysicalTypeMetadata ptmd) {
 		this.projectMetadata = projectMetadata;
@@ -45,11 +32,6 @@ class GwtProxyProperty {
 		this.ptmd = ptmd;
 		this.getter = accessorMethodName;
 		this.name = name;
-	}
-
-	public static boolean isAccessor(MethodMetadata method) {
-		String symbolName = method.getMethodName().getSymbolName();
-		return symbolName.startsWith("get") /* || symbolName.startsWith("is") */;
 	}
 
 	public String getName() {
