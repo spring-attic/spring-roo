@@ -203,7 +203,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 			try {
 				original = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(jspFilename));
 			} catch (Exception e) {
-				new IllegalStateException("Could not parse file: " + jspFilename);
+				throw new IllegalStateException("Could not parse file: " + jspFilename);
 			} 
 			Assert.notNull(original, "Unable to parse " + jspFilename);
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {

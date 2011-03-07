@@ -170,7 +170,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(menuFileName).getOutputStream());
 			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
 		}
 		
@@ -180,7 +180,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx")).getOutputStream());
 			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
 		}
 		
@@ -188,7 +188,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "item.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx")).getOutputStream());
 			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
 		}
 		
@@ -196,7 +196,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "category.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx")).getOutputStream());
 			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
 		}
 			
@@ -218,7 +218,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			try {
 				original = XmlUtils.getDocumentBuilder().parse(getMenuFile());
 			} catch (Exception e) {
-				new IllegalStateException("Could not parse file: " + menuFileName);
+				throw new IllegalStateException("Could not parse file: " + menuFileName);
 			} 
 			Assert.notNull(original, "Unable to parse " + menuFileName);
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {

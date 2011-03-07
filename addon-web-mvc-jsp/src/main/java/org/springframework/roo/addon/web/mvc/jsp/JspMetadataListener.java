@@ -249,7 +249,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			try {
 				original = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(jspFilename));
 			} catch (Exception e) {
-				new IllegalStateException("Could not parse file: " + jspFilename);
+				throw new IllegalStateException("Could not parse file: " + jspFilename);
 			}
 			Assert.notNull(original, "Unable to parse " + jspFilename);
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
@@ -314,7 +314,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), imagePath), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, imagePath)).getOutputStream());
 			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+				throw new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
 		}
 	}

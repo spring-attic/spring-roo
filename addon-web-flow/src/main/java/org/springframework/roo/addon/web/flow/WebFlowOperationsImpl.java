@@ -63,7 +63,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		String resolvedFlowDefinitionPath = resolvedFlowPath + "/flow.xml";
 
 		if (fileManager.exists(resolvedFlowPath)) {
-			new IllegalStateException("Flow directory already exists: " + resolvedFlowPath);
+			throw new IllegalStateException("Flow directory already exists: " + resolvedFlowPath);
 		}
 		fileManager.createDirectory(resolvedFlowPath);
 
@@ -147,7 +147,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), templateFileName), fileManager.createFile(resolvedTargetDirectoryPath + "/" + templateFileName).getOutputStream());
 		} catch (IOException e) {
-			new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
+			throw new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
 		}
 	}
 }
