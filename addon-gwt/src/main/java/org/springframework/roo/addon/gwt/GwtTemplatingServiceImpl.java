@@ -135,7 +135,6 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 			templateContents = template.renderToString(dataDictionary);
 			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, Path.SRC_MAIN_JAVA);
 			return physicalTypeMetadataProvider.parse(templateContents, templateId, templateType);
-
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
