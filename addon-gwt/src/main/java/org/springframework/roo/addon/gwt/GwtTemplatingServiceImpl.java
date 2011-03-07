@@ -5,6 +5,15 @@ import hapax.TemplateDataDictionary;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,7 +22,6 @@ import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
@@ -24,14 +32,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Provides a basic implementation of {@link GwtTemplatingService} which
  * is used to create {@link ClassOrInterfaceTypeDetails} objects from
@@ -41,15 +41,12 @@ import java.util.Set;
  * @author James Tyrrell
  * @since 1.1.2
  */
-
 @Component
 @Service
 public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private GwtTypeService gwtTypeService;
 
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		JavaType governorTypeName = governorTypeDetails.getName();
@@ -123,8 +120,7 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	private String getTemplateContents(String templateName, TemplateDataDictionary dataDictionary) {
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
-			Template template;
-			template = templateLoader.getTemplate(templateName);
+			Template template = templateLoader.getTemplate(templateName);
 			return template.renderToString(dataDictionary);
 		} catch (TemplateException e) {
 			throw new IllegalStateException(e);
@@ -147,12 +143,14 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 
 	private TemplateDataDictionary buildDictionary(GwtType type) {
 		ProjectMetadata projectMetadata = getProjectMetadata();
+		TemplateDataDictionary dataDictionary = null;
+		GwtType locate = GwtType.PROXY;
+		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+		
 		switch (type) {
-			case APP_ENTITY_TYPES_PROCESSOR: {
-				TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
-
-				GwtType locate = GwtType.PROXY;
-				String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+			case APP_ENTITY_TYPES_PROCESSOR: 
+				dataDictionary = buildStandardDataDictionary(type);
+				
 				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
 					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
@@ -168,12 +166,10 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 					String entity3 = new StringBuilder("\tpublic abstract void handle").append(simpleName).append("(").append(fullPath).append(" proxy);").toString();
 					dataDictionary.addSection("entities3").setVariable("entity", entity3);
 				}
-				return dataDictionary;
-			}
-			case MASTER_ACTIVITIES: {
-				GwtType locate = GwtType.PROXY;
-				TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
-				String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+				break;
+			case MASTER_ACTIVITIES: 
+				dataDictionary = buildStandardDataDictionary(type);
+				
 				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
 					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
@@ -185,14 +181,11 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 					addImport(dataDictionary, simpleName, GwtType.LIST_VIEW, projectMetadata);
 					addImport(dataDictionary, simpleName, GwtType.MOBILE_LIST_VIEW, projectMetadata);
 				}
-				return dataDictionary;
-			}
-			case APP_REQUEST_FACTORY: {
-				TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
+				break;
+			case APP_REQUEST_FACTORY: 
+				dataDictionary = buildStandardDataDictionary(type);
 				dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
 
-				GwtType locate = GwtType.PROXY;
-				String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
 					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
@@ -203,12 +196,10 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 				if (projectMetadata.isGaeEnabled()) {
 					dataDictionary.showSection("gae");
 				}
-				return dataDictionary;
-			}
-			case LIST_PLACE_RENDERER: {
-				TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
-				GwtType locate = GwtType.PROXY;
-				String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+				break;
+			case LIST_PLACE_RENDERER:
+				dataDictionary = buildStandardDataDictionary(type);
+
 				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
 					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
@@ -217,12 +208,10 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 					section.setVariable("entityFullPath", fullPath);
 					addImport(dataDictionary, GwtType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + GwtType.PROXY.getSuffix());
 				}
-				return dataDictionary;
-			}
-			case DETAILS_ACTIVITIES: {
-				TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
-				GwtType locate = GwtType.PROXY;
-				String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+				break;
+			case DETAILS_ACTIVITIES:
+				dataDictionary = buildStandardDataDictionary(type);
+
 				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
 					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
@@ -231,13 +220,13 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 					addImport(dataDictionary, GwtType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + GwtType.PROXY.getSuffix());
 					addImport(dataDictionary, GwtType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + GwtType.ACTIVITIES_MAPPER.getSuffix());
 				}
-				return dataDictionary;
-			}
-			case MOBILE_ACTIVITIES: {
-				return buildStandardDataDictionary(type);
-			}
+				break;
+			case MOBILE_ACTIVITIES:
+				dataDictionary = buildStandardDataDictionary(type);
+				break;
 		}
-		return null;
+		
+		return dataDictionary;
 	}
 
 	private TemplateDataDictionary buildStandardDataDictionary(GwtType type) {

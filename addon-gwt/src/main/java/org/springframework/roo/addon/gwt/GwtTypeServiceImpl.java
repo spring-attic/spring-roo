@@ -1,5 +1,20 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -39,21 +54,6 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Logger;
-
 /**
  * Provides a basic implementation of {@link GwtTypeService}.
  *
@@ -63,6 +63,7 @@ import java.util.logging.Logger;
 @Component
 @Service
 public class GwtTypeServiceImpl implements GwtTypeService {
+	private static Logger logger = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
@@ -70,8 +71,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	private Set<String> warnings = new LinkedHashSet<String>();
 	private Timer warningTimer = new Timer();
-
-	private static Logger logger = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
 
 	/**
 	 * Return the type arg for the client side method, given the domain method return type.
@@ -303,7 +302,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	public List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes) {
 		try {
-			//A type may consist of a concrete type which depend on
+			// A type may consist of a concrete type which depend on
 			List<ClassOrInterfaceTypeDetails> types = new ArrayList<ClassOrInterfaceTypeDetails>();
 			ClassOrInterfaceTypeDetailsBuilder templateClassBuilder = new ClassOrInterfaceTypeDetailsBuilder(templateClass);
 

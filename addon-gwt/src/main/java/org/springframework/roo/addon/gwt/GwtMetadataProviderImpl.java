@@ -1,5 +1,16 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -12,7 +23,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -25,17 +35,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
@@ -64,7 +63,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplatingService gwtTemplateService;
 	@Reference private GwtTypeService gwtTypeService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProjectOperations projectOperations;
@@ -98,7 +96,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			return null;
 		}
 
-		//We are only interested in source that is not in the client package
+		// We are only interested in source that is not in the client package
 		if (governorTypeName.getPackage().getFullyQualifiedPackageName().startsWith(GwtPath.CLIENT.packageName(projectMetadata))) {
 			return null;
 		}
@@ -115,7 +113,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 
-		//We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
+		// We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
 		if (!GwtUtils.isMappable(governorTypeDetails, entityMetadata)) {
 			return null;
 		}
@@ -258,7 +256,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
-
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return;
