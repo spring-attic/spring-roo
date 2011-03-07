@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,7 +22,6 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -24,15 +31,8 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
-
-import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
@@ -57,18 +57,26 @@ import java.util.Set;
 @Component(immediate = true)
 @Service
 public class GwtMetadataProviderImpl implements GwtMetadataProvider {
-	@Reference private GwtFileManager gwtFileManager;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private GwtTypeNamingStrategy gwtTypeNamingStrategy;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplatingService gwtTemplateService;
+	@Reference private GwtTypeNamingStrategy gwtTypeNamingStrategy;
 	@Reference private GwtTypeService gwtTypeService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private MetadataService metadataService;
+	@Reference private ProjectOperations projectOperations;
+
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+	}
+
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+	}
 
 	public MetadataItem get(String metadataIdentificationString) {
 		// Abort early if we can't continue
-		ProjectMetadata projectMetadata = getProjectMetadata();
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return null;
 		}
@@ -106,12 +114,11 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 
-		//We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
+		// We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
 		if (!GwtUtils.isMappable(governorTypeDetails, entityMetadata)) {
 			return null;
 		}
 
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtMetadataProviderImpl.class.getName(), governorTypeDetails).getDetails();
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
 		Map<JavaType, JavaType> gwtClientTypeMap = gwtTypeService.getClientTypeMap(governorTypeDetails);
 
@@ -156,7 +163,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			}
 			for (JavaSymbolName symbolName : proxyFields) {
 				GwtProxyProperty proxyProperty = clientSideTypeMap.get(symbolName);
-				GwtProxyProperty newProxyProperty = new GwtProxyProperty(getProjectMetadata(), proxyProperty.getPropertyType(), defaultPhysicalTypeMetadata, proxyProperty.getName(), proxyProperty.getGetter());
+				GwtProxyProperty newProxyProperty = new GwtProxyProperty(projectOperations.getProjectMetadata(), proxyProperty.getPropertyType(), defaultPhysicalTypeMetadata, proxyProperty.getName(), proxyProperty.getGetter());
 				clientSideTypeMap.put(symbolName, newProxyProperty);
 			}
 		}
@@ -206,8 +213,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
-
-		ProjectMetadata projectMetadata = getProjectMetadata();
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return;
 		}
@@ -234,18 +240,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		if (get(downstreamDependency) != null) {
 			metadataDependencyRegistry.notifyDownstream(downstreamDependency);
 		}
-	}
-
-	private ProjectMetadata getProjectMetadata() {
-		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-	}
-
-	protected void activate(ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-	}
-
-	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
