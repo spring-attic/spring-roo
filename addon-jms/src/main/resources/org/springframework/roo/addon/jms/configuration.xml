@@ -1,42 +1,54 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
-	<springJms>
-		<dependencies>
-			<dependency org="org.springframework" name="spring-beans" rev="${spring.version}" />
-			<dependency org="org.springframework" name="spring-jms" rev="${spring.version}" />
-			<dependency org="org.apache.geronimo.specs" name="geronimo-jms_1.1_spec" rev="1.1"/>
-		</dependencies>
-	</springJms>
-	<jmsProviders>
-		<provider id="ACTIVEMQ_IN_MEMORY">
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.activemq</groupId>
-					<artifactId>activemq-core</artifactId>
-					<version>5.4.2</version>
-					<exclusions>
-						<exclusion>
-							<groupId>commons-logging</groupId>
-							<artifactId>commons-logging</artifactId>
-						</exclusion>
-						<exclusion>
-							<groupId>commons-logging</groupId>
-							<artifactId>commons-logging-api</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.apache.xbean</groupId>
-					<artifactId>xbean-spring</artifactId>
-					<version>3.6</version>
-					<exclusions>
-						<exclusion>
-							<groupId>commons-logging</groupId>
-							<artifactId>commons-logging</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-			</dependencies>
-		</provider>
-	</jmsProviders>
+    <springJms>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jms</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jms_1.1_spec</artifactId>
+                <version>1.1</version>
+            </dependency>
+        </dependencies>
+    </springJms>
+    <jmsProviders>
+        <provider id="ACTIVEMQ_IN_MEMORY">
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.activemq</groupId>
+                    <artifactId>activemq-core</artifactId>
+                    <version>5.4.2</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-logging</groupId>
+                            <artifactId>commons-logging</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>commons-logging</groupId>
+                            <artifactId>commons-logging-api</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.xbean</groupId>
+                    <artifactId>xbean-spring</artifactId>
+                    <version>3.6</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>commons-logging</groupId>
+                            <artifactId>commons-logging</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
+        </provider>
+    </jmsProviders>
 </configuration>
