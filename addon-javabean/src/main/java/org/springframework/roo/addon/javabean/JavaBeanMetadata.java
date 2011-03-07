@@ -227,7 +227,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	private FieldMetadata getMultipleEntityIdField(JavaSymbolName fieldName) {
-		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.HashSet"));
+		// builder.getImportRegistrationResolver().addImport(new JavaType("com.google.appengine.api.datastore.KeyFactory"));
 		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType("java.util.Set", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.appengine.api.datastore.Key"))), "new HashSet<Key>()");
 		return fieldMetadataBuilder.build();
 	}
