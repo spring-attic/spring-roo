@@ -296,10 +296,12 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
 		String instantiableCollection = collectionName;
-		if (collectionType.equals(new JavaType("java.util.List"))) {
+
+		//GAE only supports java.util.List and java.util.Set collections and we need a concrete implementation of either.
+		if (collectionType.getFullyQualifiedTypeName().equals("java.util.List")) {
 			collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-		} else if (collectionType.equals(new JavaType("java.util.Set"))) {
+		} else if (collectionType.getFullyQualifiedTypeName().equals("java.util.Set")) {
 			collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}

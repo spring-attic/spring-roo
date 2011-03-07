@@ -376,10 +376,4 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public DataType getDataType() {
 		return dataType;
 	}
-
-	// Shouldn't be required given JavaType is immutable!
-	// @Override
-	// public JavaType clone() throws CloneNotSupportedException {
-	// return new JavaType(this.fullyQualifiedTypeName, this.array, this.primitive);
-	// }
 }
