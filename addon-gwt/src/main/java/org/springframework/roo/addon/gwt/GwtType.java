@@ -147,6 +147,7 @@ public enum GwtType {
 				watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(new JavaType("com.google.gwt.place.shared.Place")));
 				break;
 		}
+
 		return watchedMethods;
 	}
 
@@ -210,6 +211,7 @@ public enum GwtType {
 			case MOBILE_EDIT_VIEW:
 				watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
 				break;
+
 		}
 	}
 
@@ -260,6 +262,10 @@ public enum GwtType {
 		return watchedFieldNames;
 	}
 
+	public void setWatchedFieldNames(ArrayList<JavaSymbolName> watchedFieldNames) {
+		this.watchedFieldNames = watchedFieldNames;
+	}
+
 	public Map<JavaSymbolName, List<JavaType>> getWatchedMethods() {
 		return watchedMethods;
 	}
@@ -276,8 +282,16 @@ public enum GwtType {
 		return createAbstract;
 	}
 
+	public void setCreateAbstract(boolean createAbstract) {
+		this.createAbstract = createAbstract;
+	}
+
 	public boolean isOverwriteConcrete() {
 		return overwriteConcrete;
+	}
+
+	public void setOverwriteConcrete(boolean overwriteConcrete) {
+		this.overwriteConcrete = overwriteConcrete;
 	}
 
 	public List<GwtType> getReferences() {

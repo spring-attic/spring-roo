@@ -18,7 +18,8 @@ import java.util.List;
 
 /**
  * Provides a basic implementation of {@link GwtFileManager} which encapsulates
- * the file management functionality required by {@link GwtMetadataProviderImpl}
+ * the file management functionality required by both {@link GwtFileListener}
+ * and {@link GwtMetadataProviderImpl}
  *
  * @author James Tyrrell
  * @since 1.1.2

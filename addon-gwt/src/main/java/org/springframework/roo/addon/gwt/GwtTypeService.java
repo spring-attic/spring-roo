@@ -2,11 +2,12 @@ package org.springframework.roo.addon.gwt;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GwtTypeService {
 
@@ -14,15 +15,7 @@ public interface GwtTypeService {
 
 	List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType);
 
-	List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes);
+	Map<JavaSymbolName, GwtProxyProperty> getClientSideTypeMap(ClassOrInterfaceTypeDetails governorTypeDetails);
 
-	List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
-
-	List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
-
-	boolean isDomainObject(JavaType type);
-
-	boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, List<String> sourcePaths);
-
-	List<String> getSourcePaths();
+	Map<JavaType, JavaType> getClientTypeMap(ClassOrInterfaceTypeDetails governorTypeDetails);
 }

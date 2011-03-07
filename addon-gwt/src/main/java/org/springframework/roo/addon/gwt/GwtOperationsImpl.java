@@ -180,8 +180,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			if (is != null) {
 				try {
 					is.close();
-				} catch (IOException ignored) {
-				}
+				} catch (IOException ignored) {}
 			}
 		}
 
@@ -280,8 +279,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			if (is != null) {
 				try {
 					is.close();
-				} catch (IOException ignored) {
-				}
+				} catch (IOException ignored) {}
 			}
 		}
 
@@ -358,7 +356,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	// TODO: Remove this once it has been established how GWT and MVC projects can get along.
-	@SuppressWarnings("unused")
+	@SuppressWarnings("unused") 
 	private void updateSpringWebCtx() {
 		String mvcXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(mvcXml), "webmvc-config.xml not found; cannot continue");
