@@ -49,9 +49,10 @@ public class {{=className}} extends Composite
 
   }
 
-  class NameLabel extends Composite implements ValueAwareEditor<{{=proxy}}> {
+  class NameLabel extends Composite implements LeafValueEditor<{{=proxy}}> {
 
     final Label {{=primaryProp}}Editor = new Label();
+    private {{=proxy}} proxy = null;
 
     public NameLabel() {
       this(null);
@@ -61,23 +62,15 @@ public class {{=className}} extends Composite
       initWidget({{=primaryProp}}Editor);
     }
 
-    public void flush() {
-      // No-op
-    }
-
-    @Override
-    public void onPropertyChange(String... strings) {
-
-    }
-
-    @Override
-    public void setDelegate(
-        EditorDelegate<{{=proxy}}> editorDelegate) {
-    }
-
-    @Override
     public void setValue({{=proxy}} proxy) {
-    }
+		this.proxy = proxy;
+		{{=primaryProp}}Editor.setText({{=proxyRenderer}}.instance().render(proxy));
+	}
+
+	@Override
+	public {{=proxy}} getValue() {
+		return proxy;
+	}
   }
 
   interface Style extends CssResource {
@@ -159,11 +152,9 @@ public class {{=className}} extends Composite
     Driver driver = GWT.<Driver>create(Driver.class);
 
     // Use a ListEditor that uses our NameLabelSource
-    ListEditor<{{=proxy}}, NameLabel> editor = ListEditor
-        .of(new NameLabelSource());
+    ListEditor<{{=proxy}}, NameLabel> listEditor = ListEditor.of(new NameLabelSource());
 
     // Configure the driver
-    ListEditor<{{=proxy}}, NameLabel> listEditor = editor;
     driver.initialize(listEditor);
 
     /*
@@ -179,10 +170,16 @@ public class {{=className}} extends Composite
 
   @UiHandler("add")
   public void addClicked(ClickEvent e) {
-    if (!displayedList.contains(picker.getValue())) {
-      displayedList.add(picker.getValue());
-      viewLabel.setText(makeFlatList(displayedList));
-    }
+    if (picker.getValue() == null){
+		return;
+	}
+	for ({{=proxy}} proxy : displayedList) {
+		if (proxy.getId().equals(picker.getValue().getId())) {
+			return;
+		}
+	}
+    displayedList.add(picker.getValue());
+    viewLabel.setText(makeFlatList(displayedList));
   }
 
   @UiHandler("clickToEdit")
@@ -225,12 +222,11 @@ public class {{=className}} extends Composite
     makeEditable(editing = false);
     if (displayedList != null) {
       displayedList.clear();
-    }
-
-    if (values != null) {
+      if (values != null) {
       for ({{=proxy}} e : values) {
         displayedList.add(e);
       }
+    }
     }
     viewLabel.setText(makeFlatList(values));
   }
