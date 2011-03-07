@@ -15,6 +15,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -255,6 +256,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.List"));
 		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.ArrayList"));
 
+		String identifierMethodName = getIdentifierMethodName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
 		bodyBuilder.appendFormalLine("List<Long> longIds = new ArrayList<Long>();");
@@ -269,10 +272,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("for (" + collectionElementType.getSimpleTypeName() + " entity : " + entityCollectionName +") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (!longIds.contains(entity.getId())) {");
+		bodyBuilder.appendFormalLine("if (!longIds.contains(entity." + identifierMethodName + "())) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("longIds.add(entity.getId());");
-		bodyBuilder.appendFormalLine(entityIdsName + ".add(KeyFactory.createKey(" + collectionElementType.getSimpleTypeName() + ".class.getName(), entity.getId()));");
+		bodyBuilder.appendFormalLine("longIds.add(entity." + identifierMethodName +"());");
+		bodyBuilder.appendFormalLine(entityIdsName + ".add(KeyFactory.createKey(" + collectionElementType.getSimpleTypeName() + ".class.getName(), entity." + identifierMethodName + "()));");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
@@ -282,6 +285,40 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		return bodyBuilder;
 	}
+
+	private String getIdentifierMethodName() {
+		MethodMetadata identifierMethod = getIdentifierMethod();
+		if (identifierMethod != null) {
+			return identifierMethod.getMethodName().getSymbolName();
+		}
+		return "getId";
+	}
+
+	private MethodMetadata getIdentifierMethod() {
+		FieldMetadata identifierField = getIdentifierField();
+		if (identifierField != null) {
+			return getDeclaredGetter(identifierField);
+		}
+		return null;
+	}
+
+	private FieldMetadata getIdentifierField() {
+		for (AnnotationMetadata annotation : governorTypeDetails.getAnnotations()) {
+			if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooEntity")) {
+				AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("identifierField"));
+				if (value != null) {
+					FieldMetadata possibleIdentifierField = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName(String.valueOf(value.getValue())));
+					for (AnnotationMetadata fieldAnnotation : possibleIdentifierField.getAnnotations()) {
+						if (fieldAnnotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Id")) {
+							return possibleIdentifierField;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 
 	private InvocableMemberBodyBuilder getEntityCollectionAccessorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
 		String entityCollectionName = field.getFieldName().getSymbolName();
@@ -330,15 +367,17 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		String entityName = field.getFieldName().getSymbolName();
 		String entityIdName = hiddenIdFieldName.getSymbolName();
 
+		String identifierMethodName = getIdentifierMethodName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + entityName + " != null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (" + entityName + ".getId() == null) {");
+		bodyBuilder.appendFormalLine("if (" + entityName + "." + identifierMethodName + " () == null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(entityName + ".persist();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("this." + entityIdName + " = " + entityName + ".getId();");
+		bodyBuilder.appendFormalLine("this." + entityIdName + " = " + entityName + "." + identifierMethodName + "();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
@@ -380,19 +419,19 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return tsc.toString();
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

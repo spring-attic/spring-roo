@@ -58,7 +58,6 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 				declaredFields.put(field, (projectMetadata.isGaeEnabled() && isGaeInterested(field)));
 			}
 		}
-
 		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, declaredFields);
 	}
 
