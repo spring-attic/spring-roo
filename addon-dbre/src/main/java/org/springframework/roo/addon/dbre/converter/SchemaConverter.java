@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.converters;
+package org.springframework.roo.addon.dbre.converter;
 
 import java.util.List;
 import java.util.Set;
