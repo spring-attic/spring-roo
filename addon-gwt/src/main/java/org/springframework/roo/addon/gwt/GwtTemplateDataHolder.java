@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Holder for types and xml files created via {@link GwtTemplatingService}.
+ * Holder for types and xml files created via {@link GwtTemplateService}.
  *
  * @author James Tyrrell
  * @since 1.1.2

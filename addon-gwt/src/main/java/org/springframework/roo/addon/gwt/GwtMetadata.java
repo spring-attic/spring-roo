@@ -102,7 +102,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		FieldMetadata idField = entityMetadata.getIdentifierField();
 		Assert.notNull(idField, "GWT support requires an @Id field for " + typeName);
 		JavaSymbolName idPropertyName = idField.getFieldName();
-		Assert.isTrue("id".equals(idPropertyName.getSymbolName()), "GWT support requires that an @Id field be named \"id\" (found \"" + idPropertyName + "\") for " + typeName);
+		//Assert.isTrue("id".equals(idPropertyName.getSymbolName()), "GWT support requires that an @Id field be named \"id\" (found \"" + idPropertyName + "\") for " + typeName);
 
 		FieldMetadata versionField = entityMetadata.getVersionField();
 		Assert.notNull(versionField, "GWT support requires an @Version field for " + typeName);

@@ -6,7 +6,13 @@ import org.springframework.roo.model.JavaSymbolName;
 import java.util.List;
 import java.util.Map;
 
-public interface GwtTemplatingService {
+/**
+ * Interface for {@link GwtTemplateServiceImpl}.
+ *
+ * @author James Tyrrell
+ * @since 1.1.2
+ */
+public interface GwtTemplateService {
 
 	GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap);
 

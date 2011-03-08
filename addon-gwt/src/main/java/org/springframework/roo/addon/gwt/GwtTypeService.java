@@ -8,6 +8,12 @@ import org.springframework.roo.project.ProjectMetadata;
 
 import java.util.List;
 
+/**
+ * Interface for {@link GwtTypeServiceImpl}.
+ *
+ * @author James Tyrrell
+ * @since 1.1.2
+ */
 public interface GwtTypeService {
 
 	JavaType getGwtSideLeafType(JavaType type, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType);

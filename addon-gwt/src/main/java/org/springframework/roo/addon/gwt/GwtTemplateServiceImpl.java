@@ -33,7 +33,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Provides a basic implementation of {@link GwtTemplatingService} which
+ * Provides a basic implementation of {@link GwtTemplateService} which
  * is used to create {@link ClassOrInterfaceTypeDetails} objects from
  * source files created from templates. This class keeps all templating
  * concerns in one place.
@@ -43,7 +43,7 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component
 @Service
-public class GwtTemplatingServiceImpl implements GwtTemplatingService {
+public class GwtTemplateServiceImpl implements GwtTemplateService {
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
