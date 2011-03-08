@@ -1,5 +1,23 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -32,23 +50,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Metadata for GWT.
@@ -101,8 +102,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		FieldMetadata idField = entityMetadata.getIdentifierField();
 		Assert.notNull(idField, "GWT support requires an @Id field for " + typeName);
-		JavaSymbolName idPropertyName = idField.getFieldName();
-		//Assert.isTrue("id".equals(idPropertyName.getSymbolName()), "GWT support requires that an @Id field be named \"id\" (found \"" + idPropertyName + "\") for " + typeName);
 
 		FieldMetadata versionField = entityMetadata.getVersionField();
 		Assert.notNull(versionField, "GWT support requires an @Version field for " + typeName);
