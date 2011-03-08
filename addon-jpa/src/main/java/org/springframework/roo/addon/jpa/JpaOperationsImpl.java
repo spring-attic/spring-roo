@@ -765,32 +765,38 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		Element root = (Element) pom.getFirstChild();
 		
+		// Removed unwanted database dependencies
 		List<JdbcDatabase> databases = new ArrayList<JdbcDatabase>();
 		for (JdbcDatabase database : JdbcDatabase.values()) {
 			if (!database.getKey().equals(jdbcDatabase.getKey()) && !database.getDriverClassName().equals(jdbcDatabase.getDriverClassName())) {
 				databases.add(database);
 			}
 		}
-		removeArtifacts(getDbXPath(databases), root, configuration);
+		boolean hasChanged = removeArtifacts(getDbXPath(databases), root, configuration);
 
+		// Removed unwanted ORM providers
 		List<OrmProvider> ormProviders = new ArrayList<OrmProvider>();
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
 				ormProviders.add(provider);
 			}
 		}
-		removeArtifacts(getProviderXPath(ormProviders), root, configuration);
 		
-		mutableFile.setDescriptionOfChange("Removed redundant artifacts");
-		
-		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+		hasChanged |= removeArtifacts(getProviderXPath(ormProviders), root, configuration);
+		if (hasChanged) {
+			// Something has changed so write changes to pom.xml
+			mutableFile.setDescriptionOfChange("Removed redundant artifacts");
+			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+		}
 
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(false, pom, mutableFile);
 		}
 	}
 		
-	private void removeArtifacts(String xPathExpression, Element root, Element configuration) {
+	private boolean removeArtifacts(String xPathExpression, Element root, Element configuration) {
+		boolean hasChanged = false;
+		
 		// Remove unwanted dependencies
 		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
 		for (Element candidate : XmlUtils.findElements("/project/dependencies/dependency", root)) {
@@ -798,11 +804,14 @@ public class JpaOperationsImpl implements JpaOperations {
 				if (new Dependency(dependencyElement).equals(new Dependency(candidate))) {
 					// Found it
 					dependenciesElement.removeChild(candidate);
+					hasChanged = true;
 					break unwanted;
 				}
 			}
 		}
-		XmlUtils.removeTextNodes(dependenciesElement);
+		if (hasChanged) {
+			XmlUtils.removeTextNodes(dependenciesElement);
+		}
 
 		// Remove unwanted filters
 		Element filtersElement = XmlUtils.findFirstElement("/project/build/filters", root);
@@ -811,13 +820,16 @@ public class JpaOperationsImpl implements JpaOperations {
 				if (new Filter(filterElement).equals(new Filter(candidate))) {
 					// Found it
 					filtersElement.removeChild(candidate);
+					hasChanged = true;
 					break unwanted;
 				}
 			}
 		}
-		XmlUtils.removeTextNodes(filtersElement);
-		if (filtersElement != null && !filtersElement.hasChildNodes()) {
-			filtersElement.getParentNode().removeChild(filtersElement);
+		if (hasChanged) {
+			XmlUtils.removeTextNodes(filtersElement);
+			if (filtersElement != null && !filtersElement.hasChildNodes()) {
+				filtersElement.getParentNode().removeChild(filtersElement);
+			}
 		}
 
 		// Remove unwanted plugins
@@ -827,11 +839,16 @@ public class JpaOperationsImpl implements JpaOperations {
 				if (new Plugin(pluginElement).equals(new Plugin(candidate))) {
 					// Found it
 					pluginsElement.removeChild(candidate);
+					hasChanged = true;
 					break unwanted;
 				}
 			}
 		}
-		XmlUtils.removeTextNodes(pluginsElement);
+		if (hasChanged) {
+			XmlUtils.removeTextNodes(pluginsElement);
+		}
+		
+		return hasChanged;
 	}
 
 	private String getDbXPath(JdbcDatabase jdbcDatabase) {
