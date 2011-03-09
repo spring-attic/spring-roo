@@ -32,19 +32,19 @@ public interface DynamicFinderServices {
 	 */
 	List<JavaSymbolName> getFinders(MemberDetails memberDetails, String plural, int depth, Set<JavaSymbolName> exclusions);
 		
-    /**
-     * This method generates a {@link QueryHolder} object that consists of the:
-     * <ul>
-     * <li>named JPA query string to be used in JPA entity manager queries
-     * <li>parameter types used in the named JPA query
-     * <li>parameter names used in the named JPA query
-     * </ul>
-     * 
-     * @param memberDetails the {@link MemberDetails} object to search (required)
-     * @param finderName the finder method signature to use (required; must be a valid signature)
-     * @param plural the pluralised form of the entity name, which is used for finder method names (required)
-     * @param entityName the name of the entity to be used in the Query 
-     * @return a {@link QueryHolder} object containing all the attributes to be used in a JPA named query (null if the finder is unable to be built at this time)
-     */
-    QueryHolder getQueryHolder(MemberDetails memberDetails, JavaSymbolName finderName, String plural, String entityName);
+	/**
+	 * This method generates a {@link QueryHolder} object that consists of the:
+	 * <ul>
+	 * <li>named JPA query string to be used in JPA entity manager queries
+	 * <li>parameter types used in the named JPA query
+	 * <li>parameter names used in the named JPA query
+	 * </ul>
+	 * 
+	 * @param memberDetails the {@link MemberDetails} object to search (required)
+	 * @param finderName the finder method signature to use (required; must be a valid signature)
+	 * @param plural the pluralised form of the entity name, which is used for finder method names (required)
+	 * @param entityName the name of the entity to be used in the Query
+	 * @return a {@link QueryHolder} object containing all the attributes to be used in a JPA named query (null if the finder is unable to be built at this time)
+	 */
+	QueryHolder getQueryHolder(MemberDetails memberDetails, JavaSymbolName finderName, String plural, String entityName);
 }
