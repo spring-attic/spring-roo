@@ -156,7 +156,6 @@ public class JspOperationsImpl implements JspOperations {
 			try {
 				document = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "index-template.jspx"));
 				XmlUtils.findRequiredElement("/div/message", document.getDocumentElement()).setAttribute("code", "label" + path.replace("/", "_") + "_" + lcViewName);
-				XmlUtils.findRequiredElement("/div/page", document.getDocumentElement()).setAttribute("id", path.replace("/", "_") + "_" + lcViewName);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 			}
