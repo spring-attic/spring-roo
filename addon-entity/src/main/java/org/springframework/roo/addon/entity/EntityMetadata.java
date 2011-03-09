@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
+import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -66,6 +67,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private boolean isGaeEnabled;
 	private boolean isDataNucleusEnabled;
 	private boolean isVMforceEnabled;
+	private String columnDefinition;
+	private int columnSize;
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = JavaType.LONG_OBJECT;
@@ -125,8 +128,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					identifierColumn = id.getColumnName();
 					identifierField = id.getFieldName().getSymbolName();
 					identifierType = id.getFieldType();
+					columnDefinition = id.getColumnDefinition();
+					columnSize = id.getColumnSize();
 				}
-			}			
+			}
 		}
 		
 		// Add @Entity or @MappedSuperclass annotation
@@ -394,7 +399,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
-		if ("".equals(identifierField)) {
+		if (!StringUtils.hasText(identifierField)) {
 			// Force a default
 			identifierField = "id";
 		}
@@ -453,13 +458,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes));
 
 			String columnName = idField.getSymbolName();
-			if (!"".equals(identifierColumn)) {
+			if (StringUtils.hasText(identifierColumn)) {
 				// User has specified an alternate column name
 				columnName = identifierColumn;
 			}
 
 			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
+			if (StringUtils.hasText(columnDefinition)) {
+				columnAttributes.add(new StringAttributeValue(new JavaSymbolName("columnDefinition"), columnDefinition));
+			}
+			if (columnSize > 0) {
+				columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), columnSize));
+			}
 			annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 		}
 		
