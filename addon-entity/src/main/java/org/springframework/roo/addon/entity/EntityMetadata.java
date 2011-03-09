@@ -90,7 +90,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String schema = "";
 	@AutoPopulate private String catalog = "";
 	@AutoPopulate private String inheritanceType = "";
-		
+	@AutoPopulate private String entityName = "";
+
 	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata, MemberDetails memberDetails, List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -177,7 +178,18 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	public AnnotationMetadata getEntityAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.persistence.Entity"));
+		AnnotationMetadata entityAnnotation = getTypeAnnotation(new JavaType("javax.persistence.Entity"));
+		if (entityAnnotation == null) {
+			return null;
+		}
+		
+		if (StringUtils.hasText(entityName)) {
+			AnnotationMetadataBuilder entityBuilder = new AnnotationMetadataBuilder(entityAnnotation);
+			entityBuilder.addStringAttribute("name", entityName);
+			entityAnnotation = entityBuilder.build();
+		}
+		
+		return entityAnnotation;
 	}
 
 	public AnnotationMetadata getMappedSuperclassAnnotation() {
@@ -193,12 +205,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	public AnnotationMetadata getTableAnnotation() {
-		JavaType tableType = new JavaType("javax.persistence.Table");
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, tableType) != null) {
+		AnnotationMetadata tableAnnotation = getTypeAnnotation(new JavaType("javax.persistence.Table"));
+		if (tableAnnotation == null) {
 			return null;
 		}
 		if (StringUtils.hasText(table) || StringUtils.hasText(schema) || StringUtils.hasText(catalog)) {
-			AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(tableType);
+			AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(tableAnnotation);
 			if (StringUtils.hasText(table)) {
 				tableBuilder.addStringAttribute("name", table);
 			}
@@ -967,11 +979,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 		
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
-			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getSingleResult()).longValue();");
+			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + typeName + " o\").getSingleResult()).longValue();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", Long.class).getSingleResult();");			
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(*) FROM " + typeName + " o\", Long.class).getSingleResult();");
 		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
@@ -1006,14 +1019,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\").getResultList();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).getResultList();");
 		}
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+ 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
@@ -1076,13 +1090,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private InvocableMemberBodyBuilder getGaeFindMethodBody() {
 		builder.getImportRegistrationResolver().addImport(QUERY);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
+
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
 			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
 		} else if (!getIdentifierField().getFieldType().isPrimitive()) {
 			bodyBuilder.appendFormalLine("if (id == null) return null;");
 		}
-		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o where o." + identifierField + " = :id\").setParameter(\"id\"," + identifierField + ");");
-		bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " result = null;");
+		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o WHERE o." + identifierField + " = :id\").setParameter(\"id\"," + identifierField + ");");
+ 		bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " result = null;");
 		bodyBuilder.appendFormalLine("List results = query.getResultList();");
 		bodyBuilder.appendFormalLine("if (results.size() > 0) {");
 		bodyBuilder.indent();
@@ -1122,15 +1138,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		}
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+ 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
@@ -1166,6 +1182,22 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return plural;
 	}
 	
+	/**
+	 * Return the entityName used by DynamicFinderServices for the generation of the JPA Query
+	 * 
+	 * @return the entityName the value of entityName attribute.
+	 */
+	public String getEntityName() {
+		return entityName;
+	}
+	
+	
+	private CustomDataBuilder getCustomData(Object key, Object value) {
+		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+		customDataBuilder.put(key, value);
+		return customDataBuilder;
+	}
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -1196,11 +1228,5 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-	
-	private CustomDataBuilder getCustomData(Object key, Object value) {
-		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-		customDataBuilder.put(key, value);
-		return customDataBuilder;
 	}
 }

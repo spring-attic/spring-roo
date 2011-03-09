@@ -102,7 +102,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		for (JavaSymbolName finder : finders) {
 			// Avoid displaying problematic finders
 			try {
-				QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finder, entityMetadata.getPlural());
+				QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finder, entityMetadata.getPlural(), entityMetadata.getEntityName());
 				List<JavaSymbolName> parameterNames = queryHolder.getParameterNames();
 				List<JavaType> parameterTypes = queryHolder.getParameterTypes();
 				StringBuilder signature = new StringBuilder();
@@ -165,7 +165,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Confirm they typed a valid finder name
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), mutable);
-		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural()) == null) {
+		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural(), entityMetadata.getEntityName()) == null) {
 			logger.warning("Finder name '" + finderName.getSymbolName() + "' either does not exist or contains an error");
 			return;
 		}

@@ -51,7 +51,8 @@ public class EntityCommands implements CommandMarker {
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit,
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
+		@CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") String entityName) {
 
 		Assert.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 
@@ -112,6 +113,9 @@ public class EntityCommands implements CommandMarker {
 		}
 		if (inheritanceType != null) {
 			rooEntityBuilder.addStringAttribute("inheritanceType", inheritanceType.name());
+		}
+		if (entityName != null) {
+			rooEntityBuilder.addStringAttribute("entityName", entityName);
 		}
 		annotations.add(rooEntityBuilder);
 

@@ -23,6 +23,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link DynamicFinderServices}.
@@ -68,7 +69,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return Collections.unmodifiableList(new ArrayList<JavaSymbolName>(finders));
 	}
 
-	public QueryHolder getQueryHolder(MemberDetails memberDetails, JavaSymbolName finderName, String plural) {
+	public QueryHolder getQueryHolder(MemberDetails memberDetails, JavaSymbolName finderName, String plural, String entityName) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(finderName, "Finder name required");
 		Assert.hasText(plural, "Plural required");
@@ -78,24 +79,23 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			tokens = tokenize(memberDetails, finderName, plural);
 		} catch (FinderFieldTokenMissingException e) {
 			return null;
-		} catch (InvalidFinderException ife) {
+		} catch (InvalidFinderException e) {
 			return null;
 		}
 
 		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
-		String jpaQuery = getJpaQuery(tokens, simpleTypeName, finderName, plural);
+		String jpaQuery = getJpaQuery(tokens, simpleTypeName, finderName, plural, entityName);
 		List<JavaType> parameterTypes = getParameterTypes(tokens, finderName, plural);
 		List<JavaSymbolName> parameterNames = getParameterNames(tokens, finderName, plural);
 		return new QueryHolder(jpaQuery, parameterTypes, parameterNames, tokens);
 	}
 
-	private String getJpaQuery(List<Token> tokens, String simpleTypeName, JavaSymbolName finderName, String plural) {
+	private String getJpaQuery(List<Token> tokens, String simpleTypeName, JavaSymbolName finderName, String plural, String entityName) {
+		String typeName = StringUtils.hasText(entityName) ? entityName : simpleTypeName;
 		StringBuilder builder = new StringBuilder();
-		builder.append("SELECT ").append(simpleTypeName);
-		builder.append(" FROM ").append(simpleTypeName);
-		builder.append(" AS ").append(simpleTypeName.toLowerCase());
-		builder.append(" WHERE ");
-
+		builder.append("SELECT o FROM ").append(typeName);
+		builder.append(" AS o WHERE ");
+		
 		FieldToken lastFieldToken = null;
 		boolean isNewField = true;
 		boolean isFieldApplied = false;
@@ -110,9 +110,9 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 					if (isNewField) {
 						if (reservedToken.equalsIgnoreCase("Like")) {
-							builder.append("LOWER(").append(simpleTypeName.toLowerCase()).append(".").append(fieldName).append(")");
+							builder.append("LOWER(").append("o.").append(fieldName).append(')');
 						} else {
-							builder.append(simpleTypeName.toLowerCase()).append(".").append(fieldName);
+							builder.append("o.").append(fieldName);
 						}
 						isNewField = false;
 						isFieldApplied = false;
@@ -165,7 +165,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						if (builder.toString().endsWith("LIKE ")) {
 							builder.append("LOWER(:").append(fieldName).append(") ");
 						} else {
-							builder.append(":").append(fieldName).append(" ");
+							builder.append(':').append(fieldName).append(' ');
 						}
 						isFieldApplied = true;
 					}
@@ -177,7 +177,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		}
 		if (isNewField) {
 			if (lastFieldToken != null && !lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
-				builder.append(simpleTypeName.toLowerCase()).append(".").append(lastFieldToken.getField().getFieldName().getSymbolName());
+				builder.append("o.").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 			isFieldApplied = false;
 		}

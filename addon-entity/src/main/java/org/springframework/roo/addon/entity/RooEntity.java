@@ -163,4 +163,11 @@ public @interface RooEntity {
 	 * @return the inheritance type to use (default to "")
 	 */
 	String inheritanceType() default "";
+	
+	/**
+	 * This name is used to refer to the entity in queries. The name must not be a reserved literal in the Java Persistence query language. 
+	 * 
+	 * @return the name given to the Entity (default to "")
+	 */
+	String entityName() default "";
 }
