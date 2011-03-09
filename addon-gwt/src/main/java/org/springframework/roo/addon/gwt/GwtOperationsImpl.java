@@ -60,7 +60,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
-		gwtConfigService.updateConfiguration();
+		gwtConfigService.updateConfiguration(true);
 
 		// Get configuration.xml as document
 		Element configuration = XmlUtils.getConfiguration(getClass());

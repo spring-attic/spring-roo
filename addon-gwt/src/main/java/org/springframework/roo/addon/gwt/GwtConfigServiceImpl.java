@@ -42,13 +42,18 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	private ComponentContext context;
+	private Boolean gwtproject = null;
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
 	}
 
 	//TODO: Pool XmlUtils.write(...)s - JT
-	public void updateConfiguration() {
+	public void updateConfiguration(boolean initialSetup) {
+
+		if (!isGwtProject() && !initialSetup) {
+			return;
+		}
 
 		// Add GWT natures and builder names to maven eclipse plugin
 		updateMavenEclipsePlugin();
@@ -73,6 +78,30 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 			copyDirectoryContents(path);
 		}
 
+	}
+
+	private boolean isGwtProject() {
+
+		if (gwtproject != null){
+			return gwtproject;
+		}
+
+		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
+
+		Document pomDoc = getXmlDocument(pom);
+		Element pomRoot = (Element) pomDoc.getFirstChild();
+		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
+		gwtproject = false;
+		for (Element pluginElement : pluginElements) {
+			Plugin plugin = new Plugin(pluginElement);
+			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
+				gwtproject = true;
+				break;
+			}
+		}
+
+		return gwtproject;
 	}
 
 

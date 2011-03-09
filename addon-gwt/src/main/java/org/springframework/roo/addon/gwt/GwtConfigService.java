@@ -8,5 +8,5 @@ package org.springframework.roo.addon.gwt;
  */
 public interface GwtConfigService {
 
-	void updateConfiguration();
+	void updateConfiguration(boolean initialSetup);
 }

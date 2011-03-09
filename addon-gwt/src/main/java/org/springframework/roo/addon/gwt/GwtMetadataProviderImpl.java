@@ -69,10 +69,8 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProjectOperations projectOperations;
-
-	private Boolean lastGaeState = null;
-
 	private Map<String, Set<String>> dependsOn = new HashMap<String, Set<String>>();
+	private Boolean lastGaeState = null;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -80,6 +78,21 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+	}
+
+	public void onFileEvent(FileEvent fileEvent) {
+		if (!projectOperations.isProjectAvailable()) {
+			return;
+		}
+
+		if (lastGaeState != null && projectOperations.getProjectMetadata().isGaeEnabled() == lastGaeState) {
+			return;
+		}
+		lastGaeState = projectOperations.getProjectMetadata().isGaeEnabled();
+
+		if (fileEvent.getOperation().equals(FileOperation.UPDATED) && fileEvent.getFileDetails().getFile().getName().equals("pom.xml")) {
+			gwtConfigService.updateConfiguration(false);
+		}
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {
@@ -300,20 +313,5 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 	public String getProvidesType() {
 		return GwtMetadata.getMetadataIdentifierType();
-	}
-
-	public void onFileEvent(FileEvent fileEvent) {
-		if (!projectOperations.isProjectAvailable()) {
-			return;
-		}
-
-		if (lastGaeState != null && projectOperations.getProjectMetadata().isGaeEnabled() == lastGaeState) {
-			return;
-		}
-		lastGaeState = projectOperations.getProjectMetadata().isGaeEnabled();
-
-		if ((fileEvent.getOperation().equals(FileOperation.UPDATED) || fileEvent.getOperation().equals(FileOperation.CREATED)) && fileEvent.getFileDetails().getFile().getName().equals("pom.xml") /*&& projectOperations.getProjectMetadata().isGaeEnabled()*/) {
-			gwtConfigService.updateConfiguration();
-		}
 	}
 }
