@@ -45,8 +45,9 @@ public class DbreCommands implements CommandMarker {
 		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for entities") boolean testAutomatically, 
 		@CliOption(key = "enableViews", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Reverse engineer database views") boolean view,
 		@CliOption(key = "includeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "include-tables", help = "The tables to include in reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> includeTables,
-		@CliOption(key = "excludeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-tables", help = "The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> excludeTables) {
+		@CliOption(key = "excludeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-tables", help = "The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> excludeTables,
+		@CliOption(key = "includeNonPortable", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Include non-portable JPA @Column attributes such as 'columnDefinition'") boolean includeNonPortable) {
 		
-		dbreOperations.reverseEngineerDatabase(schema, destinationPackage, testAutomatically, view, includeTables, excludeTables);
+		dbreOperations.reverseEngineerDatabase(schema, destinationPackage, testAutomatically, view, includeTables, excludeTables, includeNonPortable);
 	}
 }

@@ -67,11 +67,12 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 	}
 
-	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables) {
+	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortable) {
 		dbreModelService.setDestinationPackage(destinationPackage);
 		dbreModelService.setView(view);
 		dbreModelService.setIncludeTables(includeTables);
 		dbreModelService.setExcludeTables(excludeTables);
+		dbreModelService.setIncludeNonPortable(includeNonPortable);
 
 		// Force it to refresh the database from the actual JDBC connection
 		Database database = dbreModelService.refreshDatabase(schema);

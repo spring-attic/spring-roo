@@ -37,6 +37,7 @@ public interface DbreOperations {
 	 * @param view true if database views are displayed, otherwise false
 	 * @param includeTables the set of tables to include in reverse engineering.
 	 * @param excludeTables the set of tables to exclude from reverse engineering.
+	 * @param includeNonPortable whether or not to include non-portable JPA @Column attributes such as 'columnDefinition'
 	 */
-	void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables);
+	void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortable);
 }

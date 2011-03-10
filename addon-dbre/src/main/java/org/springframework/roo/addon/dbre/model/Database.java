@@ -23,16 +23,18 @@ public class Database implements Serializable {
 	/** The name of the database model. Defaults to the catalog name if the schema name is not available. */
 	private String name;
 
-	/** The JavaPackage where entities are created */
-	private JavaPackage destinationPackage;
-
 	/** All tables. */
 	private Set<Table> tables;
 
-	Database(String name, Set<Table> tables, JavaPackage destinationPackage) {
+	/** The JavaPackage where entities are created */
+	private JavaPackage destinationPackage;
+	
+	/** Whether or not to included non-portable JPA attribues in the @Column annotation */
+	private boolean includeNonPortable;
+
+	Database(String name, Set<Table> tables) {
 		Assert.hasText(name, "Database name required");
 		Assert.notNull(tables, "Tables required");
-		this.destinationPackage = destinationPackage;
 		this.name = name;
 		this.tables = tables;
 		initialize();
@@ -40,10 +42,6 @@ public class Database implements Serializable {
 
 	public String getName() {
 		return name;
-	}
-
-	public JavaPackage getDestinationPackage() {
-		return destinationPackage;
 	}
 
 	public Schema getSchema() {
@@ -65,6 +63,22 @@ public class Database implements Serializable {
 			}
 		}
 		return null;
+	}
+
+	public JavaPackage getDestinationPackage() {
+		return destinationPackage;
+	}
+
+	public void setDestinationPackage(JavaPackage destinationPackage) {
+		this.destinationPackage = destinationPackage;
+	}
+
+	public boolean isIncludeNonPortable() {
+		return includeNonPortable;
+	}
+
+	public void setIncludeNonPortable(boolean includeNonPortable) {
+		this.includeNonPortable = includeNonPortable;
 	}
 
 	/**

@@ -227,7 +227,8 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --testAutomatically --enableViews --includeTables --excludeTables</programlisting></para>
+        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --testAutomatically --enableViews 
+                               --includeTables --excludeTables --includeNonPortable</programlisting></para>
 
         <para>This command creates JPA entities in your project representing
         the tables and columns in your database. As for the database
@@ -273,6 +274,10 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
         prevent entities from being created but associations are also not
         created in other entities. This is done to prevent compile errors in
         the source code.</para>
+
+        <para>You can also generate non-portable JPA @Column attributes, such
+        as 'columnDefinition' by specifying the --includeNonPortable
+        option.</para>
 
         <para>Since the DBRE Add-on provides incremental database reverse
         engineering, you can execute the command as many times as you want and

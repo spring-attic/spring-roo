@@ -189,7 +189,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private AnnotationMetadataBuilder getColumnBuilder(Identifier identifier) {
 		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 		columnBuilder.addStringAttribute("name", identifier.getColumnName());
-		columnBuilder.addStringAttribute("columnDefinition", identifier.getColumnDefinition());
+		if (StringUtils.hasText(identifier.getColumnDefinition())) {
+			columnBuilder.addStringAttribute("columnDefinition", identifier.getColumnDefinition());
+		}
 		columnBuilder.addBooleanAttribute("nullable", false);
 
 		// Add length attribute for Strings

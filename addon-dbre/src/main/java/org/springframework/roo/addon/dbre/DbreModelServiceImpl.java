@@ -66,6 +66,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	private boolean view;
 	private Set<String> includeTables;
 	private Set<String> excludeTables;
+	private boolean includeNonPortable;
 	private Set<DatabaseListener> listeners = new HashSet<DatabaseListener>();
 	private boolean startupCompleted = false;
 
@@ -178,6 +179,14 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		this.excludeTables = excludeTables;
 	}
 
+	public boolean isIncludeNonPortable() {
+		return includeNonPortable;
+	}
+
+	public void setIncludeNonPortable(boolean includeNonPortable) {
+		this.includeNonPortable = includeNonPortable;
+	}
+
 	private Database getDatabase(Schema schema, boolean forceReadFromDatabase, boolean safeMode) {
 		if (safeMode) {
 			Assert.notNull(schema, "Schema required");
@@ -219,8 +228,10 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		Connection connection = null;
 		try {
 			connection = getConnection(true);
-			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, destinationPackage, view, includeTables, excludeTables);
+			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, view, includeTables, excludeTables);
 			Database database = introspector.createDatabase();
+			database.setDestinationPackage(destinationPackage);
+			database.setIncludeNonPortable(includeNonPortable);
 
 			if (safeMode) {
 				// Don't change anything else or notify anyone, so leave now

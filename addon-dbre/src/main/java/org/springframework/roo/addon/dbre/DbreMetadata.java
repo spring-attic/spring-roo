@@ -547,7 +547,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				fieldName = getUniqueFieldName(fieldName);
 			}
 
-			field = getField(fieldName, column);
+			field = getField(fieldName, column, table.isIncludeNonPortable());
 			uniqueFields.put(fieldName, field);
 		}
 
@@ -604,7 +604,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private FieldMetadata getField(JavaSymbolName fieldName, Column column) {
+	private FieldMetadata getField(JavaSymbolName fieldName, Column column, boolean includeNonPortable) {
 		JavaType fieldType = column.getJavaType();
 
 		// Add annotations to field
@@ -613,7 +613,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add @Column annotation
 		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 		columnBuilder.addStringAttribute(NAME, column.getEscapedName());
-		columnBuilder.addStringAttribute("columnDefinition", column.getTypeName());
+		if (includeNonPortable) {
+			columnBuilder.addStringAttribute("columnDefinition", column.getTypeName());
+		}
 
 		// Add length attribute for Strings
 		if (column.getColumnSize() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {

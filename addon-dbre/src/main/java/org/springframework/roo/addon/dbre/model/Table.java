@@ -23,6 +23,7 @@ public class Table implements Serializable {
 	private Set<ForeignKey> importedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();
+	private boolean includeNonPortable;
 
 	Table() {
 	}
@@ -174,6 +175,14 @@ public class Table implements Serializable {
 		return indices.add(index);
 	}
 	
+	public boolean isIncludeNonPortable() {
+		return includeNonPortable;
+	}
+
+	public void setIncludeNonPortable(boolean includeNonPortable) {
+		this.includeNonPortable = includeNonPortable;
+	}
+
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

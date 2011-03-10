@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -23,17 +22,15 @@ import org.springframework.roo.support.util.StringUtils;
 public class DatabaseIntrospector extends AbstractIntrospector {
 	private String catalogName;
 	private Schema schema;
-	private JavaPackage destinationPackage;
 	private boolean view;
 	private Set<String> includeTables = null;
 	private Set<String> excludeTables = null;
 	private String tableName;
 	private String columnName;
 
-	public DatabaseIntrospector(Connection connection, Schema schema, JavaPackage destinationPackage, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
+	public DatabaseIntrospector(Connection connection, Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
 		super(connection);
 		this.schema = schema;
-		this.destinationPackage = destinationPackage;
 		this.view = view;
 		this.includeTables = includeTables;
 		this.excludeTables = excludeTables;
@@ -76,7 +73,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 
 	public Database createDatabase() throws SQLException {
 		String name = StringUtils.hasText(schema.getName()) ? schema.getName() : catalogName;
-		return new Database(name, getTables(), destinationPackage);
+		return new Database(name, getTables());
 	}
 
 	private Set<Table> getTables() throws SQLException {

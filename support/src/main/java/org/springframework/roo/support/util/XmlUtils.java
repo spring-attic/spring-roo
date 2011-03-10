@@ -221,7 +221,7 @@ public final class XmlUtils {
 	 * 
 	 * @param xPathExpression the xPathExpression
 	 * @param root the parent DOM element
-	 * @return a {@link List} of type {@link Element} if discovered, otherwise null
+	 * @return a {@link List} of type {@link Element} if discovered, otherwise an empty list (never null)
 	 */
 	public static List<Element> findElements(String xPathExpression, Element root) {
 		List<Element> elements = new ArrayList<Element>();

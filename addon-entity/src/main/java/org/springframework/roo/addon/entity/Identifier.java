@@ -22,7 +22,6 @@ public class Identifier {
 		Assert.notNull(fieldName, "Field name required");
 		Assert.notNull(fieldType, "Field type required");
 		Assert.hasText(columnName, "Column name required");
-		Assert.hasText(columnDefinition, "Column definition required");
 		this.fieldName = fieldName;
 		this.fieldType = fieldType;
 		this.columnName = columnName;

@@ -21,7 +21,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -69,6 +68,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private boolean isVMforceEnabled;
 	private String columnDefinition;
 	private int columnSize;
+	private int scale;
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = JavaType.LONG_OBJECT;
@@ -130,6 +130,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					identifierType = id.getFieldType();
 					columnDefinition = id.getColumnDefinition();
 					columnSize = id.getColumnSize();
+					scale = id.getScale();
 				}
 			}
 		}
@@ -431,7 +432,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					
 		// Compute the column name, as required
 		if (!hasIdClass) {
-			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			String generationType = isGaeEnabled || isVMforceEnabled ? "IDENTITY" : "AUTO";
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -454,8 +454,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				}
 			}
 			
-			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType))));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes));
+			AnnotationMetadataBuilder generatedValueBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.GeneratedValue"));
+			generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType)));
+			annotations.add(generatedValueBuilder);
 
 			String columnName = idField.getSymbolName();
 			if (StringUtils.hasText(identifierColumn)) {
@@ -463,15 +464,24 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				columnName = identifierColumn;
 			}
 
-			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
+			AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+			columnBuilder.addStringAttribute("name", columnName);
 			if (StringUtils.hasText(columnDefinition)) {
-				columnAttributes.add(new StringAttributeValue(new JavaSymbolName("columnDefinition"), columnDefinition));
+				columnBuilder.addStringAttribute("columnDefinition", columnDefinition);
 			}
-			if (columnSize > 0) {
-				columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), columnSize));
+			
+			// Add length attribute for String field
+			if (columnSize > 0 && columnSize < 4000 && identifierType.equals(JavaType.STRING_OBJECT)) {
+				columnBuilder.addIntegerAttribute("length", columnSize);
 			}
-			annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
+			
+			// Add precision and scale attributes for numeric field
+			if (scale > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(new JavaType("java.math.BigDecimal")))) {
+				columnBuilder.addIntegerAttribute("precision", columnSize);
+				columnBuilder.addIntegerAttribute("scale", scale);
+			}
+
+			annotations.add(columnBuilder);
 		}
 		
 		if (isVMforceEnabled) {
@@ -640,9 +650,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Version")));
 		
-		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionColumn));
-		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
+		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+		columnBuilder.addStringAttribute("name", versionColumn);
+		annotations.add(columnBuilder);
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, verField, versionType);
 		fieldBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.VERSION_FIELD, null));
@@ -891,14 +901,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations, boolean isPersistMethod) {
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
 		if (StringUtils.hasText(persistenceUnit)) {
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), persistenceUnit));		
+			transactionalBuilder.addStringAttribute("value", persistenceUnit);
 		}
 		if (isGaeEnabled && isPersistMethod) {
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
+			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW")));
 		}
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
+		annotations.add(transactionalBuilder);
 	}
 	
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations) {

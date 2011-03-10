@@ -40,6 +40,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -61,6 +62,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
@@ -96,7 +98,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Fall back to project's top level package
 		if (destinationPackage == null) {
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 			destinationPackage = projectMetadata.getTopLevelPackage();
 		}
 
@@ -118,6 +120,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
+				table.setIncludeNonPortable(database.isIncludeNonPortable());
 				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
 			}
 		}
@@ -172,6 +175,8 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			return null;
 		}
 
+		table.setIncludeNonPortable(database.isIncludeNonPortable());
+
 		// Get new @RooEntity attributes
 		Set<JavaSymbolName> attributesToDeleteIfPresent = new LinkedHashSet<JavaSymbolName>();
 		manageIdentifier(managedEntity.getName(), rooEntityBuilder, attributesToDeleteIfPresent, table);
@@ -194,6 +199,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Update the annotation on disk
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) managedEntity;
 		mutableTypeDetails.updateTypeAnnotation(rooEntityBuilder.build(), attributesToDeleteIfPresent);
+		
 		return table;
 	}
 
@@ -270,7 +276,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			attributesToDeleteIfPresent.add(new JavaSymbolName(IDENTIFIER_TYPE));
 
 			// We don't need a PK class, so we just tell the EntityMetadataProvider via IdentifierService the column name, field type and field name to use
-			List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table.getName(), table.getPrimaryKeys());
+			List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
 			identifierResults.put(javaType, identifiers);
 		} else if (pkCount == 0 || pkCount > 1) {
 			// Table has either no primary keys or more than one primary key so create a composite key
@@ -284,7 +290,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 			// We need a PK class, so we tell the IdentifierMetadataProvider via IdentifierService the various column names, field types and field names to use
 			// For tables with no primary keys, create a composite key using all the table's columns
-			List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table.getName(), table.getColumns()) : getIdentifiersFromPrimaryKeys(table.getName(), table.getPrimaryKeys());
+			List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table) : getIdentifiersFromPrimaryKeys(table);
 			identifierResults.put(identifierType, identifiers);
 		}
 	}
@@ -318,24 +324,30 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 	}
 
-	private List<Identifier> getIdentifiersFromPrimaryKeys(String tableName, Set<Column> primaryKeys) {
-		return getIdentifiersFromColumns(tableName, primaryKeys);
+	private List<Identifier> getIdentifiersFromPrimaryKeys(Table table) {
+		return getIdentifiers(table, true);
 	}
 
-	private List<Identifier> getIdentifiersFromColumns(String tableName, Set<Column> columns) {
+	private List<Identifier> getIdentifiersFromColumns(Table table) {
+		return getIdentifiers(table, false);
+	}
+
+	private List<Identifier> getIdentifiers(Table table, boolean usePrimaryKeys) {
 		List<Identifier> result = new ArrayList<Identifier>();
 
 		// Add fields to the identifier class
+		Set<Column> columns = usePrimaryKeys ? table.getPrimaryKeys() : table.getColumns();
 		for (Column column : columns) {
 			String columnName = column.getName();
 			JavaSymbolName fieldName;
 			try {
 				fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(columnName));
 			} catch (RuntimeException e) {
-				throw new IllegalArgumentException("Failed to create field name for column '" + columnName + "' in table '" + tableName + "': " + e.getMessage());
+				throw new IllegalArgumentException("Failed to create field name for column '" + columnName + "' in table '" + table.getName() + "': " + e.getMessage());
 			}
 			JavaType fieldType = column.getJavaType();
-			result.add(new Identifier(fieldName, fieldType, columnName, column.getColumnSize(), column.getScale(), column.getTypeName()));
+			String columnDefinition = table.isIncludeNonPortable() ? column.getTypeName() : "";
+			result.add(new Identifier(fieldName, fieldType, columnName, column.getColumnSize(), column.getScale(), columnDefinition));
 		}
 
 		return result;
