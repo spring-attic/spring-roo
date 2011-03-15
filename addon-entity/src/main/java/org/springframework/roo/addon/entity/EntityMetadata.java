@@ -1005,7 +1005,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (isDataNucleusEnabled) {
 			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + typeName + " o\").getSingleResult()).longValue();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(*) FROM " + typeName + " o\", Long.class).getSingleResult();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + typeName + " o\", Long.class).getSingleResult();");
 		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
