@@ -95,6 +95,14 @@ public class JspViewManager {
 		for (FieldMetadata field : fields) {
 			if (++fieldCounter < 7) {
 				Element columnElement = new XmlElementBuilder("table:column", document).addAttribute("id", XmlUtils.convertId("c:" + formbackingType.getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())).addAttribute("property", uncapitalize(field.getFieldName().getSymbolName())).build();
+				String fieldName = uncapitalize(field.getFieldName().getSymbolName());
+				if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
+					columnElement.setAttribute("date", "true");
+					columnElement.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}");
+				} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+					columnElement.setAttribute("calendar", "true");
+					columnElement.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}");
+				}
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
 				fieldTable.appendChild(columnElement);
 			}
