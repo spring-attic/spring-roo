@@ -85,9 +85,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private void reverseEngineer(Database database) {
-		// Lookup the relevant destination package if not explicitly given
 		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
 		
+		// Lookup the relevant destination package if not explicitly given
 		JavaPackage destinationPackage = database.getDestinationPackage();
 		if (destinationPackage == null) {
 			if (!managedEntities.isEmpty()) {
@@ -126,16 +126,16 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Notify
-		managedEntities.addAll(newEntities);
-		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
-			MetadataItem metadataItem = metadataService.get(managedEntity.getDeclaredByMetadataId(), true);
+		for (ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
+			MetadataItem metadataItem = metadataService.get(managedIdentifierType.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
 			}
 		}
 
-		for (ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
-			MetadataItem metadataItem = metadataService.get(managedIdentifierType.getDeclaredByMetadataId(), true);
+		newEntities.addAll(managedEntities);
+		for (ClassOrInterfaceTypeDetails entity : newEntities) {
+			MetadataItem metadataItem = metadataService.get(entity.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
 			}
