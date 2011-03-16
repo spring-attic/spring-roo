@@ -916,7 +916,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
-		
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.ResponseBody")));
 		String shortBeanName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		bodyBuilder.appendFormalLine("return " + shortBeanName + "." + jsonMetadata.getToJsonArrayMethodName().getSymbolName().toString() + "(" + shortBeanName + "." + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
 
