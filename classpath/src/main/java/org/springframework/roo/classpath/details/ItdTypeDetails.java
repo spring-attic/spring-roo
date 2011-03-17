@@ -65,4 +65,10 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
 	 * @return an unmodifiable representation of the inner types (may be empty but never null)
 	 */
 	List<ClassOrInterfaceTypeDetails> getInnerTypes();
+	
+	/** Returns the {@link ClassOrInterfaceTypeDetails} representing the governor of this ITD.
+	 * 
+	 * @return the governor {@link ClassOrInterfaceTypeDetails} (never null)
+	 */
+	ClassOrInterfaceTypeDetails getGovernor();
 }

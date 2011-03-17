@@ -25,7 +25,14 @@ public enum CustomDataPersistenceTags {
 	VERSION_FIELD,
 	TRANSIENT_FIELD,
 	EMBEDDED_FIELD,
+	EMBEDDED_ID_FIELD,
 	ENUMERATED_FIELD,
+	MANY_TO_MANY_FIELD,
+	ONE_TO_MANY_FIELD,
+	MANY_TO_ONE_FIELD,
+	ONE_TO_ONE_FIELD,
+	LOB_FIELD,
+	
 	
 	/**
 	 * Persistence method definitions

@@ -280,6 +280,22 @@ public abstract class MemberFindingUtils {
 		return result;
 	}
 	
+
+	/**
+	 * Searches all {@link MemberDetails} and returns all fields.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @return zero or more fields (never null)
+	 */
+	public static final List<FieldMetadata> getFields(MemberDetails memberDetails) {
+		Assert.notNull(memberDetails, "Member details required");
+		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			result.addAll(memberHoldingTypeDetails.getDeclaredFields());
+		}
+		return result;
+	}
+	
 	/**
 	 * Searches all {@link MemberDetails} and returns all methods which contain a given
 	 * {@link CustomData} tag.
