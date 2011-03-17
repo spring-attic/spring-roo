@@ -42,23 +42,33 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	private ComponentContext context;
-	private Boolean gwtproject = null;
+	private Boolean gwtProject = null;
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
 	}
 
-	//TODO: Pool XmlUtils.write(...)s - JT
+	//TODO: I think this still needs some work (why do I need to add custom xml manipulation logic here..?) - JT
 	public void updateConfiguration(boolean initialSetup) {
 
 		if (!isGwtProject() && !initialSetup) {
 			return;
 		}
 
-		// Add GWT natures and builder names to maven eclipse plugin
-		updateMavenEclipsePlugin();
+		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
 
-		updateDataNulcueusPlugin();
+		MutableFile mutablePom = fileManager.updateFile(pom);
+		Document pomDoc = getXmlDocument(pom);
+
+		// Add GWT natures and builder names to maven eclipse plugin
+		boolean pomChanged = updateMavenEclipsePlugin(pomDoc);
+
+		pomChanged |= updateDataNulcueusPlugin(pomDoc);
+
+		if (pomChanged) {
+			XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
+		}
 
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
@@ -82,8 +92,8 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 
 	private boolean isGwtProject() {
 
-		if (gwtproject != null){
-			return gwtproject;
+		if (gwtProject != null){
+			return gwtProject;
 		}
 
 		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
@@ -92,16 +102,15 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		Document pomDoc = getXmlDocument(pom);
 		Element pomRoot = (Element) pomDoc.getFirstChild();
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
-		gwtproject = false;
+		gwtProject = false;
 		for (Element pluginElement : pluginElements) {
 			Plugin plugin = new Plugin(pluginElement);
 			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
-				gwtproject = true;
+				gwtProject = true;
 				break;
 			}
 		}
-
-		return gwtproject;
+		return gwtProject;
 	}
 
 
@@ -218,16 +227,10 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 				}
 			}
 		}
-
 		return xmlDoc;
 	}
 
-	private void updateDataNulcueusPlugin() {
-		String pomXml = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Assert.isTrue(fileManager.exists(pomXml), "pom.xml not found; cannot continue");
-
-		MutableFile mutablePomXml = fileManager.updateFile(pomXml);
-		Document pomXmlDoc = getXmlDocument(pomXml);
+	private boolean updateDataNulcueusPlugin(Document pomXmlDoc) {
 
 		Element pomRoot = (Element) pomXmlDoc.getFirstChild();
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
@@ -246,12 +249,11 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 				}
 				if (!mappingExclusionPresent) {
 					configElement.appendChild(new XmlElementBuilder("mappingExcludes", pomXmlDoc).setText("**/GaeAuthFilter.class").build());
-					XmlUtils.writeXml(mutablePomXml.getOutputStream(), pomXmlDoc);
-					break;
+					return true;
 				}
 			}
-
 		}
+		return false;
 	}
 
 	private void updateWebXml() {
@@ -337,12 +339,7 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		projectOperations.addDependencies(dependencies);
 	}
 
-	private void updateMavenEclipsePlugin() {
-		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
-
-		MutableFile mutablePom = fileManager.updateFile(pom);
-		Document pomDoc = getXmlDocument(pom);
+	private boolean updateMavenEclipsePlugin(Document pomDoc) {
 
 		Element pomRoot = (Element) pomDoc.getFirstChild();
 		boolean hasChanged = false;
@@ -408,10 +405,6 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 			ctx.appendChild(newEntry);
 			hasChanged = true;
 		}
-
-		// TODO CD is there a better way of doing this here?
-		if (hasChanged) {
-			XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
-		}
+		return hasChanged;
 	}
 }
