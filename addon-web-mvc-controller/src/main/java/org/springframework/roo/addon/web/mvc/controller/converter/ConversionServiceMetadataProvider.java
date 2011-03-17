@@ -45,7 +45,6 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public final class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
-
 	@Reference private TypeLocationService typeLocationService;
 	
 	// Stores the MID (as accepted by this ConversionServiceMetadataProvider) for the one (and only one) application-wide conversion service
@@ -80,10 +79,10 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
 
-		// to get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
+		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString);
 		if (relevantDomainTypes.isEmpty()) { 
-			// no ITD needed
+			// No ITD needed
 			return null;
 		}
 		
@@ -136,18 +135,20 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	
 	private boolean isMethodOfInterest(EntityMetadata entityMetadata, MethodMetadata method, MemberDetails memberDetails) {
 		if (! BeanInfoUtils.isAccessorMethod(method)) {
-			return false; // only interested in accessors
+			return false; // Only interested in accessors
 		}
 		if (entityMetadata != null && (method.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName()) || (entityMetadata.getVersionAccessor() != null && method.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName())))) {
-			return false; // only interested in methods which are not accessors for persistence version or id fields
+			return false; // Only interested in methods which are not accessors for persistence version or id fields
 		}
 		FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+		if (field == null) {
+			return false;
+		}
 		JavaType fieldType = field.getFieldType();
-		if (field == null // Should not happen
-				|| fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
+		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
 				|| WebMetadataUtils.isApplicationType(fieldType, metadataService) // Exclude references to other domain objects as they are too verbose
 				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| WebMetadataUtils.isEmbeddedFieldType(field) /* not interested in embedded types */) {
+				|| WebMetadataUtils.isEmbeddedFieldType(field) /* Not interested in embedded types */) {
 			return false;
 		}
 		return true;

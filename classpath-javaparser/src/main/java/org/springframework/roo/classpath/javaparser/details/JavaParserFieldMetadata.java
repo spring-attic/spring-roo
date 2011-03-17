@@ -33,6 +33,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link FieldMetadata}.
@@ -111,9 +112,9 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		Assert.notNull(members, "Members required");
 		Assert.notNull(field, "Field required");
 		
-        JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
-        ClassOrInterfaceType initType = JavaParserMutableClassOrInterfaceTypeDetails.getResolvedName(compilationUnitServices.getEnclosingTypeName(), field.getFieldType(), compilationUnitServices);
-
+		JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
+		ClassOrInterfaceType initType = JavaParserMutableClassOrInterfaceTypeDetails.getResolvedName(compilationUnitServices.getEnclosingTypeName(), field.getFieldType(), compilationUnitServices);
+		
 		FieldDeclaration newField = ASTHelper.createFieldDeclaration(JavaParserUtils.getJavaParserModifier(field.getModifier()), initType, field.getFieldName().getSymbolName());
 		
 		// Add parameterized types for the field type (not initializer)
@@ -131,7 +132,7 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		Assert.isTrue(vars.size() == 1, "Expected ASTHelper to have provided a single VariableDeclarator");
 		VariableDeclarator vd = vars.iterator().next();
 
-		if (field.getFieldInitializer() != null && field.getFieldInitializer().length() > 0) {
+		if (StringUtils.hasText(field.getFieldInitializer())) {
 			// There is an initializer.
 			// We need to make a fake field that we can have JavaParser parse.
 			// Easiest way to do that is to build a simple source class containing the required field and re-parse it.

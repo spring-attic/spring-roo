@@ -68,14 +68,12 @@ public class JavaPackageConverter implements Converter {
 			existingData = "";
 		}
 
-		String topLevelPath = "";
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-
 		if (projectMetadata == null) {
 			return false;
 		}
 
-		topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+		String topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
 
 		String newValue = existingData;
 		if (existingData.startsWith("~")) {

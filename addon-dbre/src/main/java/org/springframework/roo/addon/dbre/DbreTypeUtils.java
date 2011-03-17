@@ -61,7 +61,7 @@ public abstract class DbreTypeUtils {
 	 * 
 	 * <p>
 	 * The search for the table names starts on the @Table annotation and if not present, the
-	 * @RooEntity "table" attribute is checked. If not present on either, the method returns null.
+	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
 	 * 
 	 * @param classOrInterfaceTypeDetails the type to search.
 	 * @return the table name (if known) or null (if not found).
@@ -119,7 +119,7 @@ public abstract class DbreTypeUtils {
 	 * @return a String representing the table or column.
 	 */
 	public static String suggestFieldName(String name) {
-		Assert.isTrue(StringUtils.hasText(name), "Table or column name required");
+		Assert.hasText(name, "Table or column name required");
 		return getName(name, true);
 	}
 

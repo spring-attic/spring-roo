@@ -33,7 +33,7 @@ public class FinderCommands implements CommandMarker {
 		return finderOperations.isFinderCommandAvailable();
 	}
 	
-	@CliCommand(value = "finder list", help = "List all finders for a given target (must be an entity")	
+	@CliCommand(value = "finder list", help = "List all finders for a given target (must be an entity)")
 	public SortedSet<String> listFinders(
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") JavaType typeName, 
 		@CliOption(key = { "", "depth" }, mandatory = false, unspecifiedDefaultValue = "1", specifiedDefaultValue = "1", help = "The depth of attribute combinations to be generated for the finders") Integer depth, 

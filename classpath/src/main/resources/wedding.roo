@@ -16,7 +16,7 @@ selenium test --controller ~.web.RsvpController
 
 // (OPTION: quit, mvn test, mvn tomcat:run, localhost:8080/wedding, mvn selenium:selenese)
 
-logging setup --level DEBUG --package WEB
+logging setup --level ERROR --package WEB
 security setup
 
 controller class --class ~.web.PublicRsvpController

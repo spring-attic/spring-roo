@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -16,16 +17,14 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -102,6 +101,11 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Add equals and hashCode methods
 		builder.addMethod(getEqualsMethod());
 		builder.addMethod(getHashCodeMethod());
+		
+		// Add custom data tag for Roo Identifier type
+		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+		customDataBuilder.put(CustomDataPersistenceTags.ROO_IDENTIFIER_TYPE, null);
+		builder.setCustomData(customDataBuilder);
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -131,15 +135,13 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		if (identifierServiceResult != null) {
 			for (Identifier identifier : identifierServiceResult) {
-				// Compute the column name, as required
-				String columnName = identifier.getColumnName();
 				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-				List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-				columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
-				columnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("nullable"), false));
-				annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
-
+				annotations.add(getColumnBuilder(identifier));
+				
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType());
+				CustomDataBuilder customData = new CustomDataBuilder();
+				customData.put(CustomDataPersistenceTags.ROO_IDENTIFIER_FIELD, null);
+				fieldBuilder.setCustomData(customData);
 				FieldMetadata idField = fieldBuilder.build();
 				
 				// Only add field to ITD if not declared on governor
@@ -168,19 +170,42 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		if (!fields.isEmpty()) {
 			return fields;
 		}
-				
+
 		// We need to create a default identifier field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		// Compute the column name, as required
-		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), "id"));
-		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
+		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+		columnBuilder.addStringAttribute("name", "id");
+		columnBuilder.addBooleanAttribute("nullable", false);
+		annotations.add(columnBuilder);
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("id"), new JavaType(Long.class.getName()));
 		fields.add(fieldBuilder.build());
 		
 		return fields;
+	}
+	
+	private AnnotationMetadataBuilder getColumnBuilder(Identifier identifier) {
+		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+		columnBuilder.addStringAttribute("name", identifier.getColumnName());
+		if (StringUtils.hasText(identifier.getColumnDefinition())) {
+			columnBuilder.addStringAttribute("columnDefinition", identifier.getColumnDefinition());
+		}
+		columnBuilder.addBooleanAttribute("nullable", false);
+
+		// Add length attribute for Strings
+		if (identifier.getColumnSize() < 4000 && identifier.getFieldType().equals(JavaType.STRING_OBJECT)) {
+			columnBuilder.addIntegerAttribute("length", identifier.getColumnSize());
+		}
+
+		// Add precision and scale attributes for numeric fields
+		if (identifier.getScale() > 0 && (identifier.getFieldType().equals(JavaType.DOUBLE_OBJECT) || identifier.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || identifier.getFieldType().equals(new JavaType("java.math.BigDecimal")))) {
+			columnBuilder.addIntegerAttribute("precision", identifier.getColumnSize());
+			columnBuilder.addIntegerAttribute("scale", identifier.getScale());
+		}
+		
+		return columnBuilder;
 	}
 	
 	private boolean hasField(List<? extends FieldMetadata> declaredFields, FieldMetadata idField) {
@@ -463,19 +488,19 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		return methodBuilder.build();
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentifierType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

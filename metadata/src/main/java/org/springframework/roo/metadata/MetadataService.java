@@ -51,8 +51,7 @@ public interface MetadataService extends MetadataNotificationListener, MetadataC
 	 * 
 	 * <p>
 	 * An exception will also be thrown if the identification string is related to a provider
-	 * that is not registered. Callers can verify whether a provider is registered by first using
-	 * {@link #getRegisteredProvider(String)}.
+	 * that is not registered. 
 	 * 
 	 * @param metadataIdentificationString to acquire (required and must be supported by this provider) 
 	 * @param evictCache forces eviction of the instance from any caches before attempting retrieval

@@ -63,15 +63,14 @@ public class MailOperationsImpl implements MailOperations {
 		Map<String, String> props = new HashMap<String, String>();
 		
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document appCtx = null;
+		MutableFile contextMutableFile;
+		Document appCtx;
 		try {
 			if (fileManager.exists(contextPath)) {
 				contextMutableFile = fileManager.updateFile(contextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 			} else {
-				new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+				throw new IllegalStateException("Could not acquire the Spring applicationContext.xml file");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -167,15 +166,14 @@ public class MailOperationsImpl implements MailOperations {
 		Map<String, String> props = new HashMap<String, String>();
 		
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document appCtx = null;
+		MutableFile contextMutableFile;
+		Document appCtx;
 		try {
 			if (fileManager.exists(contextPath)) {
 				contextMutableFile = fileManager.updateFile(contextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 			} else {
-				new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+				throw new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -247,15 +245,14 @@ public class MailOperationsImpl implements MailOperations {
 		mutableTypeDetails.addField(fieldBuilder.build());
 
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document appCtx = null;
+		MutableFile contextMutableFile;
+		Document appCtx;
 		try {
 			if (fileManager.exists(contextPath)) {
 				contextMutableFile = fileManager.updateFile(contextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 			} else {
-				new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+				throw new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

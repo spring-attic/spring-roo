@@ -21,10 +21,9 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
-	
 	@Reference private WebScaffoldMetadataProvider webScaffoldMetadataProvider;
 
 	protected void activate(ComponentContext context) {
@@ -50,7 +49,7 @@ public final class SolrWebSearchMetadataProvider extends AbstractItdMetadataProv
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
 		
 		// Abort if we don't have getter information available
-		if (webScaffoldMetadata == null) {
+		if (webScaffoldMetadata == null || !webScaffoldMetadata.isValid()) {
 			return null;
 		}
 		

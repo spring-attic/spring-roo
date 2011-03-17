@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dod;
 
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -49,7 +50,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
-	private static final JavaType NOT_NULL = new JavaType("javax.validation.constraints.NotNull");
 	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 
@@ -131,6 +131,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		builder.addMethod(getNewTransientEntityMethod());
+		for (MethodMetadata fieldInitializerMethod : getFieldInitializerMethods()) {
+			builder.addMethod(fieldInitializerMethod);
+		}
 		builder.addMethod(getSpecificPersistentEntityMethod());
 		builder.addMethod(getRandomPersistentEntityMethod());
 		builder.addMethod(getModifyMethod());
@@ -276,8 +279,40 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getFullyQualifiedTypeName() + " obj = new " + entityType.getFullyQualifiedTypeName() + "();");
 
 		for (MethodMetadata mutator : mandatoryMutators.keySet()) {
-			String initializer = mandatoryMutators.get(mutator);
+			bodyBuilder.appendFormalLine(mutator.getMethodName() + "(obj, index);");
+		}
+
+		bodyBuilder.appendFormalLine("return obj;");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		return methodBuilder.build();
+	}
+	
+	public List<MethodMetadata> getFieldInitializerMethods() {
+		List<MethodMetadata> fieldInitializerMethods = new LinkedList<MethodMetadata>();
+
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(entityType);
+		paramTypes.add(JavaType.INT_PRIMITIVE);
+		
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("obj"));
+		paramNames.add(new JavaSymbolName("index"));
+
+		for (MethodMetadata mutator : mandatoryMutators.keySet()) {
 			String mutatorName = mutator.getMethodName().getSymbolName();
+			JavaSymbolName methodName = new JavaSymbolName(mutatorName);
+			
+			// Locate user-defined method
+			if (MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes) != null) {
+				// Method found in governor so do not create method in ITD
+				continue;
+			}
+
+			// Method not on governor so need to create it
+			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
+			String initializer = mandatoryMutators.get(mutator);
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutatorName);
 
 			FieldMetadata field = locatedMutators.get(mutator).getField();
@@ -327,28 +362,60 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else if (field.getFieldType().equals(JavaType.CHAR_OBJECT) || field.getFieldType().equals(JavaType.CHAR_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine("obj." + mutatorName + "('N');");
 			} else if (isDecimalFieldType(field)) {
-				// Check for @DecimalMin and @DecimalMax
-				doDecimalMinAndDecimalMax(field, bodyBuilder, mutatorName, initializer, suffix);
+				// Check for @Digits, @DecimalMax, @DecimalMin
+				AnnotationMetadata digitsAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Digits"));
+				AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin"));
+				AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax"));
+
+				if (digitsAnnotation != null) {
+					doDigits(field, digitsAnnotation, bodyBuilder, mutatorName, initializer, suffix);
+				} else if (decimalMinAnnotation != null || decimalMaxAnnotation != null) {
+					doDecimalMinAndDecimalMax(field, decimalMinAnnotation, decimalMaxAnnotation, bodyBuilder, mutatorName, initializer, suffix);
+				} else {
+					bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + initializer + ");");					
+				}
 			} else if (isIntegerFieldType(field)) {
 				// Check for @Min and @Max
 				doMinAndMax(field, bodyBuilder, mutatorName, initializer, suffix);
 			} else {
 				bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + initializer + ");");
 			}
+
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+			fieldInitializerMethods.add(methodBuilder.build());
 		}
 
-		bodyBuilder.appendFormalLine("return obj;");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-		return methodBuilder.build();
+		return fieldInitializerMethods;
 	}
 
-	private void doDecimalMinAndDecimalMax(FieldMetadata field, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
+	private void doDigits(FieldMetadata field, AnnotationMetadata digitsAnnotation, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
 		String fieldType = field.getFieldType().getFullyQualifiedTypeName();
 		String fieldName = field.getFieldName().getSymbolName();
+
+		Integer integerValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("integer")).getValue();
+		Integer fractionValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("fraction")).getValue();
+
+		bodyBuilder.appendFormalLine(fieldType + " " + fieldName + " = " + initializer + ";");
+		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", integerValue, '9') + "." + StringUtils.padRight("9", fractionValue, '9'));
+		if (field.getFieldType().equals(BIG_DECIMAL)) {
+			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+		} else {
+			bodyBuilder.appendFormalLine("if (" + fieldName + " > " + maxValue.doubleValue() + suffix + ") {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine(fieldName + " = " + maxValue.doubleValue() + suffix + ";");
+		}
+
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + fieldName + ");");
+	}
+
+	private void doDecimalMinAndDecimalMax(FieldMetadata field, AnnotationMetadata decimalMinAnnotation, AnnotationMetadata decimalMaxAnnotation, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
+		String fieldType = field.getFieldType().getFullyQualifiedTypeName();
+		String fieldName = field.getFieldName().getSymbolName() + "1";
 		
-		AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin"));
-		AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax"));
 		if (decimalMinAnnotation != null && decimalMaxAnnotation == null) {
 			String minValue = (String) decimalMinAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
 
@@ -404,15 +471,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 			bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + fieldName + ");");
-		} else {
-			bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + initializer + ");");
-		}		
+		}
 	}
 
 	private void doMinAndMax(FieldMetadata field, InvocableMemberBodyBuilder bodyBuilder, String mutatorName, String initializer, String suffix) {
 		String fieldType = field.getFieldType().getFullyQualifiedTypeName();
 		String fieldName = field.getFieldName().getSymbolName();
-		
+
 		AnnotationMetadata minAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
 		AnnotationMetadata maxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
 		if (minAnnotation != null && maxAnnotation == null) {
@@ -621,8 +686,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			if (field.getFieldType().isCommonCollectionType() || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToMany")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToMany")) != null) {
 				continue;
 			}
-
+			
 			String initializer = "null";
+			String fieldInitializer = field.getFieldInitializer();
 
 			// Date fields included for DataNucleus (
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
@@ -634,11 +700,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY), java.util.Calendar.getInstance().get(java.util.Calendar.MINUTE), java.util.Calendar.getInstance().get(java.util.Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime()";
 					// initializer = "new java.util.Date()";
 				}
-			} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null) {
-				initializer = "true";
 			} else if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
-				initializer = field.getFieldName().getSymbolName();
-
+				if (fieldInitializer != null && fieldInitializer.contains("\"")) {
+					int offset = fieldInitializer.indexOf("\"");
+					initializer = fieldInitializer.substring(offset + 1, fieldInitializer.lastIndexOf("\""));
+				} else {
+					initializer = field.getFieldName().getSymbolName();
+				}
+				
 				// Check for @Size
 				AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 				if (sizeAnnotation != null) {
@@ -671,29 +740,29 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = "java.util.Calendar.getInstance()";
 				}
 			} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
-				initializer = "Boolean.TRUE";
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "Boolean.TRUE");
 			} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-				initializer = "true";
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "true");
 			} else if (field.getFieldType().equals(JavaType.INT_OBJECT)) {
-				initializer = "new Integer(index)";
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index)");
 			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
-				initializer = "new Integer(index)"; // Auto-boxed
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index)"); // Auto-boxed
 			} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT)) {
-				initializer = "new Integer(index).doubleValue()"; // Auto-boxed
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).doubleValue()"); // Auto-boxed
 			} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
-				initializer = "new Integer(index).doubleValue()";
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).doubleValue()");
 			} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT)) {
-				initializer = "new Integer(index).floatValue()"; // Auto-boxed
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).floatValue()"); // Auto-boxed
 			} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
-				initializer = "new Integer(index).floatValue()";
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).floatValue()");
 			} else if (field.getFieldType().equals(JavaType.LONG_OBJECT)) {
-				initializer = "new Integer(index).longValue()"; // Auto-boxed
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()"); // Auto-boxed
 			} else if (field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
-				initializer = "new Integer(index).longValue()";
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()");
 			} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT)) {
-				initializer = "new Integer(index).shortValue()"; // Auto-boxed
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).shortValue()"); // Auto-boxed
 			} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
-				initializer = "new Integer(index).shortValue()";
+				initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).shortValue()");
 			} else if (field.getFieldType().equals(BIG_DECIMAL)) {
 				initializer = BIG_DECIMAL.getFullyQualifiedTypeName() + ".valueOf(index)";
 			} else if (field.getFieldType().equals(BIG_INTEGER)) {
@@ -748,19 +817,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return tsc.toString();
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

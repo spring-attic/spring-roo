@@ -5,11 +5,15 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public enum GwtType {
-
-	//Represents mirror types classes. There are one of these for each entity mirrored by Roo.
+	// Represents mirror types classes. There are one of these for each entity mirrored by Roo.
 	PROXY(GwtPath.MANAGED_REQUEST, true, "Proxy", "proxy", null, false, false, true),
 	REQUEST(GwtPath.MANAGED_REQUEST, true, "Request", "request", null, false, false, true),
 	ACTIVITIES_MAPPER(GwtPath.MANAGED_ACTIVITY, true, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper", false, false, false),
@@ -143,7 +147,6 @@ public enum GwtType {
 				watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(new JavaType("com.google.gwt.place.shared.Place")));
 				break;
 		}
-
 		return watchedMethods;
 	}
 
@@ -160,7 +163,7 @@ public enum GwtType {
 				for (GwtProxyProperty property : proxyFieldTypeMap.values()) {
 					if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
 						List<JavaType> params = new ArrayList<JavaType>();
-						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getPropertyType()));
+						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
 						params.add(param);
 						watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
 					}
@@ -170,7 +173,7 @@ public enum GwtType {
 				for (GwtProxyProperty property : proxyFieldTypeMap.values()) {
 					if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
 						List<JavaType> params = new ArrayList<JavaType>();
-						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getPropertyType()));
+						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
 						params.add(param);
 						watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
 					}
@@ -180,7 +183,7 @@ public enum GwtType {
 				for (GwtProxyProperty property : proxyFieldTypeMap.values()) {
 					if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
 						List<JavaType> params = new ArrayList<JavaType>();
-						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getPropertyType()));
+						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
 						params.add(param);
 						watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
 					}
@@ -207,7 +210,6 @@ public enum GwtType {
 			case MOBILE_EDIT_VIEW:
 				watchedFieldNames.addAll(proxyFieldTypeMap.keySet());
 				break;
-
 		}
 	}
 
@@ -258,10 +260,6 @@ public enum GwtType {
 		return watchedFieldNames;
 	}
 
-	public void setWatchedFieldNames(ArrayList<JavaSymbolName> watchedFieldNames) {
-		this.watchedFieldNames = watchedFieldNames;
-	}
-
 	public Map<JavaSymbolName, List<JavaType>> getWatchedMethods() {
 		return watchedMethods;
 	}
@@ -278,16 +276,8 @@ public enum GwtType {
 		return createAbstract;
 	}
 
-	public void setCreateAbstract(boolean createAbstract) {
-		this.createAbstract = createAbstract;
-	}
-
 	public boolean isOverwriteConcrete() {
 		return overwriteConcrete;
-	}
-
-	public void setOverwriteConcrete(boolean overwriteConcrete) {
-		this.overwriteConcrete = overwriteConcrete;
 	}
 
 	public List<GwtType> getReferences() {

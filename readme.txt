@@ -268,8 +268,8 @@ PREREQUISITES:
 
    * GPG setup (probably already setup if you followed notes above)
    * Git push privileges (if you can commit, you have this)
-   * VPN access for SSH into static.springframework.org
-   * SSH keypair for auto login into static.springframework.org
+   * VPN access for SSH into static.springsource.org
+   * SSH keypair for auto login into static.springsource.org
    * s3cmd setup (so "s3cmd ls" lists spring-roo-repository.s2.org)
    * ~/.m2/settings.xml for spring-roo-repository-release and
      spring-roo-repository-snapshot IDs with S3 username/password
@@ -277,6 +277,7 @@ PREREQUISITES:
    * forum.springsource.org moderator privileges
    * www.springsource.org editor privileges
    * JIRA project administrator privileges
+   * Close down your IDE before proceeding
 
 RELEASE PROCEDURE:
 
@@ -284,17 +285,21 @@ RELEASE PROCEDURE:
 
    cd $ROO_HOME
    git pull
-   mvn clean package
+   cd $ROO_HOME/deployment-support
+  ./roo-deploy.sh -c next -n 4.5.6.RELEASE (use -v for logging)
+   cd $ROO_HOME
+   mvn clean install
    cd $ROO_HOME/deployment-support
    mvn clean site
-   ./roo-deploy -c assembly -tv (use -t for extra tests)
+   ./roo-deploy.sh -c assembly -tv (use -t for extra tests)
 
 2. Verify the assembly ZIP looks good:
 
    * Assembly ZIP unzips and is of a sensible size
    * Assembly ZIP contains both PDF and HTML documentation
    * Assembly ZIP runs correctly when installed on major platforms
-   * Run the "reference guide" command, copy the resulting XML file
+   * Create Jira Task ticket "Release Spring Roo x.y.z.aaaaaa"
+   * Run the "reference guide" command in the Roo shell, copy the resulting XML file
      into $ROO_HOME/deployment-support/src/site/docbook/reference,
      git commit and then git push (so the appendix is updated)
 
@@ -321,7 +326,7 @@ RELEASE PROCEDURE:
    very helpful for our users:
 
    cd $ROO_HOME/deployment-support
-   ./roo-deploy -c assembly -Tv (-T means Maven tests with empty repo)
+   ./roo-deploy.sh -c assembly -Tv (-T means Maven tests with empty repo)
 
 7. Repeat the verification tests on the assembly ZIP (see above). See
    note below if coordinating a release with the STS team.
@@ -337,12 +342,12 @@ RELEASE PROCEDURE:
    cd $ROO_HOME
    mvn deploy
    cd $ROO_HOME/deployment-support
-   ./roo-deploy -c deploy (use -dv for a dry-run and verbose logging)
+   ./roo-deploy.sh -c deploy (use -dv for a dry-run and verbose logging)
 
 10. Increment the version number to the next BUILD-SNAPSHOT number:
 
     cd $ROO_HOME/deployment-support
-    ./roo-deploy -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
+    ./roo-deploy.sh -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
     cd $ROO_HOME
     mvn clean install eclipse:clean eclipse:eclipse
     cd ~/some-directory; roo-dev script clinic.roo; mvn test

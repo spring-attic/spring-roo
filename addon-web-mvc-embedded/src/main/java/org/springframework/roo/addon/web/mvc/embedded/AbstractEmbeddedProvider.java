@@ -11,7 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.addon.web.mvc.jsp.JspOperations;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -27,17 +27,14 @@ import org.w3c.dom.Element;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
-@Component(componentAbstract=true)
+@Component(componentAbstract = true)
 public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
-	
-	private @Reference PathResolver pathResolver;
-	private @Reference FileManager fileManager;
-	private @Reference UrlInputStreamService httpService;
-	private @Reference JspOperations jspOperations;
-	
-	private Logger log = Logger.getLogger(getClass().getName());
+	private static final Logger logger = Logger.getLogger(AbstractEmbeddedProvider.class.getName());
+	@Reference private FileManager fileManager;
+	@Reference private UrlInputStreamService httpService;
+	@Reference private JspOperations jspOperations;
+	@Reference private ProjectOperations projectOperations;
 
 	/**
 	 * Method to install tagx file into /WEB-INF/tags/embed/ of target project.
@@ -50,7 +47,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		if (!tagName.endsWith(".tagx")) {
 			tagName = tagName.concat(".tagx");
 		}
-		String tagx = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/embed/" + tagName);
+		String tagx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/embed/" + tagName);
 		if(!fileManager.exists(tagx)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/" + tagName), fileManager.createFile(tagx).getOutputStream());
@@ -74,7 +71,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 			title = getTitle(viewName);
 		}
 		viewName = getViewName(viewName, "default");
-		String jspx = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/embed/" + viewName + ".jspx");
+		String jspx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/embed/" + viewName + ".jspx");
 		Document document = contentElement.getOwnerDocument();
 		if(!fileManager.exists(jspx)) {
 			//add document namespaces
@@ -91,7 +88,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 			
 			jspOperations.installView("/embed", viewName, title, "Embedded", document);
 		} else {
-			log.warning("Could not install jspx with name " + viewName + " because it exists already. Use the --viewName attribute to specify unique name.");
+			logger.warning("Could not install jspx with name " + viewName + " because it exists already. Use the --viewName attribute to specify unique name.");
 		}
 	}
 	
@@ -117,7 +114,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 				rd.close();
 				result = sb.toString();
 			} catch (Exception e) {
-				log.warning("Unable to connect to " + urlStr);
+				logger.warning("Unable to connect to " + urlStr);
 			}
 		}
 		return result;

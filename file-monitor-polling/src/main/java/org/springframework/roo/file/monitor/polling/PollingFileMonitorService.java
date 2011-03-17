@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-import java.util.logging.Logger;
 
 import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
 import org.springframework.roo.file.monitor.FileMonitorService;
@@ -22,7 +21,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -49,17 +47,15 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
-	private static final Logger logger = HandlerUtils.getLogger(PollingFileMonitorService.class);
 	protected Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
 	private Set<MonitoringRequest> requests = new LinkedHashSet<MonitoringRequest>();
 	private Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();
 	private Set<String> notifyChanged = new HashSet<String>();
 	private Set<String> notifyCreated = new HashSet<String>();
 	private Set<String> notifyDeleted = new HashSet<String>();
-	private Set<MonitoringRequest> notifiedFailingRequests = new HashSet<MonitoringRequest>();
-	
+
 	// Mutex
-	private Boolean lock = Boolean.TRUE;
+	private final Boolean lock = Boolean.TRUE;
 	
 	public final void add(FileEventListener e) {
 		synchronized (lock) {
@@ -133,10 +129,9 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			}
 			
 			int changes = 0;
-				
+
 			for (MonitoringRequest request : requests) {
 				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
-
 				if (priorExecution.containsKey(request)) {
 					// Need to perform a comparison, as we have data from a previous execution
 					Map<File,Long> priorFiles = priorExecution.get(request);
@@ -239,15 +234,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				}
 				
 				if (!request.getFile().exists()) {
-					if (!notifiedFailingRequests.contains(request)) {
-						logger.warning("Cannot monitor non-existent path '" + request.getFile() + "'");
-						notifiedFailingRequests.add(request);
-					}
 					continue;
-				}
-				
-				if (notifiedFailingRequests.contains(request)) {
-					notifiedFailingRequests.remove(request);
 				}
 				
 				// Build contents of the monitored location
@@ -281,7 +268,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 								// If this file was already going to be notified, there is no need to do it twice
 								notifyChanged.remove(thisFile.getCanonicalPath());
 							} catch (IOException ignored) {}
-							continue;
 						}
 					}
 					
@@ -293,7 +279,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 							// If this file was already going to be notified, there is no need to do it twice
 							notifyDeleted.remove(deletedFile.getCanonicalPath());
 						} catch (IOException ignored) {}
-						continue;
 					}
 				} else {
 					// No data from previous execution, so it's a newly-monitored location
@@ -365,7 +350,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		Assert.notNull(map, "Map required");
 		Assert.notNull(currentFile, "Current file is required");
 
-		if (currentFile.exists() == false || (currentFile.getName().length() > 1 && currentFile.getName().startsWith("."))) {
+		if (!currentFile.exists() || (currentFile.getName().length() > 1 && currentFile.getName().startsWith("."))) {
 			return;
 		}
 		
@@ -435,7 +420,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				for (File thisFile : priorFiles.keySet()) {
 					eventsToPublish.add(new FileEvent(new FileDetails(thisFile, priorFiles.get(thisFile)), FileOperation.MONITORING_FINISH, null));
 				}
-
 				publish(eventsToPublish);
 			}
 

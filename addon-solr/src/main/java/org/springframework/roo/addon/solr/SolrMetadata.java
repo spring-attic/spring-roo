@@ -26,6 +26,7 @@ import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooSolrSearchable}.
@@ -61,31 +62,32 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		this.beanPlural = javaTypePlural;
 		
 		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
-			// Do something with supertype
-		} else {
-			builder.addField(getSolrServerField());
-			if (annotationValues.getSimpleSearchMethod() != null && annotationValues.getSimpleSearchMethod().length() > 0) {
-				builder.addMethod(getSimpleSearchMethod());
-			}
-			if (annotationValues.getSearchMethod() != null && annotationValues.getSearchMethod().length() > 0) {
-				builder.addMethod(getSearchMethod());
-			}
-			if (annotationValues.getIndexMethod() != null && annotationValues.getIndexMethod().length() > 0) {
-				builder.addMethod(getIndexEntityMethod());
-				builder.addMethod(getIndexEntitiesMethod(accessorDetails, identifierAccessor, versionField));
-			}
-			if (annotationValues.getDeleteIndexMethod() != null && annotationValues.getDeleteIndexMethod().length() > 0) {
-				builder.addMethod(getDeleteIndexMethod(identifierAccessor));
-			}
-			if (annotationValues.getPostPersistOrUpdateMethod() != null && annotationValues.getPostPersistOrUpdateMethod().length() > 0) {
-				builder.addMethod(getPostPersistOrUpdateMethod());
-			}
-			if (annotationValues.getPreRemoveMethod() != null && annotationValues.getPreRemoveMethod().length() > 0) {
-				builder.addMethod(getPreRemoveMethod());
-			}
-
-			builder.addMethod(getSolrServerMethod());
+			// TODO Do something with supertype
+			return;
 		}
+		
+		builder.addField(getSolrServerField());
+		if (StringUtils.hasText(annotationValues.getSimpleSearchMethod())) {
+			builder.addMethod(getSimpleSearchMethod());
+		}
+		if (StringUtils.hasText(annotationValues.getSearchMethod())) {
+			builder.addMethod(getSearchMethod());
+		}
+		if (StringUtils.hasText(annotationValues.getIndexMethod())) {
+			builder.addMethod(getIndexEntityMethod());
+			builder.addMethod(getIndexEntitiesMethod(accessorDetails, identifierAccessor, versionField));
+		}
+		if (StringUtils.hasText(annotationValues.getDeleteIndexMethod())) {
+			builder.addMethod(getDeleteIndexMethod(identifierAccessor));
+		}
+		if (StringUtils.hasText(annotationValues.getPostPersistOrUpdateMethod())) {
+			builder.addMethod(getPostPersistOrUpdateMethod());
+		}
+		if (StringUtils.hasText(annotationValues.getPreRemoveMethod())) {
+			builder.addMethod(getPreRemoveMethod());
+		}
+
+		builder.addMethod(getSolrServerMethod());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -267,7 +269,8 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(governorTypeDetails.getName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return search(new SolrQuery(\"" + javaType.getSimpleTypeName().toLowerCase() + "_solrsummary_t:\" + queryString.toLowerCase()));");
+		bodyBuilder.appendFormalLine("String searchString = \"" + javaType.getSimpleTypeName() + "_solrsummary_t:\" + queryString;");
+		bodyBuilder.appendFormalLine("return search(new SolrQuery(searchString.toLowerCase()));");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();

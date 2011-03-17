@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.TemplateUtils;
  */
 @Component
 @Service
-public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
+public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
 	private static final char SEPARATOR = File.separatorChar;
 
 	/**

@@ -64,7 +64,6 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 	public String findIdentifier(JavaType javaType) {
 		Assert.notNull(javaType, "Java type to locate is required");
 		String result = cache.get(javaType);
-		
 		if (result != null) {
 			return result;
 		}
@@ -74,7 +73,7 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 			String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
 			String fileIdentifier = pathResolver.getIdentifier(sourcePath, relativePath);
 			if (fileManager.exists(fileIdentifier)) {
-				// found the file, so use this one
+				// Found the file, so use this one
 				String mid = PhysicalTypeIdentifier.createIdentifier(javaType, sourcePath);
 				cache.put(javaType, mid);
 				return mid;
@@ -97,11 +96,11 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 		String fileIdentifier = fileEvent.getFileDetails().getCanonicalPath();
 		
 		if (fileIdentifier.endsWith(".java") && fileEvent.getOperation() != FileOperation.MONITORING_FINISH && !fileIdentifier.endsWith("package-info.java")) {
-			// file is of interest
-			// start by evicting the cache
+			// File is of interest
+			// Start by evicting the cache
 			cache.clear();
 			
-			// figure out the JavaType this should be
+			// Figure out the JavaType this should be
 			PathResolver pathResolver = getPathResolver();
 			Path sourcePath = null;
 			for (Path path : pathResolver.getSourcePaths()) {
@@ -111,10 +110,10 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 				}
 			}
 			if (sourcePath == null) {
-				// the .java file is not under a source path, so ignore it
+				// The .java file is not under a source path, so ignore it
 				return;
 			}
-			// determine the JavaType for this file
+			// Determine the JavaType for this file
 			String relativePath = pathResolver.getRelativeSegment(fileIdentifier);
 			Assert.hasText(relativePath, "Could not determine compilation unit name for file '" + fileIdentifier + "'");
 			Assert.isTrue(relativePath.startsWith(File.separator), "Relative path unexpectedly dropped the '" + File.separator + "' prefix (received '" + relativePath + "' from '" + fileIdentifier + "'");
@@ -124,7 +123,7 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 			
 			JavaType javaType = new JavaType(relativePath.replace(File.separatorChar, '.'));
 			
-			// figure out the PhysicalTypeIdentifier
+			// Figure out the PhysicalTypeIdentifier
 			String id = PhysicalTypeIdentifier.createIdentifier(javaType, sourcePath);
 			
 			// Now we've worked out the id, we can publish the event in case others were interested

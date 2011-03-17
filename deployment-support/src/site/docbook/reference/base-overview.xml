@@ -77,6 +77,10 @@
     </listitem>
 
     <listitem>
+      <para>Database introspection and reverse engineering</para>
+    </listitem>
+
+    <listitem>
       <para>Dynamic finders (creation of finders without needing to write the
       JPA-QL for them)</para>
     </listitem>

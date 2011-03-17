@@ -1,4 +1,4 @@
-<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
   <jsp:output omit-xml-declaration="yes" />
 
   <jsp:directive.attribute name="maxPages" type="java.lang.Integer" required="true" rtexprvalue="true" description="The maximum number of pages available (ie tableRecordCount / size)" />
@@ -42,9 +42,9 @@
         <spring:param name="size" value="${size}" />
       </spring:url>
       <spring:url value="/resources/images/resultset_first.png" var="first_image_url" />
-      <spring:message code="list_first" var="first_label" />
-      <a class="image" href="${first}" title="${first_label}">
-        <img alt="${first_label}" src="${first_image_url}" />
+      <spring:message code="list_first" var="first_label" htmlEscape="false" />
+      <a class="image" href="${first}" title="${fn:escapeXml(first_label)}">
+        <img alt="${fn:escapeXml(first_label)}" src="${first_image_url}" />
       </a>
     </c:if>
     <c:if test="${page gt 1}">
@@ -53,9 +53,9 @@
         <spring:param name="size" value="${size}" />
       </spring:url>
       <spring:url value="/resources/images/resultset_previous.png" var="previous_image_url" />
-      <spring:message code="list_previous" var="previous_label" />
-      <a class="image" href="${previous}" title="${previous_label}">
-        <img alt="${previous_label}" src="${previous_image_url}" />
+      <spring:message code="list_previous" var="previous_label" htmlEscape="false" />
+      <a class="image" href="${previous}" title="${fn:escapeXml(previous_label)}">
+        <img alt="${fn:escapeXml(previous_label)}" src="${previous_image_url}" />
       </a>
     </c:if>
     <c:out value=" " />
@@ -67,9 +67,9 @@
         <spring:param name="size" value="${size}" />
       </spring:url>
       <spring:url value="/resources/images/resultset_next.png" var="next_image_url" />
-      <spring:message code="list_next" var="next_label" />
-      <a class="image" href="${next}" title="${next_label}">
-        <img alt="${next_label}" src="${next_image_url}" />
+      <spring:message code="list_next" var="next_label" htmlEscape="false" />
+      <a class="image" href="${next}" title="${fn:escapeXml(next_label)}">
+        <img alt="${fn:escapeXml(next_label)}" src="${next_image_url}" />
       </a>
     </c:if>
     <c:if test="${page ne maxPages}">
@@ -78,9 +78,9 @@
         <spring:param name="size" value="${size}" />
       </spring:url>
       <spring:url value="/resources/images/resultset_last.png" var="last_image_url" />
-      <spring:message code="list_last" var="last_label" />
-      <a class="image" href="${last}" title="${last_label}">
-        <img alt="${last_label}" src="${last_image_url}" />
+      <spring:message code="list_last" var="last_label" htmlEscape="false" />
+      <a class="image" href="${last}" title="${fn:escapeXml(last_label)}">
+        <img alt="${fn:escapeXml(last_label)}" src="${last_image_url}" />
       </a>
     </c:if>
   </c:if>

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +24,7 @@ import org.springframework.roo.support.util.StringUtils;
  * <p>
  * This class is used whenever a formal reference to a Java type is required.
  * It provides convenient ways to determine the type's simple name and package name.
- * A related {@link Converter} is also offered.
+ * A related {@link org.springframework.core.convert.converter.Converter} is also offered.
  * 
  * @author Ben Alex
  * @since 1.0
@@ -49,7 +50,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
 
-	private List<JavaType> parameters = new ArrayList<JavaType>();
+	private List<JavaType> parameters = new LinkedList<JavaType>();
 	private JavaSymbolName argName = null;
 	private int array = 0;
 	private boolean defaultPackage;
@@ -75,7 +76,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * <p>
 	 * The fully qualified type name will be enforced as follows:
 	 * <ul>
-	 * <li>The rules listed in {link {@link JavaTypeUtils#assertJavaNameLegal(String)}
+	 * <li>The rules listed in {@link JavaSymbolName#assertJavaNameLegal(String)}
 	 * <li>First letter of simple type name must be uppercase</li>
 	 * </ul>
 	 * <p>
@@ -98,11 +99,9 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
 	public JavaType(String fullyQualifiedTypeName, int array, DataType dataType, JavaSymbolName argName, List<JavaType> parameters) {
-		if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.length() == 0) {
-			throw new IllegalArgumentException("Fully qualified type name required");
-		}
-		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
+		Assert.hasText(fullyQualifiedTypeName, "Fully qualified type name required");
 		Assert.notNull(dataType, "Data type required");
+		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
 		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
 		this.defaultPackage = !fullyQualifiedTypeName.contains(".");
 		if (defaultPackage) {
@@ -112,12 +111,12 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			simpleTypeName = fullyQualifiedTypeName.substring(offset + 1);
 		}
 		// Disabled as per ROO-1734
-//		if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
-//			// Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
-//			if (simpleTypeName.length() < 2 || !Character.isUpperCase(simpleTypeName.charAt(1)) || '_' != simpleTypeName.charAt(0)) {
-//				throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
-//			}
-//		}
+		// if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
+		//     // Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
+		//     if (simpleTypeName.length() < 2 || !Character.isUpperCase(simpleTypeName.charAt(1)) || '_' != simpleTypeName.charAt(0)) {
+		//         throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
+		//     }
+		// }
 
 		this.array = array;
 		this.dataType = dataType;
@@ -211,7 +210,6 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 		if (!WILDCARD_NEITHER.equals(argName)) {
 			// It wasn't a WILDCARD_NEITHER, so we might need to continue with more details
-
 			if (dataType == DataType.TYPE || !staticForm) {
 				if (resolver != null) {
 					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this)) {
@@ -260,17 +258,24 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @return the package name (never null)
 	 */
 	public JavaPackage getPackage() {
-		if (isDefaultPackage()) {
+		if (isDefaultPackage() && !Character.isUpperCase(fullyQualifiedTypeName.charAt(0))) {
 			return new JavaPackage("");
 		}
 
 		JavaType enclosingType = getEnclosingType();
 		if (enclosingType != null) {
-			return enclosingType.getPackage();
+			String enclosingTypeFullyQualifiedTypeName = enclosingType.getFullyQualifiedTypeName();
+			int offset = enclosingTypeFullyQualifiedTypeName.lastIndexOf(".");
+			// Handle case where the package name after the last period starts with a capital letter.
+			if (offset > -1 && Character.isUpperCase(enclosingTypeFullyQualifiedTypeName.charAt(offset + 1))) {
+				return new JavaPackage(enclosingTypeFullyQualifiedTypeName);
+			} else {
+				return enclosingType.getPackage();
+			}
 		}
-
+		
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
-		return new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
+		return offset == -1 ? new JavaPackage(fullyQualifiedTypeName) : new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
 	}
 
 	/**
@@ -279,7 +284,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public JavaType getEnclosingType() {
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
 		if (offset == -1) {
-			// there is no dot in the name, so there's no way there's an enclosing type
+			// There is no dot in the name, so there's no way there's an enclosing type
 			return null;
 		}
 		String possibleName = fullyQualifiedTypeName.substring(0, offset);
@@ -294,11 +299,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			enclosedWithinPackage = possibleName.substring(0, offset2);
 			enclosedWithinTypeName = possibleName.substring(offset2 + 1);
 		}
-		if (enclosedWithinTypeName.charAt(0) == enclosedWithinTypeName.toUpperCase().charAt(0)) {
-			// First letter is uppercase, so treat it as a type name
+
+		if (Character.isUpperCase(enclosedWithinTypeName.charAt(0))) {
+			// First letter is uppercase, so treat it as a type name for now
 			String preTypeNamePortion = enclosedWithinPackage == null ? "" : (enclosedWithinPackage + ".");
 			return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
 		}
+
 		return null;
 	}
 
@@ -342,22 +349,20 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		int result = 1;
 		result = prime * result + ((fullyQualifiedTypeName == null) ? 0 : fullyQualifiedTypeName.hashCode());
 		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
+		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
 		return result;
 	}
 
 	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType;
+		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType && ((JavaType)obj).parameters.containsAll(parameters);
 	}
 
 	public final int compareTo(JavaType o) {
 		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly
 		if (o == null) return -1;
-		int cmp = fullyQualifiedTypeName.compareTo(o.fullyQualifiedTypeName);
-		if (cmp == 0) {
-			cmp = dataType.compareTo(o.dataType);
-		}
-		return cmp;
+		if (equals(o)) return 0;
+		return toString().compareTo(o.toString());
 	}
 
 	public final String toString() {
@@ -371,10 +376,4 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public DataType getDataType() {
 		return dataType;
 	}
-
-	// Shouldn't be required given JavaType is immutable!
-	// @Override
-	// public JavaType clone() throws CloneNotSupportedException {
-	// return new JavaType(this.fullyQualifiedTypeName, this.array, this.primitive);
-	// }
 }

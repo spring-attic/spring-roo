@@ -7,6 +7,12 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.project.listeners.DependencyListener;
+import org.springframework.roo.project.listeners.FilterListener;
+import org.springframework.roo.project.listeners.PluginListener;
+import org.springframework.roo.project.listeners.PropertyListener;
+import org.springframework.roo.project.listeners.RepositoryListener;
+import org.springframework.roo.project.listeners.ResourceListener;
 import org.springframework.roo.support.util.Assert;
 
 /**

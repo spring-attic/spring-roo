@@ -115,16 +115,14 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		
 		if(root == null || !"html".equals(root.getNodeName())) {
 			throw new IllegalArgumentException("Could not parse selenium test case template file!");
-		}		
+		}
 		
 		XmlUtils.findRequiredElement("/html/head/title", root).setTextContent(name);
 		
 		XmlUtils.findRequiredElement("/html/body/table/thead/tr/td", root).setTextContent(name);
 
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
-		
-		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));							
-		// tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));
+		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));
 		
 		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
@@ -134,7 +132,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		for (FieldMetadata field : WebMetadataUtils.getScaffoldElegibleFieldMetadata(formBackingType, memberDetails, metadataService, null, null)) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				tbody.appendChild(typeCommand(selenium, field));
-			} else {				
+			} else {
 				// tbody.appendChild(typeKeyCommand(selenium, field));
 			}
 		}

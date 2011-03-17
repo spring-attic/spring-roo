@@ -203,7 +203,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 			try {
 				original = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(jspFilename));
 			} catch (Exception e) {
-				new IllegalStateException("Could not parse file: " + jspFilename);
+				throw new IllegalStateException("Could not parse file: " + jspFilename);
 			} 
 			Assert.notNull(original, "Unable to parse " + jspFilename);
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
@@ -215,8 +215,8 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 			Assert.notNull(mutableFile, "Could not create JSP file '" + jspFilename + "'");
 		}
 		
-		try {
-			if (mutableFile != null) {
+		if (mutableFile != null) {
+			try {
 				// Build a string representation of the JSP
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
@@ -226,9 +226,9 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
 				// Return and indicate we wrote out the file
 				return true;
+			} catch (IOException ioe) {
+				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
 		
 		// A file existed, but it contained the same content, so we return false

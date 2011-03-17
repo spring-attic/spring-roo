@@ -8,11 +8,16 @@ import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Version;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.uaa.client.UaaService;
+import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
+import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse.Builder;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
 /**
@@ -32,9 +37,15 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 	private Map<String, String> bsnBuffer = new HashMap<String, String>();
 	/** key: projectId, value: list of products*/
 	private Map<String, List<Product>> projectIdBuffer = new HashMap<String, List<Product>>();
+	/** key: BSN, value: version */
+	private Map<String, Version> bsnVersionCache = new HashMap<String, Version>();
+	/** key: BSN, value: git commit hash, if available */
+	private Map<String, String> bsnCommitHashCache = new HashMap<String, String>();
+	private BundleContext bundleContext;
 	
 	protected void activate(ComponentContext context) {
 		// Attempt to store the SPRING_ROO Product (via the registerBSN method so as to be included via possibly-active buffering)
+		this.bundleContext = context.getBundleContext();
 		String bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(context.getBundleContext(), UaaRegistrationServiceImpl.class.getName());
 		registerBundleSymbolicNameUse(bundleSymbolicName, null);
 	}
@@ -76,7 +87,17 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 		}
 		
 		// Go and register it
-		uaaService.registerFeatureUsage(SPRING_ROO, bundleSymbolicName, featureData);
+		FeatureUse.Builder featureUseBuilder = FeatureUse.newBuilder();
+		featureUseBuilder.setName(bundleSymbolicName);
+		populateVersionInfoIfPossible(featureUseBuilder, bundleSymbolicName);
+		
+		if (featureData == null) {
+			// Use this UaaService method, as we want to preserve any feature data we might have presented previously but hasn't yet been communicated (important since UAA 1.0.1 due to its delayed uploads)
+			uaaService.registerFeatureUsage(SPRING_ROO, featureUseBuilder.build());
+		} else {
+			// New feature data is available, so treat this as overwriting any existing feature data we might have stored previously
+			uaaService.registerFeatureUsage(SPRING_ROO, featureUseBuilder.build(), featureData);
+		}
 		
 		// Try to flush the buffer while we're at it, given persistence seems to be OK at present
 		if (flushWhenDone) {
@@ -159,4 +180,47 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 		return level != PrivacyLevel.DECLINE_TOU && level != PrivacyLevel.UNDECIDED_TOU;
 	}
 	
+	/**
+	 * Populates the version information in the passed {@link Builder}. This information is obtained by
+	 * locating the bundle and using its version metadata. The Git hash code is acquired from the manifest.
+	 * 
+	 * <p>
+	 * The method returns without error if the bundle could not be found.
+	 * 
+	 * @param featureUseBuilder to insert feature use information into (required)
+	 * @param bundleSymbolicName to locate (required)
+	 */
+	private void populateVersionInfoIfPossible(Builder featureUseBuilder, String bundleSymbolicName) {
+		Version version = bsnVersionCache.get(bundleSymbolicName);
+		String commitHash = bsnCommitHashCache.get(bundleSymbolicName);
+		
+		if (version == null) {
+			for (Bundle b : bundleContext.getBundles()) {
+				if (bundleSymbolicName.equals(b.getSymbolicName())) {
+					version = b.getVersion();
+					bsnVersionCache.put(bundleSymbolicName, version);
+					Object manifestResult = b.getHeaders().get("Git-Commit-Hash");
+					if (manifestResult != null) {
+						commitHash = manifestResult.toString();
+						bsnCommitHashCache.put(bundleSymbolicName, commitHash);
+					}
+					break;
+				}
+			}
+		}
+		
+		if (version == null) {
+			// Can't acquire OSGi version information for this bundle, so give up now
+			return;
+		}
+		
+		featureUseBuilder.setMajorVersion(version.getMajor());
+		featureUseBuilder.setMinorVersion(version.getMinor());
+		featureUseBuilder.setPatchVersion(version.getMicro());
+		featureUseBuilder.setReleaseQualifier(version.getQualifier());
+		if (commitHash != null && commitHash.length() > 0) {
+			featureUseBuilder.setSourceControlIdentifier(commitHash);
+		}
+	}
+
 }

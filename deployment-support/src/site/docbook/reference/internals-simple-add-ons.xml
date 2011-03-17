@@ -707,11 +707,10 @@
     same way described above) with a simple deploy command:</para>
 
     <para><programlisting>&lt;project-name&gt;$ <emphasis role="bold">mvn deploy</emphasis></programlisting></para>
+  </section>
 
-    <para></para>
-
-    <para><emphasis role="bold">Publishing your repository to
-    RooBot</emphasis></para>
+  <section>
+    <title>Publishing to RooBot</title>
 
     <para>Once the release is complete you can check your Google Code project
     to see that your add-on pom.xml has been updated to the new version (eg
@@ -755,18 +754,29 @@
 
     <itemizedlist>
       <listitem>
-        <para>the provided repository.xml must be a valid OSGi
+        <para>The provided repository.xml must be a valid OSGi
         repository</para>
       </listitem>
 
       <listitem>
-        <para>the resource URI must use the httppgp prefix ie: &lt;resource
+        <para>The resource URI must use the httppgp prefix ie: &lt;resource
         uri="httppgp://fr-test.googlecode.com/svn/…/&gt;</para>
       </listitem>
 
       <listitem>
-        <para>the referenced bundle in the repository has a corresponding .asc
+        <para>The referenced bundle in the repository has a corresponding .asc
         file containing the PgP public key</para>
+      </listitem>
+
+      <listitem>
+        <para>The public PGP key of the add-on signer needs to be available at
+        <link
+        xlink:href="http://keyserver.ubuntu.com/">http://keyserver.ubuntu.com/</link>
+        A guide to PGP key management can be found <link
+        xlink:href="https://help.ubuntu.com/community/GnuPrivacyGuardHowto">here</link>.
+        Make sure to publish your key with this command:</para>
+
+        <programlisting>gpg --send-keys --keyserver keyserver.ubuntu.com &lt;your-key-id&gt;</programlisting>
       </listitem>
 
       <listitem>
@@ -775,8 +785,20 @@
       </listitem>
 
       <listitem>
-        <para>the referenced bundle contains a OSGi compliant manifest.mf
-        file</para>
+        <para>The referenced bundle contains a OSGi compliant manifest.mf
+        file. For example it will verify that the add-on version defined in
+        your repository.xml matches the version defined in the manifest of
+        your add-on.</para>
+      </listitem>
+
+      <listitem>
+        <para>[Important] To ensure your repository is valid RooBot will
+        download all defined resources in the repository. To do that it will
+        read the uri attribute and perform a HTTP GET request against the
+        defined URL (after replacing the httppgp:// protocol handler with
+        http://). Should the download or verification of any of the defined
+        resources in the respository fail RooBot will abort the processing of
+        the entire repository and retry later again.</para>
       </listitem>
     </itemizedlist>
 
@@ -785,6 +807,25 @@
     xlink:href="http://spring-roo-repository.springsource.org/roobot/roobot.xml">http://spring-roo-repository.springsource.org/roobot/roobot.xml</link>.
     This registry is available to RooBot client which is integrated into the
     Spring Roo Shell.</para>
+
+    <para>Once you sent your email to <link
+    xlink:href="mailto:s2-roobot@vmware.com">s2-roobot@vmware.com</link> you
+    should receive a response from RooBot indicating that the processing of
+    your repository has started. RooBot will not update you on the sucess or
+    failing of the processing. However, you should be able to see your add-on
+    listed at <link
+    xlink:href="http://spring-roo-repository.springsource.org/roobot/roobot.xml">http://spring-roo-repository.springsource.org/roobot/roobot.xml</link>
+    within a few hours. Should this not be the case, you can visit the RooBot
+    error log at <link
+    xlink:href="http://spring-roo-repository.springsource.org/roobot/roobot-log.txt">http://spring-roo-repository.springsource.org/roobot/roobot-log.txt</link>
+    which is being published every 5 minutes.</para>
+
+    <para>Once RooBot has published your add-on sucessfully it will
+    periodically process your repository to verify its ongoing validity. As
+    part of this periodic processing it will also automatically pickup new
+    versions (add-on releases) in your repository.xml. Therefore it should not
+    be necessary to explicitly notify RooBot of any changes in your
+    repository.</para>
   </section>
 
   <section>

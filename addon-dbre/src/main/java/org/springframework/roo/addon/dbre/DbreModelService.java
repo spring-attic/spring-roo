@@ -65,7 +65,6 @@ public interface DbreModelService {
 	 * available.
 	 * 
 	 * @param schema the schema to refresh (required)
-	 * @param excludeTables a set of tables to exclude
 	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
 	Database refreshDatabase(Schema schema);
@@ -110,4 +109,20 @@ public interface DbreModelService {
 	 * @param excludeTables a set of table names
 	 */
 	void setExcludeTables(Set<String> excludeTables);
+
+	/**
+	 * Whether or not to include JPA non-portable attributes of the @Column 
+	 * annotation such as 'columnDefinition'.
+	 * 
+	 * @return true to include non-portable attributes, otherwise false
+	 */
+	boolean isIncludeNonPortable();
+	
+	/** 
+	 * Specifies whether to include JPA non-portable attributes of the @Column 
+	 * annotation such as 'columnDefinition'
+	 * 
+	 * @param includeNonPortable true to include non-portable attributes, otherwise false
+	 */
+	void setIncludeNonPortable(boolean includeNonPortable);
 }

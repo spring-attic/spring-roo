@@ -42,7 +42,7 @@
           <spring:message arguments="${fn:escapeXml(label)}" code="field_invalid" var="field_invalid" htmlEscape="false" />
         </c:when>
         <c:otherwise>
-          <spring:message arguments="${label}" code="${validationMessageCode}" var="validationMessage" htmlEscape="false" />
+          <spring:message arguments="${fn:escapeXml(label)}" code="${validationMessageCode}" var="field_invalid" htmlEscape="false" />
         </c:otherwise>
       </c:choose>
     </c:if>
@@ -79,11 +79,11 @@
       </c:choose>
       <c:choose>
         <c:when test="${required}">
-          <spring:message code="field_required" var="field_required" />
-          <spring:message argumentSeparator="," arguments="${label},(${field_required})" code="field_simple_validation" var="field_validation" />
+          <spring:message code="field_required" var="field_required" htmlEscape="false" />
+          <spring:message argumentSeparator="," arguments="${label},(${field_required})" code="field_simple_validation" var="field_validation" htmlEscape="false" />
         </c:when>
         <c:otherwise>
-          <spring:message argumentSeparator="," arguments="${label}, " code="field_simple_validation" var="field_validation" />
+          <spring:message argumentSeparator="," arguments="${label}, " code="field_simple_validation" var="field_validation" htmlEscape="false" />
         </c:otherwise>
       </c:choose>
       <c:set var="sec_field_validation">

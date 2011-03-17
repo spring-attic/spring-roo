@@ -14,7 +14,7 @@ import java.util.Set;
  * Abstract activity for editing a record. Subclasses must provide access to the
  * request that will be fired when Save is clicked.
  * <p/>
- * Instances are not reusable. Once an activity is stoped, it cannot be
+ * Instances are not reusable. Once an activity is stopped, it cannot be
  * restarted.
  *
  * @param <P> the type of Proxy being edited

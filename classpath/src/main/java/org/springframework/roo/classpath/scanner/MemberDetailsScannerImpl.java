@@ -29,7 +29,7 @@ import org.springframework.roo.support.util.Assert;
  * 
  * <p>
  * Automatically detects all {@link MemberDetailsDecorator} instances in the OSGi container and will delegate to them
- * during execution of the {@link #getMemberDetails(MetadataProvider, ClassOrInterfaceTypeDetails)} method.
+ * during execution of the {@link #getMemberDetails(String, ClassOrInterfaceTypeDetails)} method.
  * 
  * <p>
  * While internally this implementation will visit {@link MetadataProvider}s and {@link MemberDetailsDecorator}s in the order
@@ -157,7 +157,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 				for (MemberDetailsDecorator decorator : decorators) {
 					MemberDetails newResult = decorator.decorate(requestingClass, result);
 					Assert.isTrue(newResult != null, "Decorator '" + decorator.getClass().getName() + "' returned an illegal result");
-					if (!newResult.equals(result)) {
+					if (newResult != null && !newResult.equals(result)) {
 						additionalLoopRequired = true;
 					}
 					result = newResult;

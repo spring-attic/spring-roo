@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.solr;
 
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -32,12 +32,10 @@ import org.springframework.roo.project.Path;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
-	
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 
 	protected void activate(ComponentContext context) {
@@ -69,18 +67,18 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 		
 		// Abort if we don't have getter information available
-		if (entityMetadata == null) {
+		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
 		}
 		
 		String beanPlural = javaType.getSimpleTypeName() + "s";
-		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
-		if (plural != null) {
-			beanPlural = plural.getPlural();
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
+		if (pluralMetadata != null && pluralMetadata.isValid()) {
+			beanPlural = pluralMetadata.getPlural();
 		}
 		
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(SolrMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
-		Map<MethodMetadata, FieldMetadata> accessorDetails = new HashMap<MethodMetadata, FieldMetadata>();
+		Map<MethodMetadata, FieldMetadata> accessorDetails = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		for (MethodMetadata methodMetadata : MemberFindingUtils.getMethods(memberDetails)) {
 			if (isMethodOfInterest(methodMetadata)) {
 				FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(methodMetadata));

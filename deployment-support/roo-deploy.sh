@@ -417,12 +417,26 @@ if [[ "$COMMAND" = "deploy" ]]; then
     log "AWS pkg.f.name.: $ZIP_FILENAME"
     log "AWS proj.name..: $PROJECT_NAME"
     log "AWS Path.......: $AWS_PATH"
-    s3_execute put --acl-public \
+
+    type -P s3cmd &>/dev/null || { l_error "s3cmd not found. Aborting." >&2; exit 1; }
+    S3CMD_OPTS=''
+    if [ "$DRY_RUN" = "1" ]; then
+        S3CMD_OPTS="$S3CMD_OPTS --dry-run"
+    fi
+    if [ "$VERBOSE" = "1" ]; then
+        S3CMD_OPTS="$S3CMD_OPTS -v"
+    fi
+    s3cmd $S3CMD_OPTS put --acl-public \
         "--add-header=x-amz-meta-bundle.version:$VERSION" \
         "--add-header=x-amz-meta-release.type:$TYPE" \
         "--add-header=x-amz-meta-package.file.name:$ZIP_FILENAME" \
         "--add-header=x-amz-meta-project.name:$PROJECT_NAME" \
         $ASSEMBLY_ZIP $AWS_PATH
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "s3cmd failed (exit code $EXITED)." >&2; exit 1;
+    fi
+
     s3_execute put --acl-public $ASSEMBLY_SHA $AWS_PATH
     s3_execute put --acl-public $ASSEMBLY_ASC $AWS_PATH
 

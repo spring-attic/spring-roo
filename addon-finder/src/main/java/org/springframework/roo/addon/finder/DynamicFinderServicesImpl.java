@@ -23,6 +23,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link DynamicFinderServices}.
@@ -68,7 +69,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return Collections.unmodifiableList(new ArrayList<JavaSymbolName>(finders));
 	}
 
-	public QueryHolder getQueryHolder(MemberDetails memberDetails, JavaSymbolName finderName, String plural) {
+	public QueryHolder getQueryHolder(MemberDetails memberDetails, JavaSymbolName finderName, String plural, String entityName) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(finderName, "Finder name required");
 		Assert.hasText(plural, "Plural required");
@@ -78,22 +79,23 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			tokens = tokenize(memberDetails, finderName, plural);
 		} catch (FinderFieldTokenMissingException e) {
 			return null;
+		} catch (InvalidFinderException e) {
+			return null;
 		}
 
-		String simpleTypeName = MemberFindingUtils.getJavaType(memberDetails).getSimpleTypeName();
-		String jpaQuery = getJpaQuery(tokens, simpleTypeName, finderName, plural);
+		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
+		String jpaQuery = getJpaQuery(tokens, simpleTypeName, finderName, plural, entityName);
 		List<JavaType> parameterTypes = getParameterTypes(tokens, finderName, plural);
 		List<JavaSymbolName> parameterNames = getParameterNames(tokens, finderName, plural);
 		return new QueryHolder(jpaQuery, parameterTypes, parameterNames, tokens);
 	}
 
-	private String getJpaQuery(List<Token> tokens, String simpleTypeName, JavaSymbolName finderName, String plural) {
+	private String getJpaQuery(List<Token> tokens, String simpleTypeName, JavaSymbolName finderName, String plural, String entityName) {
+		String typeName = StringUtils.hasText(entityName) ? entityName : simpleTypeName;
 		StringBuilder builder = new StringBuilder();
-		builder.append("SELECT ").append(simpleTypeName);
-		builder.append(" FROM ").append(simpleTypeName);
-		builder.append(" AS ").append(simpleTypeName.toLowerCase());
-		builder.append(" WHERE ");
-
+		builder.append("SELECT o FROM ").append(typeName);
+		builder.append(" AS o WHERE ");
+		
 		FieldToken lastFieldToken = null;
 		boolean isNewField = true;
 		boolean isFieldApplied = false;
@@ -101,15 +103,16 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		for (Token token : tokens) {
 			if (token instanceof ReservedToken) {
 				String reservedToken = token.getValue();
+				if (lastFieldToken == null) continue;
 				String fieldName = lastFieldToken.getField().getFieldName().getSymbolName();
 				boolean setField = true;
 
 				if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 					if (isNewField) {
 						if (reservedToken.equalsIgnoreCase("Like")) {
-							builder.append("LOWER(").append(simpleTypeName.toLowerCase()).append(".").append(fieldName).append(")");
+							builder.append("LOWER(").append("o.").append(fieldName).append(')');
 						} else {
-							builder.append(simpleTypeName.toLowerCase()).append(".").append(fieldName);
+							builder.append("o.").append(fieldName);
 						}
 						isNewField = false;
 						isFieldApplied = false;
@@ -162,7 +165,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						if (builder.toString().endsWith("LIKE ")) {
 							builder.append("LOWER(:").append(fieldName).append(") ");
 						} else {
-							builder.append(":").append(fieldName).append(" ");
+							builder.append(':').append(fieldName).append(' ');
 						}
 						isFieldApplied = true;
 					}
@@ -173,13 +176,13 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			}
 		}
 		if (isNewField) {
-			if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
-				builder.append(simpleTypeName.toLowerCase()).append(".").append(lastFieldToken.getField().getFieldName().getSymbolName());
+			if (lastFieldToken != null && !lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+				builder.append("o.").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 			isFieldApplied = false;
 		}
 		if (!isFieldApplied) {
-			if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+			if (lastFieldToken != null && !lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 				builder.append(" = :").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 		}
@@ -201,6 +204,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						JavaSymbolName fieldName = parameterNames.get(parameterNames.size() - 1);
 						// Remove the last field token
 						parameterNames.remove(parameterNames.size() - 1);
+						
 						// Replace by a min and a max value
 						parameterNames.add(new JavaSymbolName("min" + fieldName.getSymbolNameCapitalisedFirstLetter()));
 						parameterNames.add(new JavaSymbolName("max" + fieldName.getSymbolNameCapitalisedFirstLetter()));
@@ -256,11 +260,19 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	}
 
 	private List<Token> tokenize(MemberDetails memberDetails, JavaSymbolName finderName, String plural) {
-		String simpleTypeName = MemberFindingUtils.getJavaType(memberDetails).getSimpleTypeName();
+		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
 		String finder = finderName.getSymbolName();
 
 		// Just in case it starts with findBy we can remove it here
-		finder = finder.replace("find" + plural + "By", "");
+		String findBy = "find" + plural + "By";
+		if (finder.startsWith(findBy)) {
+			finder = finder.substring(findBy.length());
+		}
+		
+		// if finder still contains the findBy sequence it is most likely a wrong finder (ie someone pasted the finder string accidentally twice
+		if (finder.contains(findBy)) {
+			throw new InvalidFinderException("Dynamic finder definition for '" + finderName.getSymbolName() + "' in " + simpleTypeName + ".java is invalid");
+		}
 
 		SortedSet<FieldToken> fieldTokens = new TreeSet<FieldToken>();
 		for (MethodMetadata methodMetadata : getLocatedMutators(memberDetails)) {
@@ -277,11 +289,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		while (finder.length() > 0) {
 			Token token = getFirstToken(fieldTokens, finder, finderName.getSymbolName(), simpleTypeName);
 			if (token != null) {
-				if (token instanceof FieldToken) {
-					tokens.add((FieldToken) token);
-				}
-				if (token instanceof ReservedToken) {
-					tokens.add((ReservedToken) token);
+				if (token instanceof FieldToken || token instanceof ReservedToken) {
+					tokens.add(token);
 				}
 				finder = finder.substring(token.getValue().length());
 			}
@@ -346,42 +355,33 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	}
 
 	private boolean isNumberOrDate(String fullyQualifiedTypeName) {
-		if (fullyQualifiedTypeName.equals(Double.class.getName())) {
-			return true;
+		return fullyQualifiedTypeName.equals(Double.class.getName()) ||
+				fullyQualifiedTypeName.equals(Float.class.getName()) ||
+				fullyQualifiedTypeName.equals(Integer.class.getName()) ||
+				fullyQualifiedTypeName.equals(Long.class.getName()) ||
+				fullyQualifiedTypeName.equals(Short.class.getName()) ||
+				fullyQualifiedTypeName.equals(Date.class.getName()) ||
+				fullyQualifiedTypeName.equals(Calendar.class.getName());
+	}
+	
+	/**
+	 * Returns the {@link JavaType} from the specified {@link MemberDetails} object;
+	 * 
+	 * <p>
+	 * If the found type is abstract the next {@link MemberHoldingTypeDetails} is searched.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @return the first non-abstract JavaType, or null if not found
+	 */
+	private JavaType getConcreteJavaType(MemberDetails memberDetails) {
+		Assert.notNull(memberDetails, "Member details required");
+		JavaType javaType = null;
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			if (Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
+				continue;
+			}
+			javaType = memberHoldingTypeDetails.getName();
 		}
-		if (fullyQualifiedTypeName.equals(double.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Float.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(float.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Integer.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(int.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Long.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(long.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Short.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(short.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Date.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Calendar.class.getName())) {
-			return true;
-		}
-		return false;
+		return javaType;
 	}
 }

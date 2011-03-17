@@ -90,7 +90,7 @@ public class ItdSourceFileComposer {
 		
 		// Note we're directly interacting with the top of file string builder
 		if (!aspect.isDefaultPackage()) {
-			topOfFile.append("package " + aspect.getPackage().getFullyQualifiedPackageName() + ";").append(getNewLine());
+			topOfFile.append("package ").append(aspect.getPackage().getFullyQualifiedPackageName()).append(";").append(getNewLine());
 			topOfFile.append(getNewLine());
 		}
 		
@@ -103,7 +103,7 @@ public class ItdSourceFileComposer {
 					// We don't "import" types defined within governor, as they already have scope and this causes AJDT warnings (see ROO-1686)
 					continue;
 				}
-				topOfFile.append("import " + importType.getFullyQualifiedTypeName() + ";").append(getNewLine());
+				topOfFile.append("import ").append(importType.getFullyQualifiedTypeName()).append(";").append(getNewLine());
 			}
 			
 			topOfFile.append(getNewLine());

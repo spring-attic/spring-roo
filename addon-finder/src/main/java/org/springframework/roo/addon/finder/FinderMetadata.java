@@ -23,10 +23,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Metadata for {@link RooEntity}.
- * 
- * <p>
- * Any getter produced by this metadata is automatically included in the {@link BeanInfoMetadata}.
+ * Metadata for {@link RooEntity#finders()}.
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
@@ -86,7 +83,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * It is required that the requested name was defined in the {@link RooEntity#finders()}. If it is not
 	 * present, an exception is thrown.
 	 * 
-	 * @param the dynamic finder method name
+	 * @param finderName the dynamic finder method name
 	 * @return the user-defined method, or an ITD-generated method (never returns null)
 	 */
 	public MethodMetadata getDynamicFinderMethod(JavaSymbolName finderName) {

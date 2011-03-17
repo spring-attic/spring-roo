@@ -7,7 +7,6 @@ import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.undo.UndoManager;
-import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Represents the primary means for add-ons to modify the underlying disk storage.
@@ -15,9 +14,6 @@ import org.springframework.roo.project.ProjectMetadata;
  * <p>
  * A {@link FileManager} instance is acquired from the {@link ProcessManager}. A {@link FileManager} implementation must guarantee to use an {@link UndoManager} that is available to the
  * {@link ProcessManager}, such that {@link ProcessManager} can undo or reset as required.
- * 
- * <p>
- * A {@link FileManager} must also listen for any new {@link ProjectMetadata}. When detected, it will verify the required directories exist and start monitoring them.
  * 
  * <p>
  * An implementation may elect to defer writes to disk or discard them until {@link #commit()} or {@link #clear()} respectively is invoked.

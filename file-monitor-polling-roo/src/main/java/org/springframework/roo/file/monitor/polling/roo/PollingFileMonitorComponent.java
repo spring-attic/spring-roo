@@ -18,7 +18,7 @@ import org.springframework.roo.file.monitor.polling.PollingFileMonitorService;
  */
 @Component
 @Service
-@Reference(name="fileEventListener", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=FileEventListener.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
+@Reference(name = "fileEventListener", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = FileEventListener.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) 
 public class PollingFileMonitorComponent extends PollingFileMonitorService {
 
 	protected void bindFileEventListener(FileEventListener listener) {

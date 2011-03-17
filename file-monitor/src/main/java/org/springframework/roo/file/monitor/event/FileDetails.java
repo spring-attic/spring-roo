@@ -145,7 +145,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	/**
 	 * The {@link FileMonitorService} is required to advise of last modification times. This method provides access to the
 	 * modification time according to {@link FileMonitorService}, which may be out of date due to the polling mechanisms
-	 * often used by implementations. Instead you should generally use {@link #getFile()#lastModified()} for
+	 * often used by implementations. Instead you should generally use {@link #getFile()#lastModified} for
 	 * the most accurate disk-derived representation of the last modification time.
 	 * 
 	 * @return the time the file was last modified, or in the case of a delete, it is implementation-specific (may return null)

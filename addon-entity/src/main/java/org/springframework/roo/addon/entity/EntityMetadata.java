@@ -2,11 +2,13 @@ package org.springframework.roo.addon.entity;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -27,6 +29,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -63,6 +66,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private boolean isGaeEnabled;
 	private boolean isDataNucleusEnabled;
 	private boolean isVMforceEnabled;
+	private String columnDefinition;
+	private int columnSize;
+	private int scale;
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = JavaType.LONG_OBJECT;
@@ -87,7 +93,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String schema = "";
 	@AutoPopulate private String catalog = "";
 	@AutoPopulate private String inheritanceType = "";
-		
+	@AutoPopulate private String entityName = "";
+
 	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata, MemberDetails memberDetails, List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -121,8 +128,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					identifierColumn = id.getColumnName();
 					identifierField = id.getFieldName().getSymbolName();
 					identifierType = id.getFieldType();
+					columnDefinition = id.getColumnDefinition();
+					columnSize = id.getColumnSize();
+					scale = id.getScale();
 				}
-			}			
+			}
 		}
 		
 		// Add @Entity or @MappedSuperclass annotation
@@ -167,12 +177,25 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getFindMethod());
 		builder.addMethod(getFindEntriesMethod());
 		
+		builder.setCustomData(getCustomData(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES, getDynamicFinders()));
+		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 
 	public AnnotationMetadata getEntityAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.persistence.Entity"));
+		AnnotationMetadata entityAnnotation = getTypeAnnotation(new JavaType("javax.persistence.Entity"));
+		if (entityAnnotation == null) {
+			return null;
+		}
+		
+		if (StringUtils.hasText(entityName)) {
+			AnnotationMetadataBuilder entityBuilder = new AnnotationMetadataBuilder(entityAnnotation);
+			entityBuilder.addStringAttribute("name", entityName);
+			entityAnnotation = entityBuilder.build();
+		}
+		
+		return entityAnnotation;
 	}
 
 	public AnnotationMetadata getMappedSuperclassAnnotation() {
@@ -188,12 +211,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	public AnnotationMetadata getTableAnnotation() {
-		JavaType tableType = new JavaType("javax.persistence.Table");
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, tableType) != null) {
+		AnnotationMetadata tableAnnotation = getTypeAnnotation(new JavaType("javax.persistence.Table"));
+		if (tableAnnotation == null) {
 			return null;
 		}
 		if (StringUtils.hasText(table) || StringUtils.hasText(schema) || StringUtils.hasText(catalog)) {
-			AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(tableType);
+			AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(tableAnnotation);
 			if (StringUtils.hasText(table)) {
 				tableBuilder.addStringAttribute("name", table);
 			}
@@ -343,6 +366,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		constructorBuilder.setModifier(Modifier.PUBLIC);
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
+		constructorBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.NO_ARG_CONSTRUCTOR, null));
 		return constructorBuilder.build();
 	}
 	
@@ -376,14 +400,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
-		if ("".equals(identifierField)) {
+		if (!StringUtils.hasText(identifierField)) {
 			// Force a default
 			identifierField = "id";
 		}
 		
 		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
-		JavaSymbolName idField = null;
+		JavaSymbolName idField;
 		while (true) {
 			// Compute the required field name
 			index++;
@@ -408,7 +432,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					
 		// Compute the column name, as required
 		if (!hasIdClass) {
-			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			String generationType = isGaeEnabled || isVMforceEnabled ? "IDENTITY" : "AUTO";
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -431,18 +454,34 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				}
 			}
 			
-			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType))));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes));
+			AnnotationMetadataBuilder generatedValueBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.GeneratedValue"));
+			generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType)));
+			annotations.add(generatedValueBuilder);
 
 			String columnName = idField.getSymbolName();
-			if (!"".equals(identifierColumn)) {
+			if (StringUtils.hasText(identifierColumn)) {
 				// User has specified an alternate column name
 				columnName = identifierColumn;
 			}
 
-			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
-			annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
+			AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+			columnBuilder.addStringAttribute("name", columnName);
+			if (StringUtils.hasText(columnDefinition)) {
+				columnBuilder.addStringAttribute("columnDefinition", columnDefinition);
+			}
+			
+			// Add length attribute for String field
+			if (columnSize > 0 && columnSize < 4000 && identifierType.equals(JavaType.STRING_OBJECT)) {
+				columnBuilder.addIntegerAttribute("length", columnSize);
+			}
+			
+			// Add precision and scale attributes for numeric field
+			if (scale > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(new JavaType("java.math.BigDecimal")))) {
+				columnBuilder.addIntegerAttribute("precision", columnSize);
+				columnBuilder.addIntegerAttribute("scale", scale);
+			}
+
+			annotations.add(columnBuilder);
 		}
 		
 		if (isVMforceEnabled) {
@@ -450,6 +489,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType);
+		fieldBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.IDENTIFIER_FIELD, null));
 		return fieldBuilder.build();
 	}
 	
@@ -496,6 +536,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), bodyBuilder);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD, null));
 		return methodBuilder.build();
 	}
 	
@@ -553,8 +594,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * If a parent is defined, it may provide the field.
 	 * 
 	 * <p>
-	 * If no parent is defined, one may be located or created. Any declared or inherited field which has the 
-	 * @javax.persistence.Version annotation will be taken as the version and returned. If no such field is located,
+	 * If no parent is defined, one may be located or created. Any declared or inherited field which is annotated
+	 * with javax.persistence.Version will be taken as the version and returned. If no such field is located,
 	 * a private field may be created as per the details contained in {@link RooEntity}.
 	 * 
 	 * @return the version (may return null)
@@ -588,7 +629,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Ensure there isn't already a field called "version"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
-		JavaSymbolName verField = null;
+		JavaSymbolName verField;
 		while (true) {
 			// Compute the required field name
 			index++;
@@ -609,11 +650,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Version")));
 		
-		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionColumn));
-		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
+		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
+		columnBuilder.addStringAttribute("name", versionColumn);
+		annotations.add(columnBuilder);
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, verField, versionType);
+		fieldBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.VERSION_FIELD, null));
 		return fieldBuilder.build();
 	}
 
@@ -664,6 +706,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return this." + version.getFieldName().getSymbolName() + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), version.getFieldType(), bodyBuilder);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD, null));
 		return methodBuilder.build();
 	}
 	
@@ -731,7 +774,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(persistMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(persistMethod), "persist");
+		return getDelegateMethod(new JavaSymbolName(persistMethod), "persist", getCustomData(CustomDataPersistenceTags.PERSIST_METHOD, null));
 	}
 	
 	/**
@@ -747,7 +790,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(removeMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(removeMethod), "remove");
+		return getDelegateMethod(new JavaSymbolName(removeMethod), "remove", getCustomData(CustomDataPersistenceTags.REMOVE_METHOD, null));
 	}
 	
 	/**
@@ -763,7 +806,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(flushMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(flushMethod), "flush");
+		return getDelegateMethod(new JavaSymbolName(flushMethod), "flush", getCustomData(CustomDataPersistenceTags.FLUSH_METHOD, null));
 	}
 	
 	/**
@@ -779,7 +822,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(clearMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(clearMethod), "clear");
+		return getDelegateMethod(new JavaSymbolName(clearMethod), "clear", getCustomData(CustomDataPersistenceTags.CLEAR_METHOD, null));
 	}
 
 	/**
@@ -795,10 +838,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(mergeMethod)) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(mergeMethod), "merge");
+		return getDelegateMethod(new JavaSymbolName(mergeMethod), "merge", getCustomData(CustomDataPersistenceTags.MERGE_METHOD, null));
 	}
 	
-	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String entityManagerDelegate) {
+	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String entityManagerDelegate, CustomDataBuilder customData) {
 		// Method definition to find or build
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		
@@ -853,18 +896,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(customData);
 		return methodBuilder.build();
 	}
 
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations, boolean isPersistMethod) {
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
 		if (StringUtils.hasText(persistenceUnit)) {
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), persistenceUnit));		
+			transactionalBuilder.addStringAttribute("value", persistenceUnit);
 		}
 		if (isGaeEnabled && isPersistMethod) {
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
+			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW")));
 		}
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
+		annotations.add(transactionalBuilder);
 	}
 	
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations) {
@@ -956,16 +1000,18 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 		
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
-			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getSingleResult()).longValue();");
+			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + typeName + " o\").getSingleResult()).longValue();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", Long.class).getSingleResult();");			
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + typeName + " o\", Long.class).getSingleResult();");
 		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.COUNT_ALL_METHOD, null));
 		return methodBuilder.build();
 	}
 	
@@ -994,20 +1040,22 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\").getResultList();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).getResultList();");
 		}
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+ 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.FIND_ALL_METHOD, null));
 		return methodBuilder.build();
 	}
 
@@ -1018,6 +1066,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(findMethod)) {
 			return null;
 		}
+		
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findMethod + governorTypeDetails.getName().getSimpleTypeName());
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -1055,19 +1104,22 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.FIND_METHOD, null));
 		return methodBuilder.build();
 	}
 
 	private InvocableMemberBodyBuilder getGaeFindMethodBody() {
 		builder.getImportRegistrationResolver().addImport(QUERY);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
+
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
 			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
 		} else if (!getIdentifierField().getFieldType().isPrimitive()) {
 			bodyBuilder.appendFormalLine("if (id == null) return null;");
 		}
-		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o where o." + identifierField + " = :id\").setParameter(\"id\"," + identifierField + ");");
-		bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " result = null;");
+		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o WHERE o." + identifierField + " = :id\").setParameter(\"id\"," + identifierField + ");");
+ 		bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " result = null;");
 		bodyBuilder.appendFormalLine("List results = query.getResultList();");
 		bodyBuilder.appendFormalLine("if (results.size() > 0) {");
 		bodyBuilder.indent();
@@ -1085,6 +1137,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(findEntriesMethod)) {
 			return null;
 		}
+		
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findEntriesMethod + governorTypeDetails.getName().getSimpleTypeName() + "Entries");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -1106,21 +1159,22 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
+		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		}
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+ 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
+		methodBuilder.setCustomData(getCustomData(CustomDataPersistenceTags.FIND_ENTRIES_METHOD, null));
 		return methodBuilder.build();
 	}
 
@@ -1138,9 +1192,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (finders == null || finders.length == 0) {
 			return result;
 		}
-		for (String finder : finders) {
-			result.add(finder);
-		}
+		result.addAll(Arrays.asList(finders));
 		return Collections.unmodifiableList(result);
 	}
 
@@ -1149,6 +1201,22 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public String getPlural() {
 		return plural;
+	}
+	
+	/**
+	 * Return the entityName used by DynamicFinderServices for the generation of the JPA Query
+	 * 
+	 * @return the entityName the value of entityName attribute.
+	 */
+	public String getEntityName() {
+		return entityName;
+	}
+	
+	
+	private CustomDataBuilder getCustomData(Object key, Object value) {
+		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+		customDataBuilder.put(key, value);
+		return customDataBuilder;
 	}
 	
 	public String toString() {
@@ -1163,19 +1231,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return tsc.toString();
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentifierType() {
 		return PROVIDES_TYPE;
 	}
 	
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

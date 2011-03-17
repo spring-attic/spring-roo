@@ -123,13 +123,13 @@ public abstract class XmlRoundTripUtils {
 					} else { //we found an element in the original document with a matching id	
 						String originalElementHashCode = originalElement.getAttribute("z");
 						if (originalElementHashCode.length() > 0) { //only act if a hash code exists
-							if ("?".equals(originalElementHashCode) || originalElementHashCode.equals(XmlRoundTripUtils.calculateUniqueKeyFor(originalElement))) { //only act if hash codes match (no user changes in the element) or the user requests for the hash code to be regenerated
+							if ("?".equals(originalElementHashCode) || originalElementHashCode.equals(calculateUniqueKeyFor(originalElement))) { //only act if hash codes match (no user changes in the element) or the user requests for the hash code to be regenerated
 								if (!equalElements(originalElement, proposedElement)) { //check if the elements have equal contents
 									originalElement.getParentNode().replaceChild(original.getOwnerDocument().importNode(proposedElement, false), originalElement); //replace the original with the proposed element
 									originalDocumentChanged = true;
 								}
 								if ("?".equals(originalElementHashCode)) { //replace z if the user sets its value to '?' as an indication that roo should take over the management of this element again
-									originalElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(proposedElement));
+									originalElement.setAttribute("z", calculateUniqueKeyFor(proposedElement));
 									originalDocumentChanged = true;
 								} 
 							} else { //if hash codes don't match we will mark the element as z="user-managed"
@@ -156,7 +156,7 @@ public abstract class XmlRoundTripUtils {
 				String originalId = originalElement.getAttribute("id");
 				if (originalId.length() != 0) { //only proposed elements with an id will be considered
 					Element proposedElement = XmlUtils.findFirstElement("//*[@id='" + originalId + "']", proposed);		
-					if (null == proposedElement && (originalElement.getAttribute("z").equals(XmlRoundTripUtils.calculateUniqueKeyFor(originalElement)) || originalElement.getAttribute("z").equals("?"))) { //remove original element given the proposed document has no element with a matching id
+					if (null == proposedElement && (originalElement.getAttribute("z").equals(calculateUniqueKeyFor(originalElement)) || originalElement.getAttribute("z").equals("?"))) { //remove original element given the proposed document has no element with a matching id
 						originalElement.getParentNode().removeChild(originalElement);
 						originalDocumentChanged = true;
 					}
@@ -171,17 +171,20 @@ public abstract class XmlRoundTripUtils {
 		if (!a.getTagName().equals(b.getTagName())) { 
 			return false;
 		}
-		if (a.getAttributes().getLength() != b.getAttributes().getLength()) {
-			return false;
-		}
 		NamedNodeMap attributes = a.getAttributes();
+		int customAttributeCounter = 0;
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Node node = attributes.item(i);
-			if (!node.getNodeName().equals("z") && !node.getNodeName().startsWith("_")) {
-				if (b.getAttribute(node.getNodeName()).length() == 0 || !b.getAttribute(node.getNodeName()).equals(node.getNodeValue())) {
+			if (!node.getNodeName().startsWith("_")) {
+				if (!node.getNodeName().equals("z") && (b.getAttribute(node.getNodeName()).length() == 0 || !b.getAttribute(node.getNodeName()).equals(node.getNodeValue()))) {
 					return false;
 				}
+			} else {
+				customAttributeCounter++;
 			}
+		}
+		if (a.getAttributes().getLength() - customAttributeCounter != b.getAttributes().getLength()) {
+			return false;
 		}
 		return true;
 	}

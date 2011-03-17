@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.Assert;
  * <p>
  * All methods on this class (which does NOT include the constructor) accept null arguments,
  * and will automatically ignore any attempt to add an {@link IdentifiableJavaStructure} that is
- * not use the same {@link #declaredByMetadataId} as when the instance was constructed.
+ * not use the same declaredByMetadataId as when the instance was constructed.
  * 
  * <p>
  * In addition, any method on this class which accepts an {@link InvocableMemberMetadata} will
@@ -41,6 +41,14 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
 	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
 
+	public ItdTypeDetailsBuilder(ItdTypeDetails existing) {
+		super(existing.getDeclaredByMetadataId(), existing);
+		this.governor = existing.getGovernor();
+		this.aspect = existing.getAspect();
+		this.privilegedAspect = existing.isPrivilegedAspect();
+		this.importRegistrationResolver = new ImportRegistrationResolverImpl(aspect.getPackage());
+	}
+	
 	public ItdTypeDetailsBuilder(String declaredByMetadataId, ClassOrInterfaceTypeDetails governor, JavaType aspect, boolean privilegedAspect) {
 		super(declaredByMetadataId);
 		Assert.notNull(governor, "Name (to receive the introductions) required");

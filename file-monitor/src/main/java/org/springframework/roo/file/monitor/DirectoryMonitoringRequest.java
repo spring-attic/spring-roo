@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A request to monitor a particular directory.
@@ -19,7 +18,7 @@ public class DirectoryMonitoringRequest extends MonitoringRequest {
 	
 	public DirectoryMonitoringRequest(File file, boolean watchSubtree, Set<FileOperation> notifyOn) {
 		super(file, notifyOn);
-		Assert.isTrue(file.isDirectory(), "File '" + file + "' must be a directory");
+		// Assert.isTrue(file.isDirectory(), "File '" + file + "' must be a directory");
 		this.watchSubtree = watchSubtree;
 	}
 
@@ -38,5 +37,4 @@ public class DirectoryMonitoringRequest extends MonitoringRequest {
 		tsc.append("notifyOn", getNotifyOn());
 		return tsc.toString();
 	}
-	
 }

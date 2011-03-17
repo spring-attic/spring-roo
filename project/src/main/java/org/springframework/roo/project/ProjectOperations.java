@@ -1,6 +1,12 @@
 package org.springframework.roo.project;
 
+
 import java.util.List;
+
+import org.springframework.roo.project.listeners.DependencyListener;
+import org.springframework.roo.project.listeners.PluginListener;
+import org.springframework.roo.project.listeners.PropertyListener;
+import org.springframework.roo.project.listeners.RepositoryListener;
 
 /**
  * Specifies methods for various project-related operations.

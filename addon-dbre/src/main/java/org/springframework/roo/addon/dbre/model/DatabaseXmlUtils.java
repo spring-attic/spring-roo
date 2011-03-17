@@ -51,6 +51,8 @@ public abstract class DatabaseXmlUtils {
 		if (database.getDestinationPackage() != null) {
 			databaseElement.setAttribute("package", database.getDestinationPackage().getFullyQualifiedPackageName());
 		}
+		
+		databaseElement.appendChild(createOptionElement("includeNonPortable", String.valueOf(database.isIncludeNonPortable()), document));
 
 		for (Table table : database.getTables()) {
 			Element tableElement = document.createElement("table");
@@ -216,12 +218,23 @@ public abstract class DatabaseXmlUtils {
 			tables.add(table);
 		}
 		
-		JavaPackage destinationJavaPackage = null;
+		JavaPackage destinationPackage = null;
 		if (StringUtils.hasText(databaseElement.getAttribute("package"))) {
-			destinationJavaPackage = new JavaPackage(databaseElement.getAttribute("package"));
+			destinationPackage = new JavaPackage(databaseElement.getAttribute("package"));
 		}
 		
-		return new Database(databaseElement.getAttribute(NAME), tables, destinationJavaPackage);
+		Database database =  new Database(databaseElement.getAttribute(NAME), tables);
+		database.setDestinationPackage(destinationPackage);
+		
+		List<Element> optionElements = XmlUtils.findElements("option", databaseElement);
+		for (Element optionElement : optionElements) {
+			if (optionElement.getAttribute("key").equals("includeNonPortable")) {
+				database.setIncludeNonPortable(Boolean.parseBoolean(optionElement.getAttribute("value")));
+				break; // Don't process any more <option> elements
+			}
+		}		
+		
+		return database;
 	}
 
 	private static void addIndices(Table table, Element tableElement, IndexType indexType) {

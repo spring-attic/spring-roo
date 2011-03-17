@@ -203,10 +203,10 @@ public class JavaParserUtils  {
 		if (o1 != null && o2 == null) {
 			return false;
 		}
-		if (!o1.getName().equals(o2.getName())) {
+		if (o1 != null && !o1.getName().equals(o2.getName())) {
 			return false;
 		}
-		return o1.toString().equals(o2.toString());
+		return o1 != null && o1.toString().equals(o2.toString());
 	}
 
 	/**
@@ -555,8 +555,7 @@ public class JavaParserUtils  {
 	 * If a simple name is passed to this method, the corresponding import will be evaluated if its simple name matches.
 	 * This therefore reflects the normal Java semantics for using simple type names that have been imported.
 	 *
-	 * @param imports the compilation unit's imports (required)
-	 * @param typesInCompilationUnit the types in the compilation unit (required)
+	 * @param compilationUnitServices the types in the compilation unit (required)
 	 * @param nameExpr the expression to locate an import for (which would generally be a {@link NameExpr} and thus not have a package identifier; required)
 	 * @return the relevant import, or null if there is no import for the expression
 	 */
@@ -669,14 +668,14 @@ public class JavaParserUtils  {
 			useSimpleTypeName = false;
 		}
 
-		if (addImport && "java.lang".equals(typeToImport.getPackage().getFullyQualifiedPackageName())) {
+		if ("java.lang".equals(typeToImport.getPackage().getFullyQualifiedPackageName())) {
 			// So we would have imported, but we don't need to
 			addImport = false;
 
 			// The fact we could have imported means there was no other conflicting simple type names
 			useSimpleTypeName = true;
 		}
-
+		
 		if (addImport && typeToImport.getPackage().equals(compilationUnitPackage)) {
 			// It is not theoretically necessary to add an import for something in the same package,
 			// but we elect to explicitly perform an import so future conflicting types are not imported

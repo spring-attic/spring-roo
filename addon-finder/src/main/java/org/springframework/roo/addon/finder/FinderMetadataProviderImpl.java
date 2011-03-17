@@ -74,7 +74,7 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 		SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
 		for (String methodName : entityMetadata.getDynamicFinders()) {
 			JavaSymbolName finderName = new JavaSymbolName(methodName);
-			QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural());
+			QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural(), entityMetadata.getEntityName());
 			if (queryHolder != null) {
 				queryHolders.put(finderName, queryHolder);
 			}

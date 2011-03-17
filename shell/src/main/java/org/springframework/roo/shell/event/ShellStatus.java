@@ -30,7 +30,7 @@ public class ShellStatus {
 		EXECUTION_RESULT_PROCESSING,
 		EXECUTION_SUCCESS,
 		EXECUTION_FAILED,
-		SHUTTING_DOWN;
+		SHUTTING_DOWN
 	}
 	
 	ShellStatus(Status status) {

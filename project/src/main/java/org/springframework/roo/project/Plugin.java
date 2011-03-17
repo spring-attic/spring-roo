@@ -3,6 +3,9 @@ package org.springframework.roo.project;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.roo.project.Configuration;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.Execution;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;

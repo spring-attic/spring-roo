@@ -25,6 +25,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	private String name;
 	private Set<Table> tables = new LinkedHashSet<Table>();
 	private JavaPackage destinationPackage;
+	private boolean includeNonPortable;
 
 	public DatabaseContentHandler() {
 		super();
@@ -68,7 +69,10 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		if (qName.equals("option")) {
 			Option option = (Option) tmp;
 			if (stack.peek() instanceof ForeignKey && option.getKey().equals("exported")) {
-				((ForeignKey) stack.peek()).setExported(new Boolean(option.getValue()));
+				((ForeignKey) stack.peek()).setExported(Boolean.parseBoolean(option.getValue()));
+			}
+			if (option.getKey().equals("includeNonPortable")) {
+				includeNonPortable = Boolean.parseBoolean(option.getValue());
 			}
 		} else if (qName.equals("table")) {
 			tables.add((Table) tmp);
@@ -89,7 +93,9 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		} else if (qName.equals("unique-column") || qName.equals("index-column")) {
 			((Index) stack.peek()).addColumn((IndexColumn) tmp);
 		} else if (qName.equals("database")) {
-			database = new Database(name, tables, destinationPackage);
+			database = new Database(name, tables);
+			database.setDestinationPackage(destinationPackage);
+			database.setIncludeNonPortable(includeNonPortable);
 		} else {
 			stack.push(tmp);
 		}

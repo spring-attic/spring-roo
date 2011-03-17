@@ -15,7 +15,6 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.MessageDisplayUtils;
 import org.springframework.uaa.client.UaaService;
-import org.springframework.uaa.client.protobuf.UaaClient.UserAgent;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
 /**
@@ -76,33 +75,13 @@ public class UaaCommands implements CommandMarker {
 	
 	@CliCommand(value="download view", help="Displays the Spring User Agent Analysis (UAA) header content in plain text")
 	public String view(@CliOption(key = "file", mandatory = false, help = "The file to save the UAA JSON content to") File file) {
-		String userAgentHeader = uaaService.toHttpUserAgentHeaderValue();
-		UserAgent userAgent = uaaService.fromHttpUserAgentHeaderValue(userAgentHeader);
-		String plainText = uaaService.toString(userAgent);
-		int asHttpHeader = userAgentHeader.length();
-		int asPlainText = plainText.length();
-		int percentage = Math.round(((float)asHttpHeader / (float)asPlainText) * 100);
+		String readablePayload = uaaService.getReadablePayload();
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("Output for privacy level ").append(uaaService.getPrivacyLevel()).append(" (last changed ").append(uaaService.getPrivacyLevelLastChanged()).append(")").append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-		
-		sb.append(asHttpHeader + " HTTP User-Agent header bytes; " + asPlainText + " textual characters = " + percentage + "%").append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-		
-		if (asHttpHeader > 0) {
-			sb.append("Original HTTP User-Agent header:").append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-			sb.append(userAgentHeader);
-			sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-		} else {
-			sb.append("No HTTP User-Agent header").append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-		}
-		
-		if (asPlainText > 0) {
-			sb.append("Textual representation:").append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-			sb.append(plainText);
-			sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-		} else {
-			sb.append("No textual representation").append(LINE_SEPARATOR).append(LINE_SEPARATOR);
-		}
+
+		sb.append(readablePayload);
+		sb.append(LINE_SEPARATOR).append(LINE_SEPARATOR);
 
 		if (file != null) {
 			try {

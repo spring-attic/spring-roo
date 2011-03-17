@@ -9,38 +9,38 @@
   <c:set var="sec_searchTerm">
     <spring:escapeBody javaScriptEscape="true">${searchTerm}</spring:escapeBody>
   </c:set>
-  <script src="http://widgets.twimg.com/j/2/widget.js"></script>
+  <script src="http://widgets.twimg.com/j/2/widget.js">;</script>
   <script>
         new TWTR.Widget({
-		  version: 2,
-		  type: 'search',
-		  search: '${sec_searchTerm}',
-		  interval: 3000,
-		  title: 'Twitter Search for ${sec_searchTerm}',
-		  subject: '${searchTerm}',
-		  width: 545,
-		  height: 400,
-		  theme: {
-		    shell: {
-		      background: '#8ec1da',
-		      color: '#ffffff'
-		    },
-		    tweets: {
-		      background: '#ffffff',
-		      color: '#444444',
-		      links: '#1985b5'
-		    }
-		  },
-		  features: {
-		    scrollbar: false,
-		    loop: true,
-		    live: true,
-		    hashtags: true,
-		    timestamp: true,
-		    avatars: true,
-		    toptweets: true,
-		    behavior: 'default'
-		  }
-		}).render().start();
-	</script>
+          version: 2,
+          type: 'search',
+          search: '${sec_searchTerm}',
+          interval: 3000,
+          title: 'Twitter Search for ${sec_searchTerm}',
+          subject: '${searchTerm}',
+          width: 545,
+          height: 400,
+          theme: {
+            shell: {
+              background: '#648C1D',
+              color: '#ffffff'
+            },
+            tweets: {
+              background: '#ffffff',
+              color: '#444444',
+              links: '#c2cd23'
+            }
+          },
+          features: {
+            scrollbar: false,
+            loop: true,
+            live: true,
+            hashtags: true,
+            timestamp: true,
+            avatars: true,
+            toptweets: true,
+            behavior: 'default'
+          }
+        }).render().start();
+  </script>
 </jsp:root>

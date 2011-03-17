@@ -15,11 +15,10 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Provides utility methods historically in BeanInfoMetadata.
+ * Provides utility methods for querying JavaBeans.
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public abstract class BeanInfoUtils {
 
@@ -48,7 +47,7 @@ public abstract class BeanInfoUtils {
 	 * <p>
 	 * Not every JavaBean getter or setter actually backs to a field with an identical name. In such cases, null will be returned.
 	 * 
-	 * @param memberHoldingTypeDetails the member holders to scan (required)
+	 * @param memberDetails the member holders to scan (required)
 	 * @param propertyName the property name (required)
 	 * @return the field if found, or null if it could not be found
 	 */
@@ -103,12 +102,13 @@ public abstract class BeanInfoUtils {
 		Assert.notNull(field, "Field metadata required");
 		Assert.notNull(memberDetails, "Member details required");
 		String capitalizedFieldName = StringUtils.capitalize(field.getFieldName().getSymbolName());
-		for (MemberHoldingTypeDetails holder : memberDetails.getDetails()) {
-			if (MemberFindingUtils.getDeclaredMethod(holder, new JavaSymbolName("get" + capitalizedFieldName), new ArrayList<JavaType>()) != null
-					&& MemberFindingUtils.getDeclaredMethod(holder, new JavaSymbolName("set" + capitalizedFieldName), Arrays.asList(field.getFieldType())) != null) {
-				return true;
-			}
+
+		if ((MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("get" + capitalizedFieldName), new ArrayList<JavaType>()) != null
+				|| MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("is" + capitalizedFieldName), new ArrayList<JavaType>()) != null)
+				&& MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("set" + capitalizedFieldName), Arrays.asList(field.getFieldType())) != null) {
+			return true;
 		}
+	
 		return false;
 	}
 

@@ -21,19 +21,6 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
-import japa.parser.ast.visitor.VoidVisitor;
-import japa.parser.ast.visitor.VoidVisitorAdapter;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -60,12 +47,22 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Java Parser implementation of {@link ClassOrInterfaceTypeDetails}.
- * 
- * <p>
+ * <p/>
+ * <p/>
  * This class is immutable once constructed.
- * 
+ *
  * @author Ben Alex
  * @author James Tyrrell
  * @since 1.0.1
@@ -79,12 +76,12 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-    private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
-    private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
+	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+	private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
 	private ClassOrInterfaceTypeDetails superclass = null;
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-    private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
+	private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 
@@ -102,10 +99,38 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 	private int modifier = 0;
 
 	public JavaParserClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+		this(compilationUnit, null, typeDeclaration, declaredByMetadataId, typeName, metadataService, physicalTypeMetadataProvider);
+	}
+
+	private CompilationUnitServices getDefaultCompilationUnitServices() {
+		return new CompilationUnitServices() {
+			public List<ImportDeclaration> getImports() {
+				return imports;
+			}
+
+			public JavaPackage getCompilationUnitPackage() {
+				return compilationUnitPackage;
+			}
+
+			public List<TypeDeclaration> getInnerTypes() {
+				return innerTypes;
+			}
+
+			public JavaType getEnclosingTypeName() {
+				return name;
+			}
+
+			public PhysicalTypeCategory getPhysicalTypeCategory() {
+				return physicalTypeCategory;
+			}
+		};
+	}
+
+	public JavaParserClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, TypeDeclaration typeDeclaration, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
 		super(CustomDataImpl.NONE);
 		Assert.notNull(compilationUnit, "Compilation unit required");
 		Assert.notNull(typeDeclaration, "Unable to locate the class or interface declaration");
-		
+
 		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(typeName, "Name required");
 		Assert.notNull(metadataService, "Metadata service required");
@@ -125,7 +150,7 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 
 		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
 
-        if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
 			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
 
 			if (this.clazz.isInterface()) {
@@ -139,15 +164,21 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 			this.physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
 		}
 
-        Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
+		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
 
+		if (enclosingCompilationUnitServices == null) {
+			enclosingCompilationUnitServices = getDefaultCompilationUnitServices();
+		}
+
+		final CompilationUnitServices finalCompilationUnitServices = enclosingCompilationUnitServices;
+		// A hybrid CompilationUnitServices must be provided that references the enclosing types imports and package
 		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
 			public List<ImportDeclaration> getImports() {
-				return imports;
+				return finalCompilationUnitServices.getImports();
 			}
 
 			public JavaPackage getCompilationUnitPackage() {
-				return compilationUnitPackage;
+				return finalCompilationUnitServices.getCompilationUnitPackage();
 			}
 
 			public List<TypeDeclaration> getInnerTypes() {
@@ -155,36 +186,29 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 			}
 
 			public JavaType getEnclosingTypeName() {
-				return name;
+				return finalCompilationUnitServices.getEnclosingTypeName();
 			}
 
-            public PhysicalTypeCategory getPhysicalTypeCategory() {
-                return physicalTypeCategory;
-            }
+			public PhysicalTypeCategory getPhysicalTypeCategory() {
+				return physicalTypeCategory;
+			}
 		};
 
-        for (ImportDeclaration importDeclaration : imports) {
-            if (importDeclaration.getName() instanceof QualifiedNameExpr) {
+		for (ImportDeclaration importDeclaration : imports) {
+			if (importDeclaration.getName() instanceof QualifiedNameExpr) {
 				String qualifier = ((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString();
 				String simpleName = importDeclaration.getName().getName();
 				String fullName = qualifier + "." + simpleName;
 				// We want to calculate these...
-				JavaPackage typePackage = null; // always
-				JavaType type = null; // maybe
-				if (fullName.toLowerCase().equals(fullName)) {
-					// Everything is already lowercase, so assume it's just a straight package name and no static type imports are happening
-					typePackage = new JavaPackage(fullName);
-				} else {
-					// There is an uppercase in there, so let's make a JavaType as it can compute the enclosing type properly
-					type = new JavaType(fullName);
-					typePackage = type.getPackage();
-				}
-                ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
-                registeredImports.add(newImport.build());
-            }
-        }
 
-        if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+				JavaType type = new JavaType(fullName);
+				JavaPackage typePackage = type.getPackage();
+				ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
+				registeredImports.add(newImport.build());
+			}
+		}
+
+		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
 			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
 
 			// Determine the type name, adding type parameters if possible
@@ -194,7 +218,6 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 			this.name = new JavaType(this.name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
 
 		}
-
 
 		// Verify the package declaration appears to be correct
 		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
@@ -255,7 +278,7 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		List<AnnotationExpr> annotationsList = this.clazz == null ? this.enumClazz.getAnnotations() : typeDeclaration.getAnnotations();
 		if (annotationsList != null) {
 			for (AnnotationExpr candidate : annotationsList) {
-				JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, this);
+				JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, compilationUnitServices);
 				annotations.add(md);
 			}
 		}
@@ -276,33 +299,33 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 				if (member instanceof FieldDeclaration) {
 					FieldDeclaration castMember = (FieldDeclaration) member;
 					for (VariableDeclarator var : castMember.getVariables()) {
-                        FieldMetadata fieldMetadata = new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, this, typeParameterNames);
+						FieldMetadata fieldMetadata = new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, compilationUnitServices, typeParameterNames);
 						declaredFields.add(fieldMetadata);
 					}
 				}
 				if (member instanceof MethodDeclaration) {
 					MethodDeclaration castMember = (MethodDeclaration) member;
-                    MethodMetadata method = new JavaParserMethodMetadata(declaredByMetadataId, castMember, this, typeParameterNames);
+					MethodMetadata method = new JavaParserMethodMetadata(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames);
 					declaredMethods.add(method);
 				}
 				if (member instanceof ConstructorDeclaration) {
 					ConstructorDeclaration castMember = (ConstructorDeclaration) member;
-                    ConstructorMetadata constructorMetadata = new JavaParserConstructorMetadata(declaredByMetadataId, castMember, this, typeParameterNames);
+					ConstructorMetadata constructorMetadata = new JavaParserConstructorMetadata(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames);
 					declaredConstructors.add(constructorMetadata);
 				}
-                if (member instanceof TypeDeclaration) {
+				if (member instanceof TypeDeclaration) {
 					TypeDeclaration castMember = (TypeDeclaration) member;
-                    JavaType innerType = new JavaType(castMember.getName());
-                    String innerTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(innerType, PhysicalTypeIdentifier.getPath(declaredByMetadataId));
-                    ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = new JavaParserClassOrInterfaceTypeDetails(compilationUnit, castMember, innerTypeMetadataId, innerType, metadataService, physicalTypeMetadataProvider);
-                    declaredInnerTypes.add(classOrInterfaceTypeDetails);
+					JavaType innerType = new JavaType(castMember.getName());
+					String innerTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(innerType, PhysicalTypeIdentifier.getPath(declaredByMetadataId));
+					ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = new JavaParserClassOrInterfaceTypeDetails(compilationUnit, compilationUnitServices, castMember, innerTypeMetadataId, innerType, metadataService, physicalTypeMetadataProvider);
+					declaredInnerTypes.add(classOrInterfaceTypeDetails);
 				}
 			}
 		}
 	}
 
-    JavaParserClassOrInterfaceTypeDetails(String typeContents, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
-    	this(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), JavaParserUtils.locateTypeDeclaration(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), typeName), declaredByMetadataId, typeName, metadataService, physicalTypeMetadataProvider);
+	JavaParserClassOrInterfaceTypeDetails(String typeContents, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+		this(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), JavaParserUtils.locateTypeDeclaration(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), typeName), declaredByMetadataId, typeName, metadataService, physicalTypeMetadataProvider);
 	}
 
 	public String getDeclaredByMetadataId() {
@@ -341,13 +364,13 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		return Collections.unmodifiableList(declaredMethods);
 	}
 
-    public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
-        return Collections.unmodifiableList(declaredInnerTypes);
-    }
+	public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
+		return Collections.unmodifiableList(declaredInnerTypes);
+	}
 
-    public List<InitializerMetadata> getDeclaredInitializers() {
-        return Collections.unmodifiableList(declaredInitializers);
-    }
+	public List<InitializerMetadata> getDeclaredInitializers() {
+		return Collections.unmodifiableList(declaredInitializers);
+	}
 
 	public List<JavaType> getExtendsTypes() {
 		return Collections.unmodifiableList(extendsTypes);
@@ -357,66 +380,37 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		return Collections.unmodifiableList(implementsTypes);
 	}
 
-    public Set<ImportMetadata> getRegisteredImports() {
-        return Collections.unmodifiableSet(registeredImports);
-    }
+	public Set<ImportMetadata> getRegisteredImports() {
+		return Collections.unmodifiableSet(registeredImports);
+	}
 
 	public List<AnnotationMetadata> getAnnotations() {
 		return Collections.unmodifiableList(annotations);
 	}
 
-
-    private static ArrayList<String> listMembers(TypeDeclaration typeDeclaration) {
-
-        ArrayList<String> referenceTypes = new ArrayList<String>();
-
-        VoidVisitor<ArrayList<String>> visitor = new VoidVisitorAdapter<ArrayList<String>>() {
-
-                @Override
-                public void visit(ClassOrInterfaceType n, ArrayList<String> arg) {
-                    super.visit(n, arg);
-                    arg.add(n.getName());
-                }
-
-                @Override
-                public void visit(NameExpr n, ArrayList<String> arg) {
-                    super.visit(n, arg);
-                    arg.add(n.toString());
-                }
-
-            };
-
-        typeDeclaration.accept(visitor, referenceTypes);
-
-        return referenceTypes;
-    }
-
-
-    /**
-     * Appends the presented class to the end of the presented body declarations. The body declarations
-     * appear within the presented compilation unit. This is used to progressively build inner types.
-     * 
-     * @param compilationUnit the work-in-progress compilation unit (required)
-     * @param cit the new class to add (required)
-     * @param bodyDeclarations the list to which the new class should be appended (required)
-     * @param parent the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
-     */
-	private static final void updateOutput(final CompilationUnit compilationUnit, final ClassOrInterfaceTypeDetails cit, List<BodyDeclaration> parent) {
+	/**
+	 * Appends the presented class to the end of the presented body declarations. The body declarations appear within the presented compilation unit. This is used to progressively build inner types.
+	 *
+	 * @param compilationUnit the work-in-progress compilation unit (required)
+	 * @param cit             the new class to add (required)
+	 * @param parent          the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
+	 */
+	private static final void updateOutput(final CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, final ClassOrInterfaceTypeDetails cit, List<BodyDeclaration> parent) {
 		// Append the new imports this class declares
-        Assert.notNull(compilationUnit.getImports(), "Compilation unit imports should be non-null when producing type '" + cit.getName() + "'");
-        for (ImportMetadata importType : cit.getRegisteredImports()) {
-            if (!importType.isAsterisk()) {
-                NameExpr typeToImportExpr;
-                if (importType.getImportType().getEnclosingType() == null) {
-                    typeToImportExpr = new QualifiedNameExpr(new NameExpr(importType.getImportType().getPackage().getFullyQualifiedPackageName()), importType.getImportType().getSimpleTypeName());
-                } else {
-                    typeToImportExpr = new QualifiedNameExpr(new NameExpr(importType.getImportType().getEnclosingType().getFullyQualifiedTypeName()), importType.getImportType().getSimpleTypeName());
-                }
-                compilationUnit.getImports().add(new ImportDeclaration(typeToImportExpr, false, false));
-            } else {
-                compilationUnit.getImports().add(new ImportDeclaration(new NameExpr(importType.getImportPackage().getFullyQualifiedPackageName()), importType.isStatic(), importType.isAsterisk()));
-            }
-        }
+		Assert.notNull(compilationUnit.getImports(), "Compilation unit imports should be non-null when producing type '" + cit.getName() + "'");
+		for (ImportMetadata importType : cit.getRegisteredImports()) {
+			if (!importType.isAsterisk()) {
+				NameExpr typeToImportExpr;
+				if (importType.getImportType().getEnclosingType() == null) {
+					typeToImportExpr = new QualifiedNameExpr(new NameExpr(importType.getImportType().getPackage().getFullyQualifiedPackageName()), importType.getImportType().getSimpleTypeName());
+				} else {
+					typeToImportExpr = new QualifiedNameExpr(new NameExpr(importType.getImportType().getEnclosingType().getFullyQualifiedTypeName()), importType.getImportType().getSimpleTypeName());
+				}
+				compilationUnit.getImports().add(new ImportDeclaration(typeToImportExpr, false, false));
+			} else {
+				compilationUnit.getImports().add(new ImportDeclaration(new NameExpr(importType.getImportPackage().getFullyQualifiedPackageName()), importType.isStatic(), importType.isAsterisk()));
+			}
+		}
 
 		// Create a class or interface declaration to represent this actual type
 		int javaParserModifier = JavaParserUtils.getJavaParserModifier(cit.getModifier());
@@ -426,33 +420,33 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		// Implements handling
 		List<ClassOrInterfaceType> implementsList = new ArrayList<ClassOrInterfaceType>();
 		for (JavaType current : cit.getImplementsTypes()) {
-            implementsList.add(getResolvedName(cit.getName(), current, compilationUnit));
+			implementsList.add(getResolvedName(cit.getName(), current, compilationUnit));
 		}
 
 		if (cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE || cit.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
-			boolean isInterface = cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE ? true : false;
-            
-			if (parent == null) {
-            	// top level type
-    			typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getNameIncludingTypeParameters().replaceAll(cit.getName().getPackage().getFullyQualifiedPackageName() + ".", ""));
-    			classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) typeDeclaration;
-            } else {
-            	// inner type
-                typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getSimpleTypeName());
-    			classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) typeDeclaration;
-                
-    			if (cit.getName().getParameters().size() > 0) {
-                    classOrInterfaceDeclaration.setTypeParameters(new ArrayList<TypeParameter>());
+			boolean isInterface = cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
 
-                    for (JavaType param : cit.getName().getParameters()) {
-                        NameExpr pNameExpr = JavaParserUtils.importTypeIfRequired(cit.getName(), compilationUnit.getImports(), param);
-                        String tempName = pNameExpr.toString().replaceFirst(param.getArgName() + " extends ", "");
-                        pNameExpr = new NameExpr(tempName);
-                        ClassOrInterfaceType pResolvedName = JavaParserUtils.getClassOrInterfaceType(pNameExpr);
-                        classOrInterfaceDeclaration.getTypeParameters().add(new TypeParameter(param.getArgName().getSymbolName(), Collections.singletonList(pResolvedName)));
-                    }
-                }
-            }
+			if (parent == null) {
+				// Top level type
+				typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getNameIncludingTypeParameters().replaceAll(cit.getName().getPackage().getFullyQualifiedPackageName() + ".", ""));
+				classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) typeDeclaration;
+			} else {
+				// Inner type
+				typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getSimpleTypeName());
+				classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) typeDeclaration;
+
+				if (cit.getName().getParameters().size() > 0) {
+					classOrInterfaceDeclaration.setTypeParameters(new ArrayList<TypeParameter>());
+
+					for (JavaType param : cit.getName().getParameters()) {
+						NameExpr pNameExpr = JavaParserUtils.importTypeIfRequired(cit.getName(), compilationUnit.getImports(), param);
+						String tempName = pNameExpr.toString().replaceFirst(param.getArgName() + " extends ", "");
+						pNameExpr = new NameExpr(tempName);
+						ClassOrInterfaceType pResolvedName = JavaParserUtils.getClassOrInterfaceType(pNameExpr);
+						classOrInterfaceDeclaration.getTypeParameters().add(new TypeParameter(param.getArgName().getSymbolName(), Collections.singletonList(pResolvedName)));
+					}
+				}
+			}
 
 			// Superclass handling
 			List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
@@ -469,33 +463,59 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 			if (implementsList.size() > 0) {
 				classOrInterfaceDeclaration.setImplements(implementsList);
 			}
-
 		} else {
 			typeDeclaration = new EnumDeclaration(javaParserModifier, cit.getName().getSimpleTypeName());
 		}
 		typeDeclaration.setMembers(new ArrayList<BodyDeclaration>());
-		
+
 		Assert.notNull(typeDeclaration.getName(), "Missing type declaration name for '" + cit.getName() + "'");
-		
+
 		// If adding a new top-level type, must add it to the compilation unit types
 		Assert.notNull(compilationUnit.getTypes(), "Compilation unit types must not be null when attempting to add '" + cit.getName() + "'");
-		
+
 		if (parent == null) {
-			// top-level class
+			// Top-level class
 			compilationUnit.getTypes().add(typeDeclaration);
 		} else {
-			// inner class
+			// Inner class
 			parent.add(typeDeclaration);
 		}
 
-		// Create a compilation unit so that we can use JavaType*Metadata static methods directly
+		// If the enclosing CompilationUnitServices was not provided a default CompilationUnitServices needs to be created
+		if (enclosingCompilationUnitServices == null) {
+			// Create a compilation unit so that we can use JavaType*Metadata static methods directly
+			enclosingCompilationUnitServices = new CompilationUnitServices() {
+				public List<ImportDeclaration> getImports() {
+					return compilationUnit.getImports();
+				}
+
+				public JavaPackage getCompilationUnitPackage() {
+					return cit.getName().getPackage();
+				}
+
+				public List<TypeDeclaration> getInnerTypes() {
+					return compilationUnit.getTypes();
+				}
+
+				public JavaType getEnclosingTypeName() {
+					return cit.getName();
+				}
+
+				public PhysicalTypeCategory getPhysicalTypeCategory() {
+					return cit.getPhysicalTypeCategory();
+				}
+			};
+		}
+
+		final CompilationUnitServices finalCompilationUnitServices = enclosingCompilationUnitServices;
+		// A hybrid CompilationUnitServices must be provided that references the enclosing types imports and package
 		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
 			public List<ImportDeclaration> getImports() {
-				return compilationUnit.getImports();
+				return finalCompilationUnitServices.getImports();
 			}
 
 			public JavaPackage getCompilationUnitPackage() {
-				return cit.getName().getPackage();
+				return finalCompilationUnitServices.getCompilationUnitPackage();
 			}
 
 			public List<TypeDeclaration> getInnerTypes() {
@@ -506,9 +526,9 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 				return cit.getName();
 			}
 
-            public PhysicalTypeCategory getPhysicalTypeCategory() {
-                return cit.getPhysicalTypeCategory();
-            }
+			public PhysicalTypeCategory getPhysicalTypeCategory() {
+				return cit.getPhysicalTypeCategory();
+			}
 		};
 
 		// Add type annotations
@@ -549,57 +569,51 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		for (MethodMetadata candidate : cit.getDeclaredMethods()) {
 			JavaParserMethodMetadata.addMethod(compilationUnitServices, typeDeclaration.getMembers(), candidate, null);
 		}
-		
-        // Add inner types
+
+		// Add inner types
 		for (ClassOrInterfaceTypeDetails candidate : cit.getDeclaredInnerTypes()) {
-			updateOutput(compilationUnit, candidate, typeDeclaration.getMembers());
+			updateOutput(compilationUnit, compilationUnitServices, candidate, typeDeclaration.getMembers());
 		}
 
-		ArrayList<String> referenceTypes = listMembers(typeDeclaration);
+		HashSet<String> imported = new HashSet<String>();
+		ArrayList<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
+		for (ImportDeclaration importDeclaration : compilationUnit.getImports()) {
+			JavaPackage importPackage = null;
+			JavaType importType = null;
+			if (importDeclaration.isAsterisk()) {
+				importPackage = new JavaPackage(importDeclaration.getName().toString());
+			} else {
+				importType = new JavaType(importDeclaration.getName().toString());
+				importPackage = importType.getPackage();
+			}
 
-        HashSet<String> imported = new HashSet<String>();
-        ArrayList<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
-        for (ImportDeclaration importDeclaration : compilationUnit.getImports()) {
-        	JavaPackage importPackage = null;
-            JavaType importType = null;
-            if (importDeclaration.isAsterisk()) {
-                importPackage = new JavaPackage(importDeclaration.getName().toString());
-            } else {
-                importType = new JavaType(importDeclaration.getName().toString());
-                importPackage = importType.getPackage();
-            }
+			if (importPackage.equals(cit.getName().getPackage()) && importDeclaration.isAsterisk()) {
+				continue;
+			}
 
-            if (importPackage.equals(cit.getName().getPackage()) && importDeclaration.isAsterisk()) {
-                continue;
-            }
+			if (importPackage.equals(cit.getName().getPackage()) && importType != null && importType.getEnclosingType() == null) {
+				continue;
+			}
 
-            if (importPackage.equals(cit.getName().getPackage()) && importType != null && importType.getEnclosingType() == null) {
-                continue;
-            }
+			if (importType != null && importType.equals(cit.getName())) {
+				continue;
+			}
 
-            if (importType != null && importType.equals(cit.getName())) {
-                continue;
-            }
+			if (!imported.contains(importDeclaration.getName().toString())) {
+				imports.add(importDeclaration);
+				imported.add(importDeclaration.getName().toString());
+			}
+		}
 
-            if (importType != null && !referenceTypes.contains(importType.getSimpleTypeName())) {
-            	//continue;
-            }
+		Collections.sort(imports, new Comparator<ImportDeclaration>() {
+			public int compare(ImportDeclaration importDeclaration, ImportDeclaration importDeclaration1) {
+				return importDeclaration.getName().toString().compareTo(importDeclaration1.getName().toString());
+			}
+		});
 
-            if (!imported.contains(importDeclaration.getName().toString())) {
-                imports.add(importDeclaration);
-                imported.add(importDeclaration.getName().toString());
-            }
-        }
-
-       Collections.sort(imports, new Comparator<ImportDeclaration>() {
-           public int compare(ImportDeclaration importDeclaration, ImportDeclaration importDeclaration1) {
-               return importDeclaration.getName().toString().compareTo(importDeclaration1.getName().toString());
-           }
-       });
-
-       compilationUnit.setImports(imports);
+		compilationUnit.setImports(imports);
 	}
-	
+
 	static final String getCompilationUnitContents(final ClassOrInterfaceTypeDetails cit) {
 		Assert.notNull(cit, "Class or interface type details are required");
 		// Create a compilation unit to store the type to be created
@@ -617,9 +631,9 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		compilationUnit.setTypes(types);
 
 		// We pass in null as the 3rd argument as this denotes we're working with a top-level type
-        updateOutput(compilationUnit, cit, null);
-		
-	   return compilationUnit.toString();
+		updateOutput(compilationUnit, null, cit, null);
+
+		return compilationUnit.toString();
 	}
 
 	protected static void addEnumConstant(CompilationUnitServices compilationUnitServices, List<EnumConstantDeclaration> constants, JavaSymbolName name) {
@@ -628,31 +642,31 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		constants.add(constants.size(), newEntry);
 	}
 
-    public static ClassOrInterfaceType getResolvedName(JavaType target, JavaType current, CompilationUnit compilationUnit) {
-        NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target, compilationUnit.getImports(), current);
-        ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
-			if (current.getParameters() != null && current.getParameters().size() > 0) {
-				resolvedName.setTypeArgs(new ArrayList<Type>());
-				for (JavaType param : current.getParameters()) {
-					resolvedName.getTypeArgs().add(getResolvedName(target, param, compilationUnit));
-				}
+	public static ClassOrInterfaceType getResolvedName(JavaType target, JavaType current, CompilationUnit compilationUnit) {
+		NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target, compilationUnit.getImports(), current);
+		ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
+		if (current.getParameters() != null && current.getParameters().size() > 0) {
+			resolvedName.setTypeArgs(new ArrayList<Type>());
+			for (JavaType param : current.getParameters()) {
+				resolvedName.getTypeArgs().add(getResolvedName(target, param, compilationUnit));
 			}
+		}
 
-        return resolvedName;
-    }
+		return resolvedName;
+	}
 
-    public static ClassOrInterfaceType getResolvedName(JavaType target, JavaType current, CompilationUnitServices compilationUnit) {
-        NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target, compilationUnit.getImports(), current);
-        ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
-			if (current.getParameters() != null && current.getParameters().size() > 0) {
-				resolvedName.setTypeArgs(new ArrayList<Type>());
-				for (JavaType param : current.getParameters()) {
-					resolvedName.getTypeArgs().add(getResolvedName(target, param, compilationUnit));
-				}
+	public static ClassOrInterfaceType getResolvedName(JavaType target, JavaType current, CompilationUnitServices compilationUnit) {
+		NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target, compilationUnit.getImports(), current);
+		ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
+		if (current.getParameters() != null && current.getParameters().size() > 0) {
+			resolvedName.setTypeArgs(new ArrayList<Type>());
+			for (JavaType param : current.getParameters()) {
+				resolvedName.getTypeArgs().add(getResolvedName(target, param, compilationUnit));
 			}
+		}
 
-        return resolvedName;
-    }
+		return resolvedName;
+	}
 
 	static final void createOrUpdateTypeOnDisk(FileManager fileManager, final ClassOrInterfaceTypeDetails cit, String fileIdentifier) {
 		Assert.notNull(fileManager, "File manager required");

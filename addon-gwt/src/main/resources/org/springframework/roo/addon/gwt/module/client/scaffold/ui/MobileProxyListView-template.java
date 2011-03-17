@@ -4,7 +4,6 @@ import __TOP_LEVEL_PACKAGE__.client.scaffold.ScaffoldMobileApp;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.AbstractProxyListView;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListView;
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.requestfactory.shared.EntityProxy;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;

@@ -62,4 +62,4 @@ selenium test --controller ~.web.PetController
 selenium test --controller ~.web.VetController
 selenium test --controller ~.web.VisitController
 
-logging setup --level DEBUG
+logging setup --level INFO

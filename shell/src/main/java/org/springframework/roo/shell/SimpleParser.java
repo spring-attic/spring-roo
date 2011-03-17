@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -43,7 +44,7 @@ import org.w3c.dom.Element;
  */
 public class SimpleParser implements Parser {
 	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
-	private Object mutex = this;
+	private final Object mutex = this;
 	private Set<Converter> converters = new HashSet<Converter>();
 	private Set<CommandMarker> commands = new HashSet<CommandMarker>();
 	private Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
@@ -133,7 +134,7 @@ public class SimpleParser implements Parser {
 					if ("".equals(cliOption.key()[0])) {
 						StringBuilder message = new StringBuilder("You must specify a default option ");
 						if (cliOption.key().length > 1) {
-							message.append("(otherwise known as option '" + cliOption.key()[1] + "') ");
+							message.append("(otherwise known as option '").append(cliOption.key()[1]).append("') ");
 						}
 						message.append("for this command");
 						logger.warning(message.toString());
@@ -204,9 +205,9 @@ public class SimpleParser implements Parser {
 			if (!unavailableOptions.isEmpty()) {
 				StringBuilder message = new StringBuilder();
 				if (unavailableOptions.size() == 1) {
-					message.append("Option '" + unavailableOptions.iterator().next() + "' is not available for this command. ");
+					message.append("Option '").append(unavailableOptions.iterator().next()).append("' is not available for this command. ");
 				} else {
-					message.append("Options " + StringUtils.collectionToDelimitedString(unavailableOptions, ", ", "'", "'") + " are not available for this command. ");
+					message.append("Options ").append(StringUtils.collectionToDelimitedString(unavailableOptions, ", ", "'", "'")).append(" are not available for this command. ");
 				}
 				message.append("Use tab assist or the \"help\" command to see the legal options");
 				logger.warning(message.toString());
@@ -270,7 +271,7 @@ public class SimpleParser implements Parser {
 							if (mt != null) {
 								Assert.isNull(available, "More than one availability indicator is defined for '" + m.toGenericString() + "'");
 								try {
-									available = (Boolean) mt.method.invoke(mt.target, new Object[] {});
+									available = (Boolean) mt.method.invoke(mt.target);
 									// We should "break" here, but we loop over all to ensure no conflicting availability indicators are defined
 								} catch (Exception e) {
 									available = false;
@@ -432,7 +433,7 @@ public class SimpleParser implements Parser {
 			Assert.notNull(cmd, "CliCommand unavailable for '" + methodTarget.method.toGenericString() + "'");
 
 			// Make a reasonable attempt at parsing the remainingBuffer
-			Map<String, String> options = null;
+			Map<String, String> options;
 			try {
 				options = ParserUtils.tokenize(methodTarget.remainingBuffer);
 			} catch (IllegalArgumentException ex) {
@@ -486,7 +487,7 @@ public class SimpleParser implements Parser {
 						cliOption = (CliOption) a;
 					}
 				}
-				Assert.notNull(cliOption, "CliOption not found for parameter '" + annotations + "'");
+				Assert.notNull(cliOption, "CliOption not found for parameter '" + Arrays.toString(annotations) + "'");
 				cliOptions.add(cliOption);
 			}
 
@@ -708,10 +709,10 @@ public class SimpleParser implements Parser {
 								}
 							} else {
 								if (!"".equals(option.specifiedDefaultValue()) && !"__NULL__".equals(option.specifiedDefaultValue())) {
-									help.append("; default if option present: '" + option.specifiedDefaultValue()).append("'");
+									help.append("; default if option present: '").append(option.specifiedDefaultValue()).append("'");
 								}
 								if (!"".equals(option.unspecifiedDefaultValue()) && !"__NULL__".equals(option.unspecifiedDefaultValue())) {
-									help.append("; default if option not present: '" + option.unspecifiedDefaultValue()).append("'");
+									help.append("; default if option not present: '").append(option.unspecifiedDefaultValue()).append("'");
 								}
 							}
 							logger.info(help.toString());
@@ -833,10 +834,10 @@ public class SimpleParser implements Parser {
 										}
 									} else {
 										if (!"".equals(option.specifiedDefaultValue()) && !"__NULL__".equals(option.specifiedDefaultValue())) {
-											help.append("; default if option present: '" + option.specifiedDefaultValue()).append("'");
+											help.append("; default if option present: '").append(option.specifiedDefaultValue()).append("'");
 										}
 										if (!"".equals(option.unspecifiedDefaultValue()) && !"__NULL__".equals(option.unspecifiedDefaultValue())) {
-											help.append("; default if option not present: '" + option.unspecifiedDefaultValue()).append("'");
+											help.append("; default if option not present: '").append(option.unspecifiedDefaultValue()).append("'");
 										}
 									}
 									help.append(option.mandatory() ? " (mandatory) " : "");
@@ -941,36 +942,34 @@ public class SimpleParser implements Parser {
 					Assert.notNull(cmd, "CliCommand not found");
 
 					for (String value : cmd.value()) {
-						sb.append("Keyword:                   " + value).append(System.getProperty("line.separator"));
+						sb.append("Keyword:                   ").append(value).append(System.getProperty("line.separator"));
 					}
 
-					sb.append("Description:               " + cmd.help()).append(System.getProperty("line.separator"));
+					sb.append("Description:               ").append(cmd.help()).append(System.getProperty("line.separator"));
 
 					for (Annotation[] annotations : parameterAnnotations) {
 						CliOption cliOption = null;
 						for (Annotation a : annotations) {
 							if (a instanceof CliOption) {
 								cliOption = (CliOption) a;
-							}
 
-							for (String key : cliOption.key()) {
-								if ("".equals(key)) {
-									key = "** default **";
+								for (String key : cliOption.key()) {
+									if ("".equals(key)) {
+										key = "** default **";
+									}
+									sb.append(" Keyword:                  ").append(key).append(System.getProperty("line.separator"));
 								}
-								sb.append(" Keyword:                  " + key).append(System.getProperty("line.separator"));
-							}
 
-							sb.append("   Help:                   " + cliOption.help()).append(System.getProperty("line.separator"));
-							sb.append("   Mandatory:              " + cliOption.mandatory()).append(System.getProperty("line.separator"));
-							sb.append("   Default if specified:   '" + cliOption.specifiedDefaultValue() + "'").append(System.getProperty("line.separator"));
-							sb.append("   Default if unspecified: '" + cliOption.unspecifiedDefaultValue() + "'").append(System.getProperty("line.separator"));
-							sb.append(System.getProperty("line.separator"));
+								sb.append("   Help:                   ").append(cliOption.help()).append(System.getProperty("line.separator"));
+								sb.append("   Mandatory:              ").append(cliOption.mandatory()).append(System.getProperty("line.separator"));
+								sb.append("   Default if specified:   '").append(cliOption.specifiedDefaultValue()).append("'").append(System.getProperty("line.separator"));
+								sb.append("   Default if unspecified: '").append(cliOption.unspecifiedDefaultValue()).append("'").append(System.getProperty("line.separator"));
+								sb.append(System.getProperty("line.separator"));
+							}
 
 						}
-						Assert.notNull(cliOption, "CliOption not found for parameter '" + annotations + "'");
+						Assert.notNull(cliOption, "CliOption not found for parameter '" + Arrays.toString(annotations) + "'");
 					}
-
-					logger.info(sb.toString());
 				}
 				// Only a single argument, so default to the normal help operation
 			}
@@ -1006,9 +1005,7 @@ public class SimpleParser implements Parser {
 				for (Method m : methods) {
 					CliCommand cmd = m.getAnnotation(CliCommand.class);
 					if (cmd != null) {
-						for (String value : cmd.value()) {
-							result.add(value);
-						}
+						result.addAll(Arrays.asList(cmd.value()));
 					}
 				}
 			}

@@ -15,7 +15,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface PathResolver {
 

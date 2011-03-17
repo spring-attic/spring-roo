@@ -7,7 +7,7 @@
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
   
   <spring:url value="http://maps.google.com/" var="map">
-    <spring:param name="hnear" value="${location}" />
+    <spring:param name="q" value="${location}" />
     <spring:param name="output" value="embed" />
   </spring:url>
   <iframe width="545" height="300" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="${map}"><!-- content required --></iframe>

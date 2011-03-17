@@ -2,7 +2,7 @@
   <jsp:directive.page contentType="text/html;charset=UTF-8" />
   <jsp:output omit-xml-declaration="yes" />
 
-  <spring:message var="title" code="webflow_endstate_title" />
+  <spring:message var="title" code="webflow_endstate_title" htmlEscape="false" />
   <util:panel id="title" title="${title}">
     <h1>${fn:escapeXml(title)}</h1>
     <p>

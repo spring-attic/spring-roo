@@ -3,6 +3,7 @@ package org.springframework.roo.classpath;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,27 +61,6 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		if (upstreamDependency.startsWith("MID:org.springframework.roo.classpath.PhysicalTypeIdentifier#")) {
 			// Change to Java, so drop the cache
 			cache.clear();
-			/*
-			PTM ptm = mdservice.get(upstream)
-			
-			List<Annotations> incomingAnnotations = ptm.getTypeAnnotatios()
-			// adding incoming type to any searches it would match
-			for (List<JavaType> annotationsSearchedFor : cache.keySet()) {
-			     if (annotationsSearchedFor.contains(oneOfTheIncomingAnnotations) {
-			          // edit that cache element so this ptm.getName() is part of the list
-			     }
-			}
-			
-			// removing the incoming type from any sarches it would no longer match on
-			for (List<JavaType> annotationsSearchedFor : cache.keySet()) {
-			     if (cache.get(annotationssarchedFor).contains(ptm.getName()) {
-			          // found one we used to \match on
-			          // remove me from that element if i no longer have that annotaiton
-			     }
-			}
-			incomingType
-			
-			*/
 		}
 	}
 
@@ -165,7 +145,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 				types.add(located.getName());
 			}
 		});
-		return types;
+		return Collections.unmodifiableSet(types);
 	}
 
 	public Set<JavaType> findTypesWithAnnotation(JavaType... annotationsToDetect) {
@@ -179,7 +159,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 				types.add(located);
 			}
 		});
-		return types;
+		return Collections.unmodifiableSet(types);
 	}
 
 	private ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails(String physicalTypeMid) {

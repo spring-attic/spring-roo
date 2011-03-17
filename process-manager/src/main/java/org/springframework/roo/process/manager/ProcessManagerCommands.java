@@ -19,7 +19,6 @@ import org.springframework.roo.shell.Shell;
 @Component
 @Service
 public class ProcessManagerCommands implements CommandMarker {
-
 	@Reference private ProcessManager processManager;
 	@Reference private Shell shell; 
 	
@@ -70,10 +69,9 @@ public class ProcessManagerCommands implements CommandMarker {
 			processManager.setMinimumDelayBetweenPoll(1);
 			processManager.timerBasedPoll();
 		} finally {
-			// switch on manual polling again
+			// Switch on manual polling again
 			processManager.setMinimumDelayBetweenPoll(originalSetting);
 		}
 		return "Manual poll completed";
 	}
-
 }

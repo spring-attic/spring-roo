@@ -1,7 +1,7 @@
 <div xmlns:spring="http://www.springframework.org/tags" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
   <jsp:directive.page contentType="text/html;charset=UTF-8" />
   <jsp:output omit-xml-declaration="yes" />
-  <spring:message code="security_login_title" var="title" />
+  <spring:message code="security_login_title" var="title" htmlEscape="false" />
   <util:panel id="title" title="${title}">
     <c:if test="${not empty param.login_error}">
       <div class="errors">
@@ -24,7 +24,7 @@
           <spring:message code="security_login_form_name" />
         </label>
         <input id="j_username" type='text' name='j_username' style="width:150px" />
-        <spring:message code="security_login_form_name_message" var="name_msg" />
+        <spring:message code="security_login_form_name_message" var="name_msg" htmlEscape="false" />
         <script type="text/javascript">
           <c:set var="sec_name_msg">
             <spring:escapeBody javaScriptEscape="true">${name_msg}</spring:escapeBody>
@@ -38,7 +38,7 @@
           <spring:message code="security_login_form_password" />
         </label>
         <input id="j_password" type='password' name='j_password' style="width:150px" />
-        <spring:message code="security_login_form_password_message" var="pwd_msg" />
+        <spring:message code="security_login_form_password_message" var="pwd_msg" htmlEscape="false" />
         <script type="text/javascript">
           <c:set var="sec_pwd_msg">
             <spring:escapeBody javaScriptEscape="true">${pwd_msg}</spring:escapeBody>
@@ -49,9 +49,9 @@
       <br />
       <div class="submit">
         <script type="text/javascript">Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'proceed', event:'onclick'}));</script>
-        <spring:message code="button_submit" var="submit_label" />
+        <spring:message code="button_submit" var="submit_label" htmlEscape="false" />
         <input id="proceed" type="submit" value="${fn:escapeXml(submit_label)}" />
-        <spring:message code="button_reset" var="reset_label" />
+        <spring:message code="button_reset" var="reset_label" htmlEscape="false" />
         <input id="reset" type="reset" value="${fn:escapeXml(reset_label)}" />
       </div>
     </form>
