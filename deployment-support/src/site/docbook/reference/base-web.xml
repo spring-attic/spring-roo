@@ -370,7 +370,7 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
 
     // ...
 
-    Converter&lt;Vote, String&gt; getVoteConverter() {
+    public Converter&lt;Vote, String&gt; getVoteConverter() {
         return new Converter&lt;Vote, String&gt;() {
             public String convert(Vote source) {
                 return new StringBuilder().append(source.getIp()).append(" ").append(source.getRegistered()).toString();
