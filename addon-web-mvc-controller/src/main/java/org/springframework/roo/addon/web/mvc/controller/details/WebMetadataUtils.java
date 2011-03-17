@@ -79,7 +79,7 @@ public abstract class WebMetadataUtils {
 			}
 			// Not interested in fields that are JPA transient fields or immutable fields
 			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-			if (fieldMetadata == null || isTransientFieldType(fieldMetadata) || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
+			if (fieldMetadata == null || fieldMetadata.getCustomData().keySet().contains(CustomDataPersistenceTags.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
 				continue;
 			}
 			JavaType type = method.getReturnType();
@@ -91,7 +91,7 @@ public abstract class WebMetadataUtils {
 					}
 				}
 			} else {
-				if (isApplicationType(type, metadataService) && !isEmbeddedFieldType(fieldMetadata)) {
+				if (isApplicationType(type, metadataService) && !fieldMetadata.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD)) {
 					MemberDetails typeMemberDetails = getMemberDetails(type, metadataService, memberDetailsScanner);
 					specialTypes.put(type, getJavaTypeMetadataDetails(type, typeMemberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
 				}
@@ -345,18 +345,6 @@ public abstract class WebMetadataUtils {
 			}
 		}
 		return Collections.unmodifiableSet(finderMetadataDetails);
-	}
-	
-	private static boolean isTransientFieldType(FieldMetadata field) {
-		Assert.notNull(field, "Field metadata required");
-		
-		return field.getCustomData().keySet().contains(CustomDataPersistenceTags.TRANSIENT_FIELD) || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Transient")) != null;
-	}
-	
-	public static boolean isEmbeddedFieldType(FieldMetadata field) {
-		Assert.notNull(field, "Field metadata required");
-		
-		return field.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD) || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Embedded")) != null;
 	}
 	
 	private static boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails) {

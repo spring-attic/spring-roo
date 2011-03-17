@@ -19,6 +19,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -148,7 +149,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
 				|| WebMetadataUtils.isApplicationType(fieldType, metadataService) // Exclude references to other domain objects as they are too verbose
 				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| WebMetadataUtils.isEmbeddedFieldType(field) /* Not interested in embedded types */) {
+				|| field.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD) /* Not interested in embedded types */) {
 			return false;
 		}
 		return true;

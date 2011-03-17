@@ -42,7 +42,8 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 
 		for (int i = 0; i < memberHoldingTypeDetailsList.size(); i++) { // Cannot use enhanced for loop due to its use of Iterator which in turn has a bug in remove method
 			MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsList.get(i);
-			if (MemberFindingUtils.getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), new JavaType("org.springframework.roo.addon.entity.RooEntity")) != null) {
+			if (MemberFindingUtils.getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), new JavaType("org.springframework.roo.addon.entity.RooEntity")) != null
+					|| MemberFindingUtils.getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), new JavaType("org.springframework.roo.addon.entity.RooIdentifier")) != null) {
 				for (FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
 					for (AnnotationMetadata annotation : field.getAnnotations()) {
 						String annotationFullyQualifiedName = annotation.getAnnotationType().getFullyQualifiedTypeName();
@@ -87,6 +88,18 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 							removeMemberHoldingTypeDetailsFromList(memberHoldingTypeDetailsList, memberHoldingTypeDetails);
 							// Add new MemberHoldingTypeDetails
 							memberHoldingTypeDetailsList.add(getCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetails, field, CustomDataPersistenceTags.LOB_FIELD));
+							detailsChanged = true;
+						} else if (annotationFullyQualifiedName.equals("javax.persistence.Transient") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.TRANSIENT_FIELD)) {
+							// Remove the old MemberHoldingTypeDetails
+							removeMemberHoldingTypeDetailsFromList(memberHoldingTypeDetailsList, memberHoldingTypeDetails);
+							// Add new MemberHoldingTypeDetails
+							memberHoldingTypeDetailsList.add(getCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetails, field, CustomDataPersistenceTags.TRANSIENT_FIELD));
+							detailsChanged = true;
+						} else if (annotationFullyQualifiedName.equals("javax.persistence.Embedded") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD)) {
+							// Remove the old MemberHoldingTypeDetails
+							removeMemberHoldingTypeDetailsFromList(memberHoldingTypeDetailsList, memberHoldingTypeDetails);
+							// Add new MemberHoldingTypeDetails
+							memberHoldingTypeDetailsList.add(getCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetails, field, CustomDataPersistenceTags.EMBEDDED_FIELD));
 							detailsChanged = true;
 						}
 					}
