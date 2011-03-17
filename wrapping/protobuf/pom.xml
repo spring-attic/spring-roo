@@ -7,7 +7,7 @@
 		<version>1.1.3.BUILD-SNAPSHOT</version>
 	</parent>
     <groupId>org.springframework.roo.wrapping</groupId>
-	<artifactId>${pom.groupId}.${pkgArtifactId}-lite</artifactId>
+	<artifactId>${project.groupId}.${pkgArtifactId}-lite</artifactId>
     <version>${osgiVersion}</version>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Wrapping - ${pkgArtifactId}-lite</name>
