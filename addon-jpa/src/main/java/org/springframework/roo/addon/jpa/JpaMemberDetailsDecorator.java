@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.jpa;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
@@ -22,32 +19,32 @@ import org.springframework.roo.classpath.scanner.MemberDetailsImpl;
 import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Decorates JPA-related field metadata with custom data tags.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1.3
- *
  */
 @Service
 @Component
 public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
-		//decorate fields
-		//memberDetails = decorateFields(memberDetails);
-		
-		return memberDetails;
+		return decorateFields(memberDetails);
 	}
-	
+
 	private MemberDetails decorateFields(MemberDetails memberDetails) {
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = new ArrayList<MemberHoldingTypeDetails>(memberDetails.getDetails());
 		boolean detailsChanged = false;
+
 		for (int i = 0; i < memberHoldingTypeDetailsList.size(); i++) { // Cannot use enhanced for loop due to its use of Iterator which in turn has a bug in remove method
 			MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsList.get(i);
 			if (MemberFindingUtils.getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), new JavaType("org.springframework.roo.addon.entity.RooEntity")) != null) {
-				for (FieldMetadata field: memberHoldingTypeDetails.getDeclaredFields()) {
-					for (AnnotationMetadata annotation: field.getAnnotations()) {
+				for (FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
+					for (AnnotationMetadata annotation : field.getAnnotations()) {
 						String annotationFullyQualifiedName = annotation.getAnnotationType().getFullyQualifiedTypeName();
 						if (annotationFullyQualifiedName.equals("javax.persistence.ManyToMany") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD)) {
 							// Remove the old MemberHoldingTypeDetails
@@ -91,38 +88,37 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 							// Add new MemberHoldingTypeDetails
 							memberHoldingTypeDetailsList.add(getCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetails, field, CustomDataPersistenceTags.LOB_FIELD));
 							detailsChanged = true;
-						} 
+						}
 					}
 				}
 			}
 		}
 		if (detailsChanged) {
-//			System.out.println("details changed");
 			return new MemberDetailsImpl(memberHoldingTypeDetailsList);
 		} else {
 			return memberDetails;
 		}
 	}
-	
+
 	private MemberHoldingTypeDetails getCustomizedMemberHoldingTypeDetailsForField(MemberHoldingTypeDetails original, FieldMetadata originalField, Object tag) {
 		FieldMetadataBuilder newField = new FieldMetadataBuilder(originalField);
 		CustomDataBuilder customDataBuilder = new CustomDataBuilder(originalField.getCustomData());
 		customDataBuilder.put(tag, null);
 		newField.setCustomData(customDataBuilder);
 		List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
-		for (FieldMetadata field: original.getDeclaredFields()) {
+		for (FieldMetadata field : original.getDeclaredFields()) {
 			FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(field);
-			if (!fieldMetadataBuilder.equals(newField)) {
+			if (fieldMetadataBuilder.getDeclaredByMetadataId().equals(newField.getDeclaredByMetadataId()) && !fieldMetadataBuilder.getFieldName().equals(newField.getFieldName())) {
 				fields.add(fieldMetadataBuilder);
 			}
 		}
 		fields.add(newField);
-		
+
 		TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(original);
 		typeDetailsBuilder.setDeclaredFields(fields);
 		return typeDetailsBuilder.build();
 	}
-	
+
 	private void removeMemberHoldingTypeDetailsFromList(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails memberHoldingTypeDetails) {
 		List<MemberHoldingTypeDetails> toRemove = new ArrayList<MemberHoldingTypeDetails>();
 		for (MemberHoldingTypeDetails aMemberHoldingTypeDetailsList : memberHoldingTypeDetailsList) {
@@ -132,15 +128,15 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 		}
 		memberHoldingTypeDetailsList.removeAll(toRemove);
 	}
-	
+
 	class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
 		private MemberHoldingTypeDetails existing;
-		
+
 		protected TypeDetailsBuilder(MemberHoldingTypeDetails existing) {
 			super(existing.getDeclaredByMetadataId(), existing);
 			this.existing = existing;
 		}
-		
+
 		public MemberHoldingTypeDetails build() {
 			if (existing instanceof ItdTypeDetails) {
 				ItdTypeDetailsBuilder builder = new ItdTypeDetailsBuilder((ItdTypeDetails) existing);
