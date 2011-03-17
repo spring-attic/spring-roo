@@ -35,7 +35,7 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
 		//decorate fields
-		memberDetails = decorateFields(memberDetails);
+		//memberDetails = decorateFields(memberDetails);
 		
 		return memberDetails;
 	}
@@ -124,11 +124,13 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 	}
 	
 	private void removeMemberHoldingTypeDetailsFromList(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails memberHoldingTypeDetails) {
-		for (int i = 0; i < memberHoldingTypeDetailsList.size(); i++) {
-			if (memberHoldingTypeDetailsList.get(i).getDeclaredByMetadataId().equals(memberHoldingTypeDetails.getDeclaredByMetadataId())) {
-				memberHoldingTypeDetailsList.remove(i);
+		List<MemberHoldingTypeDetails> toRemove = new ArrayList<MemberHoldingTypeDetails>();
+		for (MemberHoldingTypeDetails aMemberHoldingTypeDetailsList : memberHoldingTypeDetailsList) {
+			if (aMemberHoldingTypeDetailsList.getDeclaredByMetadataId().equals(memberHoldingTypeDetails.getDeclaredByMetadataId())) {
+				toRemove.add(aMemberHoldingTypeDetailsList);
 			}
 		}
+		memberHoldingTypeDetailsList.removeAll(toRemove);
 	}
 	
 	class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
