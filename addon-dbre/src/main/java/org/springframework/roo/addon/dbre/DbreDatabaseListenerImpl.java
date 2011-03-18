@@ -16,8 +16,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.Identifier;
+import org.springframework.roo.addon.entity.IdentifierService;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -32,6 +34,9 @@ import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDeta
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.file.monitor.event.FileEvent;
+import org.springframework.roo.file.monitor.event.FileEventListener;
+import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.JavaPackage;
@@ -46,14 +51,14 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Responds to discovery of database structural information from {@link DbreModelService} and creates and manages entities based on this.
- * 
+ * Implementation of {@link DbreDatabaseListener}.
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
-public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements DbreDatabaseListener {
+public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements IdentifierService, FileEventListener {
 	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
 	private static final JavaType ROO_IDENTIFIER = new JavaType(RooIdentifier.class.getName());
 	private static final String IDENTIFIER_TYPE = "identifierType";
@@ -66,19 +71,31 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
-	
 	private Map<JavaType, List<Identifier>> identifierResults = null;
 
-	// This method will be called when the database becomes available for the first time and the rest of Roo has started up OK
-	public void notifyDatabaseRefreshed(Database newDatabase) {
-		processDatabase(newDatabase);
+	public void onFileEvent(FileEvent fileEvent) {
+		if (fileEvent.getFileDetails().getCanonicalPath().equals(dbreModelService.getDbreXmlPath())) {
+			if (fileEvent.getOperation() == FileOperation.UPDATED || fileEvent.getOperation() == FileOperation.CREATED) {
+				deserializeDatabase();
+			}
+		}
 	}
 
-	private void processDatabase(Database database) {
-		if (database == null) {
-			return;
+	public List<Identifier> getIdentifiers(JavaType pkType) {
+		if (identifierResults == null) {
+			// Need to populate the identifier results before returning from this method
+			deserializeDatabase();
 		}
-		if (database.hasTables()) {
+		if (identifierResults == null) {
+			// It's still null, so maybe the DBRE XML file isn't available at this time or similar
+			return null;
+		}
+		return identifierResults.get(pkType);
+	}
+	
+	private void deserializeDatabase() {
+		Database database = dbreModelService.getDatabase();
+		if (database != null) {
 			identifierResults = new HashMap<JavaType, List<Identifier>>();
 			reverseEngineer(database);
 		}
@@ -101,6 +118,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 			destinationPackage = projectMetadata.getTopLevelPackage();
 		}
+		
+		// Set the destination package in the database
+		database.setDestinationPackage(destinationPackage);
 
 		// Get tables from database
 		Set<Table> tables = new LinkedHashSet<Table>(database.getTables());
@@ -120,12 +140,17 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
-				table.setIncludeNonPortable(database.isIncludeNonPortable());
+				table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
 				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
 			}
 		}
 
 		// Notify
+		newEntities.addAll(managedEntities);
+		notify(newEntities);
+	}
+
+	private void notify(List<ClassOrInterfaceTypeDetails> newEntities) {
 		for (ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
 			MetadataItem metadataItem = metadataService.get(managedIdentifierType.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
@@ -133,7 +158,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			}
 		}
 
-		newEntities.addAll(managedEntities);
 		for (ClassOrInterfaceTypeDetails entity : newEntities) {
 			MetadataItem metadataItem = metadataService.get(entity.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
@@ -169,13 +193,13 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		String tableName = (String) tableAttribute.getValue();
 		Assert.hasText(tableName, errMsg);
 		Table table = database.getTable(tableName);
-		if (table == null) {
-			// Table has been dropped so delete managed type, and its identifier if applicable
+		if (table == null || !managedEntity.getName().getPackage().equals(database.getDestinationPackage())) {
+			// Table has been dropped or we have deliberately changed the package so delete managed type, and its identifier if applicable
 			deleteManagedType(managedEntity);
 			return null;
 		}
 
-		table.setIncludeNonPortable(database.isIncludeNonPortable());
+		table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
 
 		// Get new @RooEntity attributes
 		Set<JavaSymbolName> attributesToDeleteIfPresent = new LinkedHashSet<JavaSymbolName>();
@@ -295,18 +319,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 	}
 
-	public List<Identifier> getIdentifiers(JavaType pkType) {
-		if (identifierResults == null) {
-			// Need to populate the identifier results before returning from this method
-			processDatabase(dbreModelService.getDatabase(null));
-		}
-		if (identifierResults == null) {
-			// It's still null, so maybe the DBRE XML file isn't available at this time or similar
-			return null;
-		}
-		return identifierResults.get(pkType);
-	}
-
 	private void createIdentifierClass(JavaType identifierType) {
 		List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
@@ -346,7 +358,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				throw new IllegalArgumentException("Failed to create field name for column '" + columnName + "' in table '" + table.getName() + "': " + e.getMessage());
 			}
 			JavaType fieldType = column.getJavaType();
-			String columnDefinition = table.isIncludeNonPortable() ? column.getTypeName() : "";
+			String columnDefinition = table.isIncludeNonPortableAttributes() ? column.getTypeName() : "";
 			result.add(new Identifier(fieldName, fieldType, columnName, column.getColumnSize(), column.getScale(), columnDefinition));
 		}
 

@@ -25,7 +25,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	private String name;
 	private Set<Table> tables = new LinkedHashSet<Table>();
 	private JavaPackage destinationPackage;
-	private boolean includeNonPortable;
+	private boolean includeNonPortableAttributes;
 
 	public DatabaseContentHandler() {
 		super();
@@ -71,8 +71,8 @@ public final class DatabaseContentHandler extends DefaultHandler {
 			if (stack.peek() instanceof ForeignKey && option.getKey().equals("exported")) {
 				((ForeignKey) stack.peek()).setExported(Boolean.parseBoolean(option.getValue()));
 			}
-			if (option.getKey().equals("includeNonPortable")) {
-				includeNonPortable = Boolean.parseBoolean(option.getValue());
+			if (option.getKey().equals("includeNonPortableAttributes")) {
+				includeNonPortableAttributes = Boolean.parseBoolean(option.getValue());
 			}
 		} else if (qName.equals("table")) {
 			tables.add((Table) tmp);
@@ -95,7 +95,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		} else if (qName.equals("database")) {
 			database = new Database(name, tables);
 			database.setDestinationPackage(destinationPackage);
-			database.setIncludeNonPortable(includeNonPortable);
+			database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
 		} else {
 			stack.push(tmp);
 		}
@@ -113,23 +113,26 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	private Column getColumn(Attributes attributes) {
 		String type = attributes.getValue("type");
 		String[] dataTypeAndName = StringUtils.split(type, ",");
-		Assert.notNull(dataTypeAndName, getColumnErrorMessage("type", "12,varchar"));
+		Assert.notNull(dataTypeAndName, "The 'type' attribute of the column element must contain a comma separated value pair, eg, type=\"12,varchar\"." + getErrorMessage());
 		int dataType = Integer.parseInt(dataTypeAndName[0]);
 		String typeName = dataTypeAndName[1];
 		
-		String size = attributes.getValue("size");
 		int columnSize;
-		int decimalDigits = 0;
+		int scale = 0;
+		String size = attributes.getValue("size");
 		if (size.contains(",")) {
 			String[] precisionScale = StringUtils.split(size, ",");
-			Assert.notNull(precisionScale, getColumnErrorMessage("size", "17,2"));
 			columnSize = Integer.parseInt(precisionScale[0]);
-			decimalDigits = Integer.parseInt(precisionScale[1]);
+			scale = Integer.parseInt(precisionScale[1]);
 		} else {
 			columnSize = Integer.parseInt(size);
 		}
+		
+		if (StringUtils.hasText(attributes.getValue("scale"))) {
+			scale = Integer.parseInt(attributes.getValue("scale"));
+		}
 
-		Column column = new Column(attributes.getValue(DatabaseXmlUtils.NAME), dataType, typeName, columnSize, decimalDigits);
+		Column column = new Column(attributes.getValue(DatabaseXmlUtils.NAME), dataType, typeName, columnSize, scale);
 		column.setDescription(attributes.getValue(DatabaseXmlUtils.DESCRIPTION));
 		column.setPrimaryKey(Boolean.parseBoolean(attributes.getValue("primaryKey")));
 		column.setRequired(Boolean.parseBoolean(attributes.getValue("required")));
@@ -137,8 +140,8 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		return column;
 	}
 
-	private String getColumnErrorMessage(String attributeName, String example) {
-		return "The '" + attributeName + "' attribute of the column element must contain a comma separated value pair, eg, " + attributeName + "=\"" + example + "\". Your .roo-dbre file may be not be in the current format. Delete the file and execute the database reverse engineer command again.";
+	private String getErrorMessage() {
+		return "Your DBRE XML file may be not be in the current format. Delete the file and execute the database reverse engineer command again.";
 	}
 
 	private ForeignKey getForeignKey(Attributes attributes) {

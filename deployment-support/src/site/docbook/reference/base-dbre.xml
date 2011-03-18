@@ -52,13 +52,13 @@
         xlink:href="http://download.oracle.com/javase/6/docs/api/java/sql/DatabaseMetaData.html">java.sql.DatabaseMetadata</link>
         interface. When the database is reverse engineered, the metadata
         information is converted to XML and is stored and maintained in the
-        .roo-dbre file in the root directory of your project. DBRE creates JPA
-        entities based on the table names in your database and fields based on
-        the column names in the tables. Simple and composite primary keys are
-        supported (see <xref linkend="dbre_composite_keys" /> for more
-        details) and relationships between entities are also created using the
-        imported and exported key information obtained from the
-        metadata.</para>
+        dbre.xml file in the src/main/resources directory of your project.
+        DBRE creates JPA entities based on the table names in your database
+        and fields based on the column names in the tables. Simple and
+        composite primary keys are supported (see <xref
+        linkend="dbre_composite_keys" /> for more details) and relationships
+        between entities are also created using the imported and exported key
+        information obtained from the metadata.</para>
       </section>
 
       <section>
@@ -228,7 +228,7 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
 
       <listitem>
         <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --testAutomatically --enableViews 
-                               --includeTables --excludeTables --includeNonPortable</programlisting></para>
+                               --includeTables --excludeTables --includeNonPortableAttributes</programlisting></para>
 
         <para>This command creates JPA entities in your project representing
         the tables and columns in your database. As for the database
@@ -276,7 +276,7 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
         the source code.</para>
 
         <para>You can also generate non-portable JPA @Column attributes, such
-        as 'columnDefinition' by specifying the --includeNonPortable
+        as 'columnDefinition' by specifying the --includeNonPortableAttributes
         option.</para>
 
         <para>Since the DBRE Add-on provides incremental database reverse
@@ -476,8 +476,8 @@ public class LineItemPK {
 
       <para>One of the powerful features of DBRE is its ability to create
       relationships between entities automatically based on the foreign key
-      information in the .roo-dbre XML file. The following sections describe
-      the associations that can be created.</para>
+      information in the dbre.xml file. The following sections describe the
+      associations that can be created.</para>
 
       <section>
         <title>Many-valued associations with many-to-many multiplicity</title>

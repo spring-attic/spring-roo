@@ -1,12 +1,11 @@
 package org.springframework.roo.addon.dbre;
 
-import org.springframework.roo.addon.entity.IdentifierService;
-
 /**
- * Interface for {@link DbreDatabaseListenerImpl} required for OSGi SCR.
- *
+ * Responds to discovery of database structural information from the DBRE XML file 
+ * and creates and manages entities based on this information.
+ * 
  * @author Alan Stewart
  * @since 1.1
  */
-public interface DbreDatabaseListener extends DatabaseListener, IdentifierService {
+public interface DbreDatabaseListener {
 }

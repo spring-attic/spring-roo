@@ -18,7 +18,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Database implements Serializable {
-	private static final long serialVersionUID = -5373400310368191289L;
+	private static final long serialVersionUID = -6699287170489794958L;
 
 	/** The name of the database model. Defaults to the catalog name if the schema name is not available. */
 	private String name;
@@ -30,7 +30,7 @@ public class Database implements Serializable {
 	private JavaPackage destinationPackage;
 	
 	/** Whether or not to included non-portable JPA attribues in the @Column annotation */
-	private boolean includeNonPortable;
+	private boolean includeNonPortableAttributes;
 
 	Database(String name, Set<Table> tables) {
 		Assert.hasText(name, "Database name required");
@@ -73,12 +73,12 @@ public class Database implements Serializable {
 		this.destinationPackage = destinationPackage;
 	}
 
-	public boolean isIncludeNonPortable() {
-		return includeNonPortable;
+	public boolean isIncludeNonPortableAttributes() {
+		return includeNonPortableAttributes;
 	}
 
-	public void setIncludeNonPortable(boolean includeNonPortable) {
-		this.includeNonPortable = includeNonPortable;
+	public void setIncludeNonPortableAttributes(boolean includeNonPortableAttributes) {
+		this.includeNonPortableAttributes = includeNonPortableAttributes;
 	}
 
 	/**

@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -55,6 +56,12 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {		
+		// Abort if the database couldn't be deserialized. This can occur if the DBRE XML file has been deleted or is empty.
+		Database database = dbreModelService.getDatabaseFromCache();
+		if (database == null) {
+			return null;
+		}
+
 		// We know governor type details are non-null and can be safely cast
 		JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
 
@@ -70,12 +77,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMetadataMid);
 		if (identifierMetadata != null) {
 			identifierFields.addAll(identifierMetadata.getFields());
-		}
-
-		// Abort if the database couldn't be deserialized. This can occur if the dbre xml file has been deleted or is empty.
-		Database database = dbreModelService.getDatabase(null);
-		if (database == null) {
-			return null;
 		}
 
 		// Search for database-managed entities

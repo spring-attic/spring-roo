@@ -72,7 +72,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 	}
 
 	public Database createDatabase() throws SQLException {
-		String name = StringUtils.hasText(schema.getName()) ? schema.getName() : catalogName;
+		String name = schema != null && StringUtils.hasText(schema.getName()) ? schema.getName() : catalogName;
 		return new Database(name, getTables());
 	}
 

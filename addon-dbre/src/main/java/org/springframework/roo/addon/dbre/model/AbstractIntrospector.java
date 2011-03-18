@@ -16,7 +16,7 @@ public abstract class AbstractIntrospector {
 	protected DatabaseMetaData databaseMetaData;
 
 	AbstractIntrospector(Connection connection) throws SQLException {
-		Assert.notNull(connection, "Connection must not be null");
+		Assert.notNull(connection, "Connection required");
 		databaseMetaData = connection.getMetaData();
 		Assert.notNull(databaseMetaData, "Database metadata is null");
 	}

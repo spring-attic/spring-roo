@@ -6,7 +6,7 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dbre.DbreModelService;
+import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
@@ -33,7 +33,7 @@ public class SchemaConverter implements Converter {
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
 		try {
 			if (dbreModelService.supportsSchema(false)) {
-				Set<Schema> schemas = dbreModelService.getDatabaseSchemas(false);
+				Set<Schema> schemas = dbreModelService.getSchemas(false);
 				for (Schema schema : schemas) {
 					completions.add(schema.getName());
 				}

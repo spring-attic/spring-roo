@@ -481,6 +481,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getEscapedName());
 
 		if (referencedColumn) {
+			Assert.notNull(reference.getForeignColumn(), "Foreign key column " + reference.getForeignColumnName() + " is null");
 			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getForeignColumn().getEscapedName());
 		}
 
@@ -547,7 +548,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				fieldName = getUniqueFieldName(fieldName);
 			}
 
-			field = getField(fieldName, column, table.isIncludeNonPortable());
+			field = getField(fieldName, column, table.isIncludeNonPortableAttributes());
 			uniqueFields.put(fieldName, field);
 		}
 
