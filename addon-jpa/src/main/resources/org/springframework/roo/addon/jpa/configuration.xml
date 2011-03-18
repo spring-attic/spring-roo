@@ -270,17 +270,11 @@
                         <includes>**/*.class</includes>
                         <excludes>**/*_Roo_*.class</excludes>
                         <addDefaultConstructor>true</addDefaultConstructor>
-                        <toolProperties>
-                            <property>
-                                <name>directory</name>
-                                <value>otherdirectoryvalue</value>
-                            </property>
-                        </toolProperties>
                     </configuration>
                     <executions>
                         <execution>
                             <id>enhancer</id>
-                            <phase>compile</phase>
+                            <phase>process-classes</phase>
                             <goals>
                                 <goal>enhance</goal>
                             </goals>
