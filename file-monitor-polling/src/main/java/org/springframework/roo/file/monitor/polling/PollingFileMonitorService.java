@@ -468,13 +468,13 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			return;
 		}
 		for (File f : listFiles) {
-			if (f.isFile()) {
-				try {
-					if (FileDetails.matchesAntPath(antPath, f.getCanonicalPath())) {
-						result.add(new FileDetails(f, f.lastModified()));
-					}
-				} catch (IOException ignored) {}
-			} else {
+			try {
+				if (FileDetails.matchesAntPath(antPath, f.getCanonicalPath())) {
+					result.add(new FileDetails(f, f.lastModified()));
+				}
+			} catch (IOException ignored) {}
+
+			if (!f.isFile()) {
 				recursiveAntMatch(antPath, f, result);
 			}
 		}
