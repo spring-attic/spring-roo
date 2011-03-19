@@ -14,6 +14,7 @@ import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -262,7 +263,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	private List<Token> tokenize(MemberDetails memberDetails, JavaSymbolName finderName, String plural) {
 		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
 		String finder = finderName.getSymbolName();
-
+		
 		// Just in case it starts with findBy we can remove it here
 		String findBy = "find" + plural + "By";
 		if (finder.startsWith(findBy)) {
@@ -273,19 +274,19 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		if (finder.contains(findBy)) {
 			throw new InvalidFinderException("Dynamic finder definition for '" + finderName.getSymbolName() + "' in " + simpleTypeName + ".java is invalid");
 		}
-
+		
 		SortedSet<FieldToken> fieldTokens = new TreeSet<FieldToken>();
 		for (MethodMetadata methodMetadata : getLocatedMutators(memberDetails)) {
 			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, methodMetadata.getParameterNames().get(0));
-
+			
 			// If we did find a field matching the first parameter name of the mutator method we can add it to the finder ITD
 			if (fieldMetadata != null) {
 				fieldTokens.add(new FieldToken(fieldMetadata));
 			}
 		}
-
+		
 		List<Token> tokens = new ArrayList<Token>();
-
+		
 		while (finder.length() > 0) {
 			Token token = getFirstToken(fieldTokens, finder, finderName.getSymbolName(), simpleTypeName);
 			if (token != null) {
@@ -295,7 +296,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				finder = finder.substring(token.getValue().length());
 			}
 		}
-
+		
 		return tokens;
 	}
 
@@ -341,8 +342,10 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 	private Set<JavaSymbolName> populateFinders(Set<JavaSymbolName> finders, FieldMetadata field, String prepend, boolean isFirst, String keyWord) {
 		Set<JavaSymbolName> tempFinders = new HashSet<JavaSymbolName>();
-
-		if (isFirst) {
+		
+		if (isTransient(field)) {
+			// Not need to add transient fields
+		} else if (isFirst) {
 			tempFinders.add(new JavaSymbolName(prepend + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + keyWord));
 		} else {
 			for (JavaSymbolName finder : finders) {
@@ -352,6 +355,10 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			}
 		}
 		return tempFinders;
+	}
+	
+	private boolean isTransient(FieldMetadata field) {
+		return Modifier.isTransient(field.getModifier()) || field.getCustomData().keySet().contains(CustomDataPersistenceTags.TRANSIENT_FIELD);
 	}
 
 	private boolean isNumberOrDate(String fullyQualifiedTypeName) {
