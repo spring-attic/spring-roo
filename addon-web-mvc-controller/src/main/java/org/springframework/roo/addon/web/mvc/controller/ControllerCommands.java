@@ -7,8 +7,9 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -59,9 +60,9 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path, 
 		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") String disallowedOperations) {
 
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
-		if (entityMetadata == null) {
-			logger.warning("The specified entity can not be resolved to an Entity type in your project");
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
+			logger.warning("The specified entity can not be resolved to a type in your project");
 			return;
 		}
 		

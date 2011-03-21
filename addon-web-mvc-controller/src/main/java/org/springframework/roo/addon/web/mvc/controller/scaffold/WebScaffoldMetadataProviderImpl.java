@@ -6,7 +6,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.json.JsonMetadata;
 import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
@@ -15,8 +14,10 @@ import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -55,37 +56,30 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		// Lookup the form backing object's metadata
 		JavaType formBackingType = annotationValues.formBackingObject;
 		
-		Path path = Path.SRC_MAIN_JAVA;
-		String entityMetadataKey = EntityMetadata.createIdentifier(formBackingType, path);
-		
-		// We need to lookup the metadata we depend on
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		
-		// We need to abort if we couldn't find dependent metadata
-		if (entityMetadata == null || !entityMetadata.isValid()) {
-			log.warning("Aborting - the form backing object for Roo MVC scaffolded controllers need to be @RooEntity persistent types at this time");
-			return null;
-		}
-		
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
-		
 		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
 		
 		ClassOrInterfaceTypeDetails controllerClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		MemberDetails controllerMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), controllerClassOrInterfaceDetails);
 		
-		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, path));
+		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		MemberDetails formBackingObjectMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
 		
+		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, CustomDataPersistenceTags.PERSISTENT_TYPE);
+		if (memberHoldingTypeDetails == null) {
+			log.warning("Aborting - the form backing object for Roo MVC scaffolded controllers need to be @RooEntity persistent types at this time");
+			return null;
+		}
+		
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(memberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+		
 		JsonMetadata jsonMetadata = null;
 		
 		if (annotationValues.isExposeJson()) {
-			jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(formBackingType, path));
+			jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		}
-		
 		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, 
