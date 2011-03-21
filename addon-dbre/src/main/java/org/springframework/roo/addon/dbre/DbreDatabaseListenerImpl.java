@@ -18,6 +18,7 @@ import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
+import org.springframework.roo.addon.entity.EntityOperations;
 import org.springframework.roo.addon.entity.Identifier;
 import org.springframework.roo.addon.entity.IdentifierService;
 import org.springframework.roo.addon.entity.RooEntity;
@@ -66,6 +67,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private DbreModelService dbreModelService;
+	@Reference private EntityOperations entityOperations;
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
@@ -141,7 +143,12 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
 				table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
-				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
+				ClassOrInterfaceTypeDetails newEntity = createNewManagedEntityFromTable(table, destinationPackage);
+				if (database.isTestAutomatically()) {
+					// Create integration test
+					entityOperations.newIntegrationTest(newEntity.getName());
+				}
+				newEntities.add(newEntity);
 			}
 		}
 

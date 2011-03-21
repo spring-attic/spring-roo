@@ -25,6 +25,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	private String name;
 	private Set<Table> tables = new LinkedHashSet<Table>();
 	private JavaPackage destinationPackage;
+	private boolean testAutomatically;
 	private boolean includeNonPortableAttributes;
 
 	public DatabaseContentHandler() {
@@ -74,6 +75,9 @@ public final class DatabaseContentHandler extends DefaultHandler {
 			if (option.getKey().equals("includeNonPortableAttributes")) {
 				includeNonPortableAttributes = Boolean.parseBoolean(option.getValue());
 			}
+			if (option.getKey().equals("testAutomatically")) {
+				testAutomatically = Boolean.parseBoolean(option.getValue());
+			}
 		} else if (qName.equals("table")) {
 			tables.add((Table) tmp);
 		} else if (qName.equals("column")) {
@@ -95,6 +99,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		} else if (qName.equals("database")) {
 			database = new Database(name, tables);
 			database.setDestinationPackage(destinationPackage);
+			database.setTestAutomatically(testAutomatically);
 			database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
 		} else {
 			stack.push(tmp);

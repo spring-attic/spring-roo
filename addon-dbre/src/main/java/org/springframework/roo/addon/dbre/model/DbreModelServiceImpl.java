@@ -21,7 +21,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -103,7 +102,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml") : null;
 	}
 	
-	public Database refreshDatabase(Schema schema, JavaPackage destinationPackage, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes) {
+	public Database refreshDatabase(Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables) {
 		Assert.notNull(schema, "Schema required");
 
 		Connection connection = null;
@@ -111,8 +110,6 @@ public class DbreModelServiceImpl implements DbreModelService {
 			connection = getConnection(true);
 			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, view, includeTables, excludeTables);
 			Database database = introspector.createDatabase();
-			database.setDestinationPackage(destinationPackage);
-			database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
 			cacheDatabase(database);
 			return database;
 		} catch (Exception e) {

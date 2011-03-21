@@ -15,11 +15,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
-import org.springframework.roo.addon.entity.EntityOperations;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
@@ -41,10 +37,8 @@ import org.w3c.dom.Element;
 public class DbreOperationsImpl implements DbreOperations {
 	private static final Logger logger = HandlerUtils.getLogger(DbreOperationsImpl.class);
 	@Reference private DbreModelService dbreModelService;
-	@Reference private EntityOperations entityOperations; 
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isDbreAvailable() {
 		return projectOperations.isProjectAvailable() && (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
@@ -53,22 +47,18 @@ public class DbreOperationsImpl implements DbreOperations {
 	public void displayDatabaseMetadata(Schema schema, File file, boolean view) {
 		Assert.notNull(schema, "Schema required");
 		// Force it to refresh the database from the actual JDBC connection
-		Database database = dbreModelService.refreshDatabase(schema, null, view, Collections.<String> emptySet() , Collections.<String> emptySet(), true);
+		Database database = dbreModelService.refreshDatabase(schema, view, Collections.<String> emptySet() , Collections.<String> emptySet());
+		database.setIncludeNonPortableAttributes(true);
 		processDatabase(database, schema, file, true);
 	}
 
 	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes) {
 		// Force it to refresh the database from the actual JDBC connection
-		Database database = dbreModelService.refreshDatabase(schema, destinationPackage, view, includeTables, excludeTables, includeNonPortableAttributes);
+		Database database = dbreModelService.refreshDatabase(schema, view, includeTables, excludeTables);
+		database.setDestinationPackage(destinationPackage);
+		database.setTestAutomatically(testAutomatically);
+		database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
 		processDatabase(database, schema, null, false);
-
-		// Create integration tests if required
-		if (testAutomatically) {
-			Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
-			for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
-				entityOperations.newIntegrationTest(managedEntity.getName());
-			}
-		}
 		
 		// Update the pom.xml to add an exclusion for the dbre.xml file in the maven-war-plugin 
 		updatePom();

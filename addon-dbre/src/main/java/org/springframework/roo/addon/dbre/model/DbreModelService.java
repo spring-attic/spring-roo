@@ -3,8 +3,6 @@ package org.springframework.roo.addon.dbre.model;
 import java.io.OutputStream;
 import java.util.Set;
 
-import org.springframework.roo.model.JavaPackage;
-
 /**
  * Retrieves database metadata from an XML file or a JDBC connection.
  * 
@@ -61,14 +59,12 @@ public interface DbreModelService {
 	 * Retrieves the database metadata from a JDBC connection.
 	 * 
 	 * @param schema the schema to query (required)
-	 * @param destinationPackage the {@link JavaPackage} to create entities in
 	 * @param view true if database views are to be retrieved, otherwise false
 	 * @param includeTables a set of table names to include
 	 * @param excludeTables a set of table names to exlude
-	 * @param includeNonPortableAttributes true to include non-portable JPA @Column attributes such as 'columnDefinition', otherwise false
 	 * @return the database metadata if available (null if cannot connect to the database or the schema is not found)
 	 */
-	Database refreshDatabase(Schema schema, JavaPackage destinationPackage, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes);
+	Database refreshDatabase(Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables);
 	
 	/**
 	 * Writes the database metadata to an output stream.
