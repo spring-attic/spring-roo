@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.dod;
 
-import java.util.HashMap;
+import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -9,16 +9,17 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -36,8 +37,8 @@ import org.springframework.roo.project.Path;
 @Service
 public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	private Map<JavaType, String> entityToDodMidMap = new HashMap<JavaType, String>();
-	private Map<String, JavaType> dodMidToEntityMap = new HashMap<String, JavaType>();
+	private Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
+	private Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -77,83 +78,110 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+		// We know governor type details are non-null and can be safely cast
+		
 		// We need to parse the annotation, which we expect to be present
 		DataOnDemandAnnotationValues annotationValues = new DataOnDemandAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound() || annotationValues.getEntity() == null) {
 			return null;
 		}
-		
+	
 		// Remember that this entity JavaType matches up with this DOD's metadata identification string
 		// Start by clearing the previous association
 		JavaType oldEntity = dodMidToEntityMap.get(metadataIdentificationString);
 		if (oldEntity != null) {
 			entityToDodMidMap.remove(oldEntity);
 		}
-		entityToDodMidMap.put(annotationValues.getEntity(), metadataIdentificationString);
+		JavaType entityJavaType = annotationValues.getEntity();
+		entityToDodMidMap.put(entityJavaType, metadataIdentificationString);
 		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getEntity());
 		
-		MemberDetails memberDetails = getMemberDetails(annotationValues.getEntity());
-		if (memberDetails == null) {
+		// We need to lookup the metadata we depend on
+		String entityMetadataKey = EntityMetadata.createIdentifier(entityJavaType, Path.SRC_MAIN_JAVA);
+		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+
+		String entityClassOrInterfaceMetadataKey = PhysicalTypeIdentifier.createIdentifier(entityJavaType, Path.SRC_MAIN_JAVA);
+		PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(entityClassOrInterfaceMetadataKey);
+	
+		// We need to abort if we couldn't find dependent metadata
+		if (entityMetadata == null || !entityMetadata.isValid() || entityPhysicalTypeMetadata == null) {
 			return null;
 		}
-		
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.PERSISTENT_TYPE);
-		if (persistenceMemberHoldingTypeDetails == null) {
+	
+		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) entityPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (entityClassOrInterfaceTypeDetails == null) {
+			// Abort if the entity's class details aren't available (parse error etc)
 			return null;
 		}
+
+		// Get the IdentifierMetadata for the @EmbeddedId field if it exists
+		IdentifierMetadata identifierMetadata = getIdentifierMetadata(entityMetadata);
 		
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
-		
-		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
-		if (findEntriesMethod == null) {
-			return null;
-		}
-		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
-		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FLUSH_METHOD);;
-		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);;
-		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);;
-		
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(DataOnDemandMetadataProvider.class.getName(), entityClassOrInterfaceTypeDetails);
 		// Add the methods we care to the locatedMutators
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-			
 			if (!BeanInfoUtils.isMutatorMethod(method)) {
 				continue;
 			}
-			
+
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
-			if (field == null) {
-				continue;
-			}
+			if (field == null) continue;
+
+			// Track any changes to that method (eg it goes away)
+			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+
 			// Look up collaborating metadata
 			DataOnDemandMetadata otherMetadata = locateCollaboratingMetadata(metadataIdentificationString, field);
 			locatedMutators.put(method, new CollaboratingDataOnDemandMetadataHolder(field, otherMetadata));
-			
-			// Track any changes to that method (eg it goes away)
-			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 		}
 		
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+		MethodMetadata findEntriesMethod = entityMetadata.getFindEntriesMethod();
+		if (findEntriesMethod == null) {
+			return null;
+		}
 		
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName());
+		MethodMetadata persistMethod = entityMetadata.getPersistMethod();
+		MethodMetadata flushMethod = entityMetadata.getFlushMethod();
+		MethodMetadata findMethod = entityMetadata.getFindMethod();
+		MethodMetadata identifierAccessor = entityMetadata.getIdentifierAccessor();
+		MethodMetadata identifierMutator = entityMetadata.getIdentifierMutator();
+		
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(entityClassOrInterfaceMetadataKey, metadataIdentificationString);
+		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
+		
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, identifierMutator, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, entityClassOrInterfaceTypeDetails.getName(), identifierMetadata);
+	}
+	
+	private IdentifierMetadata getIdentifierMetadata(EntityMetadata entityMetadata) {
+		FieldMetadata identifierField = entityMetadata.getIdentifierField();
+		AnnotationMetadata embeddedIdAnnotation = MemberFindingUtils.getAnnotationOfType(identifierField.getAnnotations(), new JavaType("javax.persistence.EmbeddedId"));
+		if (embeddedIdAnnotation != null) {
+			String identifierMetadataKey = IdentifierMetadata.createIdentifier(identifierField.getFieldType(), Path.SRC_MAIN_JAVA);
+			return (IdentifierMetadata) metadataService.get(identifierMetadataKey);
+		}
+		return null;
 	}
 	
 	private DataOnDemandMetadata locateCollaboratingMetadata(String metadataIdentificationString, FieldMetadata field) {
-		// Check field type to ensure it is a persistent type and is not abstract
-		MemberDetails memberDetails = getMemberDetails(field.getFieldType());
-		if (memberDetails == null) {
+		// Check field type to ensure it is an entity and is not abstract
+		String entityMetadataKey = EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA);
+		String entityClassOrInterfaceMetadataKey = PhysicalTypeIdentifier.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA);
+
+		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+		PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(entityClassOrInterfaceMetadataKey);
+
+		if (entityMetadata == null || entityPhysicalTypeMetadata == null || Modifier.isAbstract(entityPhysicalTypeMetadata.getMemberHoldingTypeDetails().getModifier())) {
 			return null;
 		}
-		
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.PERSISTENT_TYPE);
-		if (persistenceMemberHoldingTypeDetails == null) {
-			return null;
-		}
-		
+
 		// Check field for @ManyToOne or @OneToOne annotation
-		if (!field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_ONE_FIELD) && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.ONE_TO_ONE_FIELD)) {
+		AnnotationMetadata manyToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne"));
+		AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
+		if (manyToOneAnnotation == null && oneToOneAnnotation == null) {
 			return null;
 		}
 		
@@ -165,24 +193,6 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		metadataDependencyRegistry.registerDependency(otherProvider, metadataIdentificationString);
 		
 		return (DataOnDemandMetadata) metadataService.get(otherProvider);
-	}
-	
-	private MemberDetails getMemberDetails(JavaType type) {
-		// We need to lookup the metadata we depend on
-		PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		
-		// We need to abort if we couldn't find dependent metadata
-		if (entityPhysicalTypeMetadata == null || !entityPhysicalTypeMetadata.isValid()) {
-			return null;
-		} 
-		
-		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) entityPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (entityClassOrInterfaceTypeDetails == null) {
-			// Abort if the entity's class details aren't available (parse error etc)
-			return null;
-		}
-		
-		return memberDetailsScanner.getMemberDetails(DataOnDemandMetadataProvider.class.getName(), entityClassOrInterfaceTypeDetails);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

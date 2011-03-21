@@ -41,6 +41,9 @@ public enum CustomDataPersistenceTags {
 	// Identifier accessor method (method must have no parameters, and return ID data type)
 	IDENTIFIER_ACCESSOR_METHOD,
 	
+	// Identifier accessor method (method must have one parameter, and return void data type)
+	IDENTIFIER_MUTATOR_METHOD,
+
 	// Version accessor method (method must have no parameters, and return version data type)
 	VERSION_ACCESSOR_METHOD,
 	

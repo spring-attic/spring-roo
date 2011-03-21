@@ -103,8 +103,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addMethod(getHashCodeMethod());
 		
 		// Add custom data tag for Roo Identifier type
-		CustomDataBuilder customDataBuilder = new CustomDataBuilder(builder.getCustomData().build());
-		customDataBuilder.put(CustomDataPersistenceTags.PERSISTENT_TYPE, null);
+		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+		customDataBuilder.put(CustomDataPersistenceTags.ROO_IDENTIFIER_TYPE, null);
 		builder.setCustomData(customDataBuilder);
 
 		// Create a representation of the desired output ITD
