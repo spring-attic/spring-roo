@@ -15,6 +15,7 @@ import org.springframework.roo.support.util.Assert;
  * Utility methods for finding members in {@link MemberHoldingTypeDetails} instances.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  */
 public abstract class MemberFindingUtils {
@@ -313,7 +314,22 @@ public abstract class MemberFindingUtils {
 				result.add(method);
 			}
 		}
-		return null;
+		return result;
+	}
+	
+	/**
+	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param tagKey the {@link CustomData} key to search for (required)
+	 * @return the most concrete tagged method or null if not found
+	 */
+	public static MethodMetadata getMostConcreteMethodWithTag(MemberDetails memberDetails, Object tagKey) {
+		List<MethodMetadata> taggedMethods = getMethodsWithTag(memberDetails, tagKey);
+		if (taggedMethods.size() == 0) {
+			return null;
+		} 
+		return taggedMethods.get(0);
 	}
 	
 	/**
@@ -343,10 +359,12 @@ public abstract class MemberFindingUtils {
 	 * {@link CustomData} tag.
 	 * 
 	 * @param memberDetails the {@link MemberDetails} to search (required)
-	 * @param tagKey the {@link CustomData} key to search for
+	 * @param tagKey the {@link CustomData} key to search for (required)
 	 * @return zero or more {@link MemberHoldingTypeDetails} (never null)
 	 */
 	public static List<MemberHoldingTypeDetails> getMemberHoldingTypeDetailsWithTag(MemberDetails memberDetails, Object tagKey) {
+		Assert.notNull(memberDetails, "MemberDetails required");
+		Assert.notNull(tagKey, "Custom data tag required");
 		List<MemberHoldingTypeDetails> result = new ArrayList<MemberHoldingTypeDetails>();
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
 			if (mhtd.getCustomData().keySet().contains(tagKey)) {
@@ -354,5 +372,22 @@ public abstract class MemberFindingUtils {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param tagKey the {@link CustomData} key to search for (required)
+	 * @return the most concrete tagged type or null if not found
+	 */
+	public static MemberHoldingTypeDetails getMostConcreteMemberHoldingTypeDetailsWithTag(MemberDetails memberDetails, Object tag) {
+		Assert.notNull(memberDetails, "MemberDetails required");
+		Assert.notNull(tag, "Custom data tag required");
+		List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = getMemberHoldingTypeDetailsWithTag(memberDetails, tag);
+		if (memberHoldingTypeDetailsList.size() == 0) {
+			return null;
+		}
+		return memberHoldingTypeDetailsList.get(0);
 	}
 }

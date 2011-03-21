@@ -6,12 +6,15 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dod.DataOnDemandMetadata;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
@@ -61,32 +64,35 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
 			return null;
 		}
-	
+		
+		
 		// Lookup the entity's metadata
-		JavaType javaType = annotationValues.getEntity();
-		Path path = Path.SRC_MAIN_JAVA;
-		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		if (entityMetadata == null || !entityMetadata.isValid()) {
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(annotationValues.getEntity(), Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
 			return null;
 		}
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (classOrInterfaceTypeDetails == null) {
+			return null;
+		}
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
 		
-		MethodMetadata identifierAccessorMethod = entityMetadata.getIdentifierAccessor();
-		MethodMetadata versionAccessorMethod = entityMetadata.getVersionAccessor();
-		MethodMetadata countMethod = entityMetadata.getCountMethod();
-		MethodMetadata findMethod = entityMetadata.getFindMethod();
-		MethodMetadata findAllMethod = entityMetadata.getFindAllMethod();
-		MethodMetadata findEntriesMethods = entityMetadata.getFindEntriesMethod();
-		MethodMetadata flushMethod = entityMetadata.getFlushMethod();
-		MethodMetadata mergeMethod = entityMetadata.getMergeMethod();
-		MethodMetadata persistMethod = entityMetadata.getPersistMethod();
-		MethodMetadata removeMethod = entityMetadata.getRemoveMethod();
-
+		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
+		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
+		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.COUNT_ALL_METHOD);
+		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);
+		MethodMetadata findAllMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ALL_METHOD);
+		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
+		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FLUSH_METHOD);
+		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.MERGE_METHOD);
+		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
+		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.REMOVE_METHOD);
+		
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey, metadataIdentificationString);
-		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
+		metadataDependencyRegistry.registerDependency(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 				
-		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethods, flushMethod, mergeMethod, persistMethod, removeMethod);
+		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethod, flushMethod, mergeMethod, persistMethod, removeMethod);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

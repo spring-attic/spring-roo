@@ -60,4 +60,12 @@ public interface TypeLocationService {
 	 * @return a set of ClassOrInterfaceTypeDetails that have the specified annotations.
 	 */
 	Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect);
+	
+	/**
+	 * Returns a set of {@link ClassOrInterfaceTypeDetails}s that possess the specified tag.
+	 * 
+	 * @param tag the tag to detect on a type.
+	 * @return a set of ClassOrInterfaceTypeDetails that have the specified tag.
+	 */
+	Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(Object tag);
 }
