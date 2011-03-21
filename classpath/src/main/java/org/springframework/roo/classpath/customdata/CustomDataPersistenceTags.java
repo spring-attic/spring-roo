@@ -14,7 +14,8 @@ public enum CustomDataPersistenceTags {
 	/**
 	 * Persistence type definitions
 	 */
-	ROO_IDENTIFIER_TYPE,
+	IDENTIFIER_TYPE,
+	PERSISTENT_TYPE,
 	
 	NO_ARG_CONSTRUCTOR,
 	/**
@@ -32,7 +33,7 @@ public enum CustomDataPersistenceTags {
 	MANY_TO_ONE_FIELD,
 	ONE_TO_ONE_FIELD,
 	LOB_FIELD,
-	
+	COLUMN_FIELD, // Column field tag (currently also alows setting of a value map which may contain a 'length' key with Integer value
 	
 	/**
 	 * Persistence method definitions

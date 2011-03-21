@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -49,7 +50,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
-	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 
@@ -331,8 +331,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
 				// Check for @Size or @Column with length attribute
 				AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
-				AnnotationMetadata columnAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
-
+				
 				if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
 					Integer maxValue = (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
 					bodyBuilder.appendFormalLine(fieldType + " " + fieldName + " = " + initializer + ";");
@@ -342,10 +341,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutatorName + "(" + fieldName + ");");
-				} else if (sizeAnnotation == null && columnAnnotation != null) {
-					AnnotationAttributeValue<?> lengthAttributeValue = columnAnnotation.getAttribute(new JavaSymbolName("length"));
-					if (lengthAttributeValue != null) {
-						Integer lengthValue = (Integer) columnAnnotation.getAttribute(new JavaSymbolName("length")).getValue();
+				} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+					if (values != null && values.containsKey("length")) {
+						Integer lengthValue = (Integer) values.get("length");
 						bodyBuilder.appendFormalLine(fieldType + " " + fieldName + " = " + initializer + ";");
 						bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + lengthValue + ") {");
 						bodyBuilder.indent();
@@ -671,19 +671,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		for (MethodMetadata mutatorMethod : locatedMutators.keySet()) {
 			CollaboratingDataOnDemandMetadataHolder metadataHolder = locatedMutators.get(mutatorMethod);
 			FieldMetadata field = metadataHolder.getField();
-
+			Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
 			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Id")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
+			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.VERSION_FIELD)) {
 				continue;
 			}
 
-			// Never include field annotated with @javax.persistence.Transient
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Transient")) != null) {
+			// Never include persistence transient fields
+			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.TRANSIENT_FIELD)) {
 				continue;
 			}
 
 			// Never include any sort of collection; user has to make such entities by hand
-			if (field.getFieldType().isCommonCollectionType() || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToMany")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToMany")) != null) {
+			if (field.getFieldType().isCommonCollectionType() || fieldCustomDataKeys.contains(CustomDataPersistenceTags.ONE_TO_MANY_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD)) {
 				continue;
 			}
 			
@@ -721,11 +721,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					}
 				} else {
 					// Check for @Column
-					AnnotationMetadata columnAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
-					if (columnAnnotation != null) {
-						AnnotationAttributeValue<?> lengthValue = columnAnnotation.getAttribute(new JavaSymbolName("length"));
-						if (lengthValue != null && (initializer.length() + 2) > (Integer) lengthValue.getValue()) {
-							initializer = initializer.substring(0, (Integer) lengthValue.getValue() - 2);
+					if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+						@SuppressWarnings("unchecked")
+						Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+						if (columnValues.keySet().contains("length") && (initializer.length() + 2) > (Integer) columnValues.get("length")) {
+							initializer = initializer.substring(0, (Integer) columnValues.get("length") - 2);
 						}
 					}
 				}
@@ -770,16 +770,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else if (field.getFieldType().equals(annotationValues.getEntity())) {
 				// Avoid circular references (ROO-562)
 				initializer = "obj";
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
+			} else if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.ENUMERATED_FIELD)) {
 				initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
 			} else if (metadataHolder.getDataOnDemandMetadata() != null) {
 				requiredDataOnDemandCollaborators.add(field.getFieldType());
-
-				// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
-				AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
+				
 				DataOnDemandMetadata otherMetadata = metadataHolder.getDataOnDemandMetadata();
 				String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
-				if (oneToOneAnnotation != null) {
+				// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
+				if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.ONE_TO_ONE_FIELD)) {
 					initializer = collaboratingFieldName + "." + otherMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
 				} else {
 					initializer = collaboratingFieldName + "." + otherMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";

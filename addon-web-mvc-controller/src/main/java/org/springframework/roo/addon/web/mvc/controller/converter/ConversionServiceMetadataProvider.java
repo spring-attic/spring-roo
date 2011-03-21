@@ -9,7 +9,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
@@ -110,12 +109,10 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		Map<JavaType, List<MethodMetadata>> types = new HashMap<JavaType, List<MethodMetadata>>();
 		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
 		
-		String entityMid = EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA);
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
-		metadataDependencyRegistry.registerDependency(entityMid, metadataIdentificationString);
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		int counter = 0;
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-			if (counter < 4 && isMethodOfInterest(entityMetadata, method, memberDetails)) {
+			if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
 				counter++;
 				locatedAccessors.add(method);
 				// Track any changes to that method (eg it goes away)
@@ -134,11 +131,11 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		return types;
 	}
 	
-	private boolean isMethodOfInterest(EntityMetadata entityMetadata, MethodMetadata method, MemberDetails memberDetails) {
+	private boolean isMethodOfInterest(MethodMetadata method, MemberDetails memberDetails) {
 		if (! BeanInfoUtils.isAccessorMethod(method)) {
 			return false; // Only interested in accessors
 		}
-		if (entityMetadata != null && (method.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName()) || (entityMetadata.getVersionAccessor() != null && method.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName())))) {
+		if (method.getCustomData().keySet().contains(CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD)) {
 			return false; // Only interested in methods which are not accessors for persistence version or id fields
 		}
 		FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));

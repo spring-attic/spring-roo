@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.roo.addon.entity.RooEntity;
-
 /**
  * Indicates a type that requires ROO controller support.
  * 
@@ -21,7 +19,7 @@ import org.springframework.roo.addon.entity.RooEntity;
  * <ul>
  * <li>The Spring MVC org.springframework.stereotype.Controller annotation will be declared on the controller type if not exists</li>
  * <li>Setting this annotation will also generate JSP view pages corresponding to the functionalities included</li>
- * <li>The {@link RooWebScaffold#formBackingObject()} property defines the {@link RooEntity} which is exposed through this
+ * <li>The {@link RooWebScaffold#formBackingObject()} property defines the persistent type which is exposed through this
  * controller</li>
  * </ul>
  * 

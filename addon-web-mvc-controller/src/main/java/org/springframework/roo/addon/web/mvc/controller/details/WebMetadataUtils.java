@@ -14,8 +14,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
-
-//import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
@@ -160,38 +158,17 @@ public abstract class WebMetadataUtils {
 			return javaTypePersistenceMetadataDetails;
 		}
 		FieldMetadata identifierField = idFields.get(0);
-		MethodMetadata identifierAccessor = null;
-		MethodMetadata versionAccessor = null;
-		MethodMetadata persistMethod = null;
-		MethodMetadata removeMethod = null;
-		MethodMetadata mergeMethod = null;
-		MethodMetadata findAllMethod = null;
-		MethodMetadata findMethod = null;
-		MethodMetadata countMethod = null;
-		MethodMetadata findEntriesMethod = null;
+		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
+		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
+		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
+		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.REMOVE_METHOD);
+		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.MERGE_METHOD);
+		MethodMetadata findAllMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ALL_METHOD);
+		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);
+		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.COUNT_ALL_METHOD);
+		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
 		List<String> dynamicFinderNames = new ArrayList<String>();
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-			Set<Object> keySet = method.getCustomData().keySet();
-			if (keySet.contains(CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD)) {
-				identifierAccessor = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD)) {
-				versionAccessor = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.PERSIST_METHOD)) {
-				persistMethod = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.REMOVE_METHOD)) {
-				removeMethod = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.MERGE_METHOD)) {
-				mergeMethod = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.FIND_ALL_METHOD)) {
-				findAllMethod = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.FIND_METHOD)) {
-				findMethod = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.COUNT_ALL_METHOD)) {
-				countMethod = method;
-			} else if (keySet.contains(CustomDataPersistenceTags.FIND_ENTRIES_METHOD)) {
-				findEntriesMethod = method;
-			}
-		}
+		
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
 			if (mhtd.getCustomData().keySet().contains(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES)) {
 				@SuppressWarnings("unchecked")
@@ -229,7 +206,7 @@ public abstract class WebMetadataUtils {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
 		
-		return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.ROO_IDENTIFIER_TYPE).size() > 0;
+		return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_TYPE).size() > 0;
 	}
 	
 	private static boolean isEnumType(JavaType javaType, MetadataService metadataService) {

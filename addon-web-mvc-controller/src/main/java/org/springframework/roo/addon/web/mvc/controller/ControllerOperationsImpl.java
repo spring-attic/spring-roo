@@ -9,13 +9,13 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -55,32 +55,30 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	}
 
 	public void generateAll(final JavaPackage javaPackage) {
-		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
-		for (ClassOrInterfaceTypeDetails cid : cids) {
+		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithTag(CustomDataPersistenceTags.PERSISTENT_TYPE)) {
 			if (Modifier.isAbstract(cid.getModifier())) {
 				continue;
 			}
 			
 			JavaType javaType = cid.getName();
 			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, path));
-			
-			if (entityMetadata == null || (!entityMetadata.isValid())) {
-				continue;
-			}
 			
 			// Check to see if this entity metadata has a web scaffold metadata listening to it
 			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(javaType, path);
-			if (dependencyRegistry.getDownstream(entityMetadata.getId()).contains(downstreamWebScaffoldMetadataId)) {
+			if (dependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamWebScaffoldMetadataId)) {
 				// There is already a controller for this entity
+				continue;
+			}
+			
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
+			if (pluralMetadata == null) {
 				continue;
 			}
 			
 			// To get here, there is no listening controller, so add one
 			JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Controller");
-			createAutomaticController(controller, javaType, new HashSet<String>(), entityMetadata.getPlural().toLowerCase());
+			createAutomaticController(controller, javaType, new HashSet<String>(), pluralMetadata.getPlural().toLowerCase());
 		}
-		return;
 	}
 
 	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path) {
