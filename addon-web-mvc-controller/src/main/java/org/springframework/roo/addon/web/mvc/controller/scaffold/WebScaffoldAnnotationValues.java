@@ -24,6 +24,7 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate boolean exposeFinders = true;
 	@AutoPopulate boolean registerConverters = true;
 	@AutoPopulate boolean exposeJson = true;
+	@AutoPopulate boolean populateMethods = true;
 
 	public WebScaffoldAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooWebScaffold.class.getName()));
@@ -60,5 +61,9 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 
 	public boolean isExposeJson() {
 		return exposeJson;
+	}
+	
+	public boolean isPopulateMethods() {
+		return populateMethods;
 	}
 }

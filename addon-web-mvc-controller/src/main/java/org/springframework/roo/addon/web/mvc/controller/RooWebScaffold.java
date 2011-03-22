@@ -89,4 +89,12 @@ public @interface RooWebScaffold {
 	 */
 	boolean exposeJson() default true;
 	
+	/**
+	 * Indicate if Roo should create data population methods used for model attributes required for the Spring MVC forms. If this flag 
+	 * is set to false the developer is expected to manage the population of the model attributes by himself.
+	 * 
+	 * @return indicates if the populateXXX() methods should be provided (defaults to "true"; optional)
+	 */
+	boolean populateMethods() default true;
+	
 }
