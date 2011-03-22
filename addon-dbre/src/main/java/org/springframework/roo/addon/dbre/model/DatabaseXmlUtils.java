@@ -145,9 +145,6 @@ public abstract class DatabaseXmlUtils {
 			if (optionElement.getAttribute("key").equals("includeNonPortableAttributes")) {
 				database.setIncludeNonPortableAttributes(Boolean.parseBoolean(optionElement.getAttribute("value")));
 			}
-			if (optionElement.getAttribute("key").equals("testAutomatically")) {
-				database.setTestAutomatically(Boolean.parseBoolean(optionElement.getAttribute("value")));
-			}
 		}
 
 		return database;
@@ -165,7 +162,6 @@ public abstract class DatabaseXmlUtils {
 			databaseElement.setAttribute("package", database.getDestinationPackage().getFullyQualifiedPackageName());
 		}
 
-		databaseElement.appendChild(createOptionElement("testAutomatically", String.valueOf(database.isTestAutomatically()), document));
 		databaseElement.appendChild(createOptionElement("includeNonPortableAttributes", String.valueOf(database.isIncludeNonPortableAttributes()), document));
 
 		for (Table table : database.getTables()) {

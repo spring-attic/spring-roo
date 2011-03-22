@@ -32,8 +32,6 @@ public class Database implements Serializable {
 	/** Whether or not to included non-portable JPA attribues in the @Column annotation */
 	private boolean includeNonPortableAttributes;
 	
-	private boolean testAutomatically;
-
 	Database(String name, Set<Table> tables) {
 		Assert.hasText(name, "Database name required");
 		Assert.notNull(tables, "Tables required");
@@ -81,14 +79,6 @@ public class Database implements Serializable {
 
 	public void setIncludeNonPortableAttributes(boolean includeNonPortableAttributes) {
 		this.includeNonPortableAttributes = includeNonPortableAttributes;
-	}
-
-	public boolean isTestAutomatically() {
-		return testAutomatically;
-	}
-
-	public void setTestAutomatically(boolean testAutomatically) {
-		this.testAutomatically = testAutomatically;
 	}
 
 	/**

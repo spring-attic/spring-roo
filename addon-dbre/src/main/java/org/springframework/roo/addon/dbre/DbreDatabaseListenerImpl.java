@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +19,6 @@ import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.entity.EntityOperations;
 import org.springframework.roo.addon.entity.Identifier;
 import org.springframework.roo.addon.entity.IdentifierService;
 import org.springframework.roo.addon.entity.RooEntity;
@@ -67,7 +67,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private DbreModelService dbreModelService;
-	@Reference private EntityOperations entityOperations;
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
@@ -143,21 +142,18 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
 				table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
-				ClassOrInterfaceTypeDetails newEntity = createNewManagedEntityFromTable(table, destinationPackage);
-				if (database.isTestAutomatically()) {
-					// Create integration test
-					entityOperations.newIntegrationTest(newEntity.getName());
-				}
-				newEntities.add(newEntity);
+				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
 			}
 		}
 
 		// Notify
-		newEntities.addAll(managedEntities);
-		notify(newEntities);
+		List<ClassOrInterfaceTypeDetails> allEntities = new LinkedList<ClassOrInterfaceTypeDetails>();
+		allEntities.addAll(newEntities);
+		allEntities.addAll(managedEntities);
+		notify(allEntities);
 	}
 
-	private void notify(List<ClassOrInterfaceTypeDetails> newEntities) {
+	private void notify(List<ClassOrInterfaceTypeDetails> entities) {
 		for (ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
 			MetadataItem metadataItem = metadataService.get(managedIdentifierType.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
@@ -165,7 +161,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			}
 		}
 
-		for (ClassOrInterfaceTypeDetails entity : newEntities) {
+		for (ClassOrInterfaceTypeDetails entity : entities) {
 			MetadataItem metadataItem = metadataService.get(entity.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
