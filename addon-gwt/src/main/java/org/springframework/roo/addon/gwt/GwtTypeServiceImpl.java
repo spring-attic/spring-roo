@@ -50,9 +50,15 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
 
 /**
  * Provides a basic implementation of {@link GwtTypeService}.
@@ -139,7 +145,18 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		try {
 			mutableGwtXml = fileManager.updateFile(gwtXml);
 			is = mutableGwtXml.getInputStream();
-			gwtXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableGwtXml.getInputStream());
+			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+			builder.setEntityResolver(new EntityResolver() {
+				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+					if (systemId.endsWith("gwt-module.dtd")) {
+						return new InputSource(TemplateUtils.getTemplate(GwtMetadata.class, "templates/gwt-module.dtd"));
+					} else {
+						// Use the default behaviour
+						return null;
+					}
+				}
+			});
+			gwtXmlDoc = builder.parse(mutableGwtXml.getInputStream());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
