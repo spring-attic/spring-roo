@@ -107,7 +107,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		}
 		
 		// Get the embedded identifier metadata holder - may be null of no embedded identifier exists
-		EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder = getEmbeddedIdentifierMetadataHolder(memberDetails);
+		EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder = getEmbeddedIdentifierMetadataHolder(memberDetails, metadataIdentificationString);
 		
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
@@ -148,7 +148,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, identifierMutator, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierMetadataHolder);
 	}
 	
-	private EmbeddedIdentifierMetadataHolder getEmbeddedIdentifierMetadataHolder(MemberDetails memberDetails) {
+	private EmbeddedIdentifierMetadataHolder getEmbeddedIdentifierMetadataHolder(MemberDetails memberDetails, String metadataIdentificationString) {
 		List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
 		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
 		if (fields.size() > 0) {
@@ -172,6 +172,9 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 							break;
 						}
 					}
+
+					// We need to be informed if our dependent metadata changes
+					metadataDependencyRegistry.registerDependency(identifierMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
 					return new EmbeddedIdentifierMetadataHolder(identifierMemberHoldingTypeDetails.getName(), identifierFields, identifierConstructor);
 				}
