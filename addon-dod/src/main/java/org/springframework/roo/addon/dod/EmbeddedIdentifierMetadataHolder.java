@@ -20,8 +20,8 @@ public class EmbeddedIdentifierMetadataHolder {
 
 	public EmbeddedIdentifierMetadataHolder(JavaType identifierType, List<FieldMetadata> identifierFields, ConstructorMetadata identifierConstructor) {
 		Assert.notNull(identifierType, "Identifier type required");
-		Assert.notNull(identifierFields, "Identifier fields for " + identifierType.getFullyQualifiedTypeName() + " required");
-		Assert.isTrue(identifierConstructor != null && identifierConstructor.getParameterNames().size() == identifierFields.size(), "Identifier constructor for " + identifierType.getFullyQualifiedTypeName() + " must have the same number of parameters as the number of identifier fields");
+		Assert.notNull(identifierFields, "Fields for " + identifierType.getFullyQualifiedTypeName() + " required");
+		Assert.isTrue(identifierConstructor != null && identifierConstructor.getParameterNames().size() == identifierFields.size(), "Constructor for " + identifierType.getFullyQualifiedTypeName() + " required and must have the same number of parameters as the number of identifier fields");
 		this.identifierType = identifierType;
 		this.identifierFields = identifierFields;
 		this.identifierConstructor = identifierConstructor;

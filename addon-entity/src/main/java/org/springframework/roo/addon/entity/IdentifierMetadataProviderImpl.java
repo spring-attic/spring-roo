@@ -13,6 +13,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Provides {@link IdentifierMetadata}.
@@ -45,6 +46,10 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 		// We know governor type details are non-null and can be safely cast
 		JavaType javaType = IdentifierMetadata.getJavaType(metadataIdentificationString);
 		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
+		
+		// If the project itself changes, we want a chance to refresh this item
+		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataIdentificationString);
+
 		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, noArgConstructor, identifierServiceResult);
 	}
 
