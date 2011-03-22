@@ -27,7 +27,7 @@ public abstract class MemberFindingUtils {
 	 * @param fieldName to locate (required)
 	 * @return the field, or null if not found
 	 */
-	public static final FieldMetadata getDeclaredField(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName fieldName) {
+	public static FieldMetadata getDeclaredField(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName fieldName) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(fieldName, "Field name required");
 		for (FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
@@ -46,7 +46,7 @@ public abstract class MemberFindingUtils {
 	 * @param parameters to locate (can be null if there are no parameters)
 	 * @return the method, or null if not found
 	 */
-	public static final MethodMetadata getDeclaredMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	public static MethodMetadata getDeclaredMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(methodName, "Method name required");
 		if (parameters == null) {
@@ -69,7 +69,7 @@ public abstract class MemberFindingUtils {
 	 * @param parameters to locate (can be null if there are no parameters)
 	 * @return the constructor, or null if not found
 	 */
-	public static final ConstructorMetadata getDeclaredConstructor(MemberHoldingTypeDetails memberHoldingTypeDetails, List<JavaType> parameters) {
+	public static ConstructorMetadata getDeclaredConstructor(MemberHoldingTypeDetails memberHoldingTypeDetails, List<JavaType> parameters) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		if (parameters == null) {
 			parameters = new ArrayList<JavaType>();
@@ -89,7 +89,7 @@ public abstract class MemberFindingUtils {
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static final AnnotationMetadata getDeclaredTypeAnnotation(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType type) {
+	public static AnnotationMetadata getDeclaredTypeAnnotation(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType type) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(type, "Annotation type to locate required");
 		for (AnnotationMetadata md : memberHoldingTypeDetails.getAnnotations()) {
@@ -107,7 +107,7 @@ public abstract class MemberFindingUtils {
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static final AnnotationMetadata getDeclaredTypeAnnotation(MemberDetails memberDetails, JavaType type) {
+	public static AnnotationMetadata getDeclaredTypeAnnotation(MemberDetails memberDetails, JavaType type) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(type, "Annotation type to locate required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
@@ -128,7 +128,7 @@ public abstract class MemberFindingUtils {
 	 * @param parameters the method parameter signature to locate (can be null if no parameters are required)
 	 * @return the first located method, or null if such a method cannot be found
 	 */
-	public static final MethodMetadata getMethod(MemberDetails memberDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	public static MethodMetadata getMethod(MemberDetails memberDetails, JavaSymbolName methodName, List<JavaType> parameters) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(methodName, "Method name required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
@@ -147,7 +147,7 @@ public abstract class MemberFindingUtils {
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static final AnnotationMetadata getAnnotationOfType(List<? extends AnnotationMetadata> annotations, JavaType type) {
+	public static AnnotationMetadata getAnnotationOfType(List<? extends AnnotationMetadata> annotations, JavaType type) {
 		Assert.notNull(annotations, "Annotations to search required");
 		Assert.notNull(type, "Annotation type to locate required");
 		for (AnnotationMetadata md : annotations) {
@@ -165,7 +165,7 @@ public abstract class MemberFindingUtils {
 	 * @param annotationType annotation to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static final AnnotationMetadata getTypeAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotationType) {
+	public static AnnotationMetadata getTypeAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotationType) {
 		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
 		Assert.notNull(annotationType, "Annotation type required");
 		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
@@ -185,7 +185,7 @@ public abstract class MemberFindingUtils {
 	 * @param classOrInterfaceTypeDetails to search (required)
 	 * @return zero or more methods (never null)
 	 */
-	public static final List<MethodMetadata> getMethods(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	public static List<MethodMetadata> getMethods(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
 		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
 		while (current != null) {
@@ -204,7 +204,7 @@ public abstract class MemberFindingUtils {
 	 * @param fieldName to locate (required)
 	 * @return the field, or null if not found
 	 */
-	public static final FieldMetadata getField(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaSymbolName fieldName) {
+	public static FieldMetadata getField(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaSymbolName fieldName) {
 		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
 		Assert.notNull(fieldName, "Field name required");
 		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
@@ -225,7 +225,7 @@ public abstract class MemberFindingUtils {
 	 * @param annotation to locate (required)
 	 * @return all the located fields (never null, but may be empty)
 	 */
-	public static final List<FieldMetadata> getFieldsWithAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotation) {
+	public static List<FieldMetadata> getFieldsWithAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotation) {
 		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
 		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
 		while (current != null) {
@@ -248,7 +248,7 @@ public abstract class MemberFindingUtils {
 	 * @param parameters to locate (can be null if there are no parameters)
 	 * @return the method, or null if not found
 	 */
-	public static final MethodMetadata getMethod(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	public static MethodMetadata getMethod(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
 		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
 		Assert.notNull(methodName, "Method name required");
 		if (parameters == null) {
@@ -272,7 +272,7 @@ public abstract class MemberFindingUtils {
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return zero or more constructors (never null)
 	 */
-	public static final List<ConstructorMetadata> getConstructors(MemberDetails memberDetails) {
+	public static List<ConstructorMetadata> getConstructors(MemberDetails memberDetails) {
 		Assert.notNull(memberDetails, "Member details required");
 		List<ConstructorMetadata> result = new ArrayList<ConstructorMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
@@ -287,7 +287,7 @@ public abstract class MemberFindingUtils {
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return zero or more methods (never null)
 	 */
-	public static final List<MethodMetadata> getMethods(MemberDetails memberDetails) {
+	public static List<MethodMetadata> getMethods(MemberDetails memberDetails) {
 		Assert.notNull(memberDetails, "Member details required");
 		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
@@ -302,7 +302,7 @@ public abstract class MemberFindingUtils {
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return zero or more fields (never null)
 	 */
-	public static final List<FieldMetadata> getFields(MemberDetails memberDetails) {
+	public static List<FieldMetadata> getFields(MemberDetails memberDetails) {
 		Assert.notNull(memberDetails, "Member details required");
 		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
@@ -319,7 +319,7 @@ public abstract class MemberFindingUtils {
 	 * @param tagKey the {@link CustomData} key to search for
 	 * @return zero or more methods (never null)
 	 */
-	public static final List<MethodMetadata> getMethodsWithTag(MemberDetails memberDetails, Object tagKey) {
+	public static List<MethodMetadata> getMethodsWithTag(MemberDetails memberDetails, Object tagKey) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(tagKey, "Custom data key required");
 		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
@@ -354,7 +354,7 @@ public abstract class MemberFindingUtils {
 	 * @param tagKey the {@link CustomData} key to search for
 	 * @return zero or more fields (never null)
 	 */
-	public static final List<FieldMetadata> getFieldsWithTag(MemberDetails memberDetails, Object tagKey) {
+	public static List<FieldMetadata> getFieldsWithTag(MemberDetails memberDetails, Object tagKey) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(tagKey, "Custom data key required");
 		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
@@ -392,7 +392,7 @@ public abstract class MemberFindingUtils {
 	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
 	 * 
 	 * @param memberDetails the {@link MemberDetails} to search (required)
-	 * @param tagKey the {@link CustomData} key to search for (required)
+	 * @param tag the {@link CustomData} key to search for (required)
 	 * @return the most concrete tagged type or null if not found
 	 */
 	public static MemberHoldingTypeDetails getMostConcreteMemberHoldingTypeDetailsWithTag(MemberDetails memberDetails, Object tag) {
