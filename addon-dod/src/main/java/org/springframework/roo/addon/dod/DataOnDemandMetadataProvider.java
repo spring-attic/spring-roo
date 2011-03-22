@@ -147,7 +147,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 
 		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, identifierMutator, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierMetadataHolder);
 	}
-	
+
 	private EmbeddedIdentifierMetadataHolder getEmbeddedIdentifierMetadataHolder(MemberDetails memberDetails, String metadataIdentificationString) {
 		List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
 		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
@@ -157,29 +157,22 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			if (identifierMemberDetails != null) {
 				MemberHoldingTypeDetails identifierMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(identifierMemberDetails, CustomDataPersistenceTags.IDENTIFIER_TYPE);
 				if (identifierMemberHoldingTypeDetails != null) {
-					List<JavaType> parameterTypes = new LinkedList<JavaType>();
 					for (FieldMetadata field : MemberFindingUtils.getFields(identifierMemberDetails)) {
 						if (!(Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier()) || Modifier.isTransient(field.getModifier()))) {
 							identifierFields.add(field);
-							parameterTypes.add(field.getFieldType());
 							metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 						}
 					}
-					ConstructorMetadata identifierConstructor = null;
 					List<ConstructorMetadata> constructors = MemberFindingUtils.getConstructors(identifierMemberDetails);
 					for (ConstructorMetadata constructor : constructors) {
+						metadataDependencyRegistry.registerDependency(constructor.getDeclaredByMetadataId(), metadataIdentificationString);
 						if (constructor.getParameterTypes().size() == identifierFields.size()) {
-							identifierConstructor = constructor;
-							metadataDependencyRegistry.registerDependency(identifierConstructor.getDeclaredByMetadataId(), metadataIdentificationString);
-							break;
+							return new EmbeddedIdentifierMetadataHolder(identifierMemberHoldingTypeDetails.getName(), identifierFields, constructor);
 						}
 					}
-
-					return new EmbeddedIdentifierMetadataHolder(identifierMemberHoldingTypeDetails.getName(), identifierFields, identifierConstructor);
 				}
 			}
 		}
-		
 		return null;
 	}
 
