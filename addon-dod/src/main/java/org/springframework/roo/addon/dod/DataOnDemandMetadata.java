@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -50,7 +51,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
-	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 	private static final JavaSymbolName EMBEDDED_ID_METHOD = new JavaSymbolName("setEmbeddedId");
@@ -64,13 +64,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata flushMethod;
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators;
 	private JavaType entityType;
-	private IdentifierMetadata identifierMetadata;
+	private EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder;
 	
 	private Map<MethodMetadata, String> mandatoryMutators = new LinkedHashMap<MethodMetadata, String>();
 	private List<JavaType> requiredDataOnDemandCollaborators = new LinkedList<JavaType>();
 	private Map<FieldMetadata, String> embeddedIdInitializers = new LinkedHashMap<FieldMetadata, String>();
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata identifierMutator, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, IdentifierMetadata identifierMetadata) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata identifierMutator, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -96,7 +96,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.flushMethod = flushMethod;
 		this.locatedMutators = locatedMutators;
 		this.entityType = entityType;
-		this.identifierMetadata = identifierMetadata;
+		this.embeddedIdentifierMetadataHolder = embeddedIdentifierMetadataHolder;
 		
 		// Calculate and store field initializers
 		storeEmbeddedIdInitializers();
@@ -278,7 +278,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getFullyQualifiedTypeName() + " obj = new " + entityType.getFullyQualifiedTypeName() + "();");
 
 		// Create the composite key embedded id if required
-		if (identifierMetadata != null) {
+		if (embeddedIdentifierMetadataHolder != null) {
 			bodyBuilder.appendFormalLine(EMBEDDED_ID_METHOD + "(obj, index);");
 		}
 
@@ -292,8 +292,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getEmbeddedIdMethod() {
-		if (identifierMetadata == null) {
+	public MethodMetadata getEmbeddedIdMethod() {
+		if (!hasEmbeddedIdentifier()) {
 			return null;
 		}
 		
@@ -319,16 +319,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.append(builder.toString());
 		
 		// Create constructor for embedded id class
-		String pkType = identifierMetadata.getMemberHoldingTypeDetails().getGovernor().getName().getFullyQualifiedTypeName();
+		String identifierType = embeddedIdentifierMetadataHolder.getIdentifierType().getFullyQualifiedTypeName();
+		ConstructorMetadata constructorMetadata = embeddedIdentifierMetadataHolder.getIdentifierConstructor();
 		
 		builder.delete(0, builder.length());
-		builder.append(pkType).append(" embeddedIdClass = new ").append(pkType);
+		builder.append(identifierType).append(" embeddedIdClass = new ").append(identifierType);
 		builder.append("(");
-		List<String> fieldNames = new LinkedList<String>();
-		for (FieldMetadata identifierField : embeddedIdInitializers.keySet()) {
-			fieldNames.add(identifierField.getFieldName().getSymbolName());
-		}
-		builder.append(StringUtils.collectionToDelimitedString(fieldNames, ", "));
+		builder.append(StringUtils.collectionToDelimitedString(constructorMetadata.getParameterNames(), ", "));
 		builder.append(");");
 		
 		bodyBuilder.appendFormalLine(builder.toString());
@@ -398,8 +395,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		if (fieldType.equals(JavaType.STRING_OBJECT)) {
 			// Check for @Size or @Column with length attribute
 			AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
-			AnnotationMetadata columnAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
-
 			if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
 				Integer maxValue = (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + maxValue + ") {");
@@ -407,10 +402,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				bodyBuilder.appendFormalLine(fieldName + "  = " + fieldName + ".substring(0, " + maxValue + ");");
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
-			} else if (sizeAnnotation == null && columnAnnotation != null) {
-				AnnotationAttributeValue<?> lengthAttributeValue = columnAnnotation.getAttribute(new JavaSymbolName("length"));
-				if (lengthAttributeValue != null) {
-					Integer lengthValue = (Integer) columnAnnotation.getAttribute(new JavaSymbolName("length")).getValue();
+			} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+				if (values != null && values.containsKey("length")) {
+					Integer lengthValue = (Integer) values.get("length");
 					bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + lengthValue + ") {");
 					bodyBuilder.indent();
 					bodyBuilder.appendFormalLine(fieldName + "  = " + fieldName + ".substring(0, " + lengthValue + ");");
@@ -423,14 +419,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			AnnotationMetadata digitsAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Digits"));
 			AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin"));
 			AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax"));
-			AnnotationMetadata columnAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Column"));
 
 			if (digitsAnnotation != null) {
 				doDigits(field, digitsAnnotation, bodyBuilder, mutatorName, initializer, suffix);
 			} else if (decimalMinAnnotation != null || decimalMaxAnnotation != null) {
 				doDecimalMinAndDecimalMax(field, decimalMinAnnotation, decimalMaxAnnotation, bodyBuilder, mutatorName, initializer, suffix);
-			} else if (columnAnnotation != null) {
-				doColumnPrecisionAndScale(field, columnAnnotation, bodyBuilder, mutatorName, initializer, suffix);
+			} else if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+				doColumnPrecisionAndScale(field, values, bodyBuilder, mutatorName, initializer, suffix);
 			}
 		} else if (isIntegerFieldType(fieldType)) {
 			// Check for @Min and @Max
@@ -520,20 +517,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 	}
 
-	private void doColumnPrecisionAndScale(FieldMetadata field, AnnotationMetadata columnAnnotation, InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName mutatorName, String initializer, String suffix) {
-		AnnotationAttributeValue<?> precision = columnAnnotation.getAttribute(new JavaSymbolName("precision"));
-		if (precision == null) {
+	private void doColumnPrecisionAndScale(FieldMetadata field, Map<String, Object> values, InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName mutatorName, String initializer, String suffix) {
+		if (values == null || !values.containsKey("precision")) {
 			return;
 		}
-		Integer precisionValue = (Integer) precision.getValue();
 		
-		AnnotationAttributeValue<?> scale = columnAnnotation.getAttribute(new JavaSymbolName("scale"));
-		Integer scaleValue = scale == null ? 0 : (Integer) scale.getValue();
+		Integer precision = (Integer) values.get("precision");
+		Integer scale = (Integer) values.get("scale");
+		scale = scale == null ? 0 : scale;
 		
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
 		
-		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", (precisionValue - scaleValue), '9') + "." + StringUtils.padRight("9", scaleValue, '9'));
+		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", (precision - scale), '9') + "." + StringUtils.padRight("9", scale, '9'));
 		if (fieldType.equals(BIG_DECIMAL)) {
 			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
 			bodyBuilder.indent();
@@ -730,12 +726,16 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 
+	public boolean hasEmbeddedIdentifier() {
+		return embeddedIdentifierMetadataHolder != null;
+	}
+
 	private void storeEmbeddedIdInitializers() {
-		if (identifierMetadata == null) {
+		if (!hasEmbeddedIdentifier()) {
 			return;
 		}
 
-		for (FieldMetadata field : identifierMetadata.getFields()) {
+		for (FieldMetadata field : embeddedIdentifierMetadataHolder.getIdentifierFields()) {
 			String initializer = getFieldInitializer(field, null);
 			embeddedIdInitializers.put(field, initializer);
 		}
@@ -745,19 +745,20 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		for (MethodMetadata mutatorMethod : locatedMutators.keySet()) {
 			CollaboratingDataOnDemandMetadataHolder metadataHolder = locatedMutators.get(mutatorMethod);
 			FieldMetadata field = metadataHolder.getField();
+			Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
 
-			// Never include @Id, @EmbeddedId, or @Version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Id")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.EmbeddedId")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
+			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
+			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.VERSION_FIELD)) {
 				continue;
 			}
 
-			// Never include field annotated with @javax.persistence.Transient
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Transient")) != null) {
+			// Never include persistence transient fields
+			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.TRANSIENT_FIELD)) {
 				continue;
 			}
 
 			// Never include any sort of collection; user has to make such entities by hand
-			if (field.getFieldType().isCommonCollectionType() || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToMany")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToMany")) != null) {
+			if (field.getFieldType().isCommonCollectionType() || fieldCustomDataKeys.contains(CustomDataPersistenceTags.ONE_TO_MANY_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD)) {
 				continue;
 			}
 			
@@ -770,6 +771,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaType fieldType = field.getFieldType();
 		String initializer = "null";
 		String fieldInitializer = field.getFieldInitializer();
+		Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
 
 		// Date fields included for DataNucleus (
 		if (fieldType.equals(new JavaType(Date.class.getName()))) {
@@ -802,11 +804,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				}
 			} else {
 				// Check for @Column
-				AnnotationMetadata columnAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
-				if (columnAnnotation != null) {
-					AnnotationAttributeValue<?> lengthValue = columnAnnotation.getAttribute(new JavaSymbolName("length"));
-					if (lengthValue != null && (initializer.length() + 2) > (Integer) lengthValue.getValue()) {
-						initializer = initializer.substring(0, (Integer) lengthValue.getValue() - 2);
+				if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+					if (columnValues.keySet().contains("length") && (initializer.length() + 2) > (Integer) columnValues.get("length")) {
+						initializer = initializer.substring(0, (Integer) columnValues.get("length") - 2);
 					}
 				}
 			}
@@ -855,15 +857,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(annotationValues.getEntity())) {
 			// Avoid circular references (ROO-562)
 			initializer = "obj";
-		} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
-			initializer = fieldType.getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
+		} else if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.ENUMERATED_FIELD)) {
+			initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
 		} else if (collaboratingMetadata != null) {
-			requiredDataOnDemandCollaborators.add(fieldType);
-
+			requiredDataOnDemandCollaborators.add(field.getFieldType());
+			
+			String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 			// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
-			AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
-			String collaboratingFieldName = getCollaboratingFieldName(fieldType).getSymbolName();
-			if (oneToOneAnnotation != null) {
+			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.ONE_TO_ONE_FIELD)) {
 				initializer = collaboratingFieldName + "." + collaboratingMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
 			} else {
 				initializer = collaboratingFieldName + "." + collaboratingMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";

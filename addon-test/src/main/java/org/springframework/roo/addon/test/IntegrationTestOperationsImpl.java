@@ -7,14 +7,15 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -51,48 +52,52 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 	 */
 	public void newMockTest(JavaType entity) {
 		Assert.notNull(entity, "Entity to produce a mock test for is required");
-
+		
 		JavaType name = new JavaType(entity + "Test");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
-
+		
 		if (metadataService.get(declaredByMetadataId) != null) {
 			// The file already exists
 			return;
 		}
-
+		
 		// Determine if the mocking infrastructure needs installing
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.junit.runners.JUnit4")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"), config));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.mock.staticmock.MockStaticEntityMethods")));
-
+		
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		methodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.Test")));
-
+		
 		// Get the entity so we can hopefully make a demo method that will be usable
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		EntityMetadata em = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
-		if (em != null) {
-			MethodMetadata methodMetadata = em.getCountMethod();
-			if (methodMetadata != null) {
-				String countMethod = entity.getSimpleTypeName() + "." + methodMetadata.getMethodName().getSymbolName() + "()";
-				bodyBuilder.appendFormalLine("int expectedCount = 13;");
-				bodyBuilder.appendFormalLine(countMethod + ";");
-				bodyBuilder.appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.expectReturn(expectedCount);");
-				bodyBuilder.appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.playback();");
-				bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(expectedCount, " + countMethod + ");");
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata != null) {
+			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+			if (classOrInterfaceTypeDetails != null) {
+				MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
+				List<MethodMetadata> countMethods = MemberFindingUtils.getMethodsWithTag(memberDetails, CustomDataPersistenceTags.COUNT_ALL_METHOD);
+				if (countMethods.size() == 1) {
+					String countMethod = entity.getSimpleTypeName() + "." + countMethods.get(0).getMethodName().getSymbolName() + "()";
+					bodyBuilder.appendFormalLine("int expectedCount = 13;");
+					bodyBuilder.appendFormalLine(countMethod + ";");
+					bodyBuilder.appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.expectReturn(expectedCount);");
+					bodyBuilder.appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.playback();");
+					bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(expectedCount, " + countMethod + ");");
+				}
 			}
 		}
-
+		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMethod"), JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(methodAnnotations);
 		methods.add(methodBuilder);
-
+		
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setDeclaredMethods(methods);
-
+		
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 	}
 	
@@ -124,7 +129,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), governorTypeDetails);
 			for (MemberHoldingTypeDetails typeDetails : memberDetails.getDetails()) {
-				if (!(typeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.entity.EntityMetadata") || typeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.tostring.ToStringMetadata"))) {
+				if (!(typeDetails.getCustomData().keySet().contains(CustomDataPersistenceTags.PERSISTENT_TYPE) || typeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.tostring.ToStringMetadata"))) {
 					for (MethodMetadata method : typeDetails.getDeclaredMethods()) {
 						// Check if public, non-abstract method
 						if (Modifier.isPublic(method.getModifier()) && !Modifier.isAbstract(method.getModifier())) {

@@ -267,6 +267,21 @@ public abstract class MemberFindingUtils {
 	}
 	
 	/**
+	 * Searches all {@link MemberDetails} and returns all constructors.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @return zero or more constructors (never null)
+	 */
+	public static final List<ConstructorMetadata> getConstructors(MemberDetails memberDetails) {
+		Assert.notNull(memberDetails, "Member details required");
+		List<ConstructorMetadata> result = new ArrayList<ConstructorMetadata>();
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			result.addAll(memberHoldingTypeDetails.getDeclaredConstructors());
+		}
+		return result;
+	}
+
+	/**
 	 * Searches all {@link MemberDetails} and returns all methods.
 	 * 
 	 * @param memberDetails the {@link MemberDetails} to search (required)
@@ -281,7 +296,6 @@ public abstract class MemberFindingUtils {
 		return result;
 	}
 	
-
 	/**
 	 * Searches all {@link MemberDetails} and returns all fields.
 	 * 

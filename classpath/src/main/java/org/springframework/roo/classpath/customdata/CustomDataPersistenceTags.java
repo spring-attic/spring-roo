@@ -7,7 +7,6 @@ import org.springframework.roo.model.CustomData;
  * 
  * @author Stefan Schmidt
  * @since 1.1.3
- *
  */
 public enum CustomDataPersistenceTags {
 	
@@ -18,6 +17,7 @@ public enum CustomDataPersistenceTags {
 	PERSISTENT_TYPE,
 	
 	NO_ARG_CONSTRUCTOR,
+	
 	/**
 	 * Persistence field definitions
 	 */
@@ -33,7 +33,7 @@ public enum CustomDataPersistenceTags {
 	MANY_TO_ONE_FIELD,
 	ONE_TO_ONE_FIELD,
 	LOB_FIELD,
-	COLUMN_FIELD, // Column field tag (currently also alows setting of a value map which may contain a 'length' key with Integer value
+	COLUMN_FIELD, 
 	
 	/**
 	 * Persistence method definitions
@@ -41,7 +41,7 @@ public enum CustomDataPersistenceTags {
 	// Identifier accessor method (method must have no parameters, and return ID data type)
 	IDENTIFIER_ACCESSOR_METHOD,
 	
-	// Identifier accessor method (method must have one parameter, and return void data type)
+	// Identifier mutator method (method must have one parameter, and return void data type)
 	IDENTIFIER_MUTATOR_METHOD,
 
 	// Version accessor method (method must have no parameters, and return version data type)
@@ -76,5 +76,4 @@ public enum CustomDataPersistenceTags {
 	
 	// Dynamic finder method names; CustomData value expected to be a java.util.List<String> of finder names
 	DYNAMIC_FINDER_NAMES;
-
 }

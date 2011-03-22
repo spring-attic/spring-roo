@@ -17,17 +17,13 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadataItem implements ItdTypeDetailsProvidingMetadataItem {
-
 	protected ClassOrInterfaceTypeDetails governorTypeDetails;
 	protected ItdTypeDetails itdTypeDetails;
 	protected JavaType destination;
-	
 	protected JavaType aspectName;
 	protected PhysicalTypeMetadata governorPhysicalTypeMetadata;
-	
 	protected ItdTypeDetailsBuilder builder;
 	
 	/**
@@ -54,7 +50,6 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 		this.governorPhysicalTypeMetadata = governorPhysicalTypeMetadata;
 
 		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		
 		if (physicalTypeDetails == null || !(physicalTypeDetails instanceof ClassOrInterfaceTypeDetails)) {
 			// There is a problem
 			valid = false;
@@ -87,5 +82,4 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
 	}
-
 }

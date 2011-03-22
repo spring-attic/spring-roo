@@ -44,6 +44,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
 	private boolean noArgConstructor;
+	private boolean publicNoArgConstructor = false;
 	private List<FieldMetadata> fields;
 
 	// From annotation
@@ -103,8 +104,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addMethod(getHashCodeMethod());
 		
 		// Add custom data tag for Roo Identifier type
-		CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-		customDataBuilder.put(CustomDataPersistenceTags.ROO_IDENTIFIER_TYPE, null);
+		CustomDataBuilder customDataBuilder = new CustomDataBuilder(builder.getCustomData().build());
+		customDataBuilder.put(CustomDataPersistenceTags.IDENTIFIER_TYPE, null);
 		builder.setCustomData(customDataBuilder);
 
 		// Create a representation of the desired output ITD
@@ -139,9 +140,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				annotations.add(getColumnBuilder(identifier));
 				
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType());
-				CustomDataBuilder customData = new CustomDataBuilder();
-				customData.put(CustomDataPersistenceTags.ROO_IDENTIFIER_FIELD, null);
-				fieldBuilder.setCustomData(customData);
 				FieldMetadata idField = fieldBuilder.build();
 				
 				// Only add field to ITD if not declared on governor
@@ -314,7 +312,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public ConstructorMetadata getParameterizedConstructor() {
 		Assert.notNull(fields, "Fields required");
 		// Search for an existing constructor
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		List<JavaType> paramTypes = new LinkedList<JavaType>();
 		for (FieldMetadata field : fields) {
 			paramTypes.add(field.getFieldType());
 		}
@@ -322,11 +320,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, paramTypes);
 		if (result != null) {
 			// Found an existing no-arg constructor on this class, so return it
+			publicNoArgConstructor = true;
 			return result;
 		}
 
 		// Create the constructor
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<JavaSymbolName> paramNames = new LinkedList<JavaSymbolName>();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
 		for (FieldMetadata field : fields) {
@@ -375,7 +374,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		bodyBuilder.appendFormalLine("super();");
 
 		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
-		constructorBuilder.setModifier(Modifier.PRIVATE);
+		constructorBuilder.setModifier(publicNoArgConstructor ? Modifier.PUBLIC : Modifier.PRIVATE);
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		return constructorBuilder.build();
