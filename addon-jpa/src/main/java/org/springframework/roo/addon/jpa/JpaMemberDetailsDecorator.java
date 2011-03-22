@@ -26,14 +26,13 @@ import org.springframework.roo.model.JavaSymbolName;
 
 /**
  * Decorates JPA-related {@link FieldMetadata} with custom data tags.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1.3
  */
 @Service
 @Component
 public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
-	
 	private final Class<JpaMemberDetailsDecorator> mutex = JpaMemberDetailsDecorator.class;
 
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
@@ -92,13 +91,21 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.Version") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.VERSION_FIELD)) {
 					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.VERSION_FIELD);
 					detailsChanged = true;
-				} 
+				}
 				// The @Column annotation can be used in combination with any of the annotations above
 				if (annotationFullyQualifiedName.equals("javax.persistence.Column") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
 					Map<String, Object> value = new HashMap<String, Object>();
 					AnnotationAttributeValue<?> lengthAttributeValue = annotation.getAttribute(new JavaSymbolName("length"));
 					if (lengthAttributeValue != null) {
 						value.put("length", (Integer) annotation.getAttribute(new JavaSymbolName("length")).getValue());
+					}
+					AnnotationAttributeValue<?> precisionAttributeValue = annotation.getAttribute(new JavaSymbolName("precision"));
+					if (precisionAttributeValue != null) {
+						value.put("precision", (Integer) annotation.getAttribute(new JavaSymbolName("precision")).getValue());
+					}
+					AnnotationAttributeValue<?> scaleAttributeValue = annotation.getAttribute(new JavaSymbolName("scale"));
+					if (scaleAttributeValue != null) {
+						value.put("scale", (Integer) annotation.getAttribute(new JavaSymbolName("scale")).getValue());
 					}
 					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.COLUMN_FIELD, value);
 					detailsChanged = true;
@@ -107,7 +114,7 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 		}
 		return detailsChanged;
 	}
-	
+
 	private void addCustomizedMemberHoldingTypeDetailsForField(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails original, FieldMetadata originalField, Object tag) {
 		addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, original, originalField, tag, null);
 	}
@@ -115,7 +122,7 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 	private void addCustomizedMemberHoldingTypeDetailsForField(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails original, FieldMetadata originalField, Object tag, Object value) {
 		// Remove old MemberHoldingTypeDetails first
 		removeMemberHoldingTypeDetailsFromList(memberHoldingTypeDetailsList, original);
-		
+
 		FieldMetadataBuilder newField = new FieldMetadataBuilder(originalField);
 		CustomDataBuilder customDataBuilder = new CustomDataBuilder(originalField.getCustomData());
 		customDataBuilder.put(tag, value);
@@ -128,7 +135,7 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 			}
 		}
 		fields.add(newField);
-		
+
 		TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(original);
 		typeDetailsBuilder.setDeclaredFields(fields);
 		memberHoldingTypeDetailsList.add(typeDetailsBuilder.build());
