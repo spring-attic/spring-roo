@@ -216,7 +216,6 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		if (otherProvider.equals(metadataIdentificationString)) {
 			return null;
 		}
-		metadataDependencyRegistry.registerDependency(otherProvider, metadataIdentificationString);
 		
 		return (DataOnDemandMetadata) metadataService.get(otherProvider);
 	}

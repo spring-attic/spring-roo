@@ -29,6 +29,9 @@ public class Database implements Serializable {
 	/** The JavaPackage where entities are created */
 	private JavaPackage destinationPackage;
 	
+	/** Whether to create integration tests */
+	private boolean testAutomatically;
+	
 	/** Whether or not to included non-portable JPA attribues in the @Column annotation */
 	private boolean includeNonPortableAttributes;
 	
@@ -71,6 +74,14 @@ public class Database implements Serializable {
 
 	public void setDestinationPackage(JavaPackage destinationPackage) {
 		this.destinationPackage = destinationPackage;
+	}
+
+	public boolean isTestAutomatically() {
+		return testAutomatically;
+	}
+
+	public void setTestAutomatically(boolean testAutomatically) {
+		this.testAutomatically = testAutomatically;
 	}
 
 	public boolean isIncludeNonPortableAttributes() {
