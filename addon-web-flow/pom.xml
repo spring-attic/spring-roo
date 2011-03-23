@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.web.flow</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Web - Flow</name>
+	<description>Configuration and integration of Spring Web Flow features in the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

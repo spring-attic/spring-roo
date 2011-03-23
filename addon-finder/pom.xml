@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.finder</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Finder</name>
+	<description>Support for the generation of finder methods for JPA-backed entities.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

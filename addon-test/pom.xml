@@ -11,6 +11,7 @@
 	<artifactId>org.springframework.roo.addon.test</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Automated Integration Testing</name>
+	<description>Integration of JUnit integration tests in the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

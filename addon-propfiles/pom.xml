@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.propfiles</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Property Files</name>
+	<description>Support for the management of properties files in the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

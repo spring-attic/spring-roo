@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.jdbc</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - JDBC Driver Acquisition</name>
+	<description>Support for configuration of persistence settings in target project.</description>
 	<dependencies>
 		<!-- OSGi -->
 		<dependency>

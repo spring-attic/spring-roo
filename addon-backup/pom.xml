@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.backup</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Backup</name>
+	<description>Provides project backup facilities.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

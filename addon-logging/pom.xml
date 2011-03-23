@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.logging</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Logging</name>
+	<description>Support for logging configuration of the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.property.editor</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Property Editor</name>
+	<description>Support for the creation of standard Java property editors.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.jpa</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - JPA</name>
+	<description>Support for Java Persistence API features in the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

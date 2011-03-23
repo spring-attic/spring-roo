@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.dbre</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Database Reverse Engineering</name>
+	<description>Support for the incremental reverse engineering of existing databases.</description>
 	<dependencies>
 		<!-- OSGi -->
 		<dependency>

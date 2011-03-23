@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.creator</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Creator</name>
+	<description>Support for creating new Spring Roo add-ons.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

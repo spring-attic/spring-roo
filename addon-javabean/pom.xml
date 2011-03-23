@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.javabean</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - JavaBean Method Manager</name>
+	<description>Support for creation and management of accessors and mutators following the JavaBean standard.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

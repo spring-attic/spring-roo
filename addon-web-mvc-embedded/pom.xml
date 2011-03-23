@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.web.mvc.embedded</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Web MVC Embedded Extensions</name>
+	<description>Extension to the MVC add-on which allows addition of embedded features such as maps, videos, etc into web pages.</description>
 	<dependencies>
 	      <!-- OSGi -->
           <dependency>

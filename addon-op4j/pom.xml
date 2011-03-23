@@ -10,6 +10,7 @@
   <artifactId>org.springframework.roo.addon.op4j</artifactId>
   <packaging>bundle</packaging>
   <name>Spring Roo - Addon - Op4J</name>
+  <description>Support for the configuration and integration of OP4J (http://www.op4j.org/) functionalities through an AspectJ ITD.</description>
   <dependencies>
     <!-- OSGi -->
     <dependency>

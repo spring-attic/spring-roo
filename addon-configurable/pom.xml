@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.configurable</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - @Configurable Support</name>
+	<description>Support for the introduction of Spring's @Configurable annotation through an AspectJ ITD.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

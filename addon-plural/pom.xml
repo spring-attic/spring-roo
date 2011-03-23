@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.plural</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Plural Details</name>
+	<description>Determines the plural term for a given String literal using Inflector (https://inflector.dev.java.net/).</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

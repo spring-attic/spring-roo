@@ -11,6 +11,7 @@
 	<artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Web MVC JSP View</name>
+	<description>Configuration and integration of Spring MVC JSP features in the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

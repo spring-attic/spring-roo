@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.jms</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - JMS</name>
+	<description>Support for configuring Java Messaging System settings in the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

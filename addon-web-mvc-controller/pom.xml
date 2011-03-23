@@ -11,6 +11,7 @@
 	<artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Web MVC Controller</name>
+	<description>Configuration and integration of Spring MVC controllers in the target project.</description>
 	<build>
 		<plugins>
 			<plugin>

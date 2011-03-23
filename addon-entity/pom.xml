@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.entity</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Entity</name>
+	<description>Support for the creation and management of domain entities.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

@@ -10,6 +10,7 @@
   <artifactId>org.springframework.roo.addon.roobot.client</artifactId>
   <packaging>bundle</packaging>
   <name>Spring Roo - Addon - RooBot Client</name>
+  <description>Support for add-on management through the RooBot server.</description>
   <dependencies>
     <!-- OSGi -->
     <dependency>

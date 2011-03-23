@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.gwt</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Google Web Toolkit</name>
+	<description>Support for UI scaffolding using Google Web Toolkit.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

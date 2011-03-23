@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.security</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Spring Security</name>
+	<description>Configuration and Integration of Spring Security features in the target project.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

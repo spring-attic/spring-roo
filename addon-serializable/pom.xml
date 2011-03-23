@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.serializable</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Serializable</name>
+	<description>Integration of Java serialization support through an AspectJ ITD.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>

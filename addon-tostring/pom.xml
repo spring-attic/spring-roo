@@ -10,6 +10,7 @@
 	<artifactId>org.springframework.roo.addon.tostring</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - toString</name>
+	<description>Support for the automatic management of toString() method through an AspectJ ITD.</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>
