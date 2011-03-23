@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
 
 /**
  * Provides a common set of operations for entities.
@@ -47,21 +46,4 @@ public interface EntityOperations {
 	 * @param identifierColumn the identifier column name
 	 */
 	void newIdentifier(JavaType identifierType, String identifierField, String identifierColumn);
-	
-	/**
-	 * Creates an integration test for the entity. Automatically produces a data-on-demand (DoD) class if one does not exist.
-	 * Silently returns if the integration test file already exists.
-	 * 
-	 * @param entity the entity to produce an integration test for (required)
-	 */
-	void newIntegrationTest(JavaType entity);
-
-	/**
-	 * Creates a new data-on-demand (DoD) provider for the entity. Silently returns if the DoD class already exists.
-	 * 
-	 * @param entity to produce a DoD provider for (required)
-	 * @param name the name of the new DoD class (required)
-	 * @param path the location for the new DoD class (required)
-	 */
-	void newDod(JavaType entity, JavaType name, Path path);
 }

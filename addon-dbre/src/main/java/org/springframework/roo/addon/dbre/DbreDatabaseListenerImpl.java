@@ -19,11 +19,11 @@ import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.entity.EntityOperations;
 import org.springframework.roo.addon.entity.Identifier;
 import org.springframework.roo.addon.entity.IdentifierService;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
+import org.springframework.roo.addon.test.IntegrationTestOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -68,9 +68,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private DbreModelService dbreModelService;
-	@Reference private EntityOperations entityOperations;
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private IntegrationTestOperations integrationTestOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
@@ -157,7 +157,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Create integration tests if required
 		if (database.isTestAutomatically()) {
 			for (ClassOrInterfaceTypeDetails entity : newEntities) {
-				entityOperations.newIntegrationTest(entity.getName());
+				integrationTestOperations.newIntegrationTest(entity.getName());
 			}
 		}
 	}

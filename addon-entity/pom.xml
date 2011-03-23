@@ -39,6 +39,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.test</artifactId>
+            
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.serializable</artifactId>
             
         </dependency>
