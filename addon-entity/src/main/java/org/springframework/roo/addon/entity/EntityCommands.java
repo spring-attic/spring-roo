@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.model.JavaType;
@@ -67,7 +68,7 @@ public class EntityCommands implements CommandMarker {
 
 		// Reject attempts to name the entity "Test", due to possible clashes with data on demand (see ROO-50)
 		// We will allow this to happen, though if the user insists on it via --permitReservedWords (see ROO-666)
-		if (!isEntityReasonablyNamed(name)) {
+		if (!BeanInfoUtils.isEntityReasonablyNamed(name)) {
 			if (permitReservedWords && testAutomatically) {
 				throw new IllegalArgumentException("Entity name cannot contain 'Test' or 'TestCase' as you are requesting tests; remove --testAutomatically or rename the proposed entity");
 			}
@@ -148,9 +149,5 @@ public class EntityCommands implements CommandMarker {
 		}
 
 		entityOperations.newEmbeddableClass(name, serializable);
-	}
-
-	private boolean isEntityReasonablyNamed(JavaType entity) {
-		return !entity.getSimpleTypeName().startsWith("Test") && !entity.getSimpleTypeName().endsWith("TestCase") && !entity.getSimpleTypeName().endsWith("Test");
 	}
 }

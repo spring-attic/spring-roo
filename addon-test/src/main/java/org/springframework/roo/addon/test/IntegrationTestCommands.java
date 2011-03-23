@@ -3,6 +3,7 @@ package org.springframework.roo.addon.test;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.ProjectOperations;
@@ -43,7 +44,7 @@ public class IntegrationTestCommands implements CommandMarker {
 			ReservedWords.verifyReservedWordsNotPresent(entity);
 		}
 
-		Assert.isTrue(isEntityReasonablyNamed(entity), "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
+		Assert.isTrue(BeanInfoUtils.isEntityReasonablyNamed(entity), "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
 		
 		integrationTestOperations.newIntegrationTest(entity);
 	}
@@ -70,9 +71,5 @@ public class IntegrationTestCommands implements CommandMarker {
 		}
 
 		integrationTestOperations.newTestStub(entity);
-	}
-	
-	private boolean isEntityReasonablyNamed(JavaType entity) {
-		return !entity.getSimpleTypeName().startsWith("Test") && !entity.getSimpleTypeName().endsWith("TestCase") && !entity.getSimpleTypeName().endsWith("Test");
 	}
 }

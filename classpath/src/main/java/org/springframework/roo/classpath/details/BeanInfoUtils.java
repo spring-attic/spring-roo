@@ -4,10 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -112,4 +108,13 @@ public abstract class BeanInfoUtils {
 		return false;
 	}
 
+	/**
+	 * Determines whether the presented entity is a test class or not.
+	 * 
+	 * @param entity the type to test
+	 * @return true if the entity is likely not a test class, otherwise false
+	 */
+	public static boolean isEntityReasonablyNamed(JavaType entity) {
+		return !entity.getSimpleTypeName().startsWith("Test") && !entity.getSimpleTypeName().endsWith("TestCase") && !entity.getSimpleTypeName().endsWith("Test");
+	}
 }
