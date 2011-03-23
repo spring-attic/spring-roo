@@ -62,11 +62,7 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		Document pomDoc = getXmlDocument(pom);
 
 		// Add GWT natures and builder names to maven eclipse plugin
-		boolean pomChanged = updateMavenEclipsePlugin(pomDoc);
-
-		pomChanged |= updateDataNulcueusPlugin(pomDoc);
-
-		if (pomChanged) {
+		if (updateMavenEclipsePlugin(pomDoc) || updateDataNulcueusPlugin(pomDoc)) {
 			XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 		}
 
