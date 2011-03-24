@@ -92,6 +92,10 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 				if (annotationFullyQualifiedName.equals("javax.persistence.Column") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
 					Map<String, Object> value = new HashMap<String, Object>();
 					AnnotationAttributeValue<?> lengthAttributeValue = annotation.getAttribute(new JavaSymbolName("length"));
+					AnnotationAttributeValue<?> nameAttributeValue = annotation.getAttribute(new JavaSymbolName("name"));
+					if (nameAttributeValue != null) {
+						value.put("name", (String) annotation.getAttribute(new JavaSymbolName("name")).getValue());
+					}
 					if (lengthAttributeValue != null) {
 						value.put("length", (Integer) annotation.getAttribute(new JavaSymbolName("length")).getValue());
 					}
@@ -103,9 +107,9 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 					if (scaleAttributeValue != null) {
 						value.put("scale", (Integer) annotation.getAttribute(new JavaSymbolName("scale")).getValue());
 					}
-					AnnotationAttributeValue<?> nameAttributeValue = annotation.getAttribute(new JavaSymbolName("name"));
-					if (nameAttributeValue != null) {
-						value.put("name", (String) annotation.getAttribute(new JavaSymbolName("name")).getValue());
+					AnnotationAttributeValue<?> columnDefinitionAttributeValue = annotation.getAttribute(new JavaSymbolName("columnDefinition"));
+					if (columnDefinitionAttributeValue != null) {
+						value.put("columnDefinition", (String) annotation.getAttribute(new JavaSymbolName("columnDefinition")).getValue());
 					}
 					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.COLUMN_FIELD, value);
 					detailsChanged = true;
