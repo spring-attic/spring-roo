@@ -147,12 +147,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
 			}
 		}
-
-		// Notify
-		List<ClassOrInterfaceTypeDetails> allEntities = new LinkedList<ClassOrInterfaceTypeDetails>();
-		allEntities.addAll(newEntities);
-		allEntities.addAll(managedEntities);
-		notify(allEntities);
 		
 		// Create integration tests if required
 		if (database.isTestAutomatically()) {
@@ -160,6 +154,12 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				integrationTestOperations.newIntegrationTest(entity.getName());
 			}
 		}
+		
+		// Notify
+		List<ClassOrInterfaceTypeDetails> allEntities = new LinkedList<ClassOrInterfaceTypeDetails>();
+		allEntities.addAll(newEntities);
+		allEntities.addAll(managedEntities);
+		notify(allEntities);
 	}
 
 	private void notify(List<ClassOrInterfaceTypeDetails> entities) {

@@ -68,7 +68,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType ID = new JavaType("javax.persistence.Id");
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	private static final JavaType ONE_TO_ONE = new JavaType("javax.persistence.OneToOne");
 	private static final JavaType ONE_TO_MANY = new JavaType("javax.persistence.OneToMany");
@@ -83,23 +82,24 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private List<? extends FieldMetadata> entityFields;
 	private List<? extends MethodMetadata> entityMethods;
-	private FieldMetadata versionField; 
-	private List<FieldMetadata> identifierFields;
+	private FieldMetadata identifierField;
+	private EmbeddedIdentifierHolder embeddedIdentifierHolder;
+	private FieldMetadata versionField;
 	private Set<ClassOrInterfaceTypeDetails> managedEntities;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<? extends FieldMetadata> entityFields, List<? extends MethodMetadata> entityMethods, FieldMetadata versionField, List<FieldMetadata> identifierFields, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<? extends FieldMetadata> entityFields, List<? extends MethodMetadata> entityMethods, FieldMetadata identifierField, EmbeddedIdentifierHolder embeddedIdentifierHolder, FieldMetadata versionField, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(entityFields, "Entity fields required");
 		Assert.notNull(entityMethods, "Entity methods required");
-		Assert.notNull(identifierFields, "Identifier fields required");
 		Assert.notNull(managedEntities, "Managed entities required");
 		Assert.notNull(database, "Database required");
 
 		this.entityFields = entityFields;
 		this.entityMethods = entityMethods;
+		this.identifierField = identifierField;
+		this.embeddedIdentifierHolder = embeddedIdentifierHolder;
 		this.versionField = versionField;
-		this.identifierFields = identifierFields;
 		this.managedEntities = managedEntities;
 
 		// Process values from the annotation, if present
@@ -112,7 +112,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (table == null) {
 			return;
 		}
-		
+
 		// Add fields for many-valued associations with many-to-many multiplicity
 		addManyToManyFields(database, table);
 
@@ -131,7 +131,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	private void addManyToManyFields(Database database, Table table) {
 		Map<Table, Integer> owningSideTables = new LinkedHashMap<Table, Integer>();
 
@@ -143,7 +143,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			Iterator<ForeignKey> iter = joinTable.getImportedKeys().iterator();
 			ForeignKey foreignKey1 = iter.next(); // First foreign key in set
 			ForeignKey foreignKey2 = iter.next(); // Second and last foreign key in set
-			
+
 			Table owningSideTable = foreignKey1.getForeignTable();
 			Assert.notNull(owningSideTable, "Owning-side table '" + owningSideTable.getName() + errMsg);
 
@@ -155,7 +155,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			String fieldSuffix = owningSideTables.get(owningSideTable) > 0 ? String.valueOf(owningSideTables.get(owningSideTable)) : "";
 
 			boolean sameTable = owningSideTable.equals(inverseSideTable);
-			
+
 			if (owningSideTable.equals(table)) {
 				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(DbreTypeUtils.suggestFieldName(inverseSideTable)) + (sameTable ? "1" : fieldSuffix));
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, inverseSideTable);
@@ -203,7 +203,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (table.isJoinTable()) {
 			return;
 		}
-		
+
 		for (ForeignKey exportedKey : table.getExportedKeys()) {
 			if (exportedKey.getForeignTable().isJoinTable()) {
 				continue;
@@ -413,7 +413,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (toStringAnnotation == null) {
 			return;
 		}
-		
+
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		List<StringAttributeValue> ignoreFields = new ArrayList<StringAttributeValue>();
 
@@ -494,7 +494,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				addOtherJoinColumnAttributes(joinColumnBuilder);
 			}
 		}
-		
+
 		return joinColumnBuilder;
 	}
 
@@ -534,21 +534,22 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			String columnName = column.getName();
 			JavaSymbolName fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(columnName));
 
+			boolean isIdField = isIdField(fieldName) || column.isPrimaryKey();
+			boolean isVersionField = isVersionField(fieldName) || columnName.equals("version");
 			boolean isCompositeKeyField = isCompositeKeyField(fieldName);
-			boolean isIdFieldDeclaredOnGovernor = isIdField(fieldName) && !column.isPrimaryKey();
-			boolean isVersionFieldDeclaredOnGovernor = isCompositeKeyField || isVersionField(columnName);
 			boolean isForeignKey = table.findImportedKeyByLocalColumnName(columnName) != null;
 
-			if (isVersionFieldDeclaredOnGovernor && !isIdFieldDeclaredOnGovernor || isForeignKey) {
+			if (isIdField || isVersionField || isCompositeKeyField || isForeignKey) {
 				continue;
 			}
 
-			boolean isEmdeddedIdFieldDeclaredOnGovernor = !isCompositeKeyField && isEmbeddedIdField(fieldName);
-			if (isEmdeddedIdFieldDeclaredOnGovernor) {
+			boolean hasEmbeddedIdField = isEmbeddedIdField(fieldName) && !isCompositeKeyField;
+			if (hasEmbeddedIdField) {
 				fieldName = getUniqueFieldName(fieldName);
 			}
 
 			field = getField(fieldName, column, table.isIncludeNonPortableAttributes());
+
 			uniqueFields.put(fieldName, field);
 		}
 
@@ -558,8 +559,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private boolean isCompositeKeyField(JavaSymbolName fieldName) {
-		for (FieldMetadata field : identifierFields) {
-			if (fieldName.equals(field.getFieldName())) {
+		if (embeddedIdentifierHolder == null) {
+			return false;
+		}
+
+		for (FieldMetadata field : embeddedIdentifierHolder.getIdentifierFields()) {
+			if (field.getFieldName().equals(fieldName)) {
 				return true;
 			}
 		}
@@ -567,7 +572,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private boolean isCompositeKeyColumn(Column column) {
-		for (FieldMetadata field : identifierFields) {
+		if (embeddedIdentifierHolder == null) {
+			return false;
+		}
+
+		for (FieldMetadata field : embeddedIdentifierHolder.getIdentifierFields()) {
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
 				if (!annotation.getAnnotationType().equals(COLUMN)) {
 					continue;
@@ -584,25 +593,16 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private boolean isVersionField(String columnName) {
-		return versionField != null && versionField.getFieldName().getSymbolName().equals(columnName);
-	}
-
 	private boolean isIdField(JavaSymbolName fieldName) {
-		return isAnnotatedField(fieldName, ID);
+		return identifierField != null && identifierField.getFieldName().equals(fieldName);
 	}
 
 	private boolean isEmbeddedIdField(JavaSymbolName fieldName) {
-		return isAnnotatedField(fieldName, new JavaType("javax.persistence.EmbeddedId"));
+		return embeddedIdentifierHolder != null && embeddedIdentifierHolder.getEmbeddedIdentifierField().getFieldName().equals(fieldName);
 	}
 
-	private boolean isAnnotatedField(JavaSymbolName fieldName, JavaType annotationType) {
-		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, annotationType);
-		if (fields.size() > 0) {
-			Assert.isTrue(fields.size() == 1, "More than one field was annotated with @" + annotationType.getSimpleTypeName() + " in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return fields.get(0).getFieldName().equals(fieldName);
-		}
-		return false;
+	private boolean isVersionField(JavaSymbolName fieldName) {
+		return versionField != null && versionField.getFieldName().equals(fieldName);
 	}
 
 	private FieldMetadata getField(JavaSymbolName fieldName, Column column, boolean includeNonPortable) {
@@ -633,7 +633,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (column.isUnique()) {
 			columnBuilder.addBooleanAttribute("unique", true);
 		}
-		
+
 		annotations.add(columnBuilder);
 
 		// Add @NotNull if applicable
@@ -665,7 +665,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (field == null || hasField(field)) {
 			return;
 		}
-		
+
 		builder.addField(field);
 
 		// Check for an existing accessor in the governor or in the entity metadata
@@ -762,7 +762,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null) {
 			return true;
 		}
-		
+
 		// Check entity ITD for accessor method
 		for (MethodMetadata method : entityMethods) {
 			if (method.getMethodName().equals(new JavaSymbolName(requiredAccessorName))) {
@@ -772,9 +772,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		return false;
 	}
-	
+
 	private boolean hasBooleanPrimitiveAccessor(FieldMetadata field) {
-		// Check governor for boolean accessor method for Boolean object fields 
+		// Check governor for boolean accessor method for Boolean object fields
 		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(getBooleanPrimitiveAccessorName(field)), new ArrayList<JavaType>()) != null) {
 			return true;
 		}

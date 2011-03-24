@@ -66,9 +66,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private boolean isGaeEnabled;
 	private boolean isDataNucleusEnabled;
 	private boolean isVMforceEnabled;
-	private String columnDefinition;
-	private int columnSize;
-	private int scale;
+	private String identifierColumnDefinition;
+	private int identifierColumnSize;
+	private int identifierScale;
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = JavaType.LONG_OBJECT;
@@ -128,9 +128,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					identifierColumn = id.getColumnName();
 					identifierField = id.getFieldName().getSymbolName();
 					identifierType = id.getFieldType();
-					columnDefinition = id.getColumnDefinition();
-					columnSize = id.getColumnSize();
-					scale = id.getScale();
+					identifierColumnDefinition = id.getColumnDefinition();
+					identifierColumnSize = id.getColumnSize();
+					identifierScale = id.getScale();
 				}
 			}
 		}
@@ -474,19 +474,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 			AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 			columnBuilder.addStringAttribute("name", columnName);
-			if (StringUtils.hasText(columnDefinition)) {
-				columnBuilder.addStringAttribute("columnDefinition", columnDefinition);
+			if (StringUtils.hasText(identifierColumnDefinition)) {
+				columnBuilder.addStringAttribute("columnDefinition", identifierColumnDefinition);
 			}
 			
 			// Add length attribute for String field
-			if (columnSize > 0 && columnSize < 4000 && identifierType.equals(JavaType.STRING_OBJECT)) {
-				columnBuilder.addIntegerAttribute("length", columnSize);
+			if (identifierColumnSize > 0 && identifierColumnSize < 4000 && identifierType.equals(JavaType.STRING_OBJECT)) {
+				columnBuilder.addIntegerAttribute("length", identifierColumnSize);
 			}
 			
 			// Add precision and scale attributes for numeric field
-			if (scale > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(new JavaType("java.math.BigDecimal")))) {
-				columnBuilder.addIntegerAttribute("precision", columnSize);
-				columnBuilder.addIntegerAttribute("scale", scale);
+			if (identifierScale > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(new JavaType("java.math.BigDecimal")))) {
+				columnBuilder.addIntegerAttribute("precision", identifierColumnSize);
+				columnBuilder.addIntegerAttribute("scale", identifierScale);
 			}
 
 			annotations.add(columnBuilder);
