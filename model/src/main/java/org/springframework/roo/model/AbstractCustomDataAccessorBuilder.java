@@ -28,5 +28,5 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
 
 	public void setCustomData(CustomDataBuilder customData) {
 		this.customData = customData;
-	}	
+	}
 }

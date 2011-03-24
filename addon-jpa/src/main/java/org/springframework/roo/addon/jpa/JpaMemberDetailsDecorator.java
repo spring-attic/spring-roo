@@ -21,7 +21,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsDecorator;
 import org.springframework.roo.classpath.scanner.MemberDetailsImpl;
-import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 
 /**
@@ -128,9 +127,7 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 		removeMemberHoldingTypeDetailsFromList(memberHoldingTypeDetailsList, original);
 		
 		FieldMetadataBuilder newField = new FieldMetadataBuilder(originalField);
-		CustomDataBuilder customDataBuilder = new CustomDataBuilder(originalField.getCustomData());
-		customDataBuilder.put(tag, value);
-		newField.setCustomData(customDataBuilder);
+		newField.putCustomData(tag, value);
 		List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 		for (FieldMetadata field : original.getDeclaredFields()) {
 			FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(field);

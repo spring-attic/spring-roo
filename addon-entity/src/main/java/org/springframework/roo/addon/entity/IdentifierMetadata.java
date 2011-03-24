@@ -24,7 +24,6 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -104,9 +103,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addMethod(getHashCodeMethod());
 		
 		// Add custom data tag for Roo Identifier type
-		CustomDataBuilder customDataBuilder = new CustomDataBuilder(builder.getCustomData().build());
-		customDataBuilder.put(CustomDataPersistenceTags.IDENTIFIER_TYPE, null);
-		builder.setCustomData(customDataBuilder);
+		builder.putCustomData(CustomDataPersistenceTags.IDENTIFIER_TYPE, null);
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
