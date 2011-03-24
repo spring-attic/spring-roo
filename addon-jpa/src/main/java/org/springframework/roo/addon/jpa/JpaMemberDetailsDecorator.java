@@ -33,24 +33,20 @@ import org.springframework.roo.model.JavaSymbolName;
 @Service
 @Component
 public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
-	private final Class<JpaMemberDetailsDecorator> mutex = JpaMemberDetailsDecorator.class;
 
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
 		return decorateTypesAndFields(memberDetails);
 	}
 
 	private MemberDetails decorateTypesAndFields(MemberDetails memberDetails) {
-		synchronized (mutex) {
-			List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = new ArrayList<MemberHoldingTypeDetails>(memberDetails.getDetails());
-			boolean detailsChanged = false;
-			for (int i = 0; i < memberHoldingTypeDetailsList.size(); i++) { // Cannot use enhanced for loop due to its use of Iterator which in turn has a bug in remove method
-				MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsList.get(i);
-				if (decorateFields(memberHoldingTypeDetailsList, memberHoldingTypeDetails)) {
-					detailsChanged = true;
-				}
+		List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = new ArrayList<MemberHoldingTypeDetails>(memberDetails.getDetails());
+		boolean detailsChanged = false;
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails: memberDetails.getDetails()) {
+			if (decorateFields(memberHoldingTypeDetailsList, memberHoldingTypeDetails)) {
+				detailsChanged = true;
 			}
-			return detailsChanged ? new MemberDetailsImpl(memberHoldingTypeDetailsList) : memberDetails;
 		}
+		return detailsChanged ? new MemberDetailsImpl(memberHoldingTypeDetailsList) : memberDetails;
 	}
 
 	private boolean decorateFields(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails memberHoldingTypeDetails) {
@@ -59,37 +55,37 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
 				String annotationFullyQualifiedName = annotation.getAnnotationType().getFullyQualifiedTypeName();
 				if (annotationFullyQualifiedName.equals("javax.persistence.ManyToMany") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.MANY_TO_MANY_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.MANY_TO_MANY_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.Enumerated") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.ENUMERATED_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.ENUMERATED_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.ENUMERATED_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.EmbeddedId") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_ID_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.OneToMany") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.ONE_TO_MANY_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.ONE_TO_MANY_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.ONE_TO_MANY_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.ManyToOne") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_ONE_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.MANY_TO_ONE_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.MANY_TO_ONE_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.OneToOne") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.ONE_TO_ONE_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.ONE_TO_ONE_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.ONE_TO_ONE_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.Lob") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.LOB_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.LOB_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.LOB_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.Transient") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.TRANSIENT_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.TRANSIENT_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.TRANSIENT_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.Embedded") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.EMBEDDED_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.EMBEDDED_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.Id") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.IDENTIFIER_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.IDENTIFIER_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.IDENTIFIER_FIELD);
 					detailsChanged = true;
 				} else if (annotationFullyQualifiedName.equals("javax.persistence.Version") && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.VERSION_FIELD)) {
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.VERSION_FIELD);
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.VERSION_FIELD);
 					detailsChanged = true;
 				}
 				// The @Column annotation can be used in combination with any of the annotations above
@@ -107,7 +103,11 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 					if (scaleAttributeValue != null) {
 						value.put("scale", (Integer) annotation.getAttribute(new JavaSymbolName("scale")).getValue());
 					}
-					addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.COLUMN_FIELD, value);
+					AnnotationAttributeValue<?> nameAttributeValue = annotation.getAttribute(new JavaSymbolName("name"));
+					if (nameAttributeValue != null) {
+						value.put("name", (String) annotation.getAttribute(new JavaSymbolName("name")).getValue());
+					}
+					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.COLUMN_FIELD, value);
 					detailsChanged = true;
 				}
 			}
@@ -115,14 +115,14 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 		return detailsChanged;
 	}
 
-	private void addCustomizedMemberHoldingTypeDetailsForField(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails original, FieldMetadata originalField, Object tag) {
-		addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, original, originalField, tag, null);
+	private FieldMetadata addCustomizedMemberHoldingTypeDetailsForField(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails original, FieldMetadata originalField, Object tag) {
+		return addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, original, originalField, tag, null);
 	}
 
-	private void addCustomizedMemberHoldingTypeDetailsForField(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails original, FieldMetadata originalField, Object tag, Object value) {
+	private FieldMetadata addCustomizedMemberHoldingTypeDetailsForField(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails original, FieldMetadata originalField, Object tag, Object value) {
 		// Remove old MemberHoldingTypeDetails first
 		removeMemberHoldingTypeDetailsFromList(memberHoldingTypeDetailsList, original);
-
+		
 		FieldMetadataBuilder newField = new FieldMetadataBuilder(originalField);
 		CustomDataBuilder customDataBuilder = new CustomDataBuilder(originalField.getCustomData());
 		customDataBuilder.put(tag, value);
@@ -135,10 +135,10 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 			}
 		}
 		fields.add(newField);
-
 		TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(original);
 		typeDetailsBuilder.setDeclaredFields(fields);
 		memberHoldingTypeDetailsList.add(typeDetailsBuilder.build());
+		return newField.build();
 	}
 
 	private void removeMemberHoldingTypeDetailsFromList(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, MemberHoldingTypeDetails memberHoldingTypeDetails) {

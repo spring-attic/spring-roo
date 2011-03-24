@@ -154,8 +154,11 @@ public abstract class WebMetadataUtils {
 		
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = null;
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_FIELD);
-		if (idFields.size() != 1) {
-			return javaTypePersistenceMetadataDetails;
+		if (idFields.size() == 0) {
+			idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+			if (idFields.size() != 1) {
+				return null;
+			}
 		}
 		FieldMetadata identifierField = idFields.get(0);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);

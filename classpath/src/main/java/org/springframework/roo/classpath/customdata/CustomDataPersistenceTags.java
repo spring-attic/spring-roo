@@ -47,6 +47,9 @@ public enum CustomDataPersistenceTags {
 	// Version accessor method (method must have no parameters, and return version data type)
 	VERSION_ACCESSOR_METHOD,
 	
+	// Version mutator method (method must have one parameter, and return void data type)
+	VERSION_MUTATOR_METHOD,
+	
 	// Persist method (TODO)
 	PERSIST_METHOD,
 	

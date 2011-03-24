@@ -111,14 +111,14 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
 		
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
-		if (findEntriesMethod == null) {
-			return null;
-		}
 		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
 		MethodMetadata identifierMutator = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_MUTATOR_METHOD);
+		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null || identifierMutator == null) {
+			return null;
+		}
 		
 		// Add the methods we care to the locatedMutators
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
