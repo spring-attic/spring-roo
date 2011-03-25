@@ -312,7 +312,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return null;
 		}
 		
-	//	System.out.println(identifierMutator.getMethodName());
 		StringBuilder builder = new StringBuilder();
 		for (FieldMetadata identifierField : embeddedIdInitializers.keySet()) {
 			String initializer = embeddedIdInitializers.get(identifierField);
