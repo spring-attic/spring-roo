@@ -31,7 +31,7 @@ public @interface RooIdentifier {
 	boolean gettersByDefault() default true;
 
 	/**
-	 * @return whether to generate setters for each non-transient field declared in this class (defaults to true)
+	 * @return whether to generate setters for each non-transient field declared in this class (defaults to false)
 	 */
 	boolean settersByDefault() default false;
 }

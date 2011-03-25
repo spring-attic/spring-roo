@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -107,19 +108,30 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			return null;
 		}
 		
-		// Identify all the mutators we care about on the entity
-		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
-		
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
 		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
-		MethodMetadata identifierMutator = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_MUTATOR_METHOD);
 //		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null || identifierMutator == null) {
 //			return null;
 //		}
 		
+		// Identify all the mutators we care about on the entity
+		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = getLocatedMutators(memberDetails, metadataIdentificationString);
+		
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+		
+		// Get the embedded identifier metadata holder - may be null if no embedded identifier exists
+		EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder = getEmbeddedIdentifierMetadataHolder(memberDetails, metadataIdentificationString);
+
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierMetadataHolder);
+	}
+
+	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
+		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
+
 		// Add the methods we care to the locatedMutators
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			if (!BeanInfoUtils.isMutatorMethod(method)) {
@@ -132,6 +144,23 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 				continue;
 			}
 			
+			Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
+
+			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
+			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.VERSION_FIELD)) {
+				continue;
+			}
+
+			// Never include persistence transient fields
+			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.TRANSIENT_FIELD)) {
+				continue;
+			}
+
+			// Never include any sort of collection; user has to make such entities by hand
+			if (field.getFieldType().isCommonCollectionType() || fieldCustomDataKeys.contains(CustomDataPersistenceTags.ONE_TO_MANY_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD)) {
+				continue;
+			}
+			
 			// Look up collaborating metadata
 			DataOnDemandMetadata otherMetadata = locateCollaboratingMetadata(metadataIdentificationString, field);
 			locatedMutators.put(method, new CollaboratingDataOnDemandMetadataHolder(field, otherMetadata));
@@ -140,13 +169,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 		}
 		
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-		
-		// Get the embedded identifier metadata holder - may be null if no embedded identifier exists
-		EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder = getEmbeddedIdentifierMetadataHolder(memberDetails, metadataIdentificationString);
-
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, identifierMutator, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierMetadataHolder);
+		return locatedMutators;
 	}
 
 	private EmbeddedIdentifierMetadataHolder getEmbeddedIdentifierMetadataHolder(MemberDetails memberDetails, String metadataIdentificationString) {
@@ -155,9 +178,8 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		if (fields.isEmpty()) {
 			return null;
 		}
-
-		FieldMetadata identifierField = fields.get(0);
-		MemberDetails identifierMemberDetails = getMemberDetails(identifierField.getFieldType());
+		FieldMetadata embeddedIdentifierField = fields.get(0);
+		MemberDetails identifierMemberDetails = getMemberDetails(embeddedIdentifierField.getFieldType());
 		if (identifierMemberDetails == null) {
 			return null;
 		}
@@ -177,7 +199,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		for (ConstructorMetadata constructor : constructors) {
 			metadataDependencyRegistry.registerDependency(constructor.getDeclaredByMetadataId(), metadataIdentificationString);
 			if (hasExactFields(constructor, identifierFields)) {
-				return new EmbeddedIdentifierMetadataHolder(identifierMemberHoldingTypeDetails.getName(), identifierFields, constructor);
+				return new EmbeddedIdentifierMetadataHolder(embeddedIdentifierField, identifierFields, constructor);
 			}
 		}
 		return null;
