@@ -62,13 +62,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata flushMethod;
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators;
 	private JavaType entityType;
-	private EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder;
+	private EmbeddedIdentifierHolder embeddedIdentifierHolder;
 	
 	private Map<MethodMetadata, String> fieldInitializers = new LinkedHashMap<MethodMetadata, String>();
 	private Map<FieldMetadata, String> embeddedIdInitializers = new LinkedHashMap<FieldMetadata, String>();
 	private List<JavaType> requiredDataOnDemandCollaborators = new LinkedList<JavaType>();
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -92,7 +92,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.flushMethod = flushMethod;
 		this.locatedMutators = locatedMutators;
 		this.entityType = entityType;
-		this.embeddedIdentifierMetadataHolder = embeddedIdentifierMetadataHolder;
+		this.embeddedIdentifierHolder = embeddedIdentifierHolder;
 		
 		// Calculate and store field initializers
 		storeEmbeddedIdInitializers();
@@ -282,7 +282,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getFullyQualifiedTypeName() + " obj = new " + entityType.getFullyQualifiedTypeName() + "();");
 
 		// Create the composite key embedded id if required
-		if (embeddedIdentifierMetadataHolder != null) {
+		if (embeddedIdentifierHolder != null) {
 			bodyBuilder.appendFormalLine(getEmbeddedIdMutatorMethod() + "(obj, index);");
 		}
 
@@ -301,7 +301,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return null;
 		}
 		
-		JavaSymbolName embeddedIdentifierMutator = embeddedIdentifierMetadataHolder.getEmbeddedIdentifierMutator();
+		JavaSymbolName embeddedIdentifierMutator = embeddedIdentifierHolder.getEmbeddedIdentifierMutator();
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(entityType);
 		paramTypes.add(JavaType.INT_PRIMITIVE);
@@ -325,8 +325,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.append(builder.toString());
 		
 		// Create constructor for embedded id class
-		String identifierType = embeddedIdentifierMetadataHolder.getEmbeddedIdentifierField().getFieldType().getFullyQualifiedTypeName();
-		ConstructorMetadata constructorMetadata = embeddedIdentifierMetadataHolder.getIdentifierConstructor();
+		String identifierType = embeddedIdentifierHolder.getEmbeddedIdentifierField().getFieldType().getFullyQualifiedTypeName();
+		ConstructorMetadata constructorMetadata = embeddedIdentifierHolder.getIdentifierConstructor();
 		
 		builder.delete(0, builder.length());
 		builder.append(identifierType).append(" embeddedIdClass = new ").append(identifierType);
@@ -733,7 +733,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	public boolean hasEmbeddedIdentifier() {
-		return embeddedIdentifierMetadataHolder != null;
+		return embeddedIdentifierHolder != null;
 	}
 
 	private void storeEmbeddedIdInitializers() {
@@ -741,7 +741,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
-		for (FieldMetadata field : embeddedIdentifierMetadataHolder.getIdentifierFields()) {
+		for (FieldMetadata field : embeddedIdentifierHolder.getIdentifierFields()) {
 			String initializer = getFieldInitializer(field, null);
 			embeddedIdInitializers.put(field, initializer);
 		}

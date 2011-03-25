@@ -124,9 +124,9 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
 		// Get the embedded identifier metadata holder - may be null if no embedded identifier exists
-		EmbeddedIdentifierMetadataHolder embeddedIdentifierMetadataHolder = getEmbeddedIdentifierMetadataHolder(memberDetails, metadataIdentificationString);
+		EmbeddedIdentifierHolder embeddedIdentifierHolder = getEmbeddedIdentifierHolder(memberDetails, metadataIdentificationString);
 
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierMetadataHolder);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierHolder);
 	}
 
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
@@ -172,7 +172,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		return locatedMutators;
 	}
 
-	private EmbeddedIdentifierMetadataHolder getEmbeddedIdentifierMetadataHolder(MemberDetails memberDetails, String metadataIdentificationString) {
+	private EmbeddedIdentifierHolder getEmbeddedIdentifierHolder(MemberDetails memberDetails, String metadataIdentificationString) {
 		List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
 		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
 		if (fields.isEmpty()) {
@@ -199,7 +199,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		for (ConstructorMetadata constructor : constructors) {
 			metadataDependencyRegistry.registerDependency(constructor.getDeclaredByMetadataId(), metadataIdentificationString);
 			if (hasExactFields(constructor, identifierFields)) {
-				return new EmbeddedIdentifierMetadataHolder(embeddedIdentifierField, identifierFields, constructor);
+				return new EmbeddedIdentifierHolder(embeddedIdentifierField, identifierFields, constructor);
 			}
 		}
 		return null;
