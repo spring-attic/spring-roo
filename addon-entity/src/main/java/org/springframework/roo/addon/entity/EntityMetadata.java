@@ -1090,12 +1090,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		if (isGaeEnabled) {
-			addTransactionalAnnotation(annotations);
-		}
-
 		InvocableMemberBodyBuilder bodyBuilder;
 		if (isGaeEnabled) {
+			addTransactionalAnnotation(annotations);
 			bodyBuilder = getGaeFindMethodBody();
 		} else {
 			bodyBuilder = new InvocableMemberBodyBuilder();
