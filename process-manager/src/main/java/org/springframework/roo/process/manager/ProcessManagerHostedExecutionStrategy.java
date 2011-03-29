@@ -56,7 +56,8 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
 		synchronized (mutex) {
 			if (processManager != null) {
 				// BUSY_EXECUTION needed in case of recursive commands, such as if executing a script
-				return processManager.getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE || processManager.getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING;
+				// TERMINATED added in case of additional commands following a quit or exit in a script - ROO-2270
+				return processManager.getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE || processManager.getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING || processManager.getProcessManagerStatus() == ProcessManagerStatus.TERMINATED;
 			}
 		}
 		return false;
