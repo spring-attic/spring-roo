@@ -1074,11 +1074,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Method definition to find or build
+		String idFieldName = getIdentifierField().getFieldName().getSymbolName();
 		JavaSymbolName methodName = new JavaSymbolName(findMethod + governorTypeDetails.getName().getSimpleTypeName());
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(getIdentifierField().getFieldType());
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("id"));
+		paramNames.add(new JavaSymbolName(idFieldName));
 		JavaType returnType = governorTypeDetails.getName();
 		
 		// Locate user-defined method
@@ -1097,11 +1098,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		} else {
 			bodyBuilder = new InvocableMemberBodyBuilder();
 			if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
-				bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
+				bodyBuilder.appendFormalLine("if (" + idFieldName + " == null || " + idFieldName + ".length() == 0) return null;");
 			} else if (!getIdentifierField().getFieldType().isPrimitive()) {
-				bodyBuilder.appendFormalLine("if (id == null) return null;");
+				bodyBuilder.appendFormalLine("if (" + idFieldName + " == null) return null;");
 			}
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, " + idFieldName + ");");
 		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
@@ -1115,12 +1116,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String typeName = StringUtils.hasText(entityName) ? entityName : governorTypeDetails.getName().getSimpleTypeName();
 
+		String idFieldName = getIdentifierField().getFieldName().getSymbolName();
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
-			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
+			bodyBuilder.appendFormalLine("if (" + idFieldName + " == null || " + idFieldName + ".length() == 0) return null;");
 		} else if (!getIdentifierField().getFieldType().isPrimitive()) {
-			bodyBuilder.appendFormalLine("if (id == null) return null;");
+			bodyBuilder.appendFormalLine("if (" + idFieldName + " == null) return null;");
 		}
-		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o WHERE o." + identifierField + " = :id\").setParameter(\"id\"," + getIdentifierField().getFieldName().getSymbolName() + ");");
+		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o WHERE o." + idFieldName + " = :" + idFieldName + "\").setParameter(\"" + idFieldName + "\", " + idFieldName + ");");
  		bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " result = null;");
 		bodyBuilder.appendFormalLine("List results = query.getResultList();");
 		bodyBuilder.appendFormalLine("if (results.size() > 0) {");
