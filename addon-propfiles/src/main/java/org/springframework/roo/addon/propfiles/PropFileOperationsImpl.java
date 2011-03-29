@@ -232,6 +232,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	}
 
 	private void storeProps(Properties props, OutputStream os, String comment) {
+		Assert.notNull(os, "OutputStream required");
 		try {
 			props.store(os, comment);
 		} catch (IOException e) {
@@ -239,8 +240,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} finally {
 			try {
 				os.close();
-			} catch (IOException ignored) {
-			}
+			} catch (IOException ignored) {}
 		}
 	}
 }

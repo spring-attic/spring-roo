@@ -80,12 +80,18 @@ public class LoggingOperationsImpl implements LoggingOperations {
 				break;
 		}
 
+		OutputStream outputStream = null;
 		try {
-			OutputStream outputStream = log4jMutableFile.getOutputStream();
+			outputStream = log4jMutableFile.getOutputStream();
 			props.store(outputStream, "Updated at " + new Date());
-			outputStream.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException ignored) {}
+			}
 		}
 	}
 }
