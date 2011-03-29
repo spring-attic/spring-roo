@@ -870,37 +870,38 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		Assert.notNull(entityManagerMethod, "Entity manager method should not have returned null");
 		
 		// Use the getEntityManager() method to acquire an entity manager (the method will throw an exception if it cannot be acquired)
-		bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) this." + getEntityManagerField().getFieldName().getSymbolName() + " = " + entityManagerMethod.getMethodName().getSymbolName() + "();");
+		String entityManagerFieldName = getEntityManagerField().getFieldName().getSymbolName();
+		bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName + " == null) this." + entityManagerFieldName + " = " + entityManagerMethod.getMethodName().getSymbolName() + "();");
 		
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 		if ("flush".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
-			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".flush();");
 		} else if ("clear".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
-			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".clear();");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".clear();");
 		} else if ("merge".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
 			returnType = new JavaType(governorTypeDetails.getName().getSimpleTypeName());
-			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " merged = this." + getEntityManagerField().getFieldName().getSymbolName() + ".merge(this);");
-			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
+			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " merged = this." + entityManagerFieldName + ".merge(this);");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".flush();");
 			bodyBuilder.appendFormalLine("return merged;");
 		} else if ("remove".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
-			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + ".contains(this)) {");
+			bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName + ".contains(this)) {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".remove(this);");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".remove(this);");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("} else {");
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " attached = " + governorTypeDetails.getName().getSimpleTypeName() + "." + getFindMethod().getMethodName().getSymbolName() + "(this." + getIdentifierField().getFieldName().getSymbolName() + ");");
-			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".remove(attached);");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".remove(attached);");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		} else {
 			// Persist
 			addTransactionalAnnotation(annotations, true);
-			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + "." + entityManagerDelegate  + "(this);");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "." + entityManagerDelegate  + "(this);");
 		}
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
