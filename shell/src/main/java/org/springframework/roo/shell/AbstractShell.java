@@ -108,8 +108,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 					in.close();
 				} catch (IOException ignored) {}
 			}
+			
+			logger.fine("Script required " + ((new Date().getTime() - started) / 1000) + " second(s) to execute");
 		}
-		logger.fine("Script required " + ((new Date().getTime() - started) / 1000) + " second(s) to execute");
 	}
 	
 	/**
