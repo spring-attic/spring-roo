@@ -53,19 +53,25 @@ public class BackupOperationsImpl implements BackupOperations {
 		}
 
 		long start = System.nanoTime();
+		
+		ZipOutputStream zos = null;
 		try {
 			File projectDirectory = new File(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "."));
-
 			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectOperations.getProjectMetadata().getProjectName() + "_" + df.format(new Date()) + ".zip")));
-			ZipOutputStream zos = new ZipOutputStream(file.getOutputStream());
-
+			zos = new ZipOutputStream(file.getOutputStream());
 			zip(projectDirectory, projectDirectory, zos);
-			zos.close();
 		} catch (FileNotFoundException e) {
 			logger.fine("Could not determine project directory");
 		} catch (IOException e) {
 			logger.fine("Could not create backup archive");
+		} finally {
+			if (zos != null) {
+				try {
+					zos.close();
+				} catch (IOException ignored) {}
+			}
 		}
+		
 		long milliseconds = (System.nanoTime() - start) / 1000000;
 		return "Backup completed in " + milliseconds + " ms";
 	}
@@ -77,14 +83,10 @@ public class BackupOperationsImpl implements BackupOperations {
 				if (dir.equals(base) && name.equals("target")) {
 					return false;
 				}
+				
 				// Skip existing backup files
 				if (dir.equals(base) && name.endsWith(".zip")) {
 					return false;
-				}
-				
-				// Include dbre xml if present
-				if (dir.equals(base) && name.equals(".roo-dbre")) {
-					return true;
 				}
 				
 				// Skip files that start with "."
