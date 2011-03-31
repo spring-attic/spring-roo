@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.springframework.roo.support.util.Assert;
 
-
 /**
  * Builder for {@link CustomData}.
  * 
@@ -16,7 +15,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public final class CustomDataBuilder implements Builder<CustomData> {
 	private Map<Object, Object> customData = new HashMap<Object, Object>();
@@ -24,10 +22,7 @@ public final class CustomDataBuilder implements Builder<CustomData> {
 	public CustomDataBuilder() {}
 	
 	public CustomDataBuilder(CustomData existing) {
-		Assert.notNull(existing, "Existing custom data required");
-		for (Object key : existing.keySet()) {
-			customData.put(key, existing.get(key));
-		}
+		append(existing);
 	}
 	
 	public CustomData build() {
@@ -38,6 +33,13 @@ public final class CustomDataBuilder implements Builder<CustomData> {
 		customData.clear();
 	}
 
+	public void append(CustomData existing) {
+		Assert.notNull(existing, "Existing custom data required");
+		for (Object key : existing.keySet()) {
+			customData.put(key, existing.get(key));
+		}
+	}
+	
 	public Object get(Object key) {
 		return customData.get(key);
 	}
@@ -61,5 +63,4 @@ public final class CustomDataBuilder implements Builder<CustomData> {
 	public Collection<Object> values() {
 		return customData.values();
 	}
-
 }

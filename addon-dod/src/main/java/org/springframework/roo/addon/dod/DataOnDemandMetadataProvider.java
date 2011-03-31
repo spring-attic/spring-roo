@@ -113,9 +113,9 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
-//		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null || identifierMutator == null) {
-//			return null;
-//		}
+		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
+			return null;
+		}
 		
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = getLocatedMutators(memberDetails, metadataIdentificationString);
