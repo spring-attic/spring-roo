@@ -612,12 +612,16 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.ResponseBody")));
 
+		
 		String beanShortName = getShortName(formBackingType);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + beanShortName + "." + javaTypePersistenceMetadataHolder.getFindMethod().getMethodName() + "(" + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + ");");
 		bodyBuilder.appendFormalLine("if (" + beanShortName.toLowerCase() + " == null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return new " + getShortName(new JavaType("org.springframework.http.ResponseEntity")) + "<String>(" + getShortName(new JavaType("org.springframework.http.HttpStatus")) + ".NOT_FOUND);");
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("return new " + getShortName(new JavaType("org.springframework.http.ResponseEntity")) + "<String>(headers, " + getShortName(new JavaType("org.springframework.http.HttpStatus")) + ".NOT_FOUND);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return " + beanShortName.toLowerCase() + "." + toJsonMethodName.getSymbolName() + "();");
@@ -658,7 +662,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + fromJsonMethodName.getSymbolName() + "(json)." + javaTypePersistenceMetadataHolder.getPersistMethod().getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(JavaType.STRING_OBJECT);
@@ -708,7 +715,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine(entityName + "." + javaTypePersistenceMetadataHolder.getPersistMethod().getMethodName().getSymbolName() + "();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(JavaType.STRING_OBJECT);
@@ -780,12 +790,15 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String beanShortName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("if (" + beanShortName + "." + fromJsonMethodName.getSymbolName() + "(json)." + javaTypePersistenceMetadataHolder.getMergeMethod().getMethodName().getSymbolName() + "() == null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".NOT_FOUND);");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".NOT_FOUND);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(JavaType.STRING_OBJECT);
@@ -831,16 +844,19 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(formBackingType);
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("for (" + beanName + " " + entityName + ": " + beanName + "." + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("if (" + entityName + "." + javaTypePersistenceMetadataHolder.getMergeMethod().getMethodName().getSymbolName() + "() == null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".NOT_FOUND);");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".NOT_FOUND);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(JavaType.STRING_OBJECT);
@@ -886,13 +902,16 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		String beanShortName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + beanShortName + "." + javaTypePersistenceMetadataHolder.getFindMethod().getMethodName() + "(" + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + ");");
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("if (" + beanShortName.toLowerCase() + " == null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return new " + getShortName(new JavaType("org.springframework.http.ResponseEntity")) + "<String>(" + getShortName(new JavaType("org.springframework.http.HttpStatus")) + ".NOT_FOUND);");
+		bodyBuilder.appendFormalLine("return new " + getShortName(new JavaType("org.springframework.http.ResponseEntity")) + "<String>(headers, " + getShortName(new JavaType("org.springframework.http.HttpStatus")) + ".NOT_FOUND);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(beanShortName.toLowerCase() + "." + javaTypePersistenceMetadataHolder.getRemoveMethod().getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(JavaType.STRING_OBJECT);
