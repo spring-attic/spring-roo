@@ -27,8 +27,11 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
+import org.springframework.roo.classpath.scanner.GlobalCustomDataRequest;
+import org.springframework.roo.classpath.scanner.GlobalMemberDetailsDecorator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -409,7 +412,16 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Try to locate an existing field with @javax.persistence.EmbeddedId
 		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
 		if (embeddedIdFields.size() > 0) {
-			return tagField(getIdentifierField(embeddedIdFields, EMBEDDED_ID), CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+			// TODO @EmbeddedId is a test case but when working this code needs a tidy up to reduce duplicated code so that other fields, such as version can be addedd as well. 
+			FieldMetadata idField = getIdentifierField(embeddedIdFields, EMBEDDED_ID);
+			CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+			customDataBuilder.put(CustomDataPersistenceTags.EMBEDDED_ID_FIELD, null);
+			GlobalCustomDataRequest globalCustomDataRequest = new GlobalCustomDataRequest();
+			globalCustomDataRequest.addCustomData(idField, customDataBuilder.build());
+			FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(idField);
+			builder.putCustomData(GlobalMemberDetailsDecorator.GLOBAL_MEMBER_DETAILS_DECORATOR_TAG, globalCustomDataRequest);
+			return fieldMetadataBuilder.build();
+		//	return tagField(getIdentifierField(embeddedIdFields, EMBEDDED_ID), CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
 		}
 
 		if (!StringUtils.hasText(identifierField)) {
@@ -530,7 +542,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
-			// Located an existing accessor
+			// Locate an existing accessor
 			MethodMetadata method = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
@@ -1216,26 +1228,22 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return entityName;
 	}
 	
-	public boolean hasEmbeddedId() {
-		return MemberFindingUtils.getAnnotationOfType(getIdentifierField().getAnnotations(), EMBEDDED_ID) != null;
-	}
-	
 	private MethodMetadata tagMethod(MethodMetadata method, Object tag) {
 		if (method == null) {
-			return method;
+			return null;
 		}
-		MethodMetadataBuilder metadataBuilder = new MethodMetadataBuilder(method);
-		metadataBuilder.putCustomData(tag, null);
-		return metadataBuilder.build();
+		MethodMetadataBuilder methodMetadataBuilder = new MethodMetadataBuilder(method);
+		methodMetadataBuilder.putCustomData(tag, null);
+		return methodMetadataBuilder.build();
 	}
 	
 	private FieldMetadata tagField(FieldMetadata field, Object tag) {
 		if (field == null) {
-			return field;
+			return null;
 		}
-		FieldMetadataBuilder metadataBuilder = new FieldMetadataBuilder(field);
-		metadataBuilder.putCustomData(tag, null);
-		return metadataBuilder.build();
+		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(field);
+		fieldMetadataBuilder.putCustomData(tag, null);
+		return fieldMetadataBuilder.build();
 	}
 	
 	public String toString() {
