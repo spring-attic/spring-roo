@@ -22,7 +22,6 @@ public enum CustomDataPersistenceTags {
 	 * Persistence field definitions
 	 */
 	IDENTIFIER_FIELD,
-	ROO_IDENTIFIER_FIELD,
 	VERSION_FIELD,
 	TRANSIENT_FIELD,
 	EMBEDDED_FIELD,

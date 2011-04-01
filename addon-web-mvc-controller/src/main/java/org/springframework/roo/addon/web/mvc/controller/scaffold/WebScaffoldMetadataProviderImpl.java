@@ -82,11 +82,10 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		}
 		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, 
-				MemberFindingUtils.getMethods(controllerMemberDetails), 
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, formBackingObjectMemberDetails,
 				WebMetadataUtils.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
 				WebMetadataUtils.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry), 
+				WebMetadataUtils.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry), 
 				WebMetadataUtils.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry),
 				jsonMetadata);
 	}

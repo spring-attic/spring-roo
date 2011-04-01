@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.selenium;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -11,6 +12,7 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
@@ -18,6 +20,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -128,8 +131,21 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
-
-		for (FieldMetadata field : WebMetadataUtils.getScaffoldElegibleFieldMetadata(formBackingType, memberDetails, metadataService, null, null)) {
+		
+		// Add composite PK identifier fields if needed
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(formBackingType, memberDetails, metadataService, memberDetailsScanner, null, null);
+		if (javaTypePersistenceMetadataDetails != null && javaTypePersistenceMetadataDetails.getRooIdentifierFields().size() > 0) {
+			for (FieldMetadata field : javaTypePersistenceMetadataDetails.getRooIdentifierFields()) {
+				if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
+					FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+					fieldBuilder.setFieldName(new JavaSymbolName(javaTypePersistenceMetadataDetails.getIdentifierField().getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));
+					tbody.appendChild(typeCommand(selenium, fieldBuilder.build()));
+				}
+			}
+		}
+		
+		// Add all other fields
+		for (FieldMetadata field : WebMetadataUtils.getScaffoldElegibleFieldMetadata(formBackingType, memberDetails, metadataService, memberDetailsScanner, null, null)) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				tbody.appendChild(typeCommand(selenium, field));
 			} else {
@@ -303,6 +319,13 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	private String convertToInitializer(FieldMetadata field) {
 		String initializer = " ";
 		short index = 1;
+		AnnotationMetadata min = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min"));
+		if (min != null) {
+			AnnotationAttributeValue<?> value = min.getAttribute(new JavaSymbolName("value"));
+			if (value != null) {
+				index = new Short(value.getValue().toString());
+			}
+		}
 		if (field.getFieldName().getSymbolName().contains("email") || field.getFieldName().getSymbolName().contains("Email")) {
 			initializer = "some@email.com";
 		} else if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
@@ -351,6 +374,8 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			initializer = new Long(index).toString();
 		} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 			initializer = new Short(index).toString();
+		} else if (field.getFieldType().equals(new JavaType("java.math.BigDecimal")) ) {
+			initializer = new BigDecimal(index).toString();
 		} 
 		return initializer;		
 	}

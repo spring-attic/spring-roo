@@ -93,7 +93,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		JavaType formbackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 		MemberDetails memberDetails = WebMetadataUtils.getMemberDetails(formbackingType, metadataService, memberDetailsScanner);
-		JavaTypeMetadataDetails formBackingTypeMetadataDetails = WebMetadataUtils.getJavaTypeMetadataDetails(formbackingType, memberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry);
+		JavaTypeMetadataDetails formBackingTypeMetadataDetails = WebMetadataUtils.getJavaTypeMetadataDetails(formbackingType, memberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry);
 		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formbackingType.getFullyQualifiedTypeName());
 
 		// Install web artifacts only if Spring MVC config is missing
@@ -113,7 +113,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 		
-		List<FieldMetadata> elegibleFields = WebMetadataUtils.getScaffoldElegibleFieldMetadata(formbackingType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+		List<FieldMetadata> elegibleFields = WebMetadataUtils.getScaffoldElegibleFieldMetadata(formbackingType, memberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
 
 		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), WebMetadataUtils.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
 
@@ -172,7 +172,13 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
 		properties.put(pluralResourceId, new JavaSymbolName(formBackingTypeMetadataDetails.getPlural()).getReadableSymbolName());
 		
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(formbackingType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+		if (formBackingTypeMetadataDetails.getPersistenceDetails() != null && formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields().size() > 0) {
+			for (FieldMetadata idField: formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields()) {
+				properties.put(XmlUtils.convertId(resourceId + "." + formBackingTypeMetadataDetails.getPersistenceDetails().getIdentifierField().getFieldName().getSymbolName() + "." + idField.getFieldName().getSymbolName().toLowerCase()), idField.getFieldName().getReadableSymbolName());
+			}
+		}
+		
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(formbackingType, memberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
 		Assert.notNull(javaTypePersistenceMetadataDetails, "Unable to determine persistence metadata for type " + formbackingType.getFullyQualifiedTypeName());
 		
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
@@ -186,7 +192,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			}
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
 			if (WebMetadataUtils.isApplicationType(method.getReturnType(), metadataService) && WebMetadataUtils.isRooIdentifier(method.getReturnType(), WebMetadataUtils.getMemberDetails(method.getReturnType(), metadataService, memberDetailsScanner))) {
-				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(method.getReturnType(), WebMetadataUtils.getMemberDetails(method.getReturnType(), metadataService, memberDetailsScanner), metadataService, metadataIdentificationString, metadataDependencyRegistry);
+				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(method.getReturnType(), WebMetadataUtils.getMemberDetails(method.getReturnType(), metadataService, memberDetailsScanner), metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
 				if (typePersistenceMetadataDetails != null) {
 					for (FieldMetadata f : typePersistenceMetadataDetails.getRooIdentifierFields()) {
 						String sb = f.getFieldName().getReadableSymbolName();

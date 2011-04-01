@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.scaffold;
 import java.beans.Introspector;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -21,7 +22,10 @@ import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadata
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -36,6 +40,7 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
@@ -62,18 +67,19 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private String entityName;
 	private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
 	private JsonMetadata jsonMetadata;
-	private List<MethodMetadata> existingMethods;
+	private MemberDetails memberDetails;
 	private JavaType formBackingType;
 	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
 	private JavaTypeMetadataDetails javaTypeMetadataHolder;
+	private boolean compositePk = false;
 
-	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, List<MethodMetadata> existingMethods, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, Set<FinderMetadataDetails> dynamicFinderMethods, JsonMetadata jsonMetadata) {
+	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, MemberDetails memberDetails, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, Set<FinderMetadataDetails> dynamicFinderMethods, JsonMetadata jsonMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(dynamicFinderMethods, "Finder methods required");
-		Assert.notNull(existingMethods, "List of existing methods required");
+		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(dependentTypes, "Dependent types list required");
 		if (!isValid()) {
 			return;
@@ -85,12 +91,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		this.controllerPath = annotationValues.getPath();
 		this.formBackingType = annotationValues.getFormBackingObject();
-		this.existingMethods = existingMethods;
 		this.specialDomainTypes = specialDomainTypes;
+		this.memberDetails = memberDetails;
 		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
 
 		this.dateTypes = dateTypes;
+		
+		if (javaTypeMetadataHolder.getPersistenceDetails() != null && javaTypeMetadataHolder.getPersistenceDetails().getRooIdentifierFields().size() > 0) {
+			this.compositePk = true;
+			builder.addField(getConversionServiceField());
+			builder.addConstructor(getConstructor());
+		}
 
 		if (annotationValues.create) {
 			builder.addMethod(getCreateMethod());
@@ -145,6 +157,37 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	public WebScaffoldAnnotationValues getAnnotationValues() {
 		return annotationValues;
+	}
+	
+	private FieldMetadata getConversionServiceField() {
+		JavaSymbolName fieldName = new JavaSymbolName("conversionService");
+		JavaType fieldType = new JavaType("org.springframework.core.convert.ConversionService");
+		for (FieldMetadata field: MemberFindingUtils.getFields(memberDetails)) {
+			if (field.getFieldType().equals(fieldType) && field.getFieldName().equals(fieldName)) {
+				return field;
+			}
+		}
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, fieldType, null);
+		return fieldBuilder.build();
+	}
+	
+	private ConstructorMetadata getConstructor() {
+		AnnotatedJavaType constructorParam = new AnnotatedJavaType(new JavaType("org.springframework.core.convert.ConversionService"), new ArrayList<AnnotationMetadata>());
+		for (ConstructorMetadata constructor: MemberFindingUtils.getConstructors(memberDetails)) {
+			if (constructor.getParameterTypes().equals(Arrays.asList(constructorParam))) {
+				return constructor;
+			}
+		}
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("this.conversionService = conversionService;");
+		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+		AnnotationMetadataBuilder autowired = new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired"));
+		constructorBuilder.addAnnotation(autowired.build());
+		constructorBuilder.addParameterType(constructorParam);
+		constructorBuilder.addParameterName(new JavaSymbolName("conversionService"));
+		constructorBuilder.setModifier(Modifier.PUBLIC);
+		constructorBuilder.setBodyBuilder(bodyBuilder);
+		return constructorBuilder.build();
 	}
 	
 	private MethodMetadata getDeleteMethod() {
@@ -316,7 +359,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
 		}
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName.toLowerCase() + "\", " + formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + javaTypePersistenceMetadataHolder.getFindMethod().getMethodName() + "(" + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + "));");
-		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"itemId\", " + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + ");");
+		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"itemId\", " + (compositePk ? "conversionService.convert(" : "") + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + (compositePk ? ", String.class)" : "") + ");");
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
@@ -372,7 +415,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
 		bodyBuilder.appendFormalLine(entityName + "." + javaTypePersistenceMetadataHolder.getPersistMethod().getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + entityName + "." + javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "().toString(), httpServletRequest);");
+		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." + javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
@@ -482,7 +525,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
 		bodyBuilder.appendFormalLine(entityName + "." + javaTypePersistenceMetadataHolder.getMergeMethod().getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + entityName + "." +  javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "().toString(), httpServletRequest);");
+		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." +  javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
@@ -1161,7 +1204,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		for (MethodMetadata method: existingMethods) {
+		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
 			if (method.getMethodName().equals(methodName)) {
 				return method;
 			}

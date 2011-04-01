@@ -84,6 +84,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\").serialize(this);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), bodyBuilder);
+		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_METHOD, null);
 		return methodBuilder.build();
 	}
 
@@ -123,6 +124,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\").serialize(collection);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, new JavaType("java.lang.String"), parameters, paramNames, bodyBuilder);
+		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_ARRAY_METHOD, null);
 		return methodBuilder.build();
 	}
 
@@ -168,6 +170,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		JavaType collection = new JavaType("java.util.Collection", 0, DataType.TYPE, null, params);
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, collection, parameters, paramNames, bodyBuilder);
+		methodBuilder.putCustomData(CustomDataJsonTags.FROM_JSON_ARRAY_METHOD, null);
 		return methodBuilder.build();
 	}
 
@@ -204,6 +207,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		paramNames.add(new JavaSymbolName("json"));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, governorType, parameters, paramNames, bodyBuilder);
+		methodBuilder.putCustomData(CustomDataJsonTags.FROM_JSON_METHOD, null);
 		return methodBuilder.build();
 	}
 

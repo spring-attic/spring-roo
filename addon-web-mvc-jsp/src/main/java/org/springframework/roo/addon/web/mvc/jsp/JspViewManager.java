@@ -164,33 +164,39 @@ public class JspViewManager {
 	public Document getCreateDocument() {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
-
+		
 		// Add document namespaces
 		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document).addAttribute("xmlns:form", "urn:jsptagdir:/WEB-INF/tags/form").addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields").addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page").addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core").addAttribute("xmlns:spring", "http://www.springframework.org/tags").addAttribute("version", "2.0").addChild(new XmlElementBuilder("jsp:directive.page", document).addAttribute("contentType", "text/html;charset=UTF-8").build()).addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build()).build());
-
+		
 		// Add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document).addAttribute("id", XmlUtils.convertId("fc:" + formbackingType.getFullyQualifiedTypeName())).addAttribute("modelAttribute", entityName).addAttribute("path", controllerPath).addAttribute("render", "${empty dependencies}").build();
-
+		
 		if (!controllerPath.toLowerCase().equals(formbackingType.getSimpleTypeName().toLowerCase())) {
 			formCreate.setAttribute("path", controllerPath);
 		}
-
-		List<FieldMetadata> formFields = new ArrayList<FieldMetadata>(fields);
+		
+		List<FieldMetadata> formFields = new ArrayList<FieldMetadata>();
 		
 		// Handle Roo identifiers
-		for (FieldMetadata field : formbackingTypePersistenceMetadata.getRooIdentifierFields()) {
-			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-			formFields.add(fieldBuilder.build());
+		if (formbackingTypePersistenceMetadata.getRooIdentifierFields().size() > 0) {
+			formCreate.setAttribute("compositePkField", formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName());
+			for (FieldMetadata field : formbackingTypePersistenceMetadata.getRooIdentifierFields()) {
+				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+				fieldBuilder.setFieldName(new JavaSymbolName(formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));
+				formFields.add(fieldBuilder.build());
+			}
 		}
+		formFields.addAll(fields);
+		
 		createFieldsForCreateAndUpdate(formFields, document, formCreate, true);
 		formCreate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formCreate));
-
+		
 		Element dependency = new XmlElementBuilder("form:dependency", document).addAttribute("id", XmlUtils.convertId("d:" + formbackingType.getFullyQualifiedTypeName())).addAttribute("render", "${not empty dependencies}").addAttribute("dependencies", "${dependencies}").build();
 		dependency.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(dependency));
-
+		
 		div.appendChild(formCreate);
 		div.appendChild(dependency);
-
+		
 		return document;
 	}
 
@@ -361,7 +367,6 @@ public class JspViewManager {
 			if (fieldElement == null) {
 				fieldElement = document.createElement("field:input");
 			}
-
 			addCommonAttributes(field, fieldElement);
 			fieldElement.setAttribute("field", fieldName);
 			fieldElement.setAttribute("id", XmlUtils.convertId("c:" + formbackingType.getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()));
@@ -447,6 +452,10 @@ public class JspViewManager {
 			if (tagName.endsWith("textarea") || tagName.endsWith("input") || tagName.endsWith("datetime") || tagName.endsWith("textarea") || tagName.endsWith("select") || tagName.endsWith("reference")) {
 				fieldElement.setAttribute("required", "true");
 			}
+		}
+		// Disable form binding for nested fields (mainly PKs)
+		if (field.getFieldName().getSymbolName().contains(".")) {
+			fieldElement.setAttribute("disableFormBinding", "true");
 		}
 	}
 
