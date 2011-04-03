@@ -3,8 +3,6 @@ package org.springframework.roo.classpath.scanner;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
@@ -33,9 +31,9 @@ import org.springframework.roo.model.CustomData;
  * @author Alan Stewart
  * @since 1.1.3
  */
-@Service
-@Component
-public class GlobalMemberDetailsDecorator implements MemberDetailsDecorator {
+//@Service
+//@Component
+public class GlobalMemberDetailsDecorator {//implements MemberDetailsDecorator {
 	public static final String GLOBAL_MEMBER_DETAILS_DECORATOR_TAG = "GLOBAL_MEMBER_DETAILS_DECORATOR_TAG";
 	
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
