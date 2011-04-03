@@ -145,7 +145,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     	ParseResult parseResult = null;
 		try {
 			// We support simple block comments; ie a single pair per line
-			if (!inBlockComment && line.contains("/*")) {
+			if (!inBlockComment && line.contains("/*") && line.contains("*/")) {
 				blockCommentBegin();
 				String lhs = line.substring(0, line.lastIndexOf("/*"));
 				if (line.contains("*/")) {

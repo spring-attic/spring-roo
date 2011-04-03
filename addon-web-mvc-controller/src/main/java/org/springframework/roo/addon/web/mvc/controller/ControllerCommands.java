@@ -82,7 +82,10 @@ public class ControllerCommands implements CommandMarker {
 			}
 		}
 
-		if (path == null || path.length() == 0) {
+		if (path.equals("/") || path.equals("/*")) {
+			logger.warning("Your application already contains a mapping to '/' or '/*' by default. Please provide a different path.");
+			return;
+		} else if (path == null || path.length() == 0) {
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
 			Assert.notNull(pluralMetadata, "Could not determine plural for '" + entity.getSimpleTypeName() + "'");
 			path = pluralMetadata.getPlural().toLowerCase();
