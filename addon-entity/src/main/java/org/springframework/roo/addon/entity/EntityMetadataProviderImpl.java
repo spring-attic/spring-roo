@@ -49,6 +49,12 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 		
+		// We need to parse the annotation, which we expect to be present
+		EntityAnnotationValues annotationValues = new EntityAnnotationValues(governorPhysicalTypeMetadata);
+		if (!annotationValues.isAnnotationFound()) {
+			return null;
+		}
+
 		// Now we walk the inheritance hierarchy until we find some existing EntityMetadata
 		EntityMetadata parent = null;
 		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails()).getSuperclass();
@@ -83,7 +89,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
 
 		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
-		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, pluralMetadata.getPlural(), projectMetadata, memberDetails, identifierServiceResult);
+		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, projectMetadata, annotationValues, noArgConstructor, pluralMetadata.getPlural(), memberDetails, identifierServiceResult);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
