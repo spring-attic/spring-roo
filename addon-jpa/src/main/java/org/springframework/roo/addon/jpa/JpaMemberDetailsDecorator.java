@@ -110,6 +110,10 @@ public class JpaMemberDetailsDecorator implements MemberDetailsDecorator {
 					if (columnDefinitionAttributeValue != null) {
 						value.put("columnDefinition", (String) annotation.getAttribute(new JavaSymbolName("columnDefinition")).getValue());
 					}
+					AnnotationAttributeValue<?> nullableAttributeValue = annotation.getAttribute(new JavaSymbolName("nullable"));
+					if (nullableAttributeValue != null) {
+						value.put("nullable", (Boolean) annotation.getAttribute(new JavaSymbolName("nullable")).getValue());
+					}
 					field = addCustomizedMemberHoldingTypeDetailsForField(memberHoldingTypeDetailsList, memberHoldingTypeDetails, field, CustomDataPersistenceTags.COLUMN_FIELD, value);
 					detailsChanged = true;
 				}

@@ -260,36 +260,30 @@ public class JspViewManager {
 				JavaTypeMetadataDetails collectionTypeMetadataHolder = relatedDomainTypes.get(getJavaTypeForField(field));
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataHolder = collectionTypeMetadataHolder.getPersistenceDetails();
 				if (collectionTypeMetadataHolder != null && typePersistenceMetadataHolder != null) {
-					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + collectionTypeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(getJavaTypeForField(field))).build();
+					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("required", "true").addAttribute("items", "${" + collectionTypeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(getJavaTypeForField(field))).build();
 					if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD)) {
 						fieldElement.setAttribute("multiple", "true");
 					}
 				}
 			} else if (typeMetadataHolder != null && typeMetadataHolder.isEnumType() && field.getCustomData().keySet().contains(CustomDataPersistenceTags.ENUMERATED_FIELD)) {
-				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + typeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("path", "/" + getPathForType(type)).build();
+				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("required", "true").addAttribute("items", "${" + typeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("path", "/" + getPathForType(type)).build();
 			} else if (type.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || type.getFullyQualifiedTypeName().equals(boolean.class.getName())) {
 				fieldElement = document.createElement("field:checkbox");
 			} else if (typeMetadataHolder != null && typeMetadataHolder.isApplicationType()) {
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataHolder = typeMetadataHolder.getPersistenceDetails();
 				if (typePersistenceMetadataHolder != null) {
-					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + typeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(type)).build();
+					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("required", "true").addAttribute("items", "${" + typeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(type)).build();
 				}
 			} else if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-				fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + paramName.getSymbolName().toLowerCase() + "_date_format}").build();
+				fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("required", "true").addAttribute("dateTimePattern", "${" + entityName + "_" + paramName.getSymbolName().toLowerCase() + "_date_format}").build();
 			} else {
-				fieldElement = document.createElement("field:input");
+				fieldElement = new XmlElementBuilder("field:input", document).addAttribute("required", "true").build();
 			}
-			
-			if (fieldElement == null) {
-				fieldElement = document.createElement("field:input");
-			}
-
 			addCommonAttributes(field, fieldElement);
 			fieldElement.setAttribute("disableFormBinding", "true");
 			fieldElement.setAttribute("field", paramName.getSymbolName());
 			fieldElement.setAttribute("id", XmlUtils.convertId("f:" + formbackingType.getFullyQualifiedTypeName() + "." + paramName));
 			fieldElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
-
 			formFind.appendChild(fieldElement);
 		}
 		return document;
@@ -451,6 +445,13 @@ public class JspViewManager {
 			String tagName = fieldElement.getTagName();
 			if (tagName.endsWith("textarea") || tagName.endsWith("input") || tagName.endsWith("datetime") || tagName.endsWith("textarea") || tagName.endsWith("select") || tagName.endsWith("reference")) {
 				fieldElement.setAttribute("required", "true");
+			}
+		}
+		if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+			if (values.keySet().contains("nullable") && ((Boolean) values.get("nullable")) == false) {
+				fieldElement.setAttribute("required", "true"); 
 			}
 		}
 		// Disable form binding for nested fields (mainly PKs)
