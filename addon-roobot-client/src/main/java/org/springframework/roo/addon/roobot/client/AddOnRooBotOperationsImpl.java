@@ -247,7 +247,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 	
-	public Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
+	public Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
 		synchronized (mutex) {
 			if (maxResults > 99) {
 				maxResults = 99;
@@ -283,7 +283,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 					}
 				}
 				List<Bundle> bundles = Bundle.orderBySearchRelevance(new ArrayList<Bundle>(bundleCache.values()));
-				LinkedList<Bundle> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, onlyRelevantBundles);
+				LinkedList<Bundle> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, communityOnly, requiresCommand, onlyRelevantBundles);
 				if (showFeedback) {
 					printResultList(filteredSearchResults, maxResults, linesPerResult);
 				}
@@ -299,7 +299,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
+	public void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
 		synchronized (mutex) {
 			if (bundleCache.size() == 0) {
 				// We should refresh regardless in this case
@@ -310,7 +310,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			}
 			if (bundleCache.size() != 0) {
 				List<Bundle> bundles = Bundle.orderByRanking(new ArrayList<Bundle>(bundleCache.values()));
-				LinkedList<Bundle> filteredList = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, false);
+				LinkedList<Bundle> filteredList = filterList(bundles, trustedOnly, compatibleOnly, communityOnly, requiresCommand, false);
 				printResultList(filteredList, maxResults, linesPerResult);
 			} else {
 				log.info("No add-ons known. Are you online? Try the 'download status' command");
@@ -437,7 +437,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 	
-	private LinkedList<Bundle> filterList(List<Bundle> bundles, boolean trustedOnly, boolean compatibleOnly, String requiresCommand, boolean onlyRelevantBundles) {
+	private LinkedList<Bundle> filterList(List<Bundle> bundles, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand, boolean onlyRelevantBundles) {
 		LinkedList<Bundle> filteredList = new LinkedList<Bundle>();
 		List<PGPPublicKeyRing> keys = null;
 		if (trustedOnly) {
@@ -451,6 +451,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			if (trustedOnly && !isTrustedKey(keys, latest.getPgpKey())) {
 				continue bundle_loop;
 			} 
+			if (communityOnly && latest.getObrUrl().equals("http://spring-roo-repository.springsource.org/repository.xml")) {
+				continue bundle_loop;
+			}
 			if (compatibleOnly && !isCompatible(latest.getRooVersion())) {
 				continue bundle_loop;
 			}

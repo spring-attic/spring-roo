@@ -54,7 +54,7 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 		
 		// Do a silent (console message free) lookup of matches
 		Integer matches = null;
-		matches = addOnSearch.searchAddOns(false, null, false, 1, 99, false, false, command);
+		matches = addOnSearch.searchAddOns(false, null, false, 1, 99, false, false, false, command);
 		
 		// Render to screen if required
 		if (matches == null) {
@@ -63,7 +63,7 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 			logger.info("addon search --requiresCommand \"" + command + "\" found no matches");
 		} else if (matches > 0) {
 			logger.info("Located add-on" + (matches == 1 ? "" : "s") + " that may offer this command");
-			addOnSearch.searchAddOns(true, null, false, 1, 99, false, false, command);
+			addOnSearch.searchAddOns(true, null, false, 1, 99, false, false, false, command);
 		}
 	}
 

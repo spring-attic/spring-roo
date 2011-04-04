@@ -70,7 +70,7 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
 			String searchTerms = "#jdbcdriver,driverclass:" + driverClassName;
 			
 			// Do a silent (console message free) lookup of matches
-			Integer matches = addOnSearch.searchAddOns(false, searchTerms, false, 1, 99, false, false, null);
+			Integer matches = addOnSearch.searchAddOns(false, searchTerms, false, 1, 99, false, false, false, null);
 
 			// Render to screen if required
 			if (matches == null) {
@@ -79,7 +79,7 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
 				logger.info("addon search --requiresDescription \"" + searchTerms + "\" found no matches");
 			} else if (matches > 0) {
 				logger.info("Located add-on" + (matches == 1 ? "" : "s") + " that may offer this JDBC driver");
-				addOnSearch.searchAddOns(true, searchTerms, false, 1, 99, false, false, null);
+				addOnSearch.searchAddOns(true, searchTerms, false, 1, 99, false, false, false, null);
 			}
 
 			return null;

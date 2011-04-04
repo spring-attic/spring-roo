@@ -48,9 +48,10 @@ public class AddOnCommands implements CommandMarker {
 			@CliOption(key="linesPerResult", mandatory=false, unspecifiedDefaultValue="2", specifiedDefaultValue="2", help="The maximum number of lines displayed per add-on") int linesPerResult,
 			@CliOption(key="maxResults", mandatory=false, unspecifiedDefaultValue="99", specifiedDefaultValue="99", help="The maximum number of add-ons to list") int maxResults,
 			@CliOption(key="trustedOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display trusted add-ons in search results") boolean trustedOnly,
+			@CliOption(key="communityOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display community provided add-ons in search results") boolean communityOnly,
 			@CliOption(key="compatibleOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display compatible add-ons in search results") boolean compatibleOnly) {
 		// A list is really just a search without criteria. We keep some criteria to allow reasonable filtering and display logic to take place.
-		operations.searchAddOns(true, null, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, null);
+		operations.searchAddOns(true, null, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, communityOnly, null);
 	}	
 	
 	@CliCommand(value="addon search", help="Search all known Spring Roo Add-ons")
@@ -60,8 +61,9 @@ public class AddOnCommands implements CommandMarker {
 			@CliOption(key="maxResults", mandatory=false, unspecifiedDefaultValue="20", specifiedDefaultValue="20", help="The maximum number of add-ons to list") int maxResults,
 			@CliOption(key="trustedOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display trusted add-ons in search results") boolean trustedOnly,
 			@CliOption(key="compatibleOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display compatible add-ons in search results") boolean compatibleOnly,
+			@CliOption(key="communityOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display community provided add-ons in search results") boolean communityOnly,
 			@CliOption(key="requiresCommand", mandatory=false, help="Only display add-ons in search results that offer this command") String requiresCommand) {
-		operations.searchAddOns(true, searchTerms, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, requiresCommand);
+		operations.searchAddOns(true, searchTerms, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, communityOnly, requiresCommand);
 	}
 	
 	@CliCommand(value="addon install id", help="Install Spring Roo Add-on")

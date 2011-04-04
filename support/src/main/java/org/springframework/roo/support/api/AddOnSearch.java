@@ -10,6 +10,7 @@ import java.util.logging.Logger;
  * infrastructure modules require add-on search capabilities.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.1.1
  *
  */
@@ -29,10 +30,11 @@ public interface AddOnSearch {
 	 * @param maxResults maximum number of results to display (optional)
 	 * @param trustedOnly display only trusted add-ons in search results (optional)
 	 * @param compatibleOnly display only compatible add-ons in search results (optional)
+	 * @param communityOnly display only community-provided add-ons in search results (optional)
 	 * @param requiresCommand display only add-ons which offer the specified command (optional)
 	 * @return the total number of matches found, even if only some of these are displayed due to maxResults
 	 * (or null if the add-on list is unavailable for some reason, eg network problems etc)
 	 */
-	Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand);
+	Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand);
 
 }
