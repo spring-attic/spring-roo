@@ -466,8 +466,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
 			if (databaseExists) {
 				fileManager.delete(databasePath);
-				return;
 			}
+			return;
 		}
 
 		MutableFile databaseMutableFile = null;
@@ -809,6 +809,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		
 		hasChanged |= removeArtifacts(getProviderXPath(ormProviders), root, configuration);
+
 		if (hasChanged) {
 			// Something has changed so write changes to pom.xml
 			mutableFile.setDescriptionOfChange("Removed redundant artifacts");
@@ -826,52 +827,46 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Remove unwanted dependencies
 		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
 		for (Element candidate : XmlUtils.findElements("/project/dependencies/dependency", root)) {
-			unwanted: for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
+			for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
 				if (new Dependency(dependencyElement).equals(new Dependency(candidate))) {
 					// Found it
 					dependenciesElement.removeChild(candidate);
+					XmlUtils.removeTextNodes(dependenciesElement);
 					hasChanged = true;
-					break unwanted;
 				}
 			}
-		}
-		if (hasChanged) {
-			XmlUtils.removeTextNodes(dependenciesElement);
 		}
 
 		// Remove unwanted filters
 		Element filtersElement = XmlUtils.findFirstElement("/project/build/filters", root);
-		for (Element candidate : XmlUtils.findElements("/project/build/filters/filter", root)) {
-			unwanted: for (Element filterElement : XmlUtils.findElements(xPathExpression + "/filters/filter", configuration)) {
-				if (new Filter(filterElement).equals(new Filter(candidate))) {
-					// Found it
-					filtersElement.removeChild(candidate);
-					hasChanged = true;
-					break unwanted;
+		if (filtersElement != null) {
+			for (Element candidate : XmlUtils.findElements("/project/build/filters/filter", root)) {
+				for (Element filterElement : XmlUtils.findElements(xPathExpression + "/filters/filter", configuration)) {
+					if (new Filter(filterElement).equals(new Filter(candidate))) {
+						// Found it
+						filtersElement.removeChild(candidate);
+						XmlUtils.removeTextNodes(filtersElement);
+						hasChanged = true;
+					}
 				}
 			}
-		}
-		if (hasChanged) {
-			XmlUtils.removeTextNodes(filtersElement);
-			if (filtersElement != null && !filtersElement.hasChildNodes()) {
+
+			if (!filtersElement.hasChildNodes()) {
 				filtersElement.getParentNode().removeChild(filtersElement);
 			}
 		}
-
+		
 		// Remove unwanted plugins
 		Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
 		for (Element candidate : XmlUtils.findElements("/project/build/plugins/plugin", root)) {
-			unwanted: for (Element pluginElement : XmlUtils.findElements(xPathExpression + "/plugins/plugin", configuration)) {
+			for (Element pluginElement : XmlUtils.findElements(xPathExpression + "/plugins/plugin", configuration)) {
 				if (new Plugin(pluginElement).equals(new Plugin(candidate))) {
 					// Found it
 					pluginsElement.removeChild(candidate);
+					XmlUtils.removeTextNodes(pluginsElement);
 					hasChanged = true;
-					break unwanted;
 				}
 			}
-		}
-		if (hasChanged) {
-			XmlUtils.removeTextNodes(pluginsElement);
 		}
 		
 		return hasChanged;

@@ -83,12 +83,12 @@ public class JpaCommands implements CommandMarker {
 		if (!(jdbcDatabase == JdbcDatabase.HYPERSONIC_IN_MEMORY || jdbcDatabase == JdbcDatabase.HYPERSONIC_PERSISTENT || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY)) {
 			if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
 				if (jdbcDatabase == JdbcDatabase.VMFORCE) {
-					logger.warning("Please enter your database details in src/main/resources/config.properties.");					
+					logger.warning("Please update your database details in src/main/resources/config.properties.");
 				} else {
-					logger.warning("Please enter your database details in src/main/resources/META-INF/persistence.xml.");
+					logger.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
 				}
 			} else {
-				logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
+				logger.warning("Please update your database details in src/main/resources/META-INF/spring/database.properties.");
 			}
 		}
 	}
