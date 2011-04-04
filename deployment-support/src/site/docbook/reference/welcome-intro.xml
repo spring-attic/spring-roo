@@ -449,16 +449,6 @@
     course use Roo with normal Eclipse or without an IDE at all if you
     prefer).</para>
 
-    <para>If you use OS X, we strongly recommend the use of the iTerm
-    application for terminal emulation. iTerm provides full ANSI support,
-    which isn't provided by the default OSX Terminal application. Some Roo
-    operations update the "flash message area", and if you have full ANSI
-    support in your terminal this will look more visually pleasing. Of course,
-    you don't need to use iTerm - Roo will just display the updates with other
-    console messages in that case. Windows and Linux users need not do
-    anything special, as those operating systems work perfectly fine
-    out-of-the-box.</para>
-
     <para>Once you have satisfied the initial requirements, you can install
     Roo by following these steps:</para>
 
