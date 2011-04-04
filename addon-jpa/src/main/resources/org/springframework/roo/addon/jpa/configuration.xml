@@ -108,9 +108,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.version>1.4.0</gae.version>
-                <gae-test.version>1.4.0</gae-test.version>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.4.0/appengine-java-sdk-1.4.0</gae.home>
             </properties>
             <repositories>
                 <repository>
@@ -135,24 +133,24 @@
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-1.0-sdk</artifactId>
-                    <version>${gae.version}</version>
+                    <version>1.4.0</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-testing</artifactId>
-                    <version>${gae-test.version}</version>
+                    <version>1.4.0</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-stubs</artifactId>
-                    <version>${gae-test.version}</version>
+                    <version>1.4.0</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-labs</artifactId>
-                    <version>${gae-test.version}</version>
+                    <version>1.4.0</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -162,7 +160,7 @@
                     <artifactId>maven-gae-plugin</artifactId>
                     <version>0.5.7</version>
                     <configuration>
-                        <unpackVersion>${gae.version}</unpackVersion>
+                        <unpackVersion>1.4.0</unpackVersion>
                     </configuration>
                     <executions>
                         <execution>
@@ -241,14 +239,11 @@
             </dependencies>
         </provider>
         <provider id="OPENJPA">
-            <properties>
-                <openjpa.version>2.1.0</openjpa.version>
-            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.apache.openjpa</groupId>
                     <artifactId>openjpa</artifactId>
-                    <version>${openjpa.version}</version>
+                    <version>2.1.0</version>
                     <exclusions>
                         <exclusion>
                             <groupId>commons-logging</groupId>
@@ -284,7 +279,7 @@
                         <dependency>
                             <groupId>org.apache.openjpa</groupId>
                             <artifactId>openjpa</artifactId>
-                            <version>${openjpa.version}</version>
+                            <version>2.1.0</version>
                             <exclusions>
                                 <exclusion>
                                     <groupId>commons-logging</groupId>
@@ -322,9 +317,6 @@
             </dependencies>
         </provider>
         <provider id="DATANUCLEUS">
-            <properties>
-                <datanucleus.version>1.1.5</datanucleus.version>
-            </properties>
             <repositories>
                 <repository>
                     <id>DataNucleus_2</id>
@@ -347,7 +339,7 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-core</artifactId>
-                    <version>${datanucleus.version}</version>
+                    <version>1.1.5</version>
                     <scope>runtime</scope>
                     <exclusions>
                         <exclusion>
@@ -364,7 +356,7 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-rdbms</artifactId>
-                    <version>${datanucleus.version}</version>
+                    <version>1.1.5</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
@@ -408,7 +400,7 @@
                         <dependency>
                             <groupId>org.datanucleus</groupId>
                             <artifactId>datanucleus-core</artifactId>
-                            <version>${datanucleus.version}</version>
+                            <version>1.1.5</version>
                             <exclusions>
                                 <exclusion>
                                     <groupId>javax.transaction</groupId>
@@ -419,7 +411,7 @@
                         <dependency>
                             <groupId>org.datanucleus</groupId>
                             <artifactId>datanucleus-rdbms</artifactId>
-                            <version>${datanucleus.version}</version>
+                            <version>1.1.5</version>
                         </dependency>
                         <dependency>
                             <groupId>org.datanucleus</groupId>
@@ -431,9 +423,6 @@
             </plugins>
         </provider>
         <provider id="DATANUCLEUS_2">
-            <properties>
-                <datanucleus.version>2.1.4</datanucleus.version>
-            </properties>
             <repositories>
                 <repository>
                     <id>DataNucleus_2</id>
@@ -456,7 +445,7 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-core</artifactId>
-                    <version>${datanucleus.version}</version>
+                    <version>2.1.4</version>
                     <exclusions>
                         <exclusion>
                             <groupId>javax.transaction</groupId>
@@ -467,12 +456,12 @@
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-jpa</artifactId>
-                    <version>${datanucleus.version}</version>
+                    <version>2.1.4</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-rdbms</artifactId>
-                    <version>${datanucleus.version}</version>
+                    <version>2.1.4</version>
                 </dependency>
                 <dependency>
                     <groupId>org.datanucleus</groupId>
@@ -516,7 +505,7 @@
                         <dependency>
                             <groupId>org.datanucleus</groupId>
                             <artifactId>datanucleus-core</artifactId>
-                            <version>${datanucleus.version}</version>
+                            <version>2.1.4</version>
                             <exclusions>
                                 <exclusion>
                                     <groupId>javax.transaction</groupId>
@@ -527,12 +516,12 @@
                         <dependency>
                             <groupId>org.datanucleus</groupId>
                             <artifactId>datanucleus-jpa</artifactId>
-                            <version>${datanucleus.version}</version>
+                            <version>2.1.4</version>
                         </dependency>
                         <dependency>
                             <groupId>org.datanucleus</groupId>
                             <artifactId>datanucleus-rdbms</artifactId>
-                            <version>${datanucleus.version}</version>
+                            <version>2.1.4</version>
                         </dependency>
                         <dependency>
                             <groupId>org.datanucleus</groupId>
