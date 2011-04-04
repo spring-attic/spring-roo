@@ -1,11 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,14 +9,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -60,7 +54,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		String servletCtxFilename = "WEB-INF/spring/webmvc-config.xml";
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'" + servletCtxFilename + "' does not exist");
 
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))) {
+		String webXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		if (fileManager.exists(webXmlPath)) {
 			// File exists, so nothing to do
 			return;
 		}
@@ -69,19 +64,19 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Document webXml;
 		try {
 			webXml = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 
 		String projectName = projectOperations.getProjectMetadata().getProjectName();
 		WebXmlUtils.setDisplayName(projectName, webXml, null);
 		WebXmlUtils.setDescription("Roo generated " + projectName + " application", webXml, null);
 
-		writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"), webXml);
+		fileManager.createOrUpdateXmlFileIfRequired(webXmlPath, webXml, true);
 		try {
 			templateInputStream.close();
-		} catch (IOException ignore) {
-		}
+		} catch (IOException ignored) {}
+		
 		fileManager.scan();
 	}
 
@@ -114,7 +109,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", webXml, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", webXml, null);
 
-		writeToDiskIfNecessary(webXmlFile, webXml);
+		fileManager.createOrUpdateXmlFileIfRequired(webXmlFile, webXml, true);
 	}
 
 	private void createWebApplicationContext() {
@@ -139,11 +134,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 		Element rootElement = (Element) webMvcConfig.getFirstChild();
 		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
-		writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"), webMvcConfig);
+		fileManager.createOrUpdateXmlFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"), webMvcConfig, true);
+
 		try {
 			templateInputStream.close();
-		} catch (IOException ignore) {
-		}
+		} catch (IOException ignored) {}
+
 		fileManager.scan();
 	}
 
@@ -158,50 +154,5 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		projectOperations.addDependencies(dependencies);
 		
 		projectOperations.updateProjectType(ProjectType.WAR);
-	}
-
-	/** return indicates if disk was changed (ie updated or created) */
-	private boolean writeToDiskIfNecessary(String fileName, Document proposed) {
-		// Build a string representation of the JSP
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, proposed);
-		String xmlContent = byteArrayOutputStream.toString();
-		try {
-			byteArrayOutputStream.close();
-		} catch (IOException ignore) {}
-
-		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
-		MutableFile mutableFile = null;
-		if (fileManager.exists(fileName)) {
-			// First verify if the file has even changed
-			File f = new File(fileName);
-			String existing = null;
-			try {
-				existing = FileCopyUtils.copyToString(new FileReader(f));
-			} catch (IOException ignoreAndJustOverwriteIt) {
-			}
-
-			if (!xmlContent.equals(existing)) {
-				mutableFile = fileManager.updateFile(fileName);
-			}
-		} else {
-			mutableFile = fileManager.createFile(fileName);
-			Assert.notNull(mutableFile, "Could not create XML file '" + fileName + "'");
-		}
-
-		if (mutableFile != null) {
-			try {
-				// We need to write the file out (it's a new file, or the existing file has different contents)
-				FileCopyUtils.copy(xmlContent, new OutputStreamWriter(mutableFile.getOutputStream()));
-				
-				// Return and indicate we wrote out the file
-				return true;
-			} catch (IOException ioe) {
-				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-			}
-		}
-
-		// A file existed, but it contained the same content, so we return false
-		return false;
 	}
 }

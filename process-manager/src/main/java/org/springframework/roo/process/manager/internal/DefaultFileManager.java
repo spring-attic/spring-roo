@@ -1,5 +1,6 @@
 package org.springframework.roo.process.manager.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -29,6 +30,8 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
 
 /**
  * Default implementation of {@link FileManager}.
@@ -132,7 +135,6 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		return new DefaultMutableFile(actual, fileMonitorService, renderer);
 	}
 
-
 	public SortedSet<FileDetails> findMatchingAntPath(String antPath) {
 		return fileMonitorService.findMatchingAntPath(antPath);
 	}
@@ -149,6 +151,18 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		}
 	}
 	
+	public void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, boolean writeImmediately) {
+		Assert.notNull(document, "Document required");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		XmlUtils.writeXml(baos, document);
+		String newContents = baos.toString();
+		try {
+			baos.close();
+		} catch (IOException ignored) {}
+		
+		createOrUpdateTextFileIfRequired(fileIdentifier, newContents, writeImmediately);
+	}
+
 	public void commit() {
 		try {
 			for (String fileIdentifier : deferredFileWrites.keySet()) {
@@ -187,8 +201,8 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		if (mutableFile != null) {
 			try {
 				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
-			} catch (IOException ioe) {
-				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
+			} catch (IOException e) {
+				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", e);
 			}
 		}
 	}
@@ -201,7 +215,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		if (event.isUndoing()) {
 			clear();
 		} else {
-			// it's a flush or a reset event
+			// It's a flush or a reset event
 			commit();
 		}
 	}

@@ -49,6 +49,10 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JpaOperationsImpl implements JpaOperations {
+	private static final String DATABASE_URL = "database.url";
+	private static final String DATABASE_DRIVER = "database.driverClassName";
+	private static final String DATABASE_USERNAME = "database.username";
+	private static final String DATABASE_PASSWORD = "database.password";
 	private static final String PERSISTENCE_UNIT = "persistence-unit";
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
 	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
@@ -232,15 +236,15 @@ public class JpaOperationsImpl implements JpaOperations {
 		root.appendChild(entityManagerFactory);
 		XmlUtils.removeTextNodes(root);
 
-		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
+		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
 		String persistencePath = getPersistencePath();
-		MutableFile persistenceMutableFile = null;
 
 		Document persistence;
 		try {
+			MutableFile persistenceMutableFile = null;
 			if (fileManager.exists(persistencePath)) {
 				persistenceMutableFile = fileManager.updateFile(persistencePath);
 				persistence = XmlUtils.getDocumentBuilder().parse(persistenceMutableFile.getInputStream());
@@ -387,7 +391,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		persistenceUnitElement.appendChild(properties);
-		XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
+		
+		fileManager.createOrUpdateXmlFileIfRequired(persistencePath, persistence, true);
 	}
 
 	private String getConnectionString(JdbcDatabase jdbcDatabase, String hostName, String databaseName) {
@@ -441,8 +446,8 @@ public class JpaOperationsImpl implements JpaOperations {
 			Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", rootElement);
 			applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
 
-			XmlUtils.writeXml(appengineMutableFile.getOutputStream(), appengine);
-
+			fileManager.createOrUpdateXmlFileIfRequired(appenginePath, appengine, true);
+		
 			if (!loggingPropertiesPathExists) {
 				try {
 					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "logging.properties");
@@ -461,8 +466,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
 			if (databaseExists) {
 				fileManager.delete(databasePath);
+				return;
 			}
-			return;
 		}
 
 		MutableFile databaseMutableFile = null;
@@ -482,23 +487,38 @@ public class JpaOperationsImpl implements JpaOperations {
 			throw new IllegalStateException(e);
 		}
 
-		props.put("database.driverClassName", jdbcDatabase.getDriverClassName());
-
 		String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName);
-		props.put("database.url", connectionString);
-
 		if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
 			userName = StringUtils.hasText(userName) ? userName : "sa";
 		}
-		props.put("database.username", StringUtils.trimToEmpty(userName));
-		props.put("database.password", StringUtils.trimToEmpty(password));
 
+		boolean hasChanged = !props.get(DATABASE_DRIVER).equals(jdbcDatabase.getDriverClassName());
+		hasChanged |= !props.get(DATABASE_URL).equals(connectionString);
+		hasChanged |= !props.get(DATABASE_USERNAME).equals(StringUtils.trimToEmpty(userName));
+		hasChanged |= !props.get(DATABASE_PASSWORD).equals(StringUtils.trimToEmpty(password));
+		if (!hasChanged) {
+			// No changes from existing database configuration so exit now
+			return;
+		}
+		
+		// Write changes to database.properties file
+		props.put(DATABASE_URL, connectionString);
+		props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
+		props.put(DATABASE_USERNAME, StringUtils.trimToEmpty(userName));
+		props.put(DATABASE_PASSWORD, StringUtils.trimToEmpty(password));
+
+		OutputStream outputStream = null;
 		try {
-			OutputStream outputStream = databaseMutableFile.getOutputStream();
+			outputStream = databaseMutableFile.getOutputStream();
 			props.store(outputStream, "Updated at " + new Date());
-			outputStream.close();
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException ignored) {}
+			}
 		}
 	}
 
@@ -533,12 +553,18 @@ public class JpaOperationsImpl implements JpaOperations {
 		props.put("sfdc.userName", StringUtils.trimToEmpty(userName));
 		props.put("sfdc.password", StringUtils.trimToEmpty(password));
 
+		OutputStream outputStream = null;
 		try {
-			OutputStream outputStream = configMutableFile.getOutputStream();
+			outputStream = configMutableFile.getOutputStream();
 			props.store(outputStream, "Updated at " + new Date());
-			outputStream.close();
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException ignored) {}
+			}
 		}
 	}
 

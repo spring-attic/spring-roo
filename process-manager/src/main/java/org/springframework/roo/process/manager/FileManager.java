@@ -7,6 +7,7 @@ import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.undo.UndoManager;
+import org.w3c.dom.Document;
 
 /**
  * Represents the primary means for add-ons to modify the underlying disk storage.
@@ -75,7 +76,7 @@ public interface FileManager {
 	 */
 	MutableFile createFile(String fileIdentifier);
 
-	/**
+	/**ProcessManager
 	 * Attempts to delete a file or directory on the disk. The path should be in canonical file name format.
 	 * 
 	 * <p>
@@ -126,6 +127,18 @@ public interface FileManager {
 	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
 	 */
 	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately);
+
+	/**
+	 * Provides a simple way to create or update an XML file, skipping any modification if the file's contents match the proposed contents. 
+	 * 
+	 * <p>
+	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
+	 * 
+	 * @param fileIdentifier to create or update as appropriate (required)
+	 * @param document the DOM document 
+	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
+	 */
+	void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, boolean writeImmediately);
 
 	/**
 	 * Commits actual changes to the disk that an implementation may have elected to defer.
