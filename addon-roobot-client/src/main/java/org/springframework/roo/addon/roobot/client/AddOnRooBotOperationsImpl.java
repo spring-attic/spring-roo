@@ -67,6 +67,10 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	private final Class<AddOnRooBotOperationsImpl> mutex = AddOnRooBotOperationsImpl.class;
 	private Preferences prefs;
+	private List<String> noUpgradeBsnList = Arrays.asList(
+			"org.springframework.uaa.client", 
+			"org.springframework.roo.url.stream.jdk", 
+			"org.springframework.roo.url.stream");
 	
 	public static final String ADDON_UPGRADE_STABILITY_LEVEL = "ADDON_UPGRADE_STABILITY_LEVEL";
 	
@@ -575,12 +579,15 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				bundleCache.clear();
 				for (Element bundleElement : XmlUtils.findElements("/roobot/bundles/bundle", roobotXml.getDocumentElement())) {
 					String bsn = bundleElement.getAttribute("bsn");
+					if (noUpgradeBsnList.contains(bsn)) {
+						// List only add-ons which are not core (see ROO-2190)
+						continue; 
+					}
 					List<Comment> comments = new LinkedList<Comment>();
 					for (Element commentElement: XmlUtils.findElements("comments/comment", bundleElement)) {
 						comments.add(new Comment(Rating.fromInt(new Integer(commentElement.getAttribute("rating"))), commentElement.getAttribute("comment"), dateFormat.parse(commentElement.getAttribute("date"))));
 					}
 					Bundle bundle = new Bundle(bundleElement.getAttribute("bsn"), new Float(bundleElement.getAttribute("uaa-ranking")), comments);
-						
 					for (Element versionElement: XmlUtils.findElements("versions/version", bundleElement)) {
 						if (bsn != null && bsn.length() > 0 && versionElement != null) {
 							String signedBy = "";
@@ -618,7 +625,6 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 									rooVersion = split[0] + "." + split[1];
 								}
 							}
-							
 							BundleVersion version = new BundleVersion(versionElement.getAttribute("url"), versionElement.getAttribute("obr-url"), versionBuilder.toString(), versionElement.getAttribute("name"), new Long(versionElement.getAttribute("size")).longValue(), versionElement.getAttribute("description"), pgpKey, signedBy, rooVersion, commands);
 							// For security reasons we ONLY accept httppgp:// add-on versions
 							if (!version.getUri().startsWith("httppgp://")) {
