@@ -69,9 +69,9 @@ if [ "$cygwin" = "true" ]; then
 fi
 
 # make sure to disable the flash message feature for the default OSX terminal, we recommend to use a ANSI compliant terminal such as iTerm if flash message support is desired
-FLASH_DISABLED=false;
+APPLE_TERMINAL=false;
 if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-	FLASH_DISABLED=true
+	APPLE_TERMINAL=true
 fi
 
 # Hop, hop, hop...
@@ -79,8 +79,8 @@ DEBUG=
 #DEBUG="-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"
 PAUSE=
 #PAUSE="-Droo.pause=true"
-METADATA_TRACE=
-#METADATA_TRACE="-Droo.metadata.trace=true"
-java $PAUSE $DEBUG $METADATA_TRACE -Dflash.message.disabled=$FLASH_DISABLED $ROO_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
+#METADATA_TRACE=
+METADATA_TRACE="-Droo.metadata.trace=true"
+java $PAUSE $DEBUG $METADATA_TRACE -Dis.apple.terminal=$APPLE_TERMINAL $ROO_OPTS -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 echo Roo exited with code $EXITED

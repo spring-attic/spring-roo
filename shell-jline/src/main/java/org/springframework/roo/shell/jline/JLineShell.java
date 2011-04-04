@@ -35,6 +35,7 @@ import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
 import org.springframework.roo.support.util.OsUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Uses the feature-rich <a href="http://jline.sourceforge.net/">JLine</a> library to provide an interactive shell.
@@ -51,7 +52,8 @@ import org.springframework.roo.support.util.OsUtils;
 public abstract class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
-	private static final boolean FLASH_MESSAGE_DISABLED = Boolean.getBoolean("flash.message.disabled");
+	private static final boolean APPLE_TERMINAL = Boolean.getBoolean("is.apple.terminal");
+	private static final char ESC = 27;
 	
     private ConsoleReader reader;
     private boolean developmentMode = false;
@@ -190,7 +192,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 	
 	private void flashMessageRenderer() {
-		if (!reader.getTerminal().isANSISupported() || FLASH_MESSAGE_DISABLED) {
+		if (!reader.getTerminal().isANSISupported()) {
 			return;
 		}
 		// Setup a thread to ensure flash messages are displayed and cleared correctly
@@ -232,12 +234,18 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
 		
 		if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
-    		if (reader != null && reader.getTerminal().isANSISupported() && !FLASH_MESSAGE_DISABLED) {
+    		if (reader != null && reader.getTerminal().isANSISupported()) {
             	// We can probably update the window title, as requested
-        		final char esc = (char) 27;
+			    if (!StringUtils.hasText(message)) {
+				    System.out.println("No text");
+			    }
 
         		ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
-    			buff.append(esc + "]0;").append(message).append(esc +"\\");
+			    String suffix = "\\";
+			    if (APPLE_TERMINAL) {
+					suffix = "\\u0007";
+			    }
+    			buff.append(ESC + "]0;").append(message).append(ESC + suffix);
         		String stg = buff.toString();
         		try {
         			reader.printString(stg);
@@ -247,8 +255,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			
     		return;
 		}
-		
-		if ((reader !=null && !reader.getTerminal().isANSISupported()) || FLASH_MESSAGE_DISABLED) {
+		if ((reader !=null && !reader.getTerminal().isANSISupported())) {
 			super.flash(level, message, slot);
 			return;
 		}
@@ -298,8 +305,12 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	// Externally synchronized via the two calling methods having a mutex on flashInfoMap
 	private void doAnsiFlash(int row, Level level, String message) {
 		ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
-		buff.append(ANSICodes.save());
-		
+		if (APPLE_TERMINAL) {
+			buff.append(ESC + "7");
+		} else {
+			buff.append(ANSICodes.save());
+		}
+
 		// Figure out the longest line we're presently displaying (or were) and erase the line from that position
 		int mostFurtherLeftColNumber = Integer.MAX_VALUE;
 		for (Integer candidate : rowErasureMap.values()) {
@@ -333,8 +344,12 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			// Record we want to erase from this positioning next time (so we clean up after ourselves)
 			rowErasureMap.put(row, startFrom);
 		}
-		
-		buff.append(ANSICodes.restore());
+		if (APPLE_TERMINAL) {
+			buff.append(ESC + "8");
+		} else {
+			buff.append(ANSICodes.restore());
+		}
+
 		String stg = buff.toString();
 		try {
 			reader.printString(stg);
