@@ -6,22 +6,26 @@
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
            http://www.springframework.org/schema/webflow-config http://www.springframework.org/schema/webflow-config/spring-webflow-config-2.0.xsd">
 
-	<!--Maps request paths to flows in the flowRegistry-->
-	<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping">
-		<property name="order" value="0" />
-		<property name="flowRegistry" ref="flowRegistry" />
+	<!-- Places the ConversionService in request scope so it's available during request processing -->
+	<bean id="conversionServiceExposingInterceptor" class="org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor"> 
+		<constructor-arg ref="applicationConversionService" /> 
+	</bean> 
+	
+	<!--Maps request paths to flows in the flowRegistry--> 
+	<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerMapping"> 
+		<property name="order" value="0" /> 
+		<property name="flowRegistry" ref="flowRegistry" /> 
+		<property name="interceptors"> 
+			<array> 
+				<ref bean="conversionServiceExposingInterceptor"/> 
+			</array> 
+		</property> 
 	</bean>
 
 	<!-- Dispatches requests mapped to flows to FlowHandler implementations -->
 	<bean class="org.springframework.webflow.mvc.servlet.FlowHandlerAdapter">
 		<property name="flowExecutor" ref="flowExecutor" />
 	</bean>
-
-	<!--Dispatches requests mapped to POJO @Controllers implementations-->
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
-
-	<!-- Dispatches requests mapped to org.springframework.web.servlet.mvc.Controller implementations -->
-	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
 	
 	<!-- Executes flows: the entry point into the Spring Web Flow system -->
 	<webflow:flow-executor id="flowExecutor" />
