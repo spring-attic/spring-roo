@@ -28,6 +28,7 @@
 		<module>firebird</module>
 		<module>h2</module>
 		<module>derby</module>
+  		<module>db2express</module>
     	<module>jsch</module>
   		<module>jgit</module>
 	</modules>

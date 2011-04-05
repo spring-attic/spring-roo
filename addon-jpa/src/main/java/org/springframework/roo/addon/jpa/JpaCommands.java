@@ -76,7 +76,7 @@ public class JpaCommands implements CommandMarker {
 
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, persistenceUnit);
 		
-		if (jdbcDatabase == JdbcDatabase.ORACLE || jdbcDatabase == JdbcDatabase.DB2) {
+		if (jdbcDatabase == JdbcDatabase.ORACLE || jdbcDatabase == JdbcDatabase.DB2_EXPRESS_C || jdbcDatabase == JdbcDatabase.DB2_400) {
 			logger.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
 		}
 		
