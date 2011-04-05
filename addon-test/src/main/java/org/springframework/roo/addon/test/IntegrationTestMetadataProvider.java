@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -66,15 +67,7 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		}
 		
 		// Lookup the entity's metadata
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(annotationValues.getEntity(), Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata == null) {
-			return null;
-		}
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (classOrInterfaceTypeDetails == null) {
-			return null;
-		}
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = getMemberDetails(annotationValues.getEntity());
 		
 		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
 		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
@@ -91,7 +84,12 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey, metadataIdentificationString);
-		metadataDependencyRegistry.registerDependency(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+				metadataDependencyRegistry.registerDependency(((ClassOrInterfaceTypeDetails) memberHoldingTypeDetails).getDeclaredByMetadataId(), metadataIdentificationString);
+				break;
+			}
+		}
 				
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethod, flushMethod, mergeMethod, persistMethod, removeMethod, hasEmbeddedIdentifier);
 	}

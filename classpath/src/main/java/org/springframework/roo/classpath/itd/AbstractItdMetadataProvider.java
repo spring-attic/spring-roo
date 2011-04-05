@@ -13,6 +13,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -366,4 +367,21 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		return createLocalIdentifier(governorType, path);
 	}
 
+	protected MemberDetails getMemberDetails(JavaType type) {
+		// We need to lookup the metadata we depend on
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		
+		// We need to abort if we couldn't find dependent metadata
+		if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
+			return null;
+		} 
+		
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (classOrInterfaceTypeDetails == null) {
+			// Abort if the type's class details aren't available (parse error etc)
+			return null;
+		}
+		
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
+	}
 }

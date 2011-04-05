@@ -11,7 +11,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
-import org.springframework.roo.addon.dod.DataOnDemandMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -129,24 +128,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			metadataDependencyRegistry.registerDependency(versionField.getDeclaredByMetadataId(), metadataIdentificationString);
 		}
 		return versionField;
-	}
-
-	private MemberDetails getMemberDetails(JavaType type) {
-		// We need to lookup the metadata we depend on
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-
-		// We need to abort if we couldn't find dependent metadata
-		if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
-			return null;
-		}
-
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (classOrInterfaceTypeDetails == null) {
-			// Abort if the type's class details aren't available (parse error etc)
-			return null;
-		}
-
-		return memberDetailsScanner.getMemberDetails(DataOnDemandMetadataProvider.class.getName(), classOrInterfaceTypeDetails);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
