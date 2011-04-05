@@ -133,6 +133,7 @@ public abstract class FileCopyUtils {
 	/**
 	 * Copy the contents of the given byte array to the given OutputStream.
 	 * Closes the stream when done.
+	 * 
 	 * @param in the byte array to copy from
 	 * @param out the OutputStream to copy to
 	 * @throws IOException in case of I/O errors
@@ -142,12 +143,10 @@ public abstract class FileCopyUtils {
 		Assert.notNull(out, "No OutputStream specified");
 		try {
 			out.write(in);
-		}
-		finally {
+		} finally {
 			try {
 				out.close();
-			}
-			catch (IOException ex) {
+			} catch (IOException ignored) {
 			}
 		}
 	}

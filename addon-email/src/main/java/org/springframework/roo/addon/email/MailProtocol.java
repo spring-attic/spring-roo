@@ -32,6 +32,13 @@ public class MailProtocol implements Comparable<MailProtocol> {
 		return obj != null && obj instanceof MailProtocol && this.compareTo((MailProtocol) obj) == 0;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((protocolLabel == null) ? 0 : protocolLabel.hashCode());
+		return result;
+	}
+
 	public final int compareTo(MailProtocol o) {
 		if (o == null) return -1;
 		int result = this.protocolLabel.compareTo(o.protocolLabel);

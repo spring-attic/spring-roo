@@ -92,18 +92,18 @@ public class JmsOperationsImpl implements JmsOperations {
 		Element root = (Element) appCtx.getFirstChild();
 
 		if (StringUtils.hasText(name)) {
-			Element destination = appCtx.createElement("amq:" + destinationType.getType().toLowerCase());
+			Element destination = appCtx.createElement("amq:" + destinationType.name().toLowerCase());
 			destination.setAttribute("physicalName", name);
 			destination.setAttribute("id", name);
 			root.appendChild(destination);
 			addDefaultDestination(appCtx, name);
 		}
 
-		Element listenerContainer = XmlUtils.findFirstElement("/beans/listener-container[@destination-type = '" + destinationType.getType().toLowerCase() + "']", root);
+		Element listenerContainer = XmlUtils.findFirstElement("/beans/listener-container[@destination-type = '" + destinationType.name().toLowerCase() + "']", root);
 		if (listenerContainer == null) {
 			listenerContainer = appCtx.createElement("jms:listener-container");
 			listenerContainer.setAttribute("connection-factory", "jmsFactory");
-			listenerContainer.setAttribute("destination-type", destinationType.getType().toLowerCase());
+			listenerContainer.setAttribute("destination-type", destinationType.name().toLowerCase());
 			root.appendChild(listenerContainer);
 		}
 
@@ -224,10 +224,10 @@ public class JmsOperationsImpl implements JmsOperations {
 		Element root = appCtx.getDocumentElement();
 		
 		Element listenerContainer = XmlUtils.findFirstElementByName("jms:listener-container", root);
-		if (listenerContainer != null && destinationType.getType().toLowerCase().equals(listenerContainer.getAttribute("destination-type"))) {
+		if (listenerContainer != null && destinationType.name().toLowerCase().equals(listenerContainer.getAttribute("destination-type"))) {
 			listenerContainer = appCtx.createElement("jms:listener-container");
 			listenerContainer.setAttribute("connection-factory", "jmsFactory");
-			listenerContainer.setAttribute("destination-type", destinationType.getType().toLowerCase());
+			listenerContainer.setAttribute("destination-type", destinationType.name().toLowerCase());
 			root.appendChild(listenerContainer);
 		}
 
@@ -258,7 +258,7 @@ public class JmsOperationsImpl implements JmsOperations {
 			dependencies.add(new Dependency(dependencyElement));
 		}
 
-		List<Element> jmsDependencies = XmlUtils.findElements("/configuration/jmsProviders/provider[@id = '" + jmsProvider.getKey() + "']/dependencies/dependency", configuration);
+		List<Element> jmsDependencies = XmlUtils.findElements("/configuration/jmsProviders/provider[@id = '" + jmsProvider.name() + "']/dependencies/dependency", configuration);
 		for (Element dependencyElement : jmsDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
