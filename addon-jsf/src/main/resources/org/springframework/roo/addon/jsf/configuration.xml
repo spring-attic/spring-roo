@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+    <jsf-implementations>
+        <jsf-implementation id="ORACLE_MOJARRA">
+            <dependencies>
+                <dependency>
+                    <groupId>com.sun.faces</groupId>
+                    <artifactId>jsf-api</artifactId>
+                    <version>2.0.3</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.sun.faces</groupId>
+                    <artifactId>jsf-impl</artifactId>
+                    <version>2.0.3</version>
+                </dependency>
+            </dependencies>
+            <repositories>
+                <repository>
+                    <id>java.net.m2</id>
+                    <url>http://download.java.net/maven/2</url>
+                </repository>
+            </repositories>
+        </jsf-implementation>
+        <jsf-implementation id="APACHE_MYFACES">
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-api</artifactId>
+                    <version>2.0.4</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.myfaces.core</groupId>
+                    <artifactId>myfaces-impl</artifactId>
+                    <version>2.0.4</version>
+                </dependency>
+            </dependencies>
+        </jsf-implementation>
+    </jsf-implementations>
+    <jsf-libraries>
+        <jsf-library id="PRIMEFACES">
+            <dependencies>
+                <dependency>
+                    <groupId>org.primefaces</groupId>
+                    <artifactId>primefaces</artifactId>
+                    <version>2.2.1</version>
+                </dependency>
+            </dependencies>
+            <repositories>
+                <repository>
+                    <id>prime-repo</id>
+                    <name>Prime Technology Maven Repository</name>
+                    <url>http://repository.prime.com.tr</url>
+                    <layout>default</layout>
+                </repository>
+            </repositories>
+        </jsf-library>
+    </jsf-libraries>
+</configuration>

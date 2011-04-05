@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+              version="2.0">
+    <lifecycle>
+        <phase-listener>
+            com.springsource.vote.listeners.LoginErrorPhaseListener
+        </phase-listener>
+    </lifecycle>
+
+    <application>
+        <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
+
+        <resource-bundle>
+            <base-name>com.springsource.vote.web.i18n.appmessages</base-name>
+            <var>appmessages</var>
+        </resource-bundle>
+        <resource-bundle>
+            <base-name>com.springsource.vote.web.i18n.messages</base-name>
+            <var>messages</var>
+        </resource-bundle>
+
+        <locale-config>
+            <default-locale>en</default-locale>
+            <supported-locale>es</supported-locale>
+            <supported-locale>de</supported-locale>
+        </locale-config>
+
+    </application>
+</faces-config>
