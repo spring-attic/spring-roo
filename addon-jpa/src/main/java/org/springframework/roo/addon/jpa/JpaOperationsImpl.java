@@ -327,7 +327,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
 				properties.appendChild(persistence.createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
 				String hbm2dll = "create";
-				if (jdbcDatabase == JdbcDatabase.DB2400) {
+				if (jdbcDatabase == JdbcDatabase.DB2_400) {
 					hbm2dll = "validate";
 				}
 				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", hbm2dll, persistence));

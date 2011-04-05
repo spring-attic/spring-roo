@@ -193,8 +193,13 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
     need to obtain an OSGi-enabled driver from Oracle or IBM respectively or
     wrap your own Oracle or DB2 driver jars using Roo's wrapping facility. Use
     the <link linkend="command-index-addon-create-wrapper">addon create
-    wrapper</link> to turn an existing DB2 or Oracle JDBC driver into an OSGi
-    bundle you can install into Roo.</para>
+    wrapper</link> to turn an existing Oracle JDBC driver into an OSGi bundle
+    you can install into Roo. Roo does provide a wrapping pom.xml for the DB2
+    Express-C edition that can be used to convert your db2jcc4.jar into an
+    OSGi-compliant driver. You can then use the osgi start command to install
+    the jar, for example:</para>
+
+    <para><programlisting>roo&gt; osgi start --url file:///tmp/org.springframework.roo.wrapping.db2jcc4-9.7.2.0001.jar</programlisting></para>
   </section>
 
   <section>

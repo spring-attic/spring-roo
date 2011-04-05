@@ -64,16 +64,16 @@
                 </dependency>
             </dependencies>
         </database>
-        <database id="DB2">
+        <database id="DB2_EXPRESS_C">
             <dependencies>
                 <dependency>
                     <groupId>com.ibm</groupId>
-                    <artifactId>db2jcc</artifactId>
-                    <version>3.59.81</version>
+                    <artifactId>db2jcc4</artifactId>
+                    <version>9.7.2</version>
                 </dependency>
             </dependencies>
         </database>
-        <database id="DB2400">
+        <database id="DB2_400">
             <dependencies>
                 <dependency>
                     <groupId>net.sf.jt400</groupId>
