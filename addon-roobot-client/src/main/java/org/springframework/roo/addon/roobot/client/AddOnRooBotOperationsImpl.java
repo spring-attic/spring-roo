@@ -70,7 +70,31 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private List<String> noUpgradeBsnList = Arrays.asList(
 			"org.springframework.uaa.client", 
 			"org.springframework.roo.url.stream.jdk", 
-			"org.springframework.roo.url.stream");
+			"org.springframework.roo.url.stream",
+			"org.springframework.roo.file.monitor",
+			"org.springframework.roo.file.monitor.polling",
+			"org.springframework.roo.file.monitor.polling.roo",
+			"org.springframework.roo.bootstrap",
+			"org.springframework.roo.classpath",
+			"org.springframework.roo.classpath.javaparser",
+			"org.springframework.roo.deployment.support",
+			"org.springframework.roo.felix",
+			"org.springframework.roo.file.undo",
+			"org.springframework.roo.metadata",
+			"org.springframework.roo.model",
+			"org.springframework.roo.osgi.bundle",
+			"org.springframework.roo.osgi.roo.bundle",
+			"org.springframework.roo.process.manager",
+			"org.springframework.roo.project",
+			"org.springframework.roo.root",
+			"org.springframework.roo.shell",
+			"org.springframework.roo.shell.jline",
+			"org.springframework.roo.shell.jline.osgi",
+			"org.springframework.roo.shell.osgi",
+			"org.springframework.roo.startlevel",
+			"org.springframework.roo.support",
+			"org.springframework.roo.support.osgi",
+			"org.springframework.roo.uaa");
 	
 	public static final String ADDON_UPGRADE_STABILITY_LEVEL = "ADDON_UPGRADE_STABILITY_LEVEL";
 	
