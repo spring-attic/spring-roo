@@ -40,6 +40,15 @@
         </repository>
     </repositories>
 
+    <profiles>
+        <profile>
+            <id>commercial</id>
+            <modules>
+                <module>db2express</module>
+            </modules>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
