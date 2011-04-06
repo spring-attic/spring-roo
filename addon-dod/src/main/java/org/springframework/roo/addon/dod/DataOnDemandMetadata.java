@@ -404,7 +404,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				Integer maxValue = (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + maxValue + ") {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + "  = " + fieldName + ".substring(0, " + maxValue + ");");
+				bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + maxValue + ");");
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
 			} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
@@ -414,7 +414,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					Integer lengthValue = (Integer) values.get("length");
 					bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + lengthValue + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine(fieldName + "  = " + fieldName + ".substring(0, " + lengthValue + ");");
+					bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + lengthValue + ");");
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 				}
@@ -779,34 +779,52 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				initializer = field.getFieldName().getSymbolName();
 			}
 			
+			int maxLength = Integer.MAX_VALUE;
+			
 			// Check for @Size
 			AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 			if (sizeAnnotation != null) {
 				AnnotationAttributeValue<?> maxValue = sizeAnnotation.getAttribute(new JavaSymbolName("max"));
-				if (maxValue != null && (Integer) maxValue.getValue() > 1 && (initializer.length() + 2) > (Integer) maxValue.getValue()) {
-					initializer = initializer.substring(0, (Integer) maxValue.getValue() - 2);
+				if (maxValue != null) {
+					maxLength = ((Integer) maxValue.getValue()).intValue();
 				}
 				AnnotationAttributeValue<?> minValue = sizeAnnotation.getAttribute(new JavaSymbolName("min"));
 				if (minValue != null && (initializer.length() + 2) < (Integer) minValue.getValue()) {
 					initializer = String.format("%1$-" + ((Integer) minValue.getValue() - 2) + "s", initializer).replace(' ', 'x');
 				}
 			} else {
-				// Check for @Column
 				if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
 					@SuppressWarnings("unchecked")
 					Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
-					if (columnValues.keySet().contains("length") && (initializer.length() + 2) > (Integer) columnValues.get("length")) {
-						initializer = initializer.substring(0, (Integer) columnValues.get("length") - 2);
+					if (columnValues.keySet().contains("length")) {
+						maxLength = ((Integer) columnValues.get("length")).intValue();
 					}
 				}
 			}
 
-			initializer = "\"" + initializer + "_\" + index";
+			switch (maxLength) {
+			case 0:
+				initializer = "\"\"";
+				break;
+			case 1:
+				initializer = "String.valueOf(index)";
+				break;
+			case 2:
+				initializer = "\"" + initializer.charAt(0) + "\" + index";
+				break;
+			default:
+				if (initializer.length() + 2 > maxLength) {
+					initializer = "\"" + initializer.substring(0, maxLength - 2) + "_\" + index";
+				} else {
+					initializer = "\"" + initializer + "_\" + index";
+				}
+			}
 		} else if (fieldType.equals(new JavaType(Calendar.class.getName()))) {
+			String calendarString = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH)";
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
-				initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH) - 1)";
+				initializer = calendarString + " - 1)";
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future")) != null) {
-				initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH) + 1)";
+				initializer = calendarString + " + 1)";
 			} else {
 				initializer = "java.util.Calendar.getInstance()";
 			}
