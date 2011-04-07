@@ -789,8 +789,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					maxLength = ((Integer) maxValue.getValue()).intValue();
 				}
 				AnnotationAttributeValue<?> minValue = sizeAnnotation.getAttribute(new JavaSymbolName("min"));
-				if (minValue != null && (initializer.length() + 2) < (Integer) minValue.getValue()) {
-					initializer = String.format("%1$-" + ((Integer) minValue.getValue() - 2) + "s", initializer).replace(' ', 'x');
+				if (minValue != null) {
+					int minLength = ((Integer) minValue.getValue()).intValue();
+					Assert.isTrue(maxLength >= minLength, "@Size attribute 'max' must be greater than 'min' for field '" + field.getFieldName().getSymbolName() + "' in " + entityType.getFullyQualifiedTypeName());
+					if (initializer.length() + 2 < minLength) {
+						initializer = String.format("%1$-" + (minLength - 2) + "s", initializer).replace(' ', 'x');
+					}
 				}
 			} else {
 				if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
