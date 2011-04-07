@@ -32,7 +32,7 @@ import org.springframework.roo.support.util.Assert;
  * Provides {@link WebFinderMetadata}.
  * 
  * @author Stefan Schmidt
- * @since 1.0
+ * @since 1.1.3
  */
 @Component(immediate = true) 
 @Service 

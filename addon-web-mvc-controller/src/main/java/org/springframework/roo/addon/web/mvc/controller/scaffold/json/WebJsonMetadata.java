@@ -45,10 +45,10 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Metadata for {@link RooWebScaffold}.
+ * Metadata for Json functionality provided through {@link RooWebScaffold}.
  * 
  * @author Stefan Schmidt
- * @since 1.0
+ * @since 1.1.3
  */
 public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = WebJsonMetadata.class.getName();
