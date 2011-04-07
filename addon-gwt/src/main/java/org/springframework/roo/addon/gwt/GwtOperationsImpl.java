@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -14,9 +18,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * Provides GWT installation services.
@@ -80,16 +81,21 @@ public class GwtOperationsImpl implements GwtOperations {
 			metadataService.get(id);
 		}
 	}
-
 	private void updateRepositories(Element configuration) {
-		List<Element> repositories = XmlUtils.findElements("/configuration/gwt/repositories/repository", configuration);
-		for (Element repositoryElement : repositories) {
-			projectOperations.addRepository(new Repository(repositoryElement));
+		List<Repository> repositories = new ArrayList<Repository>();
+
+		List<Element> gwtRepositories = XmlUtils.findElements("/configuration/gwt/repositories/repository", configuration);
+		for (Element repositoryElement : gwtRepositories) {
+			repositories.add(new Repository(repositoryElement));
+		}
+		projectOperations.addRepositories(repositories);
+
+		repositories.clear();
+		List<Element> gwtPluginRepositories = XmlUtils.findElements("/configuration/gwt/pluginRepositories/pluginRepository", configuration);
+		for (Element repositoryElement : gwtPluginRepositories) {
+			repositories.add(new Repository(repositoryElement));
 		}
 
-		List<Element> pluginRepositories = XmlUtils.findElements("/configuration/gwt/pluginRepositories/pluginRepository", configuration);
-		for (Element repositoryElement : pluginRepositories) {
-			projectOperations.addPluginRepository(new Repository(repositoryElement));
-		}
+		projectOperations.addPluginRepositories(repositories);
 	}
 }
