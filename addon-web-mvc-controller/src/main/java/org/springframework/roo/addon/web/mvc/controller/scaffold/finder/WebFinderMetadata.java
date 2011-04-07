@@ -67,6 +67,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(dynamicFinderMethods, "Finder methods required");
 		Assert.notNull(memberDetails, "Member details required");
+		Assert.notNull(dynamicFinderMethods, "Array of dynamic finder methods cannot be null");
 		if (!isValid()) {
 			return;
 		}

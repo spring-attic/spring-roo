@@ -67,6 +67,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(memberDetails, "Member details required");
+		Assert.notNull(dynamicFinderMethods, "Array of dynamic finder methods cannot be null");
+		Assert.notNull(jsonMetadata, "Json metadata required");
 		if (!isValid()) {
 			return;
 		}
