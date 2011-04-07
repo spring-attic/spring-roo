@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.scaffold;
+package org.springframework.roo.addon.web.mvc.controller.scaffold.json;
 
 import java.util.logging.Logger;
 
@@ -11,6 +11,7 @@ import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.converter.ConversionServiceOperations;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -29,17 +30,17 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Provides {@link WebScaffoldMetadata}.
+ * Provides {@link WebJsonMetadata}.
  * 
  * @author Stefan Schmidt
  * @since 1.0
  */
 @Component(immediate = true) 
 @Service 
-public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataProvider implements WebScaffoldMetadataProvider {
+public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvider implements WebJsonMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
-	private final Logger log = Logger.getLogger(WebScaffoldMetadataProviderImpl.class.getName());
+	private final Logger log = Logger.getLogger(WebJsonMetadataProviderImpl.class.getName());
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -49,17 +50,14 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || annotationValues.formBackingObject == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
+		if (!annotationValues.isAnnotationFound() || annotationValues.getFormBackingObject() == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
 			return null;
 		}
 		
 		// Lookup the form backing object's metadata
-		JavaType formBackingType = annotationValues.formBackingObject;
+		JavaType formBackingType = annotationValues.getFormBackingObject();
 		
 		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
-		
-		ClassOrInterfaceTypeDetails controllerClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails controllerMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), controllerClassOrInterfaceDetails);
 		
 		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
@@ -82,10 +80,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		}
 		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, formBackingObjectMemberDetails,
+		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, formBackingObjectMemberDetails,
 				WebMetadataUtils.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry), 
 				WebMetadataUtils.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry),
 				jsonMetadata);
 	}
@@ -111,21 +107,21 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
-		return "Controller";
+		return "Controller_Json";
 	}
 	
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
-		JavaType javaType = WebScaffoldMetadata.getJavaType(metadataIdentificationString);
-		Path path = WebScaffoldMetadata.getPath(metadataIdentificationString);
+		JavaType javaType = WebJsonMetadata.getJavaType(metadataIdentificationString);
+		Path path = WebJsonMetadata.getPath(metadataIdentificationString);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 		return physicalTypeIdentifier;
 	}
 	
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
-		return WebScaffoldMetadata.createIdentifier(javaType, path);
+		return WebJsonMetadata.createIdentifier(javaType, path);
 	}
 	
 	public String getProvidesType() {
-		return WebScaffoldMetadata.getMetadataIdentiferType();
+		return WebJsonMetadata.getMetadataIdentiferType();
 	}
 }
