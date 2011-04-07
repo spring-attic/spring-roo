@@ -11,7 +11,8 @@ field number attending --type java.lang.Integer
 field string specialRequests --sizeMax 100
 field date confirmed --type java.util.Date
 
-controller scaffold ~.web.RsvpController
+web mvc setup
+web mvc scaffold ~.web.RsvpController
 selenium test --controller ~.web.RsvpController
 
 // (OPTION: quit, mvn test, mvn tomcat:run, localhost:8080/wedding, mvn selenium:selenese)
@@ -19,7 +20,7 @@ selenium test --controller ~.web.RsvpController
 logging setup --level ERROR --package WEB
 security setup
 
-controller class --class ~.web.PublicRsvpController
+web mvc controller --class ~.web.PublicRsvpController
 finder list --class ~.domain.Rsvp --filter code,equ
 finder add --finderName findRsvpsByCodeEquals
 

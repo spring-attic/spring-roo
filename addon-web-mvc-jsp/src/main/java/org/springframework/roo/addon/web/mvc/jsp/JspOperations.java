@@ -11,8 +11,10 @@ import org.w3c.dom.Document;
  * @author Ben Alex
  */
 public interface JspOperations {
-
-	boolean isProjectAvailable();
+	
+	boolean isControllerAvailable();
+	
+	boolean isSetupAvailable();
 	
 	boolean isInstallLanguageCommandAvailable();
 

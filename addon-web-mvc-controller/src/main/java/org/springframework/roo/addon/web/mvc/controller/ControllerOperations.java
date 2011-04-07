@@ -19,8 +19,13 @@ public interface ControllerOperations {
 	 * @param javaPackage The package where the new controllers are scaffolded.
 	 */
 	void generateAll(JavaPackage javaPackage);
+	
+	void setup();
 
+	@Deprecated
 	boolean isNewControllerAvailable();
+	
+	boolean isScaffoldAvailable();
 
 	/**
 	 * Creates a new Spring MVC controller which will be automatically scaffolded.

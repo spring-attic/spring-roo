@@ -83,9 +83,17 @@ public class JspOperationsImpl implements JspOperations {
 	protected void activate(ComponentContext context) {
 		this.context = context;
 	}
+	
+	public boolean isControllerAvailable() {
+		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
+	}
 
-	public boolean isProjectAvailable() {
+	private boolean isProjectAvailable() {
 		return projectOperations.isProjectAvailable();
+	}
+	
+	public boolean isSetupAvailable() {
+		return isProjectAvailable() && !isControllerAvailable();
 	}
 
 	public boolean isInstallLanguageCommandAvailable() {
@@ -94,6 +102,11 @@ public class JspOperationsImpl implements JspOperations {
 
 	public void installCommonViewArtefacts() {
 		Assert.isTrue(isProjectAvailable(), "Project metadata required");
+		
+		if (!isControllerAvailable()) {
+			webMvcOperations.installAllWebMvcArtifacts();
+		}
+		
 		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Install tiles config
@@ -177,7 +190,6 @@ public class JspOperationsImpl implements JspOperations {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default.jspx"))) {
-			webMvcOperations.installAllWebMvcArtifacts();
 			installCommonViewArtefacts();
 		}
 		String lcViewName = viewName.getSymbolName().toLowerCase();

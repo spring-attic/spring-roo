@@ -5,18 +5,19 @@ persistence setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 entity --class ~.domain.Choice --testAutomatically
 field string namingChoice --notNull --sizeMin 1 --sizeMax 30
 field string description --sizeMax 80
-controller scaffold ~.web.ChoiceController
+web mvc setup
+web mvc scaffold ~.web.ChoiceController
 
 entity --class Vote --testAutomatically
 field reference choice --type Choice
 field string ip --notNull --sizeMin 7 --sizeMax 15
 field date registered --type java.util.Date --notNull --past
-controller scaffold ~.web.VoteController
+web mvc scaffold ~.web.VoteController
 
-controller class ~.web.PublicVoteController --preferredMapping /public
+web mvc controller ~.web.PublicVoteController --preferredMapping /public
 
-web mvc install language --code de
-web mvc install language --code es
+web mvc language --code de
+web mvc language --code es
 
 logging setup --level WARN --package WEB
 

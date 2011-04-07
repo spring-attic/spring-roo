@@ -52,10 +52,11 @@ finder add --finderName findVisitsByDescriptionAndVisitDate --class ~.domain.Vis
 finder add --finderName findVisitsByVisitDateBetween
 finder add --finderName findVisitsByDescriptionLike
 
-controller all --package ~.web
+web mvc setup
+web mvc all --package ~.web
 
-web mvc install language --code de
-web mvc install language --code es
+web mvc language --code de
+web mvc language --code es
 
 selenium test --controller ~.web.OwnerController
 selenium test --controller ~.web.PetController

@@ -49,9 +49,17 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-
+	
 	public boolean isNewControllerAvailable() {
 		return projectOperations.isProjectAvailable();
+	}
+	
+	public boolean isScaffoldAvailable() {
+		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
+	}
+	
+	public void setup() {
+		webMvcOperations.installAllWebMvcArtifacts();
 	}
 
 	public void generateAll(final JavaPackage javaPackage) {
@@ -118,7 +126,5 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		typeDetailsBuilder.setAnnotations(annotations);
 
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
-
-		webMvcOperations.installAllWebMvcArtifacts();
 	}
 }

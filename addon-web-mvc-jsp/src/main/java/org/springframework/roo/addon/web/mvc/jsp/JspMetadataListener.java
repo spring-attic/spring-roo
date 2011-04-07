@@ -97,6 +97,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formbackingType.getFullyQualifiedTypeName());
 
 		// Install web artifacts only if Spring MVC config is missing
+		// TODO: remove this call when 'controller' commands are gone
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views"))) {
 			jspOperations.installCommonViewArtefacts();
