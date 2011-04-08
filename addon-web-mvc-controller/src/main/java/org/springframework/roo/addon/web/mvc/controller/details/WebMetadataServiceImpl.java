@@ -15,6 +15,10 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.serializable.CustomDataSerializableTags;
@@ -48,23 +52,29 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Utils to retrieve various metadata information for use by Web scaffolding add-ons.
+ * Implementation of {@link WebMetadataService} to retrieve various metadata information for use by Web scaffolding add-ons.
  * 
  * @author Stefan Schmidt
  * @since 1.1.2
  */
-public abstract class WebMetadataUtils {
+@Component
+@Service
+public class WebMetadataServiceImpl implements WebMetadataService {
+	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private MetadataService metadataService;
+	@Reference private TypeLocationService typeLocationService;
 	
-	private static Logger log = Logger.getLogger(WebMetadataUtils.class.getName());
+	private static Logger log = Logger.getLogger(WebMetadataServiceImpl.class.getName());
 	
-	public static SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, MemberDetailsScanner memberDetailsScanner, TypeLocationService typeLocationService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
-		Assert.isTrue(isApplicationType(javaType, metadataService), "The supplied type " + javaType + " is not a type which is present in this application");
+		Assert.isTrue(isApplicationType(javaType), "The supplied type " + javaType + " is not a type which is present in this application");
 		
 		SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
-		JavaTypeMetadataDetails javaTypeMetadataDetails = getJavaTypeMetadataDetails(javaType, memberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry);
+		JavaTypeMetadataDetails javaTypeMetadataDetails = getJavaTypeMetadataDetails(javaType, memberDetails, metadataIdentificationString);
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = javaTypeMetadataDetails.getPersistenceDetails();
 		specialTypes.put(javaType, javaTypeMetadataDetails);
 		
@@ -85,22 +95,22 @@ public abstract class WebMetadataUtils {
 			JavaType type = method.getReturnType();
 			if (type.isCommonCollectionType()) {
 				for (JavaType genericType: type.getParameters()) {
-					if (isApplicationType(genericType, metadataService)) {
-						MemberDetails genericTypeMemberDetails = getMemberDetails(genericType, metadataService, memberDetailsScanner);
-						specialTypes.put(genericType, getJavaTypeMetadataDetails(genericType, genericTypeMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
+					if (isApplicationType(genericType)) {
+						MemberDetails genericTypeMemberDetails = getMemberDetails(genericType);
+						specialTypes.put(genericType, getJavaTypeMetadataDetails(genericType, genericTypeMemberDetails, metadataIdentificationString));
 					}
 				}
 			} else {
-				if (isApplicationType(type, metadataService) && !fieldMetadata.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD)) {
-					MemberDetails typeMemberDetails = getMemberDetails(type, metadataService, memberDetailsScanner);
-					specialTypes.put(type, getJavaTypeMetadataDetails(type, typeMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
+				if (isApplicationType(type) && !fieldMetadata.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD)) {
+					MemberDetails typeMemberDetails = getMemberDetails(type);
+					specialTypes.put(type, getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
 				}
 			}
 		}
 		return Collections.unmodifiableSortedMap(specialTypes);
 	}
 	
-	public static List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, MemberDetailsScanner memberDetailsScanner, TypeLocationService typeLocationService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public List<JavaTypeMetadataDetails> getDependentApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
@@ -108,13 +118,13 @@ public abstract class WebMetadataUtils {
 		List<JavaTypeMetadataDetails> dependentTypes = new ArrayList<JavaTypeMetadataDetails>();
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			JavaType type = method.getReturnType();
-			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type, metadataService)) {
+			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
 				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
 				if (null != field && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull"))) {
-					MemberDetails typeMemberDetails = getMemberDetails(type, metadataService, memberDetailsScanner);
-					JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
+					MemberDetails typeMemberDetails = getMemberDetails(type);
+					JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataIdentificationString);
 					if (javaTypePersistenceMetadataHolder != null) {
-						dependentTypes.add(getJavaTypeMetadataDetails(type, typeMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
+						dependentTypes.add(getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
 					}
 				}
 			}
@@ -122,7 +132,7 @@ public abstract class WebMetadataUtils {
 		return Collections.unmodifiableList(dependentTypes);
 	}
 	
-	public static List<FieldMetadata> getScaffoldElegibleFieldMetadata(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, MemberDetailsScanner memberDetailsScanner, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public List<FieldMetadata> getScaffoldEligibleFieldMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
@@ -133,7 +143,7 @@ public abstract class WebMetadataUtils {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			if (isPersistenceIdentifierOrVersionMethod(method, getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry))) {
+			if (isPersistenceIdentifierOrVersionMethod(method, getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString))) {
 				continue;
 			}
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
@@ -141,7 +151,7 @@ public abstract class WebMetadataUtils {
 			if (field == null || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
 				continue;
 			}
-			registerDependency(metadataDependencyRegistry, method.getDeclaredByMetadataId(), metadataIdentificationString);
+			registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			if (!fields.containsKey(propertyName)) {
 				fields.put(propertyName, field);
 			}
@@ -149,7 +159,7 @@ public abstract class WebMetadataUtils {
 		return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields.values()));
 	}
 	
-	public static JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, MemberDetailsScanner memberDetailsScanner, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details service required");
 		Assert.notNull(metadataService, "Metadata service required");
@@ -162,7 +172,7 @@ public abstract class WebMetadataUtils {
 			if (idFields.size() != 1) {
 				return null;
 			} else {
-				for (FieldMetadata field: MemberFindingUtils.getFields(getMemberDetails(idFields.get(0).getFieldType(), metadataService, memberDetailsScanner))) {
+				for (FieldMetadata field: MemberFindingUtils.getFields(getMemberDetails(idFields.get(0).getFieldType()))) {
 					if (!field.getCustomData().keySet().contains(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD)) {
 						compositePkFields.add(field);
 					}
@@ -170,7 +180,7 @@ public abstract class WebMetadataUtils {
 			}
 		}
 		FieldMetadata identifierField = idFields.get(0);
-		registerDependency(metadataDependencyRegistry, identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
+		registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
 		
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
 		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
@@ -185,42 +195,40 @@ public abstract class WebMetadataUtils {
 		
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
 			if (mhtd.getCustomData().keySet().contains(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES)) {
-				@SuppressWarnings("unchecked")
-				List<String> list = (List<String>) mhtd.getCustomData().get(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES);
-				dynamicFinderNames = list;
+				dynamicFinderNames = (List<String>) mhtd.getCustomData().get(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES);
 			}
 		}
 		
 		if (identifierAccessor != null) {
-			registerDependency(metadataDependencyRegistry, identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
+			registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
 			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
 					findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), compositePkFields);
 		}	
 		return javaTypePersistenceMetadataDetails;
 	}
 	
-	private static String getPlural(JavaType javaType, MetadataService metadataService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	private String getPlural(JavaType javaType, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		
 		String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
 		if (pluralMetadata != null) {
-			registerDependency(metadataDependencyRegistry, pluralMetadataKey, metadataIdentificationString);
+			registerDependency(pluralMetadataKey, metadataIdentificationString);
 			return pluralMetadata.getPlural();
 		} else {
 			return javaType.getSimpleTypeName() + "s";
 		}
 	}
 	
-	public static boolean isRooIdentifier(JavaType javaType, MemberDetails memberDetails) {
+	public boolean isRooIdentifier(JavaType javaType, MemberDetails memberDetails) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
 		
 		return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_TYPE).size() > 0;
 	}
 	
-	private static boolean isEnumType(JavaType javaType, MetadataService metadataService) {
+	private boolean isEnumType(JavaType javaType, MetadataService metadataService) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		
@@ -240,20 +248,20 @@ public abstract class WebMetadataUtils {
 		return false;
 	}
 	
-	public static boolean isApplicationType(JavaType javaType, MetadataService metadataService) {
+	public boolean isApplicationType(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		
 		return (metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null);
 	}
 	
-	public static Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, MemberDetailsScanner memberDetailsScanner, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
 		
 		Map<JavaSymbolName, DateTimeFormatDetails> dates = new HashMap<JavaSymbolName, DateTimeFormatDetails>();
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString);
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
@@ -282,7 +290,7 @@ public abstract class WebMetadataUtils {
 					}
 				}
 				if (dateTimeFormat != null) {
-					registerDependency(metadataDependencyRegistry, fieldMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
+					registerDependency(fieldMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
 					dates.put(fieldMetadata.getFieldName(), dateTimeFormat);
 					if (javaTypePersistenceMetadataDetails != null) {
 						for (String finder : javaTypePersistenceMetadataDetails.getFinderNames()) {
@@ -300,7 +308,7 @@ public abstract class WebMetadataUtils {
 		return Collections.unmodifiableMap(dates);
 	}
 	
-	public static Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
@@ -309,7 +317,7 @@ public abstract class WebMetadataUtils {
 		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {
-			registerDependency(metadataDependencyRegistry, finderMetadataKey, metadataIdentificationString);
+			registerDependency(finderMetadataKey, metadataIdentificationString);
 			for (MethodMetadata method: finderMetadata.getAllDynamicFinders()) {
 				List<JavaSymbolName> paramNames = method.getParameterNames();
 				List<JavaType> paramTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
@@ -335,7 +343,7 @@ public abstract class WebMetadataUtils {
 		return Collections.unmodifiableSet(finderMetadataDetails);
 	}
 	
-	private static boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails) {
+	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails) {
 		Assert.notNull(method, "Method metadata required");
 		
 		return javaTypePersistenceMetadataDetails != null
@@ -343,19 +351,19 @@ public abstract class WebMetadataUtils {
 						|| (javaTypePersistenceMetadataDetails.getVersionAccessorMethod() != null && method.getMethodName().equals(javaTypePersistenceMetadataDetails.getVersionAccessorMethod().getMethodName())));
 	}
 	
-	public static JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, MemberDetailsScanner memberDetailsScanner, TypeLocationService typeLocationService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
-		registerDependency(metadataDependencyRegistry, PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
+		registerDependency(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		return new JavaTypeMetadataDetails(
 				javaType, 
-				getPlural(javaType, metadataService, metadataIdentificationString, metadataDependencyRegistry), 
-				isEnumType(javaType, metadataService), isApplicationType(javaType, metadataService), 
-				getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry),
-				getControllerPathForType(javaType, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
+				getPlural(javaType, metadataIdentificationString),
+				isEnumType(javaType, metadataService), isApplicationType(javaType),
+				getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString),
+				getControllerPathForType(javaType, metadataIdentificationString));
 	}
 	
-	private static String getControllerPathForType(JavaType type, MetadataService metadataService, TypeLocationService typeLocationService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	private String getControllerPathForType(JavaType type, String metadataIdentificationString) {
 		String webScaffoldMetadataKey = null;
 		WebScaffoldMetadata webScaffoldMetadata = null;
 		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
@@ -374,24 +382,23 @@ public abstract class WebMetadataUtils {
 			}
 		}
 		if (webScaffoldMetadata != null) {
-			registerDependency(metadataDependencyRegistry, webScaffoldMetadataKey, metadataIdentificationString);
+			registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
 			return webScaffoldMetadata.getAnnotationValues().getPath();
 		} else {
-			return getPlural(type, metadataService, metadataIdentificationString, metadataDependencyRegistry).toLowerCase();
+			return getPlural(type, metadataIdentificationString).toLowerCase();
 		}
 	}
 	
-	private static void registerDependency(MetadataDependencyRegistry registry, String upstream, String downStream) {
-		if (registry != null && StringUtils.hasText(upstream) && StringUtils.hasText(downStream) && !upstream.equals(downStream) && !MetadataIdentificationUtils.getMetadataClass(downStream).equals(MetadataIdentificationUtils.getMetadataClass(upstream))) {
-			registry.registerDependency(upstream, downStream);
+	private void registerDependency(String upstreamDependency, String downStreamDependency) {
+		if (metadataDependencyRegistry != null && StringUtils.hasText(upstreamDependency) && StringUtils.hasText(downStreamDependency) && !upstreamDependency.equals(downStreamDependency) && !MetadataIdentificationUtils.getMetadataClass(downStreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(upstreamDependency))) {
+			metadataDependencyRegistry.registerDependency(upstreamDependency, downStreamDependency);
 		}
 	}
 	
-	public static MemberDetails getMemberDetails(JavaType javaType, MetadataService metadataService, MemberDetailsScanner memberDetailsScanner) {
+	public MemberDetails getMemberDetails(JavaType javaType) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metdata for type " + javaType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails classOrInterfaceDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(WebMetadataUtils.class.getName(), classOrInterfaceDetails);
-		return memberDetails;
+		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceDetails);
 	}
 }
