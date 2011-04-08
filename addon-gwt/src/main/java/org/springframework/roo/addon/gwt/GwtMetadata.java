@@ -273,7 +273,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 						}
 					}
 					for (Element el : sortedElements) {
-						existingHoldingElement.removeChild(el);
+						if (el.getParentNode() != null && el.getParentNode().equals(existingHoldingElement)) {
+							existingHoldingElement.removeChild(el);
+						}
 					}
 
 					for (Element el : sortedElements) {
