@@ -48,6 +48,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -60,12 +61,11 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class WebMetadataServiceImpl implements WebMetadataService {
+	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
-	
-	private static Logger log = Logger.getLogger(WebMetadataServiceImpl.class.getName());
 	
 	public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
@@ -79,7 +79,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		specialTypes.put(javaType, javaTypeMetadataDetails);
 		
 		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
-			// not interested in non accessor methods
+			// Not interested in non accessor methods
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
@@ -159,6 +159,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		return Collections.unmodifiableList(new ArrayList<FieldMetadata>(fields.values()));
 	}
 	
+	@SuppressWarnings("unchecked") 
 	public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details service required");
@@ -171,11 +172,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
 			if (idFields.size() != 1) {
 				return null;
-			} else {
-				for (FieldMetadata field: MemberFindingUtils.getFields(getMemberDetails(idFields.get(0).getFieldType()))) {
-					if (!field.getCustomData().keySet().contains(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD)) {
-						compositePkFields.add(field);
-					}
+			}
+			for (FieldMetadata field: MemberFindingUtils.getFields(getMemberDetails(idFields.get(0).getFieldType()))) {
+				if (!field.getCustomData().keySet().contains(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD)) {
+					compositePkFields.add(field);
 				}
 			}
 		}
@@ -216,15 +216,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		if (pluralMetadata != null) {
 			registerDependency(pluralMetadataKey, metadataIdentificationString);
 			return pluralMetadata.getPlural();
-		} else {
-			return javaType.getSimpleTypeName() + "s";
 		}
+		return javaType.getSimpleTypeName() + "s";
 	}
 	
 	public boolean isRooIdentifier(JavaType javaType, MemberDetails memberDetails) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
-		
 		return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_TYPE).size() > 0;
 	}
 	
@@ -301,7 +299,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 						}
 					}
 				} else {
-					log.warning("It is recommended to use @DateTimeFormat(style=\"S-\") on " + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
+					logger.warning("It is recommended to use @DateTimeFormat(style=\"S-\") on " + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
 				}
 			}
 		}
@@ -384,9 +382,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		if (webScaffoldMetadata != null) {
 			registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
 			return webScaffoldMetadata.getAnnotationValues().getPath();
-		} else {
-			return getPlural(type, metadataIdentificationString).toLowerCase();
 		}
+		return getPlural(type, metadataIdentificationString).toLowerCase();
 	}
 	
 	private void registerDependency(String upstreamDependency, String downStreamDependency) {
