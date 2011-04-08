@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.gwt;
 
 /**
- * Interface for {@link GwtConfigServiceImpl}.
+ * Provides GWT configuration services.
  *
  * @author James Tyrrell
  * @since 1.1.2

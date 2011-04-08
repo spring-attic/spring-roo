@@ -150,10 +150,10 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 					if (systemId.endsWith("gwt-module.dtd")) {
 						return new InputSource(TemplateUtils.getTemplate(GwtMetadata.class, "templates/gwt-module.dtd"));
-					} else {
-						// Use the default behaviour
-						return null;
 					}
+					
+					// Use the default behaviour
+					return null;
 				}
 			});
 			gwtXmlDoc = builder.parse(mutableGwtXml.getInputStream());

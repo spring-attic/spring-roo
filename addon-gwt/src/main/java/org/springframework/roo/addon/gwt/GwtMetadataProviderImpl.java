@@ -1,5 +1,16 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -12,8 +23,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.file.monitor.event.FileEvent;
-import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -26,17 +35,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
@@ -62,7 +60,6 @@ import java.util.Set;
 @Service
 public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	@Reference private FileManager fileManager;
-	@Reference private GwtConfigService gwtConfigService;
 	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplateService gwtTemplateService;
 	@Reference private GwtTypeService gwtTypeService;
@@ -70,7 +67,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProjectOperations projectOperations;
 	private Map<String, Set<String>> dependsOn = new HashMap<String, Set<String>>();
-	private Boolean lastGaeState = null;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -80,30 +76,11 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	public void onFileEvent(FileEvent fileEvent) {
-		if (!projectOperations.isProjectAvailable()) {
-			return;
-		}
-
-		if (lastGaeState != null && projectOperations.getProjectMetadata().isGaeEnabled() == lastGaeState) {
-			return;
-		}
-		lastGaeState = projectOperations.getProjectMetadata().isGaeEnabled();
-
-		if (fileEvent.getOperation().equals(FileOperation.UPDATED) && fileEvent.getFileDetails().getFile().getName().equals("pom.xml")) {
-			gwtConfigService.updateConfiguration(false);
-		}
-	}
-
 	public MetadataItem get(String metadataIdentificationString) {
 		// Abort early if we can't continue
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return null;
-		}
-
-		if (lastGaeState == null) {
-			lastGaeState = projectMetadata.isGaeEnabled();
 		}
 
 		if (!fileManager.exists(GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata))) {

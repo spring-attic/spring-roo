@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Provides GWT configuration services.
+ * Implemetation of {@link GwtConfigServiceImpl}.
  * 
  * @author James Tyrrell
  * @since 1.1.2

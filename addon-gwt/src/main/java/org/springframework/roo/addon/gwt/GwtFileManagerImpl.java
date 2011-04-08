@@ -17,13 +17,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Provides a basic implementation of {@link GwtFileManager} which encapsulates
- * the file management functionality required by {@link GwtMetadataProviderImpl}
+ * Implementation of {@link GwtFileManager}.
  *
  * @author James Tyrrell
- * @since 1.1.2
+ * @since 1.1.1
  */
-
 @Component
 @Service
 public class GwtFileManagerImpl implements GwtFileManager {

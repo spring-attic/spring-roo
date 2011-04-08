@@ -5,7 +5,8 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import java.util.List;
 
 /**
- * Interface for {@link GwtFileManagerImpl}.
+ * Provides a basic implementation of {@link GwtFileManager} which encapsulates
+ * the file management functionality required by {@link GwtMetadataProviderImpl}
  *
  * @author James Tyrrell
  * @since 1.1.1

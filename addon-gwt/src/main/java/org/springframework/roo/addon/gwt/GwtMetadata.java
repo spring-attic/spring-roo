@@ -210,10 +210,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 					if (systemId.equals("http://dl.google.com/gwt/DTD/xhtml.ent")) {
 						return new InputSource(TemplateUtils.getTemplate(GwtMetadata.class, "templates/xhtml.ent"));
-					} else {
-						// Use the default behaviour
-						return null;
 					}
+					
+					// Use the default behaviour
+					return null;
 				}
 			});
 
@@ -304,12 +304,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 			List<JavaType> methodReturnTypeArgs = Collections.singletonList(methodMetaData.getReturnType());
 			JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, methodReturnTypeArgs);
 			return getRequestMethod(destinationMetadataId, methodMetaData, methodReturnType);
-		} else {
-			JavaType proxy = PhysicalTypeIdentifier.getJavaType(getDestinationMetadataId(GwtType.PROXY));
-			List<JavaType> methodReturnTypeArgs = Arrays.asList(proxy, JavaType.VOID_OBJECT);
-			JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.InstanceRequest", 0, DataType.TYPE, null, methodReturnTypeArgs);
-			return getRequestMethod(destinationMetadataId, methodMetaData, methodReturnType);
 		}
+		
+		JavaType proxy = PhysicalTypeIdentifier.getJavaType(getDestinationMetadataId(GwtType.PROXY));
+		List<JavaType> methodReturnTypeArgs = Arrays.asList(proxy, JavaType.VOID_OBJECT);
+		JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.InstanceRequest", 0, DataType.TYPE, null, methodReturnTypeArgs);
+		return getRequestMethod(destinationMetadataId, methodMetaData, methodReturnType);
 	}
 
 	private MethodMetadataBuilder getRequestMethod(String destinationMetadataId, MethodMetadata methodMetaData, JavaType methodReturnType) {
