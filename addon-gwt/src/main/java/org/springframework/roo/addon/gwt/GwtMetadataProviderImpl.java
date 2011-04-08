@@ -123,7 +123,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			return null;
 		}
 
-
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		// Obtain the governor's information
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeId);
@@ -132,7 +131,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		}
 
 		ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 
 		// We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
