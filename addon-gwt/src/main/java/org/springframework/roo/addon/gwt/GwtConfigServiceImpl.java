@@ -1,5 +1,14 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -21,17 +30,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 /**
- * Implemetation of {@link GwtConfigServiceImpl}.
+ * Implementation of {@link GwtConfigServiceImpl}.
  * 
  * @author James Tyrrell
  * @since 1.1.2
@@ -123,11 +123,9 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		if (!projectOperations.getProjectMetadata().isGaeEnabled() && targetDirectory.contains("/gae")) {
 			return;
 		}
-
 		if (!targetDirectory.endsWith("/")) {
 			targetDirectory += "/";
 		}
-
 		if (!fileManager.exists(targetDirectory)) {
 			fileManager.createDirectory(targetDirectory);
 		}
@@ -337,7 +335,6 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		for (Element pluginElement : pluginElements) {
 			Plugin plugin = new Plugin(pluginElement);
 			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
-
 				Element ctx = XmlUtils.findRequiredElement("configuration/additionalBuildcommands", pluginElement);
 				boolean gwtProjectValidatorCommandPresent = false;
 				for (Element buildCommand : XmlUtils.findElements("buildCommand", ctx)) {
