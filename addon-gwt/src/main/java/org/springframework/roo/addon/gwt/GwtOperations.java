@@ -1,13 +1,14 @@
 package org.springframework.roo.addon.gwt;
 
 /**
- * Interface for {@link GwtOperationsImpl}.
+ * Provides GWT installation services.
  *
  * @author Ben Alex
+ * @since 1.1
  */
 public interface GwtOperations {
 
-	boolean isSetupGwtAvailable();
+	boolean isSetupAvailable();
 
-	void setupGwt();
+	void setup();
 }

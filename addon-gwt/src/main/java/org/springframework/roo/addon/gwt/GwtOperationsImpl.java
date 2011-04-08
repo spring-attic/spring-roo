@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
- * Provides GWT installation services.
+ * Implementation of {@link GwtOperations}.
  *
  * @author Ben Alex
  * @author Alan Stewart
@@ -38,7 +38,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference private WebMvcOperations mvcOperations;
 	@Reference private ProjectOperations projectOperations;
 
-	public boolean isSetupGwtAvailable() {
+	public boolean isSetupAvailable() {
 		if (!projectOperations.isProjectAvailable()) {
 			return false;
 		}
@@ -55,7 +55,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		return true;
 	}
 
-	public void setupGwt() {
+	public void setup() {
 		// Install web pieces if not already installed
 		if (!fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
 			mvcOperations.installAllWebMvcArtifacts();

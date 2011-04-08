@@ -18,13 +18,19 @@ import org.springframework.roo.shell.CommandMarker;
 public class GwtCommands implements CommandMarker {
 	@Reference private GwtOperations gwtOperations;
 
-	@CliAvailabilityIndicator("gwt setup")
-	public boolean isInstallSecurityAvailable() {
-		return gwtOperations.isSetupGwtAvailable();
+	@CliAvailabilityIndicator({ "web gwt setup", "gwt setup" })
+	public boolean isSetupAvailable() {
+		return gwtOperations.isSetupAvailable();
 	}
 
-	@CliCommand(value = "gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
-	public void installSecurity() {
-		gwtOperations.setupGwt();
+	@CliCommand(value = "web gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
+	public void webGwtSetup() {
+		gwtOperations.setup();
+	}
+	
+	@Deprecated
+	@CliCommand(value = "gwt setup", help = "Install Google Web Toolkit (GWT) into your project - deprecated, use 'web gwt setup' instead")
+	public void installGwt() {
+		gwtOperations.setup();
 	}
 }

@@ -242,15 +242,12 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		for (GwtType type : typesToBeWritten.keySet()) {
 			gwtFileManager.write(typesToBeWritten.get(type), type.isOverwriteConcrete());
 		}
-
 		for (ClassOrInterfaceTypeDetails type : templateDataHolder.getTypeList()) {
 			gwtFileManager.write(type, false);
 		}
-
 		for (String destFile : xmlToBeWritten.keySet()) {
 			gwtFileManager.write(destFile, xmlToBeWritten.get(destFile));
 		}
-
 		for (String destFile : templateDataHolder.getXmlMap().keySet()) {
 			gwtFileManager.write(destFile, templateDataHolder.getXmlMap().get(destFile));
 		}

@@ -32,12 +32,12 @@ import java.util.Set;
 
 /**
  * Provides GWT configuration services.
- *
+ * 
  * @author James Tyrrell
  * @since 1.1.2
  */
-@Component
-@Service
+@Component 
+@Service 
 public class GwtConfigServiceImpl implements GwtConfigService {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -48,9 +48,8 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		this.context = context;
 	}
 
-	//TODO: I think this still needs some work (why do I need to add custom xml manipulation logic here..?) - JT
+	// TODO: I think this still needs some work (why do I need to add custom xml manipulation logic here..?) - JT
 	public void updateConfiguration(boolean initialSetup) {
-
 		if (!isGwtProject() && !initialSetup) {
 			return;
 		}
@@ -71,24 +70,23 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		// Add dependencies
 		updateDependencies(configuration);
 
-		// Add POM plugin
+		// Add POM plugins
 		updatePlugins(configuration);
 
 		// Update web.xml
 		updateWebXml();
 
+		// Update persistence.xml
 		updatePersistenceXml();
 
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
 			copyDirectoryContents(path);
 		}
-
 	}
 
 	private boolean isGwtProject() {
-
-		if (gwtProject != null){
+		if (gwtProject != null) {
 			return gwtProject;
 		}
 
@@ -108,7 +106,6 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		}
 		return gwtProject;
 	}
-
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {
 		for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
@@ -219,15 +216,13 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 			if (is != null) {
 				try {
 					is.close();
-				} catch (IOException ignored) {
-				}
+				} catch (IOException ignored) {}
 			}
 		}
 		return xmlDoc;
 	}
 
 	private boolean updateDataNulcueusPlugin(Document pomXmlDoc) {
-
 		Element pomRoot = (Element) pomXmlDoc.getFirstChild();
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
 		for (Element pluginElement : pluginElements) {
@@ -336,7 +331,6 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 	}
 
 	private boolean updateMavenEclipsePlugin(Document pomDoc) {
-
 		Element pomRoot = (Element) pomDoc.getFirstChild();
 		boolean hasChanged = false;
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
