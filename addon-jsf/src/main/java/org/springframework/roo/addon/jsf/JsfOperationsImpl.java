@@ -58,15 +58,15 @@ public class JsfOperationsImpl implements JsfOperations {
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
 
-	public boolean isSetupJsfAvailable() {
+	public boolean isSetupAvailable() {
 		return projectOperations.isProjectAvailable();
 	}
 
-	public boolean isJsfAvailable() {
-		return isSetupJsfAvailable() && hasWebXml();
+	public boolean isScaffoldAvailable() {
+		return isSetupAvailable() && hasWebXml();
 	}
 
-	public void setupJsf(JsfImplementation jsfImplementation) {
+	public void setup(JsfImplementation jsfImplementation) {
 		Assert.notNull(jsfImplementation, "JSF implementation required");
 		updateConfiguration(jsfImplementation);
 		copyWebXml();
@@ -90,7 +90,6 @@ public class JsfOperationsImpl implements JsfOperations {
 	private void copyWebXml() {
 		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
 		if (hasWebXml()) {
-			System.out.println("has web xml");
 			return;
 		}
 		
@@ -226,7 +225,8 @@ public class JsfOperationsImpl implements JsfOperations {
 
 	public void createManagedBean(JavaType managedBean, JavaType entity) {
 		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
-			return; // Type exists already - nothing to do
+			// Type exists already - nothing to do
+			return; 
 		}
 		
 		// Create type annotation for new managed bean
@@ -239,7 +239,7 @@ public class JsfOperationsImpl implements JsfOperations {
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
-		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());		
+		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 	}
 	
 	private String getImplementationXPath(List<JsfImplementation> jsfImplementations) {

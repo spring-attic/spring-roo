@@ -11,11 +11,11 @@ import org.springframework.roo.model.JavaType;
  */
 public interface JsfOperations {
 
-	boolean isSetupJsfAvailable();
+	boolean isSetupAvailable();
 	
-	boolean isJsfAvailable();
+	boolean isScaffoldAvailable();
 
-	void setupJsf(JsfImplementation jsfImplementation);
+	void setup(JsfImplementation jsfImplementation);
 
 	void generateAll(JavaPackage destinationPackage);
 
