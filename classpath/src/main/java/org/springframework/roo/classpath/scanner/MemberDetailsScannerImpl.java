@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.scanner;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -102,10 +102,10 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 	public final MemberDetails getMemberDetails(String requestingClass, ClassOrInterfaceTypeDetails cid) {
 		synchronized (lock) {
 			// Create a list of discovered members
-			List<MemberHoldingTypeDetails> memberHoldingTypeDetails = new ArrayList<MemberHoldingTypeDetails>();
+			List<MemberHoldingTypeDetails> memberHoldingTypeDetails = new LinkedList<MemberHoldingTypeDetails>();
 			
 			// Build a List representing the class hierarchy, where the first element is the absolute superclass
-			List<ClassOrInterfaceTypeDetails> cidHierarchy = new ArrayList<ClassOrInterfaceTypeDetails>();
+			List<ClassOrInterfaceTypeDetails> cidHierarchy = new LinkedList<ClassOrInterfaceTypeDetails>();
 			while (cid != null) {
 				cidHierarchy.add(0, cid);  // Note to the top of the list
 				cid = cid.getSuperclass();
