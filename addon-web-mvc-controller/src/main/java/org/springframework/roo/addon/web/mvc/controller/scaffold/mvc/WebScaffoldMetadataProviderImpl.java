@@ -9,7 +9,8 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.converter.ConversionServiceOperations;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServiceImpl;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -39,6 +40,8 @@ import org.springframework.roo.support.util.Assert;
 public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataProvider implements WebScaffoldMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
+	@Reference private WebMetadataService webMetadataService;
+
 	private final Logger log = Logger.getLogger(WebScaffoldMetadataProviderImpl.class.getName());
 
 	protected void activate(ComponentContext context) {
@@ -74,9 +77,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, formBackingObjectMemberDetails,
-				WebMetadataUtils.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry));
+				webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString),
+				webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString),
+				webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString));
 	}
 	
 	void installConversionService(JavaType governor) {

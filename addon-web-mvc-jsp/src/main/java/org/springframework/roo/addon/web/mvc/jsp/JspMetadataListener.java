@@ -18,7 +18,7 @@ import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.mvc.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
@@ -70,6 +70,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TilesOperations tilesOperations;
+	@Reference private WebMetadataService webMetadataService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
@@ -92,8 +93,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		
 		JavaType formbackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
-		MemberDetails memberDetails = WebMetadataUtils.getMemberDetails(formbackingType, metadataService, memberDetailsScanner);
-		JavaTypeMetadataDetails formBackingTypeMetadataDetails = WebMetadataUtils.getJavaTypeMetadataDetails(formbackingType, memberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry);
+		MemberDetails memberDetails = webMetadataService.getMemberDetails(formbackingType);
+		JavaTypeMetadataDetails formBackingTypeMetadataDetails = webMetadataService.getJavaTypeMetadataDetails(formbackingType, memberDetails, metadataIdentificationString);
 		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formbackingType.getFullyQualifiedTypeName());
 
 		// Install web artifacts only if Spring MVC config is missing
@@ -114,9 +115,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 		
-		List<FieldMetadata> elegibleFields = WebMetadataUtils.getScaffoldElegibleFieldMetadata(formbackingType, memberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
+		List<FieldMetadata> elegibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formbackingType, memberDetails, metadataIdentificationString);
 
-		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), WebMetadataUtils.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
+		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), webMetadataService.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataIdentificationString));
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 
@@ -179,7 +180,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			}
 		}
 		
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(formbackingType, memberDetails, metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(formbackingType, memberDetails, metadataIdentificationString);
 		Assert.notNull(javaTypePersistenceMetadataDetails, "Unable to determine persistence metadata for type " + formbackingType.getFullyQualifiedTypeName());
 		
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
@@ -192,8 +193,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				continue; 
 			}
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
-			if (WebMetadataUtils.isApplicationType(method.getReturnType(), metadataService) && WebMetadataUtils.isRooIdentifier(method.getReturnType(), WebMetadataUtils.getMemberDetails(method.getReturnType(), metadataService, memberDetailsScanner))) {
-				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(method.getReturnType(), WebMetadataUtils.getMemberDetails(method.getReturnType(), metadataService, memberDetailsScanner), metadataService, memberDetailsScanner, metadataIdentificationString, metadataDependencyRegistry);
+			if (webMetadataService.isApplicationType(method.getReturnType()) && webMetadataService.isRooIdentifier(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()))) {
+				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()), metadataIdentificationString);
 				if (typePersistenceMetadataDetails != null) {
 					for (FieldMetadata f : typePersistenceMetadataDetails.getRooIdentifierFields()) {
 						String sb = f.getFieldName().getReadableSymbolName();
@@ -217,7 +218,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
-			Set<FinderMetadataDetails> finderMethodsDetails = WebMetadataUtils.getDynamicFinderMethodsAndFields(formbackingType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+			Set<FinderMetadataDetails> finderMethodsDetails = webMetadataService.getDynamicFinderMethodsAndFields(formbackingType, memberDetails, metadataIdentificationString);
 			for (FinderMetadataDetails finderDetails : finderMethodsDetails) {
 				String finderName = finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName();
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";

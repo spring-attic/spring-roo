@@ -13,7 +13,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.mvc.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -59,6 +59,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	@Reference private MenuOperations menuOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private WebMetadataService webMetadataService;
 	
 	public boolean isProjectAvailable() {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
@@ -133,7 +134,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
 		
 		// Add composite PK identifier fields if needed
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(formBackingType, memberDetails, metadataService, memberDetailsScanner, null, null);
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(formBackingType, memberDetails, null);
 		if (javaTypePersistenceMetadataDetails != null && javaTypePersistenceMetadataDetails.getRooIdentifierFields().size() > 0) {
 			for (FieldMetadata field : javaTypePersistenceMetadataDetails.getRooIdentifierFields()) {
 				if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
@@ -145,7 +146,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		}
 		
 		// Add all other fields
-		for (FieldMetadata field : WebMetadataUtils.getScaffoldElegibleFieldMetadata(formBackingType, memberDetails, metadataService, memberDetailsScanner, null, null)) {
+		for (FieldMetadata field : webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, null)) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				tbody.appendChild(typeCommand(selenium, field));
 			} else {

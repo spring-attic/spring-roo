@@ -12,7 +12,8 @@ import org.springframework.roo.addon.json.JsonMetadata;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServiceImpl;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -38,6 +39,8 @@ import org.springframework.roo.support.util.Assert;
 @Service 
 public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvider implements WebJsonMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private WebMetadataService webMetadataService;
+
 	private final Logger log = Logger.getLogger(WebJsonMetadataProviderImpl.class.getName());
 
 	protected void activate(ComponentContext context) {
@@ -69,8 +72,8 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(memberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
-		SortedMap<JavaType, JavaTypeMetadataDetails> relatedMd = WebMetadataUtils.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry);
-		Set<FinderMetadataDetails> finderDetails = WebMetadataUtils.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+		SortedMap<JavaType, JavaTypeMetadataDetails> relatedMd = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
+		Set<FinderMetadataDetails> finderDetails = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		JsonMetadata jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		if (jsonMetadata == null) {
 			return null;

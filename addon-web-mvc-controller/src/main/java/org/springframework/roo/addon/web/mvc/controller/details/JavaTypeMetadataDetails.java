@@ -32,6 +32,7 @@ public class JavaTypeMetadataDetails {
 		Assert.notNull(javaType, "Java type required");
 		Assert.hasText(plural, "Plural required");
 		Assert.hasText(controllerPath, "Controller path required");
+		//Assert.notNull(persistenceDetails, "Java type persistence metadata details required");
 		this.javaType = javaType;
 		this.plural = plural;
 		this.isEnumType = isEnumType;

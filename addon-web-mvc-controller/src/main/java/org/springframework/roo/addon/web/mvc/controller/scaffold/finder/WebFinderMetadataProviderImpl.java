@@ -7,7 +7,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServiceImpl;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -33,6 +34,8 @@ import org.springframework.roo.support.util.Assert;
 @Service 
 public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider implements WebFinderMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private WebMetadataService webMetadataService;
+
 	private final Logger log = Logger.getLogger(WebFinderMetadataProviderImpl.class.getName());
 
 	protected void activate(ComponentContext context) {
@@ -69,8 +72,8 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 		}
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
 		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, formBackingObjectMemberDetails,
-				WebMetadataUtils.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, memberDetailsScanner, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry));
+				webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString),
+				webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString));
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

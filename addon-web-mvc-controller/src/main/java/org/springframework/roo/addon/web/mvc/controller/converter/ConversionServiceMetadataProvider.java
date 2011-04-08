@@ -13,7 +13,8 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.json.CustomDataJsonTags;
 import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServiceImpl;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.mvc.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -48,6 +49,7 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public final class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private WebMetadataService webMetadataService;
 	
 	// Stores the MID (as accepted by this ConversionServiceMetadataProvider) for the one (and only one) application-wide conversion service
 	private String applicationConversionServiceFactoryBeanMid;
@@ -147,7 +149,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			} 
 			
-			if (BeanInfoUtils.isAccessorMethod(method) && WebMetadataUtils.isApplicationType(method.getReturnType(), metadataService)) {
+			if (BeanInfoUtils.isAccessorMethod(method) && webMetadataService.isApplicationType(method.getReturnType())) {
 				// Track any related java types in the project
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
@@ -172,7 +174,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		}
 		JavaType fieldType = field.getFieldType();
 		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
-				|| WebMetadataUtils.isApplicationType(fieldType, metadataService) // Exclude references to other domain objects as they are too verbose
+				|| webMetadataService.isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
 				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
 				|| field.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD) /* Not interested in embedded types */) {
 			return false;
