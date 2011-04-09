@@ -292,6 +292,12 @@ if [[ "$COMMAND" = "assembly" ]]; then
     rm $WORK_DIR/bundle/*jgit*.jar
     rm $WORK_DIR/bundle/*git*.jar
     rm $WORK_DIR/bundle/*op4j*.jar
+    rm $WORK_DIR/bundle/*aopalliance-*.jar
+    rm $WORK_DIR/bundle/jackson-*.jar
+    rm $WORK_DIR/bundle/jcl-over-slf4j-*.jar
+    rm $WORK_DIR/bundle/servlet-api-*.jar
+    rm $WORK_DIR/bundle/slf4j-*.jar
+    rm $WORK_DIR/bundle/spring-*.jar
     mv $WORK_DIR/bundle/org.springframework.roo.bootstrap-*.jar $WORK_DIR/bin
     mv $WORK_DIR/bundle/org.apache.felix.framework-*.jar $WORK_DIR/bin
     cp $ROO_HOME/bootstrap/src/main/bin/* $WORK_DIR/bin

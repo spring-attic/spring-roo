@@ -12,6 +12,7 @@
     <description>Automates the conversion of standard JARs into OSGi bundles for Spring Roo usage.</description>
 
     <modules>
+        <module>aopalliance</module>
         <module>json-simple</module>
         <module>protobuf</module>
         <module>jline</module>
