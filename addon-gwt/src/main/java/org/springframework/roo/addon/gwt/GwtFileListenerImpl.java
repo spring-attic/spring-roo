@@ -15,7 +15,7 @@ import org.springframework.roo.project.ProjectOperations;
  */
 @Component(immediate = true)
 @Service
-public class GwtFIleListenerImpl implements GwtFileListener {
+public class GwtFileListenerImpl implements GwtFileListener {
 	@Reference private GwtConfigService gwtConfigService;
 	@Reference private ProjectOperations projectOperations;
 	private Boolean lastGaeState = null;

@@ -251,7 +251,6 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 
 		MutableFile mutableWebXml = fileManager.updateFile(webXml);
 		Document webXmlDoc = getXmlDocument(webXml);
-
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
