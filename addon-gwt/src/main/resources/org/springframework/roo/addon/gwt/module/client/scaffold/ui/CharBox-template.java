@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.ValueBox;
 public class CharBox extends ValueBox<Character> {
 
 	public CharBox() {
-		super(Document.get().createTextInputElement(), CharRenderer.instance(),
-				CharParser.instance());
+		super(Document.get().createTextInputElement(), CharRenderer.instance(), CharParser.instance());
 	}
 }

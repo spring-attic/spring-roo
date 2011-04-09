@@ -8,7 +8,6 @@ import java.text.ParseException;
  * Simple parser of Short that wraps {@link Short#valueOf(String)}.
  */
 public class ShortParser implements Parser<Short> {
-
 	private static ShortParser INSTANCE;
 
 	/**

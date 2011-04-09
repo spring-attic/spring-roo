@@ -8,12 +8,9 @@ import java.util.Collection;
 /**
  * A renderer for Collections that is parameterized by another renderer.
  */
-public class CollectionRenderer<E, R extends Renderer<E>, T extends Collection<E>>
-		extends AbstractRenderer<T> implements Renderer<T> {
+public class CollectionRenderer<E, R extends Renderer<E>, T extends Collection<E>> extends AbstractRenderer<T> implements Renderer<T> {
 
-	public static <E, R extends Renderer<E>,
-			T extends Collection<E>> CollectionRenderer<E, R, T> of(
-			R r) {
+	public static <E, R extends Renderer<E>, T extends Collection<E>> CollectionRenderer<E, R, T> of(R r) {
 		return new CollectionRenderer<E, R, T>(r);
 	}
 

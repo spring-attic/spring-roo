@@ -14,6 +14,7 @@ public class RequestEvent extends GwtEvent<RequestEvent.Handler> {
 	 * Implemented by handlers of this type of event.
 	 */
 	public interface Handler extends EventHandler {
+		
 		/**
 		 * Called when a {@link RequestEvent} is fired.
 		 *

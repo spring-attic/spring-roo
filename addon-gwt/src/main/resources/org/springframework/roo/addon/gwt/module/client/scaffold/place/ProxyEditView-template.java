@@ -11,8 +11,7 @@ import com.google.gwt.user.client.ui.IsWidget;
  * @param <P> the type of the proxy
  * @param <V> the type of this ProxyEditView, required to allow {@link #createEditorDriver()} to be correctly typed
  */
-public interface ProxyEditView<P extends EntityProxy, V extends ProxyEditView<P, V>>
-		extends IsWidget, HasEditorErrors<P> {
+public interface ProxyEditView<P extends EntityProxy, V extends ProxyEditView<P, V>> extends IsWidget, HasEditorErrors<P> {
 
 	/**
 	 * @return a new {@link RequestFactoryEditorDriver} initialized to run this editor

@@ -20,18 +20,15 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @param <P> the type of the proxy
  */
-public abstract class MobileProxyListView<P extends EntityProxy> extends
-		AbstractProxyListView<P> {
+public abstract class MobileProxyListView<P extends EntityProxy> extends AbstractProxyListView<P> {
 
 	interface Binder extends UiBinder<Widget, MobileProxyListView> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	@UiField(provided = true)
-	CellList<P> list;
-	@UiField
-	Button newButton;
+	@UiField(provided = true) CellList<P> list;
+	@UiField Button newButton;
 
 	/**
 	 * Constructor.
@@ -47,8 +44,7 @@ public abstract class MobileProxyListView<P extends EntityProxy> extends
 				renderer.render(value, sb);
 			}
 		};
-		this.list = new CellList<P>(cell,
-				ScaffoldMobileApp.getMobileListResources());
+		this.list = new CellList<P>(cell, ScaffoldMobileApp.getMobileListResources());
 		init(BINDER.createAndBindUi(this), list, newButton);
 
 		// Initialize the widget.

@@ -8,7 +8,6 @@ import java.text.ParseException;
  * Simple parser of Character.
  */
 public class CharParser implements Parser<Character> {
-
 	private static CharParser INSTANCE;
 
 	/**

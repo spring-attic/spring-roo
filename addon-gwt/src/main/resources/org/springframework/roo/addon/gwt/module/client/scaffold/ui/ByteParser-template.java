@@ -8,7 +8,6 @@ import java.text.ParseException;
  * Simple parser of Byte that wraps {@link Byte#valueOf(String)}.
  */
 public class ByteParser implements Parser<Byte> {
-
 	private static ByteParser INSTANCE;
 
 	/**

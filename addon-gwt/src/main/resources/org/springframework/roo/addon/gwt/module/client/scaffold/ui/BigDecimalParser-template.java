@@ -9,7 +9,6 @@ import java.text.ParseException;
  * Simple parser of BigDecimal that wraps {@link BigDecimal#toString()}.
  */
 public class BigDecimalParser implements Parser<BigDecimal> {
-
 	private static BigDecimalParser INSTANCE;
 
 	/**

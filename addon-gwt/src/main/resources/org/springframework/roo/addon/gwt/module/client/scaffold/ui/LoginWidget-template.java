@@ -14,15 +14,14 @@ import com.google.gwt.user.client.ui.Widget;
  * A simple widget which displays info about the user and a logout link.
  */
 public class LoginWidget extends Composite {
+	
 	interface Binder extends UiBinder<Widget, LoginWidget> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	@UiField
-	SpanElement name;
-	@UiField
-	Anchor logoutLink;
+	@UiField SpanElement name;
+	@UiField Anchor logoutLink;
 
 	public LoginWidget() {
 		initWidget(BINDER.createAndBindUi(this));

@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.ValueBox;
 public class ShortBox extends ValueBox<Short> {
 
 	public ShortBox() {
-		super(Document.get().createTextInputElement(), ShortRenderer.instance(),
-				ShortParser.instance());
+		super(Document.get().createTextInputElement(), ShortRenderer.instance(), ShortParser.instance());
 	}
 }

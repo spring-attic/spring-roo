@@ -8,7 +8,6 @@ import java.text.ParseException;
  * Simple parser of Float that wraps {@link Float#valueOf(String)}.
  */
 public class FloatParser implements Parser<Float> {
-
 	private static FloatParser INSTANCE;
 
 	/**
