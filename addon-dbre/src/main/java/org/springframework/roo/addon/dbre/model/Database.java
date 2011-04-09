@@ -159,12 +159,12 @@ public class Database implements Serializable {
 					Reference reference = foreignKey.getReferences().iterator().next();
 					reference.setInsertableOrUpdatable(false);
 					break fk;
-				} else {
-					for (Reference reference : foreignKey.getReferences()) {
-						reference.setInsertableOrUpdatable(false);
-					}
-					break fk;
 				}
+				
+				for (Reference reference : foreignKey.getReferences()) {
+					reference.setInsertableOrUpdatable(false);
+				}
+				break fk;
 			}
 		}
 	}

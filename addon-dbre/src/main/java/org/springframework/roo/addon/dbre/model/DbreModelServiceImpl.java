@@ -139,10 +139,10 @@ public class DbreModelServiceImpl implements DbreModelService {
 		if (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
 			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 			return connectionProvider.getConnection(connectionProperties, displayAddOns);
-		} else {
-			Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
-			return connectionProvider.getConnection(connectionProperties, displayAddOns);
 		}
+		
+		Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
+		return connectionProvider.getConnection(connectionProperties, displayAddOns);
 	}
 
 	private Properties getConnectionPropertiesFromDataNucleusConfiguration() {
