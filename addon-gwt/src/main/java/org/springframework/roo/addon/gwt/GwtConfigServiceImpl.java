@@ -173,7 +173,7 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 
 	private CharSequence getGaeHookup() {
 		StringBuilder builder = new StringBuilder("    // AppEngine user authentication\n\n");
-		builder.append("    // AppEngine user authentication\n\n");
+		builder.append("    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.loginWidget);\n\n");
 		builder.append("    new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
 		return builder.toString();
 	}
