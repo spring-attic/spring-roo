@@ -23,7 +23,6 @@ public class ScaffoldModule extends AbstractGinModule {
 	}
 
 	static class PlaceControllerProvider implements Provider<PlaceController> {
-
 		private final PlaceController placeController;
 
 		@Inject
@@ -37,14 +36,12 @@ public class ScaffoldModule extends AbstractGinModule {
 	}
 
 	static class RequestFactoryProvider implements Provider<ApplicationRequestFactory> {
-
 		private final ApplicationRequestFactory requestFactory;
 
 		@Inject
 		public RequestFactoryProvider(EventBus eventBus) {
 			requestFactory = GWT.create(ApplicationRequestFactory.class);
-			requestFactory.initialize(eventBus, new EventSourceRequestTransport(
-					eventBus__GAE_REQUEST_TRANSPORT__));
+			requestFactory.initialize(eventBus, new EventSourceRequestTransport(eventBus__GAE_REQUEST_TRANSPORT__));
 		}
 
 		public ApplicationRequestFactory get() {

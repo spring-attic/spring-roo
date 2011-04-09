@@ -19,9 +19,7 @@ import java.util.Set;
  *
  * @param <P> the type of Proxy being edited
  */
-public abstract class AbstractProxyEditActivity<P extends EntityProxy> implements Activity,
-		ProxyEditView.Delegate {
-
+public abstract class AbstractProxyEditActivity<P extends EntityProxy> implements Activity, ProxyEditView.Delegate {
 	protected final ProxyEditView<P, ?> view;
 	private final PlaceController placeController;
 
@@ -35,8 +33,7 @@ public abstract class AbstractProxyEditActivity<P extends EntityProxy> implement
 
 	public void cancelClicked() {
 		String unsavedChangesWarning = mayStop();
-		if ((unsavedChangesWarning == null)
-				|| Window.confirm(unsavedChangesWarning)) {
+		if ((unsavedChangesWarning == null) || Window.confirm(unsavedChangesWarning)) {
 			editorDriver = null;
 			exit(false);
 		}
@@ -72,9 +69,9 @@ public abstract class AbstractProxyEditActivity<P extends EntityProxy> implement
 		setWaiting(true);
 		request.fire(new Receiver<Void>() {
 			/*
-						* Callbacks do nothing if editorDriver is null, we were stopped in
-						* midflight
-						*/
+			 * Callbacks do nothing if editorDriver is null, we were stopped in
+			 * midflight
+			*/
 			@Override
 			public void onFailure(ServerFailure error) {
 				if (editorDriver != null) {

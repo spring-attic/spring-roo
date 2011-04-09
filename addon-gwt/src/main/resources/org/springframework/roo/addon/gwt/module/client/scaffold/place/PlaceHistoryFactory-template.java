@@ -5,7 +5,6 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.inject.Inject;
 
 public class PlaceHistoryFactory {
-
 	private final ProxyListPlace.Tokenizer proxyListPlaceTokenizer;
 	private final ProxyPlace.Tokenizer proxyPlaceTokenizer;
 
@@ -22,5 +21,4 @@ public class PlaceHistoryFactory {
 	public PlaceTokenizer<ProxyPlace> getProxyPlaceTokenizer() {
 		return proxyPlaceTokenizer;
 	}
-
 }

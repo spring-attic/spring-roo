@@ -20,18 +20,12 @@ public class ScaffoldMobileShell extends Composite {
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	@UiField
-	Button backButton;
-	@UiField
-	Element backButtonWrapper;
-	@UiField
-	SimplePanel body;
-	@UiField
-	Button editButton;
-	@UiField
-	LoginWidget loginWidget;
-	@UiField
-	Element title;
+	@UiField Button backButton;
+	@UiField Element backButtonWrapper;
+	@UiField SimplePanel body;
+	@UiField Button editButton;
+	@UiField LoginWidget loginWidget;
+	@UiField Element title;
 
 	public ScaffoldMobileShell() {
 		initWidget(BINDER.createAndBindUi(this));

@@ -9,10 +9,10 @@ import com.google.gwt.requestfactory.shared.ServiceLocator;
  * Gives a RequestFactory system access to the Google AppEngine UserService.
  */
 public class UserServiceLocator implements ServiceLocator {
+	
 	public UserServiceWrapper getInstance(Class<?> clazz) {
 		final UserService service = UserServiceFactory.getUserService();
 		return new UserServiceWrapper() {
-
 			public String createLoginURL(String destinationURL) {
 				return service.createLoginURL(destinationURL);
 			}

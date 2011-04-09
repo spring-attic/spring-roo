@@ -16,8 +16,7 @@ public class GaeAuthFilter implements Filter {
 	public void destroy() {
 	}
 
-	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-	                     FilterChain filterChain) throws IOException, ServletException {
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 		UserService userService = UserServiceFactory.getUserService();
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;

@@ -18,8 +18,7 @@ public class ProxyPlaceToListPlace implements FilteredActivityMapper.Filter {
 
 	/**
 	 * @param place a place to process
-	 * @return an appropriate ProxyListPlace, or null if the given place has
-	 *         nothing to do with proxies
+	 * @return an appropriate ProxyListPlace, or null if the given place has nothing to do with proxies
 	 */
 	public ProxyListPlace proxyListPlaceFor(Place place) {
 		if (place instanceof ProxyListPlace) {

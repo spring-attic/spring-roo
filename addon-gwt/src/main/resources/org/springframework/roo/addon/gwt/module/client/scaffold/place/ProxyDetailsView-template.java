@@ -14,6 +14,7 @@ public interface ProxyDetailsView<P> extends TakesValue<P>, IsWidget {
 	 * Implemented by the owner of the view.
 	 */
 	interface Delegate {
+		
 		void deleteClicked();
 
 		void editClicked();

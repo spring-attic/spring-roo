@@ -34,8 +34,7 @@ import java.util.Map;
  *
  * @param <P> the type of {@link EntityProxy} listed
  */
-public abstract class AbstractProxyListActivity<P extends EntityProxy>
-		implements Activity, ProxyListView.Delegate<P> {
+public abstract class AbstractProxyListActivity<P extends EntityProxy> implements Activity, ProxyListView.Delegate<P> {
 
 	/**
 	 * This mapping allows us to update individual rows as records change.
@@ -52,8 +51,7 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
 	private AcceptsOneWidget display;
 	private EntityProxyId<P> pendingSelection;
 
-	public AbstractProxyListActivity(PlaceController placeController,
-	                                 ProxyListView<P> view, Class<P> proxyType) {
+	public AbstractProxyListActivity(PlaceController placeController, ProxyListView<P> view, Class<P> proxyType) {
 		this.view = view;
 		this.placeController = placeController;
 		this.proxyClass = proxyType;
@@ -157,7 +155,6 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
 		// Select the new proxy, if it's relevant
 		if (proxyId != null) {
 			P selectMe = idToProxy.get(proxyId);
-
 			if (selectMe != null) {
 				pendingSelection = null;
 				selectionModel.setSelected(selectMe, true);
@@ -195,11 +192,9 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
 			case UPDATE:
 				update(proxyId);
 				break;
-
 			case DELETE:
 				init();
 				break;
-
 			case PERSIST:
 				/*
 				 * On create, we presume the new record is at the end of the list, so
@@ -243,8 +238,7 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
 		}
 	}
 
-	private void fireRangeRequest(final Range range,
-	                              final Receiver<List<P>> callback) {
+	private void fireRangeRequest(final Range range, final Receiver<List<P>> callback) {
 		createRangeRequest(range).with(getView().getPaths()).fire(callback);
 	}
 

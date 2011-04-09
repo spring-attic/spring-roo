@@ -44,8 +44,7 @@ public class GaeAuthRequestTransport extends DefaultRequestTransport {
 						 * com.google.gwt.requestfactory.shared.Receiver will not post a
 						 * runtime exception.
 						 */
-						receiver.onTransportFailure(new ServerFailure(
-								"Unauthenticated user", null, null, false /* not fatal */));
+						receiver.onTransportFailure(new ServerFailure("Unauthenticated user", null, null, false /* not fatal */));
 						eventBus.fireEvent(new GaeAuthenticationFailureEvent(loginUrl));
 						return;
 					}
@@ -57,8 +56,7 @@ public class GaeAuthRequestTransport extends DefaultRequestTransport {
 					 * com.google.gwt.requestfactory.shared.Receiver will not post a
 					 * runtime exception
 					 */
-					receiver.onTransportFailure(new ServerFailure(
-							"Status zero response, probably after auth failure", null, null, false /* not fatal */));
+					receiver.onTransportFailure(new ServerFailure("Status zero response, probably after auth failure", null, null, false /* not fatal */));
 					return;
 				}
 				superCallback.onResponseReceived(request, response);

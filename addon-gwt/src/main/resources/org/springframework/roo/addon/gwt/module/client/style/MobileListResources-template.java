@@ -9,6 +9,7 @@ import com.google.gwt.user.cellview.client.CellList;
 public interface MobileListResources extends CellList.Resources {
 
 	interface MobileStyle extends CellList.Style {
+		
 		/**
 		 * Applied to the date property in a cell.
 		 */

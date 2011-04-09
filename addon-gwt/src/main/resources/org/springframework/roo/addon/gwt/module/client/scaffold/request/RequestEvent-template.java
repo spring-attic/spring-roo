@@ -38,8 +38,7 @@ public class RequestEvent extends GwtEvent<RequestEvent.Handler> {
 	 * @param handler  a {@link RequestEvent.Handler}
 	 * @return a {@link HandlerRegistration} instance
 	 */
-	public static HandlerRegistration register(EventBus eventBus,
-	                                           RequestEvent.Handler handler) {
+	public static HandlerRegistration register(EventBus eventBus, RequestEvent.Handler handler) {
 		return eventBus.addHandler(TYPE, handler);
 	}
 

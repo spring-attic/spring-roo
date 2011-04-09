@@ -11,6 +11,7 @@ import com.google.gwt.requestfactory.shared.RequestFactory;
  * A place in the app that deals with a specific {@link RequestFactory} proxy.
  */
 public class ProxyPlace extends Place {
+	
 	/**
 	 * The things you do with a record, each of which is a different bookmarkable
 	 * location in the scaffold app.
@@ -24,9 +25,6 @@ public class ProxyPlace extends Place {
 	 */
 	@Prefix("r")
 	public static class Tokenizer implements PlaceTokenizer<ProxyPlace> {
-		/**
-		 *
-		 */
 		private static final String SEPARATOR = "!";
 		private final RequestFactory requests;
 
@@ -45,11 +43,9 @@ public class ProxyPlace extends Place {
 
 		public String getToken(ProxyPlace place) {
 			if (Operation.CREATE == place.getOperation()) {
-				return requests.getHistoryToken(place.getProxyClass()) + SEPARATOR
-						+ place.getOperation();
+				return requests.getHistoryToken(place.getProxyClass()) + SEPARATOR + place.getOperation();
 			}
-			return requests.getHistoryToken(place.getProxyId()) + SEPARATOR
-					+ place.getOperation();
+			return requests.getHistoryToken(place.getProxyId()) + SEPARATOR + place.getOperation();
 		}
 	}
 
@@ -126,15 +122,13 @@ public class ProxyPlace extends Place {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((operation == null) ? 0 : operation.hashCode());
-		result = prime * result
-				+ ((proxyClass == null) ? 0 : proxyClass.hashCode());
+		result = prime * result + ((proxyClass == null) ? 0 : proxyClass.hashCode());
 		result = prime * result + ((proxyId == null) ? 0 : proxyId.hashCode());
 		return result;
 	}
 
 	@Override
 	public String toString() {
-		return "ProxyPlace [operation=" + operation + ", proxy=" + proxyId
-				+ ", proxyClass=" + proxyClass + "]";
+		return "ProxyPlace [operation=" + operation + ", proxy=" + proxyId + ", proxyClass=" + proxyClass + "]";
 	}
 }

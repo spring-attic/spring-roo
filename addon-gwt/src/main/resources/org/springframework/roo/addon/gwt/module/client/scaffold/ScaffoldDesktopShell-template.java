@@ -13,21 +13,17 @@ import com.google.gwt.user.client.ui.*;
  * The outermost UI of the application.
  */
 public class ScaffoldDesktopShell extends Composite {
+	
 	interface Binder extends UiBinder<Widget, ScaffoldDesktopShell> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	@UiField
-	SimplePanel details;
-	@UiField
-	DivElement error;
-	@UiField
-	LoginWidget loginWidget;
-	@UiField
-	SimplePanel master;
-	@UiField
-	NotificationMole mole;
+	@UiField SimplePanel details;
+	@UiField DivElement error;
+	@UiField LoginWidget loginWidget;
+	@UiField SimplePanel master;
+	@UiField NotificationMole mole;
 	@UiField(provided = true)
 	ValuePicker<ProxyListPlace> placesBox = new ValuePicker<ProxyListPlace>(new ApplicationListPlaceRenderer());
 

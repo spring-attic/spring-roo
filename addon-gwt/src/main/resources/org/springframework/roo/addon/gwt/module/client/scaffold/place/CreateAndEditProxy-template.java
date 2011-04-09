@@ -12,13 +12,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
  * @param <P> the type of proxy to create and edit
  */
 public abstract class CreateAndEditProxy<P extends EntityProxy> extends AbstractProxyEditActivity<P> {
-
 	private final P proxy;
 	private final PlaceController placeController;
 	private Class<P> proxyClass;
 
-	public CreateAndEditProxy(Class<P> proxyClass, RequestContext request,
-	                          ProxyEditView<P, ?> view, PlaceController placeController) {
+	public CreateAndEditProxy(Class<P> proxyClass, RequestContext request, ProxyEditView<P, ?> view, PlaceController placeController) {
 		super(view, placeController);
 		this.proxy = request.create(proxyClass);
 		this.placeController = placeController;

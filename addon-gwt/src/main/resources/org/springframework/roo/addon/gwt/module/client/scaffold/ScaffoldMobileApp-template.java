@@ -40,9 +40,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 	/**
 	 * The root activity that shows all entities.
 	 */
-	private static class DefaultActivity extends AbstractActivity implements
-			IsScaffoldMobileActivity {
-
+	private static class DefaultActivity extends AbstractActivity implements IsScaffoldMobileActivity {
 		private final Widget widget;
 
 		public DefaultActivity(Widget widget) {
@@ -75,8 +73,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		}
 	}
 
-	public static final Place ROOT_PLACE = new Place() {
-	};
+	public static final Place ROOT_PLACE = new Place() {};
 
 	private static MobileListResources res = GWT.create(MobileListResources.class);
 
@@ -103,16 +100,13 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 	private final PlaceHistoryFactory placeHistoryFactory;
 
 	@Inject
-	public ScaffoldMobileApp(ScaffoldMobileShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus,
-	                         PlaceController placeController, ScaffoldMobileActivities scaffoldMobileActivities,
-	                         PlaceHistoryFactory placeHistoryFactory) {
+	public ScaffoldMobileApp(ScaffoldMobileShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus, PlaceController placeController, ScaffoldMobileActivities scaffoldMobileActivities, PlaceHistoryFactory placeHistoryFactory) {
 		this.shell = shell;
 		this.requestFactory = requestFactory;
 		this.eventBus = eventBus;
 		this.placeController = placeController;
 		this.scaffoldMobileActivities = scaffoldMobileActivities;
 		this.placeHistoryFactory = placeHistoryFactory;
-
 	}
 
 	@Override
@@ -120,7 +114,6 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		isMobile = true;
 
 		/* Add handlers, setup activities */
-
 		init();
 
 		/* Hide the loading message */
@@ -128,13 +121,11 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		loading.getParentElement().removeChild(loading);
 
 		/* And show the user the shell */
-
-		// TODO(jlabanca): Use RootLayoutPanel when we switch to DockLayoutPanel.
+		// TODO (jlabanca): Use RootLayoutPanel when we switch to DockLayoutPanel.
 		RootPanel.get().add(shell);
 	}
 
 	private void init() {
-
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
 			public void onUncaughtException(Throwable e) {
 				log.log(Level.SEVERE, e.getMessage(), e);
@@ -148,9 +139,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 					return requestFactory.loggingRequest();
 				}
 			};
-			Logger.getLogger("").addHandler(
-					new RequestFactoryLogHandler(provider, Level.WARNING,
-							new ArrayList<String>()));
+			Logger.getLogger("").addHandler(new RequestFactoryLogHandler(provider, Level.WARNING, new ArrayList<String>()));
 		}
 
 		__GAE_HOOKUP__
@@ -159,20 +148,16 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		final Renderer<ProxyListPlace> placePickerRenderer = new ApplicationListPlaceRenderer();
 		Cell<ProxyListPlace> placePickerCell = new AbstractCell<ProxyListPlace>() {
 			@Override
-			public void render(Context context, ProxyListPlace value,
-			                   SafeHtmlBuilder sb) {
+			public void render(Context context, ProxyListPlace value, SafeHtmlBuilder sb) {
 				sb.appendEscaped(placePickerRenderer.render(value));
 			}
 		};
-		CellList<ProxyListPlace> placePickerList = new CellList<ProxyListPlace>(
-				placePickerCell, getMobileListResources());
+		CellList<ProxyListPlace> placePickerList = new CellList<ProxyListPlace>(placePickerCell, getMobileListResources());
 		placePickerList.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
-		final ValuePicker<ProxyListPlace> placePickerView = new ValuePicker<ProxyListPlace>(
-				placePickerList);
+		final ValuePicker<ProxyListPlace> placePickerView = new ValuePicker<ProxyListPlace>(placePickerList);
 		Activity defaultActivity = new DefaultActivity(placePickerView);
 		ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace();
-		ProxyListPlacePicker proxyListPlacePicker = new ProxyListPlacePicker(
-				placeController, proxyPlaceToListPlace);
+		ProxyListPlacePicker proxyListPlacePicker = new ProxyListPlacePicker(placeController, proxyPlaceToListPlace);
 		placePickerView.setAcceptableValues(getTopPlaces());
 		proxyListPlacePicker.register(eventBus, placePickerView);
 
@@ -227,8 +212,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		 * and finds the corresponding Activity to run
 		 */
 
-		final ActivityManager activityManager = new ActivityManager(
-				activityMapper, eventBus);
+		final ActivityManager activityManager = new ActivityManager(activityMapper, eventBus);
 
 		activityManager.setDisplay(shell.getBody());
 

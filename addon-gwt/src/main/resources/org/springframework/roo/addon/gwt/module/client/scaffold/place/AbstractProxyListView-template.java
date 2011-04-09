@@ -13,9 +13,7 @@ import com.google.gwt.view.client.HasData;
  *
  * @param <P> the type of the proxy
  */
-public abstract class AbstractProxyListView<P extends EntityProxy> extends
-		Composite implements ProxyListView<P> {
-
+public abstract class AbstractProxyListView<P extends EntityProxy> extends Composite implements ProxyListView<P> {
 	private HasData<P> display;
 	private ProxyListView.Delegate<P> delegate;
 
@@ -44,8 +42,6 @@ public abstract class AbstractProxyListView<P extends EntityProxy> extends
 	}
 
 	protected void initWidget(Widget widget) {
-		throw new UnsupportedOperationException(
-				"AbstractRecordListView must be initialized via "
-						+ "init(Widget, HasData<P>, Button) ");
+		throw new UnsupportedOperationException("AbstractRecordListView must be initialized via init(Widget, HasData<P>, Button) ");
 	}
 }

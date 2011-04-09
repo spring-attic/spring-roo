@@ -28,9 +28,7 @@ __GAE_IMPORT__
  * Application for browsing entities.
  */
 public class ScaffoldDesktopApp extends ScaffoldApp {
-
 	private static final Logger log = Logger.getLogger(Scaffold.class.getName());
-
 	private final ScaffoldDesktopShell shell;
 	private final ApplicationRequestFactory requestFactory;
 	private final EventBus eventBus;
@@ -40,10 +38,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 	private final ApplicationDetailsActivities applicationDetailsActivities;
 
 	@Inject
-	public ScaffoldDesktopApp(ScaffoldDesktopShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus,
-	                          PlaceController placeController, PlaceHistoryFactory placeHistoryFactory,
-	                          ApplicationMasterActivities applicationMasterActivities,
-	                          ApplicationDetailsActivities applicationDetailsActivities) {
+	public ScaffoldDesktopApp(ScaffoldDesktopShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus, PlaceController placeController, PlaceHistoryFactory placeHistoryFactory, ApplicationMasterActivities applicationMasterActivities, ApplicationDetailsActivities applicationDetailsActivities) {
 		this.shell = shell;
 		this.requestFactory = requestFactory;
 		this.eventBus = eventBus;
@@ -54,24 +49,18 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 	}
 
 	public void run() {
-
 		/* Add handlers, setup activities */
-
 		init();
 
 		/* Hide the loading message */
-
 		Element loading = Document.get().getElementById("loading");
 		loading.getParentElement().removeChild(loading);
 
 		/* And show the user the shell */
-
 		RootLayoutPanel.get().add(shell);
-
 	}
 
 	private void init() {
-
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
 			public void onUncaughtException(Throwable e) {
 				Window.alert("Error: " + e.getMessage());
@@ -86,9 +75,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 					return requestFactory.loggingRequest();
 				}
 			};
-			Logger.getLogger("").addHandler(
-					new RequestFactoryLogHandler(provider, Level.WARNING,
-							new ArrayList<String>()));
+			Logger.getLogger("").addHandler(new RequestFactoryLogHandler(provider, Level.WARNING, new ArrayList<String>()));
 		}
 
 		RequestEvent.register(eventBus, new RequestEvent.Handler() {
