@@ -75,4 +75,12 @@ public interface UaaRegistrationService {
 	 * to the service. If the privacy level does not support this, the buffer should be preserved.
 	 */
 	void flushIfPossible();
+	
+	/**
+	 * Attempts to transmit the data immediately to the server. This will only occur if the privacy
+	 * level is acceptable and the {@link UaaService} is capable of transmission. Note this method
+	 * should very rarely be necessary. It is only useful if an immediate transmission is desirable
+	 * for some special reason (eg UAA is being used to convey user contributions to the server).
+	 */
+	void requestTransmission();
 }

@@ -14,11 +14,12 @@ import org.osgi.framework.Version;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.uaa.client.TransmissionAwareUaaService;
+import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse.Builder;
-import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
 /**
  * Default implementation of {@link UaaRegistrationService}.
@@ -29,7 +30,7 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
  */
 @Service
 @Component
-public class UaaRegistrationServiceImpl implements UaaRegistrationService {
+public class UaaRegistrationServiceImpl implements UaaRegistrationService, TransmissionEventListener {
 
 	@Reference private UaaService uaaService;
 	@Reference private PublicFeatureResolver publicFeatureResolver;
@@ -48,11 +49,17 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 		this.bundleContext = context.getBundleContext();
 		String bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(context.getBundleContext(), UaaRegistrationServiceImpl.class.getName());
 		registerBundleSymbolicNameUse(bundleSymbolicName, null);
+		if (uaaService instanceof TransmissionAwareUaaService) {
+			((TransmissionAwareUaaService)uaaService).addTransmissionEventListener(this);
+		}
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		// Last effort to store the data given we're shutting down
 		flushIfPossible();
+		if (uaaService instanceof TransmissionAwareUaaService) {
+			((TransmissionAwareUaaService)uaaService).removeTransmissionEventListener(this);
+		}
 	}
 	
 	public void registerBundleSymbolicNameUse(String bundleSymbolicName, String customJson) {
@@ -73,7 +80,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 		}
 
 		// If we cannot persist it at present, buffer it for potential persistence later on
-		if (!isPrivacyLevelAllowingPersistence()) {
+		if (!uaaService.isUaaTermsOfUseAccepted()) {
 			bsnBuffer.put(bundleSymbolicName, customJson);
 			return;
 		}
@@ -114,7 +121,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 		Assert.hasText(projectId, "Project ID required");
 		
 		// If we cannot persist it at present, buffer it for potential persistence later on
-		if (!isPrivacyLevelAllowingPersistence()) {
+		if (!uaaService.isUaaTermsOfUseAccepted()) {
 			List<Product> value = projectIdBuffer.get(projectId);
 			if (value == null) {
 				value = new ArrayList<Product>();
@@ -153,7 +160,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 			return;
 		}
 		
-		if (!isPrivacyLevelAllowingPersistence()) {
+		if (!uaaService.isUaaTermsOfUseAccepted()) {
 			// We can't flush yet
 			return;
 		}
@@ -174,10 +181,21 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService {
 		
 		projectIdBuffer.clear();
 	}
-
-	private boolean isPrivacyLevelAllowingPersistence() {
-		PrivacyLevel level = uaaService.getPrivacyLevel();
-		return level != PrivacyLevel.DECLINE_TOU && level != PrivacyLevel.UNDECIDED_TOU;
+	
+	public void requestTransmission() {
+		if (uaaService instanceof TransmissionAwareUaaService) {
+			TransmissionAwareUaaService ta = (TransmissionAwareUaaService) uaaService;
+			ta.requestTransmission();
+		}
+	}
+	
+	public void afterTransmission(TransmissionType type, boolean successful) {}
+	
+	public void beforeTransmission(TransmissionType type) {
+		if (type == TransmissionType.UPLOAD) {
+			// Good time to flush through to UAA API, so the latest data is included in the upload
+			flushIfPossible();
+		}
 	}
 	
 	/**

@@ -277,14 +277,14 @@
             </dependency>
             <!-- External OSGi Bundles (ie not wrapped) -->
             <dependency>
+                <groupId>org.springframework.uaa</groupId>
+                <artifactId>org.springframework.uaa.client</artifactId>
+                <version>1.0.2.RELEASE</version>
+            </dependency>
+            <dependency>
                 <groupId>org.fusesource.jansi</groupId>
                 <artifactId>jansi</artifactId>
                 <version>1.5</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.uaa</groupId>
-                <artifactId>org.springframework.uaa.client</artifactId>
-                <version>1.0.1.RELEASE</version>
             </dependency>
             <!-- Wrapped JARs -->
             <dependency>

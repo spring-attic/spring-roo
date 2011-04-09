@@ -16,8 +16,6 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
-import org.springframework.uaa.client.TransmissionAwareUaaService;
-import org.springframework.uaa.client.UaaService;
 
 /**
  * Implementation of {@link AddOnFeedbackOperations}.
@@ -32,7 +30,6 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 
 	@Reference private UaaRegistrationService registrationService;
 	@Reference private UrlInputStreamService urlInputStreamService;
-	@Reference private UaaService uaaService;
 	private BundleContext bundleContext;
 	private static final Logger log = Logger.getLogger(AddOnFeedbackOperationsImpl.class.getName());
 	
@@ -82,10 +79,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		registrationService.registerBundleSymbolicNameUse(BundleFindingUtils.findFirstBundleForTypeName(bundleContext, AddOnRooBotOperations.class.getName()), customJson);
 		
 		// Push the feedback up to the server now if possible
-		if (uaaService instanceof TransmissionAwareUaaService) {
-			TransmissionAwareUaaService ta = (TransmissionAwareUaaService) uaaService;
-			ta.requestTransmission();
-		}
+		registrationService.requestTransmission();
 		
 		log.info("Thanks for sharing your feedback.");
 	}
