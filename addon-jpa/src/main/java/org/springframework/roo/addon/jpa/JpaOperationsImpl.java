@@ -76,9 +76,8 @@ public class JpaOperationsImpl implements JpaOperations {
 	public SortedSet<String> getDatabaseProperties() {
 		if (fileManager.exists(getDatabasePropertiesPath())) {
 			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT, "database.properties", true);
-		} else {
-			return getPropertiesFromDataNucleusConfiguration();
 		}
+		return getPropertiesFromDataNucleusConfiguration();
 	}
 
 	private String getPersistencePath() {
@@ -425,36 +424,36 @@ public class JpaOperationsImpl implements JpaOperations {
 				fileManager.delete(loggingPropertiesPath);
 			}
 			return;
-		} else {
-			MutableFile appengineMutableFile = null;
-			Document appengine;
-			try {
-				if (appenginePathExists) {
-					appengineMutableFile = fileManager.updateFile(appenginePath);
-					appengine = XmlUtils.getDocumentBuilder().parse(appengineMutableFile.getInputStream());
-				} else {
-					appengineMutableFile = fileManager.createFile(appenginePath);
-					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
-					Assert.notNull(templateInputStream, "Could not acquire appengine-web.xml template");
-					appengine = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-				}
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-
-			Element rootElement = appengine.getDocumentElement();
-			Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", rootElement);
-			applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
-
-			fileManager.createOrUpdateXmlFileIfRequired(appenginePath, appengine, true);
+		}
 		
-			if (!loggingPropertiesPathExists) {
-				try {
-					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "logging.properties");
-					FileCopyUtils.copy(templateInputStream, fileManager.createFile(loggingPropertiesPath).getOutputStream());
-				} catch (IOException e) {
-					throw new IllegalStateException(e);
-				}
+		MutableFile appengineMutableFile = null;
+		Document appengine;
+		try {
+			if (appenginePathExists) {
+				appengineMutableFile = fileManager.updateFile(appenginePath);
+				appengine = XmlUtils.getDocumentBuilder().parse(appengineMutableFile.getInputStream());
+			} else {
+				appengineMutableFile = fileManager.createFile(appenginePath);
+				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
+				Assert.notNull(templateInputStream, "Could not acquire appengine-web.xml template");
+				appengine = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element rootElement = appengine.getDocumentElement();
+		Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", rootElement);
+		applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
+
+		fileManager.createOrUpdateXmlFileIfRequired(appenginePath, appengine, true);
+
+		if (!loggingPropertiesPathExists) {
+			try {
+				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "logging.properties");
+				FileCopyUtils.copy(templateInputStream, fileManager.createFile(loggingPropertiesPath).getOutputStream());
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
 			}
 		}
 	}
