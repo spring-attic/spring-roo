@@ -161,20 +161,24 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Locates an annotation on this class and its superclasses.
 	 * 
-	 * @param classOrInterfaceTypeDetails to search (required)
+	 * @param memberHoldingTypeDetails to search (required)
 	 * @param annotationType annotation to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static AnnotationMetadata getTypeAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotationType) {
-		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
+	public static AnnotationMetadata getTypeAnnotation(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType annotationType) {
+		Assert.notNull(memberHoldingTypeDetails, "Class or interface type details required");
 		Assert.notNull(annotationType, "Annotation type required");
-		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
+		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
 		while (current != null) {
 			AnnotationMetadata result = getDeclaredTypeAnnotation(current, annotationType);
 			if (result != null) {
 				return result;
 			}
-			current = current.getSuperclass();
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
+			} else {
+				current = null;
+			}
 		}
 		return null;
 	}
@@ -182,17 +186,21 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Locates all methods on this class and its superclasses.
 	 * 
-	 * @param classOrInterfaceTypeDetails to search (required)
+	 * @param memberHoldingTypeDetails to search (required)
 	 * @return zero or more methods (never null)
 	 */
-	public static List<MethodMetadata> getMethods(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	public static List<MethodMetadata> getMethods(MemberHoldingTypeDetails memberHoldingTypeDetails) {
 		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
-		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
+		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
 		while (current != null) {
 			for (MethodMetadata methods : current.getDeclaredMethods()) {
 				result.add(methods);
 			}
-			current = current.getSuperclass();
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
+			} else {
+				current = null;
+			}
 		}
 		return result;
 	}
@@ -200,20 +208,24 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Searches up the inheritance hierarchy until the first field with the specified name is located.
 	 * 
-	 * @param classOrInterfaceTypeDetails to search (required)
+	 * @param memberHoldingTypeDetails to search (required)
 	 * @param fieldName to locate (required)
 	 * @return the field, or null if not found
 	 */
-	public static FieldMetadata getField(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaSymbolName fieldName) {
-		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
+	public static FieldMetadata getField(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName fieldName) {
+		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(fieldName, "Field name required");
-		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
+		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
 		while (current != null) {
 			FieldMetadata result = getDeclaredField(current, fieldName);
 			if (result != null) {
 				return result;
 			}
-			current = current.getSuperclass();
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
+			} else {
+				current = null;
+			}
 		}
 		return null;
 	}
@@ -221,13 +233,15 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Searches up the inheritance hierarchy and locates all declared fields which are annotated with the specified annotation.
 	 * 
-	 * @param classOrInterfaceTypeDetails to search (required)
+	 * @param memberHoldingTypeDetails to search (required)
 	 * @param annotation to locate (required)
 	 * @return all the located fields (never null, but may be empty)
 	 */
-	public static List<FieldMetadata> getFieldsWithAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotation) {
+	public static List<FieldMetadata> getFieldsWithAnnotation(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType annotation) {
+		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
+		Assert.notNull(annotation, "Annotation required");
 		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
-		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
+		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
 		while (current != null) {
 			for (FieldMetadata field : current.getDeclaredFields()) {
 				if (getAnnotationOfType(field.getAnnotations(), annotation) != null) {
@@ -235,7 +249,11 @@ public abstract class MemberFindingUtils {
 					result.add(field);
 				}
 			}
-			current = current.getSuperclass();
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
+			} else {
+				current = null;
+			}
 		}
 		return result;
 	}
@@ -243,25 +261,29 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Searches up the inheritance hierarchy until the first method with the specified name and parameters is located.
 	 * 
-	 * @param classOrInterfaceTypeDetails to search (required)
+	 * @param memberHoldingTypeDetails to search (required)
 	 * @param methodName to locate (required)
 	 * @param parameters to locate (can be null if there are no parameters)
 	 * @return the method, or null if not found
 	 */
-	public static MethodMetadata getMethod(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
-		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
+	public static MethodMetadata getMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+		Assert.notNull(memberHoldingTypeDetails, "Class or interface type details required");
 		Assert.notNull(methodName, "Method name required");
 		if (parameters == null) {
 			parameters = new ArrayList<JavaType>();
 		}
 
-		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
+		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
 		while (current != null) {
 			MethodMetadata result = getDeclaredMethod(current, methodName, parameters);
 			if (result != null) {
 				return result;
 			}
-			current = current.getSuperclass();
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
+			} else {
+				current = null;
+			}
 		}
 		return null;
 	}
