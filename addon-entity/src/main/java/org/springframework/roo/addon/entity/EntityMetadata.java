@@ -26,11 +26,8 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
-import org.springframework.roo.classpath.scanner.GlobalCustomDataRequest;
-import org.springframework.roo.classpath.scanner.GlobalMemberDetailsDecorator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -144,7 +141,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getFindEntriesMethod());
 		
 		builder.putCustomData(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES, getDynamicFinders());
-		builder.putCustomData(CustomDataPersistenceTags.PERSISTENT_TYPE, null);
+		//builder.putCustomData(CustomDataPersistenceTags.PERSISTENT_TYPE, null);
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -360,7 +357,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		constructorBuilder.setModifier(Modifier.PUBLIC);
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
-		constructorBuilder.putCustomData(CustomDataPersistenceTags.NO_ARG_CONSTRUCTOR, null);
+		//constructorBuilder.putCustomData(CustomDataPersistenceTags.NO_ARG_CONSTRUCTOR, null);
 		return constructorBuilder.build();
 	}
 	
@@ -372,19 +369,20 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * 
 	 * <p>
 	 * If no parent is defined, one will be located or created. Any declared or inherited field which has the 
-	 * {@link javax.persistence.Id @Id} or {@link javax.persistence.EmbeddedId @EmbeddedId} annotation will be taken as the identifier and returned. If no such field is located,
-	 * a private field will be created as per the details contained in {@link RooEntity}.
+	 * {@link javax.persistence.Id @Id} or {@link javax.persistence.EmbeddedId @EmbeddedId} annotation will be
+	 * taken as the identifier and returned. If no such field is located, a private field will be created as
+	 * per the details contained in {@link RooEntity}.
 	 * 
 	 * @return the identifier (never returns null)
 	 */
-	public FieldMetadata getIdentifierField() {
+	private FieldMetadata getIdentifierField() {
 		if (parent != null) {
 			FieldMetadata idField = parent.getIdentifierField();
 			if (idField != null) {
 				if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), ID) != null) {
-					return tagField(idField, CustomDataPersistenceTags.IDENTIFIER_FIELD);
+					return idField;
 				} else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), EMBEDDED_ID) != null) {
-					return tagField(idField, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+					return idField;
 				}
 			}
 			return parent.getIdentifierField();
@@ -393,22 +391,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Try to locate an existing field with @javax.persistence.Id
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
 		if (idFields.size() > 0) {
-			return tagField(getIdentifierField(idFields, ID), CustomDataPersistenceTags.IDENTIFIER_FIELD);
+			return getIdentifierField(idFields, ID);
 		}
 		
 		// Try to locate an existing field with @javax.persistence.EmbeddedId
 		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
 		if (embeddedIdFields.size() > 0) {
-			// TODO @EmbeddedId is a test case but when working this code needs a tidy up to reduce duplicated code so that other fields, such as version can be addedd as well. 
-			FieldMetadata idField = getIdentifierField(embeddedIdFields, EMBEDDED_ID);
-			CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-			customDataBuilder.put(CustomDataPersistenceTags.EMBEDDED_ID_FIELD, null);
-			GlobalCustomDataRequest globalCustomDataRequest = new GlobalCustomDataRequest();
-			globalCustomDataRequest.addCustomData(idField, customDataBuilder.build());
-			FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(idField);
-			builder.putCustomData(GlobalMemberDetailsDecorator.GLOBAL_MEMBER_DETAILS_DECORATOR_TAG, globalCustomDataRequest);
-			return fieldMetadataBuilder.build();
-		//	return tagField(getIdentifierField(embeddedIdFields, EMBEDDED_ID), CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
 		if (!StringUtils.hasText(identifierField)) {
@@ -498,15 +487,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (isVMforceEnabled) {
 			identifierType = JavaType.STRING_OBJECT;
 		}
-		
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType);
-		FieldMetadata field = fieldBuilder.build();
-		return hasIdClass ? tagField(field, CustomDataPersistenceTags.EMBEDDED_ID_FIELD) : tagField(field, CustomDataPersistenceTags.IDENTIFIER_FIELD);
+
+		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType).build();
 	}
 	
 	private FieldMetadata getIdentifierField(List<FieldMetadata> identifierFields, JavaType identifierType) {
 		Assert.isTrue(identifierFields.size() == 1, "More than one field was annotated with @" + identifierType.getSimpleTypeName() + " in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-		return identifierFields.get(0);
+		return new FieldMetadataBuilder(identifierFields.get(0)).build();
 	}
 
 	/**
@@ -518,9 +505,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * 
 	 * @return the accessor (never returns null)
 	 */
-	public MethodMetadata getIdentifierAccessor() {
+	private MethodMetadata getIdentifierAccessor() {
 		if (parent != null) {
-			return tagMethod(parent.getIdentifierAccessor(), CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
+			return parent.getIdentifierAccessor();
 		}
 
 		// Locate the identifier field, and compute the name of the accessor that will be produced
@@ -534,7 +521,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return tagMethod(method, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
+					return method;
 				} else {
 					// Method is not public so make the required accessor name unique 
 					requiredAccessorName += "_";
@@ -546,8 +533,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), bodyBuilder);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), bodyBuilder).build();
 	}
 	
 	/**
@@ -562,7 +548,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	public MethodMetadata getIdentifierMutator() {
 		// TODO: This is a temporary workaround to support web data binding approaches; to be reviewed more thoroughly in future
 		if (parent != null) {
-			return tagMethod(parent.getIdentifierMutator(), CustomDataPersistenceTags.IDENTIFIER_MUTATOR_METHOD);
+			return parent.getIdentifierMutator();
 		}
 		
 		// Locate the identifier field, and compute the name of the accessor that will be produced
@@ -581,7 +567,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return tagMethod(method, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
+					return method;
 				} else {
 					// Method is not public so make the required mutator name unique 
 					requiredMutatorName += "_";
@@ -594,7 +580,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("this." + id.getFieldName().getSymbolName() + " = id;");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.IDENTIFIER_MUTATOR_METHOD);
+		return methodBuilder.build();
 	}
 
 	/**
@@ -622,8 +608,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Version"));
 		if (found.size() > 0) {
 			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @Version in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			FieldMetadata field = found.get(0);
-			return field;
+			return found.get(0);
 		}
 		
 		// Quit at this stage if the user doesn't want a version field
@@ -668,7 +653,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		annotations.add(columnBuilder);
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, verField, versionType);
-		return tagField(fieldBuilder.build(), CustomDataPersistenceTags.VERSION_FIELD);
+		return fieldBuilder.build();
 	}
 
 	/**
@@ -691,7 +676,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			FieldMetadata result = parent.getVersionField();
 			if (result != null) {
 				// It's the parent's responsibility to provide the accessor, not ours
-				return tagMethod(parent.getVersionAccessor(), CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
+				return parent.getVersionAccessor();
 			}
 		}
 		
@@ -705,7 +690,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return tagMethod(method, CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
+					return method;
 				} else {
 					// Method is not public so make the required accessor name unique 
 					requiredAccessorName += "_";
@@ -718,7 +703,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return this." + version.getFieldName().getSymbolName() + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), version.getFieldType(), bodyBuilder);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
+		return methodBuilder.build();
 	}
 	
 	/**
@@ -733,7 +718,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	public MethodMetadata getVersionMutator() {
 		// TODO: This is a temporary workaround to support web data binding approaches; to be reviewed more thoroughly in future
 		if (parent != null) {
-			return tagMethod(parent.getVersionMutator(), CustomDataPersistenceTags.VERSION_MUTATOR_METHOD);
+			return parent.getVersionMutator();
 		}
 		
 		// Locate the version field, and compute the name of the mutator that will be produced
@@ -756,7 +741,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
-					return tagMethod(method, CustomDataPersistenceTags.VERSION_MUTATOR_METHOD);
+					return method;
 				} else {
 					// Method is not public so make the required mutator name unique 
 					requiredMutatorName += "_";
@@ -769,7 +754,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("this." + version.getFieldName().getSymbolName() + " = version;");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.VERSION_MUTATOR_METHOD);
+		return methodBuilder.build();
 	}
 	
 	/**
@@ -779,13 +764,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (parent != null) {
 			MethodMetadata found = parent.getPersistMethod();
 			if (found != null) {
-				return tagMethod(found, CustomDataPersistenceTags.PERSIST_METHOD);
+				return found;
 			}
 		}
 		if ("".equals(annotationValues.getPersistMethod())) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(annotationValues.getPersistMethod()), "persist", CustomDataPersistenceTags.PERSIST_METHOD);
+		return getDelegateMethod(new JavaSymbolName(annotationValues.getPersistMethod()), "persist");
 	}
 	
 	/**
@@ -795,13 +780,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (parent != null) {
 			MethodMetadata found = parent.getRemoveMethod();
 			if (found != null) {
-				return tagMethod(found, CustomDataPersistenceTags.REMOVE_METHOD);
+				return found;
 			}
 		}
 		if ("".equals(annotationValues.getRemoveMethod())) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(annotationValues.getRemoveMethod()), "remove", CustomDataPersistenceTags.REMOVE_METHOD);
+		return getDelegateMethod(new JavaSymbolName(annotationValues.getRemoveMethod()), "remove");
 	}
 	
 	/**
@@ -811,13 +796,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (parent != null) {
 			MethodMetadata found = parent.getFlushMethod();
 			if (found != null) {
-				return tagMethod(found, CustomDataPersistenceTags.FLUSH_METHOD);
+				return found;
 			}
 		}
 		if ("".equals(annotationValues.getFlushMethod())) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(annotationValues.getFlushMethod()), "flush", CustomDataPersistenceTags.FLUSH_METHOD);
+		return getDelegateMethod(new JavaSymbolName(annotationValues.getFlushMethod()), "flush");
 	}
 	
 	/**
@@ -827,13 +812,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (parent != null) {
 			MethodMetadata found = parent.getClearMethod();
 			if (found != null) {
-				return tagMethod(found, CustomDataPersistenceTags.CLEAR_METHOD);
+				return found;
 			}
 		}
 		if ("".equals(annotationValues.getClearMethod())) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(annotationValues.getClearMethod()), "clear", CustomDataPersistenceTags.CLEAR_METHOD);
+		return getDelegateMethod(new JavaSymbolName(annotationValues.getClearMethod()), "clear");
 	}
 
 	/**
@@ -843,23 +828,23 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (parent != null) {
 			MethodMetadata found = parent.getMergeMethod();
 			if (found != null) {
-				return tagMethod(found, CustomDataPersistenceTags.MERGE_METHOD);
+				return found;
 			}
 		}
 		if ("".equals(annotationValues.getMergeMethod())) {
 			return null;
 		}
-		return getDelegateMethod(new JavaSymbolName(annotationValues.getMergeMethod()), "merge", CustomDataPersistenceTags.MERGE_METHOD);
+		return getDelegateMethod(new JavaSymbolName(annotationValues.getMergeMethod()), "merge");
 	}
 	
-	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String entityManagerDelegate, Object tag) {
+	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String entityManagerDelegate) {
 		// Method definition to find or build
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
-			return tagMethod(userMethod, tag);
+			return userMethod;//tagMethod(userMethod, tag);
 		}
 		
 		// Create the method
@@ -908,7 +893,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return tagMethod(methodBuilder.build(), tag);
+		return methodBuilder.build();//tagMethod(methodBuilder.build(), tag);
 	}
 	
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations, boolean isPersistMethod) {
@@ -1002,7 +987,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return tagMethod(userMethod, CustomDataPersistenceTags.COUNT_ALL_METHOD);
+			return userMethod;
 		}
 		
 		// Create method
@@ -1022,7 +1007,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.COUNT_ALL_METHOD);
+		return methodBuilder.build();
 	}
 	
 	/**
@@ -1045,7 +1030,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return tagMethod(userMethod, CustomDataPersistenceTags.FIND_ALL_METHOD);
+			return userMethod;
 		}
 		
 		// Create method
@@ -1065,7 +1050,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.FIND_ALL_METHOD);
+		return methodBuilder.build();
 	}
 
 	/**
@@ -1089,7 +1074,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return tagMethod(userMethod, CustomDataPersistenceTags.FIND_METHOD);
+			return userMethod;
 		}
 		
 		// Create method
@@ -1111,7 +1096,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.FIND_METHOD);
+		return methodBuilder.build();
 	}
 
 	private InvocableMemberBodyBuilder getGaeFindMethodBody() {
@@ -1161,7 +1146,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return tagMethod(userMethod, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
+			return userMethod;
 		}
 		
 		// Create method
@@ -1181,7 +1166,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return tagMethod(methodBuilder.build(), CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
+		return methodBuilder.build();
 	}
 
 	private void addSuppressWarnings(List<AnnotationMetadataBuilder> annotations) {

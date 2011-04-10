@@ -68,9 +68,22 @@ public final class AnnotatedJavaType {
 		Assert.notNull(javaTypes, "Java types required");
 		List<AnnotatedJavaType> result = new ArrayList<AnnotatedJavaType>();
 		for (JavaType javaType : javaTypes) {
-			result.add(new AnnotatedJavaType(javaType, null));
+			result.add(convertFromJavaType(javaType));
 		}
 		return result;
+	}
+
+	/**
+	 * Converts a {@link JavaType} into an equivalent {@link AnnotatedJavaType}.
+	 * Note that each returned {@link AnnotatedJavaType}will have no annotation metadata, as the input {@link JavaType}
+	 * cannot store any such metadata.
+	 *
+	 * @param javaType to convert (required)
+	 * @return the equivalent {@link AnnotatedJavaType} (never returns null)
+	 */
+	public static AnnotatedJavaType convertFromJavaType(JavaType javaType) {
+		Assert.notNull(javaType, "Java types required");
+		return new AnnotatedJavaType(javaType, null);
 	}
 
 	/**
@@ -84,9 +97,21 @@ public final class AnnotatedJavaType {
 		Assert.notNull(annotatedJavaTypes, "Annotated Java types required");
 		List<JavaType> result = new ArrayList<JavaType>();
 		for (AnnotatedJavaType annotatedJavaType : annotatedJavaTypes) {
-			result.add(annotatedJavaType.getJavaType());
+			result.add(convertFromAnnotatedJavaType(annotatedJavaType));
 		}
 		return result;
+	}
+
+	/**
+	 * Converts a non-null {@link AnnotatedJavaType} into an equivalent {@link JavaType}.
+	 * Note the annotation metadata will be discarded, as it cannot be stored inside a {@link JavaType}.
+	 *
+	 * @param annotatedJavaType to convert (required)
+	 * @return the equivalent {@link AnnotatedJavaType}, but without any actual annotations (never returns null)
+	 */
+	public static JavaType convertFromAnnotatedJavaType(AnnotatedJavaType annotatedJavaType) {
+		Assert.notNull(annotatedJavaType, "Annotated Java types required");
+		return annotatedJavaType.getJavaType();
 	}
 
     public boolean isVarArgs() {
