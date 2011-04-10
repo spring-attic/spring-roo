@@ -62,6 +62,10 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		JavaType dodJavaType = new JavaType(annotationValues.getEntity().getFullyQualifiedTypeName() + "DataOnDemand");
 		String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dodJavaType, Path.SRC_TEST_JAVA);
 		DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
+
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey, metadataIdentificationString);
+
 		if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
 			return null;
 		}
@@ -81,12 +85,10 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.REMOVE_METHOD);
 		
 		boolean hasEmbeddedIdentifier = dataOnDemandMetadata.hasEmbeddedIdentifier();
-		
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey, metadataIdentificationString);
+
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
-				metadataDependencyRegistry.registerDependency(((ClassOrInterfaceTypeDetails) memberHoldingTypeDetails).getDeclaredByMetadataId(), metadataIdentificationString);
+				metadataDependencyRegistry.registerDependency(memberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 				break;
 			}
 		}

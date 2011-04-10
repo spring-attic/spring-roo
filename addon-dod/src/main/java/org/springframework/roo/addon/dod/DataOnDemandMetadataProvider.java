@@ -106,6 +106,9 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
+
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
 		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
@@ -118,9 +121,6 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = getLocatedMutators(memberDetails, metadataIdentificationString);
-		
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
 		// Get the embedded identifier metadata holder - may be null if no embedded identifier exists
 		EmbeddedIdentifierHolder embeddedIdentifierHolder = getEmbeddedIdentifierHolder(memberDetails, metadataIdentificationString);
