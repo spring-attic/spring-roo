@@ -12,6 +12,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.StringUtils;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -126,7 +127,7 @@ public class MethodTagger implements Tagger<MethodMetadata> {
 		}
 		String suffix = suffixPlural || suffixSingular ? getSuffix(memberHoldingTypeDetailsList, suffixSingular) : "";
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails && !Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
 				for (AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
 					if (annotationMetadata.getAnnotationType().equals(catalystAnnotationType)) {
 						AnnotationAttributeValue annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
@@ -145,7 +146,7 @@ public class MethodTagger implements Tagger<MethodMetadata> {
 	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular) {
 		String plural = "";
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails && !Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
 				if (singular) {
 					return memberHoldingTypeDetails.getName().getSimpleTypeName();
 				}
