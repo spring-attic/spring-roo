@@ -565,7 +565,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			} else if (javaTypePersistenceMd != null && javaTypePersistenceMd.isRooIdentifier()) {
 				continue;
 			} else {
-				throw new IllegalStateException("Unable to scaffold controller for type " + formBackingType.getFullyQualifiedTypeName() + ". The referenced type " + type.getFullyQualifiedTypeName() + " cannot be handled");
+				return methods;
+				/*
+				 * TODO: Previously the commented out exception was thrown, but this cause the Metadata not to be created, even though ->
+				 * TODO: <- a partial MD could be created. Stefan can you please verify that this is acceptable. -JT
+				 */
+				//throw new IllegalStateException("Unable to scaffold controller for type " + formBackingType.getFullyQualifiedTypeName() + ". The referenced type " + type.getFullyQualifiedTypeName() + " cannot be handled");
 			}
 
 			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + javaTypeMd.getPlural());
@@ -633,20 +638,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("uiModel"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		Iterator<Map.Entry<JavaSymbolName, DateTimeFormatDetails>> it = dateTypes.entrySet().iterator();
-		while (it.hasNext()) {
-			Entry<JavaSymbolName, DateTimeFormatDetails> entry = it.next();
+		for (Entry<JavaSymbolName, DateTimeFormatDetails> javaSymbolNameDateTimeFormatDetailsEntry : dateTypes.entrySet()) {
 			String pattern;
-			if (entry.getValue().pattern != null) {
-				pattern = "\"" + entry.getValue().pattern + "\"";
+			if (javaSymbolNameDateTimeFormatDetailsEntry.getValue().pattern != null) {
+				pattern = "\"" + javaSymbolNameDateTimeFormatDetailsEntry.getValue().pattern + "\"";
 			} else {
 				JavaType dateTimeFormat = new JavaType("org.joda.time.format.DateTimeFormat");
 				String dateTimeFormatSimple = dateTimeFormat.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 				JavaType localeContextHolder = new JavaType("org.springframework.context.i18n.LocaleContextHolder");
 				String localeContextHolderSimple = localeContextHolder.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-				pattern = dateTimeFormatSimple + ".patternForStyle(\"" + entry.getValue().style + "\", " + localeContextHolderSimple + ".getLocale())";
+				pattern = dateTimeFormatSimple + ".patternForStyle(\"" + javaSymbolNameDateTimeFormatDetailsEntry.getValue().style + "\", " + localeContextHolderSimple + ".getLocale())";
 			}
-			bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + pattern + ");");
+			bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName + "_" + javaSymbolNameDateTimeFormatDetailsEntry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + pattern + ");");
 		}
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, addDateTimeFormatPatterns, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);

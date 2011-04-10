@@ -117,6 +117,15 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<FieldMetadata> elegibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formbackingType, memberDetails, metadataIdentificationString);
 
+		/*
+		 * TODO: This was added to allow the creation of a partial MetadataItem. Stefan can you please verify that this is acceptable. -JT
+		 */
+		for (JavaTypeMetadataDetails javaTypeMetadataDetails : webMetadataService.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataIdentificationString).values()) {
+			if (javaTypeMetadataDetails.getPersistenceDetails() == null) {
+				return null;
+			}
+		}
+
 		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), webMetadataService.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataIdentificationString));
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
