@@ -424,6 +424,6 @@ public abstract class MemberFindingUtils {
 		if (memberHoldingTypeDetailsList.size() == 0) {
 			return null;
 		}
-		return memberHoldingTypeDetailsList.get(0);
+		return memberHoldingTypeDetailsList.get(memberHoldingTypeDetailsList.size() - 1);
 	}
 }
