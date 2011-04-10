@@ -57,6 +57,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		helperDotHelpHelp();
 	}
 
 	private void helperDotHelp() {

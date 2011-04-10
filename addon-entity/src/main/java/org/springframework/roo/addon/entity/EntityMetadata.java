@@ -141,8 +141,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getFindEntriesMethod());
 		
 		builder.putCustomData(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES, getDynamicFinders());
-		//builder.putCustomData(CustomDataPersistenceTags.PERSISTENT_TYPE, null);
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
@@ -357,7 +356,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		constructorBuilder.setModifier(Modifier.PUBLIC);
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
-		//constructorBuilder.putCustomData(CustomDataPersistenceTags.NO_ARG_CONSTRUCTOR, null);
 		return constructorBuilder.build();
 	}
 	
@@ -375,7 +373,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * 
 	 * @return the identifier (never returns null)
 	 */
-	private FieldMetadata getIdentifierField() {
+	public FieldMetadata getIdentifierField() {
 		if (parent != null) {
 			FieldMetadata idField = parent.getIdentifierField();
 			if (idField != null) {
@@ -491,7 +489,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType).build();
 	}
 	
-	private FieldMetadata getIdentifierField(List<FieldMetadata> identifierFields, JavaType identifierType) {
+	public FieldMetadata getIdentifierField(List<FieldMetadata> identifierFields, JavaType identifierType) {
 		Assert.isTrue(identifierFields.size() == 1, "More than one field was annotated with @" + identifierType.getSimpleTypeName() + " in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 		return new FieldMetadataBuilder(identifierFields.get(0)).build();
 	}
@@ -505,7 +503,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * 
 	 * @return the accessor (never returns null)
 	 */
-	private MethodMetadata getIdentifierAccessor() {
+	public MethodMetadata getIdentifierAccessor() {
 		if (parent != null) {
 			return parent.getIdentifierAccessor();
 		}
@@ -1201,24 +1199,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public String getEntityName() {
 		return annotationValues.getEntityName();
-	}
-	
-	private MethodMetadata tagMethod(MethodMetadata method, Object tag) {
-		if (method == null) {
-			return null;
-		}
-		MethodMetadataBuilder methodMetadataBuilder = new MethodMetadataBuilder(method);
-		methodMetadataBuilder.putCustomData(tag, null);
-		return methodMetadataBuilder.build();
-	}
-	
-	private FieldMetadata tagField(FieldMetadata field, Object tag) {
-		if (field == null) {
-			return null;
-		}
-		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(field);
-		fieldMetadataBuilder.putCustomData(tag, null);
-		return fieldMetadataBuilder.build();
 	}
 	
 	public String toString() {
