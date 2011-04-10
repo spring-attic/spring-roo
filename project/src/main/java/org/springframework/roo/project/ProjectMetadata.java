@@ -306,7 +306,22 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Determines whether the Google App Engine maven plugin exists in the pom.
+	 * Determines whether the GWT Maven plugin exists in the pom.
+	 * 
+	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
+	 */
+	public boolean isGwtEnabled() {
+		for (Plugin buildPlugin : buildPlugins) {
+			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	
+	/**
+	 * Determines whether the Google App Engine Maven plugin exists in the pom.
 	 * 
 	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
 	 */
@@ -320,7 +335,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Determines whether the DataNucleus maven plugin exists in the pom.
+	 * Determines whether the DataNucleus Maven plugin exists in the pom.
 	 * 
 	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
 	 */
@@ -334,7 +349,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Determines whether the VMforce maven dependency exists in the pom.
+	 * Determines whether the VMforce Maven dependency exists in the pom.
 	 * 
 	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
 	 */

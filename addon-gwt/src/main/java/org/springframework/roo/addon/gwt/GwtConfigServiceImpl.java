@@ -42,7 +42,6 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	private ComponentContext context;
-	private Boolean gwtProject = null;
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
@@ -50,7 +49,8 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 
 	// TODO: I think this still needs some work (why do I need to add custom xml manipulation logic here..?) - JT
 	public void updateConfiguration(boolean initialSetup) {
-		if (!isGwtProject() && !initialSetup) {
+		// if (!isGwtProject() && !initialSetup) {
+		if (!initialSetup) {
 			return;
 		}
 
@@ -85,27 +85,27 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		}
 	}
 
-	private boolean isGwtProject() {
-		if (gwtProject != null) {
-			return gwtProject;
-		}
-
-		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
-
-		Document pomDoc = getXmlDocument(pom);
-		Element pomRoot = (Element) pomDoc.getFirstChild();
-		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
-		gwtProject = false;
-		for (Element pluginElement : pluginElements) {
-			Plugin plugin = new Plugin(pluginElement);
-			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
-				gwtProject = true;
-				break;
-			}
-		}
-		return gwtProject;
-	}
+//	private boolean isGwtProject() {
+//		if (gwtProject != null) {
+//			return gwtProject;
+//		}
+//
+//		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+//		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
+//
+//		Document pomDoc = getXmlDocument(pom);
+//		Element pomRoot = (Element) pomDoc.getFirstChild();
+//		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
+//		gwtProject = false;
+//		for (Element pluginElement : pluginElements) {
+//			Plugin plugin = new Plugin(pluginElement);
+//			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
+//				gwtProject = true;
+//				break;
+//			}
+//		}
+//		return gwtProject;
+//	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {
 		for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {

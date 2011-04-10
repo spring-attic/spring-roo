@@ -8,7 +8,7 @@ import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.project.ProjectOperations;
 
 /**
- * Implemetation of {@link GwtFileListener).
+ * Implementation of {@link GwtFileListener).
  * 
  * @author Alan Stewart
  * @since 1.1.3
@@ -18,20 +18,13 @@ import org.springframework.roo.project.ProjectOperations;
 public class GwtFileListenerImpl implements GwtFileListener {
 	@Reference private GwtConfigService gwtConfigService;
 	@Reference private ProjectOperations projectOperations;
-	private Boolean lastGaeState = null;
 
 	public void onFileEvent(FileEvent fileEvent) {
-		if (!projectOperations.isProjectAvailable()) {
+		if (!projectOperations.isProjectAvailable() || !projectOperations.getProjectMetadata().isGaeEnabled()) {
 			return;
 		}
 
-		if (lastGaeState != null && projectOperations.getProjectMetadata().isGaeEnabled() == lastGaeState) {
-			return;
-		}
-		
-		lastGaeState = projectOperations.getProjectMetadata().isGaeEnabled();
-
-		if (fileEvent.getOperation().equals(FileOperation.UPDATED) && fileEvent.getFileDetails().getFile().getName().equals("pom.xml")) {
+		if (fileEvent.getOperation().equals(FileOperation.UPDATED) && fileEvent.getFileDetails().getFile().getName().equals("pom.xml") && projectOperations.getProjectMetadata().isGwtEnabled()) {
 			gwtConfigService.updateConfiguration(false);
 		}
 	}

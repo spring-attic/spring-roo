@@ -75,7 +75,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = srcRoot.getRelativeSegment(fd.getCanonicalPath());
-			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
+			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
 			JavaType javaType = new JavaType(fullPath);
 			String id = GwtMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 			metadataService.get(id);
