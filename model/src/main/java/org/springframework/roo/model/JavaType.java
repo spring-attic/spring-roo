@@ -269,9 +269,8 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			// Handle case where the package name after the last period starts with a capital letter.
 			if (offset > -1 && Character.isUpperCase(enclosingTypeFullyQualifiedTypeName.charAt(offset + 1))) {
 				return new JavaPackage(enclosingTypeFullyQualifiedTypeName);
-			} else {
-				return enclosingType.getPackage();
 			}
+			return enclosingType.getPackage();
 		}
 		
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");

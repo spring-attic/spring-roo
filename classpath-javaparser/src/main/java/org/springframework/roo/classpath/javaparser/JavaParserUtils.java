@@ -429,9 +429,8 @@ public class JavaParserUtils  {
 			QualifiedNameExpr qne = (QualifiedNameExpr) nameExpr;
 			if (StringUtils.hasText(qne.getQualifier().getName())) {
 				return new ClassOrInterfaceType(qne.getQualifier().getName() + "." + qne.getName());
-			} else {
-				return new ClassOrInterfaceType(qne.getName());
 			}
+			return new ClassOrInterfaceType(qne.getName());
 		}
 		return new ClassOrInterfaceType(nameExpr.getName());
 	}
@@ -701,9 +700,8 @@ public class JavaParserUtils  {
 
 		if (useSimpleTypeName) {
 			return new NameExpr(typeToImport.getSimpleTypeName());
-		} else {
-			return new QualifiedNameExpr(new NameExpr(typeToImport.getPackage().getFullyQualifiedPackageName()), typeToImport.getSimpleTypeName());
 		}
+		return new QualifiedNameExpr(new NameExpr(typeToImport.getPackage().getFullyQualifiedPackageName()), typeToImport.getSimpleTypeName());
 	}
 
 	/**

@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.scanner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.roo.classpath.customdata.tagkeys.TagKey;
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -8,7 +11,6 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -19,9 +21,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.CustomDataBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Builder for {@link MemberDetails}.
  *
@@ -30,9 +29,7 @@ import java.util.List;
  * @author James Tyrrell
  * @since 1.1.3
  */
-
 public class MemberDetailsBuilder {
-
 	private List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = new ArrayList<MemberHoldingTypeDetails>();
 	private MemberDetails originalMemberDetails;
 	private boolean changed = false;
@@ -59,7 +56,7 @@ public class MemberDetailsBuilder {
 			CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 			customDataBuilder.put(key, value);
 			doModification((ConstructorMetadata) toModify, customDataBuilder.build());
-		}  else if (toModify instanceof MemberHoldingTypeDetails) {
+		} else if (toModify instanceof MemberHoldingTypeDetails) {
 			CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 			customDataBuilder.put(key, value);
 			doModification((MemberHoldingTypeDetails) toModify, customDataBuilder.build());
@@ -174,7 +171,7 @@ public class MemberDetailsBuilder {
 		}
 
 		public void addDataToField(FieldMetadata replacement, CustomData customData) {
-			//If the MIDs don't match then the proposed can't be a replacement
+			// If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
 			}
@@ -189,7 +186,7 @@ public class MemberDetailsBuilder {
 		}
 
 		public void addDataToMethod(MethodMetadata replacement, CustomData customData) {
-			//If the MIDs don't match then the proposed can't be a replacement
+			// If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
 			}
@@ -206,7 +203,7 @@ public class MemberDetailsBuilder {
 		}
 
 		public void addDataToConstructor(ConstructorMetadata replacement, CustomData customData) {
-			//If the MIDs don't match then the proposed can't be a replacement
+			// If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
 			}

@@ -1,6 +1,5 @@
 package org.springframework.roo.shell;
 
-
 /*
  * NaturalOrderComparator.java -- Perform natural order comparisons of strings in Java.
  * Copyright (C) 2003 by Pierre-Luc Paour <natorder@paour.com>
@@ -24,7 +23,6 @@ package org.springframework.roo.shell;
  * 3. This notice may not be removed or altered from any source distribution.
  *
  */
-
 import java.util.Comparator;
 
 public class NaturalOrderComparator<E> implements Comparator<E> {
@@ -62,7 +60,6 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 	}
 
 	public int compare(Object o1, Object o2) {
-
 		if (o1 == null && o2 == null) {
 			return 1;
 		}
@@ -140,9 +137,8 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 	static char charAt(String s, int i) {
 		if (i >= s.length()) {
 			return 0;
-		} else {
-			return s.charAt(i);
 		}
+		return s.charAt(i);
 	}
 
 	public static boolean isSpace(char c) {

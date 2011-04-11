@@ -176,24 +176,25 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			parseResult = getParser().parse(line);
 			if (parseResult == null) {
 				return false;
-			} else {
-				setShellStatus(Status.EXECUTING);
-				Object result = executionStrategy.execute(parseResult);
-				setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
-				if (result != null) {
-					if (result instanceof ExitShellRequest) {
-						exitShellRequest = (ExitShellRequest) result;
-						// Give ProcessManager a chance to close down its threads before the overall OSGi framework is terminated (ROO-1938)
-						executionStrategy.terminate();
-					} else if (result instanceof Iterable<?>) {
-						for (Object o : (Iterable<?>) result) {
-							logger.info(o.toString());
-						}
-					} else {
-						logger.info(result.toString());
+			}
+			
+			setShellStatus(Status.EXECUTING);
+			Object result = executionStrategy.execute(parseResult);
+			setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
+			if (result != null) {
+				if (result instanceof ExitShellRequest) {
+					exitShellRequest = (ExitShellRequest) result;
+					// Give ProcessManager a chance to close down its threads before the overall OSGi framework is terminated (ROO-1938)
+					executionStrategy.terminate();
+				} else if (result instanceof Iterable<?>) {
+					for (Object o : (Iterable<?>) result) {
+						logger.info(o.toString());
 					}
+				} else {
+					logger.info(result.toString());
 				}
 			}
+			
 			logCommandIfRequired(line, true);
 			setShellStatus(Status.EXECUTION_SUCCESS, line, parseResult);
 			return true;

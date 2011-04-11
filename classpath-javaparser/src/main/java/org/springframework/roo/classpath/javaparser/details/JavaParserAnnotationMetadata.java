@@ -313,7 +313,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 		annotations.add(annotationExpression);
 
 		// Add member-value pairs to our AnnotationExpr
-		if (memberValuePairs != null && memberValuePairs.size() > 0) {
+		if (memberValuePairs.size() > 0) {
 
 			// Have to check here for cases where we need to change an existing MarkerAnnotationExpr to a NormalAnnotationExpr or SingleMemberAnnotationExpr
 			if (annotationExpression instanceof MarkerAnnotationExpr) {
@@ -321,7 +321,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 
 				annotations.remove(mae);
 
-				if (memberValuePairs != null && memberValuePairs.size() == 1 && (memberValuePairs.get(0).getName() == null || "value".equals(memberValuePairs.get(0).getName()))) {
+				if (memberValuePairs.size() == 1 && (memberValuePairs.get(0).getName() == null || "value".equals(memberValuePairs.get(0).getName()))) {
 					Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
 					annotationExpression = new SingleMemberAnnotationExpr(nameToUse, toUse);
 					annotations.add(annotationExpression);
@@ -339,13 +339,13 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 					Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
 					smae.setMemberValue(toUse);
 					return;
-				} else {
-					// There is > 1 expression, or they have provided some sort of non-default value, so it's time to upgrade the expression
-					// (whilst retaining any potentially existing expression values)
-					Expression existingValue = smae.getMemberValue();
-					annotationExpression = new NormalAnnotationExpr(smae.getName(), new ArrayList<MemberValuePair>());
-					((NormalAnnotationExpr) annotationExpression).getPairs().add(new MemberValuePair("value", existingValue));
 				}
+				
+				// There is > 1 expression, or they have provided some sort of non-default value, so it's time to upgrade the expression
+				// (whilst retaining any potentially existing expression values)
+				Expression existingValue = smae.getMemberValue();
+				annotationExpression = new NormalAnnotationExpr(smae.getName(), new ArrayList<MemberValuePair>());
+				((NormalAnnotationExpr) annotationExpression).getPairs().add(new MemberValuePair("value", existingValue));
 			}
 			Assert.isInstanceOf(NormalAnnotationExpr.class, annotationExpression, "Attempting to add >1 annotation member-value pair requires an existing normal annotation expression");
 			List<MemberValuePair> annotationPairs = ((NormalAnnotationExpr) annotationExpression).getPairs();

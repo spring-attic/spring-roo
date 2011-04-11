@@ -190,9 +190,8 @@ public class GitOperationsImpl implements GitOperations {
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
-		} else {
-			throw new IllegalStateException("Git support not available");
 		}
+		throw new IllegalStateException("Git support not available");
 	}
 
 	private boolean hasDotGit() {

@@ -118,9 +118,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				}
 			}
 
-			if (order.isEmpty()) {
-				result = null;
-			} else {
+			if (!order.isEmpty()) {
 				int index = 0;
 				int size = map.keySet().size();
 				for (String fieldName : order) {

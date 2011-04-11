@@ -161,9 +161,8 @@ public class SimpleParser implements Parser {
 					if (requiredType.isPrimitive()) {
 						logger.warning("Nulls cannot be presented to primitive type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
 						return null;
-					} else {
-						arguments.add(null);
 					}
+					arguments.add(null);
 					continue;
 				}
 
@@ -186,10 +185,10 @@ public class SimpleParser implements Parser {
 						throw new IllegalStateException("TODO: Add basic type conversion");
 						// SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
 						// result = simpleTypeConverter.convertIfNecessary(value, requiredType, mp);
-					} else {
-						// Use the converter
-						result = c.convertFromText(value, requiredType, cliOption.optionContext());
 					}
+					
+					// Use the converter
+					result = c.convertFromText(value, requiredType, cliOption.optionContext());
 					arguments.add(result);
 				} catch (RuntimeException e) {
 					logger.warning("Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
@@ -337,7 +336,6 @@ public class SimpleParser implements Parser {
 							// This is the first match, so ensure the intended match really represents the start of a command and not a later word within it
 							if (lastCommandWordUsed == 0 && candidate > 0) {
 								// This is not a valid match
-								bufferToReturn = null;
 								break next_buffer_loop;
 							}
 						}
@@ -733,9 +731,8 @@ public class SimpleParser implements Parser {
 								// Values presented from the last space onwards
 								if (translated.endsWith(" ")) {
 									return translated.lastIndexOf(" ") + 1;
-								} else {
-									return translated.trim().lastIndexOf(" ");
 								}
+								return translated.trim().lastIndexOf(" ");
 							}
 							return 0;
 						}

@@ -520,10 +520,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
 					return method;
-				} else {
-					// Method is not public so make the required accessor name unique 
-					requiredAccessorName += "_";
 				}
+				
+				// Method is not public so make the required accessor name unique 
+				requiredAccessorName += "_";
 			}
 		}
 
@@ -566,10 +566,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
 					return method;
-				} else {
-					// Method is not public so make the required mutator name unique 
-					requiredMutatorName += "_";
 				}
+				
+				// Method is not public so make the required mutator name unique 
+				requiredMutatorName += "_";
 			}
 		}
 		
@@ -689,10 +689,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
 					return method;
-				} else {
-					// Method is not public so make the required accessor name unique 
-					requiredAccessorName += "_";
 				}
+				
+				// Method is not public so make the required accessor name unique 
+				requiredAccessorName += "_";
 			}
 		}
 		
@@ -740,10 +740,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
 					return method;
-				} else {
-					// Method is not public so make the required mutator name unique 
-					requiredMutatorName += "_";
 				}
+				
+				// Method is not public so make the required mutator name unique 
+				requiredMutatorName += "_";
 			}
 		}
 		
