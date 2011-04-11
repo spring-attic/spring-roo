@@ -1,7 +1,9 @@
 package org.springframework.roo.addon.tostring;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -44,7 +46,11 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(ToStringMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
 
-		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
+		SortedSet<MethodMetadata> locatedAccessors = new TreeSet<MethodMetadata>(new Comparator<MethodMetadata>() {
+			public int compare(MethodMetadata l, MethodMetadata r) {
+				return l.getMethodName().compareTo(r.getMethodName());
+			}
+		});
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			if (BeanInfoUtils.isAccessorMethod(method)) {
 				locatedAccessors.add(method);
@@ -52,8 +58,8 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
 		}
-
-		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, locatedAccessors);
+		
+		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, new LinkedList<MethodMetadata>(locatedAccessors));
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
