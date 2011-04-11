@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.2.RELEASE [rev 6fd10ea].</para>
+    <para>This appendix was automatically built from Roo 1.1.3.RELEASE [rev 68e9162].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -113,6 +113,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--communityOnly</term>
+                    <listitem>
+                        <para>Only display community provided add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--compatibleOnly</term>
                     <listitem>
                         <para>Only display compatible add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
@@ -172,6 +178,12 @@
                     <term>--compatibleOnly</term>
                     <listitem>
                         <para>Only display compatible add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--communityOnly</term>
+                    <listitem>
+                        <para>Only display community provided add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -391,7 +403,7 @@
         <para>Controller Commands are contained in org.springframework.roo.addon.web.mvc.controller.ControllerCommands.</para>
         <section xml:id="command-index-controller-all">
             <title>controller all</title>
-            <para>Scaffold a controller for all entities without an existing controller</para>
+            <para>Scaffold controllers for all project entities without an existing controller</para>
             <programlisting><![CDATA[controller all --package]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -417,6 +429,50 @@
                     <term>--entity</term>
                     <listitem>
                         <para>The name of the entity object which the controller exposes to the web tier; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--disallowedOperations</term>
+                    <listitem>
+                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-all">
+            <title>web mvc all</title>
+            <para>Scaffold Spring MVC controllers for all project entities without an existing controller</para>
+            <programlisting><![CDATA[web mvc all --package]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which new controllers will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-scaffold">
+            <title>web mvc scaffold</title>
+            <para>Create a new scaffold Controller (ie where Roo maintains CRUD functionality automatically)</para>
+            <programlisting><![CDATA[web mvc scaffold --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--backingType</term>
+                    <listitem>
+                        <para>The name of the form backing type which the controller exposes to the web tier; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -604,6 +660,35 @@
             </variablelist>
         </section>
     </section>
+    <section xml:id="command-index-data-on-demand-commands">
+        <title>Data On Demand Commands</title>
+        <para>Data On Demand Commands are contained in org.springframework.roo.addon.dod.DataOnDemandCommands.</para>
+        <section xml:id="command-index-dod">
+            <title>dod</title>
+            <para>Creates a new data on demand for the specified entity</para>
+            <programlisting><![CDATA[dod]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The entity which this data on demand class will create and modify as required; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand'); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
     <section xml:id="command-index-dbre-commands">
         <title>Dbre Commands</title>
         <para>Dbre Commands are contained in org.springframework.roo.addon.dbre.DbreCommands.</para>
@@ -671,6 +756,12 @@
                     <term>--excludeTables</term>
                     <listitem>
                         <para>The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--includeNonPortableAttributes</term>
+                    <listitem>
+                        <para>Include non-portable JPA @Column attributes such as 'columnDefinition'; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -884,31 +975,6 @@
     <section xml:id="command-index-entity-commands">
         <title>Entity Commands</title>
         <para>Entity Commands are contained in org.springframework.roo.addon.entity.EntityCommands.</para>
-        <section xml:id="command-index-dod">
-            <title>dod</title>
-            <para>Creates a new data on demand for the specified entity</para>
-            <programlisting><![CDATA[dod]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--entity</term>
-                    <listitem>
-                        <para>The entity which this data on demand class will create and modify as required; default if option not present: '*'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand'); no default value</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--permitReservedWords</term>
-                    <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
         <section xml:id="command-index-embeddable">
             <title>embeddable</title>
             <para>Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA</para>
@@ -1041,23 +1107,10 @@
                         <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-test-integration">
-            <title>test integration</title>
-            <para>Creates a new integration test for the specified entity</para>
-            <programlisting><![CDATA[test integration]]></programlisting>
-            <variablelist>
                 <varlistentry>
-                    <term>--entity</term>
+                    <term>--entityName</term>
                     <listitem>
-                        <para>The name of the entity to create an integration test for; default if option not present: '*'</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--permitReservedWords</term>
-                    <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                        <para>The name used to refer to the entity in queries; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2156,8 +2209,14 @@
         <para>Gwt Commands are contained in org.springframework.roo.addon.gwt.GwtCommands.</para>
         <section xml:id="command-index-gwt-setup">
             <title>gwt setup</title>
-            <para>Install Google Web Toolkit (GWT) into your project</para>
+            <para>Install Google Web Toolkit (GWT) into your project - deprecated, use 'web gwt setup' instead</para>
             <programlisting><![CDATA[gwt setup]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-web-gwt-setup">
+            <title>web gwt setup</title>
+            <para>Install Google Web Toolkit (GWT) into your project</para>
+            <programlisting><![CDATA[web gwt setup]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
     </section>
@@ -2181,6 +2240,25 @@
     <section xml:id="command-index-integration-test-commands">
         <title>Integration Test Commands</title>
         <para>Integration Test Commands are contained in org.springframework.roo.addon.test.IntegrationTestCommands.</para>
+        <section xml:id="command-index-test-integration">
+            <title>test integration</title>
+            <para>Creates a new integration test for the specified entity</para>
+            <programlisting><![CDATA[test integration]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The name of the entity to create an integration test for; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-test-mock">
             <title>test mock</title>
             <para>Creates a mock test for the specified entity</para>
@@ -2525,6 +2603,25 @@
                 </varlistentry>
             </variablelist>
         </section>
+        <section xml:id="command-index-web-mvc-controller">
+            <title>web mvc controller</title>
+            <para>Create a new manual Controller (ie where you write the methods)</para>
+            <programlisting><![CDATA[web mvc controller --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--preferredMapping</term>
+                    <listitem>
+                        <para>Indicates a specific request mapping path for this controller (eg /foo/); no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-web-mvc-install-language">
             <title>web mvc install language</title>
             <para>Install new internationalization bundle for MVC scaffolded UI.</para>
@@ -2542,6 +2639,50 @@
             <title>web mvc install view</title>
             <para>Create a new static view.</para>
             <programlisting><![CDATA[web mvc install view --path --viewName --title]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>The path the static view to create in (required, ie '/foo/blah'); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The view name the mapping this view should adopt (required, ie 'index'); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--title</term>
+                    <listitem>
+                        <para>The title of the view; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-language">
+            <title>web mvc language</title>
+            <para>Install new internationalization bundle for MVC scaffolded UI.</para>
+            <programlisting><![CDATA[web mvc language --code]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--code</term>
+                    <listitem>
+                        <para>The language code for the desired bundle; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-setup">
+            <title>web mvc setup</title>
+            <para>Setup a basic project structure for a Spring MVC / JSP application</para>
+            <programlisting><![CDATA[web mvc setup]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-web-mvc-view">
+            <title>web mvc view</title>
+            <para>Create a new static view.</para>
+            <programlisting><![CDATA[web mvc view --path --viewName --title]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--path</term>

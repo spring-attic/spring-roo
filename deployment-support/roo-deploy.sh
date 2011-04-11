@@ -68,7 +68,7 @@ quick_zip_gpg_tests() {
 
     # Test the hash worked OK
     # (for script testing purposes only:) sed -i 's/0/1/g' $ASSEMBLY_SHA
-    sha1sum --check --status $ASSEMBLY_SHA
+    sha1sum --status --check $ASSEMBLY_SHA
     if [[ ! "$?" = "0" ]]; then
         l_error "sha1sum verification of $ASSEMBLY_SHA failed" >&2; exit 1;
     fi
