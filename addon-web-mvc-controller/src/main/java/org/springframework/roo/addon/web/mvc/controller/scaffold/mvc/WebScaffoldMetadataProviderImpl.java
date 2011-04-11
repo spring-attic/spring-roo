@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold.mvc;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -22,11 +23,12 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -43,15 +45,31 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true) 
 @Service 
-public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataProvider implements WebScaffoldMetadataProvider {
+public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements WebScaffoldMetadataProvider {
 	private static final Logger logger = HandlerUtils.getLogger(WebJsonMetadataProviderImpl.class);
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
 	@Reference private WebMetadataService webMetadataService;
+	private Map<JavaType, String> entityToDodMidMap = new HashMap<JavaType, String>();
+	private Map<String, JavaType> dodMidToEntityMap = new HashMap<String, JavaType>();
 
 	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
+	}
+	
+	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
+		JavaType governor = itdTypeDetails.getName();
+		String localMid = entityToDodMidMap.get(governor);
+		if (localMid == null) {
+			// No DOD is not interested in this JavaType, so let's move on
+			return null;
+		}
+		
+		// Because localMid is not null, we know that it is a 
+		return localMid;
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -60,6 +78,15 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		if (!annotationValues.isAnnotationFound() || annotationValues.getFormBackingObject() == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
 			return null;
 		}
+		
+		// Remember that this entity JavaType matches up with this DOD's metadata identification string
+		// Start by clearing the previous association
+		JavaType oldEntity = dodMidToEntityMap.get(metadataIdentificationString);
+		if (oldEntity != null) {
+			entityToDodMidMap.remove(oldEntity);
+		}
+		entityToDodMidMap.put(annotationValues.getFormBackingObject(), metadataIdentificationString);
+		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getFormBackingObject());
 		
 		// Lookup the form backing object's metadata
 		JavaType formBackingType = annotationValues.getFormBackingObject();
@@ -73,7 +100,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		
 		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, CustomDataPersistenceTags.PERSISTENT_TYPE);
 		if (memberHoldingTypeDetails == null) {
-			logger.warning("Aborting - the form backing object for Roo MVC scaffolded controllers need to be @RooEntity persistent types at this time");
+//			logger.warning("Aborting - the form backing object for Roo MVC scaffolded controllers need to be @RooEntity persistent types at this time");
 			return null;
 		}
 		

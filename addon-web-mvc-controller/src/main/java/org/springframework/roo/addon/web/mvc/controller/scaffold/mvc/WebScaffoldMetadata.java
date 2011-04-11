@@ -4,7 +4,6 @@ import java.beans.Introspector;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -565,12 +564,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			} else if (javaTypePersistenceMd != null && javaTypePersistenceMd.isRooIdentifier()) {
 				continue;
 			} else {
-				return methods;
-				/*
-				 * TODO: Previously the commented out exception was thrown, but this cause the Metadata not to be created, even though ->
-				 * TODO: <- a partial MD could be created. Stefan can you please verify that this is acceptable. -JT
-				 */
-				//throw new IllegalStateException("Unable to scaffold controller for type " + formBackingType.getFullyQualifiedTypeName() + ". The referenced type " + type.getFullyQualifiedTypeName() + " cannot be handled");
+				
+				continue;
+//				throw new IllegalStateException("Unable to scaffold controller for type " + formBackingType.getFullyQualifiedTypeName() + ". The referenced type " + type.getFullyQualifiedTypeName() + " cannot be handled");
 			}
 
 			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + javaTypeMd.getPlural());

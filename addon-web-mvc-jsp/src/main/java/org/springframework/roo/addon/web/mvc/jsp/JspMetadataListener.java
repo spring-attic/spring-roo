@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -22,13 +23,11 @@ import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServi
 import org.springframework.roo.addon.web.mvc.controller.scaffold.mvc.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -62,13 +61,11 @@ import org.w3c.dom.Document;
 public final class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
 	@Reference private FileManager fileManager;
 	@Reference private JspOperations jspOperations;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MenuOperations menuOperations;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private WebMetadataService webMetadataService;
 
@@ -117,23 +114,23 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<FieldMetadata> elegibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formbackingType, memberDetails, metadataIdentificationString);
 
-		/*
-		 * TODO: This was added to allow the creation of a partial MetadataItem. Stefan can you please verify that this is acceptable. -JT
-		 */
-		for (JavaTypeMetadataDetails javaTypeMetadataDetails : webMetadataService.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataIdentificationString).values()) {
-			if (javaTypeMetadataDetails.getPersistenceDetails() == null) {
-				return null;
-			}
+		SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = webMetadataService.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataIdentificationString);
+		
+		JavaTypeMetadataDetails formbackingTypeMetadata = relatedTypeMd.get(formbackingType);
+		Assert.notNull(formbackingTypeMetadata, "Form backing type metadata required");
+		JavaTypePersistenceMetadataDetails formbackingTypePersistenceMetadata = formbackingTypeMetadata.getPersistenceDetails();
+		if (formbackingTypePersistenceMetadata == null) {
+			return null;
 		}
 
-		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), webMetadataService.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataIdentificationString));
+		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), relatedTypeMd);
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 
 		if (controllerPath.startsWith("/")) {
 			controllerPath = controllerPath.substring(1);
 		}
-
+		
 		// Make the holding directory for this controller
 		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + controllerPath);
 		if (!fileManager.exists(destinationDirectory)) {

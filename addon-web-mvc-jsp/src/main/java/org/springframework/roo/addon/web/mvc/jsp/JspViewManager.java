@@ -325,6 +325,8 @@ public class JspViewManager {
 				// if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
 				if (typePersistenceMetadataHolder != null) {
 					fieldElement = new XmlElementBuilder("field:simple", document).addAttribute("messageCode", "entity_reference_not_managed").addAttribute("messageCodeAttribute", new JavaSymbolName(fieldType.getSimpleTypeName()).getReadableSymbolName()).build();
+				} else {
+					continue;
 				}
 			} else if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_ONE_FIELD) || field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD) || field.getCustomData().keySet().contains(CustomDataPersistenceTags.ONE_TO_ONE_FIELD)) {
 				JavaType referenceType = getJavaTypeForField(field);
