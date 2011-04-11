@@ -28,7 +28,7 @@ public class JLineLogHandler extends Handler {
 	private ShellPromptAccessor shellPromptAccessor;
 	private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
 	private static String lastMessage;
-	private static boolean includeThreadName = true;
+	private static boolean includeThreadName = false;
 	private boolean ansiSupported;
 	private String userInterfaceThreadName;
 	private static boolean suppressDuplicateMessages = true;
