@@ -62,9 +62,9 @@ if [ "$cygwin" = "true" ]; then
 fi
 
 # make sure to disable the flash message feature for the default OSX terminal, we recommend to use a ANSI compliant terminal such as iTerm if flash message support is desired
-FLASH_DISABLED=false;
+APPLE_TERMINAL=false;
 if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
-	FLASH_DISABLED=true
+	APPLE_TERMINAL=true
 fi
 
 # Hop, hop, hop...
