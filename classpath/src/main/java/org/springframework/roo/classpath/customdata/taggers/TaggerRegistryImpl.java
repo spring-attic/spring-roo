@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.customdata.taggers;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.support.util.Assert;
 
 import java.util.ArrayList;

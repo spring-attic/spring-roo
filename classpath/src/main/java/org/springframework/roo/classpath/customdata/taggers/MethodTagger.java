@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
 import org.jvnet.inflector.Noun;
-import org.springframework.roo.classpath.customdata.tagkeys.TagKey;
+import org.springframework.roo.model.TagKey;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;

@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.customdata;
 
 import org.springframework.roo.classpath.customdata.tagkeys.ConstructorMetadataTagKey;
 import org.springframework.roo.classpath.customdata.tagkeys.FieldMetadataTagKey;
+import org.springframework.roo.classpath.customdata.tagkeys.ItdTypeDetailsTagKey;
 import org.springframework.roo.classpath.customdata.tagkeys.MemberHoldingTypeDetailsTagKey;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataTagKey;
 import org.springframework.roo.model.CustomData;
@@ -17,8 +18,8 @@ public class CustomDataPersistenceTags {
 	
 	//TODO: Once TagKey builders have been created they should be used here -JT
 
-	public static final MemberHoldingTypeDetailsTagKey IDENTIFIER_TYPE = new MemberHoldingTypeDetailsTagKey("IDENTIFIER_TYPE");
-	public static final MemberHoldingTypeDetailsTagKey PERSISTENT_TYPE = new MemberHoldingTypeDetailsTagKey("PERSISTENT_TYPE");
+	public static final ItdTypeDetailsTagKey IDENTIFIER_TYPE = new ItdTypeDetailsTagKey("IDENTIFIER_TYPE");
+	public static final ItdTypeDetailsTagKey PERSISTENT_TYPE = new ItdTypeDetailsTagKey("PERSISTENT_TYPE");
 
 	public static final ConstructorMetadataTagKey NO_ARG_CONSTRUCTOR = new ConstructorMetadataTagKey("NO_ARG_CONSTRUCTOR");
 
@@ -51,5 +52,5 @@ public class CustomDataPersistenceTags {
 	public static final MethodMetadataTagKey FIND_ENTRIES_METHOD = new MethodMetadataTagKey("FIND_ENTRIES_METHOD");
 
 	//Dynamic finder method names; CustomData value expected to be a java.util.List<String> of finder names
-	public static final MethodMetadataTagKey DYNAMIC_FINDER_NAMES = new MethodMetadataTagKey("DYNAMIC_FINDER_NAMES");
+	public static final ItdTypeDetailsTagKey DYNAMIC_FINDER_NAMES = new ItdTypeDetailsTagKey("DYNAMIC_FINDER_NAMES");
 }

@@ -21,7 +21,7 @@ public class MemberDetailsImpl implements MemberDetails {
 	 * 
 	 * @param details the member holders that should be stored in this instance (cannot be null or empty)
 	 */
-	public MemberDetailsImpl(List<MemberHoldingTypeDetails> details) {
+	MemberDetailsImpl(List<MemberHoldingTypeDetails> details) {
 		Assert.notEmpty(details, "Member holding details required");
 		this.details = details;
 	}

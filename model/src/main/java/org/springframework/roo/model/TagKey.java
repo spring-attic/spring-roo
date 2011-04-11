@@ -1,4 +1,4 @@
-package org.springframework.roo.classpath.customdata.tagkeys;
+package org.springframework.roo.model;
 
 /**
  * A type safe type that provides a key for tagging and validating

@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.customdata.taggers.TaggerRegistry;
 import org.springframework.roo.classpath.customdata.taggers.TypeTagger;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 
@@ -52,7 +53,7 @@ public class GlobalMemberDetailsDecorator implements MemberDetailsDecorator {
 		}
 
 		for (TypeTagger typeTagger : taggerRegistry.getTypeTaggers()) {
-			for (MemberHoldingTypeDetails typeDetails : typeTagger.matches(memberDetails.getDetails())) {
+			for (ItdTypeDetails typeDetails : typeTagger.matches(memberDetails.getDetails())) {
 				memberDetailsBuilder.tag(typeDetails, typeTagger.getTagKey(), typeTagger.getTagValue(typeDetails));
 			}
 		}

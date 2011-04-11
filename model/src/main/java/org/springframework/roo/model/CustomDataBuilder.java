@@ -16,43 +16,43 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public final class CustomDataBuilder implements Builder<CustomData> {
-	private Map<Object, Object> customData = new HashMap<Object, Object>();
+public final class CustomDataBuilder<T extends CustomDataAccessor> implements Builder<CustomData<T>> {
+	private Map<TagKey<T>, Object> customData = new HashMap<TagKey<T>, Object>();
 	
 	public CustomDataBuilder() {}
 	
-	public CustomDataBuilder(CustomData existing) {
+	public CustomDataBuilder(CustomData<T> existing) {
 		append(existing);
 	}
 	
-	public CustomData build() {
-		return new CustomDataImpl(customData);
+	public CustomData<T> build() {
+		return new CustomDataImpl<T>(customData);
 	}
 	
 	public void clear() {
 		customData.clear();
 	}
 
-	public void append(CustomData existing) {
+	public void append(CustomData<T> existing) {
 		Assert.notNull(existing, "Existing custom data required");
-		for (Object key : existing.keySet()) {
+		for (TagKey<T> key : existing) {
 			customData.put(key, existing.get(key));
 		}
 	}
 	
-	public Object get(Object key) {
+	public Object get(TagKey<T> key) {
 		return customData.get(key);
 	}
 
-	public Set<Object> keySet() {
+	public Set<TagKey<T>> keySet() {
 		return customData.keySet();
 	}
 
-	public Object put(Object key, Object value) {
+	public Object put(TagKey<T> key, Object value) {
 		return customData.put(key, value);
 	}
 
-	public Object remove(Object key) {
+	public Object remove(TagKey<T> key) {
 		return customData.remove(key);
 	}
 

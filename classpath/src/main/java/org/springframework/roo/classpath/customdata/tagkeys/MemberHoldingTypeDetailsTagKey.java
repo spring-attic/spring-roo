@@ -1,9 +1,11 @@
 package org.springframework.roo.classpath.customdata.tagkeys;
 
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.model.TagKey;
 
 /**
- * {@link MemberHoldingTypeDetails} specific implementation of {@link TagKey}.
+ * {@link MemberHoldingTypeDetails} specific implementation of {@link org.springframework.roo.model.TagKey}.
+ * TODO: Create MemberHoldingTypeDetailsTagKeyBuilder
  *
  * @author James Tyrrell
  * @since 1.1.3

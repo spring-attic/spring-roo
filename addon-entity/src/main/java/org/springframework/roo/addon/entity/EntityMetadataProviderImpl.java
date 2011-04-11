@@ -20,6 +20,7 @@ import org.springframework.roo.classpath.customdata.taggers.MethodTagger;
 import org.springframework.roo.classpath.customdata.taggers.TaggerRegistry;
 import org.springframework.roo.classpath.customdata.taggers.TypeTagger;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -49,7 +50,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		helperDotHelp();
+		addTaggers();
 	}
 	
 	protected void deactivate(ComponentContext context) {
@@ -57,10 +58,10 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		helperDotHelpHelp();
+		removeTaggers();
 	}
 
-	private void helperDotHelp() {
+	private void addTaggers() {
 		taggerRegistry.registerTagger(getClass(), new TypeTagger(CustomDataPersistenceTags.PERSISTENT_TYPE, "org.springframework.roo.addon.entity.EntityMetadata"));
 		taggerRegistry.registerTagger(getClass(), new TypeTagger(CustomDataPersistenceTags.IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"));
 
@@ -108,7 +109,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.COLUMN_FIELD, getAnnotationMetadataList("javax.persistence.Column")));
 	}
 
-	private void helperDotHelpHelp() {
+	private void removeTaggers() {
 		taggerRegistry.unregisterTaggers(getClass());
 	}
 

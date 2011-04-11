@@ -1,6 +1,6 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import org.springframework.roo.classpath.customdata.tagkeys.TagKey;
+import org.springframework.roo.model.TagKey;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;

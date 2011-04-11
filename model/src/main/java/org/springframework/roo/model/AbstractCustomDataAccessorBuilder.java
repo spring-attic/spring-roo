@@ -9,24 +9,24 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAccessor> implements Builder<T> {
-	private CustomDataBuilder customData = new CustomDataBuilder();
+	private CustomDataBuilder<T> customData = new CustomDataBuilder<T>();
 
 	protected AbstractCustomDataAccessorBuilder() {}
 	
-	protected AbstractCustomDataAccessorBuilder(CustomDataAccessor existing) {
+	protected AbstractCustomDataAccessorBuilder(CustomDataAccessor<T> existing) {
 		Assert.notNull(existing, "Custom data accessor required");
-		this.customData = new CustomDataBuilder(existing.getCustomData());
+		this.customData = new CustomDataBuilder<T>(existing.getCustomData());
 	}
 	
-	public Object putCustomData(Object key, Object value) {
+	public Object putCustomData(TagKey<T> key, Object value) {
 		return customData.put(key, value);
 	}
 
-	public CustomDataBuilder getCustomData() {
+	public CustomDataBuilder<T> getCustomData() {
 		return this.customData;
 	}
 
-	public void setCustomData(CustomDataBuilder customData) {
+	public void setCustomData(CustomDataBuilder<T> customData) {
 		this.customData = customData;
 	}
 }

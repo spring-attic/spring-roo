@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.customdata.tagkeys;
 
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
+import org.springframework.roo.model.TagKey;
 
 /**
  * {@link IdentifiableJavaStructure} specific implementation of {@link TagKey}.
@@ -10,7 +11,7 @@ import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
  */
 public abstract class IdentifiableJavaStructureTagKey<T extends IdentifiableJavaStructure> implements TagKey<T> {
 
-	Integer modifier;
+	private Integer modifier;
 
 	public IdentifiableJavaStructureTagKey(Integer modifier) {
 		this.modifier = modifier;

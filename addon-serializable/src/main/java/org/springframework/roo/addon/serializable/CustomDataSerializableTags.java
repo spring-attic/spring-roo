@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.serializable;
 
+import org.springframework.roo.classpath.customdata.tagkeys.FieldMetadataTagKey;
 import org.springframework.roo.model.CustomData;
 
 /**
@@ -8,8 +9,8 @@ import org.springframework.roo.model.CustomData;
  * @author Stefan Schmidt
  * @since 1.1.3
  */
-public enum CustomDataSerializableTags {
+public class CustomDataSerializableTags {
 	
-	SERIAL_VERSION_UUID_FIELD;
+	public static FieldMetadataTagKey SERIAL_VERSION_UUID_FIELD = new FieldMetadataTagKey("SERIAL_VERSION_UUID_FIELD");
 
 }

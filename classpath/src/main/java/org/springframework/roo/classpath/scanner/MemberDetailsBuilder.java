@@ -1,9 +1,6 @@
 package org.springframework.roo.classpath.scanner;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.roo.classpath.customdata.tagkeys.TagKey;
+import org.springframework.roo.model.TagKey;
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
@@ -18,8 +15,13 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.CustomDataBuilder;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Builder for {@link MemberDetails}.
@@ -29,18 +31,22 @@ import org.springframework.roo.model.CustomDataBuilder;
  * @author James Tyrrell
  * @since 1.1.3
  */
-public class MemberDetailsBuilder {
-	private List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = new ArrayList<MemberHoldingTypeDetails>();
+
+public class MemberDetailsBuilder implements Builder<MemberDetails> {
+
+	private Map<String, MemberHoldingTypeDetails> memberHoldingTypeDetailsMap = new HashMap<String, MemberHoldingTypeDetails>();
 	private MemberDetails originalMemberDetails;
 	private boolean changed = false;
 
 	public MemberDetailsBuilder(MemberDetails memberDetails) {
 		this.originalMemberDetails = memberDetails;
-		memberHoldingTypeDetailsList = new ArrayList<MemberHoldingTypeDetails>(memberDetails.getDetails());
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			memberHoldingTypeDetailsMap.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), memberHoldingTypeDetails);
+		}
 	}
 
 	public MemberDetails build() {
-		return changed ? new MemberDetailsImpl(memberHoldingTypeDetailsList) : originalMemberDetails;
+		return changed ? new MemberDetailsImpl(new LinkedList<MemberHoldingTypeDetails>(memberHoldingTypeDetailsMap.values())) : originalMemberDetails;
 	}
 
 	public <T> void tag(T toModify, TagKey<T> key, Object value) {
@@ -56,7 +62,7 @@ public class MemberDetailsBuilder {
 			CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 			customDataBuilder.put(key, value);
 			doModification((ConstructorMetadata) toModify, customDataBuilder.build());
-		} else if (toModify instanceof MemberHoldingTypeDetails) {
+		}  else if (toModify instanceof MemberHoldingTypeDetails) {
 			CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 			customDataBuilder.put(key, value);
 			doModification((MemberHoldingTypeDetails) toModify, customDataBuilder.build());
@@ -64,48 +70,69 @@ public class MemberDetailsBuilder {
 	}
 
 	private void doModification(FieldMetadata field, CustomData customData) {
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(field.getDeclaredByMetadataId());
+		if (memberHoldingTypeDetails != null) {
 			if (memberHoldingTypeDetails.getDeclaredByMetadataId().equals(field.getDeclaredByMetadataId())) {
 				FieldMetadata matchedField = MemberFindingUtils.getField(memberHoldingTypeDetails, field.getFieldName());
 				if (matchedField != null && !matchedField.getCustomData().keySet().containsAll(customData.keySet())) {
-					memberHoldingTypeDetailsList.remove(memberHoldingTypeDetails);
-					TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(memberHoldingTypeDetails);
+					/*TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(memberHoldingTypeDetails);
 					typeDetailsBuilder.addDataToField(field, customData);
-					memberHoldingTypeDetailsList.add(typeDetailsBuilder.build());
+					memberHoldingTypeDetailsMap.put(field.getDeclaredByMetadataId(), typeDetailsBuilder.build());*/
+					if (memberHoldingTypeDetails instanceof ItdTypeDetails) {
+						TypeDetailsBuilder<ItdTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ItdTypeDetails>((ItdTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.addDataToField(field, customData);
+						memberHoldingTypeDetailsMap.put(field.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					} else if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+						TypeDetailsBuilder<ClassOrInterfaceTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ClassOrInterfaceTypeDetails>((ClassOrInterfaceTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.addDataToField(field, customData);
+						memberHoldingTypeDetailsMap.put(field.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					}
 					changed = true;
-					break;
 				}
 			}
 		}
 	}
 
 	private void doModification(MethodMetadata method, CustomData customData) {
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(method.getDeclaredByMetadataId());
+		if (memberHoldingTypeDetails != null) {
 			if (memberHoldingTypeDetails.getDeclaredByMetadataId().equals(method.getDeclaredByMetadataId())) {
 				MethodMetadata matchedMethod = MemberFindingUtils.getMethod(memberHoldingTypeDetails, method.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes()));
 				if (matchedMethod != null && !matchedMethod.getCustomData().keySet().containsAll(customData.keySet())) {
-					memberHoldingTypeDetailsList.remove(memberHoldingTypeDetails);
-					TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(memberHoldingTypeDetails);
+					/*TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(memberHoldingTypeDetails);
 					typeDetailsBuilder.addDataToMethod(method, customData);
-					memberHoldingTypeDetailsList.add(typeDetailsBuilder.build());
+					memberHoldingTypeDetailsMap.put(method.getDeclaredByMetadataId(), typeDetailsBuilder.build());*/
+					if (memberHoldingTypeDetails instanceof ItdTypeDetails) {
+						TypeDetailsBuilder<ItdTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ItdTypeDetails>((ItdTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.addDataToMethod(method, customData);
+						memberHoldingTypeDetailsMap.put(method.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					} else if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+						TypeDetailsBuilder<ClassOrInterfaceTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ClassOrInterfaceTypeDetails>((ClassOrInterfaceTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.addDataToMethod(method, customData);
+						memberHoldingTypeDetailsMap.put(method.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					}
 					changed = true;
-					break;
 				}
 			}
 		}
 	}
 
 	private void doModification(ConstructorMetadata constructor, CustomData customData) {
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(constructor.getDeclaredByMetadataId());
+		if (memberHoldingTypeDetails != null) {
 			if (memberHoldingTypeDetails.getDeclaredByMetadataId().equals(constructor.getDeclaredByMetadataId())) {
 				ConstructorMetadata matchedConstructor = MemberFindingUtils.getDeclaredConstructor(memberHoldingTypeDetails, AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()));
 				if (matchedConstructor != null && !matchedConstructor.getCustomData().keySet().containsAll(customData.keySet())) {
-					memberHoldingTypeDetailsList.remove(memberHoldingTypeDetails);
-					TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(memberHoldingTypeDetails);
-					typeDetailsBuilder.addDataToConstructor(constructor, customData);
-					memberHoldingTypeDetailsList.add(typeDetailsBuilder.build());
+					if (memberHoldingTypeDetails instanceof ItdTypeDetails) {
+						TypeDetailsBuilder<ItdTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ItdTypeDetails>((ItdTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.addDataToConstructor(constructor, customData);
+						memberHoldingTypeDetailsMap.put(constructor.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					} else if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+						TypeDetailsBuilder<ClassOrInterfaceTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ClassOrInterfaceTypeDetails>((ClassOrInterfaceTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.addDataToConstructor(constructor, customData);
+						memberHoldingTypeDetailsMap.put(constructor.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					}
 					changed = true;
-					break;
 				}
 			}
 		}
@@ -113,71 +140,76 @@ public class MemberDetailsBuilder {
 	}
 
 	private void doModification(MemberHoldingTypeDetails type, CustomData customData) {
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(type.getDeclaredByMetadataId());
+		if (memberHoldingTypeDetails != null) {
 			if (memberHoldingTypeDetails.getDeclaredByMetadataId().equals(type.getDeclaredByMetadataId())) {
 				if (memberHoldingTypeDetails.getName().equals(type.getName()) && !memberHoldingTypeDetails.getCustomData().keySet().containsAll(customData.keySet())) {
-					memberHoldingTypeDetailsList.remove(memberHoldingTypeDetails);
-					TypeDetailsBuilder typeDetailsBuilder = new TypeDetailsBuilder(memberHoldingTypeDetails);
-					typeDetailsBuilder.getCustomData().append(customData);
-					memberHoldingTypeDetailsList.add(typeDetailsBuilder.build());
+					if (memberHoldingTypeDetails instanceof ItdTypeDetails) {
+						TypeDetailsBuilder<ItdTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ItdTypeDetails>((ItdTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.getCustomData().append(customData);
+						memberHoldingTypeDetailsMap.put(type.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					} else if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+						TypeDetailsBuilder<ClassOrInterfaceTypeDetails> typeDetailsBuilder = new TypeDetailsBuilder<ClassOrInterfaceTypeDetails>((ClassOrInterfaceTypeDetails) memberHoldingTypeDetails);
+						typeDetailsBuilder.getCustomData().append(customData);
+						memberHoldingTypeDetailsMap.put(type.getDeclaredByMetadataId(), typeDetailsBuilder.build());
+					}
 					changed = true;
-					break;
 				}
 			}
 		}
 
 	}
 
-	class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
+	private class TypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractMemberHoldingTypeDetailsBuilder<T> {
 		private MemberHoldingTypeDetails existing;
 
-		protected TypeDetailsBuilder(MemberHoldingTypeDetails existing) {
+		protected TypeDetailsBuilder(T existing) {
 			super(existing);
 			this.existing = existing;
 		}
 
-		public MemberHoldingTypeDetails build() {
+		public T build() {
 			if (existing instanceof ItdTypeDetails) {
 				ItdTypeDetailsBuilder builder = new ItdTypeDetailsBuilder((ItdTypeDetails) existing);
 				// Push in all members that may have been modified
 				builder.setDeclaredFields(this.getDeclaredFields());
 				builder.setDeclaredMethods(this.getDeclaredMethods());
 				builder.setAnnotations(this.getAnnotations());
-				builder.setCustomData(this.getCustomData());
+				builder.setCustomData((CustomDataBuilder<ItdTypeDetails>) this.getCustomData());
 				builder.setDeclaredConstructors(this.getDeclaredConstructors());
 				builder.setDeclaredInitializers(this.getDeclaredInitializers());
 				builder.setDeclaredInnerTypes(this.getDeclaredInnerTypes());
 				builder.setExtendsTypes(this.getExtendsTypes());
 				builder.setImplementsTypes(this.getImplementsTypes());
 				builder.setModifier(this.getModifier());
-				return builder.build();
+				return (T) builder.build();
 			} else if (existing instanceof ClassOrInterfaceTypeDetails) {
 				ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) existing);
 				// Push in all members that may
 				builder.setDeclaredFields(this.getDeclaredFields());
 				builder.setDeclaredMethods(this.getDeclaredMethods());
 				builder.setAnnotations(this.getAnnotations());
-				builder.setCustomData(this.getCustomData());
+				builder.setCustomData((CustomDataBuilder<ClassOrInterfaceTypeDetails>) this.getCustomData());
 				builder.setDeclaredConstructors(this.getDeclaredConstructors());
 				builder.setDeclaredInitializers(this.getDeclaredInitializers());
 				builder.setDeclaredInnerTypes(this.getDeclaredInnerTypes());
 				builder.setExtendsTypes(this.getExtendsTypes());
 				builder.setImplementsTypes(this.getImplementsTypes());
 				builder.setModifier(this.getModifier());
-				return builder.build();
+				return (T) builder.build();
 			} else {
 				throw new IllegalStateException("Unknown instance of MemberHoldingTypeDetails");
 			}
 		}
 
-		public void addDataToField(FieldMetadata replacement, CustomData customData) {
-			// If the MIDs don't match then the proposed can't be a replacement
+		public void addDataToField(FieldMetadata replacement, CustomData<FieldMetadata> customData) {
+			//If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
 			}
 			for (FieldMetadataBuilder existingField : getDeclaredFields()) {
 				if (existingField.getFieldName().equals(replacement.getFieldName())) {
-					for (Object key : customData.keySet()) {
+					for (TagKey<FieldMetadata> key : customData.keySet()) {
 						existingField.putCustomData(key, customData.get(key));
 					}
 					break;
@@ -185,15 +217,15 @@ public class MemberDetailsBuilder {
 			}
 		}
 
-		public void addDataToMethod(MethodMetadata replacement, CustomData customData) {
-			// If the MIDs don't match then the proposed can't be a replacement
+		public void addDataToMethod(MethodMetadata replacement, CustomData<MethodMetadata> customData) {
+			//If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
 			}
 			for (MethodMetadataBuilder existingMethod : getDeclaredMethods()) {
 				if (existingMethod.getMethodName().equals(replacement.getMethodName())) {
 					if (AnnotatedJavaType.convertFromAnnotatedJavaTypes(existingMethod.getParameterTypes()).equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(replacement.getParameterTypes()))) {
-						for (Object key : customData.keySet()) {
+						for (TagKey<MethodMetadata> key : customData.keySet()) {
 							existingMethod.putCustomData(key, customData.get(key));
 						}
 						break;
@@ -202,14 +234,14 @@ public class MemberDetailsBuilder {
 			}
 		}
 
-		public void addDataToConstructor(ConstructorMetadata replacement, CustomData customData) {
-			// If the MIDs don't match then the proposed can't be a replacement
+		public void addDataToConstructor(ConstructorMetadata replacement, CustomData<ConstructorMetadata> customData) {
+			//If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
 			}
 			for (ConstructorMetadataBuilder existingConstructor : getDeclaredConstructors()) {
 				if (AnnotatedJavaType.convertFromAnnotatedJavaTypes(existingConstructor.getParameterTypes()).equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(replacement.getParameterTypes()))) {
-					for (Object key : customData.keySet()) {
+					for (TagKey<ConstructorMetadata> key : customData.keySet()) {
 						existingConstructor.putCustomData(key, customData.get(key));
 					}
 					break;

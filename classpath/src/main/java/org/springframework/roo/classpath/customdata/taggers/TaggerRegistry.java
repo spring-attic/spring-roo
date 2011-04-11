@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
+import org.springframework.roo.classpath.details.ItdTypeDetails;
+
 import java.util.List;
 
 /**
