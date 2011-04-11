@@ -18,7 +18,7 @@ import java.util.Set;
  * @since 1.1
  *
  */
-public interface CustomData<T extends CustomDataAccessor> extends Iterable<TagKey<T>> {
+public interface CustomData extends Iterable<Object> {
 	
 	/**
 	 * Obtains a specific item of custom data.
@@ -33,13 +33,13 @@ public interface CustomData<T extends CustomDataAccessor> extends Iterable<TagKe
 	 * @param key to search for (required)
 	 * @return the object if found, otherwise null
 	 */
-	Object get(TagKey<T> key);
+	Object get(Object key);
 	
 	/**
 	 * Obtains an immutable representation of all custom data keys. 
 	 * 
 	 * @return the keys (never null, but may be empty)
 	 */
-	Set<TagKey<T>> keySet();
+	Set<Object> keySet();
 	
 }

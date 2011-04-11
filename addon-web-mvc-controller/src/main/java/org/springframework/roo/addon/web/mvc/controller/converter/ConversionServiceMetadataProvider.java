@@ -20,7 +20,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -101,7 +101,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
 			JavaType backingType = webScaffoldAnnotationValues.getFormBackingObject();
 			MemberDetails memberDetails = getMemberDetails(backingType);
-			List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+			List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 			if (embeddedIdFields.size() > 1) {
 				throw new IllegalStateException("Found multiple embedded ID fields in " + backingType.getFullyQualifiedTypeName() + " type. Only one is allowed.");
 			} else if (embeddedIdFields.size() == 1) {
@@ -164,7 +164,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		if (! BeanInfoUtils.isAccessorMethod(method)) {
 			return false; // Only interested in accessors
 		}
-		if (method.getCustomData().keySet().contains(CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD)) {
+		if (method.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {
 			return false; // Only interested in methods which are not accessors for persistence version or id fields
 		}
 		FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
@@ -175,7 +175,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
 				|| webMetadataService.isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
 				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| field.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD) /* Not interested in embedded types */) {
+				|| field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) /* Not interested in embedded types */) {
 			return false;
 		}
 		return true;

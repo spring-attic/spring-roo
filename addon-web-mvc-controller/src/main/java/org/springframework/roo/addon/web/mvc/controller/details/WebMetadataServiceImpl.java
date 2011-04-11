@@ -28,7 +28,7 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -89,7 +89,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			}
 			// Not interested in fields that are JPA transient fields or immutable fields
 			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-			if (fieldMetadata == null || fieldMetadata.getCustomData().keySet().contains(CustomDataPersistenceTags.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
+			if (fieldMetadata == null || fieldMetadata.getCustomData().keySet().contains(PersistenceCustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
 				continue;
 			}
 			JavaType type = method.getReturnType();
@@ -101,7 +101,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 					}
 				}
 			} else {
-				if (isApplicationType(type) && !fieldMetadata.getCustomData().keySet().contains(CustomDataPersistenceTags.EMBEDDED_FIELD)) {
+				if (isApplicationType(type) && !fieldMetadata.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD)) {
 					MemberDetails typeMemberDetails = getMemberDetails(type);
 					specialTypes.put(type, getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
 				}
@@ -166,10 +166,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(metadataService, "Metadata service required");
 		
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = null;
-		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_FIELD);
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
 		List<FieldMetadata> compositePkFields = new LinkedList<FieldMetadata>();
 		if (idFields.size() == 0) {
-			idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+			idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 			if (idFields.size() != 1) {
 				return null;
 			}
@@ -182,20 +182,20 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		FieldMetadata identifierField = idFields.get(0);
 		registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
 		
-		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
-		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD);
-		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
-		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.REMOVE_METHOD);
-		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.MERGE_METHOD);
-		MethodMetadata findAllMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ALL_METHOD);
-		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);
-		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.COUNT_ALL_METHOD);
-		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
+		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
+		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
+		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
+		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.MERGE_METHOD);
+		MethodMetadata findAllMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ALL_METHOD);
+		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
+		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.COUNT_ALL_METHOD);
+		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
 		List<String> dynamicFinderNames = new ArrayList<String>();
 		
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
-			if (mhtd.getCustomData().keySet().contains(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES)) {
-				dynamicFinderNames = (List<String>) mhtd.getCustomData().get(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES);
+			if (mhtd.getCustomData().keySet().contains(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES)) {
+				dynamicFinderNames = (List<String>) mhtd.getCustomData().get(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES);
 			}
 		}
 		
@@ -223,7 +223,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	public boolean isRooIdentifier(JavaType javaType, MemberDetails memberDetails) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
-		return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_TYPE).size() > 0;
+		return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_TYPE).size() > 0;
 	}
 	
 	private boolean isEnumType(JavaType javaType, MetadataService metadataService) {

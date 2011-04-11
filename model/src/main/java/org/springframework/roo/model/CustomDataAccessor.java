@@ -7,12 +7,12 @@ package org.springframework.roo.model;
  * @since 1.1
  *
  */
-public interface CustomDataAccessor<T extends CustomDataAccessor> {
+public interface CustomDataAccessor {
 
 	/**
 	 * Provides immutable access to the custom data stored against the instance.
 	 * 
 	 * @return the custom data (never returns null)
 	 */
-	CustomData<T> getCustomData();
+	CustomData getCustomData();
 }

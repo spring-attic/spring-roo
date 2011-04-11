@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
 import org.jvnet.inflector.Noun;
-import org.springframework.roo.model.TagKey;
+import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -20,8 +20,8 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * {@link MethodMetadata} specific implementation of {@link Tagger}. Matches
- * are based on field name which is dynamically determined based on: the {@link FieldTagger}s
+ * {@link MethodMetadata} specific implementation of {@link Matcher}. Matches
+ * are based on field name which is dynamically determined based on: the {@link FieldMatcher}s
  * presented; the type of method (accessor/mutator); the default method name; the user specified
  * method name obtained from a particular Roo annotation; a plural/singular suffix of the
  * referenced entity; and, an additional suffix.
@@ -29,11 +29,11 @@ import java.util.Set;
  * @author James Tyrrell
  * @since 1.1.3
  */
-public class MethodTagger implements Tagger<MethodMetadata> {
+public class MethodMatcher implements Matcher<MethodMetadata> {
 
-	private List<FieldTagger> fieldTaggers = new ArrayList<FieldTagger>();
+	private List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
 	private boolean isAccessor = false;
-	private TagKey<MethodMetadata> tagKey;
+	private CustomDataKey<MethodMetadata> customDataKey;
 	private JavaType catalystAnnotationType;
 	private JavaSymbolName userDefinedNameAttribute;
 	private String defaultName;
@@ -41,21 +41,21 @@ public class MethodTagger implements Tagger<MethodMetadata> {
 	private boolean suffixSingular = false;
 	private String additionalSuffix = "";
 
-	public MethodTagger(List<FieldTagger> fieldTaggers, TagKey<MethodMetadata> tagKey, boolean isAccessor) {
+	public MethodMatcher(List<FieldMatcher> fieldTaggers, CustomDataKey<MethodMetadata> customDataKey, boolean isAccessor) {
 		this.fieldTaggers = fieldTaggers;
-		this.tagKey = tagKey;
+		this.customDataKey = customDataKey;
 		this.isAccessor = isAccessor;
 	}
 
-	public MethodTagger(TagKey<MethodMetadata> tagKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName) {
-		this.tagKey = tagKey;
+	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName) {
+		this.customDataKey = customDataKey;
 		this.catalystAnnotationType = catalystAnnotationType;
 		this.userDefinedNameAttribute = userDefinedNameAttribute;
 		this.defaultName = defaultName;
 	}
 
-	public MethodTagger(TagKey<MethodMetadata> tagKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular) {
-		this.tagKey = tagKey;
+	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular) {
+		this.customDataKey = customDataKey;
 		this.catalystAnnotationType = catalystAnnotationType;
 		this.userDefinedNameAttribute = userDefinedNameAttribute;
 		this.defaultName = defaultName;
@@ -63,8 +63,8 @@ public class MethodTagger implements Tagger<MethodMetadata> {
 		this.suffixSingular = suffixSingular;
 	}
 
-	public MethodTagger(TagKey<MethodMetadata> tagKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular, String additionalSuffix) {
-		this.tagKey = tagKey;
+	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular, String additionalSuffix) {
+		this.customDataKey = customDataKey;
 		this.catalystAnnotationType = catalystAnnotationType;
 		this.userDefinedNameAttribute = userDefinedNameAttribute;
 		this.defaultName = defaultName;
@@ -73,8 +73,8 @@ public class MethodTagger implements Tagger<MethodMetadata> {
 		this.additionalSuffix = additionalSuffix;
 	}
 
-	public TagKey<MethodMetadata> getTagKey() {
-		return tagKey;
+	public CustomDataKey<MethodMetadata> getCustomDataKey() {
+		return customDataKey;
 	}
 
 	public Object getTagValue(MethodMetadata key) {
@@ -168,7 +168,7 @@ public class MethodTagger implements Tagger<MethodMetadata> {
 
 	private List<FieldMetadata> getFieldsInterestedIn(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		for (FieldTagger fieldTagger : fieldTaggers) {
+		for (FieldMatcher fieldTagger : fieldTaggers) {
 			fields.addAll(fieldTagger.matches(memberHoldingTypeDetailsList));
 		}
 		return fields;

@@ -15,26 +15,26 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  *
  */
-public final class CustomDataImpl<T extends CustomDataAccessor> implements CustomData<T> {
+public final class CustomDataImpl implements CustomData {
 
-	private Map<TagKey<T>, Object> customData;
+	private Map<Object, Object> customData;
 	
 	public static final CustomData NONE = new CustomDataImpl(new HashMap<Object, Object>());
 	
-	CustomDataImpl(Map<TagKey<T>, Object> customData) {
+	public CustomDataImpl(Map<Object, Object> customData) {
 		Assert.notNull(customData, "Custom data required");
 		this.customData = Collections.unmodifiableMap(customData);
 	}
 	
-	public Object get(TagKey<T> key) {
+	public Object get(Object key) {
 		return customData.get(key);
 	}
 
-	public Set<TagKey<T>> keySet() {
+	public Set<Object> keySet() {
 		return customData.keySet();
 	}
 
-	public Iterator<TagKey<T>> iterator() {
+	public Iterator<Object> iterator() {
 		return customData.keySet().iterator();
 	}
 

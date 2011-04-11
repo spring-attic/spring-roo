@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -140,7 +140,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getFindMethod());
 		builder.addMethod(getFindEntriesMethod());
 		
-		builder.putCustomData(CustomDataPersistenceTags.DYNAMIC_FINDER_NAMES, getDynamicFinders());
+		builder.putCustomData(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES, getDynamicFinders());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();

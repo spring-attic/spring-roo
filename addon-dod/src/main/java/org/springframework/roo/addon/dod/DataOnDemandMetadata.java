@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -407,9 +407,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + maxValue + ");");
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
-			} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+			} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
 				if (values != null && values.containsKey("length")) {
 					Integer lengthValue = (Integer) values.get("length");
 					bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + lengthValue + ") {");
@@ -429,9 +429,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				doDigits(field, digitsAnnotation, bodyBuilder, mutatorName, initializer, suffix);
 			} else if (decimalMinAnnotation != null || decimalMaxAnnotation != null) {
 				doDecimalMinAndDecimalMax(field, decimalMinAnnotation, decimalMaxAnnotation, bodyBuilder, mutatorName, initializer, suffix);
-			} else if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
 				@SuppressWarnings("unchecked")
-				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
 				doColumnPrecisionAndScale(field, values, bodyBuilder, mutatorName, initializer, suffix);
 			}
 		} else if (isIntegerFieldType(fieldType)) {
@@ -797,9 +797,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					}
 				}
 			} else {
-				if (field.getCustomData().keySet().contains(CustomDataPersistenceTags.COLUMN_FIELD)) {
+				if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
 					@SuppressWarnings("unchecked")
-					Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(CustomDataPersistenceTags.COLUMN_FIELD);
+					Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
 					if (columnValues.keySet().contains("length")) {
 						maxLength = ((Integer) columnValues.get("length")).intValue();
 					}
@@ -867,14 +867,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(annotationValues.getEntity())) {
 			// Avoid circular references (ROO-562)
 			initializer = "obj";
-		} else if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.ENUMERATED_FIELD)) {
+		} else if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
 			initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
 		} else if (collaboratingMetadata != null) {
 			requiredDataOnDemandCollaborators.add(field.getFieldType());
 			
 			String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 			// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
-			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.ONE_TO_ONE_FIELD)) {
+			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ONE_TO_ONE_FIELD)) {
 				initializer = collaboratingFieldName + "." + collaboratingMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
 			} else {
 				initializer = collaboratingFieldName + "." + collaboratingMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";

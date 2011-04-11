@@ -1,6 +1,6 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import org.springframework.roo.model.TagKey;
+import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -10,19 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link ConstructorMetadata} specific implementation of {@link Tagger}. Currently
+ * {@link ConstructorMetadata} specific implementation of {@link Matcher}. Currently
  * ConstructorMetadata instances are only matched based on parameter types.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
-public class ConstructorTagger implements Tagger<ConstructorMetadata>{
+public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 
-	private TagKey<ConstructorMetadata> tagKey;
+	private CustomDataKey<ConstructorMetadata> customDataKey;
 	private List<JavaType> parameterTypes = new ArrayList<JavaType>();
 
-	public ConstructorTagger(TagKey<ConstructorMetadata> tagKey, List<JavaType> parameterTypes) {
-		this.tagKey = tagKey;
+	public ConstructorMatcher(CustomDataKey<ConstructorMetadata> customDataKey, List<JavaType> parameterTypes) {
+		this.customDataKey = customDataKey;
 		this.parameterTypes = parameterTypes;
 	}
 
@@ -38,8 +38,8 @@ public class ConstructorTagger implements Tagger<ConstructorMetadata>{
 		return constructors;
 	}
 
-	public TagKey<ConstructorMetadata> getTagKey() {
-		return tagKey;
+	public CustomDataKey<ConstructorMetadata> getCustomDataKey() {
+		return customDataKey;
 	}
 
 	public Object getTagValue(ConstructorMetadata key) {

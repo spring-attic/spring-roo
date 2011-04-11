@@ -13,14 +13,13 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
-import org.springframework.roo.classpath.customdata.taggers.ConstructorTagger;
-import org.springframework.roo.classpath.customdata.taggers.FieldTagger;
-import org.springframework.roo.classpath.customdata.taggers.MethodTagger;
-import org.springframework.roo.classpath.customdata.taggers.TaggerRegistry;
-import org.springframework.roo.classpath.customdata.taggers.TypeTagger;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.taggers.ConstructorMatcher;
+import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
+import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
+import org.springframework.roo.classpath.customdata.taggers.TypeMatcher;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -41,7 +40,7 @@ import org.springframework.roo.project.ProjectMetadata;
 public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements EntityMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
-	@Reference private TaggerRegistry taggerRegistry;
+	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	
 	private boolean noArgConstructor = true;
 
@@ -50,7 +49,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		addTaggers();
+		registerMatchers();
 	}
 	
 	protected void deactivate(ComponentContext context) {
@@ -58,59 +57,59 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		removeTaggers();
+		unregisterMatchers();
 	}
 
-	private void addTaggers() {
-		taggerRegistry.registerTagger(getClass(), new TypeTagger(CustomDataPersistenceTags.PERSISTENT_TYPE, "org.springframework.roo.addon.entity.EntityMetadata"));
-		taggerRegistry.registerTagger(getClass(), new TypeTagger(CustomDataPersistenceTags.IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"));
+	private void registerMatchers() {
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new TypeMatcher(PersistenceCustomDataKeys.PERSISTENT_TYPE, "org.springframework.roo.addon.entity.EntityMetadata"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new TypeMatcher(PersistenceCustomDataKeys.IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"));
 
-		taggerRegistry.registerTagger(getClass(), new ConstructorTagger(CustomDataPersistenceTags.NO_ARG_CONSTRUCTOR, new ArrayList<JavaType>()));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new ConstructorMatcher(PersistenceCustomDataKeys.NO_ARG_CONSTRUCTOR, new ArrayList<JavaType>()));
 
 		AnnotationMetadata idAnnotation = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Id")).build();
 		AnnotationMetadata embeddedIdAnnotation = new AnnotationMetadataBuilder(new JavaType("javax.persistence.EmbeddedId")).build();
-		FieldTagger idAndEmbeddedIdFieldTagger = new FieldTagger(CustomDataPersistenceTags.IDENTIFIER_FIELD, Arrays.asList(idAnnotation, embeddedIdAnnotation));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(Arrays.asList(idAndEmbeddedIdFieldTagger), CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD, true));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(Arrays.asList(idAndEmbeddedIdFieldTagger), CustomDataPersistenceTags.IDENTIFIER_MUTATOR_METHOD, false));
+		FieldMatcher idAndEmbeddedIdFieldTagger = new FieldMatcher(PersistenceCustomDataKeys.IDENTIFIER_FIELD, Arrays.asList(idAnnotation, embeddedIdAnnotation));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(Arrays.asList(idAndEmbeddedIdFieldTagger), PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD, true));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(Arrays.asList(idAndEmbeddedIdFieldTagger), PersistenceCustomDataKeys.IDENTIFIER_MUTATOR_METHOD, false));
 
-		FieldTagger identifierFieldTagger = new FieldTagger(CustomDataPersistenceTags.IDENTIFIER_FIELD, Arrays.asList(idAnnotation));
-		taggerRegistry.registerTagger(getClass(), identifierFieldTagger);
+		FieldMatcher identifierFieldTagger = new FieldMatcher(PersistenceCustomDataKeys.IDENTIFIER_FIELD, Arrays.asList(idAnnotation));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), identifierFieldTagger);
 
-		FieldTagger embeddedIdFieldTagger = new FieldTagger(CustomDataPersistenceTags.EMBEDDED_ID_FIELD, Arrays.asList(embeddedIdAnnotation));
-		taggerRegistry.registerTagger(getClass(), embeddedIdFieldTagger);
+		FieldMatcher embeddedIdFieldTagger = new FieldMatcher(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD, Arrays.asList(embeddedIdAnnotation));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), embeddedIdFieldTagger);
 
 		AnnotationMetadata annotationMetadata = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Version")).build();
-		FieldTagger versionFieldTagger = new FieldTagger(CustomDataPersistenceTags.VERSION_FIELD, Arrays.asList(annotationMetadata));
-		taggerRegistry.registerTagger(getClass(), versionFieldTagger);
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(Arrays.asList(versionFieldTagger), CustomDataPersistenceTags.VERSION_ACCESSOR_METHOD, true));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(Arrays.asList(versionFieldTagger), CustomDataPersistenceTags.VERSION_MUTATOR_METHOD, false));
+		FieldMatcher versionFieldTagger = new FieldMatcher(PersistenceCustomDataKeys.VERSION_FIELD, Arrays.asList(annotationMetadata));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), versionFieldTagger);
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(Arrays.asList(versionFieldTagger), PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD, true));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(Arrays.asList(versionFieldTagger), PersistenceCustomDataKeys.VERSION_MUTATOR_METHOD, false));
 
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.PERSIST_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("persistMethod"), "persist"));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.REMOVE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("removeMethod"), "remove"));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.FLUSH_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("flushMethod"), "flush"));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.CLEAR_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("clearMethod"), "clear"));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.MERGE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("mergeMethod"), "merge"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.PERSIST_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("persistMethod"), "persist"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.REMOVE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("removeMethod"), "remove"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FLUSH_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("flushMethod"), "flush"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.CLEAR_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("clearMethod"), "clear"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.MERGE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("mergeMethod"), "merge"));
 
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.COUNT_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("countMethod"), "count", true, false));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.FIND_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findAllMethod"), "findAll", true, false));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.FIND_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findMethod"), "find", false, true));
-		taggerRegistry.registerTagger(getClass(), new MethodTagger(CustomDataPersistenceTags.FIND_ENTRIES_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findEntriesMethod"), "find", false, true, "Entries"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.COUNT_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("countMethod"), "count", true, false));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findAllMethod"), "findAll", true, false));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findMethod"), "find", false, true));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_ENTRIES_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findEntriesMethod"), "find", false, true, "Entries"));
 
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.MANY_TO_MANY_FIELD, getAnnotationMetadataList("javax.persistence.ManyToMany")));
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.ENUMERATED_FIELD, getAnnotationMetadataList("javax.persistence.Enumerated")));
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.ONE_TO_MANY_FIELD, getAnnotationMetadataList("javax.persistence.OneToMany")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD, getAnnotationMetadataList("javax.persistence.ManyToMany")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.ENUMERATED_FIELD, getAnnotationMetadataList("javax.persistence.Enumerated")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.ONE_TO_MANY_FIELD, getAnnotationMetadataList("javax.persistence.OneToMany")));
 
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.MANY_TO_ONE_FIELD, getAnnotationMetadataList("javax.persistence.ManyToOne")));
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.ONE_TO_ONE_FIELD, getAnnotationMetadataList("javax.persistence.OneToOne")));
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.LOB_FIELD, getAnnotationMetadataList("javax.persistence.Lob")));
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.TRANSIENT_FIELD, getAnnotationMetadataList("javax.persistence.Transient")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.MANY_TO_ONE_FIELD, getAnnotationMetadataList("javax.persistence.ManyToOne")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.ONE_TO_ONE_FIELD, getAnnotationMetadataList("javax.persistence.OneToOne")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.LOB_FIELD, getAnnotationMetadataList("javax.persistence.Lob")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.TRANSIENT_FIELD, getAnnotationMetadataList("javax.persistence.Transient")));
 
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.EMBEDDED_FIELD, getAnnotationMetadataList("javax.persistence.Embedded")));
-		taggerRegistry.registerTagger(getClass(), new FieldTagger(CustomDataPersistenceTags.COLUMN_FIELD, getAnnotationMetadataList("javax.persistence.Column")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.EMBEDDED_FIELD, getAnnotationMetadataList("javax.persistence.Embedded")));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.COLUMN_FIELD, getAnnotationMetadataList("javax.persistence.Column")));
 	}
 
-	private void removeTaggers() {
-		taggerRegistry.unregisterTaggers(getClass());
+	private void unregisterMatchers() {
+		customDataKeyDecorator.unregisterMatchers(getClass().getName());
 	}
 
 	private AnnotationMetadata getAnnotationMetadata(String type) {

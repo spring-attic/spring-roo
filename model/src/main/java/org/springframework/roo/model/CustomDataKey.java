@@ -7,7 +7,7 @@ package org.springframework.roo.model;
  * @author James Tyrrell
  * @since 1.1.3
  */
-public interface TagKey<T> {
+public interface CustomDataKey<T> extends Criteria<T> {
 
-	void validate(T taggedInstance) throws IllegalStateException;
+	String name();
 }

@@ -10,31 +10,31 @@ import java.util.List;
 
 /**
  * {@link InvocableMemberMetadata} specific implementation of
- * {@link IdentifiableAnnotatedJavaStructureTagKey}.
+ * {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
-public abstract class InvocableMemberMetadataTagKey<T extends InvocableMemberMetadata> extends IdentifiableAnnotatedJavaStructureTagKey<T>{
+public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMemberMetadata> extends IdentifiableAnnotatedJavaStructureCustomDataKey<T> {
 
 	private List<AnnotatedJavaType> parameterTypes;
 	private List<JavaSymbolName> parameterNames;
 	private List<JavaType> throwsTypes;
 
-	protected InvocableMemberMetadataTagKey(Integer modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes) {
+	protected InvocableMemberMetadataCustomDataKey(Integer modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes) {
 		super(modifier, annotations);
 		this.parameterTypes = parameterTypes;
 		this.parameterNames = parameterNames;
 		this.throwsTypes = throwsTypes;
 	}
 
-	protected InvocableMemberMetadataTagKey() {
+	protected InvocableMemberMetadataCustomDataKey() {
 		super();
 	}
 
-	public void validate(T taggedInstance) throws IllegalStateException {
-		super.validate(taggedInstance);
+	public boolean meets(T invocableMemberMetadata) throws IllegalStateException {
 		//TODO: Add in validation logic for parameterTypes, parameterNames, throwsTypes
+		return super.meets(invocableMemberMetadata);
 	}
 
 	public List<AnnotatedJavaType> getParameterTypes() {

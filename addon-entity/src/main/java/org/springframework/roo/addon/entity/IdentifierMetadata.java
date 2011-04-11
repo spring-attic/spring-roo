@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -103,7 +103,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addMethod(getHashCodeMethod());
 		
 		// Add custom data tag for Roo Identifier type
-		builder.putCustomData(CustomDataPersistenceTags.IDENTIFIER_TYPE, null);
+		builder.putCustomData(PersistenceCustomDataKeys.IDENTIFIER_TYPE, null);
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();

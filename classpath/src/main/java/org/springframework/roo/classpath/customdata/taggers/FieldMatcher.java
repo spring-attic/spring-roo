@@ -1,6 +1,6 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import org.springframework.roo.model.TagKey;
+import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -12,20 +12,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link FieldMetadata} specific implementation of {@link Tagger}. Matches
+ * {@link FieldMetadata} specific implementation of {@link Matcher}. Matches
  * are based on whether the field is annotated with at least one of the annotations
  * specified.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
-public class FieldTagger implements Tagger<FieldMetadata>{
+public class FieldMatcher implements Matcher<FieldMetadata> {
 	private List<AnnotationMetadata> annotations;
-		private TagKey<FieldMetadata> tagKey;
+		private CustomDataKey<FieldMetadata> customDataKey;
 
-		public FieldTagger(TagKey<FieldMetadata> tagKey, List<AnnotationMetadata> annotations) {
+		public FieldMatcher(CustomDataKey<FieldMetadata> customDataKey, List<AnnotationMetadata> annotations) {
 			this.annotations = annotations;
-			this.tagKey = tagKey;
+			this.customDataKey = customDataKey;
 		}
 
 		public List<FieldMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
@@ -66,7 +66,7 @@ public class FieldTagger implements Tagger<FieldMetadata>{
 			return null;
 		}
 
-		public TagKey<FieldMetadata> getTagKey() {
-			return tagKey;
+		public CustomDataKey<FieldMetadata> getCustomDataKey() {
+			return customDataKey;
 		}
 }

@@ -15,7 +15,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -102,7 +102,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			return null;
 		}
 		
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.PERSISTENT_TYPE);
+		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
@@ -110,11 +110,11 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
-		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_ENTRIES_METHOD);
-		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.PERSIST_METHOD);
-		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FLUSH_METHOD);
-		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.FIND_METHOD);
-		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_ACCESSOR_METHOD);
+		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
+		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
+		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
+		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
+		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
 			return null;
 		}
@@ -146,17 +146,17 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
 
 			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
-			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.VERSION_FIELD)) {
+			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.VERSION_FIELD)) {
 				continue;
 			}
 
 			// Never include persistence transient fields
-			if (fieldCustomDataKeys.contains(CustomDataPersistenceTags.TRANSIENT_FIELD)) {
+			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.TRANSIENT_FIELD)) {
 				continue;
 			}
 
 			// Never include any sort of collection; user has to make such entities by hand
-			if (field.getFieldType().isCommonCollectionType() || fieldCustomDataKeys.contains(CustomDataPersistenceTags.ONE_TO_MANY_FIELD) || fieldCustomDataKeys.contains(CustomDataPersistenceTags.MANY_TO_MANY_FIELD)) {
+			if (field.getFieldType().isCommonCollectionType() || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ONE_TO_MANY_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD)) {
 				continue;
 			}
 			
@@ -173,7 +173,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 
 	private EmbeddedIdentifierHolder getEmbeddedIdentifierHolder(MemberDetails memberDetails, String metadataIdentificationString) {
 		List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
-		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 		if (fields.isEmpty()) {
 			return null;
 		}
@@ -183,7 +183,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			return null;
 		}
 		
-		MemberHoldingTypeDetails identifierMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(identifierMemberDetails, CustomDataPersistenceTags.IDENTIFIER_TYPE);
+		MemberHoldingTypeDetails identifierMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(identifierMemberDetails, PersistenceCustomDataKeys.IDENTIFIER_TYPE);
 		if (identifierMemberHoldingTypeDetails == null) {
 			return null;
 		}
@@ -222,13 +222,13 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			return null;
 		}
 		
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.PERSISTENT_TYPE);
+		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
 		
 		// Check field for @ManyToOne or @OneToOne annotation
-		if (!field.getCustomData().keySet().contains(CustomDataPersistenceTags.MANY_TO_ONE_FIELD) && !field.getCustomData().keySet().contains(CustomDataPersistenceTags.ONE_TO_ONE_FIELD)) {
+		if (!field.getCustomData().keySet().contains(PersistenceCustomDataKeys.MANY_TO_ONE_FIELD) && !field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ONE_TO_ONE_FIELD)) {
 			return null;
 		}
 		

@@ -14,7 +14,7 @@ import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.CustomDataPersistenceTags;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -73,7 +73,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataPersistenceTags.PERSISTENT_TYPE);
+		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
@@ -91,7 +91,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	private FieldMetadata getIdentifierField(MemberDetails memberDetails, String metadataIdentificationString) {
-		List<FieldMetadata> identifierFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.IDENTIFIER_FIELD);
+		List<FieldMetadata> identifierFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
 		if (!identifierFields.isEmpty()) {
 			return identifierFields.get(0);
 		}
@@ -99,12 +99,12 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	private EmbeddedIdentifierHolder getEmbeddedIdentifierHolder(MemberDetails memberDetails, String metadataIdentificationString) {
-		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.EMBEDDED_ID_FIELD);
+		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 		if (!embeddedIdFields.isEmpty()) {
 			FieldMetadata embeddedIdentifierField = embeddedIdFields.get(0);
 			MemberDetails identifierMemberDetails = getMemberDetails(embeddedIdentifierField.getFieldType());
 			if (identifierMemberDetails != null) {
-				MemberHoldingTypeDetails identifierMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(identifierMemberDetails, CustomDataPersistenceTags.IDENTIFIER_TYPE);
+				MemberHoldingTypeDetails identifierMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(identifierMemberDetails, PersistenceCustomDataKeys.IDENTIFIER_TYPE);
 				if (identifierMemberHoldingTypeDetails != null) {
 					List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
 					for (FieldMetadata field : MemberFindingUtils.getFields(identifierMemberDetails)) {
@@ -122,7 +122,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 
 	private FieldMetadata getVersionField(MemberDetails memberDetails, String metadataIdentificationString) {
 		FieldMetadata versionField = null;
-		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataPersistenceTags.VERSION_FIELD);
+		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_FIELD);
 		if (!fields.isEmpty()) {
 			versionField = fields.get(0);
 			metadataDependencyRegistry.registerDependency(versionField.getDeclaredByMetadataId(), metadataIdentificationString);

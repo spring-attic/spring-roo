@@ -7,21 +7,21 @@ import java.util.List;
 
 /**
  * {@link IdentifiableAnnotatedJavaStructure} specific implementation of
- * {@link IdentifiableJavaStructureTagKey}.
+ * {@link IdentifiableJavaStructureCustomDataKey}.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
-public abstract class IdentifiableAnnotatedJavaStructureTagKey<T extends IdentifiableAnnotatedJavaStructure> extends IdentifiableJavaStructureTagKey<T>{
+public abstract class IdentifiableAnnotatedJavaStructureCustomDataKey<T extends IdentifiableAnnotatedJavaStructure> extends IdentifiableJavaStructureCustomDataKey<T> {
 
 	private List<AnnotationMetadata> annotations;
 
-	protected IdentifiableAnnotatedJavaStructureTagKey(Integer modifier, List<AnnotationMetadata> annotations) {
+	protected IdentifiableAnnotatedJavaStructureCustomDataKey(Integer modifier, List<AnnotationMetadata> annotations) {
 		super(modifier);
 		this.annotations = annotations;
 	}
 
-	protected IdentifiableAnnotatedJavaStructureTagKey() {
+	protected IdentifiableAnnotatedJavaStructureCustomDataKey() {
 		super();
 	}
 
@@ -29,8 +29,8 @@ public abstract class IdentifiableAnnotatedJavaStructureTagKey<T extends Identif
 		return annotations;
 	}
 
-	public void validate(T taggedInstance) throws IllegalStateException {
-		super.validate(taggedInstance);
+	public boolean meets(T identifiableAnnotatedJavaStructure) throws IllegalStateException {
 		//TODO: Add in validation logic for annotations
+		return super.meets(identifiableAnnotatedJavaStructure);
 	}
 }
