@@ -35,7 +35,7 @@ public enum AddOnStabilityLevel {
 		}
 	}
 
-	public static int getAddOnStabilityLevel (String version) {
+	public static int getAddOnStabilityLevel(String version) {
 		if (version.endsWith(".RELEASE")) {
 			return RELEASE.getLevel();
 		} else if (version.matches("\\.RC\\d")) {

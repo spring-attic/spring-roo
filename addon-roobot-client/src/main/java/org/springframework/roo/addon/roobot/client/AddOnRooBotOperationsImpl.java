@@ -344,7 +344,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	public void upgradesAvailable(AddOnStabilityLevel addonStabilityLevel) {
 		synchronized (mutex) {
-			addonStabilityLevel = addonStabilityLevel == null ? AddOnStabilityLevel.ANY : addonStabilityLevel;
+			addonStabilityLevel = checkAddOnStabilityLevel(addonStabilityLevel);
 			Map<String, Bundle> bundles = getUpgradableBundles(addonStabilityLevel);
 			if (bundles.size() > 0) {
 				log.info("The following add-ons / components are available for upgrade for level: " + addonStabilityLevel.name());
@@ -805,7 +805,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 					String exisingBundleVersion = ebv.toString().trim();
 					if (isCompatible(b.getLatestVersion().getRooVersion()) 
 							&& rooBotBundleVersion.compareToIgnoreCase(exisingBundleVersion) > 0 
-							&& asl.getLevel() >= AddOnStabilityLevel.getAddOnStabilityLevel(exisingBundleVersion)) {
+							&& asl.getLevel() > AddOnStabilityLevel.getAddOnStabilityLevel(exisingBundleVersion)) {
 						bundles.put(b.getSymbolicName() + ";" + exisingBundleVersion, b);
 					}
 				}
