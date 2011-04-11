@@ -30,7 +30,6 @@ import java.util.Set;
  * @since 1.1.3
  */
 public class MethodMatcher implements Matcher<MethodMetadata> {
-
 	private List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
 	private boolean isAccessor = false;
 	private CustomDataKey<MethodMetadata> customDataKey;
@@ -130,12 +129,11 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails && !Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
 				for (AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
 					if (annotationMetadata.getAnnotationType().equals(catalystAnnotationType)) {
-						AnnotationAttributeValue annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
+						AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
 						if (annotationAttributeValue != null) {
 							return new JavaSymbolName(annotationAttributeValue.getValue().toString() + suffix);
-						} else {
-							break;
 						}
+						break;
 					}
 				}
 			}
@@ -152,12 +150,11 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 				}
 				for (AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
 					if (annotationMetadata.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.plural.RooPlural"))) {
-						AnnotationAttributeValue annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
+						AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 						if (annotationAttributeValue != null) {
 							return annotationAttributeValue.getValue().toString();
-						} else {
-							break;
 						}
+						break;
 					}
 				}
 				plural = getInflectorPlural(memberHoldingTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
