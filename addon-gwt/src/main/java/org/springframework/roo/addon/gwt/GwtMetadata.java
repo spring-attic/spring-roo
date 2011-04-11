@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
@@ -157,7 +159,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		List<MethodMetadataBuilder> methods = new LinkedList<MethodMetadataBuilder>();
+		Set<String> methodNames = new HashSet<String>();
 		for (MethodMetadata method : proxyMethods) {
+			if (methodNames.contains(method.getMethodName().getSymbolName())) {
+				continue;
+			}
+			methodNames.add(method.getMethodName().getSymbolName());
 			MethodMetadataBuilder abstractAccessorMethodBuilder = new MethodMetadataBuilder(destinationMetadataId, method);
 			abstractAccessorMethodBuilder.setBodyBuilder(new InvocableMemberBodyBuilder());
 			abstractAccessorMethodBuilder.setModifier(Modifier.ABSTRACT);
