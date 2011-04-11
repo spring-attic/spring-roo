@@ -64,7 +64,7 @@
         <module>addon-creator</module>
         <module>addon-roobot-client</module>
         <module>addon-json</module>
-        <module>addon-jsf</module>
+        <!-- module>addon-jsf</module -->
         <module>addon-op4j</module>
         <module>addon-git</module>
         <module>annotations</module>
@@ -628,11 +628,13 @@
                 <artifactId>org.springframework.roo.addon.web.mvc.selenium</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- 
             <dependency> 
                 <groupId>org.springframework.roo</groupId> 
                 <artifactId>org.springframework.roo.addon.jsf</artifactId> 
                 <version>${project.version}</version> 
             </dependency>
+            -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.bootstrap</artifactId>
