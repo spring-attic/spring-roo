@@ -325,76 +325,9 @@ public class ItdSourceFileComposer {
 			return;
 		}
 		content = true;
-		for (MethodMetadata method : methods) {
-			Assert.isTrue(method.getParameterTypes().size() == method.getParameterNames().size(), "Mismatched parameter names against parameter types");
-			
-			// Append annotations
-			for (AnnotationMetadata annotation : method.getAnnotations()) {
-				this.appendIndent();
-				outputAnnotation(annotation);
-				this.newLine(false);
-			}
-			
-			// Append "<modifier> <returntype> <methodName>" portion
-			this.appendIndent();
-			if (method.getModifier() != 0) {
-				this.append(Modifier.toString(method.getModifier()));
-				this.append(" ");
-			}
-
-			// return type
-			boolean staticMethod = Modifier.isStatic(method.getModifier());
-			this.append(method.getReturnType().getNameIncludingTypeParameters(staticMethod, resolver));
-			this.append(" ");
-			this.append(introductionTo.getSimpleTypeName());
-			this.append(".");
-			this.append(method.getMethodName().getSymbolName());
-
-			// Append parameter types and names
-			this.append("(");
-			List<AnnotatedJavaType> paramTypes = method.getParameterTypes();
-			List<JavaSymbolName> paramNames = method.getParameterNames();
-			for (int i = 0 ; i < paramTypes.size(); i++) {
-				AnnotatedJavaType paramType = paramTypes.get(i);
-				JavaSymbolName paramName = paramNames.get(i);
-				for (AnnotationMetadata methodParameterAnnotation : paramType.getAnnotations()) {
-					outputAnnotation(methodParameterAnnotation);
-					this.append(" ");
-				}
-				this.append(paramType.getJavaType().getNameIncludingTypeParameters(false, resolver));
-				this.append(" ");
-				this.append(paramName.getSymbolName());
-				if (i < paramTypes.size() - 1) {
-					this.append(", ");
-				}
-			}
-			
-			// add exceptions to be thrown
-			List<JavaType> throwsTypes = method.getThrowsTypes();
-			if (throwsTypes.size() > 0) {
-				this.append(") throws ");
-				for (int i = 0; i < throwsTypes.size(); i++) {
-					this.append(throwsTypes.get(i).getNameIncludingTypeParameters(false, resolver));
-					if (throwsTypes.size() > (i+1)) {
-						this.append(", ");
-					}
-				}
-				this.append(" {");
-			} else {
-				this.append(") {");
-			}
-			
-			this.newLine(false);
-			this.indent();
-
-			// Add body
-			this.append(method.getBody());
-			this.indentRemove();
-			this.appendFormalLine("}");
-			this.newLine();
-		}
+		writeMethods(methods, true);
 	}
-	
+
 	private void appendFields() {
 		List<? extends FieldMetadata> fields = itdTypeDetails.getDeclaredFields();
 		if (fields == null || fields.size() == 0) {
@@ -442,19 +375,49 @@ public class ItdSourceFileComposer {
 		List<ClassOrInterfaceTypeDetails> innerTypes = itdTypeDetails.getInnerTypes();
 		
 		for (ClassOrInterfaceTypeDetails innerType: innerTypes) {
+			content = true;
 			this.appendIndent();
 			if (innerType.getModifier() != 0) {
 				this.append(Modifier.toString(innerType.getModifier()));
 				this.append(" ");
 			}
 			this.append("class ");
-			this.append(introductionTo.getSimpleTypeName());
+			this.append(introductionTo.getNameIncludingTypeParameters());
 			this.append(".");
 			this.append(innerType.getName().getSimpleTypeName());
+			if (innerType.getExtendsTypes().size() > 0) {
+				this.append(" extends ");
+				// There should only be one extends type for inner classes
+				JavaType extendsType = innerType.getExtendsTypes().get(0);
+				if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
+					this.append(extendsType.getNameIncludingTypeParameters());
+				} else {
+					this.append(extendsType.getNameIncludingTypeParameters(false, resolver));
+				}
+				this.append(" ");
+			}
+			List<JavaType> implementsTypes = innerType.getImplementsTypes();
+			if (implementsTypes.size() > 0) {
+				this.append(" implements ");
+				for (int i = 0; i < implementsTypes.size(); i++) {
+					JavaType implementsType = implementsTypes.get(i);
+					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(implementsType)) {
+						this.append(implementsType.getNameIncludingTypeParameters());
+					} else {
+						this.append(implementsType.getNameIncludingTypeParameters(false, resolver));
+					}
+					if (i != (implementsTypes.size() - 1)) {
+						this.append(", ");
+					} else {
+						this.append(" ");
+					}
+				}
+			}
 			this.append(" {");
 			this.newLine(false);
-			
+			// Write out fields
 			for (FieldMetadata field: innerType.getDeclaredFields()) {
+				this.indent();
 				this.newLine(false);
 				this.appendIndent();
 				this.appendIndent();
@@ -475,10 +438,92 @@ public class ItdSourceFileComposer {
 				// Complete the field declaration
 				this.append(";");
 				this.newLine(false);
+				this.indentRemove();
 			}
+			
+			// Write out methods
+			this.indent();
+			writeMethods(innerType.getDeclaredMethods(), false);
+			this.indentRemove();
+			
 			this.appendIndent();
 			this.append("}");
 			this.newLine(false);
+			this.newLine();
+		}
+	}
+
+	private void writeMethods(List<? extends MethodMetadata> methods, boolean defineTarget) {
+		for (MethodMetadata method : methods) {
+			Assert.isTrue(method.getParameterTypes().size() == method.getParameterNames().size(), "Mismatched parameter names against parameter types");
+			
+			// Append annotations
+			for (AnnotationMetadata annotation : method.getAnnotations()) {
+				this.appendIndent();
+				outputAnnotation(annotation);
+				this.newLine(false);
+			}
+			
+			// Append "<modifier> <returntype> <methodName>" portion
+			this.appendIndent();
+			if (method.getModifier() != 0) {
+				this.append(Modifier.toString(method.getModifier()));
+				this.append(" ");
+			}
+
+			// return type
+			boolean staticMethod = Modifier.isStatic(method.getModifier());
+			this.append(method.getReturnType().getNameIncludingTypeParameters(staticMethod, resolver));
+			this.append(" ");
+			if (defineTarget) {
+				this.append(introductionTo.getSimpleTypeName());
+				this.append(".");
+			}
+			this.append(method.getMethodName().getSymbolName());
+
+			// Append parameter types and names
+			this.append("(");
+			List<AnnotatedJavaType> paramTypes = method.getParameterTypes();
+			List<JavaSymbolName> paramNames = method.getParameterNames();
+			for (int i = 0 ; i < paramTypes.size(); i++) {
+				AnnotatedJavaType paramType = paramTypes.get(i);
+				JavaSymbolName paramName = paramNames.get(i);
+				for (AnnotationMetadata methodParameterAnnotation : paramType.getAnnotations()) {
+					outputAnnotation(methodParameterAnnotation);
+					this.append(" ");
+				}
+				this.append(paramType.getJavaType().getNameIncludingTypeParameters(false, resolver));
+				this.append(" ");
+				this.append(paramName.getSymbolName());
+				if (i < paramTypes.size() - 1) {
+					this.append(", ");
+				}
+			}
+			
+			// add exceptions to be thrown
+			List<JavaType> throwsTypes = method.getThrowsTypes();
+			if (throwsTypes.size() > 0) {
+				this.append(") throws ");
+				for (int i = 0; i < throwsTypes.size(); i++) {
+					this.append(throwsTypes.get(i).getNameIncludingTypeParameters(false, resolver));
+					if (throwsTypes.size() > (i+1)) {
+						this.append(", ");
+					}
+				}
+				this.append(" {");
+			} else {
+				this.append(") {");
+			}
+			
+			this.newLine(false);
+			
+			// Add body
+			this.indent();
+			this.append(method.getBody());
+			this.indentRemove();
+			
+			this.appendFormalLine("}");
+			this.newLine();
 		}
 	}
 

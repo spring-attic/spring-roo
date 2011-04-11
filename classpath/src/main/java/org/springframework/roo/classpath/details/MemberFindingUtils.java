@@ -159,6 +159,23 @@ public abstract class MemberFindingUtils {
 	}
 
 	/**
+	 * Locates an inner type with the specified name.
+	 * 
+	 * @param MemberDetails to search (required)
+	 * @param typeName to locate (required)
+	 */
+	public static ClassOrInterfaceTypeDetails getDeclaredInnerType(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType typeName) {
+		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
+		Assert.notNull(typeName, "Name of inner type required");
+		for (ClassOrInterfaceTypeDetails coitd : memberHoldingTypeDetails.getDeclaredInnerTypes()) {
+			if (coitd.getName().getSimpleTypeName().equals(typeName.getSimpleTypeName())) {
+				return coitd;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Locates an annotation on this class and its superclasses.
 	 * 
 	 * @param memberHoldingTypeDetails to search (required)

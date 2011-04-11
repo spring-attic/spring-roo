@@ -3,12 +3,16 @@ package org.springframework.roo.addon.web.mvc.controller.converter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
 import org.springframework.roo.addon.json.CustomDataJsonTags;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -53,14 +57,17 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
 		//loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
 		for (JavaType type: new TreeSet<JavaType>(domainJavaTypes.keySet())) {
-			JavaSymbolName converterMethodName = new JavaSymbolName("get" + type.getSimpleTypeName() + "Converter");
-			builder.addMethod(getConverterMethod(type, domainJavaTypes.get(type), converterMethodName));
-			installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + converterMethodName + "());");
+			JavaType converterName = new JavaType(type.getSimpleTypeName() + "Converter");
+			ClassOrInterfaceTypeDetails converter = getConverter(type, converterName, domainJavaTypes.get(type));
+			if (converter != null) {
+				builder.addInnerType(converter);
+				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(new " + converterName + "());");
+			}
 		}
 		for (JavaType type: compositePkTypes.keySet()) {
-			for (MethodMetadata method: getCompositePkConverters(type, compositePkTypes.get(type))) {
-				builder.addMethod(method);
-				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + method.getMethodName().getSymbolName() + "());");
+			for (ClassOrInterfaceTypeDetails converter: getCompositePkConverters(type, compositePkTypes.get(type))) {
+				builder.addInnerType(converter);
+				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(new " + converter.getName().getSimpleTypeName() + "());");
 			}
 		}
 		MethodMetadata installMethod = installMethodBuilder.build();
@@ -72,95 +79,83 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		new ItdSourceFileComposer(itdTypeDetails);
 	}
 	
-	private List<MethodMetadata> getCompositePkConverters(JavaType type, Map<Object, JavaSymbolName> jsonMethodNames) {
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
+	private List<ClassOrInterfaceTypeDetails> getCompositePkConverters(JavaType targetType, Map<Object, JavaSymbolName> jsonMethodNames) {
+		List<ClassOrInterfaceTypeDetails> converters = new LinkedList<ClassOrInterfaceTypeDetails>();
 		
+		JavaType innerType = new JavaType("JsonTo" + targetType.getSimpleTypeName() + "Converter");
 		JavaType base64 = new JavaType("org.apache.commons.codec.binary.Base64");
 		String base64Name = base64.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		String typeName = type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-				
-		JavaSymbolName stringToPkTypeMethod = new JavaSymbolName("getStringTo" + type.getSimpleTypeName() + "Converter");
-		if (getGovernorMethod(stringToPkTypeMethod, new ArrayList<AnnotatedJavaType>()) == null) {
+		String typeName = targetType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		
+		if (MemberFindingUtils.getDeclaredInnerType(governorTypeDetails, innerType) == null) {
 			List<JavaType> parameters = new ArrayList<JavaType>();
 			parameters.add(JavaType.STRING_OBJECT);
-			parameters.add(type);
+			parameters.add(targetType);
 			JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
-			String converterTypeName = converterJavaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine("return new " + converterTypeName + "() {");
-			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine("public " + typeName + " convert(String encodedJson) {");
-			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return " + typeName + "." + jsonMethodNames.get(CustomDataJsonTags.FROM_JSON_METHOD).getSymbolName() + "(new String(" + base64Name + ".decodeBase64(encodedJson)));");
-			bodyBuilder.indentRemove();
-			bodyBuilder.appendFormalLine("}");
-			bodyBuilder.indentRemove();
-			bodyBuilder.appendFormalLine("};");
 			
-			methods.add(new MethodMetadataBuilder(getId(), 0, stringToPkTypeMethod, converterJavaType, bodyBuilder).build());
+			MethodMetadataBuilder convert = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("convert"), targetType, bodyBuilder);
+			convert.addParameterType(new AnnotatedJavaType(JavaType.STRING_OBJECT, null));
+			convert.addParameterName(new JavaSymbolName("encodedJson"));
+			ClassOrInterfaceTypeDetailsBuilder converterBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId(), Modifier.STATIC, innerType, PhysicalTypeCategory.CLASS);
+			converterBuilder.addImplementsType(converterJavaType);
+			converterBuilder.addMethod(convert);
+			converters.add(converterBuilder.build());
 		}
-		JavaSymbolName pkTypeToStringMethod = new JavaSymbolName("get" + type.getSimpleTypeName() + "ToStringConverter");
-		if (getGovernorMethod(pkTypeToStringMethod, new ArrayList<AnnotatedJavaType>()) == null) {
+		
+		innerType = new JavaType(targetType.getSimpleTypeName() + "ToJsonConverter");
+		if (MemberFindingUtils.getDeclaredInnerType(governorTypeDetails, innerType) == null) {
 			List<JavaType> parameters = new ArrayList<JavaType>();
-			parameters.add(type);
+			parameters.add(targetType);
 			parameters.add(JavaType.STRING_OBJECT);
 			JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
-			String converterTypeName = converterJavaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-
-			InvocableMemberBodyBuilder bodyBuilder2 = new InvocableMemberBodyBuilder();
-			bodyBuilder2.appendFormalLine("return new " + converterTypeName + "() {");
-			bodyBuilder2.indent();
-			bodyBuilder2.appendFormalLine("public String convert(" + typeName + " " + StringUtils.uncapitalize(type.getSimpleTypeName()) + ") {");
-			bodyBuilder2.indent();
-			bodyBuilder2.appendFormalLine("return " + base64Name + ".encodeBase64URLSafeString(" + StringUtils.uncapitalize(type.getSimpleTypeName()) + "." + jsonMethodNames.get(CustomDataJsonTags.TO_JSON_METHOD).getSymbolName() + "().getBytes());");
-			bodyBuilder2.indentRemove();
-			bodyBuilder2.appendFormalLine("}");
-			bodyBuilder2.indentRemove();
-			bodyBuilder2.appendFormalLine("};");
 			
-			methods.add(new MethodMetadataBuilder(getId(), 0, pkTypeToStringMethod, converterJavaType, bodyBuilder2).build());
+			InvocableMemberBodyBuilder bodyBuilder2 = new InvocableMemberBodyBuilder();
+			bodyBuilder2.appendFormalLine("return " + base64Name + ".encodeBase64URLSafeString(" + StringUtils.uncapitalize(targetType.getSimpleTypeName()) + "." + jsonMethodNames.get(CustomDataJsonTags.TO_JSON_METHOD).getSymbolName() + "().getBytes());");
+			
+			MethodMetadataBuilder convert = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("convert"), JavaType.STRING_OBJECT, bodyBuilder2);
+			convert.addParameterType(new AnnotatedJavaType(targetType, null));
+			convert.addParameterName(new JavaSymbolName(StringUtils.uncapitalize(targetType.getSimpleTypeName())));
+			ClassOrInterfaceTypeDetailsBuilder converterBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId(), Modifier.STATIC, innerType, PhysicalTypeCategory.CLASS);
+			converterBuilder.addImplementsType(converterJavaType);
+			converterBuilder.addMethod(convert);
+			converters.add(converterBuilder.build());
 		}
-		return methods;
+		return converters;
 	}
 	
-	private MethodMetadata getConverterMethod(JavaType type, List<MethodMetadata> methods, JavaSymbolName methodName) {
-		if (getGovernorMethod(methodName, new ArrayList<AnnotatedJavaType>()) != null) {
+	private ClassOrInterfaceTypeDetails getConverter(JavaType targetType, JavaType innerType, List<MethodMetadata> methods) {
+		if (MemberFindingUtils.getDeclaredInnerType(governorTypeDetails, innerType) != null) {
 			return null;
 		}
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(type);
+		parameters.add(targetType);
 		parameters.add(JavaType.STRING_OBJECT);
 		
 		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
-		
+		String targetTypeName = StringUtils.uncapitalize(targetType.getSimpleTypeName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "() {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("public String convert(" + type.getSimpleTypeName() + " " + type.getSimpleTypeName().toLowerCase() + ") {");
-		bodyBuilder.indent();
 		
 		StringBuilder sb = new StringBuilder("return new StringBuilder()");
 		for (int i=0; i < methods.size(); i++) {
 			if (i > 0) {
 				sb.append(".append(\" \")");
 			}
-			sb.append(".append(" + type.getSimpleTypeName().toLowerCase() + "." + methods.get(i).getMethodName().getSymbolName() + "()");
-			
-//			if (domainEnumTypes.contains(methods.get(i).getReturnType())) {
-//				sb.append(".name()");
-//			}
+			sb.append(".append(" + targetTypeName + "." + methods.get(i).getMethodName().getSymbolName() + "()");
 			sb.append(")");
 		}
 		sb.append(".toString();");
 		
 		bodyBuilder.appendFormalLine(sb.toString()); 
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("};");
-		
-		return (new MethodMetadataBuilder(getId(), 0, methodName, converterJavaType, bodyBuilder)).build();
+		MethodMetadataBuilder convert = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("convert"), JavaType.STRING_OBJECT, bodyBuilder);
+		convert.addParameterType(new AnnotatedJavaType(targetType, null));
+		convert.addParameterName(new JavaSymbolName(targetTypeName));
+		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId(), Modifier.STATIC, innerType, PhysicalTypeCategory.CLASS);
+		classBuilder.addImplementsType(converterJavaType);
+		classBuilder.addMethod(convert);
+		return classBuilder.build();
 	}
 	
 	private MethodMetadataBuilder getInstallMethodBuilder() {
