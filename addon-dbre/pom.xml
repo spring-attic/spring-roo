@@ -106,7 +106,6 @@
 		<dependency>
 			<groupId>org.springframework.roo.wrapping</groupId>
 			<artifactId>org.springframework.roo.wrapping.inflector</artifactId>
-			<version>0.7.0.0001</version>
 		</dependency>
 	</dependencies>
 </project>

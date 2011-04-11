@@ -26,12 +26,10 @@
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
             <artifactId>org.springframework.roo.wrapping.jline</artifactId>
-            <version>0.9.94.0001</version>
         </dependency>
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
             <artifactId>jansi</artifactId>
-            <version>1.5</version>
         </dependency>
     </dependencies>
   

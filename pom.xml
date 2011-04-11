@@ -425,52 +425,52 @@
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.aopalliance</artifactId>
-                <version>1.0.0.0001</version>
+                <version>1.0.0.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.bcpg-jdk15</artifactId>
-                <version>1.45.0.0001</version>
+                <version>1.45.0.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.bcprov-jdk15</artifactId>
-                <version>1.45.0.0001</version>
+                <version>1.45.0.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
-                <version>1.0.7.0001</version>
+                <version>1.0.7.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.hapax</artifactId>
-                <version>2.3.4.0002</version>
+                <version>2.3.4.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.inflector</artifactId>
-                <version>0.7.0.0001</version>
+                <version>0.7.0.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.jsch</artifactId>
-                <version>0.1.42.0001</version>
+                <version>0.1.42.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.jgit</artifactId>
-                <version>0.9.3.0001</version>
+                <version>0.9.3.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
-                <version>1.1.0.0001</version>
+                <version>1.1.0.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.jline</artifactId>
-                <version>0.9.94.0001</version>
+                <version>0.9.94.0010</version>
             </dependency>
             <!-- Roo Modules -->
             <dependency>

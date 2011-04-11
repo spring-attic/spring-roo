@@ -98,28 +98,6 @@ or sign a replacement key (the public key servers offer no way to
 revoke a key unless you can sign the recovation request).
 
 ======================================================================
-OSGI WRAPPING JARS
-======================================================================
-
-Some Roo modules require JARs that are not already in OSGi form. That
-is, they don't have an OSGi-aware manifest. Roo has a special project
-called "wrapper" that can convert normal JARs into OSGi JARs.
-
-You'll need to run the wrapper before trying to do anything with Roo.
-If you don't do this, you'll see errors which state Maven cannot find
-"org.springframework.roo.wrapping.some_module".
-
-To create the wrapped JARs, from the root Roo checkout location type:
-
-  cd $ROO_HOME/wrapping
-  mvn clean install
-  cd ..
-
-You need not do this too often. If you get an error about a missing
-wrapper JAR (org.springframework.roo.wrapping.some_module), simply
-repeat the above commands and you should be fine.
-
-======================================================================
 DEVELOPING WITHIN ECLIPSE
 ======================================================================
 
