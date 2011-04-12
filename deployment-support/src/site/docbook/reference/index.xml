@@ -95,6 +95,8 @@
 
     <xi:include href="base-web.xml" />
     
+    <xi:include href="base-cloud-foundry.xml" />
+    
     <xi:include href="base-gwt.xml" />
 
     <xi:include href="base-json.xml" />
