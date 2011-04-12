@@ -19,6 +19,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -47,25 +48,21 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		this.context = context;
 	}
 
-	// TODO: I think this still needs some work (why do I need to add custom xml manipulation logic here..?) - JT
 	public void updateConfiguration(boolean initialSetup) {
-		// if (!isGwtProject() && !initialSetup) {
-		if (!initialSetup) {
+		if (!projectOperations.isProjectAvailable()) {
 			return;
 		}
 
-		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
-
-		MutableFile mutablePom = fileManager.updateFile(pom);
-		Document pomDoc = getXmlDocument(pom);
-
 		// Add GWT natures and builder names to maven eclipse plugin
-		if (updateMavenEclipsePlugin(pomDoc) || updateDataNulcueusPlugin(pomDoc)) {
-			XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
-		}
-
+		updateEclipsePlugin();
+		
+		// Add mapping exclusion to DataNucleus plugin
+		updateDataNulcueusPlugin();
+			
 		Element configuration = XmlUtils.getConfiguration(getClass());
+
+		// Add POM repositories
+		updateRepositories(configuration);
 
 		// Add dependencies
 		updateDependencies(configuration);
@@ -85,33 +82,239 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		}
 	}
 
-//	private boolean isGwtProject() {
-//		if (gwtProject != null) {
-//			return gwtProject;
-//		}
-//
-//		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-//		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
-//
-//		Document pomDoc = getXmlDocument(pom);
-//		Element pomRoot = (Element) pomDoc.getFirstChild();
-//		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
-//		gwtProject = false;
-//		for (Element pluginElement : pluginElements) {
-//			Plugin plugin = new Plugin(pluginElement);
-//			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
-//				gwtProject = true;
-//				break;
-//			}
-//		}
-//		return gwtProject;
-//	}
+	private void updateEclipsePlugin() {
+		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		MutableFile mutablePomFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		Document pom = getXmlDocument(pomPath);
+		Element pomRoot = pom.getDocumentElement();
+		
+		boolean hasChanged = false;
+		
+		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
+		for (Element pluginElement : pluginElements) {
+			Plugin plugin = new Plugin(pluginElement);
+			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
+				Element additionalBuildcommandsElement = XmlUtils.findRequiredElement("configuration/additionalBuildcommands", pluginElement);
+				boolean gwtProjectValidatorCommandPresent = false;
+				for (Element buildCommandElement : XmlUtils.findElements("buildCommand", additionalBuildcommandsElement)) {
+					Element buildCommandNameElement = XmlUtils.findFirstElementByName("name", buildCommandElement);
+					if (buildCommandNameElement.getTextContent().equals("com.google.gwt.eclipse.core.gwtProjectValidator")) {
+						gwtProjectValidatorCommandPresent = true;
+						break;
+					}
+				}
 
-	private void removeIfFound(String xpath, Element webXmlRoot) {
-		for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
-			if (toRemove != null) {
-				toRemove.getParentNode().removeChild(toRemove);
-				toRemove = null;
+				// Add in the builder configuration
+				if (!gwtProjectValidatorCommandPresent) {
+					Element newBuildCommand = new XmlElementBuilder("buildCommand", pom).addChild(new XmlElementBuilder("name", pom).setText("com.google.gwt.eclipse.core.gwtProjectValidator").build()).build();
+					additionalBuildcommandsElement.appendChild(newBuildCommand);
+					hasChanged = true;
+				}
+
+				Element additionalProjectnaturesElement = XmlUtils.findRequiredElement("configuration/additionalProjectnatures", pluginElement);
+				List<Element> projectnatureElements = XmlUtils.findElements("projectnature", additionalProjectnaturesElement);
+
+				boolean gwtNaturePresent = false;
+				for (Element projectnatureElement : projectnatureElements) {
+					if (projectnatureElement.getTextContent().equals("com.google.gwt.eclipse.core.gwtNature")) {
+						gwtNaturePresent = true;
+						break;
+					}
+				}
+
+				// Add in the additional nature
+				if (!gwtNaturePresent) {
+					Element newProjectnature = new XmlElementBuilder("projectnature", pom).setText("com.google.gwt.eclipse.core.gwtNature").build();
+					additionalProjectnaturesElement.appendChild(newProjectnature);
+					hasChanged = true;
+				}
+
+				boolean gaeNaturePresent = false;
+				for (Element projectnatureElement : projectnatureElements) {
+					if (projectnatureElement.getTextContent().equals("com.google.appengine.eclipse.core.gaeNature")) {
+						gaeNaturePresent = true;
+						break;
+					}
+				}
+				// If gae plugin configured, add gaeNature
+				if (projectOperations.getProjectMetadata().isGaeEnabled() && !gaeNaturePresent) {
+					Element newProjectnature = new XmlElementBuilder("projectnature", pom).setText("com.google.appengine.eclipse.core.gaeNature").build();
+					additionalProjectnaturesElement.appendChild(newProjectnature);
+					hasChanged = true;
+				}
+			}
+		}
+
+		// Fix output directory
+		Element outputDirectory = XmlUtils.findFirstElement("/project/build/outputDirectory", pomRoot);
+		if (outputDirectory != null) {
+			if (!outputDirectory.getTextContent().equals("${project.build.directory}/${project.build.finalName}/WEB-INF/classes")) {
+				outputDirectory.setTextContent("${project.build.directory}/${project.build.finalName}/WEB-INF/classes");
+				hasChanged = true;
+			}
+		} else {
+			Element newEntry = new XmlElementBuilder("outputDirectory", pom).setText("${project.build.directory}/${project.build.finalName}/WEB-INF/classes").build();
+			Element ctx = XmlUtils.findRequiredElement("/project/build", pomRoot);
+			ctx.appendChild(newEntry);
+			hasChanged = true;
+		}
+		
+		if (hasChanged) {
+			XmlUtils.writeXml(mutablePomFile.getOutputStream(), pom);
+		}
+	}
+	
+	private void updateDataNulcueusPlugin() {
+		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		MutableFile mutablePomFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		Document pom = getXmlDocument(pomPath);
+		Element pomRoot = pom.getDocumentElement();
+		
+		boolean hasChanged = false;
+
+		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
+		for (Element pluginElement : pluginElements) {
+			Plugin plugin = new Plugin(pluginElement);
+			if ("maven-datanucleus-plugin".equals(plugin.getArtifactId()) && "org.datanucleus".equals(plugin.getGroupId())) {
+				Element configElement = plugin.getConfiguration().getConfiguration();
+				boolean mappingExclusionPresent = false;
+				for (int i = 0; i < configElement.getChildNodes().getLength(); i++) {
+					Node childNode = configElement.getChildNodes().item(i);
+					if (childNode.getNodeName().equals("mappingExcludes")) {
+						if (childNode.getTextContent().equals("**/GaeAuthFilter.class")) {
+							mappingExclusionPresent = true;
+						}
+					}
+				}
+				if (!mappingExclusionPresent) {
+					configElement.appendChild(new XmlElementBuilder("mappingExcludes", pom).setText("**/GaeAuthFilter.class").build());
+					hasChanged = true;
+				}
+			}
+		}
+		
+		if (hasChanged) {
+			XmlUtils.writeXml(mutablePomFile.getOutputStream(), pom);
+		}
+	}
+	
+	private void updateRepositories(Element configuration) {
+		List<Repository> repositories = new ArrayList<Repository>();
+
+		List<Element> gwtRepositories = XmlUtils.findElements("/configuration/gwt/repositories/repository", configuration);
+		for (Element repositoryElement : gwtRepositories) {
+			repositories.add(new Repository(repositoryElement));
+		}
+		projectOperations.addRepositories(repositories);
+
+		repositories.clear();
+		List<Element> gwtPluginRepositories = XmlUtils.findElements("/configuration/gwt/pluginRepositories/pluginRepository", configuration);
+		for (Element repositoryElement : gwtPluginRepositories) {
+			repositories.add(new Repository(repositoryElement));
+		}
+		projectOperations.addPluginRepositories(repositories);
+	}
+
+	private void updateDependencies(Element configuration) {
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+
+		List<Element> gwtDependencies = XmlUtils.findElements("/configuration/gwt/dependencies/dependency", configuration);
+		for (Element dependencyElement : gwtDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
+		}
+
+		if (projectOperations.getProjectMetadata().isGaeEnabled()) {
+			// Add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
+			List<Element> gaeDependencies = XmlUtils.findElements("/configuration/gwt/gae-dependencies/dependency", configuration);
+			for (Element dependencyElement : gaeDependencies) {
+				dependencies.add(new Dependency(dependencyElement));
+			}
+		}
+
+		projectOperations.addDependencies(dependencies);
+	}
+
+	private void updatePlugins(Element configuration) {
+		boolean removePlugin = false;
+		for (Plugin existingBuildPlugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
+			if (existingBuildPlugin.getArtifactId().equals("gwt-maven-plugin")) {
+				Element pluginConfiguration = existingBuildPlugin.getConfiguration().getConfiguration();
+				Element serverElement = XmlUtils.findFirstElement("server", pluginConfiguration);
+				if (serverElement == null) {
+					removePlugin = projectOperations.getProjectMetadata().isGaeEnabled();
+					break;
+				}
+				if ("com.google.appengine.tools.development.gwt.AppEngineLauncher".equals(serverElement.getTextContent())) {
+					removePlugin = !projectOperations.getProjectMetadata().isGaeEnabled();
+				}
+				break;
+			}
+		}
+
+		List<Element> plugins = XmlUtils.findElements(projectOperations.getProjectMetadata().isGaeEnabled() ? "/configuration/gwt/gae-plugins/plugin" : "/configuration/gwt/plugins/plugin", configuration);
+		for (Element pluginElement : plugins) {
+			Plugin plugin = new Plugin(pluginElement);
+			if (removePlugin) {
+				projectOperations.removeBuildPlugin(plugin);
+			}
+			projectOperations.addBuildPlugin(plugin);
+		}
+	}
+	
+	private void updateWebXml() {
+		String webXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		Assert.isTrue(fileManager.exists(webXmlPath), "web.xml not found; cannot continue");
+
+		MutableFile mutableWebXmlFile = fileManager.updateFile(webXmlPath);
+		Document webXml = getXmlDocument(webXmlPath);
+		Element webXmlRoot = webXml.getDocumentElement();
+
+		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXml, null);
+		if (projectOperations.getProjectMetadata().isGaeEnabled()) {
+			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectOperations.getProjectMetadata()) + ".GaeAuthFilter", "/gwtRequest/*", webXml, "This filter makes GAE authentication services visible to a RequestFactory client.");
+			String displayName = "Redirect to the login page if needed before showing any html pages";
+			WebXmlUtils.WebResourceCollection webResourceCollection = new WebXmlUtils.WebResourceCollection("Login required", null, Collections.singletonList("*.html"), new ArrayList<String>());
+			ArrayList<String> roleNames = new ArrayList<String>();
+			roleNames.add("*");
+			String userDataConstraint = null;
+			WebXmlUtils.addSecurityConstraint(displayName, Collections.singletonList(webResourceCollection), roleNames, userDataConstraint, webXml, null);
+		} else {
+			Element filter = XmlUtils.findFirstElement("/web-app/filter[filter-name = 'GaeAuthFilter']", webXml.getDocumentElement());
+			if (filter != null) {
+				filter.getParentNode().removeChild(filter);
+			}
+			Element filterMapping = XmlUtils.findFirstElement("/web-app/filter-mapping[filter-name = 'GaeAuthFilter']", webXml.getDocumentElement());
+			if (filterMapping != null) {
+				filterMapping.getParentNode().removeChild(filterMapping);
+			}
+			Element securityConstraint = XmlUtils.findFirstElement("security-constraint", webXml.getDocumentElement());
+			if (securityConstraint != null) {
+				securityConstraint.getParentNode().removeChild(securityConstraint);
+			}
+		}
+
+		removeIfFound("/web-app/error-page", webXmlRoot);
+		XmlUtils.writeXml(mutableWebXmlFile.getOutputStream(), webXml);
+	}
+	
+	private void updatePersistenceXml() {
+		String persistenceXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		if (!fileManager.exists(persistenceXml)) {
+			return;
+		}
+
+		MutableFile mutablePersistenceXml = fileManager.updateFile(persistenceXml);
+		Document persistenceXmlDoc = getXmlDocument(persistenceXml);
+
+		Element persistenceXmlDocRoot = (Element) persistenceXmlDoc.getFirstChild();
+		List<Element> persistenceUnitElements = XmlUtils.findElements("persistence-unit", persistenceXmlDocRoot);
+
+		for (Element persistenceUnitElement : persistenceUnitElements) {
+			Element provider = XmlUtils.findFirstElement("provider", persistenceUnitElement);
+			if (provider != null && "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider".equals(provider.getTextContent()) && !projectOperations.getProjectMetadata().isGaeEnabled()) {
+				persistenceUnitElement.getParentNode().removeChild(persistenceUnitElement);
+				XmlUtils.writeXml(mutablePersistenceXml.getOutputStream(), persistenceXmlDoc);
+				break;
 			}
 		}
 	}
@@ -171,6 +374,15 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		}
 	}
 
+	private void removeIfFound(String xpath, Element webXmlRoot) {
+		for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
+			if (toRemove != null) {
+				toRemove.getParentNode().removeChild(toRemove);
+				toRemove = null;
+			}
+		}
+	}
+
 	private CharSequence getGaeHookup() {
 		StringBuilder builder = new StringBuilder("    // AppEngine user authentication\n\n");
 		builder.append("    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.loginWidget);\n\n");
@@ -178,36 +390,13 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 		return builder.toString();
 	}
 
-	private void updatePersistenceXml() {
-		String persistenceXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
-		if (!fileManager.exists(persistenceXml)) {
-			return;
-		}
-
-		MutableFile mutablePersistenceXml = fileManager.updateFile(persistenceXml);
-		Document persistenceXmlDoc = getXmlDocument(persistenceXml);
-
-		Element persistenceXmlDocRoot = (Element) persistenceXmlDoc.getFirstChild();
-		List<Element> persistenceUnitElements = XmlUtils.findElements("persistence-unit", persistenceXmlDocRoot);
-
-		for (Element persistenceUnitElement : persistenceUnitElements) {
-			Element provider = XmlUtils.findFirstElement("provider", persistenceUnitElement);
-			if (provider != null && "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider".equals(provider.getTextContent()) && !projectOperations.getProjectMetadata().isGaeEnabled()) {
-				persistenceUnitElement.getParentNode().removeChild(persistenceUnitElement);
-				XmlUtils.writeXml(mutablePersistenceXml.getOutputStream(), persistenceXmlDoc);
-				break;
-			}
-		}
-	}
-
 	private Document getXmlDocument(String xmlFile) {
-		MutableFile mutableXml;
 		InputStream is = null;
-		Document xmlDoc;
+		Document xmlDocument;
 		try {
-			mutableXml = fileManager.updateFile(xmlFile);
+			MutableFile mutableXml = fileManager.updateFile(xmlFile);
 			is = mutableXml.getInputStream();
-			xmlDoc = XmlUtils.getDocumentBuilder().parse(mutableXml.getInputStream());
+			xmlDocument = XmlUtils.getDocumentBuilder().parse(mutableXml.getInputStream());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
@@ -217,180 +406,6 @@ public class GwtConfigServiceImpl implements GwtConfigService {
 				} catch (IOException ignored) {}
 			}
 		}
-		return xmlDoc;
-	}
-
-	private boolean updateDataNulcueusPlugin(Document pomXmlDoc) {
-		Element pomRoot = (Element) pomXmlDoc.getFirstChild();
-		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
-		for (Element pluginElement : pluginElements) {
-			Plugin plugin = new Plugin(pluginElement);
-			if ("maven-datanucleus-plugin".equals(plugin.getArtifactId()) && "org.datanucleus".equals(plugin.getGroupId())) {
-				Element configElement = plugin.getConfiguration().getConfiguration();
-				boolean mappingExclusionPresent = false;
-				for (int i = 0; i < configElement.getChildNodes().getLength(); i++) {
-					Node childNode = configElement.getChildNodes().item(i);
-					if (childNode.getNodeName().equals("mappingExcludes")) {
-						if (childNode.getTextContent().equals("**/GaeAuthFilter.class")) {
-							mappingExclusionPresent = true;
-						}
-					}
-				}
-				if (!mappingExclusionPresent) {
-					configElement.appendChild(new XmlElementBuilder("mappingExcludes", pomXmlDoc).setText("**/GaeAuthFilter.class").build());
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private void updateWebXml() {
-		String webXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-		Assert.isTrue(fileManager.exists(webXml), "web.xml not found; cannot continue");
-
-		MutableFile mutableWebXml = fileManager.updateFile(webXml);
-		Document webXmlDoc = getXmlDocument(webXml);
-		Element webXmlRoot = webXmlDoc.getDocumentElement();
-
-		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
-		if (projectOperations.getProjectMetadata().isGaeEnabled()) {
-			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectOperations.getProjectMetadata()) + ".GaeAuthFilter", "/gwtRequest/*", webXmlDoc, "This filter makes GAE authentication services visible to a RequestFactory client.");
-			String displayName = "Redirect to the login page if needed before showing any html pages";
-			WebXmlUtils.WebResourceCollection webResourceCollection = new WebXmlUtils.WebResourceCollection("Login required", null, Collections.singletonList("*.html"), new ArrayList<String>());
-			ArrayList<String> roleNames = new ArrayList<String>();
-			roleNames.add("*");
-			String userDataConstraint = null;
-			WebXmlUtils.addSecurityConstraint(displayName, Collections.singletonList(webResourceCollection), roleNames, userDataConstraint, webXmlDoc, null);
-		} else {
-			Element filter = XmlUtils.findFirstElement("/web-app/filter[filter-name = 'GaeAuthFilter']", webXmlDoc.getDocumentElement());
-			if (filter != null) {
-				filter.getParentNode().removeChild(filter);
-			}
-			Element filterMapping = XmlUtils.findFirstElement("/web-app/filter-mapping[filter-name = 'GaeAuthFilter']", webXmlDoc.getDocumentElement());
-			if (filterMapping != null) {
-				filterMapping.getParentNode().removeChild(filterMapping);
-			}
-			Element securityConstraint = XmlUtils.findFirstElement("security-constraint", webXmlDoc.getDocumentElement());
-			if (securityConstraint != null) {
-				securityConstraint.getParentNode().removeChild(securityConstraint);
-			}
-		}
-
-		removeIfFound("/web-app/error-page", webXmlRoot);
-		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
-	}
-
-	private void updatePlugins(Element configuration) {
-		boolean removePlugin = false;
-		for (Plugin existingBuildPlugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
-			if (existingBuildPlugin.getArtifactId().equals("gwt-maven-plugin")) {
-				Element pluginConfiguration = existingBuildPlugin.getConfiguration().getConfiguration();
-				Element serverElement = XmlUtils.findFirstElement("server", pluginConfiguration);
-				if (serverElement == null) {
-					removePlugin = projectOperations.getProjectMetadata().isGaeEnabled();
-					break;
-				}
-				if ("com.google.appengine.tools.development.gwt.AppEngineLauncher".equals(serverElement.getTextContent())) {
-					removePlugin = !projectOperations.getProjectMetadata().isGaeEnabled();
-				}
-				break;
-			}
-		}
-
-		List<Element> plugins = XmlUtils.findElements(projectOperations.getProjectMetadata().isGaeEnabled() ? "/configuration/gwt/gae-plugins/plugin" : "/configuration/gwt/plugins/plugin", configuration);
-		for (Element pluginElement : plugins) {
-			Plugin plugin = new Plugin(pluginElement);
-			if (removePlugin) {
-				projectOperations.removeBuildPlugin(plugin);
-			}
-			projectOperations.addBuildPlugin(plugin);
-		}
-	}
-
-	private void updateDependencies(Element configuration) {
-		List<Dependency> dependencies = new ArrayList<Dependency>();
-
-		List<Element> gwtDependencies = XmlUtils.findElements("/configuration/gwt/dependencies/dependency", configuration);
-		for (Element dependencyElement : gwtDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
-		}
-
-		if (projectOperations.getProjectMetadata().isGaeEnabled()) {
-			// Add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
-			List<Element> gaeDependencies = XmlUtils.findElements("/configuration/gwt/gae-dependencies/dependency", configuration);
-			for (Element dependencyElement : gaeDependencies) {
-				dependencies.add(new Dependency(dependencyElement));
-			}
-		}
-
-		projectOperations.addDependencies(dependencies);
-	}
-
-	private boolean updateMavenEclipsePlugin(Document pomDoc) {
-		Element pomRoot = (Element) pomDoc.getFirstChild();
-		boolean hasChanged = false;
-		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
-		for (Element pluginElement : pluginElements) {
-			Plugin plugin = new Plugin(pluginElement);
-			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
-				Element ctx = XmlUtils.findRequiredElement("configuration/additionalBuildcommands", pluginElement);
-				boolean gwtProjectValidatorCommandPresent = false;
-				for (Element buildCommand : XmlUtils.findElements("buildCommand", ctx)) {
-					Element buildCommandName = XmlUtils.findFirstElementByName("name", buildCommand);
-					if (buildCommandName.getTextContent().equals("com.google.gwt.eclipse.core.gwtProjectValidator")) {
-						gwtProjectValidatorCommandPresent = true;
-						break;
-					}
-				}
-
-				// Add in the builder configuration
-				if (!gwtProjectValidatorCommandPresent) {
-					Element newEntry = new XmlElementBuilder("buildCommand", pomDoc).addChild(new XmlElementBuilder("name", pomDoc).setText("com.google.gwt.eclipse.core.gwtProjectValidator").build()).build();
-					ctx.appendChild(newEntry);
-					hasChanged = true;
-				}
-
-				ctx = XmlUtils.findRequiredElement("configuration/additionalProjectnatures", pluginElement);
-				boolean gwtNaturePresent = false;
-				boolean gaeNaturePresent = false;
-				for (Element natureElement : XmlUtils.findElements("projectnature", ctx)) {
-					if (natureElement.getTextContent().equals("com.google.appengine.eclipse.core.gaeNature")) {
-						gaeNaturePresent = true;
-					} else if (natureElement.getTextContent().equals("com.google.gwt.eclipse.core.gwtNature")) {
-						gwtNaturePresent = true;
-					}
-				}
-
-				// Add in the additional nature
-				if (!gwtNaturePresent) {
-					Element newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.gwt.eclipse.core.gwtNature").build();
-					ctx.appendChild(newEntry);
-					hasChanged = true;
-				}
-
-				// If gae plugin configured, add gaeNature
-				if (projectOperations.getProjectMetadata().isGaeEnabled() && !gaeNaturePresent) {
-					Element newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.appengine.eclipse.core.gaeNature").build();
-					ctx.appendChild(newEntry);
-					hasChanged = true;
-				}
-			}
-		}
-
-		// Fix output directory
-		Element outputDirectory = XmlUtils.findFirstElement("/project/build/outputDirectory", pomRoot);
-		if (outputDirectory != null) {
-			if (!outputDirectory.getTextContent().equals("${project.build.directory}/${project.build.finalName}/WEB-INF/classes")) {
-				outputDirectory.setTextContent("${project.build.directory}/${project.build.finalName}/WEB-INF/classes");
-				hasChanged = true;
-			}
-		} else {
-			Element newEntry = new XmlElementBuilder("outputDirectory", pomDoc).setText("${project.build.directory}/${project.build.finalName}/WEB-INF/classes").build();
-			Element ctx = XmlUtils.findRequiredElement("/project/build", pomRoot);
-			ctx.appendChild(newEntry);
-			hasChanged = true;
-		}
-		return hasChanged;
+		return xmlDocument;
 	}
 }

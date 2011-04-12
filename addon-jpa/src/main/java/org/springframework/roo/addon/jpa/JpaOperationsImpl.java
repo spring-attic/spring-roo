@@ -35,6 +35,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -100,7 +101,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		updateApplicationContext(ormProvider, jdbcDatabase, jndi, persistenceUnit);
 		updatePersistenceXml(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, persistenceUnit);
-		updateGaeXml(ormProvider, jdbcDatabase, applicationId);
+		manageGaeXml(ormProvider, jdbcDatabase, applicationId);
 		updateVMforceConfigProperties(ormProvider, jdbcDatabase, userName, password);
 		
 		if (!StringUtils.hasText(jndi)) {
@@ -121,11 +122,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
-		Document appCtx;
+		Document applicationContext;
 		try {
 			if (fileManager.exists(contextPath)) {
 				contextMutableFile = fileManager.updateFile(contextPath);
-				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
+				applicationContext = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 			} else {
 				throw new IllegalStateException("Could not acquire applicationContext.xml in " + contextPath);
 			}
@@ -133,7 +134,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			throw new IllegalStateException(e);
 		}
 
-		Element root = appCtx.getDocumentElement();
+		Element root = applicationContext.getDocumentElement();
 
 		// Checking for existence of configurations, if found abort
 		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id = 'dataSource']", root);
@@ -147,21 +148,21 @@ public class JpaOperationsImpl implements JpaOperations {
 				root.removeChild(dataSourceJndi);
 			}
 		} else if (!StringUtils.hasText(jndi) && dataSource == null) {
-			dataSource = appCtx.createElement("bean");
+			dataSource = applicationContext.createElement("bean");
 			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
 			dataSource.setAttribute("destroy-method", "close");
 			dataSource.setAttribute("id", "dataSource");
-			dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", appCtx));
-			dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
-			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
-			dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
+			dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", applicationContext));
+			dataSource.appendChild(createPropertyElement("url", "${database.url}", applicationContext));
+			dataSource.appendChild(createPropertyElement("username", "${database.username}", applicationContext));
+			dataSource.appendChild(createPropertyElement("password", "${database.password}", applicationContext));
 			root.appendChild(dataSource);
 			if (dataSourceJndi != null) {
 				dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
 			}
 		} else if (StringUtils.hasText(jndi)) {
 			if (dataSourceJndi == null) {
-				dataSourceJndi = appCtx.createElement("jee:jndi-lookup");
+				dataSourceJndi = applicationContext.createElement("jee:jndi-lookup");
 				dataSourceJndi.setAttribute("id", "dataSource");
 				root.appendChild(dataSourceJndi);
 			}
@@ -178,28 +179,28 @@ public class JpaOperationsImpl implements JpaOperations {
 				dataSource.removeChild(validationQueryElement);
 				dataSource.removeChild(testOnBorrowElement);
 			} else if (jdbcDatabase == JdbcDatabase.MYSQL && validationQueryElement == null && testOnBorrowElement == null) {
-				dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1 FROM DUAL", appCtx));
-				dataSource.appendChild(createPropertyElement("testOnBorrow", "true", appCtx));
+				dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1 FROM DUAL", applicationContext));
+				dataSource.appendChild(createPropertyElement("testOnBorrow", "true", applicationContext));
 			}
 		}
 
 		Element transactionManager = XmlUtils.findFirstElement("/beans/bean[@id = 'transactionManager']", root);
 		if (transactionManager == null) {
-			transactionManager = appCtx.createElement("bean");
+			transactionManager = applicationContext.createElement("bean");
 			transactionManager.setAttribute("id", "transactionManager");
 			transactionManager.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
 			if (StringUtils.hasText(persistenceUnit)) {
-				Element qualifier = appCtx.createElement("qualifier");
+				Element qualifier = applicationContext.createElement("qualifier");
 				qualifier.setAttribute("value", persistenceUnit);
 				transactionManager.appendChild(qualifier);
 			}
-			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
+			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", applicationContext));
 			root.appendChild(transactionManager);
 		}
 
 		Element aspectJTxManager = XmlUtils.findFirstElement("/beans/annotation-driven", root);
 		if (aspectJTxManager == null) {
-			aspectJTxManager = appCtx.createElement("tx:annotation-driven");
+			aspectJTxManager = applicationContext.createElement("tx:annotation-driven");
 			aspectJTxManager.setAttribute("mode", "aspectj");
 			aspectJTxManager.setAttribute("transaction-manager", "transactionManager");
 			root.appendChild(aspectJTxManager);
@@ -210,24 +211,19 @@ public class JpaOperationsImpl implements JpaOperations {
 			root.removeChild(entityManagerFactory);
 		}
 
-		entityManagerFactory = appCtx.createElement("bean");
+		entityManagerFactory = applicationContext.createElement("bean");
 		entityManagerFactory.setAttribute("id", "entityManagerFactory");
 
 		switch (jdbcDatabase) {
 			case GOOGLE_APP_ENGINE:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
-				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), appCtx));
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), applicationContext));
 				break;
 			default:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-				switch (ormProvider) {
-					case DATANUCLEUS:
-					case DATANUCLEUS_2:
-						entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), appCtx));
-						break;
-					default:
-						entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
-						break;
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), applicationContext));
+				if (!ormProvider.name().startsWith("DATANUCLEUS")) {
+					entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", applicationContext));
 				}
 				break;
 		}
@@ -235,7 +231,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		root.appendChild(entityManagerFactory);
 		XmlUtils.removeTextNodes(root);
 
-		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
+		fileManager.createOrUpdateXmlFileIfRequired(contextPath, applicationContext, true);
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
@@ -409,7 +405,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return connectionString.replace("HOST_NAME", hostName);
 	}
 
-	private void updateGaeXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String applicationId) {
+	private void manageGaeXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String applicationId) {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		String appenginePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
 		boolean appenginePathExists = fileManager.exists(appenginePath);
@@ -582,13 +578,13 @@ public class JpaOperationsImpl implements JpaOperations {
 					outputStream.close();
 				} else if (ormProvider != OrmProvider.DATANUCLEUS && props.containsKey(dnKey)) {
 					OutputStream outputStream = log4jMutableFile.getOutputStream();
-					props.remove(dnKey);
+					props.put(dnKey, "WARN");
 					props.store(outputStream, "Updated at " + new Date());
 					outputStream.close();
 				}
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -724,6 +720,11 @@ public class JpaOperationsImpl implements JpaOperations {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
 		
+		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
+			Element gwtPluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
+			buildPlugins.add(new Plugin(gwtPluginElement));
+		}
+
 		for (Plugin buildPlugin : buildPlugins) {
 			projectOperations.addBuildPlugin(buildPlugin);
 		}
@@ -732,8 +733,8 @@ public class JpaOperationsImpl implements JpaOperations {
 			updateEclipsePlugin(true);
 		}
 	}
-
-	private void updateEclipsePlugin(boolean addBuildCommand) {
+	
+	private void updateEclipsePlugin(boolean addToPlugin) {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		MutableFile mutableFile = null;
 
@@ -748,31 +749,43 @@ public class JpaOperationsImpl implements JpaOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		
-		updateEclipsePlugin(addBuildCommand, pom, mutableFile);
-	}
-	
-	private void updateEclipsePlugin(boolean addBuildCommand, Document pom, MutableFile mutableFile) {
+
 		Element root = pom.getDocumentElement();
+		boolean hasChanged = false;
 		
-		String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
+		// Manage GAE buildCommand
 		Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
-		Assert.notNull(additionalBuildcommandsElement, "additionalBuildcommands element of the maven-eclipse-plugin reqired");
-		Element buildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + gaeBuildCommandName + "']", additionalBuildcommandsElement);
-		
-		if (addBuildCommand && buildCommandElement == null) {
+		Assert.notNull(additionalBuildcommandsElement, "additionalBuildcommands element of the maven-eclipse-plugin required");
+		String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
+		Element gaeBuildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + gaeBuildCommandName + "']", additionalBuildcommandsElement);
+		if (addToPlugin && gaeBuildCommandElement == null) {
 			Element nameElement = pom.createElement("name");
 			nameElement.setTextContent(gaeBuildCommandName);
-			buildCommandElement = pom.createElement("buildCommand");
-			buildCommandElement.appendChild(nameElement);
-			additionalBuildcommandsElement.appendChild(buildCommandElement);
-			mutableFile.setDescriptionOfChange("Updated maven-eclipse-plugin");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
-		} 
+			gaeBuildCommandElement = pom.createElement("buildCommand");
+			gaeBuildCommandElement.appendChild(nameElement);
+			additionalBuildcommandsElement.appendChild(gaeBuildCommandElement);
+			hasChanged = true;
+		} else if (!addToPlugin && gaeBuildCommandElement != null) {
+			additionalBuildcommandsElement.removeChild(gaeBuildCommandElement);
+			hasChanged = true;
+		}
+
+		// Manage GAE projectnature
+		Element additionalProjectnaturesElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalProjectnatures", root);
+		Assert.notNull(additionalProjectnaturesElement, "additionalProjectnatures element of the maven-eclipse-plugin required");
+		String gaeProjectnatureName = "com.google.appengine.eclipse.core.gaeNature";
+		Element gaeProjectnatureElement = XmlUtils.findFirstElement("projectnature[text() = '" + gaeProjectnatureName + "']", additionalProjectnaturesElement);
+		if (addToPlugin && gaeProjectnatureElement == null) {
+			gaeProjectnatureElement = new XmlElementBuilder("projectnature", pom).setText(gaeProjectnatureName).build();
+			additionalProjectnaturesElement.appendChild(gaeProjectnatureElement);
+			hasChanged = true;
+		} else if (!addToPlugin && gaeProjectnatureElement != null) {
+			additionalProjectnaturesElement.removeChild(gaeProjectnatureElement);
+			hasChanged = true;
+		}
 		
-		if (!addBuildCommand && buildCommandElement != null) {
-			additionalBuildcommandsElement.removeChild(buildCommandElement);
-			mutableFile.setDescriptionOfChange("Updated maven-eclipse-plugin");
+		if (hasChanged) {
+			mutableFile.setDescriptionOfChange("Managed GAE buildCommand and projectnature in maven-eclipse-plugin");
 			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		}
 	}
@@ -788,9 +801,9 @@ public class JpaOperationsImpl implements JpaOperations {
 			throw new IllegalStateException("Could not open POM '" + pomPath + "'", ex);
 		}
 
-		Element root = (Element) pom.getFirstChild();
+		Element root = pom.getDocumentElement();
 		
-		// Removed unwanted database dependencies
+		// Remove unwanted database artifacts
 		List<JdbcDatabase> databases = new ArrayList<JdbcDatabase>();
 		for (JdbcDatabase database : JdbcDatabase.values()) {
 			if (!database.getKey().equals(jdbcDatabase.getKey()) && !database.getDriverClassName().equals(jdbcDatabase.getDriverClassName())) {
@@ -799,16 +812,19 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		boolean hasChanged = removeArtifacts(getDbXPath(databases), root, configuration);
 
-		// Removed unwanted ORM providers
+		// Remove unwanted ORM provider artifacts
 		List<OrmProvider> ormProviders = new ArrayList<OrmProvider>();
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
 				ormProviders.add(provider);
 			}
 		}
-		
 		hasChanged |= removeArtifacts(getProviderXPath(ormProviders), root, configuration);
-
+		
+		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
+			hasChanged |= removePlugins(getGwtPluginXPath(jdbcDatabase), root, configuration);
+		}
+		
 		if (hasChanged) {
 			// Something has changed so write changes to pom.xml
 			mutableFile.setDescriptionOfChange("Removed redundant artifacts");
@@ -816,58 +832,66 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
-			updateEclipsePlugin(false, pom, mutableFile);
+			updateEclipsePlugin(false);
 		}
 	}
-		
+
 	private boolean removeArtifacts(String xPathExpression, Element root, Element configuration) {
 		boolean hasChanged = false;
-		
+
 		// Remove unwanted dependencies
 		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
-		for (Element candidate : XmlUtils.findElements("/project/dependencies/dependency", root)) {
-			for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
-				if (new Dependency(dependencyElement).equals(new Dependency(candidate))) {
-					// Found it
-					dependenciesElement.removeChild(candidate);
-					XmlUtils.removeTextNodes(dependenciesElement);
-					hasChanged = true;
+		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
+			Dependency dependency = new Dependency(dependencyElement);
+			Element candidate = XmlUtils.findFirstElement("/project/dependencies/dependency[artifactId = '" + dependency.getArtifactId() + "']", root);
+			if (candidate != null) {
+				if (projectOperations.getProjectMetadata().isGwtEnabled() && dependency.getGroupId().equals("com.google.appengine")) {
+					continue;
 				}
+				// Found it
+				dependenciesElement.removeChild(candidate);
+				XmlUtils.removeTextNodes(dependenciesElement);
+				hasChanged = true;
 			}
 		}
+
+		// Remove unwanted plugins
+		hasChanged |= removePlugins(xPathExpression + "/plugins/plugin", root, configuration);
 
 		// Remove unwanted filters
 		Element filtersElement = XmlUtils.findFirstElement("/project/build/filters", root);
 		if (filtersElement != null) {
-			for (Element candidate : XmlUtils.findElements("/project/build/filters/filter", root)) {
-				for (Element filterElement : XmlUtils.findElements(xPathExpression + "/filters/filter", configuration)) {
-					if (new Filter(filterElement).equals(new Filter(candidate))) {
-						// Found it
-						filtersElement.removeChild(candidate);
-						XmlUtils.removeTextNodes(filtersElement);
-						hasChanged = true;
-					}
+			for (Element filterElement : XmlUtils.findElements(xPathExpression + "/filters/filter", configuration)) {
+				Filter filter = new Filter(filterElement);
+				Element candidate = XmlUtils.findFirstElement("/project/build/filters/filter[text() = '" + filter.getValue() + "']", root);
+				if (candidate != null) {
+					// Found it
+					filtersElement.removeChild(candidate);
+					XmlUtils.removeTextNodes(filtersElement);
+					hasChanged = true;
 				}
 			}
-
 			if (!filtersElement.hasChildNodes()) {
 				filtersElement.getParentNode().removeChild(filtersElement);
 			}
 		}
-		
-		// Remove unwanted plugins
+
+		return hasChanged;
+	}
+
+	private boolean removePlugins(String pluginsXPath, Element root, Element configuration) {
+		boolean hasChanged = false;
 		Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
-		for (Element candidate : XmlUtils.findElements("/project/build/plugins/plugin", root)) {
-			for (Element pluginElement : XmlUtils.findElements(xPathExpression + "/plugins/plugin", configuration)) {
-				if (new Plugin(pluginElement).equals(new Plugin(candidate))) {
-					// Found it
-					pluginsElement.removeChild(candidate);
-					XmlUtils.removeTextNodes(pluginsElement);
-					hasChanged = true;
-				}
+		for (Element pluginElement : XmlUtils.findElements(pluginsXPath, configuration)) {
+			Plugin plugin = new Plugin(pluginElement);
+			Element candidate = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = '" + plugin.getArtifactId() + "']", root);
+			if (candidate != null) {
+				// Found it
+				pluginsElement.removeChild(candidate);
+				XmlUtils.removeTextNodes(pluginsElement);
+				hasChanged = true;
 			}
 		}
-		
 		return hasChanged;
 	}
 
@@ -907,6 +931,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		return builder.toString();
 	}
 
+	private String getGwtPluginXPath(JdbcDatabase jdbcDatabase) {
+		return "/configuration/gwt/plugins/plugin[@id = '" + (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE ? "nonGAE" : "GAE") + "']";
+	}
+		
 	private Element createPropertyElement(String name, String value, Document doc) {
 		Element property = doc.createElement("property");
 		property.setAttribute("name", name);
