@@ -731,6 +731,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(true);
+			updateDataNucleusPlugin(true);
 		}
 	}
 	
@@ -790,6 +791,47 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
+	private void updateDataNucleusPlugin(boolean addToPlugin) {
+		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		MutableFile mutableFile = null;
+
+		Document pom;
+		try {
+			if (fileManager.exists(pomPath)) {
+				mutableFile = fileManager.updateFile(pomPath);
+				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
+			} else {
+				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element root = pom.getDocumentElement();
+		boolean hasChanged = false;
+		
+		// Manage GAE buildCommand
+		Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);
+		if (configurationElement == null) {
+			return;
+		}
+
+		Element mappingExcludesElement = XmlUtils.findFirstElement("mappingExcludes", configurationElement);
+		if (addToPlugin && mappingExcludesElement == null) {
+			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", pom).setText("**/GaeAuthFilter.class").build();
+			configurationElement.appendChild(mappingExcludesElement);
+			hasChanged = true;
+		} else if (!addToPlugin && mappingExcludesElement != null) {
+			configurationElement.removeChild(configurationElement);
+			hasChanged = true;
+		}
+		
+		if (hasChanged) {
+			mutableFile.setDescriptionOfChange("Managed mappingExcludes element in maven-datanucleus-plugin");
+			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+		}
+	}
+
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "/pom.xml");
 		MutableFile mutableFile = fileManager.updateFile(pomPath);
@@ -833,6 +875,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(false);
+			updateDataNucleusPlugin(false);
 		}
 	}
 

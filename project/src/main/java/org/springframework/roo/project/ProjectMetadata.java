@@ -1,5 +1,6 @@
 package org.springframework.roo.project;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,8 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a project.
@@ -308,15 +311,23 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Determines whether the GWT Maven plugin exists in the pom.
 	 * 
-	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
+	 * @return true if the gwt-maven-plugin is present in the pom.xml or the ApplicationScaffold.gwt.xml file exists, otherwise false
 	 */
 	public boolean isGwtEnabled() {
+		boolean hasGwt = false;
 		for (Plugin buildPlugin : buildPlugins) {
 			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
-				return true;
+				hasGwt = true;
 			}
 		}
-		return false;
+		
+		if (!hasGwt) {
+			String gwtXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, StringUtils.replace(topLevelPackage.getFullyQualifiedPackageName(), ".", File.separator) + "/ApplicationScaffold.gwt.xml");
+			File file = new File(gwtXmlPath);
+			hasGwt |= file.exists();
+		}
+		
+		return hasGwt;
 	}
 
 	
