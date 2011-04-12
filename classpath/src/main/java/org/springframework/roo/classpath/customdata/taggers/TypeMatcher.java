@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link MemberHoldingTypeDetails} specific implementation of {@link Matcher}. Matches
+ * {@link MemberHoldingTypeDetails}-specific implementation of {@link Matcher}. Matches
  * are based on the the type's MID.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
 public class TypeMatcher implements Matcher<MemberHoldingTypeDetails> {
-
 	private CustomDataKey<MemberHoldingTypeDetails> customDataKey;
 	private String declaredBy;
 

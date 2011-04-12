@@ -9,14 +9,12 @@ import org.springframework.roo.model.JavaType;
 import java.util.List;
 
 /**
- * {@link InvocableMemberMetadata} specific implementation of
- * {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.
+ * {@link InvocableMemberMetadata}-specific implementation of {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
 public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMemberMetadata> extends IdentifiableAnnotatedJavaStructureCustomDataKey<T> {
-
 	private List<AnnotatedJavaType> parameterTypes;
 	private List<JavaSymbolName> parameterNames;
 	private List<JavaType> throwsTypes;
@@ -33,7 +31,7 @@ public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMe
 	}
 
 	public boolean meets(T invocableMemberMetadata) throws IllegalStateException {
-		//TODO: Add in validation logic for parameterTypes, parameterNames, throwsTypes
+		// TODO: Add in validation logic for parameterTypes, parameterNames, throwsTypes
 		return super.meets(invocableMemberMetadata);
 	}
 

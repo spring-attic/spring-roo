@@ -1,7 +1,12 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -9,13 +14,8 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsBuilder;
+import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.support.util.Assert;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * An implementation of {@link CustomDataKeyDecorator}.
@@ -26,8 +26,7 @@ import java.util.Set;
 @Component
 @Service
 public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
-
-	private HashMap<String, Matcher> taggerMap = new HashMap<String, Matcher>();
+	private HashMap<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
 
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
 		MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(memberDetails);
@@ -60,7 +59,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		return memberDetailsBuilder.build();
 	}
 
-	public void registerMatcher(String addingClass, Matcher matcher) {
+	public void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher) {
 		Assert.notNull(addingClass, "The calling class must be specified");
 		Assert.notNull(matcher, "The matcher must be specified");
 		taggerMap.put(addingClass + matcher.getCustomDataKey().toString(), matcher);
@@ -80,7 +79,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
 	public List<MethodMatcher> getMethodTaggers() {
 		List<MethodMatcher> methodTaggers = new ArrayList<MethodMatcher>();
-		for (Matcher matcher : taggerMap.values()) {
+		for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
 			if (matcher instanceof MethodMatcher) {
 				methodTaggers.add((MethodMatcher) matcher);
 			}
@@ -90,7 +89,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
 	public List<FieldMatcher> getFieldTaggers() {
 		List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
-		for (Matcher matcher : taggerMap.values()) {
+		for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
 			if (matcher instanceof FieldMatcher) {
 				fieldTaggers.add((FieldMatcher) matcher);
 			}
@@ -100,7 +99,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
 	public List<ConstructorMatcher> getConstructorTaggers() {
 		List<ConstructorMatcher> constructorTaggers = new ArrayList<ConstructorMatcher>();
-		for (Matcher matcher : taggerMap.values()) {
+		for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
 			if (matcher instanceof ConstructorMatcher) {
 				constructorTaggers.add((ConstructorMatcher) matcher);
 			}
@@ -110,7 +109,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
 	public List<TypeMatcher> getTypeTaggers() {
 		List<TypeMatcher> typeTaggers = new ArrayList<TypeMatcher>();
-		for (Matcher matcher : taggerMap.values()) {
+		for (Matcher<? extends CustomDataAccessor> matcher : taggerMap.values()) {
 			if (matcher instanceof TypeMatcher) {
 				typeTaggers.add((TypeMatcher) matcher);
 			}

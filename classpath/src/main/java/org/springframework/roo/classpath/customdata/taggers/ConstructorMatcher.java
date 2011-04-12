@@ -10,14 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link ConstructorMetadata} specific implementation of {@link Matcher}. Currently
+ * {@link ConstructorMetadata}-specific implementation of {@link Matcher}. Currently
  * ConstructorMetadata instances are only matched based on parameter types.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
 public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
-
 	private CustomDataKey<ConstructorMetadata> customDataKey;
 	private List<JavaType> parameterTypes = new ArrayList<JavaType>();
 

@@ -9,13 +9,12 @@ import org.springframework.roo.model.JavaType;
 import java.util.List;
 
 /**
- * {@link MethodMetadata} specific  implementation of {@link InvocableMemberMetadataCustomDataKey}.
+ * {@link MethodMetadata}-specific  implementation of {@link InvocableMemberMetadataCustomDataKey}.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
 public class MethodMetadataCustomDataKey extends InvocableMemberMetadataCustomDataKey<MethodMetadata> {
-
 	private JavaType returnType;
 	private JavaSymbolName methodName;
 	private String name;
@@ -33,7 +32,7 @@ public class MethodMetadataCustomDataKey extends InvocableMemberMetadataCustomDa
 
 	@Override
 	public boolean meets(MethodMetadata methodMetadata) throws IllegalStateException {
-		//TODO: Add in validation logic for returnType, methodName
+		// TODO: Add in validation logic for returnType, methodName
 		return super.meets(methodMetadata);
 	}
 

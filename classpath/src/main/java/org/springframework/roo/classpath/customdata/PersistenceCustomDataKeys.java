@@ -14,8 +14,7 @@ import org.springframework.roo.model.CustomData;
  * @since 1.1.3
  */
 public class PersistenceCustomDataKeys {
-	
-	//TODO: Once CustomDataKey builders have been created they should be used here -JT
+	// TODO: Once CustomDataKey builders have been created they should be used here -JT
 
 	public static final MemberHoldingTypeDetailsCustomDataKey IDENTIFIER_TYPE = new MemberHoldingTypeDetailsCustomDataKey("IDENTIFIER_TYPE");
 	public static final MemberHoldingTypeDetailsCustomDataKey PERSISTENT_TYPE = new MemberHoldingTypeDetailsCustomDataKey("PERSISTENT_TYPE");
@@ -33,8 +32,7 @@ public class PersistenceCustomDataKeys {
 	public static final FieldMetadataCustomDataKey MANY_TO_ONE_FIELD = new FieldMetadataCustomDataKey("MANY_TO_ONE_FIELD");
 	public static final FieldMetadataCustomDataKey ONE_TO_ONE_FIELD = new FieldMetadataCustomDataKey("ONE_TO_ONE_FIELD");
 	public static final FieldMetadataCustomDataKey LOB_FIELD = new FieldMetadataCustomDataKey("LOB_FIELD");
-	public static final FieldMetadataCustomDataKey COLUMN_FIELD = new FieldMetadataCustomDataKey("COLUMN_FIELD");
-
+	public static final FieldMetadataCustomDataKey COLUMN_FIELD = new FieldMetadataCustomDataKey("COLUMN_FIELD"); 
 
 	public static final MethodMetadataCustomDataKey IDENTIFIER_ACCESSOR_METHOD = new MethodMetadataCustomDataKey("IDENTIFIER_ACCESSOR_METHOD");
 	public static final MethodMetadataCustomDataKey IDENTIFIER_MUTATOR_METHOD = new MethodMetadataCustomDataKey("IDENTIFIER_MUTATOR_METHOD");
@@ -50,6 +48,6 @@ public class PersistenceCustomDataKeys {
 	public static final MethodMetadataCustomDataKey FIND_METHOD = new MethodMetadataCustomDataKey("FIND_METHOD");
 	public static final MethodMetadataCustomDataKey FIND_ENTRIES_METHOD = new MethodMetadataCustomDataKey("FIND_ENTRIES_METHOD");
 
-	//Dynamic finder method names; CustomData value expected to be a java.util.List<String> of finder names
+	// Dynamic finder method names; CustomData value expected to be a java.util.List<String> of finder names
 	public static final MethodMetadataCustomDataKey DYNAMIC_FINDER_NAMES = new MethodMetadataCustomDataKey("DYNAMIC_FINDER_NAMES");
 }

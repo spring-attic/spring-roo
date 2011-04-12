@@ -1,11 +1,10 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
 import org.springframework.roo.classpath.scanner.MemberDetailsDecorator;
-
-import java.util.List;
+import org.springframework.roo.model.CustomDataAccessor;
 
 /**
- * Provides a universal registry for {@link Matcher} objects. Initial
+ * Provides a universal registry for {@link Matcher} objects. Initially
  * no checks are being performed upon adding new Matcher instances, it
  * is envisioned that this will change and an alert would be provided
  * if a {@link Matcher} object was in conflict with another. For this to
@@ -20,7 +19,7 @@ import java.util.List;
  */
 public interface CustomDataKeyDecorator extends MemberDetailsDecorator {
 
-	void registerMatcher(String addingClass, Matcher matcher);
+	void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher);
 
 	void unregisterMatchers(String addingClass);
 }

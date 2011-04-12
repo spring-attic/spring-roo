@@ -81,7 +81,6 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	}
 
 	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
-
 		List<FieldMetadata> fields = getFieldsInterestedIn(memberHoldingTypeDetailsList);
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		Set<JavaSymbolName> fieldNames = new HashSet<JavaSymbolName>();
@@ -104,10 +103,9 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	}
 
 	/**
-	 * This method returns the plural term as per inflector.
-	 * ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
-	 *
-	 * @param term   The term to be pluralized
+	 * This method returns the plural term as per inflector. ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
+	 * 
+	 * @param term The term to be pluralized
 	 * @param locale Locale
 	 * @return pluralized term
 	 */

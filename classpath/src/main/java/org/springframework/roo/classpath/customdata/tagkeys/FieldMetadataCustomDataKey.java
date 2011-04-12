@@ -8,13 +8,12 @@ import org.springframework.roo.model.JavaType;
 import java.util.List;
 
 /**
- * {@link FieldMetadata} specific  implementation of {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.
+ * {@link FieldMetadata}-specific  implementation of {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.
  *
  * @author James Tyrrell
  * @since 1.1.3
  */
 public class FieldMetadataCustomDataKey extends IdentifiableAnnotatedJavaStructureCustomDataKey<FieldMetadata> {
-
 	private JavaType fieldType;
 	private JavaSymbolName fieldName;
 	private String fieldInitializer;
@@ -37,7 +36,7 @@ public class FieldMetadataCustomDataKey extends IdentifiableAnnotatedJavaStructu
 	}
 
 	public boolean meets(FieldMetadata fieldMetadata) {
-		//TODO: Add in validation logic for fieldType, fieldName, fieldInitializer
+		// TODO: Add in validation logic for fieldType, fieldName, fieldInitializer
 		return super.meets(fieldMetadata);
 	}
 
@@ -53,7 +52,6 @@ public class FieldMetadataCustomDataKey extends IdentifiableAnnotatedJavaStructu
 		return fieldInitializer;
 	}
 
-	@Override
 	public String toString() {
 		return name;
 	}

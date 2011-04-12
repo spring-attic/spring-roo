@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface Matcher<T extends CustomDataAccessor> {
 
-	public List<T> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList);
+	List<T> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList);
 
-	public CustomDataKey<T> getCustomDataKey();
+	CustomDataKey<T> getCustomDataKey();
 }

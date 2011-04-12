@@ -41,7 +41,6 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	
 	private boolean noArgConstructor = true;
 
 	protected void activate(ComponentContext context) {
