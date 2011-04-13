@@ -720,17 +720,25 @@ public class JpaOperationsImpl implements JpaOperations {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
 		
-		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
-			Element gwtPluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
-			buildPlugins.add(new Plugin(gwtPluginElement));
-		}
-
 		for (Plugin buildPlugin : buildPlugins) {
 			projectOperations.addBuildPlugin(buildPlugin);
 		}
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(true);
+			if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
+				// Refresh the ProjectMetadata, as the maven-gae-plugin may have been added 
+				// to the pom but not reflected in a cached ProjectMetadata instance
+				metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
+			}
+		}
+
+		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
+			Element gwtPluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
+			projectOperations.addBuildPlugin(new Plugin(gwtPluginElement));
+		}
+		
+		if (ormProvider == OrmProvider.DATANUCLEUS) {
 			updateDataNucleusPlugin(true);
 		}
 	}
@@ -822,7 +830,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			configurationElement.appendChild(mappingExcludesElement);
 			hasChanged = true;
 		} else if (!addToPlugin && mappingExcludesElement != null) {
-			configurationElement.removeChild(configurationElement);
+			configurationElement.removeChild(mappingExcludesElement);
 			hasChanged = true;
 		}
 		
@@ -869,7 +877,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		
 		if (hasChanged) {
 			// Something has changed so write changes to pom.xml
-			mutableFile.setDescriptionOfChange("Removed redundant artifacts");
+			mutableFile.setDescriptionOfChange("Removed redundant dependencies, plugins, and filters");
 			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		}
 
@@ -886,7 +894,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
 		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
 			Dependency dependency = new Dependency(dependencyElement);
-			Element candidate = XmlUtils.findFirstElement("/project/dependencies/dependency[artifactId = '" + dependency.getArtifactId() + "']", root);
+			Element candidate = XmlUtils.findFirstElement("/project/dependencies/dependency[artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersionId() + "']", root);
 			if (candidate != null) {
 				if (projectOperations.getProjectMetadata().isGwtEnabled() && dependency.getGroupId().equals("com.google.appengine")) {
 					continue;
@@ -927,7 +935,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
 		for (Element pluginElement : XmlUtils.findElements(pluginsXPath, configuration)) {
 			Plugin plugin = new Plugin(pluginElement);
-			Element candidate = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = '" + plugin.getArtifactId() + "']", root);
+			Element candidate = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = '" + plugin.getArtifactId() + "' and version = '" + plugin.getVersion() + "']", root);
 			if (candidate != null) {
 				// Found it
 				pluginsElement.removeChild(candidate);

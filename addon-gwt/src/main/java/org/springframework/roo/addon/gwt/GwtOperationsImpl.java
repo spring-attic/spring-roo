@@ -25,6 +25,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
+import org.springframework.roo.project.listeners.PluginListener;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -47,7 +48,7 @@ import org.w3c.dom.Element;
  */
 @Component
 @Service
-public class GwtOperationsImpl implements GwtOperations {
+public class GwtOperationsImpl implements GwtOperations, PluginListener {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private WebMvcOperations mvcOperations;
@@ -56,8 +57,13 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
+		projectOperations.addPluginListener(this);
 	}
 
+	protected void deactivate(ComponentContext context) {
+		projectOperations.removePluginListener(this);
+	}
+	
 	public boolean isSetupAvailable() {
 		if (!projectOperations.isProjectAvailable()) {
 			return false;
@@ -106,11 +112,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		// Update persistence.xml
 		updatePersistenceXml();
 
-		// Copy "static" directories
-		for (GwtPath path : GwtPath.values()) {
-			copyDirectoryContents(path);
-		}
-
 		// Do a "get" for every .java file, thus ensuring the metadata is fired
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
@@ -122,6 +123,19 @@ public class GwtOperationsImpl implements GwtOperations {
 			String id = GwtMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 			metadataService.get(id);
 		}
+	}
+
+	public void pluginAdded(Plugin plugin) {
+		if (plugin.getArtifactId().equals("gwt-maven-plugin")) {
+			// Copy "static" directories
+			for (GwtPath path : GwtPath.values()) {
+				copyDirectoryContents(path);
+			}
+		}
+	}
+
+	public void pluginRemoved(Plugin plugin) {
+		// Do nothing
 	}
 
 	private void updateEclipsePlugin() {
@@ -174,6 +188,43 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 	}
 
+	private void updateDataNulcueusPlugin() {
+		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		MutableFile mutableFile = null;
+
+		Document pom;
+		try {
+			if (fileManager.exists(pomPath)) {
+				mutableFile = fileManager.updateFile(pomPath);
+				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
+			} else {
+				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element root = pom.getDocumentElement();
+		boolean hasChanged = false;
+
+		Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);
+		if (configurationElement == null) {
+			return;
+		}
+
+		Element mappingExcludesElement = XmlUtils.findFirstElement("mappingExcludes", configurationElement);
+		if (mappingExcludesElement == null) {
+			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", pom).setText("**/GaeAuthFilter.class").build();
+			configurationElement.appendChild(mappingExcludesElement);
+			hasChanged = true;
+		}
+
+		if (hasChanged) {
+			mutableFile.setDescriptionOfChange("Added mappingExcludes element to maven-datanucleus-plugin");
+			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+		}
+	}
+
 	private void updateBuildOutputDirectory() {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		MutableFile mutableFile = null;
@@ -208,43 +259,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 
 		if (hasChanged) {
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
-		}
-	}
-
-	private void updateDataNulcueusPlugin() {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile mutableFile = null;
-
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				mutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		Element root = pom.getDocumentElement();
-		boolean hasChanged = false;
-
-		Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);
-		if (configurationElement == null) {
-			return;
-		}
-
-		Element mappingExcludesElement = XmlUtils.findFirstElement("mappingExcludes", configurationElement);
-		if (mappingExcludesElement == null) {
-			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", pom).setText("**/GaeAuthFilter.class").build();
-			configurationElement.appendChild(mappingExcludesElement);
-			hasChanged = true;
-		}
-
-		if (hasChanged) {
-			mutableFile.setDescriptionOfChange("Added mappingExcludes element to maven-datanucleus-plugin");
+			mutableFile.setDescriptionOfChange("Added outputDirectory");
 			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		}
 	}
@@ -318,21 +333,22 @@ public class GwtOperationsImpl implements GwtOperations {
 			String userDataConstraint = null;
 			WebXmlUtils.addSecurityConstraint(displayName, Collections.singletonList(webResourceCollection), roleNames, userDataConstraint, webXml, null);
 		} else {
-			Element filter = XmlUtils.findFirstElement("/web-app/filter[filter-name = 'GaeAuthFilter']", webXml.getDocumentElement());
+			Element filter = XmlUtils.findFirstElement("/web-app/filter[filter-name = 'GaeAuthFilter']", root);
 			if (filter != null) {
 				filter.getParentNode().removeChild(filter);
 			}
-			Element filterMapping = XmlUtils.findFirstElement("/web-app/filter-mapping[filter-name = 'GaeAuthFilter']", webXml.getDocumentElement());
+			Element filterMapping = XmlUtils.findFirstElement("/web-app/filter-mapping[filter-name = 'GaeAuthFilter']", root);
 			if (filterMapping != null) {
 				filterMapping.getParentNode().removeChild(filterMapping);
 			}
-			Element securityConstraint = XmlUtils.findFirstElement("security-constraint", webXml.getDocumentElement());
+			Element securityConstraint = XmlUtils.findFirstElement("security-constraint", root);
 			if (securityConstraint != null) {
 				securityConstraint.getParentNode().removeChild(securityConstraint);
 			}
 		}
 
 		removeIfFound("/web-app/error-page", root);
+		mutableFile.setDescriptionOfChange("Managed security filter and security-constraint");
 		XmlUtils.writeXml(mutableFile.getOutputStream(), webXml);
 	}
 

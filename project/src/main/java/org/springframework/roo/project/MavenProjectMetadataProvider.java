@@ -79,7 +79,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element root = (Element) document.getFirstChild();
+		Element root = document.getDocumentElement();
 
 		// Obtain project name
 		Element artifactIdElement = XmlUtils.findFirstElement("/project/artifactId", root);
@@ -360,7 +360,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element root = (Element) document.getFirstChild();
+		Element root = document.getDocumentElement();
 		Element plugins = XmlUtils.findFirstElement("/project/build/plugins", root);
 		Assert.notNull(plugins, "Plugins unable to be found");
 
@@ -430,7 +430,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		plugins.appendChild(pluginElement);
 
 		mutableFile.setDescriptionOfChange("Added plugin " + plugin.getArtifactId());
-
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
@@ -453,7 +452,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 
 		Element packaging = XmlUtils.findFirstElement("/project/packaging", document.getDocumentElement());
-
 		if (packaging == null) {
 			packaging = document.createElement("packaging");
 			document.getDocumentElement().appendChild(packaging);
@@ -464,7 +462,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		packaging.setTextContent(projectType.getType());
 
 		mutableFile.setDescriptionOfChange("Updated project type to " + projectType.getType());
-
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
@@ -515,7 +512,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element root = (Element) document.getFirstChild();
+		Element root = document.getDocumentElement();
 		Element repositoriesElement = XmlUtils.findFirstElement("/project/" + containingPath, root);
 		Assert.notNull(repositoriesElement, containingPath + " element not found");
 
@@ -541,7 +538,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		builder.insert(0, "Added " + (builder.indexOf(",") == -1 ? path : containingPath) + " ");
 
 		mutableFile.setDescriptionOfChange(builder.toString());
-
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
@@ -586,7 +582,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		repositoriesElement.appendChild(createRepositoryElement(document, repository, path));
 
 		mutableFile.setDescriptionOfChange("Added " + path + " " + repository.getId());
-
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
@@ -677,7 +672,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element root = (Element) document.getFirstChild();
+		Element root = document.getDocumentElement();
 		Element properties = XmlUtils.findFirstElement("/project/properties", root);
 
 		for (Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
@@ -814,7 +809,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		build.appendChild(resources);
 
 		mutableFile.setDescriptionOfChange("Added resource");
-
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
@@ -861,8 +855,8 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document;
 		try {
 			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-		} catch (Exception ex) {
-			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
+		} catch (Exception E) {
+			throw new IllegalStateException("Could not open POM '" + pom + "'", E);
 		}
 
 		Element root = (Element) document.getFirstChild();
@@ -899,7 +893,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element root = (Element) document.getFirstChild();
+		Element root = document.getDocumentElement();
 		Element plugins = XmlUtils.findFirstElement(containingPath, root);
 
 		for (Element candidate : XmlUtils.findElements(path, root)) {

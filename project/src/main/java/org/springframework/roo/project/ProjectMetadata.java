@@ -232,8 +232,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * @return an unmodifiable collection of the build plugins (never null, but
-	 * may be empty).
+	 * @return an unmodifiable collection of the build plugins (never null, but may be empty).
 	 */
 	public Set<Plugin> getBuildPlugins() {
 		return Collections.unmodifiableSet(buildPlugins);
@@ -308,25 +307,26 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Determines whether the GWT Maven plugin exists in the pom.
+	 * Determines whether GWT is enabled in the project.
 	 * 
 	 * @return true if the gwt-maven-plugin is present in the pom.xml or the ApplicationScaffold.gwt.xml file exists, otherwise false
 	 */
 	public boolean isGwtEnabled() {
-		boolean hasGwt = false;
+		boolean gwtEnabled = false;
 		for (Plugin buildPlugin : buildPlugins) {
 			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
-				hasGwt = true;
+				gwtEnabled = true;
+				break;
 			}
 		}
 		
-		if (!hasGwt) {
+		if (!gwtEnabled) {
 			String gwtXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, StringUtils.replace(topLevelPackage.getFullyQualifiedPackageName(), ".", File.separator) + "/ApplicationScaffold.gwt.xml");
 			File file = new File(gwtXmlPath);
-			hasGwt |= file.exists();
+			gwtEnabled |= file.exists();
 		}
 		
-		return hasGwt;
+		return gwtEnabled;
 	}
 
 	
