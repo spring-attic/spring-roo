@@ -108,7 +108,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.4.0/appengine-java-sdk-1.4.0</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.4.3/appengine-java-sdk-1.4.3</gae.home>
             </properties>
             <repositories>
                 <repository>
@@ -133,24 +133,24 @@
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-1.0-sdk</artifactId>
-                    <version>1.4.0</version>
+                    <version>1.4.3</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-testing</artifactId>
-                    <version>1.4.0</version>
+                    <version>1.4.3</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-stubs</artifactId>
-                    <version>1.4.0</version>
+                    <version>1.4.3</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-labs</artifactId>
-                    <version>1.4.0</version>
+                    <version>1.4.3</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -158,9 +158,9 @@
                 <plugin>
                     <groupId>net.kindleit</groupId>
                     <artifactId>maven-gae-plugin</artifactId>
-                    <version>0.5.7</version>
+                    <version>0.8.4</version>
                     <configuration>
-                        <unpackVersion>1.4.0</unpackVersion>
+                        <unpackVersion>1.4.3</unpackVersion>
                     </configuration>
                     <executions>
                         <execution>
