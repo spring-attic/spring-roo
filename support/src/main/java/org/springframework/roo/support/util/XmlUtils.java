@@ -1,5 +1,6 @@
 package org.springframework.roo.support.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,6 +48,22 @@ public final class XmlUtils {
 	private XmlUtils() {
 	}
 
+	/**
+	 * Read an XML document from the supplied file and return a document.
+	 *  
+	 * @param fileIdentifier the file read (required)
+	 * @return a DOM representation of the XML file
+	 */
+	public static final Document readXml(String fileIdentifier) {
+		Assert.notNull(fileIdentifier, "File identifier required");
+		try {
+			File file = new File(fileIdentifier);
+			return getDocumentBuilder().parse(file);
+		} catch (Exception e) {
+			throw new IllegalStateException("Could not read " + fileIdentifier, e);
+		}
+	}
+	
 	/**
 	 * Write an XML document to the OutputStream provided. This will use the pre-configured Roo provided Transformer.
 	 * 
@@ -290,8 +307,8 @@ public final class XmlUtils {
 		// factory.setNamespaceAware(true);
 		try {
 			return factory.newDocumentBuilder();
-		} catch (ParserConfigurationException ex) {
-			throw new IllegalStateException(ex);
+		} catch (ParserConfigurationException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 	
