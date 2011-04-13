@@ -92,9 +92,6 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 		// Add outputDirectory to build element of pom
 		updateBuildOutputDirectory();
 
-		// Add mappingExcludes to DataNucleus plugin
-		updateDataNulcueusPlugin();
-
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		// Add POM repositories
@@ -184,43 +181,6 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 
 		if (hasChanged) {
 			mutableFile.setDescriptionOfChange("Managed GWT buildCommand and projectnature in maven-eclipse-plugin");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
-		}
-	}
-
-	private void updateDataNulcueusPlugin() {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile mutableFile = null;
-
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				mutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		Element root = pom.getDocumentElement();
-		boolean hasChanged = false;
-
-		Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);
-		if (configurationElement == null) {
-			return;
-		}
-
-		Element mappingExcludesElement = XmlUtils.findFirstElement("mappingExcludes", configurationElement);
-		if (mappingExcludesElement == null) {
-			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", pom).setText("**/GaeAuthFilter.class").build();
-			configurationElement.appendChild(mappingExcludesElement);
-			hasChanged = true;
-		}
-
-		if (hasChanged) {
-			mutableFile.setDescriptionOfChange("Added mappingExcludes element to maven-datanucleus-plugin");
 			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		}
 	}

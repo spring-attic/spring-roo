@@ -9,6 +9,7 @@ import com.google.gwt.requestfactory.shared.RequestFactory;
  * being managed away by Roo.
  */
 public interface ScaffoldRequestFactory extends RequestFactory {
+	
 	/**
 	 * Return a GWT logging request.
 	 */

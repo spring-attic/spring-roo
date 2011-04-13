@@ -578,7 +578,7 @@ public class JpaOperationsImpl implements JpaOperations {
 					outputStream.close();
 				} else if (ormProvider != OrmProvider.DATANUCLEUS && props.containsKey(dnKey)) {
 					OutputStream outputStream = log4jMutableFile.getOutputStream();
-					props.put(dnKey, "WARN");
+					props.remove(dnKey);
 					props.store(outputStream, "Updated at " + new Date());
 					outputStream.close();
 				}
@@ -728,18 +728,18 @@ public class JpaOperationsImpl implements JpaOperations {
 			updateEclipsePlugin(true);
 			if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
 				// Refresh the ProjectMetadata, as the maven-gae-plugin may have been added 
-				// to the pom but not reflected in a cached ProjectMetadata instance
+				// to the pom but not yet reflected in a cached ProjectMetadata instance
 				metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
+			}
+			
+			if (ormProvider == OrmProvider.DATANUCLEUS) {
+				updateDataNucleusPlugin(true);
 			}
 		}
 
 		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
 			Element gwtPluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
 			projectOperations.addBuildPlugin(new Plugin(gwtPluginElement));
-		}
-		
-		if (ormProvider == OrmProvider.DATANUCLEUS) {
-			updateDataNucleusPlugin(true);
 		}
 	}
 	

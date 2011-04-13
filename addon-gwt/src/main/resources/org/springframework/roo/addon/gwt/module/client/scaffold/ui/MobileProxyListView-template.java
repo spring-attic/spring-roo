@@ -14,7 +14,6 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 
-
 /**
  * An implementation of {@link ProxyListView} used in mobile applications
  *
@@ -22,7 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public abstract class MobileProxyListView<P extends EntityProxy> extends AbstractProxyListView<P> {
 
-	interface Binder extends UiBinder<Widget, MobileProxyListView> {
+	interface Binder extends UiBinder<Widget, MobileProxyListView<?>> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
