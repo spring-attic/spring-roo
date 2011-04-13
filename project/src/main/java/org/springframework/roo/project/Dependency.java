@@ -203,7 +203,7 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	public int hashCode() {
-		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.version.hashCode() * (this.type != null ? this.type.hashCode() : 1) * (this.scope != null ? this.scope.hashCode() : 1);
+		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.version.hashCode() * (this.type != null ? this.type.hashCode() : 1);
 	}
 
 	public boolean equals(Object obj) {
@@ -223,9 +223,6 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		if (result == 0 && this.type != null) {
 			result = this.type.compareTo(o.type);
-		}
-		if (result == 0 && this.scope != null) {
-			result = this.scope.compareTo(o.scope);
 		}
 		return result;
 	}
