@@ -404,17 +404,22 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			fileName = fileName.replace("-template", "");
-
 			String targetFilename = targetDirectory + fileName;
-			if (fileManager.exists(targetFilename)) {
-				continue;
-			}
+			
 			try {
+				boolean exists = fileManager.exists(targetFilename);
 				if (targetFilename.endsWith("png")) {
+					if (exists) {
+						continue;
+					}
 					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetFilename).getOutputStream());
 				} else {
 					// Read template and insert the user's package
 					String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
+					if (exists && !input.contains("__GAE_")) {
+						continue;
+					}
+					
 					String topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName();
 					input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);
 					input = input.replace("__SEGMENT_PACKAGE__", gwtPath.segmentPackage());
@@ -431,7 +436,7 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 					}
 
 					// Output the file for the user
-					MutableFile mutableFile = fileManager.createFile(targetFilename);
+					MutableFile mutableFile = exists ? fileManager.updateFile(targetFilename) : fileManager.createFile(targetFilename);
 					FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
 				}
 			} catch (IOException e) {
