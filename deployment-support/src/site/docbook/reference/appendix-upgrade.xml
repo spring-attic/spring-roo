@@ -224,6 +224,29 @@
     forum</link> for assistance.</para>
   </section>
 
+  <section>
+    <title>Upgrading to 1.1.3.RELEASE</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.2.RELEASE to Spring Roo 1.1.3.RELEASE are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+
+      <listitem>
+        <para>For MVC scaffolded applications it is recommended to manually
+        replace the list.tagx in your application by creating a dummy project
+        and copying the list.tagx file into your project. This process will be
+        automated through a new 'web mvc update tags' command in Roo
+        1.1.4+.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
   <section xml:id="upgrade-1.1.2.RELEASE">
     <title>Upgrading to 1.1.2.RELEASE</title>
 
