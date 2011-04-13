@@ -1,7 +1,9 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.backup.BackupOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
@@ -77,6 +80,7 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private I18nSupport i18nSupport;
 	@Reference private UaaRegistrationService uaaRegistrationService;
+	@Reference private BackupOperations backupOperations;
 
 	private ComponentContext context;
 
@@ -113,27 +117,27 @@ public class JspOperationsImpl implements JspOperations {
 		updateConfiguration();
 
 		// Install styles
-		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"));
+		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
 
 		// Install styles
-		copyDirectoryContents("styles/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/styles"));
-		copyDirectoryContents("styles/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes"));
+		copyDirectoryContents("styles/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/styles"), false);
+		copyDirectoryContents("styles/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes"), false);
 
 		// Install layout
-		copyDirectoryContents("tiles/default.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
-		copyDirectoryContents("tiles/layouts.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
-		copyDirectoryContents("tiles/header.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
-		copyDirectoryContents("tiles/footer.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
-		copyDirectoryContents("tiles/views.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
+		copyDirectoryContents("tiles/default.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"), false);
+		copyDirectoryContents("tiles/layouts.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"), false);
+		copyDirectoryContents("tiles/header.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"), false);
+		copyDirectoryContents("tiles/footer.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"), false);
+		copyDirectoryContents("tiles/views.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"), false);
 
 		// Install common view files
-		copyDirectoryContents("*.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
+		copyDirectoryContents("*.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"), false);
 
 		// Install tags
-		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form"));
-		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form/fields"));
-		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu"));
-		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/util"));
+		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form"), false);
+		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form/fields"), false);
+		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu"), false);
+		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/util"), false);
 
 		// Install default language 'en'
 		installI18n(i18nSupport.getLanguage(Locale.ENGLISH));
@@ -219,6 +223,18 @@ public class JspOperationsImpl implements JspOperations {
 				XmlUtils.writeXml(mvcConfigFile.getOutputStream(), doc);
 			}
 		}
+	}
+	
+	public void updateTags(boolean backup) {
+		if (backup) {
+			backupOperations.backup();
+		}
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		// Update tags
+		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form"), true);
+		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form/fields"), true);
+		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu"), true);
+		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/util"), true);
 	}
 
 	/**
@@ -408,7 +424,7 @@ public class JspOperationsImpl implements JspOperations {
 	 * @param sourceAntPath the source path
 	 * @param targetDirectory the target directory
 	 */
-	private void copyDirectoryContents(String sourceAntPath, String targetDirectory) {
+	private void copyDirectoryContents(String sourceAntPath, String targetDirectory, boolean replace) {
 		Assert.hasText(sourceAntPath, "Source path required");
 		Assert.hasText(targetDirectory, "Target directory required");
 
@@ -425,11 +441,36 @@ public class JspOperationsImpl implements JspOperations {
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
-			if (!fileManager.exists(targetDirectory + fileName)) {
+			if (replace) {
+				BufferedReader in = null;
+				StringBuilder sb = new StringBuilder();
 				try {
-					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetDirectory + fileName).getOutputStream());
-				} catch (IOException e) {
-					throw new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+					in = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()));
+					while (true) {
+						int ch = in.read();
+						if (ch < 0) {
+							break;
+						}
+						sb.append((char) ch);
+					}
+				} catch (Exception e) {
+					throw new IllegalStateException(e);
+				} finally {
+					if (in != null) {
+						try {
+							in.close();
+						} catch (IOException ignored) {
+						}
+					}
+				}
+				fileManager.createOrUpdateTextFileIfRequired(targetDirectory + fileName, sb.toString(), false);
+			} else {
+				if (!fileManager.exists(targetDirectory + fileName)) {
+					try {
+						FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetDirectory + fileName).getOutputStream());
+					} catch (IOException e) {
+						throw new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+					}
 				}
 			}
 		}

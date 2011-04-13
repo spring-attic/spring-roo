@@ -63,4 +63,12 @@ public interface JspOperations {
 	 * @param document the jspx document to use for the view
 	 */
 	void installView(String path, String viewName, String title, String category, Document document);
+	
+	/**
+	 * Replaces an existing tag library with the latest version (set backup flag to backup your application first)
+	 * 
+	 * @param backup indicates wether your application should be backed up prior to replacing the tagx library
+	 */
+	void updateTags(boolean backup);
+	
 }

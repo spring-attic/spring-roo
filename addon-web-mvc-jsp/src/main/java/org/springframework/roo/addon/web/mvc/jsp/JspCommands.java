@@ -24,7 +24,7 @@ public class JspCommands implements CommandMarker {
 	private Logger log = Logger.getLogger(getClass().getName());
 	@Reference private JspOperations jspOperations;
 
-	@CliAvailabilityIndicator({ "web mvc controller", "controller class", "web mvc install view", "web mvc view" }) 
+	@CliAvailabilityIndicator({ "web mvc controller", "controller class", "web mvc install view", "web mvc view", "web mvc update tags" }) 
 	public boolean isControllerClassAvailable() {
 		return jspOperations.isControllerAvailable();
 	}
@@ -98,5 +98,12 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = "title", mandatory = true, help = "The title of the view") String title) {
 	
 		view(path, viewName, title);
+	}
+	
+	@CliCommand(value = "web mvc update tags", help = "Replace an existing application tagx library with the latest version (use --backup option to backup your application first)") 
+	public void update(
+			@CliOption(key = "backup", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Backup your application before replacing your existing tag library") boolean backup) {
+		
+		jspOperations.updateTags(backup);
 	}
 }

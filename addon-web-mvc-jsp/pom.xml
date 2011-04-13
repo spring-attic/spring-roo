@@ -98,5 +98,10 @@
             <artifactId>org.springframework.roo.uaa</artifactId>
             
         </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.backup</artifactId>
+            
+        </dependency>
 	</dependencies>
 </project>
