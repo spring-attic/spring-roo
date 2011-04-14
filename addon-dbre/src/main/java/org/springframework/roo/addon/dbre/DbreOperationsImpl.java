@@ -17,7 +17,6 @@ import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -95,20 +94,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	
 	private void updatePom() {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile mutableFile = null;
-
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				mutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		
+		Document pom = XmlUtils.readXml(pomPath);
 		Element root = pom.getDocumentElement();
 		
 		String warPluginXPath = "/project/build/plugins/plugin[artifactId = 'maven-war-plugin']";
@@ -152,22 +138,14 @@ public class DbreOperationsImpl implements DbreOperations {
 		
 		warPluginElement.appendChild(configurationElement);
 		
-		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+		fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, true);
 	}
 
 	private void updatePersistenceXml() {
 		String persistencePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
-		MutableFile persistenceMutableFile = null;
-
-		Document persistence;
-		try {
-			persistenceMutableFile = fileManager.updateFile(persistencePath);
-			persistence = XmlUtils.getDocumentBuilder().parse(persistenceMutableFile.getInputStream());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		Document persistence = XmlUtils.readXml(persistencePath);
 		Element root = persistence.getDocumentElement();
+		
 		Element providerElement = XmlUtils.findFirstElement("/persistence/persistence-unit/provider", root);
 		Assert.notNull(providerElement, "/persistence/persistence-unit/provider is null");
 		String provider = providerElement.getTextContent();
@@ -192,7 +170,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 
 		if (changed) {
-			XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
+			fileManager.createOrUpdateXmlFileIfRequired(persistencePath, persistence, true);
 		}
 	}
 
