@@ -28,7 +28,7 @@ public interface FileManager {
 	/**
 	 * Indicates whether the file identified by the passed canonical path exists.
 	 * 
-	 * @param fileIdentifier to locate (required, in canonical path format)
+	 * @param fileIdentifier the file or directory to locate (required, in canonical path format)
 	 * @return true if the file or directory exists
 	 */
 	boolean exists(String fileIdentifier);
@@ -37,7 +37,7 @@ public interface FileManager {
 	 * Obtains an input stream for the indicated file identifier, which must be a file (not a directory) and must exist at the time the method is called. This method is useful if read-only access to a
 	 * file is required. For read-write access, use one of the other methods on {@link FileManager}.
 	 * 
-	 * @param fileIdentifier to read (required, in canonical path format)
+	 * @param fileIdentifier the file to read (required, in canonical path format)
 	 * @return the input stream (never null)
 	 */
 	InputStream getInputStream(String fileIdentifier);
@@ -60,6 +60,14 @@ public interface FileManager {
 	FileDetails createDirectory(String fileIdentifier);
 
 	/**
+	 * Obtains an already-existing file for reading. The path should be in canonical file name format.
+	 * 
+	 * @param fileIdentifier the file to read that already exists (required)
+	 * @return a representation of the file (or null if the file does not exist)
+	 */
+	FileDetails readFile(String fileIdentifier);
+
+	/**
 	 * Attempts to create a zero-byte file on the disk.
 	 * 
 	 * <p>
@@ -76,7 +84,7 @@ public interface FileManager {
 	 */
 	MutableFile createFile(String fileIdentifier);
 
-	/**ProcessManager
+	/**
 	 * Attempts to delete a file or directory on the disk. The path should be in canonical file name format.
 	 * 
 	 * <p>
@@ -88,7 +96,7 @@ public interface FileManager {
 	 * <p>
 	 * If a delete fails, an exception will be thrown.
 	 * 
-	 * @param fileIdentifier to delete (required)
+	 * @param fileIdentifier the file to delete (required)
 	 */
 	void delete(String fileIdentifier);
 
@@ -102,7 +110,7 @@ public interface FileManager {
 	 * <p>
 	 * Refer to the documentation for {@link MutableFile} for important restrictions on usage.
 	 * 
-	 * @param fileIdentifier to update (must be a file that already exists, required)
+	 * @param fileIdentifier the file to update (must be a file that already exists, required)
 	 * @return a mutable presentation (never null)
 	 */
 	MutableFile updateFile(String fileIdentifier);
@@ -122,7 +130,7 @@ public interface FileManager {
 	 * <p>
 	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
 	 * 
-	 * @param fileIdentifier to create or update as appropriate (required)
+	 * @param fileIdentifier the file to create or update as appropriate (required)
 	 * @param newContents the replacement contents (required, but can be zero bytes if the file should be deleted)
 	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
 	 */
@@ -132,13 +140,41 @@ public interface FileManager {
 	 * Provides a simple way to create or update an XML file, skipping any modification if the file's contents match the proposed contents. 
 	 * 
 	 * <p>
+	 * Implementations guarantee to {@link #createDirectory(String)} as required to create any required parent directories.
+	 * 
+	 * <p>
 	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
 	 * 
-	 * @param fileIdentifier to create or update as appropriate (required)
+	 * @param fileIdentifier the file to create or update as appropriate (required)
+	 * @param document the DOM document 
+	 * @param message the additional information to be supplied to the underlying 
+	 * {@link MutableFile} instance (can be null or empty to clear any extra information)
+	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
+	 */
+	void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, String message, boolean writeImmediately);
+
+	/**
+	 * Provides a simple way to create or update an XML file, skipping any modification if the file's contents match the proposed contents. 
+	 * 
+	 * <p>
+	 * Implementations guarantee to {@link #createDirectory(String)} as required to create any required parent directories.
+	 * 
+	 * <p>
+	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
+	 * 
+	 * @param fileIdentifier the file to create or update as appropriate (required)
 	 * @param document the DOM document 
 	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
 	 */
 	void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, boolean writeImmediately);
+
+	/**
+	 * Delegates to {@link FileMonitorService#findMatchingAntPath(String)}.
+	 * 
+	 * @param antPath the Ant path to evaluate, as per the canonical file path format (required)
+	 * @return all matching identifiers (may be empty, but never null)
+	 */
+	SortedSet<FileDetails> findMatchingAntPath(String antPath);
 
 	/**
 	 * Commits actual changes to the disk that an implementation may have elected to defer.
@@ -151,26 +187,9 @@ public interface FileManager {
 	void clear();
 	
 	/**
-	 * Obtains an already-existing file for reading. The path should be in canonical file name format.
-	 * 
-	 * @param fileIdentifier to read that already exists (required)
-	 * @return a representation of the file (or null if the file does not exist)
-	 */
-	FileDetails readFile(String fileIdentifier);
-
-	/**
 	 * Delegates to {@link FileMonitorService#scanAll()} or {@link NotifiableFileMonitorService#scanNotified()} if available.
 	 * 
 	 * @return the number of changes detected (can be 0 or above)
 	 */
 	int scan();
-
-	/**
-	 * Delegates to {@link FileMonitorService#findMatchingAntPath(String)}.
-	 * 
-	 * @param antPath the Ant path to evaluate, as per the canonical file path format (required)
-	 * @return all matching identifiers (may be empty, but never null)
-	 */
-	SortedSet<FileDetails> findMatchingAntPath(String antPath);
-
 }

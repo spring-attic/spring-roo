@@ -42,10 +42,10 @@ import org.w3c.dom.Document;
 @Component
 @Service
 public class DefaultFileManager implements FileManager, UndoListener {
-	@Reference private UndoManager undoManager;
+	@Reference private FilenameResolver filenameResolver;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
 	@Reference private ProcessManager processManager;
-	@Reference private FilenameResolver filenameResolver;
+	@Reference private UndoManager undoManager;
 
 	protected void activate(ComponentContext context) {
 		undoManager.addUndoListener(this);
@@ -139,28 +139,28 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		return fileMonitorService.findMatchingAntPath(antPath);
 	}
 
-	public int scan() {
-		return fileMonitorService.scanNotified();
-	}
-
 	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately) {
 		if (writeImmediately) {
-			createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+			createOrUpdateTextFileIfRequired(fileIdentifier, newContents, "");
 		} else {
 			deferredFileWrites.put(fileIdentifier, newContents);
 		}
 	}
 	
-	public void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, boolean writeImmediately) {
+	public void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, String message, boolean writeImmediately) {
 		Assert.notNull(document, "Document required");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XmlUtils.writeXml(baos, document);
 		String newContents = baos.toString();
-		try {
-			baos.close();
-		} catch (IOException ignored) {}
-		
-		createOrUpdateTextFileIfRequired(fileIdentifier, newContents, writeImmediately);
+		if (writeImmediately) {
+			createOrUpdateTextFileIfRequired(fileIdentifier, newContents, message);
+		} else {
+			deferredFileWrites.put(fileIdentifier, newContents);
+		}
+	}
+
+	public void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, boolean writeImmediately) {
+		createOrUpdateXmlFileIfRequired(fileIdentifier, document, "", writeImmediately);
 	}
 
 	public void commit() {
@@ -172,7 +172,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 						delete(fileIdentifier);
 					}
 				} else {
-					createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+					createOrUpdateTextFileIfRequired(fileIdentifier, newContents, "");
 				}
 			}
 		} finally {
@@ -180,14 +180,31 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		}
 	}
 	
-	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents) {
+	public void clear() {
+		deferredFileWrites.clear();
+	}
+
+	public int scan() {
+		return fileMonitorService.scanNotified();
+	}
+
+	public void onUndoEvent(UndoEvent event) {
+		if (event.isUndoing()) {
+			clear();
+		} else {
+			// It's a flush or a reset event
+			commit();
+		}
+	}
+
+	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, String message) {
 		MutableFile mutableFile = null;
 		if (exists(fileIdentifier)) {
 			// First verify if the file has even changed
-			File f = new File(fileIdentifier);
+			File file = new File(fileIdentifier);
 			String existing = null;
 			try {
-				existing = FileCopyUtils.copyToString(new FileReader(f));
+				existing = FileCopyUtils.copyToString(new FileReader(file));
 			} catch (IOException ignored) {}
 
 			if (!newContents.equals(existing)) {
@@ -200,24 +217,11 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
 		if (mutableFile != null) {
 			try {
+				mutableFile.setDescriptionOfChange(message);
 				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", e);
 			}
 		}
 	}
-
-	public void clear() {
-		deferredFileWrites.clear();
-	}
-
-	public void onUndoEvent(UndoEvent event) {
-		if (event.isUndoing()) {
-			clear();
-		} else {
-			// It's a flush or a reset event
-			commit();
-		}
-	}
-
 }

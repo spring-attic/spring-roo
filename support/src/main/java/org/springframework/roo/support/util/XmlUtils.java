@@ -63,8 +63,7 @@ public final class XmlUtils {
 	public static final Document readXml(String fileIdentifier) {
 		Assert.notNull(fileIdentifier, "File identifier required");
 		try {
-			File file = new File(fileIdentifier);
-			return getDocumentBuilder().parse(file);
+			return factory.newDocumentBuilder().parse(new File(fileIdentifier));
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not read " + fileIdentifier, e);
 		}
@@ -155,6 +154,7 @@ public final class XmlUtils {
 	 * Creates a {@link StreamResult} by wrapping the given outputEntry in an
 	 * {@link OutputStreamWriter} that transforms Windows line endings (\r\n) 
 	 * into Unix line endings (\n) on Windows for consistency with Roo's templates.  
+	 * 
 	 * @param outputStream
 	 * @return StreamResult 
 	 * @throws UnsupportedEncodingException 
@@ -174,6 +174,7 @@ public final class XmlUtils {
 				public void write(int c) throws IOException {
 					if (c != '\r') super.write(c);
 				}
+				
 				public void write(String str, int off, int len) throws IOException {
 					String orig = str.substring(off, off + len);
 					String filtered = orig.replace("\r\n", "\n");

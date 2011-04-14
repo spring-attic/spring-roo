@@ -90,6 +90,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	public void configureJpa(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
+		// long start = System.currentTimeMillis();
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(jdbcDatabase, "JDBC database required");
 
@@ -116,24 +117,13 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateFilters(configuration, ormProvider, jdbcDatabase);
 		updateResources(configuration, ormProvider, jdbcDatabase);
 		updateBuildPlugins(configuration, ormProvider, jdbcDatabase);
+		// System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
 	}
 
 	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String persistenceUnit) {
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document applicationContext;
-		try {
-			if (fileManager.exists(contextPath)) {
-				contextMutableFile = fileManager.updateFile(contextPath);
-				applicationContext = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire applicationContext.xml in " + contextPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		Document applicationContext = XmlUtils.readXml(contextPath);
+		
 		Element root = applicationContext.getDocumentElement();
 
 		// Checking for existence of configurations, if found abort
@@ -239,12 +229,9 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		Document persistence;
 		try {
-			MutableFile persistenceMutableFile = null;
 			if (fileManager.exists(persistencePath)) {
-				persistenceMutableFile = fileManager.updateFile(persistencePath);
-				persistence = XmlUtils.getDocumentBuilder().parse(persistenceMutableFile.getInputStream());
+				persistence = XmlUtils.readXml(persistencePath);
 			} else {
-				persistenceMutableFile = fileManager.createFile(persistencePath);
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
 				Assert.notNull(templateInputStream, "Could not acquire peristence.xml template");
 				persistence = XmlUtils.getDocumentBuilder().parse(templateInputStream);
@@ -252,7 +239,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-
+		
 		Properties dialects = new Properties();
 		try {
 			InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
@@ -422,14 +409,11 @@ public class JpaOperationsImpl implements JpaOperations {
 			return;
 		}
 		
-		MutableFile appengineMutableFile = null;
 		Document appengine;
 		try {
 			if (appenginePathExists) {
-				appengineMutableFile = fileManager.updateFile(appenginePath);
-				appengine = XmlUtils.getDocumentBuilder().parse(appengineMutableFile.getInputStream());
+				appengine = XmlUtils.readXml(appenginePath);
 			} else {
-				appengineMutableFile = fileManager.createFile(appenginePath);
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
 				Assert.notNull(templateInputStream, "Could not acquire appengine-web.xml template");
 				appengine = XmlUtils.getDocumentBuilder().parse(templateInputStream);
@@ -745,19 +729,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	
 	private void updateEclipsePlugin(boolean addToPlugin) {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile mutableFile = null;
-
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				mutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document pom = XmlUtils.readXml(pomPath);
 
 		Element root = pom.getDocumentElement();
 		boolean hasChanged = false;
@@ -794,26 +766,13 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		
 		if (hasChanged) {
-			mutableFile.setDescriptionOfChange("Managed GAE buildCommand and projectnature in maven-eclipse-plugin");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Managed GAE buildCommand and projectnature in maven-eclipse-plugin", true);
 		}
 	}
 
 	private void updateDataNucleusPlugin(boolean addToPlugin) {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile mutableFile = null;
-
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				mutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document pom = XmlUtils.readXml(pomPath);
 
 		Element root = pom.getDocumentElement();
 		boolean hasChanged = false;
@@ -835,22 +794,13 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		
 		if (hasChanged) {
-			mutableFile.setDescriptionOfChange("Managed mappingExcludes element in maven-datanucleus-plugin");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Managed mappingExcludes element in maven-datanucleus-plugin", true);
 		}
 	}
 
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "/pom.xml");
-		MutableFile mutableFile = fileManager.updateFile(pomPath);
-
-		Document pom;
-		try {
-			pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-		} catch (Exception ex) {
-			throw new IllegalStateException("Could not open POM '" + pomPath + "'", ex);
-		}
-
+		Document pom = XmlUtils.readXml(pomPath);
 		Element root = pom.getDocumentElement();
 		
 		// Remove unwanted database artifacts
@@ -876,11 +826,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		
 		if (hasChanged) {
-			// Something has changed so write changes to pom.xml
-			mutableFile.setDescriptionOfChange("Removed redundant dependencies, plugins, and filters");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Removed redundant dependencies, plugins, and filters", true);
 		}
-
+		
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(false);
 			updateDataNucleusPlugin(false);
@@ -899,7 +847,6 @@ public class JpaOperationsImpl implements JpaOperations {
 				if (projectOperations.getProjectMetadata().isGwtEnabled() && dependency.getGroupId().equals("com.google.appengine")) {
 					continue;
 				}
-				// Found it
 				dependenciesElement.removeChild(candidate);
 				XmlUtils.removeTextNodes(dependenciesElement);
 				hasChanged = true;
@@ -937,7 +884,6 @@ public class JpaOperationsImpl implements JpaOperations {
 			Plugin plugin = new Plugin(pluginElement);
 			Element candidate = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = '" + plugin.getArtifactId() + "' and version = '" + plugin.getVersion() + "']", root);
 			if (candidate != null) {
-				// Found it
 				pluginsElement.removeChild(candidate);
 				XmlUtils.removeTextNodes(pluginsElement);
 				hasChanged = true;
