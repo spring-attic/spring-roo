@@ -39,6 +39,7 @@ import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -481,6 +482,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			if (compatibleOnly && !isCompatible(latest.getRooVersion())) {
 				continue bundle_loop;
 			}
+			if (isBundleInstalled(bundle)) {
+				continue bundle_loop;
+			}
 			if (requiresCommand != null && requiresCommand.length() > 0) {
 				boolean matchingCommand = false;
 				for (String cmd : latest.getCommands().keySet()) {
@@ -835,5 +839,16 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	private enum InstallOrUpgradeStatus {
 		SUCCESS, FAILED, INVALID_OBR_URL, PGP_VERIFICATION_NEEDED, SHELL_RESTART_NEEDED;
+	}
+	
+	private boolean isBundleInstalled(Bundle search) {
+		BundleContext bundleContext = context.getBundleContext();
+		for (org.osgi.framework.Bundle bundle: bundleContext.getBundles()) {
+			String bsn = bundle.getHeaders().get("Bundle-SymbolicName").toString();
+			if (StringUtils.hasText(bsn) && bsn.equals(search.getSymbolicName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
