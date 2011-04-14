@@ -276,18 +276,24 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 
 		if (mutableFile != null) {
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			try {
 				// Build a string representation of the JSP
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
+				XmlUtils.writeFormattedXml(byteArrayOutputStream, original);
 				String jspContent = byteArrayOutputStream.toString();
-				byteArrayOutputStream.close();
 				// We need to write the file out (it's a new file, or the existing file has different contents)
 				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
 				// Return and indicate we wrote out the file
 				return true;
 			} catch (IOException ioe) {
 				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
+			} finally {
+				if (byteArrayOutputStream != null) {
+					try {
+						byteArrayOutputStream.close();
+					} catch (IOException ignore) {
+					}
+				}
 			}
 		}
 

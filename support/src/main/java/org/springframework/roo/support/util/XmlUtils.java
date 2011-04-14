@@ -26,10 +26,16 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.w3c.dom.DOMConfiguration;
+import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSOutput;
+import org.w3c.dom.ls.LSSerializer;
 
 /**
  * Utilities related to DOM and XML usage.
@@ -98,6 +104,50 @@ public final class XmlUtils {
 			} catch (IOException ignored) {
 				// Do nothing
 			}
+		}
+	}
+	
+	public static void writeFormattedXml(OutputStream outputStream, Document document) {
+		// Note that the "format-pretty-print" DOM configuration parameter can only be set in JDK 1.6+.
+		DOMImplementation domImplementation = document.getImplementation();
+		if (domImplementation.hasFeature("LS", "3.0") && domImplementation.hasFeature("Core", "2.0")) {
+			DOMImplementationLS domImplementationLS = null;
+			try {
+				domImplementationLS = (DOMImplementationLS) domImplementation.getFeature("LS", "3.0");
+			} catch (NoSuchMethodError nsme) {
+				// Fall back to default LS
+				DOMImplementationRegistry registry = null;
+				try {
+					registry = DOMImplementationRegistry.newInstance();
+				} catch (Exception e) {
+					// DOMImplementationRegistry not available. Falling back to TrAX.
+					writeXml(outputStream, document);
+					return;
+				}
+				if (registry != null) {
+					domImplementationLS = (DOMImplementationLS) registry.getDOMImplementation("LS");
+				}
+			}
+			if (domImplementationLS != null) {
+				LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
+				DOMConfiguration domConfiguration = lsSerializer.getDomConfig();
+				if (domConfiguration.canSetParameter("format-pretty-print", Boolean.TRUE)) {
+					lsSerializer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
+					LSOutput lsOutput = domImplementationLS.createLSOutput();
+					lsOutput.setEncoding("UTF-8");
+					lsOutput.setByteStream(outputStream);
+					lsSerializer.write(document, lsOutput);
+				} else {
+					// DOMConfiguration 'format-pretty-print' parameter not available. Falling back to TrAX.
+					writeXml(outputStream, document);
+				}
+			} else {
+				// DOMImplementationLS not available. Falling back to TrAX.
+				writeXml(outputStream, document);
+			}
+		} else {
+			// DOM 3.0 LS and/or DOM 2.0 Core not supported. Falling back to TrAX.
+			writeXml(outputStream, document);
 		}
 	}
 	
