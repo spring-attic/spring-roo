@@ -710,17 +710,19 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(true);
 			if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
-				// Refresh the ProjectMetadata, as the maven-gae-plugin may have been added 
-				// to the pom but not yet reflected in a cached ProjectMetadata instance
+				// Refresh the ProjectMetadata, as the maven-gae-plugin has been added to the pom but may not yet be reflected 
 				metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
 			}
 			
-			if (ormProvider == OrmProvider.DATANUCLEUS) {
-				updateDataNucleusPlugin(true);
-			}
+			updateDataNucleusPlugin(true);
 		}
-
+		
 		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
+			if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
+				// Refresh the ProjectMetadata, as the maven-gae-plugin has been removed from the pom but not yet reflected
+				metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
+			}
+
 			Element gwtPluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
 			projectOperations.addBuildPlugin(new Plugin(gwtPluginElement));
 		}
@@ -862,7 +864,6 @@ public class JpaOperationsImpl implements JpaOperations {
 				Filter filter = new Filter(filterElement);
 				Element candidate = XmlUtils.findFirstElement("/project/build/filters/filter[text() = '" + filter.getValue() + "']", root);
 				if (candidate != null) {
-					// Found it
 					filtersElement.removeChild(candidate);
 					XmlUtils.removeTextNodes(filtersElement);
 					hasChanged = true;
