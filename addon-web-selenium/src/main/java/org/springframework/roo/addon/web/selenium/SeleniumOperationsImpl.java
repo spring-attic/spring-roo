@@ -75,11 +75,10 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Assert.notNull(controller, "Controller type required");	
 		
 		String webScaffoldMetadataIdentifier = WebScaffoldMetadata.createIdentifier(controller, Path.SRC_MAIN_JAVA);
-		
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
 		Assert.notNull(webScaffoldMetadata, "Web controller '" + controller.getFullyQualifiedTypeName()  + "' does not appear to be an automatic, scaffolded controller");
 		
-		//we abort the creation of a selenium test if the controller does not allow the creation of new instances for the form backing object
+		// We abort the creation of a selenium test if the controller does not allow the creation of new instances for the form backing object
 		if (!webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			logger.warning("The controller you specified does not allow the creation of new instances of the form backing object. No Selenium tests created.");
 			return;
@@ -93,40 +92,33 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
-		MutableFile seleniumMutableFile = null;
-		
-		name = (name != null ? name : "Selenium test for " + controller.getSimpleTypeName());
 		
 		Document selenium;
 		try {
 			if (fileManager.exists(seleniumPath)) {
-				seleniumMutableFile = fileManager.updateFile(seleniumPath);
-				selenium = XmlUtils.getDocumentBuilder().parse(seleniumMutableFile.getInputStream());
+				selenium =  XmlUtils.readXml(seleniumPath);
 			} else {
-				seleniumMutableFile = fileManager.createFile(seleniumPath);
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-template.xhtml");
 				Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
 				selenium = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		} 	
-		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
-		
+		}
+
 		Element root = (Element) selenium.getLastChild();
 		
-		if(root == null || !"html".equals(root.getNodeName())) {
+		if (root == null || !"html".equals(root.getNodeName())) {
 			throw new IllegalArgumentException("Could not parse selenium test case template file!");
 		}
 		
+		name = (name != null ? name : "Selenium test for " + controller.getSimpleTypeName());
 		XmlUtils.findRequiredElement("/html/head/title", root).setTextContent(name);
 		
 		XmlUtils.findRequiredElement("/html/body/table/thead/tr/td", root).setTextContent(name);
 
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
-		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));
+		tbody.appendChild(openCommand(selenium, serverURL + projectOperations.getProjectMetadata().getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));
 		
 		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
@@ -156,8 +148,8 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		tbody.appendChild(clickAndWaitCommand(selenium, "//input[@id='proceed']" ));	
 		
-		XmlUtils.writeXml(seleniumMutableFile.getOutputStream(), selenium);
-		
+		fileManager.createOrUpdateXmlFileIfRequired(seleniumPath, selenium, true);
+
 		manageTestSuite(relativeTestFilePath, name, serverURL);
 		
 		installMavenPlugin();
@@ -181,7 +173,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		} 	
+		} 
 		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
@@ -202,36 +194,16 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		
 		XmlUtils.writeXml(seleniumMutableFile.getOutputStream(), suite);
 		
-		menuOperations.addMenuItem(
-				new JavaSymbolName("SeleniumTests"), 
-				new JavaSymbolName("Test"),
-				"Test",
-				"selenium_menu_test_suite",
-				"/resources/" + relativeTestFilePath,
-				"si_");		
+		menuOperations.addMenuItem(new JavaSymbolName("SeleniumTests"), new JavaSymbolName("Test"), "Test", "selenium_menu_test_suite", "/resources/" + relativeTestFilePath, "si_");
 	}
 	
 	private void installMavenPlugin(){
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		String pomFilePath = "pom.xml";
-		String pomPath = pathResolver.getIdentifier(Path.ROOT, pomFilePath);
-		MutableFile pomMutableFile = null;
-		
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				pomMutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("This command cannot be run before a project has been created.");
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		} 	
-		
+		String pomPath = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
+		Document pom = XmlUtils.readXml(pomPath);		
 		Element root = (Element) pom.getLastChild();
 		
-		//stop if the plugin is already installed
+		// Stop if the plugin is already installed
 		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='selenium-maven-plugin']", root) != null) {
 			return;
 		}
@@ -239,7 +211,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Element dependencies = XmlUtils.findRequiredElement("/project/dependencies", root);
 		Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
 
-		//now install the plugin itself
+		// Now install the plugin itself
 		Element plugin = pom.createElement("plugin");
 		Element groupId = pom.createElement("groupId");
 		groupId.setTextContent("org.codehaus.mojo");
@@ -253,7 +225,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Element configuration = pom.createElement("configuration");
 		Element suite = pom.createElement("suite");
 		String suitePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "selenium/test-suite.xhtml");
-		suitePath = suitePath.substring(pathResolver.getRoot(Path.ROOT).length()+1);
+		suitePath = suitePath.substring(pathResolver.getRoot(Path.ROOT).length() + 1);
 		suite.setTextContent(suitePath);
 		configuration.appendChild(suite);
 		Element browser = pom.createElement("browser");
@@ -269,7 +241,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		
 		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
 
-		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+		fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, true);
 	}
 	
 	private Node clickAndWaitCommand(Document document, String linkTarget){
@@ -398,7 +370,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	
 	private boolean isSpecialType(JavaType javaType) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		//we are only interested if the type is part of our application and if no editor exists for it already
+		// We are only interested if the type is part of our application and if no editor exists for it already
 		if (metadataService.get(physicalTypeIdentifier) != null) {
 		  return true;
 		}		

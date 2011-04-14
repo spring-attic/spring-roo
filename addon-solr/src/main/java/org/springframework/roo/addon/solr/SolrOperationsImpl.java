@@ -59,20 +59,7 @@ public class SolrOperationsImpl implements SolrOperations {
 		updateSolrProperties(solrServerUrl);
 
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document appCtx;
-		try {
-			if (fileManager.exists(contextPath)) {
-				contextMutableFile = fileManager.updateFile(contextPath);
-				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not find applicationContext.xml");
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		Document appCtx = XmlUtils.readXml(contextPath);
 		Element root = (Element) appCtx.getFirstChild();
 
 		if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
@@ -85,14 +72,14 @@ public class SolrOperationsImpl implements SolrOperations {
 		}
 
 		Element solrServer = XmlUtils.findFirstElement("/beans/bean[@id='solrServer']", root);
-
 		if (solrServer != null) {
 			return;
 		}
 
 		root.appendChild(new XmlElementBuilder("bean", appCtx).addAttribute("id", "solrServer").addAttribute("class", "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer").addChild(new XmlElementBuilder("constructor-arg", appCtx).addAttribute("value", "${solr.serverUrl}").build()).build());
-
-		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
+		XmlUtils.removeTextNodes(root);
+		
+		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
 	}
 
 	private void updateSolrProperties(String solrServerUrl) {

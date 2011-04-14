@@ -10,7 +10,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -84,41 +83,19 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		}
 
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-
-		try {
-			if (fileManager.exists(webXml)) {
-				MutableFile mutableWebXml = fileManager.updateFile(webXml);
-				Document webXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableWebXml.getInputStream());
-				WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN, WebMvcOperations.HTTP_METHOD_FILTER_NAME, WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, SecurityOperations.SECURITY_FILTER_NAME, "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDoc, null);
-				XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
-			} else {
-				throw new IllegalStateException("Could not acquire " + webXml);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document webXmlDoc = XmlUtils.readXml(webXml);
+		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN, WebMvcOperations.HTTP_METHOD_FILTER_NAME, WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, SecurityOperations.SECURITY_FILTER_NAME, "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDoc, null);
+		fileManager.createOrUpdateXmlFileIfRequired(webXml, webXmlDoc, true);
 
 		// Include static view controller handler to webmvc-config.xml
 		String webMvc = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-
-		MutableFile mutableConfigXml = null;
-		Document webConfigDoc;
-		try {
-			if (fileManager.exists(webMvc)) {
-				mutableConfigXml = fileManager.updateFile(webMvc);
-				webConfigDoc = XmlUtils.getDocumentBuilder().parse(mutableConfigXml.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire " + webMvc);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document webConfigDoc = XmlUtils.readXml(webMvc);
 
 		Element viewController = XmlUtils.findFirstElementByName("mvc:view-controller", webConfigDoc.getDocumentElement());
 		Assert.notNull(viewController, "Could not find mvc:view-controller in " + webMvc);
 
 		viewController.getParentNode().insertBefore(new XmlElementBuilder("mvc:view-controller", webConfigDoc).addAttribute("path", "/login").build(), viewController);
-		XmlUtils.writeXml(mutableConfigXml.getOutputStream(), webConfigDoc);
+		fileManager.createOrUpdateXmlFileIfRequired(webMvc, webConfigDoc, true);
 	}
 
 	private void updatePomProperties(Element configuration) {
