@@ -24,7 +24,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -36,7 +35,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Provides email configuration operations.
+ * Implementation of {@link MailOperationsImpl}.
  * 
  * @author Stefan Schmidt
  * @since 1.0
@@ -60,25 +59,12 @@ public class MailOperationsImpl implements MailOperations {
 	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
 		Assert.hasText(hostServer, "Host server name required");
 
-		Map<String, String> props = new HashMap<String, String>();
-		
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile;
-		Document appCtx;
-		try {
-			if (fileManager.exists(contextPath)) {
-				contextMutableFile = fileManager.updateFile(contextPath);
-				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire the Spring applicationContext.xml file");
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		Element root = (Element) appCtx.getFirstChild();
+		Document appCtx = XmlUtils.readXml(contextPath);
+		Element root = appCtx.getDocumentElement();
 
 		boolean installDependencies = true;
+		Map<String, String> props = new HashMap<String, String>();
 
 		Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.javamail.JavaMailSenderImpl']", root);
 		if (mailBean != null) {
@@ -153,33 +139,23 @@ public class MailOperationsImpl implements MailOperations {
 			}
 		}
 
-		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
+		XmlUtils.removeTextNodes(root);
+		
+		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
 
 		if (installDependencies) {
 			updateConfiguration();
 		}
 
-		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, false);
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, true);
 	}
 
-	public void configureTemplateMessage(String from, String subject) {
-		Map<String, String> props = new HashMap<String, String>();
-		
+	public void configureTemplateMessage(String from, String subject) {		
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile;
-		Document appCtx;
-		try {
-			if (fileManager.exists(contextPath)) {
-				contextMutableFile = fileManager.updateFile(contextPath);
-				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document appCtx = XmlUtils.readXml(contextPath);
 
-		Element root = (Element) appCtx.getFirstChild();
+		Element root = appCtx.getDocumentElement();
+		Map<String, String> props = new HashMap<String, String>();
 
 		if (StringUtils.hasText(from) || StringUtils.hasText(subject)) {
 			Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.SimpleMailMessage']", root);
@@ -214,12 +190,13 @@ public class MailOperationsImpl implements MailOperations {
 			}
 
 			root.appendChild(smmBean);
+			XmlUtils.removeTextNodes(root);
 
-			XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
+			fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
 		}
 
 		if (props.size() > 0) {
-			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, false);
+			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, true);
 		}
 	}
 
@@ -245,18 +222,7 @@ public class MailOperationsImpl implements MailOperations {
 		mutableTypeDetails.addField(fieldBuilder.build());
 
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile;
-		Document appCtx;
-		try {
-			if (fileManager.exists(contextPath)) {
-				contextMutableFile = fileManager.updateFile(contextPath);
-				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document appCtx = XmlUtils.readXml(contextPath);
 
 		Element root = (Element) appCtx.getFirstChild();
 
@@ -305,7 +271,7 @@ public class MailOperationsImpl implements MailOperations {
 				}
 				root.appendChild(new XmlElementBuilder("task:annotation-driven", appCtx).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
 				root.appendChild(new XmlElementBuilder("task:executor", appCtx).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
-				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), contextMutableFile.getOutputStream(), appCtx);
+				fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
 				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "email.properties", "executor.poolSize", "10", true);
 			}
 			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));

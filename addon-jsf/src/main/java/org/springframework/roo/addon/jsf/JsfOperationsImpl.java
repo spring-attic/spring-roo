@@ -27,7 +27,6 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -123,14 +122,7 @@ public class JsfOperationsImpl implements JsfOperations {
 
 	private void cleanup(Element configuration, JsfImplementation jsfImplementation) {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "/pom.xml");
-		MutableFile mutableFile = fileManager.updateFile(pomPath);
-
-		Document pom;
-		try {
-			pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-		} catch (Exception e) {
-			throw new IllegalStateException("Could not open POM '" + pomPath + "'", e);
-		}
+		Document pom = XmlUtils.readXml(pomPath);
 
 		Element root = (Element) pom.getFirstChild();
 		
@@ -141,9 +133,8 @@ public class JsfOperationsImpl implements JsfOperations {
 			}
 		}
 		if (removeArtifacts(getImplementationXPath(jsfImplementations), root, configuration)) {
-			mutableFile.setDescriptionOfChange("Removed redundant artifacts");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
-		}	
+			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Removed redundant dependencies, plugins, and filters", true);
+		}
 	}
 	
 	private boolean removeArtifacts(String xPathExpression, Element root, Element configuration) {

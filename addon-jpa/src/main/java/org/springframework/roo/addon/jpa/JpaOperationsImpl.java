@@ -122,9 +122,8 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String persistenceUnit) {
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		Document applicationContext = XmlUtils.readXml(contextPath);
-		
-		Element root = applicationContext.getDocumentElement();
+		Document appCtx = XmlUtils.readXml(contextPath);
+		Element root = appCtx.getDocumentElement();
 
 		// Checking for existence of configurations, if found abort
 		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id = 'dataSource']", root);
@@ -138,21 +137,21 @@ public class JpaOperationsImpl implements JpaOperations {
 				root.removeChild(dataSourceJndi);
 			}
 		} else if (!StringUtils.hasText(jndi) && dataSource == null) {
-			dataSource = applicationContext.createElement("bean");
+			dataSource = appCtx.createElement("bean");
 			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
 			dataSource.setAttribute("destroy-method", "close");
 			dataSource.setAttribute("id", "dataSource");
-			dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", applicationContext));
-			dataSource.appendChild(createPropertyElement("url", "${database.url}", applicationContext));
-			dataSource.appendChild(createPropertyElement("username", "${database.username}", applicationContext));
-			dataSource.appendChild(createPropertyElement("password", "${database.password}", applicationContext));
+			dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", appCtx));
+			dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
+			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
+			dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
 			root.appendChild(dataSource);
 			if (dataSourceJndi != null) {
 				dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
 			}
 		} else if (StringUtils.hasText(jndi)) {
 			if (dataSourceJndi == null) {
-				dataSourceJndi = applicationContext.createElement("jee:jndi-lookup");
+				dataSourceJndi = appCtx.createElement("jee:jndi-lookup");
 				dataSourceJndi.setAttribute("id", "dataSource");
 				root.appendChild(dataSourceJndi);
 			}
@@ -169,28 +168,28 @@ public class JpaOperationsImpl implements JpaOperations {
 				dataSource.removeChild(validationQueryElement);
 				dataSource.removeChild(testOnBorrowElement);
 			} else if (jdbcDatabase == JdbcDatabase.MYSQL && validationQueryElement == null && testOnBorrowElement == null) {
-				dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1 FROM DUAL", applicationContext));
-				dataSource.appendChild(createPropertyElement("testOnBorrow", "true", applicationContext));
+				dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1 FROM DUAL", appCtx));
+				dataSource.appendChild(createPropertyElement("testOnBorrow", "true", appCtx));
 			}
 		}
 
 		Element transactionManager = XmlUtils.findFirstElement("/beans/bean[@id = 'transactionManager']", root);
 		if (transactionManager == null) {
-			transactionManager = applicationContext.createElement("bean");
+			transactionManager = appCtx.createElement("bean");
 			transactionManager.setAttribute("id", "transactionManager");
 			transactionManager.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
 			if (StringUtils.hasText(persistenceUnit)) {
-				Element qualifier = applicationContext.createElement("qualifier");
+				Element qualifier = appCtx.createElement("qualifier");
 				qualifier.setAttribute("value", persistenceUnit);
 				transactionManager.appendChild(qualifier);
 			}
-			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", applicationContext));
+			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
 			root.appendChild(transactionManager);
 		}
 
 		Element aspectJTxManager = XmlUtils.findFirstElement("/beans/annotation-driven", root);
 		if (aspectJTxManager == null) {
-			aspectJTxManager = applicationContext.createElement("tx:annotation-driven");
+			aspectJTxManager = appCtx.createElement("tx:annotation-driven");
 			aspectJTxManager.setAttribute("mode", "aspectj");
 			aspectJTxManager.setAttribute("transaction-manager", "transactionManager");
 			root.appendChild(aspectJTxManager);
@@ -201,19 +200,19 @@ public class JpaOperationsImpl implements JpaOperations {
 			root.removeChild(entityManagerFactory);
 		}
 
-		entityManagerFactory = applicationContext.createElement("bean");
+		entityManagerFactory = appCtx.createElement("bean");
 		entityManagerFactory.setAttribute("id", "entityManagerFactory");
 
 		switch (jdbcDatabase) {
 			case GOOGLE_APP_ENGINE:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
-				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), applicationContext));
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), appCtx));
 				break;
 			default:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), applicationContext));
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), appCtx));
 				if (!ormProvider.name().startsWith("DATANUCLEUS")) {
-					entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", applicationContext));
+					entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
 				}
 				break;
 		}
@@ -221,7 +220,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		root.appendChild(entityManagerFactory);
 		XmlUtils.removeTextNodes(root);
 
-		fileManager.createOrUpdateXmlFileIfRequired(contextPath, applicationContext, true);
+		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
@@ -233,7 +232,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				persistence = XmlUtils.readXml(persistencePath);
 			} else {
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
-				Assert.notNull(templateInputStream, "Could not acquire peristence.xml template");
+				Assert.notNull(templateInputStream, "Could not acquire persistence.xml template");
 				persistence = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 			}
 		} catch (Exception e) {
@@ -773,9 +772,9 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateDataNucleusPlugin(boolean addToPlugin) {
 		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Document pom = XmlUtils.readXml(pomPath);
-
 		Element root = pom.getDocumentElement();
 		boolean hasChanged = false;
+		
 		
 		// Manage GAE buildCommand
 		Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);

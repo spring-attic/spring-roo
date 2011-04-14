@@ -4,7 +4,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Interface to operations available via {@link MailOperationsImpl}.
+ * Provides email configuration operations.
  * 
  * @author Ben Alex
  */
