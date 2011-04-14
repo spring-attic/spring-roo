@@ -135,7 +135,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 					break;
 				}
 			}
-			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), projectOperations.getProjectMetadata(), governorTypeDetails.getName(), false);
+			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), projectMetadata, governorTypeDetails.getName(), false);
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
 			methodBuilder.setReturnType(gwtType);
 			MethodMetadata convertedMethod = methodBuilder.build();
