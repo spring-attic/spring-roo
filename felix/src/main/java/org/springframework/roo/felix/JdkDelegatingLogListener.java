@@ -1,5 +1,7 @@
 package org.springframework.roo.felix;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +29,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * are sent to the JDK logger.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.1
  *
  */
@@ -37,12 +40,14 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 	@Reference private LogReaderService logReaderService;
 	private final static Logger logger = HandlerUtils.getLogger(JdkDelegatingLogListener.class);
 	
+	public static final String DO_NOT_LOG = "#DO_NOT_LOG";
+	
 	@SuppressWarnings("unchecked")
 	protected void activate(ComponentContext context) {
 		logReaderService.addLogListener(this);
 		Enumeration<LogEntry> latestLogs = logReaderService.getLog();
 		if (latestLogs.hasMoreElements()) {
-			logNow(latestLogs.nextElement());
+			logNow(latestLogs.nextElement(), false);
 		}
 	}
 
@@ -51,10 +56,17 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 	}
 	
 	public void logged(LogEntry entry) {
-		logNow(entry);
+		if (containsDoNotLogTag(entry.getException())) {
+			// Only log Felix stack trace in development mode, discard log otherwise
+			if (isDevelopmentMode()) {
+				logNow(entry, true);
+			}
+		} else {
+			logNow(entry, false);
+		}
 	}
 
-	private void logNow(LogEntry entry) {
+	private void logNow(LogEntry entry, boolean removeDoNotLogTag) {
 		int osgiLevel = entry.getLevel();
 		Level jdkLevel = Level.FINEST;
 		
@@ -78,8 +90,33 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 			}
 		} else {
 			// Important log message, so log it via JDK
-			logger.log(jdkLevel, buildMessage(entry), entry.getException());
+			if (removeDoNotLogTag) {
+				logger.log(jdkLevel, buildMessage(entry) + cleanThrowable(entry.getException()));
+			} else {
+				logger.log(jdkLevel, buildMessage(entry), entry.getException());
+			}
 		}
+	}
+	
+	public static String cleanThrowable(Throwable throwable) {
+		final StringBuilder result = new StringBuilder();
+		final String NEW_LINE = System.getProperty("line.separator");
+		result.append(NEW_LINE);
+		result.append(throwable.toString().replace(DO_NOT_LOG, ""));
+		result.append(NEW_LINE);
+		for (StackTraceElement ste : throwable.getStackTrace()){
+			result.append(ste);
+			result.append(NEW_LINE);
+		}
+		return result.toString();
+	}
+	
+	private boolean containsDoNotLogTag(Throwable throwable) {
+		if (throwable.getMessage().contains(DO_NOT_LOG)) {
+			return true;
+		}
+		PrintWriter pw = new PrintWriter(new StringWriter());
+		return pw.toString().contains(DO_NOT_LOG);
 	}
 	
 	private String buildMessage(LogEntry entry) {

@@ -87,7 +87,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 			logger.log(Level.SEVERE, "Download URL '" + resourceUrl.toExternalForm() + "' failed");
 			logger.log(Level.SEVERE, "This resource was signed with PGP key ID '" + decision.getSignatureAsHex() + "', which is not currently trusted");
 			logger.log(Level.SEVERE, "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
-			throw new IOException("Download URL '" + resourceUrl.toExternalForm() + "' has untrusted PGP signature");
+			throw new IOException("Download URL '" + resourceUrl.toExternalForm() + "' has untrusted PGP signature " + JdkDelegatingLogListener.DO_NOT_LOG);
 		} else {
 			// logger.log(Level.FINE, "Download URL '" + resourceUrl.toExternalForm() + "' signature uses acceptable PGP key ID '" + decision.getSignatureAsHex() + "'");
 		}
