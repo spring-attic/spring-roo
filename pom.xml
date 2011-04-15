@@ -67,6 +67,7 @@
         <!-- module>addon-jsf</module -->
         <module>addon-op4j</module>
         <module>addon-git</module>
+		<module>addon-cloud-foundry</module>
         <module>annotations</module>
     </modules>
     <organization>
