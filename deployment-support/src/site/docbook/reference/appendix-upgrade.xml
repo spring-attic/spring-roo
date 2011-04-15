@@ -224,7 +224,7 @@
     forum</link> for assistance.</para>
   </section>
 
-  <section>
+  <section xml:id="upgrade-1.1.3.RELEASE">
     <title>Upgrading to 1.1.3.RELEASE</title>
 
     <para>The main changes you need to be aware of when upgrading from Spring
