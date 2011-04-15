@@ -888,6 +888,8 @@ public class JpaOperationsImpl implements JpaOperations {
 				XmlUtils.removeTextNodes(pluginsElement);
 				hasChanged = true;
 			}
+			//We should attempt to remove it from ProjectOperations regardless of it being found in the physical pom.xml file
+			projectOperations.removeBuildPlugin(plugin);
 		}
 		return hasChanged;
 	}
