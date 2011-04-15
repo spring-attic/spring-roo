@@ -438,6 +438,11 @@
                 <version>1.45.0.0010</version>
             </dependency>
             <dependency>
+				<groupId>org.springframework.roo.wrapping</groupId>
+				<artifactId>org.springframework.roo.wrapping.cloud-foundry-api</artifactId>
+				<version>0.0.1.0010</version>
+			</dependency>
+            <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
                 <version>1.0.7.0010</version>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>wrapping</artifactId>
+		<version>1.1.3.RELEASE</version>
+	</parent>
+    <groupId>org.springframework.roo.wrapping</groupId>
+	<artifactId>${pom.groupId}.cloud-foundry-api</artifactId>
+    <version>${osgiVersion}</version>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Wrapping - Cloud Foundry API</name>
+    <description>Cloud Foundry Java client API. This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
+
+    <properties>
+        <pkgArtifactId>AppCloudClient</pkgArtifactId>
+        <pkgVersion>0.0.1.A1-ROO</pkgVersion>
+        <osgiVersion>0.0.1.0010</osgiVersion>
+        <pkgVendor>VMware, Inc</pkgVendor>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.vmware.appcloud</groupId>
+            <artifactId>${pkgArtifactId}</artifactId>
+            <version>${pkgVersion}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>com.vmware.appcloud.client;version=${project.version};version=${project.version}</Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
