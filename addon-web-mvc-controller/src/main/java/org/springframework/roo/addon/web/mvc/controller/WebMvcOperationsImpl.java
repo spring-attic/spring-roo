@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -60,23 +61,28 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			return;
 		}
 
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
-		Document webXml;
+		MutableFile mutableFile = null;
+		Document document;
+		InputStream templateInputStream;
 		try {
-			webXml = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
+			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
+			mutableFile = fileManager.createFile(webXmlPath);
+			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 
 		String projectName = projectOperations.getProjectMetadata().getProjectName();
-		WebXmlUtils.setDisplayName(projectName, webXml, null);
-		WebXmlUtils.setDescription("Roo generated " + projectName + " application", webXml, null);
+		WebXmlUtils.setDisplayName(projectName, document, null);
+		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 
-		fileManager.createOrUpdateXmlFileIfRequired(webXmlPath, webXml, true);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+
 		try {
 			templateInputStream.close();
 		} catch (IOException ignored) {}
-		
+
 		fileManager.scan();
 	}
 
@@ -88,28 +94,24 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		String webXmlFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXmlFile), "'" + webXmlFile + "' does not exist");
 
-		Document webXml;
-		try {
-			webXml = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(webXmlFile));
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
+		MutableFile mutableFile = fileManager.updateFile(webXmlFile);
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
 
-		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("defaultHtmlEscape", "true"), webXml, "Enable escaping of form submission contents");
-		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), webXml, null);
-		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", webXml, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
-		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", webXml, null);
+		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("defaultHtmlEscape", "true"), document, "Enable escaping of form submission contents");
+		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), document, null);
+		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", document, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
+		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
-			WebXmlUtils.addFilter(WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", webXml, null);
+			WebXmlUtils.addFilter(WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", document, null);
 		}
-		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", webXml, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet(projectOperations.getProjectMetadata().getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
-		WebXmlUtils.setSessionTimeout(new Integer(10), webXml, null);
+		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", document, "Creates the Spring Container shared by all Servlets and Filters");
+		WebXmlUtils.addServlet(projectOperations.getProjectMetadata().getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
+		WebXmlUtils.setSessionTimeout(new Integer(10), document, null);
 		// WebXmlUtils.addWelcomeFile("/", webXml, null);
-		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", webXml, null);
-		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", webXml, null);
+		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", document, null);
+		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", document, null);
 
-		fileManager.createOrUpdateXmlFileIfRequired(webXmlFile, webXml, true);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
 	private void createWebApplicationContext() {
@@ -119,22 +121,28 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		// Verify the middle tier application context already exists
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"))) {
+		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		if (fileManager.exists(webConfigFile)) {
 			// This file already exists, nothing to do
 			return;
 		}
 
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
-		Document webMvcConfig;
+		MutableFile mutableFile = null;
+		Document document;
+		InputStream templateInputStream;
 		try {
-			webMvcConfig = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
+			templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
+			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
+			mutableFile = fileManager.createFile(webConfigFile);
+			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 
-		Element rootElement = (Element) webMvcConfig.getFirstChild();
-		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
-		fileManager.createOrUpdateXmlFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"), webMvcConfig, true);
+		Element root = (Element) document.getFirstChild();
+		XmlUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
+		
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 
 		try {
 			templateInputStream.close();

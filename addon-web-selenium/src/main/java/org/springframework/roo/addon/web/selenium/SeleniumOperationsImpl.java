@@ -93,21 +93,18 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 		
-		Document selenium;
+		MutableFile mutableFile = null;
+		Document document;
 		try {
-			if (fileManager.exists(seleniumPath)) {
-				selenium =  XmlUtils.readXml(seleniumPath);
-			} else {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-template.xhtml");
-				Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
-				selenium = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-			}
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(),  "selenium-template.xhtml");
+			Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
+			mutableFile = fileManager.createFile(seleniumPath);
+			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 
-		Element root = (Element) selenium.getLastChild();
-		
+		Element root = (Element) document.getLastChild();
 		if (root == null || !"html".equals(root.getNodeName())) {
 			throw new IllegalArgumentException("Could not parse selenium test case template file!");
 		}
@@ -118,7 +115,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		XmlUtils.findRequiredElement("/html/body/table/thead/tr/td", root).setTextContent(name);
 
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
-		tbody.appendChild(openCommand(selenium, serverURL + projectOperations.getProjectMetadata().getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));
+		tbody.appendChild(openCommand(document, serverURL + projectOperations.getProjectMetadata().getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));
 		
 		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
@@ -132,7 +129,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 				if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 					FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
 					fieldBuilder.setFieldName(new JavaSymbolName(javaTypePersistenceMetadataDetails.getIdentifierField().getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));
-					tbody.appendChild(typeCommand(selenium, fieldBuilder.build()));
+					tbody.appendChild(typeCommand(document, fieldBuilder.build()));
 				}
 			}
 		}
@@ -140,15 +137,15 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		// Add all other fields
 		for (FieldMetadata field : webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, null)) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
-				tbody.appendChild(typeCommand(selenium, field));
+				tbody.appendChild(typeCommand(document, field));
 			} else {
 				// tbody.appendChild(typeKeyCommand(selenium, field));
 			}
 		}
 
-		tbody.appendChild(clickAndWaitCommand(selenium, "//input[@id='proceed']" ));	
+		tbody.appendChild(clickAndWaitCommand(document, "//input[@id='proceed']" ));	
 		
-		fileManager.createOrUpdateXmlFileIfRequired(seleniumPath, selenium, true);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 
 		manageTestSuite(relativeTestFilePath, name, serverURL);
 		
@@ -199,9 +196,9 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	
 	private void installMavenPlugin(){
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		String pomPath = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
-		Document pom = XmlUtils.readXml(pomPath);		
-		Element root = (Element) pom.getLastChild();
+		MutableFile mutableFile = fileManager.updateFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = (Element) document.getLastChild();
 		
 		// Stop if the plugin is already installed
 		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='selenium-maven-plugin']", root) != null) {
@@ -212,36 +209,36 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
 
 		// Now install the plugin itself
-		Element plugin = pom.createElement("plugin");
-		Element groupId = pom.createElement("groupId");
+		Element plugin = document.createElement("plugin");
+		Element groupId = document.createElement("groupId");
 		groupId.setTextContent("org.codehaus.mojo");
 		plugin.appendChild(groupId);
-		Element artifactId = pom.createElement("artifactId");
+		Element artifactId = document.createElement("artifactId");
 		artifactId.setTextContent("selenium-maven-plugin");
 		plugin.appendChild(artifactId);
-		Element version = pom.createElement("version");
+		Element version = document.createElement("version");
 		version.setTextContent("1.1");
 		plugin.appendChild(version);
-		Element configuration = pom.createElement("configuration");
-		Element suite = pom.createElement("suite");
+		Element configuration = document.createElement("configuration");
+		Element suite = document.createElement("suite");
 		String suitePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "selenium/test-suite.xhtml");
 		suitePath = suitePath.substring(pathResolver.getRoot(Path.ROOT).length() + 1);
 		suite.setTextContent(suitePath);
 		configuration.appendChild(suite);
-		Element browser = pom.createElement("browser");
+		Element browser = document.createElement("browser");
 		browser.setTextContent("*firefox");
 		configuration.appendChild(browser);
-		Element results = pom.createElement("results");
+		Element results = document.createElement("results");
 		results.setTextContent("${project.build.directory}/selenium.html");
 		configuration.appendChild(results);
-		Element startURL = pom.createElement("startURL");
+		Element startURL = document.createElement("startURL");
 		startURL.setTextContent("http://localhost:4444/");
 		configuration.appendChild(startURL);
 		plugin.appendChild(configuration);
 		
 		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
 
-		fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, true);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 	
 	private Node clickAndWaitCommand(Document document, String linkTarget){

@@ -314,8 +314,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			}
 
 			dataDictionary.addSection("fields").setVariable("field", property.getName());
-			if (!isReadOnly(property.getName(), governorTypeDetails, entityMetadata))
+			if (!isReadOnly(property.getName(), governorTypeDetails, entityMetadata)) {
 				dataDictionary.addSection("editViewProps").setVariable("prop", property.forEditView());
+			}
 
 			TemplateDataDictionary propertiesSection = dataDictionary.addSection("properties");
 			propertiesSection.setVariable("prop", property.getName());
@@ -359,7 +360,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 					maybeAddImport(dataDictionary, importSet, property.getSetEditorType());
 				}
 			}
-
 		}
 
 		dataDictionary.setVariable("proxyFields", proxyFields);

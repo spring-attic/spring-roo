@@ -7,7 +7,6 @@ import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.undo.UndoManager;
-import org.w3c.dom.Document;
 
 /**
  * Represents the primary means for add-ons to modify the underlying disk storage.
@@ -135,38 +134,6 @@ public interface FileManager {
 	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
 	 */
 	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately);
-
-	/**
-	 * Provides a simple way to create or update an XML file, skipping any modification if the file's contents match the proposed contents. 
-	 * 
-	 * <p>
-	 * Implementations guarantee to {@link #createDirectory(String)} as required to create any required parent directories.
-	 * 
-	 * <p>
-	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
-	 * 
-	 * @param fileIdentifier the file to create or update as appropriate (required)
-	 * @param document the DOM document 
-	 * @param message the additional information to be supplied to the underlying 
-	 * {@link MutableFile} instance (can be null or empty to clear any extra information)
-	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
-	 */
-	void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, String message, boolean writeImmediately);
-
-	/**
-	 * Provides a simple way to create or update an XML file, skipping any modification if the file's contents match the proposed contents. 
-	 * 
-	 * <p>
-	 * Implementations guarantee to {@link #createDirectory(String)} as required to create any required parent directories.
-	 * 
-	 * <p>
-	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
-	 * 
-	 * @param fileIdentifier the file to create or update as appropriate (required)
-	 * @param document the DOM document 
-	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
-	 */
-	void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, boolean writeImmediately);
 
 	/**
 	 * Delegates to {@link FileMonitorService#findMatchingAntPath(String)}.

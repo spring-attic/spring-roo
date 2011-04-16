@@ -148,7 +148,18 @@ public interface ProjectOperations {
 	void addDependency(String groupId, String artifactId, String version);
 
 	/**
-	 * Allows removal of a JAR dependency to the POM. 
+	 * Allows removal of JAR dependencies from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param dependencies a list of dependencies to remove (required)
+	 */
+	void removeDependencies(List<Dependency> dependencies);
+
+	/**
+	 * Allows removal of a JAR dependency from the POM. 
 	 * 
 	 * <p>
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
@@ -238,6 +249,17 @@ public interface ProjectOperations {
 	void removePluginRepository(Repository repository);
 
 	/**
+	 * Allows addition of a build plugins to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add 
+	 * a new build capability to their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param plugins a list build plugins to add (required)
+	 */
+	void addBuildPlugins(List<Plugin> plugins);
+
+	/**
 	 * Allows addition of a build plugin to the POM. 
 	 * 
 	 * <p>
@@ -249,7 +271,18 @@ public interface ProjectOperations {
 	void addBuildPlugin(Plugin plugin);
 
 	/**
-	 * Allows remove of an existing build plugin from the POM. 
+	 * Allows removal of an existing build plugins from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * build plugins from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param plugins a list build plugins to remove (required)
+	 */
+	void removeBuildPlugins(List<Plugin> plugins);
+	
+	/**
+	 * Allows removall of an existing build plugin from the POM. 
 	 * 
 	 * <p>
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
@@ -266,7 +299,7 @@ public interface ProjectOperations {
 	 * 
 	 * @param plugin the build plugin to update (required)
 	 */
-	void buildPluginUpdate(Plugin plugin);
+	void updateBuildPlugin(Plugin plugin);
 	
 	/**
 	 * Allows addition of a property to the POM. 

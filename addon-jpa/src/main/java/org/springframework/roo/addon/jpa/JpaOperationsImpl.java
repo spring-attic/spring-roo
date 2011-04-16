@@ -24,7 +24,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -69,7 +68,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	public boolean isJpaInstalled() {
 		return projectOperations.isProjectAvailable() && fileManager.exists(getPersistencePath());
 	}
-	
+
 	public boolean hasDatabaseProperties() {
 		return fileManager.exists(getDatabasePropertiesPath());
 	}
@@ -104,7 +103,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		updatePersistenceXml(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, persistenceUnit);
 		manageGaeXml(ormProvider, jdbcDatabase, applicationId);
 		updateVMforceConfigProperties(ormProvider, jdbcDatabase, userName, password);
-		
+
 		if (!StringUtils.hasText(jndi)) {
 			updateDatabaseProperties(ormProvider, jdbcDatabase, hostName, databaseName, userName, password);
 		}
@@ -122,7 +121,8 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String persistenceUnit) {
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		Document appCtx = XmlUtils.readXml(contextPath);
+		MutableFile mutableFile = fileManager.updateFile(contextPath);
+		Document appCtx = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = appCtx.getDocumentElement();
 
 		// Checking for existence of configurations, if found abort
@@ -218,27 +218,29 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		root.appendChild(entityManagerFactory);
-		XmlUtils.removeTextNodes(root);
 
-		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
+		XmlUtils.removeTextNodes(root);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), appCtx);
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
 		String persistencePath = getPersistencePath();
-
+		MutableFile mutableFile = null;
 		Document persistence;
 		try {
 			if (fileManager.exists(persistencePath)) {
-				persistence = XmlUtils.readXml(persistencePath);
+				mutableFile = fileManager.updateFile(persistencePath);
+				persistence = XmlUtils.readXml(mutableFile.getInputStream());
 			} else {
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
 				Assert.notNull(templateInputStream, "Could not acquire persistence.xml template");
-				persistence = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+				mutableFile = fileManager.createFile(persistencePath);
+				persistence = XmlUtils.readXml(templateInputStream);
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		
+
 		Properties dialects = new Properties();
 		try {
 			InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
@@ -251,7 +253,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element root = persistence.getDocumentElement();
 		Element persistenceElement = XmlUtils.findFirstElement("/persistence", root);
 		Assert.notNull(persistenceElement, "No persistence element found");
-		
+
 		Element persistenceUnitElement;
 		if (StringUtils.hasText(persistenceUnit)) {
 			persistenceUnitElement = XmlUtils.findFirstElement(PERSISTENCE_UNIT + "[@name = '" + persistenceUnit + "']", persistenceElement);
@@ -279,7 +281,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
 				break;
 		}
-		
+
 		// Add provider element
 		Element provider = persistence.createElement("provider");
 		switch (jdbcDatabase) {
@@ -314,9 +316,9 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", hbm2dll, persistence));
 				properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
 				properties.appendChild(createPropertyElement("hibernate.connection.charSet", "UTF-8", persistence));
-				properties.appendChild(persistence.createComment(" Uncomment the following two properties for JBoss only ")); 
-				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.apply_to_ddl\" value=\"false\" /")); 
-				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.autoregister_listeners\" value=\"false\" /")); 
+				properties.appendChild(persistence.createComment(" Uncomment the following two properties for JBoss only "));
+				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.apply_to_ddl\" value=\"false\" /"));
+				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.autoregister_listeners\" value=\"false\" /"));
 				break;
 			case OPENJPA:
 				properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
@@ -372,8 +374,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		persistenceUnitElement.appendChild(properties);
-		
-		fileManager.createOrUpdateXmlFileIfRequired(persistencePath, persistence, true);
+
+		XmlUtils.writeXml(mutableFile.getOutputStream(), persistence);
 	}
 
 	private String getConnectionString(JdbcDatabase jdbcDatabase, String hostName, String databaseName) {
@@ -392,10 +394,10 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void manageGaeXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String applicationId) {
-		PathResolver pathResolver = projectOperations.getPathResolver();
-		String appenginePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
+		String appenginePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
 		boolean appenginePathExists = fileManager.exists(appenginePath);
-		String loggingPropertiesPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/logging.properties");
+
+		String loggingPropertiesPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/logging.properties");
 		boolean loggingPropertiesPathExists = fileManager.exists(loggingPropertiesPath);
 
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
@@ -407,25 +409,28 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 			return;
 		}
-		
+
+		MutableFile mutableFile = null;
 		Document appengine;
 		try {
 			if (appenginePathExists) {
-				appengine = XmlUtils.readXml(appenginePath);
+				mutableFile = fileManager.updateFile(appenginePath);
+				appengine = XmlUtils.readXml(mutableFile.getInputStream());
 			} else {
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
 				Assert.notNull(templateInputStream, "Could not acquire appengine-web.xml template");
+				mutableFile = fileManager.createFile(appenginePath);
 				appengine = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 
-		Element rootElement = appengine.getDocumentElement();
-		Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", rootElement);
+		Element root = appengine.getDocumentElement();
+		Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", root);
 		applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
 
-		fileManager.createOrUpdateXmlFileIfRequired(appenginePath, appengine, true);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), appengine);
 
 		if (!loggingPropertiesPathExists) {
 			try {
@@ -448,15 +453,14 @@ public class JpaOperationsImpl implements JpaOperations {
 			return;
 		}
 
-		MutableFile databaseMutableFile = null;
+		MutableFile mutableFile = null;
 		Properties props = new Properties();
-
 		try {
 			if (databaseExists) {
-				databaseMutableFile = fileManager.updateFile(databasePath);
-				props.load(databaseMutableFile.getInputStream());
+				mutableFile = fileManager.updateFile(databasePath);
+				props.load(mutableFile.getInputStream());
 			} else {
-				databaseMutableFile = fileManager.createFile(databasePath);
+				mutableFile = fileManager.createFile(databasePath);
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
 				Assert.notNull(templateInputStream, "Could not acquire database properties template");
 				props.load(templateInputStream);
@@ -478,7 +482,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			// No changes from existing database configuration so exit now
 			return;
 		}
-		
+
 		// Write changes to database.properties file
 		props.put(DATABASE_URL, connectionString);
 		props.put(DATABASE_DRIVER, jdbcDatabase.getDriverClassName());
@@ -487,7 +491,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		OutputStream outputStream = null;
 		try {
-			outputStream = databaseMutableFile.getOutputStream();
+			outputStream = mutableFile.getOutputStream();
 			props.store(outputStream, "Updated at " + new Date());
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -510,16 +514,15 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 			return;
 		}
-		
-		MutableFile configMutableFile = null;
-		Properties props = new Properties();
 
+		MutableFile mutableFile = null;
+		Properties props = new Properties();
 		try {
 			if (configExists) {
-				configMutableFile = fileManager.updateFile(configPath);
-				props.load(configMutableFile.getInputStream());
+				mutableFile = fileManager.updateFile(configPath);
+				props.load(mutableFile.getInputStream());
 			} else {
-				configMutableFile = fileManager.createFile(configPath);
+				mutableFile = fileManager.createFile(configPath);
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "config-template.properties");
 				Assert.notNull(templateInputStream, "Could not acquire config properties template");
 				props.load(templateInputStream);
@@ -533,7 +536,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		OutputStream outputStream = null;
 		try {
-			outputStream = configMutableFile.getOutputStream();
+			outputStream = mutableFile.getOutputStream();
 			props.store(outputStream, "Updated at " + new Date());
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -576,7 +579,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(new Property(property));
 		}
-	
+
 		List<Element> providerProperties = XmlUtils.findElements(getProviderXPath(ormProvider) + "/properties/*", configuration);
 		for (Element property : providerProperties) {
 			projectOperations.addProperty(new Property(property));
@@ -585,7 +588,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updateDependencies(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
-		
+
 		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
@@ -606,7 +609,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		
+
 		// Add all new dependencies to pom.xml
 		projectOperations.addDependencies(dependencies);
 	}
@@ -622,17 +625,17 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element repositoryElement : databaseRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
-	
+
 		List<Element> ormRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/repositories/repository", configuration);
 		for (Element repositoryElement : ormRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
-	
+
 		List<Element> jpaRepositories = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/repositories/repository", configuration);
 		for (Element repositoryElement : jpaRepositories) {
 			repositories.add(new Repository(repositoryElement));
 		}
-		
+
 		// Add all new repositories to pom.xml
 		projectOperations.addRepositories(repositories);
 	}
@@ -644,12 +647,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element pluginRepositoryElement : databasePluginRepositories) {
 			pluginRepositories.add(new Repository(pluginRepositoryElement));
 		}
-		
+
 		List<Element> ormPluginRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : ormPluginRepositories) {
 			pluginRepositories.add(new Repository(pluginRepositoryElement));
 		}
-		
+
 		// Add all new plugin repositories to pom.xml
 		projectOperations.addPluginRepositories(pluginRepositories);
 	}
@@ -661,12 +664,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element filterElement : databaseFilters) {
 			filters.add(new Filter(filterElement));
 		}
-	
+
 		List<Element> ormFilters = XmlUtils.findElements(getProviderXPath(ormProvider) + "/filters/filter", configuration);
 		for (Element filterElement : ormFilters) {
 			filters.add(new Filter(filterElement));
 		}
-		
+
 		for (Filter filter : filters) {
 			projectOperations.addFilter(filter);
 		}
@@ -679,12 +682,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element resourceElement : databaseResources) {
 			resources.add(new Resource(resourceElement));
 		}
-	
+
 		List<Element> ormResources = XmlUtils.findElements(getProviderXPath(ormProvider) + "/resources/resource", configuration);
 		for (Element resourceElement : ormResources) {
 			resources.add(new Resource(resourceElement));
 		}
-		
+
 		for (Resource resource : resources) {
 			projectOperations.addResource(resource);
 		}
@@ -697,53 +700,41 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element pluginElement : databasePlugins) {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
-	
+
 		List<Element> ormPlugins = XmlUtils.findElements(getProviderXPath(ormProvider) + "/plugins/plugin", configuration);
 		for (Element pluginElement : ormPlugins) {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
-		
-		for (Plugin buildPlugin : buildPlugins) {
-			projectOperations.addBuildPlugin(buildPlugin);
+
+		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
+			Element pluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
+			buildPlugins.add(new Plugin(pluginElement));
 		}
+
+		projectOperations.addBuildPlugins(buildPlugins);
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(true);
-			if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
-				// Refresh the ProjectMetadata, as the maven-gae-plugin has been added to the pom but may not yet be reflected 
-				metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
-			}
-			
 			updateDataNucleusPlugin(true);
 		}
-		
-		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
-			if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
-				// Refresh the ProjectMetadata, as the maven-gae-plugin has been removed from the pom but not yet reflected
-				metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
-			}
-
-			Element gwtPluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
-			projectOperations.addBuildPlugin(new Plugin(gwtPluginElement));
-		}
 	}
-	
-	private void updateEclipsePlugin(boolean addToPlugin) {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Document pom = XmlUtils.readXml(pomPath);
 
-		Element root = pom.getDocumentElement();
+	private void updateEclipsePlugin(boolean addToPlugin) {
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
+
 		boolean hasChanged = false;
-		
+
 		// Manage GAE buildCommand
 		Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
 		Assert.notNull(additionalBuildcommandsElement, "additionalBuildcommands element of the maven-eclipse-plugin required");
 		String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
 		Element gaeBuildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + gaeBuildCommandName + "']", additionalBuildcommandsElement);
 		if (addToPlugin && gaeBuildCommandElement == null) {
-			Element nameElement = pom.createElement("name");
+			Element nameElement = document.createElement("name");
 			nameElement.setTextContent(gaeBuildCommandName);
-			gaeBuildCommandElement = pom.createElement("buildCommand");
+			gaeBuildCommandElement = document.createElement("buildCommand");
 			gaeBuildCommandElement.appendChild(nameElement);
 			additionalBuildcommandsElement.appendChild(gaeBuildCommandElement);
 			hasChanged = true;
@@ -758,140 +749,122 @@ public class JpaOperationsImpl implements JpaOperations {
 		String gaeProjectnatureName = "com.google.appengine.eclipse.core.gaeNature";
 		Element gaeProjectnatureElement = XmlUtils.findFirstElement("projectnature[text() = '" + gaeProjectnatureName + "']", additionalProjectnaturesElement);
 		if (addToPlugin && gaeProjectnatureElement == null) {
-			gaeProjectnatureElement = new XmlElementBuilder("projectnature", pom).setText(gaeProjectnatureName).build();
+			gaeProjectnatureElement = new XmlElementBuilder("projectnature", document).setText(gaeProjectnatureName).build();
 			additionalProjectnaturesElement.appendChild(gaeProjectnatureElement);
 			hasChanged = true;
 		} else if (!addToPlugin && gaeProjectnatureElement != null) {
 			additionalProjectnaturesElement.removeChild(gaeProjectnatureElement);
 			hasChanged = true;
 		}
-		
+
 		if (hasChanged) {
-			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Managed GAE buildCommand and projectnature in maven-eclipse-plugin", true);
+			mutableFile.setDescriptionOfChange("Updated GAE buildCommand and projectnature in maven-eclipse-plugin");
+			XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 		}
 	}
 
 	private void updateDataNucleusPlugin(boolean addToPlugin) {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Document pom = XmlUtils.readXml(pomPath);
-		Element root = pom.getDocumentElement();
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
+	
 		boolean hasChanged = false;
-		
-		
+
 		// Manage GAE buildCommand
 		Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);
 		if (configurationElement == null) {
 			return;
 		}
 
+		String descriptionOfChange = "";
 		Element mappingExcludesElement = XmlUtils.findFirstElement("mappingExcludes", configurationElement);
 		if (addToPlugin && mappingExcludesElement == null) {
-			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", pom).setText("**/GaeAuthFilter.class").build();
+			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", document).setText("**/GaeAuthFilter.class").build();
 			configurationElement.appendChild(mappingExcludesElement);
+			descriptionOfChange = "Added mappingExcludes element in maven-datanucleus-plugin";
 			hasChanged = true;
 		} else if (!addToPlugin && mappingExcludesElement != null) {
 			configurationElement.removeChild(mappingExcludesElement);
+			descriptionOfChange = "Removed mappingExcludes element from maven-datanucleus-plugin";
 			hasChanged = true;
 		}
-		
+
 		if (hasChanged) {
-			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Managed mappingExcludes element in maven-datanucleus-plugin", true);
+			mutableFile.setDescriptionOfChange(descriptionOfChange);
+			XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 		}
 	}
 
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "/pom.xml");
-		Document pom = XmlUtils.readXml(pomPath);
-		Element root = pom.getDocumentElement();
-		
-		// Remove unwanted database artifacts
+		// Get unwanted databases
 		List<JdbcDatabase> databases = new ArrayList<JdbcDatabase>();
 		for (JdbcDatabase database : JdbcDatabase.values()) {
 			if (!database.getKey().equals(jdbcDatabase.getKey()) && !database.getDriverClassName().equals(jdbcDatabase.getDriverClassName())) {
 				databases.add(database);
 			}
 		}
-		boolean hasChanged = removeArtifacts(getDbXPath(databases), root, configuration);
+		String databaseXPath = getDbXPath(databases);
 
-		// Remove unwanted ORM provider artifacts
+		// Get unwanted ORM providers
 		List<OrmProvider> ormProviders = new ArrayList<OrmProvider>();
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
 				ormProviders.add(provider);
 			}
 		}
-		hasChanged |= removeArtifacts(getProviderXPath(ormProviders), root, configuration);
-		
+		String providersXPath = getProviderXPath(ormProviders);
+
+		// Remove redundant dependencies
+		List<Dependency> redundantDependencies = new ArrayList<Dependency>();
+		redundantDependencies.addAll(getDependencies(databaseXPath, configuration));
+		redundantDependencies.addAll(getDependencies(providersXPath, configuration));
+		projectOperations.removeDependencies(redundantDependencies);
+
+		// Remove redundant filters
+		List<Filter> redundantFilters = new ArrayList<Filter>();
+		redundantFilters.addAll(getFilters(databaseXPath, configuration));
+		redundantFilters.addAll(getFilters(providersXPath, configuration));
+		for (Filter filter : redundantFilters) {
+			projectOperations.removeFilter(filter);
+		}
+
+		// Remove redundant build plugins
+		List<Plugin> redundantBuildPlugins = new ArrayList<Plugin>();
+		redundantBuildPlugins.addAll(getPlugins(databaseXPath + "/plugins/plugin", configuration));
+		redundantBuildPlugins.addAll(getPlugins(providersXPath + "/plugins/plugin", configuration));
 		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
-			hasChanged |= removePlugins(getGwtPluginXPath(jdbcDatabase), root, configuration);
+			redundantBuildPlugins.addAll(getPlugins(getGwtPluginXPath(jdbcDatabase), configuration));
 		}
-		
-		if (hasChanged) {
-			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Removed redundant dependencies, plugins, and filters", true);
-		}
-		
+		projectOperations.removeBuildPlugins(redundantBuildPlugins);
+
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(false);
 			updateDataNucleusPlugin(false);
 		}
 	}
 
-	private boolean removeArtifacts(String xPathExpression, Element root, Element configuration) {
-		boolean hasChanged = false;
-
-		// Remove unwanted dependencies
-		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
+	private List<Dependency> getDependencies(String xPathExpression, Element configuration) {
+		List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
-			Dependency dependency = new Dependency(dependencyElement);
-			Element candidate = XmlUtils.findFirstElement("/project/dependencies/dependency[artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersionId() + "']", root);
-			if (candidate != null) {
-				if (projectOperations.getProjectMetadata().isGwtEnabled() && dependency.getGroupId().equals("com.google.appengine")) {
-					continue;
-				}
-				dependenciesElement.removeChild(candidate);
-				XmlUtils.removeTextNodes(dependenciesElement);
-				hasChanged = true;
-			}
+			dependencies.add(new Dependency(dependencyElement));
 		}
-
-		// Remove unwanted plugins
-		hasChanged |= removePlugins(xPathExpression + "/plugins/plugin", root, configuration);
-
-		// Remove unwanted filters
-		Element filtersElement = XmlUtils.findFirstElement("/project/build/filters", root);
-		if (filtersElement != null) {
-			for (Element filterElement : XmlUtils.findElements(xPathExpression + "/filters/filter", configuration)) {
-				Filter filter = new Filter(filterElement);
-				Element candidate = XmlUtils.findFirstElement("/project/build/filters/filter[text() = '" + filter.getValue() + "']", root);
-				if (candidate != null) {
-					filtersElement.removeChild(candidate);
-					XmlUtils.removeTextNodes(filtersElement);
-					hasChanged = true;
-				}
-			}
-			if (!filtersElement.hasChildNodes()) {
-				filtersElement.getParentNode().removeChild(filtersElement);
-			}
-		}
-
-		return hasChanged;
+		return dependencies;
 	}
 
-	private boolean removePlugins(String pluginsXPath, Element root, Element configuration) {
-		boolean hasChanged = false;
-		Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
-		for (Element pluginElement : XmlUtils.findElements(pluginsXPath, configuration)) {
-			Plugin plugin = new Plugin(pluginElement);
-			Element candidate = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = '" + plugin.getArtifactId() + "' and version = '" + plugin.getVersion() + "']", root);
-			if (candidate != null) {
-				pluginsElement.removeChild(candidate);
-				XmlUtils.removeTextNodes(pluginsElement);
-				hasChanged = true;
-			}
-			//We should attempt to remove it from ProjectOperations regardless of it being found in the physical pom.xml file
-			projectOperations.removeBuildPlugin(plugin);
+	private List<Filter> getFilters(String xPathExpression, Element configuration) {
+		List<Filter> filters = new ArrayList<Filter>();
+		for (Element filterElement : XmlUtils.findElements(xPathExpression + "/filters/filter", configuration)) {
+			filters.add(new Filter(filterElement));
 		}
-		return hasChanged;
+		return filters;
+	}
+
+	private List<Plugin> getPlugins(String xPathExpression, Element configuration) {
+		List<Plugin> buildPlugins = new ArrayList<Plugin>();
+		for (Element pluginElement : XmlUtils.findElements(xPathExpression, configuration)) {
+			buildPlugins.add(new Plugin(pluginElement));
+		}
+		return buildPlugins;
 	}
 
 	private String getDbXPath(JdbcDatabase jdbcDatabase) {
@@ -911,11 +884,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		builder.append("]");
 		return builder.toString();
 	}
-	
+
 	private String getProviderXPath(OrmProvider provider) {
 		return "/configuration/ormProviders/provider[@id = '" + provider.name() + "']";
 	}
-	
+
 	private String getProviderXPath(List<OrmProvider> ormProviders) {
 		StringBuilder builder = new StringBuilder("/configuration/ormProviders/provider[");
 		for (int i = 0, n = ormProviders.size(); i < n; i++) {
@@ -933,7 +906,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	private String getGwtPluginXPath(JdbcDatabase jdbcDatabase) {
 		return "/configuration/gwt/plugins/plugin[@id = '" + (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE ? "nonGAE" : "GAE") + "']";
 	}
-		
+
 	private Element createPropertyElement(String name, String value, Document doc) {
 		Element property = doc.createElement("property");
 		property.setAttribute("name", name);
@@ -956,10 +929,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		FileDetails fileDetails = fileManager.readFile(persistenceXmlPath);
 		Document document = null;
 		try {
-			InputStream is = new FileInputStream(fileDetails.getFile());
+			InputStream inputStream = new FileInputStream(fileDetails.getFile());
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setErrorHandler(null);
-			document = builder.parse(is);
+			document = builder.parse(inputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -983,7 +956,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			if ("datanucleus.ConnectionPassword".equals(key)) {
 				properties.add("datanucleus.ConnectionPassword = " + value);
 			}
-			
+
 			if (properties.size() == 4) {
 				// All required properties have been found so ignore rest of elements
 				break;

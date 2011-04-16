@@ -58,17 +58,17 @@ public class SolrOperationsImpl implements SolrOperations {
 
 		updateSolrProperties(solrServerUrl);
 
-		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		Document appCtx = XmlUtils.readXml(contextPath);
-		Element root = (Element) appCtx.getFirstChild();
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
 
 		if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 			if (root.getAttribute("xmlns:task").length() == 0) {
 				root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
 				root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
 			}
-			root.appendChild(new XmlElementBuilder("task:annotation-driven", appCtx).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
-			root.appendChild(new XmlElementBuilder("task:executor", appCtx).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
+			root.appendChild(new XmlElementBuilder("task:annotation-driven", document).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
+			root.appendChild(new XmlElementBuilder("task:executor", document).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
 		}
 
 		Element solrServer = XmlUtils.findFirstElement("/beans/bean[@id='solrServer']", root);
@@ -76,10 +76,10 @@ public class SolrOperationsImpl implements SolrOperations {
 			return;
 		}
 
-		root.appendChild(new XmlElementBuilder("bean", appCtx).addAttribute("id", "solrServer").addAttribute("class", "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer").addChild(new XmlElementBuilder("constructor-arg", appCtx).addAttribute("value", "${solr.serverUrl}").build()).build());
-		XmlUtils.removeTextNodes(root);
+		root.appendChild(new XmlElementBuilder("bean", document).addAttribute("id", "solrServer").addAttribute("class", "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer").addChild(new XmlElementBuilder("constructor-arg", document).addAttribute("value", "${solr.serverUrl}").build()).build());
 		
-		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
+		XmlUtils.removeTextNodes(root);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
 	private void updateSolrProperties(String solrServerUrl) {

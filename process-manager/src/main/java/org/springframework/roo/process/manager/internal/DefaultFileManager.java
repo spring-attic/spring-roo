@@ -1,6 +1,5 @@
 package org.springframework.roo.process.manager.internal;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -30,8 +29,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
 
 /**
  * Default implementation of {@link FileManager}.
@@ -141,28 +138,12 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
 	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately) {
 		if (writeImmediately) {
-			createOrUpdateTextFileIfRequired(fileIdentifier, newContents, "");
+			createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
 		} else {
 			deferredFileWrites.put(fileIdentifier, newContents);
 		}
 	}
 	
-	public void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, String message, boolean writeImmediately) {
-		Assert.notNull(document, "Document required");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		XmlUtils.writeXml(baos, document);
-		String newContents = baos.toString();
-		if (writeImmediately) {
-			createOrUpdateTextFileIfRequired(fileIdentifier, newContents, message);
-		} else {
-			deferredFileWrites.put(fileIdentifier, newContents);
-		}
-	}
-
-	public void createOrUpdateXmlFileIfRequired(String fileIdentifier, Document document, boolean writeImmediately) {
-		createOrUpdateXmlFileIfRequired(fileIdentifier, document, "", writeImmediately);
-	}
-
 	public void commit() {
 		try {
 			for (String fileIdentifier : deferredFileWrites.keySet()) {
@@ -172,7 +153,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 						delete(fileIdentifier);
 					}
 				} else {
-					createOrUpdateTextFileIfRequired(fileIdentifier, newContents, "");
+					createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
 				}
 			}
 		} finally {
@@ -197,7 +178,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		}
 	}
 
-	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, String message) {
+	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents) {
 		MutableFile mutableFile = null;
 		if (exists(fileIdentifier)) {
 			// First verify if the file has even changed
@@ -217,7 +198,6 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
 		if (mutableFile != null) {
 			try {
-				mutableFile.setDescriptionOfChange(message);
 				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", e);

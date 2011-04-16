@@ -218,7 +218,6 @@ class GwtProxyProperty {
 		return ptmd != null && ptmd.getMemberHoldingTypeDetails() != null && ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 	}
 
-
 	public boolean isEmbeddable() {
 		if (ptmd != null && ptmd.getMemberHoldingTypeDetails() != null) {
 			if (ptmd.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {

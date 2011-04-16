@@ -27,6 +27,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -92,20 +93,23 @@ public class JsfOperationsImpl implements JsfOperations {
 			return;
 		}
 		
-		InputStream inputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
-		Document webXml;
+		MutableFile mutableFile = null;
+		Document document;
 		try {
-			webXml = XmlUtils.getDocumentBuilder().parse(inputStream);
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
+			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
+			mutableFile = fileManager.createFile(getWebXmlFile());
+			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 		
 		String projectName = projectOperations.getProjectMetadata().getProjectName();
-		WebXmlUtils.setDisplayName(projectName, webXml, null);
-		WebXmlUtils.setDescription("Roo generated " + projectName + " application", webXml, null);
+		WebXmlUtils.setDisplayName(projectName, document, null);
+		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		
-		fileManager.createOrUpdateXmlFileIfRequired(getWebXmlFile(), webXml, true);
-
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+	
 		fileManager.scan();
 	}
 
@@ -121,39 +125,23 @@ public class JsfOperationsImpl implements JsfOperations {
 	}
 
 	private void cleanup(Element configuration, JsfImplementation jsfImplementation) {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "/pom.xml");
-		Document pom = XmlUtils.readXml(pomPath);
-
-		Element root = (Element) pom.getFirstChild();
-		
 		List<JsfImplementation> jsfImplementations = new ArrayList<JsfImplementation>();
 		for (JsfImplementation implementation : JsfImplementation.values()) {
 			if (implementation != jsfImplementation) {
 				jsfImplementations.add(implementation);
 			}
 		}
-		if (removeArtifacts(getImplementationXPath(jsfImplementations), root, configuration)) {
-			fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, "Removed redundant dependencies, plugins, and filters", true);
-		}
+		
+		String implementationXPath = getImplementationXPath(jsfImplementations);
+		projectOperations.removeDependencies(getDependencies(implementationXPath, configuration));
 	}
 	
-	private boolean removeArtifacts(String xPathExpression, Element root, Element configuration) {
-		boolean hasChanged = false;
-
-		// Remove unwanted dependencies
-		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
-		for (Element candidate : XmlUtils.findElements("/project/dependencies/dependency", root)) {
-			for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
-				if (new Dependency(dependencyElement).equals(new Dependency(candidate))) {
-					// Found it
-					dependenciesElement.removeChild(candidate);
-					XmlUtils.removeTextNodes(dependenciesElement);
-					hasChanged = true;
-				}
-			}
+	private List<Dependency> getDependencies(String xPathExpression, Element configuration) {
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
+			dependencies.add(new Dependency(dependencyElement));
 		}
-		
-		return hasChanged;
+		return dependencies;
 	}
 
 	private void updateDependencies(Element configuration, JsfImplementation jsfImplementation) {

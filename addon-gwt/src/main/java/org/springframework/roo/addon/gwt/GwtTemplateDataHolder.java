@@ -11,9 +11,7 @@ import java.util.Map;
  * @author James Tyrrell
  * @since 1.1.2
  */
-
 public class GwtTemplateDataHolder {
-
 	private final Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap;
 	private final Map<GwtType, String> xmlTemplates;
 	private final List<ClassOrInterfaceTypeDetails> typeList;

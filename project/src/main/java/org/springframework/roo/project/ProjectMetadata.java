@@ -11,6 +11,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -78,7 +79,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Convenience method for determining whether all presented dependencies are registered. 
+	 * Convenience method for determining whether all of the presented dependencies are registered. 
 	 *
 	 * @param dependencies the dependencies to check (required)
 	 * @return whether all the dependencies are currently registered or not
@@ -86,6 +87,17 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public boolean isAllDependenciesRegistered(List<Dependency> dependencies) {
 		Assert.notNull(dependencies, "Dependencies to check is required");
 		return this.dependencies.containsAll(dependencies);
+	}
+
+	/**
+	 * Convenience method for determining whether any of the presented dependencies are registered. 
+	 *
+	 * @param dependencies the dependencies to check (required)
+	 * @return whether any of the dependencies are currently registered or not
+	 */
+	public boolean isAnyDependenciesRegistered(List<Dependency> dependencies) {
+		Assert.notNull(dependencies, "Dependencies to check is required");
+		return CollectionUtils.containsAny(this.dependencies, dependencies);
 	}
 
 	/**
@@ -143,6 +155,28 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public boolean isPluginRepositoryRegistered(Repository repository) {
 		Assert.notNull(repository, "Plugin repository to check is required");
 		return pluginRepositories.contains(repository);
+	}
+
+	/**
+	 * Convenience method for determining whether all of the presented plugins are registered. 
+	 *
+	 * @param plugins the plugins to check (required)
+	 * @return whether all the plugins are currently registered or not
+	 */
+	public boolean isAllPluginsRegistered(List<Plugin> plugins) {
+		Assert.notNull(plugins, "Plugins to check is required");
+		return buildPlugins.containsAll(plugins);
+	}
+
+	/**
+	 * Convenience method for determining whether any of the presented plugins are registered. 
+	 *
+	 * @param plugins the plugins to check (required)
+	 * @return whether any of the plugins are currently registered or not
+	 */
+	public boolean isAnyPluginsRegistered(List<Plugin> plugins) {
+		Assert.notNull(plugins, "Plugins to check is required");
+		return CollectionUtils.containsAny(buildPlugins, plugins);
 	}
 
 	/**

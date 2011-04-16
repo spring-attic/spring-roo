@@ -23,6 +23,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.listeners.PluginListener;
@@ -63,7 +64,7 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 	protected void deactivate(ComponentContext context) {
 		projectOperations.removePluginListener(this);
 	}
-	
+
 	public boolean isSetupAvailable() {
 		if (!projectOperations.isProjectAvailable()) {
 			return false;
@@ -124,6 +125,9 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 
 	public void pluginAdded(Plugin plugin) {
 		if (plugin.getArtifactId().equals("gwt-maven-plugin")) {
+			// Refresh project metadata first in case the maven-gae-plugin has been added
+			metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
+
 			// Copy "static" directories
 			for (GwtPath path : GwtPath.values()) {
 				copyDirectoryContents(path);
@@ -136,22 +140,10 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 	}
 
 	private void updateEclipsePlugin() {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile mutableFile = null;
-
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				mutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		Document pom = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = pom.getDocumentElement();
+
 		boolean hasChanged = false;
 
 		// Add GWT buildCommand
@@ -180,28 +172,16 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 		}
 
 		if (hasChanged) {
-			mutableFile.setDescriptionOfChange("Managed GWT buildCommand and projectnature in maven-eclipse-plugin");
+			mutableFile.setDescriptionOfChange("Updated GWT buildCommand and projectnature in maven-eclipse-plugin");
 			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		}
 	}
 
 	private void updateBuildOutputDirectory() {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile mutableFile = null;
-
-		Document pom;
-		try {
-			if (fileManager.exists(pomPath)) {
-				mutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		Document pom = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = pom.getDocumentElement();
+
 		boolean hasChanged = false;
 
 		String outputDirectoryText = "${project.build.directory}/${project.build.finalName}/WEB-INF/classes";
@@ -243,12 +223,10 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 
 	private void updateDependencies(Element configuration) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
-
 		List<Element> gwtDependencies = XmlUtils.findElements("/configuration/gwt/dependencies/dependency", configuration);
 		for (Element dependencyElement : gwtDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-
 		projectOperations.addDependencies(dependencies);
 	}
 
@@ -265,24 +243,10 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 	}
 
 	private void updateWebXml() {
-		String webXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-		Assert.isTrue(fileManager.exists(webXmlPath), "web.xml not found; cannot continue");
-		MutableFile mutableFile = null;
-
-		Document webXml;
-		try {
-			if (fileManager.exists(webXmlPath)) {
-				mutableFile = fileManager.updateFile(webXmlPath);
-				webXml = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire web.xml in " + webXmlPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
+		Document webXml = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = webXml.getDocumentElement();
-		
+
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXml, null);
 		if (projectOperations.getProjectMetadata().isGaeEnabled()) {
 			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectOperations.getProjectMetadata()) + ".GaeAuthFilter", "/gwtRequest/*", webXml, "This filter makes GAE authentication services visible to a RequestFactory client.");
@@ -308,33 +272,16 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 		}
 
 		removeIfFound("/web-app/error-page", root);
-		mutableFile.setDescriptionOfChange("Managed security filter and security-constraint");
+		mutableFile.setDescriptionOfChange("Managed security filter and security-constraint in web.xml");
 		XmlUtils.writeXml(mutableFile.getOutputStream(), webXml);
 	}
 
 	private void updatePersistenceXml() {
-		String persistenceXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
-		if (!fileManager.exists(persistenceXmlPath)) {
-			return;
-		}
-
-		MutableFile mutableFile = null;
-		Document persistenceXml;
-		try {
-			if (fileManager.exists(persistenceXmlPath)) {
-				mutableFile = fileManager.updateFile(persistenceXmlPath);
-				persistenceXml = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not acquire persistence.xml in " + persistenceXmlPath);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		Document persistenceXml = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = persistenceXml.getDocumentElement();
-		
-		List<Element> persistenceUnitElements = XmlUtils.findElements("persistence-unit", root);
-		for (Element persistenceUnitElement : persistenceUnitElements) {
+
+		for (Element persistenceUnitElement : XmlUtils.findElements("persistence-unit", root)) {
 			Element provider = XmlUtils.findFirstElement("provider", persistenceUnitElement);
 			if (provider != null && "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider".equals(provider.getTextContent()) && !projectOperations.getProjectMetadata().isGaeEnabled()) {
 				persistenceUnitElement.getParentNode().removeChild(persistenceUnitElement);
@@ -365,7 +312,7 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			fileName = fileName.replace("-template", "");
 			String targetFilename = targetDirectory + fileName;
-			
+
 			try {
 				boolean exists = fileManager.exists(targetFilename);
 				if (targetFilename.endsWith("png")) {
@@ -379,7 +326,7 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 					if (exists && !input.contains("__GAE_")) {
 						continue;
 					}
-					
+
 					String topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName();
 					input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);
 					input = input.replace("__SEGMENT_PACKAGE__", gwtPath.segmentPackage());

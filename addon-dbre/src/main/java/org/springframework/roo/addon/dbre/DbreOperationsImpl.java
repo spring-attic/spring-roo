@@ -17,6 +17,7 @@ import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -93,9 +94,9 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 	
 	private void updatePom() {
-		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Document pom = XmlUtils.readXml(pomPath);
-		Element root = pom.getDocumentElement();
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
 		
 		String warPluginXPath = "/project/build/plugins/plugin[artifactId = 'maven-war-plugin']";
 		Element warPluginElement = XmlUtils.findFirstElement(warPluginXPath, root);
@@ -111,25 +112,25 @@ public class DbreOperationsImpl implements DbreOperations {
 		
 		Element configurationElement = XmlUtils.findFirstElement("configuration", warPluginElement);
 		if (configurationElement == null) {
-			configurationElement = pom.createElement("configuration");
+			configurationElement = document.createElement("configuration");
 		}
 		Element webResourcesElement = XmlUtils.findFirstElement("configuration/webResources", warPluginElement);
 		if (webResourcesElement == null) {
-			webResourcesElement = pom.createElement("webResources");
+			webResourcesElement = document.createElement("webResources");
 		}
 		Element excludesElement = XmlUtils.findFirstElement("configuration/webResources/resource/excludes", warPluginElement);
 		if (excludesElement == null) {
-			excludesElement = pom.createElement("excludes");
+			excludesElement = document.createElement("excludes");
 		}
 
-		excludeElement = pom.createElement("exclude");
+		excludeElement = document.createElement("exclude");
 		excludeElement.setTextContent("dbre.xml");
 		excludesElement.appendChild(excludeElement);
 		
-		Element directoryElement = pom.createElement("directory");
+		Element directoryElement = document.createElement("directory");
 		directoryElement.setTextContent("src/main/resources");
 		
-		Element resourceElement = pom.createElement("resource");
+		Element resourceElement = document.createElement("resource");
 		resourceElement.appendChild(directoryElement);
 		resourceElement.appendChild(excludesElement);
 		webResourcesElement.appendChild(resourceElement);
@@ -138,13 +139,13 @@ public class DbreOperationsImpl implements DbreOperations {
 		
 		warPluginElement.appendChild(configurationElement);
 		
-		fileManager.createOrUpdateXmlFileIfRequired(pomPath, pom, true);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
 	private void updatePersistenceXml() {
-		String persistencePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
-		Document persistence = XmlUtils.readXml(persistencePath);
-		Element root = persistence.getDocumentElement();
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
 		
 		Element providerElement = XmlUtils.findFirstElement("/persistence/persistence-unit/provider", root);
 		Assert.notNull(providerElement, "/persistence/persistence-unit/provider is null");
@@ -170,7 +171,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 
 		if (changed) {
-			fileManager.createOrUpdateXmlFileIfRequired(persistencePath, persistence, true);
+			XmlUtils.writeFormattedXml(mutableFile.getOutputStream(), document);
 		}
 	}
 

@@ -16,7 +16,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to add the specified dependencies. If all the dependencies already exist according
-	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * to {@link ProjectMetadata#isAllDependencyRegistered(Dependency)}, the method silently returns.
 	 * Otherwise each new dependency is added.
 	 * 
 	 * <p>
@@ -28,7 +28,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	void addDependencies(List<Dependency> dependencies);
 	
 	/**
-	 * Attempts to add the specified dependency. If the dependency already exists according
+	 * Attempts to add the specified dependency. If the dependency already exists according to
 	 * to {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.Dependency)}, the method silently returns.
 	 * Otherwise the dependency is added.
 	 * 
@@ -40,6 +40,19 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 */
 	void addDependency(Dependency dependency);
 	
+	/**
+	 * Attempts to remove the specified dependencies. If all the dependencies do not exist according
+	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * Otherwise each located dependency is removed.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param dependencies the dependencies to remove (required)
+	 */
+	void removeDependencies(List<Dependency> dependencies);
+
 	/**
 	 * Attempts to remove the specified dependency. If the dependency does not exist according
 	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
@@ -54,6 +67,19 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	void removeDependency(Dependency dependency);
 	
 	/**
+	 * Attempts to add the specified plugins. If all the plugins already exist according
+	 * to {@link ProjectMetadata#isAllPluginRegistered(Plugin)}, the method silently returns.
+	 * Otherwise each new dependency is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param plugins the plugins to add (required)
+	 */
+	void addBuildPlugins(List<Plugin> plugins);
+
+	/**
 	 * Attempts to add the specified build plugin. If the plugin already exists 
 	 * according to {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.Plugin)},
 	 * the method silently returns. Otherwise the plugin is added.
@@ -67,9 +93,22 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	void addBuildPlugin(Plugin plugin);
 	
 	/**
-	 * Attempts to remove the specified build plugin dependency. If the dependency does not 
+	 * Attempts to remove the specified plugins. If all the plugins do not exist according
+	 * to {@link ProjectMetadata#isAnyPluginRegistered(Plugin)}, the method silently returns.
+	 * Otherwise each located plugin is removed.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param plugins the plugins to remove (required)
+	 */
+	void removeBuildPlugins(List<Plugin> plugins);
+
+	/**
+	 * Attempts to remove the specified build plugin. If the plugin does not 
 	 * exist according to {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.Plugin)},
-	 * the method silently returns. Otherwise the located dependency is removed.
+	 * the method silently returns. Otherwise the located plugin is removed.
 	 * 
 	 * <p>
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}

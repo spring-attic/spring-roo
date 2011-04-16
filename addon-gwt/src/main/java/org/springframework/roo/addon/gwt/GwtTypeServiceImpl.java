@@ -110,7 +110,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		}
 
 		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-
 		if (GwtUtils.isDomainObject(type, ptmd)) {
 			if (GwtUtils.isEmbeddable(ptmd)) {
 				throw new IllegalStateException("GWT does not currently support embedding objects in entities, such as '" + type.getSimpleTypeName() + "' in '" + governorType.getSimpleTypeName() + "'.");
@@ -179,7 +178,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 		return sourcePaths;
 	}
-
 
 	public List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
 		List<MethodMetadata> proxyMethods = new LinkedList<MethodMetadata>();

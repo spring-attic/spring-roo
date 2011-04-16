@@ -3,7 +3,7 @@ package org.springframework.roo.addon.jpa;
 import java.util.SortedSet;
 
 /**
- * Interface to commands available in {@link JpaOperationsImpl}.
+ * Provides JPA configuration operations.
  * 
  * @author Ben Alex
  * @since 1.0

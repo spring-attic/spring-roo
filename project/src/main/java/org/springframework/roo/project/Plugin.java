@@ -182,9 +182,6 @@ public class Plugin implements Comparable<Plugin> {
 		return configuration;
 	}
 
-	/**
-	 * @return list of dependencies (never null)
-	 */
 	public List<Dependency> getDependencies() {
 		return dependencies;
 	}
@@ -213,6 +210,13 @@ public class Plugin implements Comparable<Plugin> {
 			result = this.version.compareTo(o.version);
 		}
 		return result;
+	}
+
+	/**
+	 * @return a simple description, as would be used for console output
+	 */
+	public String getSimpleDescription() {
+		return groupId + ":" + artifactId + ":" + version;
 	}
 
 	public String toString() {

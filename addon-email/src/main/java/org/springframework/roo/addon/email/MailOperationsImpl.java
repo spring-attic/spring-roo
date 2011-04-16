@@ -24,6 +24,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -59,9 +60,9 @@ public class MailOperationsImpl implements MailOperations {
 	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
 		Assert.hasText(hostServer, "Host server name required");
 
-		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		Document appCtx = XmlUtils.readXml(contextPath);
-		Element root = appCtx.getDocumentElement();
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
 
 		boolean installDependencies = true;
 		Map<String, String> props = new HashMap<String, String>();
@@ -72,11 +73,11 @@ public class MailOperationsImpl implements MailOperations {
 			installDependencies = false;
 		}
 
-		mailBean = appCtx.createElement("bean");
+		mailBean = document.createElement("bean");
 		mailBean.setAttribute("class", "org.springframework.mail.javamail.JavaMailSenderImpl");
 		mailBean.setAttribute("id", "mailSender");
 
-		Element property = appCtx.createElement("property");
+		Element property = document.createElement("property");
 		property.setAttribute("name", "host");
 		property.setAttribute("value", "${email.host}");
 		mailBean.appendChild(property);
@@ -84,7 +85,7 @@ public class MailOperationsImpl implements MailOperations {
 		props.put("email.host", hostServer);
 
 		if (protocol != null) {
-			Element pElement = appCtx.createElement("property");
+			Element pElement = document.createElement("property");
 			pElement.setAttribute("value", "${email.protocol}");
 			pElement.setAttribute("name", "protocol");
 			mailBean.appendChild(pElement);
@@ -92,7 +93,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(port)) {
-			Element pElement = appCtx.createElement("property");
+			Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "port");
 			pElement.setAttribute("value", "${email.port}");
 			mailBean.appendChild(pElement);
@@ -100,7 +101,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(encoding)) {
-			Element pElement = appCtx.createElement("property");
+			Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "defaultEncoding");
 			pElement.setAttribute("value", "${email.encoding}");
 			mailBean.appendChild(pElement);
@@ -108,7 +109,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(username)) {
-			Element pElement = appCtx.createElement("property");
+			Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "username");
 			pElement.setAttribute("value", "${email.username}");
 			mailBean.appendChild(pElement);
@@ -116,22 +117,22 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(password)) {
-			Element pElement = appCtx.createElement("property");
+			Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "password");
 			pElement.setAttribute("value", "${email.password}");
 			mailBean.appendChild(pElement);
 			props.put("email.password", password);
 
 			if (MailProtocol.SMTP.equals(protocol)) {
-				Element javaMailProperties = appCtx.createElement("property");
+				Element javaMailProperties = document.createElement("property");
 				javaMailProperties.setAttribute("name", "javaMailProperties");
-				Element securityProps = appCtx.createElement("props");
+				Element securityProps = document.createElement("props");
 				javaMailProperties.appendChild(securityProps);
-				Element prop = appCtx.createElement("prop");
+				Element prop = document.createElement("prop");
 				prop.setAttribute("key", "mail.smtp.auth");
 				prop.setTextContent("true");
 				securityProps.appendChild(prop);
-				Element prop2 = appCtx.createElement("prop");
+				Element prop2 = document.createElement("prop");
 				prop2.setAttribute("key", "mail.smtp.starttls.enable");
 				prop2.setTextContent("true");
 				securityProps.appendChild(prop2);
@@ -140,9 +141,8 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		XmlUtils.removeTextNodes(root);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 		
-		fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
-
 		if (installDependencies) {
 			updateConfiguration();
 		}
@@ -151,16 +151,16 @@ public class MailOperationsImpl implements MailOperations {
 	}
 
 	public void configureTemplateMessage(String from, String subject) {		
-		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		Document appCtx = XmlUtils.readXml(contextPath);
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
 
-		Element root = appCtx.getDocumentElement();
 		Map<String, String> props = new HashMap<String, String>();
 
 		if (StringUtils.hasText(from) || StringUtils.hasText(subject)) {
 			Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.SimpleMailMessage']", root);
 			if (smmBean == null) {
-				smmBean = appCtx.createElement("bean");
+				smmBean = document.createElement("bean");
 				smmBean.setAttribute("class", "org.springframework.mail.SimpleMailMessage");
 				smmBean.setAttribute("id", "templateMessage");
 			}
@@ -170,7 +170,7 @@ public class MailOperationsImpl implements MailOperations {
 				if (smmProperty != null) {
 					smmBean.removeChild(smmProperty);
 				}
-				smmProperty = appCtx.createElement("property");
+				smmProperty = document.createElement("property");
 				smmProperty.setAttribute("value", "${email.from}");
 				smmProperty.setAttribute("name", "from");
 				smmBean.appendChild(smmProperty);
@@ -182,7 +182,7 @@ public class MailOperationsImpl implements MailOperations {
 				if (smmProperty != null) {
 					smmBean.removeChild(smmProperty);
 				}
-				smmProperty = appCtx.createElement("property");
+				smmProperty = document.createElement("property");
 				smmProperty.setAttribute("value", "${email.subject}");
 				smmProperty.setAttribute("name", "subject");
 				smmBean.appendChild(smmProperty);
@@ -190,9 +190,9 @@ public class MailOperationsImpl implements MailOperations {
 			}
 
 			root.appendChild(smmBean);
+			
 			XmlUtils.removeTextNodes(root);
-
-			fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
+			XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 		}
 
 		if (props.size() > 0) {
@@ -221,10 +221,9 @@ public class MailOperationsImpl implements MailOperations {
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, modifier, annotations, fieldName, new JavaType("org.springframework.mail.MailSender"));
 		mutableTypeDetails.addField(fieldBuilder.build());
 
-		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		Document appCtx = XmlUtils.readXml(contextPath);
-
-		Element root = (Element) appCtx.getFirstChild();
+		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
 
 		Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
 
@@ -269,9 +268,11 @@ public class MailOperationsImpl implements MailOperations {
 					root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
 					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
 				}
-				root.appendChild(new XmlElementBuilder("task:annotation-driven", appCtx).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
-				root.appendChild(new XmlElementBuilder("task:executor", appCtx).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
-				fileManager.createOrUpdateXmlFileIfRequired(contextPath, appCtx, true);
+				root.appendChild(new XmlElementBuilder("task:annotation-driven", document).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
+				root.appendChild(new XmlElementBuilder("task:executor", document).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
+				
+				XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+
 				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "email.properties", "executor.poolSize", "10", true);
 			}
 			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
