@@ -61,7 +61,7 @@ public class MetadataPollingUaaRegistrationFacility {
 						typeToBsnMap.put(typeName, bundleSymbolicName);
 					}
 					
-					if (bundleSymbolicName == null || NOT_FOUND.equals(bundleSymbolicName)) {
+					if (NOT_FOUND.equals(bundleSymbolicName)) {
 						continue;
 					}
 					

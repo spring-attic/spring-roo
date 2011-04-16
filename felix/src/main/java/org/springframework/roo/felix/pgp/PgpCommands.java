@@ -28,7 +28,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 @Component
 public class PgpCommands implements CommandMarker {
-
 	@Reference PgpService pgpService;
 
 	@CliCommand(value="pgp status", help="Displays the status of the PGP environment")
@@ -72,10 +71,9 @@ public class PgpCommands implements CommandMarker {
 		if (pgpService.isAutomaticTrust()) {
 			pgpService.setAutomaticTrust(false);
 			return "Automatic PGP key trusting disabled (this is the safest option)";
-		} else {
-			pgpService.setAutomaticTrust(true);
-			return "Automatic PGP key trusting enabled (this is potentially unsafe); disable by typing 'pgp automatic trust' again";
 		}
+		pgpService.setAutomaticTrust(true);
+		return "Automatic PGP key trusting enabled (this is potentially unsafe); disable by typing 'pgp automatic trust' again";
 	}
 	
 	@CliCommand(value="pgp untrust", help="Revokes your trust for a particular key ID")

@@ -563,9 +563,7 @@ public abstract class StringUtils {
 			}
 			return newPath + relativePath;
 		}
-		else {
-			return relativePath;
-		}
+		return relativePath;
 	}
 
 	/**

@@ -196,9 +196,7 @@ class AntPatchStringMatcher {
 			}
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	private boolean matchBeforeFirstStarOrCurly() {
