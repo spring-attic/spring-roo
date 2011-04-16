@@ -843,9 +843,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	private boolean isBundleInstalled(Bundle search) {
 		BundleContext bundleContext = context.getBundleContext();
-		for (org.osgi.framework.Bundle bundle : bundleContext.getBundles()) {
-			Object bsnObject = bundle.getHeaders().get("Bundle-SymbolicName");
-			String bsn = bsnObject != null ? bsnObject.toString() : "";
+		for (org.osgi.framework.Bundle bundle: bundleContext.getBundles()) {
+			String bsn = (String) bundle.getHeaders().get("Bundle-SymbolicName");
 			if (StringUtils.hasText(bsn) && bsn.equals(search.getSymbolicName())) {
 				return true;
 			}
