@@ -1,6 +1,5 @@
 package org.springframework.roo.support.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,17 +54,17 @@ public final class XmlUtils {
 	}
 
 	/**
-	 * Read an XML document from the supplied file and return a document.
+	 * Read an XML document from the supplied input stream and return a document.
 	 *  
-	 * @param fileIdentifier the file read (required)
-	 * @return a DOM representation of the XML file
+	 * @param inputStream the input stream to read from (required)
+	 * @return a document
 	 */
-	public static final Document readXml(String fileIdentifier) {
-		Assert.notNull(fileIdentifier, "File identifier required");
+	public static final Document readXml(InputStream inputStream) {
+		Assert.notNull(inputStream, "InputStream required");
 		try {
-			return factory.newDocumentBuilder().parse(new File(fileIdentifier));
+			return factory.newDocumentBuilder().parse(inputStream);
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not read " + fileIdentifier, e);
+			throw new IllegalStateException("Could not open input stream", e);
 		}
 	}
 	
