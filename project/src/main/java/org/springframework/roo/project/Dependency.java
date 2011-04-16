@@ -179,7 +179,12 @@ public class Dependency implements Comparable<Dependency> {
 		return artifactId;
 	}
 
+	@Deprecated
 	public String getVersionId() {
+		return version;
+	}
+
+	public String getVersion() {
 		return version;
 	}
 

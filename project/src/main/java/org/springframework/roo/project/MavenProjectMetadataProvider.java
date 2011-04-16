@@ -158,7 +158,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				// This dependency was detected
 				Dependency first = dependenciesExcludingVersion.iterator().next();
 				// Convert the detected dependency into a Product as best we can
-				String versionSequence = first.getVersionId();
+				String versionSequence = first.getVersion();
 				// Version sequence given; see if it looks like a property
 				if (versionSequence != null && versionSequence.startsWith("${") && versionSequence.endsWith("}")) {
 					// Strip the ${ } from the version sequence
@@ -280,7 +280,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		int removeCount = 0;
 		StringBuilder builder = new StringBuilder();
 		for (Dependency dependency : dependencies) {
-			for (Element candidate : XmlUtils.findElements("dependency[artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersionId() + "']", dependenciesElement)) {
+			for (Element candidate : XmlUtils.findElements("dependency[artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersion() + "']", dependenciesElement)) {
 				dependenciesElement.removeChild(candidate);
 				builder.append(dependency.getSimpleDescription());
 				builder.append(", ");
@@ -513,7 +513,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		groupIdElement.setTextContent(dependency.getGroupId());
 		artifactIdElement.setTextContent(dependency.getArtifactId());
-		versionElement.setTextContent(dependency.getVersionId());
+		versionElement.setTextContent(dependency.getVersion());
 
 		dependencyElement.appendChild(groupIdElement);
 		dependencyElement.appendChild(artifactIdElement);
