@@ -1,8 +1,8 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.UnknownHostException;
 import java.util.EmptyStackException;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -11,10 +11,9 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Comment;
@@ -42,12 +41,14 @@ public abstract class DatabaseXmlUtils {
 	}
 
 	static Schema readSchemaFromInputStreamWithDom(InputStream inputStream) {
+		Assert.notNull("Input stream required");
 		Document document = getDocument(inputStream);
 		Element databaseElement = document.getDocumentElement();
 		return new Schema(databaseElement.getAttribute("schema"));
 	}
 
 	static Schema readSchemaFromInputStream(InputStream inputStream) {
+		Assert.notNull("Input stream required");
 		try {
 			SAXParserFactory spf = SAXParserFactory.newInstance();
 			SAXParser parser = spf.newSAXParser();
@@ -68,9 +69,6 @@ public abstract class DatabaseXmlUtils {
 			return contentHandler.getDatabase();
 		} catch (EmptyStackException e) {
 			throw new IllegalStateException("Unable to read database from XML file", e);
-		} catch (UnknownHostException e) {
-			// Return null as user may not have an Internet connection to db.apache.org to read Torque database DTD
-			return null;
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -214,10 +212,9 @@ public abstract class DatabaseXmlUtils {
 
 		document.appendChild(databaseElement);
 
-		Transformer transformer = XmlUtils.createIndentingTransformer();
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://db.apache.org/torque/dtd/database_3_3.dtd");
+		// ROO-2355: transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://db.apache.org/torque/dtd/database_3_3.dtd");
 
-		XmlUtils.writeXml(transformer, outputStream, document);
+		XmlUtils.writeXml(outputStream, document);
 	}
 
 	private static void addForeignKeyElements(Set<ForeignKey> foreignKeys, boolean exported, Element tableElement, Document document) {
@@ -268,6 +265,10 @@ public abstract class DatabaseXmlUtils {
 			return builder.parse(inputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
+		} finally {
+			try {
+				inputStream.close();
+			} catch (IOException ignored) {}
 		}
 	}
 }
