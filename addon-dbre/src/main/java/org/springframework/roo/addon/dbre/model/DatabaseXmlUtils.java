@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre.model;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.UnknownHostException;
 import java.util.EmptyStackException;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -67,6 +68,9 @@ public abstract class DatabaseXmlUtils {
 			return contentHandler.getDatabase();
 		} catch (EmptyStackException e) {
 			throw new IllegalStateException("Unable to read database from XML file", e);
+		} catch (UnknownHostException e) {
+			// Return null as user may not have an Internet connection to db.apache.org to read Torque database DTD
+			return null;
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
