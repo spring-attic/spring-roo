@@ -348,10 +348,33 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return bodyBuilder;
 	}
 
+	private InvocableMemberBodyBuilder getSingularEntityAccessor(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
+		String entityName = field.getFieldName().getSymbolName();
+		String entityIdName = hiddenIdFieldName.getSymbolName();
+		String simpleFieldTypeName = field.getFieldType().getSimpleTypeName();
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("if (" + entityName + " != null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("if (this." + entityName + " == null || this." + entityName + ".getId() != this." + entityIdName + ") {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("this." + entityName + " = " + simpleFieldTypeName + ".find" + simpleFieldTypeName + "(this." + entityIdName + ");");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("} else {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("this." + entityName + " = null;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("return this." + entityName + ";");
+
+		return bodyBuilder;
+	}
+
 	private InvocableMemberBodyBuilder getSingularEntityMutator(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
 		String entityName = field.getFieldName().getSymbolName();
 		String entityIdName = hiddenIdFieldName.getSymbolName();
-
 		String identifierMethodName = getIdentifierMethodName(field);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -369,26 +392,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		bodyBuilder.appendFormalLine("this." + entityIdName + " = null;");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-
-		return bodyBuilder;
-	}
-
-	private InvocableMemberBodyBuilder getSingularEntityAccessor(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
-		String entityName = field.getFieldName().getSymbolName();
-		String entityIdName = hiddenIdFieldName.getSymbolName();
-		String simpleFieldTypeName = field.getFieldType().getSimpleTypeName();
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (this." + entityIdName + " != null) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("this." + entityName + " = " + simpleFieldTypeName + ".find" + simpleFieldTypeName + "(this." + entityIdName + ");");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("} else {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("this." + entityName + " = null;");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return this." + entityName + ";");
+		bodyBuilder.appendFormalLine("this." + entityName + " = " + entityName + ";");
 
 		return bodyBuilder;
 	}
