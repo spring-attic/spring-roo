@@ -14,9 +14,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -32,7 +29,6 @@ import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
-import org.springframework.roo.project.listeners.PluginListener;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -117,9 +113,6 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		// Add dependencies
 		updateDependencies(configuration);
 
-		// Add POM plugins
-		updateBuildPlugins(configuration);
-
 		// Update web.xml
 		updateWebXml();
 
@@ -139,6 +132,24 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		}
 	}
 
+	public void notify(String upstreamDependency, String downstreamDependency) {
+		if (StringUtils.hasText(upstreamDependency) && MetadataIdentificationUtils.isValid(upstreamDependency)) {
+			if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+				boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
+				boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+				if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
+					wasGaeEnabled = isGaeEnabled;
+					// Update ApplicationRequestFactory
+					gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY);
+					// Update the GaeHelper type
+					updateGaeHelper(isGaeEnabled);
+					updateBuildPlugins(isGaeEnabled);
+				}
+				projectOperations.addDependency("com.google.appengine", "appengine-api-1.0-sdk", "1.4.3");
+			}
+		}
+	}
+	
 	private void updateEclipsePlugin() {
 		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
 		Document pom = XmlUtils.readXml(mutableFile.getInputStream());
@@ -230,18 +241,6 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		projectOperations.addDependencies(dependencies);
 	}
 
-	private void updateBuildPlugins(Element configuration) {
-		Set<Plugin> buildPlugins = projectOperations.getProjectMetadata().getBuildPlugins();
-		List<Element> pluginElements = XmlUtils.findElements("/configuration/gwt/plugins/plugin", configuration);
-		for (Element pluginElement : pluginElements) {
-			Plugin plugin = new Plugin(pluginElement);
-			if (plugin.getArtifactId().equals("gwt-maven-plugin") && buildPlugins.contains(plugin)) {
-				projectOperations.removeBuildPlugin(plugin);
-			}
-			projectOperations.addBuildPlugin(plugin);
-		}
-	}
-
 	private void updateWebXml() {
 		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
 		Document webXml = XmlUtils.readXml(mutableFile.getInputStream());
@@ -305,7 +304,6 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	}
 
 	private void updateFile(String sourceAntPath, String targetDirectory, String segmentPackage, boolean overwrite, boolean isGaeEnabled) {
-
 		if (!targetDirectory.endsWith("/")) {
 			targetDirectory += "/";
 		}
@@ -336,7 +334,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 					input = input.replace("__SEGMENT_PACKAGE__", segmentPackage);
 					input = input.replace("__PROJECT_NAME__", projectOperations.getProjectMetadata().getProjectName());
 
-					if (/*projectOperations.getProjectMetadata().isGaeEnabled() &&*/ isGaeEnabled) {
+					if ( isGaeEnabled) {
 						input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
 						input = input.replace("__GAE_HOOKUP__", getGaeHookup());
 						input = input.replace("__GAE_REQUEST_TRANSPORT__", ", new GaeAuthRequestTransport(eventBus)");
@@ -355,6 +353,16 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		}
 	}
 
+	private void updateBuildPlugins(boolean isGaeEnabled) {
+		Element configuration = XmlUtils.getConfiguration(getClass());
+		String xPath = "/configuration/gwt/plugins/plugin[@gae-enabled = '" + isGaeEnabled + "']";
+		Element pluginElement = XmlUtils.findFirstElement(xPath, configuration);
+		Assert.notNull(pluginElement, "gwt-maven-plugin required");
+		Plugin plugin = new Plugin(pluginElement);
+		projectOperations.removeBuildPlugin(plugin);
+		projectOperations.addBuildPlugin(plugin);
+	}
+
 	private void removeIfFound(String xpath, Element webXmlRoot) {
 		for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
 			if (toRemove != null) {
@@ -369,22 +377,5 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		builder.append("    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.getLoginWidget());\n\n");
 		builder.append("    new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
 		return builder.toString();
-	}
-
-	public void notify(String upstreamDependency, String downstreamDependency) {
-		if (StringUtils.hasText(upstreamDependency) && MetadataIdentificationUtils.isValid(upstreamDependency)) {
-			if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-				boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
-				boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-				if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
-					wasGaeEnabled = isGaeEnabled;
-					//Update ApplicationRequestFactory
-					gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY);
-					//Update the GaeHelper type
-					updateGaeHelper(isGaeEnabled);
-				}
-				projectOperations.addDependency("com.google.appengine", "appengine-api-1.0-sdk", "1.4.3");
-			}
-		}
 	}
 }

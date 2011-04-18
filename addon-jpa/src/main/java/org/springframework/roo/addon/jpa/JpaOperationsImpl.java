@@ -63,7 +63,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-
+	
 	public boolean isJpaInstallationPossible() {
 		return projectOperations.isProjectAvailable() && !fileManager.exists(getPersistencePath());
 	}
@@ -748,11 +748,6 @@ public class JpaOperationsImpl implements JpaOperations {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
 
-		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
-			Element pluginElement = XmlUtils.findFirstElement(getGwtPluginXPath(jdbcDatabase), configuration);
-			buildPlugins.add(new Plugin(pluginElement));
-		}
-
 		projectOperations.addBuildPlugins(buildPlugins);
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
@@ -872,12 +867,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		// Remove redundant build plugins
 		List<Plugin> redundantBuildPlugins = new ArrayList<Plugin>();
-		redundantBuildPlugins.addAll(getPlugins(databaseXPath + "/plugins/plugin", configuration));
-		redundantBuildPlugins.addAll(getPlugins(providersXPath + "/plugins/plugin", configuration));
-		if (projectOperations.getProjectMetadata().isGwtEnabled()) {
-			redundantBuildPlugins.addAll(getPlugins(getGwtPluginXPath(jdbcDatabase), configuration));
-		}
+		redundantBuildPlugins.addAll(getPlugins(databaseXPath, configuration));
+		redundantBuildPlugins.addAll(getPlugins(providersXPath, configuration));
 		projectOperations.removeBuildPlugins(redundantBuildPlugins);
+
+		// Remove redundant resources
+		List<Resource> redundantResources = new ArrayList<Resource>();
+		redundantResources.addAll(getResources(databaseXPath, configuration));
+		redundantResources.addAll(getResources(providersXPath, configuration));
+		for (Resource resource : redundantResources) {
+			projectOperations.removeResource(resource);
+		}
 
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(false);
@@ -903,10 +903,18 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private List<Plugin> getPlugins(String xPathExpression, Element configuration) {
 		List<Plugin> buildPlugins = new ArrayList<Plugin>();
-		for (Element pluginElement : XmlUtils.findElements(xPathExpression, configuration)) {
+		for (Element pluginElement : XmlUtils.findElements(xPathExpression + "/plugins/plugin", configuration)) {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
 		return buildPlugins;
+	}
+	
+	private List<Resource> getResources(String xPathExpression, Element configuration) {
+		List<Resource> resources = new ArrayList<Resource>();
+		for (Element resourceElement : XmlUtils.findElements(xPathExpression + "/resources/resource", configuration)) {
+			resources.add(new Resource(resourceElement));
+		}
+		return resources;
 	}
 
 	private String getDbXPath(JdbcDatabase jdbcDatabase) {
@@ -943,10 +951,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		builder.append("]");
 		return builder.toString();
-	}
-
-	private String getGwtPluginXPath(JdbcDatabase jdbcDatabase) {
-		return "/configuration/gwt/plugins/plugin[@id = '" + (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE ? "nonGAE" : "GAE") + "']";
 	}
 
 	private Element createPropertyElement(String name, String value, Document doc) {

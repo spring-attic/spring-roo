@@ -40,14 +40,14 @@
                 <artifactId>xalan</artifactId>
                 <version>2.7.1</version>
             </dependency>
-			<dependency>
-				<groupId>com.google.appengine</groupId>
-				<artifactId>appengine-api-1.0-sdk</artifactId>
-				<version>1.4.3</version>
-			</dependency>
+            <dependency>
+                <groupId>com.google.appengine</groupId>
+                <artifactId>appengine-api-1.0-sdk</artifactId>
+                <version>1.4.3</version>
+            </dependency>
         </dependencies>
         <plugins>
-            <plugin>
+            <plugin gae-enabled="false">
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <version>2.1.0-1</version>
@@ -73,6 +73,47 @@
                     <modules>
                         <module>${project.groupId}.ApplicationScaffold</module>
                     </modules>
+                    <copyWebapp>true</copyWebapp>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>gwtcompile</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin gae-enabled="true">
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>2.1.0-1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.gwt</groupId>
+                        <artifactId>gwt-dev</artifactId>
+                        <version>2.2.0</version>
+                        <scope>provided</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.google.gwt</groupId>
+                        <artifactId>gwt-user</artifactId>
+                        <version>2.2.0</version>
+                        <scope>provided</scope>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <logLevel>INFO</logLevel>
+                    <style>PRETTY</style>
+                    <gwtVersion>2.2.0</gwtVersion>
+                    <runTarget>/ApplicationScaffold.html</runTarget>
+                    <hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
+                    <modules>
+                        <module>${project.groupId}.ApplicationScaffold</module>
+                    </modules>
+                    <server>com.google.appengine.tools.development.gwt.AppEngineLauncher</server>
+                    <extraJvmArgs>-javaagent:${gae.home}/lib/agent/appengine-agent.jar -Xmx1024m</extraJvmArgs>
                     <copyWebapp>true</copyWebapp>
                 </configuration>
                 <executions>
