@@ -888,7 +888,11 @@ public class JpaOperationsImpl implements JpaOperations {
 	private List<Dependency> getDependencies(String xPathExpression, Element configuration) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
-			dependencies.add(new Dependency(dependencyElement));
+			Dependency dependency = new Dependency(dependencyElement);
+			if (projectOperations.getProjectMetadata().isGwtEnabled() && dependency.getGroupId().equals("com.google.appengine") && dependency.getArtifactId().equals("appengine-api-1.0-sdk")) {
+				continue;
+			}
+			dependencies.add(dependency);
 		}
 		return dependencies;
 	}
