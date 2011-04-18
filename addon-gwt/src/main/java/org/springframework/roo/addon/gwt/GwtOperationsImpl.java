@@ -382,19 +382,6 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		projectOperations.updateBuildPlugin(defaultPlugin);
 	}
 
-
-	private void xmlToString(Element element) throws TransformerException {
-		//Set up the transformer to write the output string
-        TransformerFactory tFactory = TransformerFactory.newInstance();
-        Transformer transformer = tFactory.newTransformer();
-        transformer.setOutputProperty("indent", "yes");
-        StringWriter sw = new StringWriter();
-        StreamResult result = new StreamResult(sw);
-		DOMSource source = new DOMSource(element);
-		transformer.transform(source, result);
-		System.out.println(sw.toString());
-	}
-
 	private void removeIfFound(String xpath, Element webXmlRoot) {
 		for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
 			if (toRemove != null) {
