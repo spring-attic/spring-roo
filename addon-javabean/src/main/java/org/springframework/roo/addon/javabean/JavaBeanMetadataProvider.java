@@ -16,14 +16,18 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.util.StringUtils;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides {@link JavaBeanMetadata}.
@@ -36,8 +40,11 @@ import java.util.Map;
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
+	private Set<String> producedMids = new HashSet<String>();
+	private Boolean wasGaeEnabled = null;
 
 	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
 	}
@@ -45,6 +52,23 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
+	}
+
+	@Override
+	protected void notifyForGenericListener(String upstreamDependency) {
+		super.notifyForGenericListener(upstreamDependency);
+		if (StringUtils.hasText(upstreamDependency) && MetadataIdentificationUtils.isValid(upstreamDependency)) {
+			if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+				boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
+				boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+				if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
+					wasGaeEnabled = isGaeEnabled;
+					for (String producedMid : producedMids) {
+						metadataService.get(producedMid, true);
+					}
+				}
+			}
+		}
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -62,7 +86,9 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 				declaredFields.put(field, isGaeInterested(field));
 			}
 		}
-		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, declaredFields);
+		JavaBeanMetadata javaBeanMetadata = new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, declaredFields);
+		producedMids.add(javaBeanMetadata.getId());
+		return javaBeanMetadata;
 	}
 
 	private FieldMetadata isGaeInterested(FieldMetadata field) {
