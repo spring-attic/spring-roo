@@ -1,5 +1,6 @@
 package org.springframework.roo.support.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,6 +18,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
@@ -56,8 +58,8 @@ public final class XmlUtils {
 	/**
 	 * Read an XML document from the supplied input stream and return a document.
 	 *  
-	 * @param inputStream the input stream to read from (required)
-	 * @return a document
+	 * @param inputStream the input stream to read from (required).  The stream is closed upon completion.
+	 * @return a document.
 	 */
 	public static final Document readXml(InputStream inputStream) {
 		Assert.notNull(inputStream, "InputStream required");
@@ -65,6 +67,10 @@ public final class XmlUtils {
 			return factory.newDocumentBuilder().parse(inputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not open input stream", e);
+		} finally {
+			try {
+				inputStream.close();
+			} catch (IOException inored) {}
 		}
 	}
 	
@@ -146,6 +152,42 @@ public final class XmlUtils {
 		} else {
 			// DOM 3.0 LS and/or DOM 2.0 Core not supported. Falling back to TrAX.
 			writeXml(outputStream, document);
+		}
+	}
+	
+	/**
+	 * Compares two DOM documents by comparing the representations of the documents as XML strings
+	 *  
+	 * @param document1 the first document
+	 * @param document2 the second document
+	 * @return true if the XML representation document1 is the same as the XML representation of document2, otherwise false
+	 */
+	public static boolean compareDocuments(Document document1, Document document2) {
+		if (document1 == null || document2 == null) {
+			return false;
+		}
+		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+		XmlUtils.writeXml(baos1, document1);
+		String s1 = baos1.toString();
+		ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+		XmlUtils.writeXml(baos2, document2);
+		String s2 = baos2.toString();
+		return s1.equals(s2);
+	}
+	
+	/**
+	 * Clones the presented DOM document.
+	 * 
+	 * @param document the document to clone
+	 * @return a document
+	 */
+	public static Document cloneDocument(Document document) {
+		try {
+			DOMResult result = new DOMResult();
+			createIndentingTransformer().transform(new DOMSource(document), result);
+			return (Document) result.getNode();
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 	

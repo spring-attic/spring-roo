@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -30,6 +31,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -49,6 +51,7 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JpaOperationsImpl implements JpaOperations {
+	private static Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
 	private static final String DATABASE_URL = "database.url";
 	private static final String DATABASE_DRIVER = "database.driverClassName";
 	private static final String DATABASE_USERNAME = "database.username";
@@ -123,6 +126,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile mutableFile = fileManager.updateFile(contextPath);
 		Document appCtx = XmlUtils.readXml(mutableFile.getInputStream());
+		Document existing = XmlUtils.cloneDocument(appCtx);
 		Element root = appCtx.getDocumentElement();
 
 		// Checking for existence of configurations, if found abort
@@ -220,17 +224,22 @@ public class JpaOperationsImpl implements JpaOperations {
 		root.appendChild(entityManagerFactory);
 
 		XmlUtils.removeTextNodes(root);
-		XmlUtils.writeXml(mutableFile.getOutputStream(), appCtx);
+		
+		if (existing == null || !XmlUtils.compareDocuments(existing, appCtx)) {
+			XmlUtils.writeXml(mutableFile.getOutputStream(), appCtx);
+		}
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
 		String persistencePath = getPersistencePath();
 		MutableFile mutableFile = null;
 		Document persistence;
+		Document existing = null;
 		try {
 			if (fileManager.exists(persistencePath)) {
 				mutableFile = fileManager.updateFile(persistencePath);
 				persistence = XmlUtils.readXml(mutableFile.getInputStream());
+				existing = XmlUtils.cloneDocument(persistence);
 			} else {
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
 				Assert.notNull(templateInputStream, "Could not acquire persistence.xml template");
@@ -249,7 +258,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-
+		
 		Element root = persistence.getDocumentElement();
 		Element persistenceElement = XmlUtils.findFirstElement("/persistence", root);
 		Assert.notNull(persistenceElement, "No persistence element found");
@@ -375,7 +384,12 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		persistenceUnitElement.appendChild(properties);
 
-		XmlUtils.writeXml(mutableFile.getOutputStream(), persistence);
+		if (existing == null || !XmlUtils.compareDocuments(existing, persistence)) {
+			XmlUtils.writeXml(mutableFile.getOutputStream(), persistence);
+			if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE && (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2)) {
+				logger.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
+			}
+		}
 	}
 
 	private String getConnectionString(JdbcDatabase jdbcDatabase, String hostName, String databaseName) {
@@ -427,10 +441,14 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		Element root = appengine.getDocumentElement();
+		
 		Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", root);
-		applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
-
-		XmlUtils.writeXml(mutableFile.getOutputStream(), appengine);
+		String textContent = StringUtils.hasText(applicationId) ? applicationId : getProjectName();
+		if (!textContent.equals(applicationElement.getTextContent())) {
+			applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
+			XmlUtils.writeXml(mutableFile.getOutputStream(), appengine);
+			logger.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
+		}
 
 		if (!loggingPropertiesPathExists) {
 			try {
@@ -502,6 +520,22 @@ public class JpaOperationsImpl implements JpaOperations {
 				} catch (IOException ignored) {}
 			}
 		}
+		
+		// Log message to console
+		switch (jdbcDatabase) {
+			case ORACLE:
+			case DB2_EXPRESS_C:
+			case DB2_400:
+				logger.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+				break;
+			case POSTGRES:
+			case DERBY:
+			case MSSQL:
+			case SYBASE:
+			case MYSQL:
+				logger.warning("Please update your database details in src/main/resources/META-INF/spring/database.properties.");
+				break;
+		}
 	}
 
 	private void updateVMforceConfigProperties(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String userName, String password) {
@@ -527,8 +561,14 @@ public class JpaOperationsImpl implements JpaOperations {
 				Assert.notNull(templateInputStream, "Could not acquire config properties template");
 				props.load(templateInputStream);
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+
+		boolean hasChanged = !props.get("sfdc.userName").equals(StringUtils.trimToEmpty(userName));
+		hasChanged |= !props.get("sfdc.password").equals(StringUtils.trimToEmpty(password));
+		if (!hasChanged) {
+			return;
 		}
 
 		props.put("sfdc.userName", StringUtils.trimToEmpty(userName));
@@ -547,6 +587,8 @@ public class JpaOperationsImpl implements JpaOperations {
 				} catch (IOException ignored) {}
 			}
 		}
+		
+		logger.warning("Please update your database details in src/main/resources/config.properties.");
 	}
 
 	private void updateLog4j(OrmProvider ormProvider) {
