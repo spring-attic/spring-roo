@@ -124,13 +124,13 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Filters list
 		Set<Filter> filters = new HashSet<Filter>();
-		for (Element filter : XmlUtils.findElements("/project/build/filters/filter/*", root)) {
+		for (Element filter : XmlUtils.findElements("/project/build/filters/filter", root)) {
 			filters.add(new Filter(filter));
 		}
 
 		// Resources list
 		Set<Resource> resources = new HashSet<Resource>();
-		for (Element resource : XmlUtils.findElements("/project/build/resources/resource/*", root)) {
+		for (Element resource : XmlUtils.findElements("/project/build/resources/resource", root)) {
 			resources.add(new Resource(resource));
 		}
 
@@ -800,14 +800,25 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = document.getDocumentElement();
 
-		for (Element candidate : XmlUtils.findElements("/project/build/filters/filter", root)) {
+		Element filtersElement = XmlUtils.findFirstElement("/project/build/filters", root);
+		if (filtersElement == null) {
+			return;
+		}
+		
+		for (Element candidate : XmlUtils.findElements("filter", filtersElement)) {
 			if (filter.equals(new Filter(candidate))) {
-				candidate.getParentNode().removeChild(candidate);
+				filtersElement.removeChild(candidate);
 				mutableFile.setDescriptionOfChange("Removed filter '" + filter.getValue() + "'");
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
 
+		List<Element> filterElements = XmlUtils.findElements("filter", filtersElement);
+		if (filterElements.isEmpty()) {
+			filtersElement.getParentNode().removeChild(filtersElement);
+		}
+		
+		XmlUtils.removeTextNodes(root);
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
@@ -855,7 +866,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		resourcesElement.appendChild(resourceElement);
 		buildElement.appendChild(resourcesElement);
 
-		mutableFile.setDescriptionOfChange("Added resource");
+		mutableFile.setDescriptionOfChange("Added resource with " + resource.getSimpleDescription());
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
@@ -871,14 +882,25 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = document.getDocumentElement();
 
-		for (Element candidate : XmlUtils.findElements("/project/build/resources/resource['" + resource.getDirectory() + "']", root)) {
+		Element resourcesElement = XmlUtils.findFirstElement("/project/build/resources", root);
+		if (resourcesElement == null) {
+			return;
+		}
+		
+		for (Element candidate : XmlUtils.findElements("resource[directory = '" + resource.getDirectory().getName() + "']", resourcesElement)) {
 			if (resource.equals(new Resource(candidate))) {
-				candidate.getParentNode().removeChild(candidate);
-				mutableFile.setDescriptionOfChange("Removed resource");
+				resourcesElement.removeChild(candidate);
+				mutableFile.setDescriptionOfChange("Removed resource with " + resource.getSimpleDescription());
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
 
+		List<Element> resourceElements = XmlUtils.findElements("resource", resourcesElement);
+		if (resourceElements.isEmpty()) {
+			resourcesElement.getParentNode().removeChild(resourcesElement);
+		}
+
+		XmlUtils.removeTextNodes(root);
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 

@@ -3,11 +3,6 @@ package org.springframework.roo.project;
 
 import java.util.List;
 
-import org.springframework.roo.project.listeners.DependencyListener;
-import org.springframework.roo.project.listeners.PluginListener;
-import org.springframework.roo.project.listeners.PropertyListener;
-import org.springframework.roo.project.listeners.RepositoryListener;
-
 /**
  * Specifies methods for various project-related operations.
  * 
@@ -36,75 +31,7 @@ public interface ProjectOperations {
 	 * @return the {@link PathResolver}, or null if the project is unavailable
 	 */
 	PathResolver getPathResolver();
-
-	/**
-	 * Register a listener to track changes in build dependencies.
-	 * 
-	 * @param listener the DependencyListener to register.
-	 */
-	void addDependencyListener(DependencyListener listener);
-
-	/**
-	 * Remove a dependency listener from change tracking.
-	 *
-	 * @param listener the DependencyListener to remove.
-	 */
-	void removeDependencyListener(DependencyListener listener);
-
-	/**
-	 * Register a listener to track changes in repositories.
-	 *
-	 * @param listener the RepositoryListener to register.
-	 */
-	void addRepositoryListener(RepositoryListener listener);
-
-	/**
-	 * Remove a repository listener from change tracking
-	 *
-	 * @param listener the RepositoryListener to remove.
-	 */
-	void removeRepositoryListener(RepositoryListener listener);
 	
-	/**
-	 * Register a listener to track changes in plugin repositories
-	 *
-	 * @param listener the RepositoryListener to register.
-	 */
-	void addPluginRepositoryListener(RepositoryListener listener);
-
-	/**
-	 * Remove a plugin repository listener from change tracking
-	 *
-	 * @param listener the RepositoryListener to remove.
-	 */
-	void removePluginRepositoryListener(RepositoryListener listener);
-
-	/**
-	 * Register a listener to track changes in build plugins
-	 *
-	 * @param listener the PluginListener to register.
-	 */
-	void addPluginListener(PluginListener listener);
-
-	/**
-	 * Remove a build plugin listener from change tracking
-	 *
-	 * @param listener the PluginListener to remove.
-	 */
-	void removePluginListener(PluginListener listener);
-	
-	/**
-	 * Register a listener to track changes in pom properties
-	 */
-	void addPropertyListener(PropertyListener listener);
-
-	/**
-	 * Remove a property listener from change tracking
-	 *
-	 * @param listener the PropertyListener to remove.
-	 */
-	void removePropertyListener(PropertyListener listener);
-
 	/**
 	 * Updates the project type.
 	 * 

@@ -51,19 +51,7 @@ public class Filter implements Comparable<Filter> {
 	}
 
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Filter other = (Filter) obj;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
+		return obj != null && obj instanceof Filter && this.compareTo((Filter) obj) == 0;
 	}
 
 	public int compareTo(Filter o) {
