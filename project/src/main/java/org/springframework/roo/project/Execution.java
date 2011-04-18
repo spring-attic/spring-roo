@@ -38,4 +38,30 @@ public final class Execution {
 	public List<String> getGoals() {
 		return this.goals;
 	}
+
+    public int hashCode() {
+		return 11 * this.id.hashCode() * this.phase.hashCode() * this.goals.hashCode();
+	}
+
+	public boolean equals(Object obj) {
+		return obj != null && obj instanceof Execution && this.compareTo((Execution) obj) == 0;
+	}
+
+	public int compareTo(Execution o) {
+		if (o == null) {
+			throw new NullPointerException();
+		}
+		int result = this.id.compareTo(o.id);
+		if (result == 0) {
+			result = this.phase.compareTo(o.phase);
+		}
+		if (result == 0) {
+			String[] thisGoals = (String[]) this.goals.toArray();
+			String[] oGoals = (String[]) o.goals.toArray();
+			Arrays.sort(thisGoals);
+			Arrays.sort(oGoals);
+			result = Arrays.toString(thisGoals).compareTo(Arrays.toString(oGoals));
+		}
+		return result;
+	}
 }

@@ -3,9 +3,6 @@ package org.springframework.roo.project;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.project.Configuration;
-import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.Execution;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
@@ -191,7 +188,7 @@ public class Plugin implements Comparable<Plugin> {
 	}
 
 	public int hashCode() {
-		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.version.hashCode();
+		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.version.hashCode() * (this.configuration != null ? this.configuration.hashCode() : 1);
 	}
 
 	public boolean equals(Object obj) {
@@ -208,6 +205,11 @@ public class Plugin implements Comparable<Plugin> {
 		}
 		if (result == 0) {
 			result = this.version.compareTo(o.version);
+		}
+		if (result == 0) {
+			if (this.configuration != null && o.configuration != null) {
+				result = this.configuration.compareTo(o.configuration);
+			}
 		}
 		return result;
 	}

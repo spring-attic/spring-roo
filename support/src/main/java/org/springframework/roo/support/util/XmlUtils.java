@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -172,6 +174,45 @@ public final class XmlUtils {
 		XmlUtils.writeXml(baos2, document2);
 		String s2 = baos2.toString();
 		return s1.equals(s2);
+	}
+
+	/**
+	 * Compares two DOM elements by comparing the representations of the elements as XML strings
+	 *
+	 * @param element1 the first element
+	 * @param element2 the second element
+	 * @return true if the XML representation element1 is the same as the XML representation of element2, otherwise false
+	 */
+	public static boolean compareElements(Element element1, Element element2) {
+		Assert.notNull(element1, "First element required");
+		Assert.notNull(element2, "Second element required");
+		if (!element1.equals(element2) || element1 != element2) {
+			return false;
+		}
+		String s1 = elementToString(element1);
+		String s2 = elementToString(element2);
+		return s1.equals(s2);
+	}
+
+	/**
+	 * Converts a DOM element to an XML string
+	 *
+	 * @param element the first element
+	 * @return the XML String representation of the element, never null
+	 */
+	public static String elementToString(Element element) {
+		try {
+			TransformerFactory tFactory = TransformerFactory.newInstance();
+			Transformer transformer = tFactory.newTransformer();
+			transformer.setOutputProperty("indent", "yes");
+			StringWriter writer = new StringWriter();
+			StreamResult result = new StreamResult(writer);
+			DOMSource source = new DOMSource(element);
+			transformer.transform(source, result);
+			return writer.toString();
+		} catch (TransformerException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	/**

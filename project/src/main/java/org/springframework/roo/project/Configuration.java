@@ -1,6 +1,7 @@
 package org.springframework.roo.project;
 
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -11,13 +12,30 @@ import org.w3c.dom.Element;
  */
 public final class Configuration {
 	private final Element configuration;
+	private final String configAsString;
 
 	public Configuration(Element configuration) {
 		Assert.notNull(configuration, "configuration must be specified");
 		this.configuration = configuration;
+		this.configAsString = XmlUtils.elementToString(configuration);
 	}
 
 	public Element getConfiguration() {
 		return configuration;
+	}
+
+	public int hashCode() {
+		return 11 * this.configAsString.hashCode();
+	}
+
+	public boolean equals(Object obj) {
+		return obj != null && obj instanceof Configuration && this.compareTo((Configuration) obj) == 0;
+	}
+
+	public int compareTo(Configuration o) {
+		if (o == null) {
+			throw new NullPointerException();
+		}
+		return configAsString.compareTo(o.configAsString);
 	}
 }
