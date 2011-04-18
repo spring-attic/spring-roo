@@ -163,9 +163,8 @@ public final class XmlUtils {
 	 * @return true if the XML representation document1 is the same as the XML representation of document2, otherwise false
 	 */
 	public static boolean compareDocuments(Document document1, Document document2) {
-		if (document1 == null || document2 == null) {
-			return false;
-		}
+		Assert.notNull(document1, "First document required");
+		Assert.notNull(document2, "Second document required");
 		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
 		XmlUtils.writeXml(baos1, document1);
 		String s1 = baos1.toString();
