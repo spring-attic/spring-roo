@@ -29,7 +29,9 @@ public class GaeLoginWidgetDriver {
 		request.getCurrentUser().to(new Receiver<GaeUser>() {
 			@Override
 			public void onSuccess(GaeUser response) {
-				widget.setUserName(response.getNickname());
+				if (response != null) {
+					widget.setUserName(response.getNickname());
+				}
 			}
 		});
 

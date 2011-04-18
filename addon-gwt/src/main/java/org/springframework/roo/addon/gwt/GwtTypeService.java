@@ -22,6 +22,8 @@ public interface GwtTypeService {
 
 	List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes);
 
+	void buildType(GwtType destType);
+
 	List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
 
 	List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
@@ -31,4 +33,6 @@ public interface GwtTypeService {
 	boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, List<String> sourcePaths);
 
 	List<String> getSourcePaths();
+
+	boolean isGwtModuleXmlPresent();
 }

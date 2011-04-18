@@ -5,6 +5,7 @@ import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.ui.ApplicationListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.activity.IsScaffoldMobileActivity;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.gae.GaeHelper;
 import __TOP_LEVEL_PACKAGE__.client.style.MobileListResources;
 import com.google.gwt.activity.shared.*;
 import com.google.gwt.cell.client.AbstractCell;
@@ -100,7 +101,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 	private final PlaceHistoryFactory placeHistoryFactory;
 
 	@Inject
-	public ScaffoldMobileApp(ScaffoldMobileShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus, PlaceController placeController, ScaffoldMobileActivities scaffoldMobileActivities, PlaceHistoryFactory placeHistoryFactory) {
+	public ScaffoldMobileApp(ScaffoldMobileShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus, PlaceController placeController, ScaffoldMobileActivities scaffoldMobileActivities, PlaceHistoryFactory placeHistoryFactory, GaeHelper gaeHelper) {
 		this.shell = shell;
 		this.requestFactory = requestFactory;
 		this.eventBus = eventBus;
@@ -142,7 +143,6 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 			Logger.getLogger("").addHandler(new RequestFactoryLogHandler(provider, Level.WARNING, new ArrayList<String>()));
 		}
 
-		__GAE_HOOKUP__
 		/* Left side lets us pick from all the types of entities */
 
 		final Renderer<ProxyListPlace> placePickerRenderer = new ApplicationListPlaceRenderer();

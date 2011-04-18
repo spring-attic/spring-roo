@@ -14,7 +14,13 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -30,6 +36,7 @@ import org.springframework.roo.project.listeners.PluginListener;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -49,20 +56,23 @@ import org.w3c.dom.Element;
  */
 @Component
 @Service
-public class GwtOperationsImpl implements GwtOperations, PluginListener {
+public class GwtOperationsImpl implements GwtOperations, MetadataNotificationListener {
 	@Reference private FileManager fileManager;
+	@Reference private GwtTypeService gwtTypeService;
 	@Reference private MetadataService metadataService;
 	@Reference private WebMvcOperations mvcOperations;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	private ComponentContext context;
+	private Boolean wasGaeEnabled = null;
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
-		projectOperations.addPluginListener(this);
+		metadataDependencyRegistry.addNotificationListener(this);
 	}
 
 	protected void deactivate(ComponentContext context) {
-		projectOperations.removePluginListener(this);
+		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
 	public boolean isSetupAvailable() {
@@ -86,6 +96,12 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 		if (!fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
+
+		for (GwtPath path : GwtPath.values()) {
+			copyDirectoryContents(path);
+		}
+
+		updateGaeHelper(projectOperations.getProjectMetadata().isGaeEnabled());
 
 		// Add GWT natures and builder names to maven eclipse plugin
 		updateEclipsePlugin();
@@ -121,22 +137,6 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 			String id = GwtMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 			metadataService.get(id);
 		}
-	}
-
-	public void pluginAdded(Plugin plugin) {
-		if (plugin.getArtifactId().equals("gwt-maven-plugin")) {
-			// Refresh project metadata first in case the maven-gae-plugin has been added
-			metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
-
-			// Copy "static" directories
-			for (GwtPath path : GwtPath.values()) {
-				copyDirectoryContents(path);
-			}
-		}
-	}
-
-	public void pluginRemoved(Plugin plugin) {
-		// Do nothing
 	}
 
 	private void updateEclipsePlugin() {
@@ -291,13 +291,21 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 		}
 	}
 
+	private void updateGaeHelper(boolean isGaeEnabled) {
+		String sourceAntPath = "module/client/scaffold/gae/GaeHelper-template.java";
+		String segmentPackage = "client.scaffold.gae";
+		String targetDirectory = projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", "\\/") + "/client/scaffold/gae");;
+		updateFile(sourceAntPath, targetDirectory, segmentPackage, true, isGaeEnabled);
+	}
+
 	private void copyDirectoryContents(GwtPath gwtPath) {
 		String sourceAntPath = gwtPath.sourceAntPath();
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectOperations.getProjectMetadata());
+		updateFile(sourceAntPath, targetDirectory, gwtPath.segmentPackage(), false, projectOperations.getProjectMetadata().isGaeEnabled());
+	}
 
-		if (!projectOperations.getProjectMetadata().isGaeEnabled() && targetDirectory.contains("/gae")) {
-			return;
-		}
+	private void updateFile(String sourceAntPath, String targetDirectory, String segmentPackage, boolean overwrite, boolean isGaeEnabled) {
+
 		if (!targetDirectory.endsWith("/")) {
 			targetDirectory += "/";
 		}
@@ -308,31 +316,27 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
 		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
+
 		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			fileName = fileName.replace("-template", "");
 			String targetFilename = targetDirectory + fileName;
-
 			try {
-				boolean exists = fileManager.exists(targetFilename);
+				if (fileManager.exists(targetFilename) && !overwrite) {
+					continue;
+				}
 				if (targetFilename.endsWith("png")) {
-					if (exists) {
-						continue;
-					}
 					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetFilename).getOutputStream());
 				} else {
 					// Read template and insert the user's package
 					String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
-					if (exists && !input.contains("__GAE_")) {
-						continue;
-					}
 
 					String topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName();
 					input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);
-					input = input.replace("__SEGMENT_PACKAGE__", gwtPath.segmentPackage());
+					input = input.replace("__SEGMENT_PACKAGE__", segmentPackage);
 					input = input.replace("__PROJECT_NAME__", projectOperations.getProjectMetadata().getProjectName());
 
-					if (projectOperations.getProjectMetadata().isGaeEnabled()) {
+					if (/*projectOperations.getProjectMetadata().isGaeEnabled() &&*/ isGaeEnabled) {
 						input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
 						input = input.replace("__GAE_HOOKUP__", getGaeHookup());
 						input = input.replace("__GAE_REQUEST_TRANSPORT__", ", new GaeAuthRequestTransport(eventBus)");
@@ -343,8 +347,7 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 					}
 
 					// Output the file for the user
-					MutableFile mutableFile = exists ? fileManager.updateFile(targetFilename) : fileManager.createFile(targetFilename);
-					FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
+					fileManager.createOrUpdateTextFileIfRequired(targetFilename, input, true);
 				}
 			} catch (IOException e) {
 				throw new IllegalStateException("Unable to create '" + targetFilename + "'", e);
@@ -363,8 +366,25 @@ public class GwtOperationsImpl implements GwtOperations, PluginListener {
 
 	private CharSequence getGaeHookup() {
 		StringBuilder builder = new StringBuilder("    // AppEngine user authentication\n\n");
-		builder.append("    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.loginWidget);\n\n");
+		builder.append("    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.getLoginWidget());\n\n");
 		builder.append("    new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
 		return builder.toString();
+	}
+
+	public void notify(String upstreamDependency, String downstreamDependency) {
+		if (StringUtils.hasText(upstreamDependency) && MetadataIdentificationUtils.isValid(upstreamDependency)) {
+			if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+				boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
+				boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+				if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
+					wasGaeEnabled = isGaeEnabled;
+					//Update ApplicationRequestFactory
+					gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY);
+					//Update the GaeHelper type
+					updateGaeHelper(isGaeEnabled);
+				}
+				projectOperations.addDependency("com.google.appengine", "appengine-api-1.0-sdk", "1.4.3");
+			}
+		}
 	}
 }

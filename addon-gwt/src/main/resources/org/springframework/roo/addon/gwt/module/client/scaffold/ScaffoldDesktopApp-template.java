@@ -2,6 +2,7 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.gae.GaeHelper;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
 import com.google.gwt.activity.shared.*;
@@ -38,7 +39,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 	private final ApplicationDetailsActivities applicationDetailsActivities;
 
 	@Inject
-	public ScaffoldDesktopApp(ScaffoldDesktopShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus, PlaceController placeController, PlaceHistoryFactory placeHistoryFactory, ApplicationMasterActivities applicationMasterActivities, ApplicationDetailsActivities applicationDetailsActivities) {
+	public ScaffoldDesktopApp(ScaffoldDesktopShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus, PlaceController placeController, PlaceHistoryFactory placeHistoryFactory, ApplicationMasterActivities applicationMasterActivities, ApplicationDetailsActivities applicationDetailsActivities, GaeHelper gaeHelper) {
 		this.shell = shell;
 		this.requestFactory = requestFactory;
 		this.eventBus = eventBus;
@@ -91,7 +92,6 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 			}
 		});
 
-		__GAE_HOOKUP__
 		CachingActivityMapper cached = new CachingActivityMapper(applicationMasterActivities);
 		ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace();
 		ActivityMapper masterActivityMap = new FilteredActivityMapper(proxyPlaceToListPlace, cached);

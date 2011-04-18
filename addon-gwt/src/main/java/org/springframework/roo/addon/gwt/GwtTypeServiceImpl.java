@@ -37,6 +37,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
@@ -70,10 +71,12 @@ import javax.xml.parsers.DocumentBuilder;
 @Service
 public class GwtTypeServiceImpl implements GwtTypeService {
 	private static Logger logger = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
+	@Reference private FileManager fileManager;
+	@Reference private GwtFileManager gwtFileManager;
+	@Reference private GwtTemplateService gwtTemplateService;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private FileManager fileManager;
 
 	private Set<String> warnings = new LinkedHashSet<String>();
 	private Timer warningTimer = new Timer();
@@ -134,15 +137,52 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return extendsTypes;
 	}
 
+	public boolean isGwtModuleXmlPresent() {
+		try{
+			return fileManager.exists(getGwtModuleXml());
+		} catch (IllegalStateException e) {
+			return false;
+		}
+	}
+
+	private String getGwtModuleXml() {
+		String gwtModuleXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", "/") + "/*.gwt.xml");
+		Set<FileDetails> potentialXmlFiles = fileManager.findMatchingAntPath(gwtModuleXml);
+		if (potentialXmlFiles.size() == 1) {
+			return potentialXmlFiles.iterator().next().getCanonicalPath();
+		} else if (potentialXmlFiles.size() > 1) {
+			throw new IllegalStateException("Multiple gwt.xml files detected; cannot continue");
+		}
+		throw new IllegalStateException("No gwt.xml file detected; cannot continue");
+	}
+
+	public void buildType(GwtType type) {
+		if (GwtType.LIST_PLACE_RENDERER.equals(type)) {
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
+			watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
+			type.setWatchedMethods(watchedMethods);
+		} else {
+			type.resolveMethodsToWatch(type);
+		}
+
+		type.resolveWatchedFieldNames(type);
+		List<ClassOrInterfaceTypeDetails> templateTypeDetails = gwtTemplateService.getStaticTemplateTypeDetails(type);
+		List<ClassOrInterfaceTypeDetails> typesToBeWritten = new ArrayList<ClassOrInterfaceTypeDetails>();
+		for (ClassOrInterfaceTypeDetails templateTypeDetail : templateTypeDetails) {
+			typesToBeWritten.addAll(buildType(type, templateTypeDetail, getExtendsTypes(templateTypeDetail)));
+		}
+		gwtFileManager.write(typesToBeWritten, type.isOverwriteConcrete());
+	}
+
 	public List<String> getSourcePaths() {
-		String gwtXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", "/") + "/ApplicationScaffold.gwt.xml");
-		Assert.isTrue(fileManager.exists(gwtXml), "GWT module's gwt.xml file not found; cannot continue");
+		Assert.isTrue(isGwtModuleXmlPresent(), "GWT module's gwt.xml file not found; cannot continue");
 
 		MutableFile mutableGwtXml;
 		InputStream is = null;
 		Document gwtXmlDoc;
 		try {
-			mutableGwtXml = fileManager.updateFile(gwtXml);
+			mutableGwtXml = fileManager.updateFile(getGwtModuleXml());
 			is = mutableGwtXml.getInputStream();
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new EntityResolver() {
