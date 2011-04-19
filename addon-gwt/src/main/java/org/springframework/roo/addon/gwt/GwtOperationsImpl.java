@@ -3,11 +3,9 @@ package org.springframework.roo.addon.gwt;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,16 +39,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * Implementation of {@link GwtOperations}.
@@ -151,13 +139,16 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 				boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
 				if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
 					wasGaeEnabled = isGaeEnabled;
+					
 					// Update ApplicationRequestFactory
 					gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY);
+					
 					// Update the GaeHelper type
 					updateGaeHelper(isGaeEnabled);
+					
+					// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated 
 					updateBuildPlugins(isGaeEnabled);
 				}
-				projectOperations.addDependency("com.google.appengine", "appengine-api-1.0-sdk", "1.4.3");
 			}
 		}
 	}
@@ -370,15 +361,15 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		String xPath = "/configuration/gwt/plugins/plugin[@gae-enabled = '" + isGaeEnabled + "']";
 		Element pluginElement = XmlUtils.findFirstElement(xPath, configuration);
 		Assert.notNull(pluginElement, "gwt-maven-plugin required");
-		pluginElement.removeAttribute("gae-enabled");
 		Plugin defaultPlugin = new Plugin(pluginElement);
 		for (Plugin plugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
 			if ("gwt-maven-plugin".equals(plugin.getArtifactId())) {
-			 	if (defaultPlugin.equals(plugin)) {
-					 return;
-				 }
+				if (defaultPlugin.equals(plugin)) {
+					return;
+				}
 			}
 		}
+
 		projectOperations.updateBuildPlugin(defaultPlugin);
 	}
 

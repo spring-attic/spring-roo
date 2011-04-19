@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.ScaffoldDesktopShell;
 __GAE_IMPORT__
-
 public class GaeHelper {
 
 	@Inject
