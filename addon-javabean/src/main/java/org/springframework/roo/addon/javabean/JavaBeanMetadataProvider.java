@@ -94,7 +94,10 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	private FieldMetadata isGaeInterested(FieldMetadata field) {
 		JavaType fieldType = field.getFieldType();
 		if (fieldType.isCommonCollectionType()) {
-			fieldType = field.getFieldType().getParameters().get(0);
+			if (fieldType.getParameters().isEmpty()) {
+				return null;
+			}
+			fieldType = fieldType.getParameters().get(0);
 		}
 
 		try {
