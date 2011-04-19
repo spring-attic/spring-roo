@@ -58,7 +58,7 @@ public class Filter implements Comparable<Filter> {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		return this.value.compareTo(o.value);
+		return value.compareTo(o.value);
 	}
 
 	public String toString() {

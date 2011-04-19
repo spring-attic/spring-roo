@@ -188,28 +188,32 @@ public class Plugin implements Comparable<Plugin> {
 	}
 
 	public int hashCode() {
-		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.version.hashCode() * (this.configuration != null ? this.configuration.hashCode() : 1);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
+		result = prime * result + ((artifactId == null) ? 0 : artifactId.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
+		return result;
 	}
 
 	public boolean equals(Object obj) {
 		return obj != null && obj instanceof Plugin && this.compareTo((Plugin) obj) == 0;
 	}
 
-	public int compareTo(Plugin o) {
+ 	public int compareTo(Plugin o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		int result = this.groupId.compareTo(o.groupId);
+		int result = groupId.compareTo(o.groupId);
 		if (result == 0) {
-			result = this.artifactId.compareTo(o.artifactId);
+			result = artifactId.compareTo(o.artifactId);
 		}
 		if (result == 0) {
-			result = this.version.compareTo(o.version);
+			result = version.compareTo(o.version);
 		}
-		if (result == 0) {
-			if (this.configuration != null && o.configuration != null) {
-				result = this.configuration.compareTo(o.configuration);
-			}
+		if (result == 0 && configuration != null && o.configuration != null) {
+			result = configuration.compareTo(o.configuration);
 		}
 		return result;
 	}
@@ -226,6 +230,9 @@ public class Plugin implements Comparable<Plugin> {
 		tsc.append("groupId", groupId);
 		tsc.append("artifactId", artifactId);
 		tsc.append("version", version);
+		if (configuration != null) {
+			tsc.append("configuration", configuration);
+		}
 		return tsc.toString();
 	}
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Immutable representation of an execution specification for a (maven) build plugin
+ * Immutable representation of an execution specification for a (Maven) build plugin
  * 
  * @author Adrian Colyer
  * @author Alan Stewart
@@ -39,8 +39,13 @@ public final class Execution {
 		return this.goals;
 	}
 
-    public int hashCode() {
-		return 11 * this.id.hashCode() * this.phase.hashCode() * this.goals.hashCode();
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((goals == null) ? 0 : goals.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((phase == null) ? 0 : phase.hashCode());
+		return result;
 	}
 
 	public boolean equals(Object obj) {
@@ -51,12 +56,12 @@ public final class Execution {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		int result = this.id.compareTo(o.id);
+		int result = id.compareTo(o.id);
 		if (result == 0) {
-			result = this.phase.compareTo(o.phase);
+			result = phase.compareTo(o.phase);
 		}
 		if (result == 0) {
-			String[] thisGoals = (String[]) this.goals.toArray();
+			String[] thisGoals = (String[]) goals.toArray();
 			String[] oGoals = (String[]) o.goals.toArray();
 			Arrays.sort(thisGoals);
 			Arrays.sort(oGoals);

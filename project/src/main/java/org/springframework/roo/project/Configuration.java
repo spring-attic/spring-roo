@@ -17,7 +17,7 @@ public final class Configuration {
 	public Configuration(Element configuration) {
 		Assert.notNull(configuration, "configuration must be specified");
 		this.configuration = configuration;
-		this.configAsString = XmlUtils.elementToString(configuration);
+		this.configAsString = XmlUtils.nodeToString(configuration);
 	}
 
 	public Element getConfiguration() {
@@ -25,7 +25,10 @@ public final class Configuration {
 	}
 
 	public int hashCode() {
-		return 11 * this.configAsString.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((configAsString == null) ? 0 : configAsString.hashCode());
+		return result;
 	}
 
 	public boolean equals(Object obj) {
@@ -37,5 +40,9 @@ public final class Configuration {
 			throw new NullPointerException();
 		}
 		return configAsString.compareTo(o.configAsString);
+	}
+	
+	public String toString() {
+		return configAsString;
 	}
 }

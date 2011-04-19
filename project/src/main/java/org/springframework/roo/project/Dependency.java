@@ -83,22 +83,22 @@ public class Dependency implements Comparable<Dependency> {
 	public Dependency(Element dependency) {
 		// Test if it has Maven format
 		if (dependency.hasChildNodes() && dependency.getElementsByTagName("artifactId").getLength() > 0) {
-			this.groupId = "org.apache.maven.plugins";
+			groupId = "org.apache.maven.plugins";
 			if (dependency.getElementsByTagName("groupId").getLength() > 0) {
-				this.groupId = dependency.getElementsByTagName("groupId").item(0).getTextContent();
+				groupId = dependency.getElementsByTagName("groupId").item(0).getTextContent();
 			}
 
 			this.artifactId = dependency.getElementsByTagName("artifactId").item(0).getTextContent();
 
 			NodeList versionElements = dependency.getElementsByTagName("version");
 			if (versionElements.getLength() > 0) {
-				this.version = dependency.getElementsByTagName("version").item(0).getTextContent();
+				version = dependency.getElementsByTagName("version").item(0).getTextContent();
 			} else {
-				this.version = "";
+				version = "";
 			}
 
 			// POM attributes supported in Maven 3.1
-			this.type = DependencyType.JAR;
+			type = DependencyType.JAR;
 			if (XmlUtils.findFirstElement("type", dependency) != null || dependency.hasAttribute("type")) {
 				String t;
 				if (dependency.hasAttribute("type")) {
@@ -109,14 +109,14 @@ public class Dependency implements Comparable<Dependency> {
 				if (t.equals("JAR")) {
 					// Already a JAR, so no need to reassign
 				} else if (t.equals("ZIP")) {
-					this.type = DependencyType.ZIP;
+					type = DependencyType.ZIP;
 				} else {
-					this.type = DependencyType.OTHER;
+					type = DependencyType.OTHER;
 				}
 			}
 
 			// POM attributes supported in Maven 3.1
-			this.scope = DependencyScope.COMPILE;
+			scope = DependencyScope.COMPILE;
 			if (XmlUtils.findFirstElement("scope", dependency) != null || dependency.hasAttribute("scope")) {
 				String s;
 				if (dependency.hasAttribute("scope")) {
@@ -125,15 +125,15 @@ public class Dependency implements Comparable<Dependency> {
 					s = XmlUtils.findFirstElement("scope", dependency).getTextContent().trim().toUpperCase();
 				}
 				try {
-					this.scope = DependencyScope.valueOf(s);
+					scope = DependencyScope.valueOf(s);
 				} catch (IllegalArgumentException e) {
 					throw new IllegalArgumentException("Invalid dependency scope: " + s);
 				}
 			}
-			if (this.scope == DependencyScope.SYSTEM) {
+			if (scope == DependencyScope.SYSTEM) {
 				if (XmlUtils.findFirstElement("systemPath", dependency) != null) {
 					String path = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
-					this.systemPath = path;
+					systemPath = path;
 				} else {
 					throw new IllegalArgumentException("Missing <systemPath> declaraton for system scope");
 				}
@@ -160,11 +160,11 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		// Otherwise test for Ivy format
 		else if (dependency.hasAttribute("org") && dependency.hasAttribute("name") && dependency.hasAttribute("rev")) {
-			this.groupId = dependency.getAttribute("org");
-			this.artifactId = dependency.getAttribute("name");
-			this.version = dependency.getAttribute("rev");
-			this.type = DependencyType.JAR;
-			this.scope = DependencyScope.COMPILE;
+			groupId = dependency.getAttribute("org");
+			artifactId = dependency.getAttribute("name");
+			version = dependency.getAttribute("rev");
+			type = DependencyType.JAR;
+			scope = DependencyScope.COMPILE;
 			// TODO: implement exclusions parser for IVY format
 		} else {
 			throw new IllegalStateException("Dependency XML format not supported or is missing a mandatory node ('" + dependency + "')");
@@ -208,7 +208,14 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	public int hashCode() {
-		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.version.hashCode() * (this.type != null ? this.type.hashCode() : 1) * (this.scope != null ? this.scope.hashCode() : 1);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((artifactId == null) ? 0 : artifactId.hashCode());
+		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
+		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		return result;
 	}
 
 	public boolean equals(Object obj) {
@@ -219,18 +226,18 @@ public class Dependency implements Comparable<Dependency> {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		int result = this.groupId.compareTo(o.groupId);
+		int result = groupId.compareTo(o.groupId);
 		if (result == 0) {
-			result = this.artifactId.compareTo(o.artifactId);
+			result = artifactId.compareTo(o.artifactId);
 		}
 		if (result == 0) {
-			result = this.version.compareTo(o.version);
+			result = version.compareTo(o.version);
 		}
 		if (result == 0 && this.type != null) {
-			result = this.type.compareTo(o.type);
+			result = type.compareTo(o.type);
 		}
 		if (result == 0 && this.scope != null) {
-			result = this.scope.compareTo(o.scope);
+			result = scope.compareTo(o.scope);
 		}
 		return result;
 	}
