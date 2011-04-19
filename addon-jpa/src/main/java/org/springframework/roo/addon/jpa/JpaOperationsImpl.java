@@ -126,7 +126,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile mutableFile = fileManager.updateFile(contextPath);
 		Document appCtx = XmlUtils.readXml(mutableFile.getInputStream());
-		Document existing = XmlUtils.cloneDocument(appCtx);
+		Document existing = (Document) appCtx.cloneNode(true);
 		Element root = appCtx.getDocumentElement();
 
 		// Checking for existence of configurations, if found abort
@@ -225,7 +225,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		XmlUtils.removeTextNodes(root);
 		
-		if (existing == null || !XmlUtils.compareDocuments(existing, appCtx)) {
+		if (existing == null || !XmlUtils.compareNodes(existing, appCtx)) {
 			XmlUtils.writeXml(mutableFile.getOutputStream(), appCtx);
 		}
 	}
@@ -239,7 +239,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			if (fileManager.exists(persistencePath)) {
 				mutableFile = fileManager.updateFile(persistencePath);
 				persistence = XmlUtils.readXml(mutableFile.getInputStream());
-				existing = XmlUtils.cloneDocument(persistence);
+				existing = (Document) persistence.cloneNode(true);
 			} else {
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
 				Assert.notNull(templateInputStream, "Could not acquire persistence.xml template");
@@ -384,7 +384,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		persistenceUnitElement.appendChild(properties);
 
-		if (existing == null || !XmlUtils.compareDocuments(existing, persistence)) {
+		if (existing == null || !XmlUtils.compareNodes(existing, persistence)) {
 			XmlUtils.writeXml(mutableFile.getOutputStream(), persistence);
 			if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE && (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2)) {
 				logger.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
@@ -748,6 +748,9 @@ public class JpaOperationsImpl implements JpaOperations {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
 
+		for (Plugin plugin : buildPlugins) {
+			System.out.println("adding plugin " + plugin.getSimpleDescription());
+		}
 		projectOperations.addBuildPlugins(buildPlugins);
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {

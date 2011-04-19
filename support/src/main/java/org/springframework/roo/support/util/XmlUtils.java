@@ -1,6 +1,5 @@
 package org.springframework.roo.support.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,7 +19,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
@@ -33,6 +31,7 @@ import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
@@ -158,79 +157,36 @@ public final class XmlUtils {
 	}
 	
 	/**
-	 * Compares two DOM documents by comparing the representations of the documents as XML strings
-	 *  
-	 * @param document1 the first document
-	 * @param document2 the second document
-	 * @return true if the XML representation document1 is the same as the XML representation of document2, otherwise false
+	 * Compares two DOM {@link Node nodes} by comparing the representations of the nodes as XML strings
+	 *
+	 * @param node1 the first node
+	 * @param node2 the second node
+	 * @return true if the XML representation node1 is the same as the XML representation of node2, otherwise false
 	 */
-	public static boolean compareDocuments(Document document1, Document document2) {
-		Assert.notNull(document1, "First document required");
-		Assert.notNull(document2, "Second document required");
-		ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
-		XmlUtils.writeXml(baos1, document1);
-		String s1 = baos1.toString();
-		ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
-		XmlUtils.writeXml(baos2, document2);
-		String s2 = baos2.toString();
+	public static boolean compareNodes(Node node1, Node node2) {
+		Assert.notNull(node1, "First node required");
+		Assert.notNull(node2, "Second node required");
+		String s1 = nodeToString(node1);
+		String s2 = nodeToString(node2);
 		return s1.equals(s2);
 	}
 
 	/**
-	 * Compares two DOM elements by comparing the representations of the elements as XML strings
+	 * Converts a {@link Node node} to an XML string
 	 *
-	 * @param element1 the first element
-	 * @param element2 the second element
-	 * @return true if the XML representation element1 is the same as the XML representation of element2, otherwise false
+	 * @param node the first element
+	 * @return the XML String representation of the node, never null
 	 */
-	public static boolean compareElements(Element element1, Element element2) {
-		Assert.notNull(element1, "First element required");
-		Assert.notNull(element2, "Second element required");
-		if (!element1.equals(element2) || element1 != element2) {
-			return false;
-		}
-		String s1 = elementToString(element1);
-		String s2 = elementToString(element2);
-		return s1.equals(s2);
-	}
-
-	/**
-	 * Converts a DOM element to an XML string
-	 *
-	 * @param element the first element
-	 * @return the XML String representation of the element, never null
-	 */
-	public static String elementToString(Element element) {
+	public static String nodeToString(Node node) {
 		try {
-			TransformerFactory tFactory = TransformerFactory.newInstance();
-			Transformer transformer = tFactory.newTransformer();
-			transformer.setOutputProperty("indent", "yes");
 			StringWriter writer = new StringWriter();
-			StreamResult result = new StreamResult(writer);
-			DOMSource source = new DOMSource(element);
-			transformer.transform(source, result);
+			createIndentingTransformer().transform(new DOMSource(node), new StreamResult(writer));
 			return writer.toString();
 		} catch (TransformerException e) {
 			throw new IllegalStateException(e);
 		}
 	}
-	
-	/**
-	 * Clones the presented DOM document.
-	 * 
-	 * @param document the document to clone
-	 * @return a document
-	 */
-	public static Document cloneDocument(Document document) {
-		try {
-			DOMResult result = new DOMResult();
-			createIndentingTransformer().transform(new DOMSource(document), result);
-			return (Document) result.getNode();
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-	
+
 	/**
 	 * Creates a {@link StreamResult} by wrapping the given outputEntry in an
 	 * {@link OutputStreamWriter} that transforms Windows line endings (\r\n) 
@@ -445,16 +401,16 @@ public final class XmlUtils {
 	}
 	
 	/**
-	 * Removes empty text nodes from the specified element
+	 * Removes empty text nodes from the specified node
 	 * 
-	 * @param element the element where empty text nodes will be removed
+	 * @param node the element where empty text nodes will be removed
 	 */
-	public static void removeTextNodes(Element element) {
-		if (element == null) {
+	public static void removeTextNodes(Node node) {
+		if (node == null) {
 			return;
 		}
 		
-		NodeList children = element.getChildNodes();
+		NodeList children = node.getChildNodes();
 		for (int i = children.getLength() - 1; i >= 0; i--) {
 			Node child = children.item(i);
 			switch (child.getNodeType()) {
@@ -464,7 +420,7 @@ public final class XmlUtils {
 				case Node.CDATA_SECTION_NODE:
 				case Node.TEXT_NODE:
 					if (!StringUtils.hasText(child.getNodeValue())) {
-						element.removeChild(child);
+						node.removeChild(child);
 					}
 					break;
 			}
@@ -532,5 +488,58 @@ public final class XmlUtils {
 				throw new IllegalArgumentException("Illegal name '" + element + "' (illegal character)");
 			}
 		}
+	}
+	
+	
+	public static String elementToString(Node n) {
+		String name = n.getNodeName();
+		short type = n.getNodeType();
+
+		if (Node.CDATA_SECTION_NODE == type) {
+			return "<![CDATA[" + n.getNodeValue() + "]]&gt;";
+		}
+		if (name.startsWith("#")) {
+			return "";
+		}
+
+		StringBuilder sb = new StringBuilder();
+		sb.append('<').append(name);
+
+		NamedNodeMap attrs = n.getAttributes();
+		if (attrs != null) {
+			for (int i = 0; i < attrs.getLength(); i++) {
+				Node attr = attrs.item(i);
+				sb.append(' ').append(attr.getNodeName()).append("=\"").append(attr.getNodeValue()).append("\"");
+			}
+		}
+
+		String textContent = null;
+		NodeList children = n.getChildNodes();
+
+		if (children.getLength() == 0) {
+			if ((textContent = n.getTextContent()) != null && !"".equals(textContent)) {
+				sb.append(textContent).append("</").append(name).append('>');
+			} else {
+				sb.append("/>");
+			}
+		} else {
+			sb.append('>');
+			boolean hasValidChildren = false;
+			for (int i = 0; i < children.getLength(); i++) {
+				String childToString = elementToString(children.item(i));
+				if (!"".equals(childToString)) {
+					sb.append(childToString);
+					hasValidChildren = true;
+				}
+			}
+
+			if (!hasValidChildren && ((textContent = n.getTextContent()) != null)) {
+				sb.append(textContent);
+			}
+
+			sb.append("</").append(name).append('>');
+		}
+
+		return sb.toString();
 	}
 }
