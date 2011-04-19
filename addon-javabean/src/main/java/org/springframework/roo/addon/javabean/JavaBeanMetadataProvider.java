@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.javabean;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -24,11 +29,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.StringUtils;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * Provides {@link JavaBeanMetadata}.
  *
@@ -40,7 +40,7 @@ import java.util.Set;
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
-	private Set<String> producedMids = new HashSet<String>();
+	private Set<String> producedMids = new LinkedHashSet<String>();
 	private Boolean wasGaeEnabled = null;
 
 	protected void activate(ComponentContext context) {
@@ -86,9 +86,9 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 				declaredFields.put(field, isGaeInterested(field));
 			}
 		}
-		JavaBeanMetadata javaBeanMetadata = new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, declaredFields);
-		producedMids.add(javaBeanMetadata.getId());
-		return javaBeanMetadata;
+
+		producedMids.add(metadataIdentificationString);
+		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, declaredFields);
 	}
 
 	private FieldMetadata isGaeInterested(FieldMetadata field) {
