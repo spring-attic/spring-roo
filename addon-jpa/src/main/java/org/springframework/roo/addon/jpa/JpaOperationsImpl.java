@@ -748,9 +748,6 @@ public class JpaOperationsImpl implements JpaOperations {
 			buildPlugins.add(new Plugin(pluginElement));
 		}
 
-		for (Plugin plugin : buildPlugins) {
-			System.out.println("adding plugin " + plugin.getSimpleDescription());
-		}
 		projectOperations.addBuildPlugins(buildPlugins);
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {

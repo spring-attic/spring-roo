@@ -347,7 +347,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so build plugin addition is unavailable");
 		if (projectMetadata.isBuildPluginRegistered(plugin)) {
-			System.out.println("Plugin already registered " + plugin.getSimpleDescription());
 			return;
 		}
 

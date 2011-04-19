@@ -188,21 +188,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 */
 	public boolean isBuildPluginRegistered(Plugin plugin) {
 		Assert.notNull(plugin, "Plugin to check is required");
-
-//		for (Plugin p : buildPlugins) {
-//			if (p.getArtifactId().equals("maven-gae-plugin") && plugin.getArtifactId().equals("maven-gae-plugin")) {
-//				if (p.compareTo(plugin) == 0) {
-//					System.out.println("plugin is equal " + p.getSimpleDescription() + ":" + plugin.getSimpleDescription());
-//				} else {
-//					System.out.println("plugin is NOT equal " + p.getSimpleDescription() + ":" + plugin.getSimpleDescription());
-//				}
-//				System.out.println("groupId " + p.getGroupId().compareTo(plugin.getGroupId()));
-//				System.out.println("artifactId " + p.getArtifactId().compareTo(plugin.getArtifactId()));
-//				System.out.println("version " + p.getVersion().compareTo(plugin.getVersion()));
-//				System.out.println("config " + p.getConfiguration().compareTo(plugin.getConfiguration()));
-//				System.out.println("Plugin " + p.compareTo(plugin));
-//			}
-//		}
 		return buildPlugins.contains(plugin);
 	}
 	
