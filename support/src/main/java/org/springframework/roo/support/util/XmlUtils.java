@@ -192,7 +192,7 @@ public final class XmlUtils {
 	}
 
 	/**
-	 * Creates a {@link StreamResult} by wrapping the given outputEntry in an
+	 * Creates a {@link StreamResult} by wrapping the given outputStream in an
 	 * {@link OutputStreamWriter} that transforms Windows line endings (\r\n) 
 	 * into Unix line endings (\n) on Windows for consistency with Roo's templates.  
 	 * 
