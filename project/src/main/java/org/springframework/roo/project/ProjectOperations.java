@@ -4,6 +4,7 @@ package org.springframework.roo.project;
 import java.util.List;
 
 import org.springframework.roo.project.listeners.DependencyListener;
+import org.springframework.roo.project.listeners.FilterListener;
 import org.springframework.roo.project.listeners.PluginListener;
 import org.springframework.roo.project.listeners.PropertyListener;
 import org.springframework.roo.project.listeners.RepositoryListener;
@@ -114,6 +115,22 @@ public interface ProjectOperations {
 	 */
 	@Deprecated
 	void removePropertyListener(PropertyListener listener);
+	
+	/**
+	 * Register a listener to track changes in pom filters
+
+	 * @param listener the FilterListener to register.
+	 */
+	@Deprecated
+	void addFilterListener(FilterListener listener);
+	
+	/**
+	 * Remove a filter listener from change tracking
+	 *
+	 * @param listener the FilterListener to remove.
+	 */
+	@Deprecated
+	void removeFilterListener(FilterListener listener);
 	
 	/**
 	 * Updates the project type.
