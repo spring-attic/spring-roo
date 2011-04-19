@@ -145,9 +145,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		Assert.notNull(projectMetadata, "Plugin modification prohibited at this time");
 		Assert.notNull(plugin, "Plugin required");
-		if (projectMetadata.isBuildPluginRegistered(plugin)) {
-			// Already exists, so just quit
-			return;
+		for (Plugin existingPlugin : projectMetadata.getBuildPlugins()) {
+			if (existingPlugin.equals(plugin)) {
+				// Already exists, so just quit
+				return;
+			}
 		}
 		
 		// Delete any existing plugin with a different version

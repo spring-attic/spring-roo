@@ -158,37 +158,64 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Convenience method for determining whether all of the presented plugins are registered. 
+	 * Convenience method for determining whether all of the presented plugins
+	 * are registered based on the groupId, artifactId, and version.
 	 *
 	 * @param plugins the plugins to check (required)
 	 * @return whether all the plugins are currently registered or not
 	 */
 	public boolean isAllPluginsRegistered(List<Plugin> plugins) {
 		Assert.notNull(plugins, "Plugins to check is required");
-		return buildPlugins.containsAll(plugins);
+		for (Plugin plugin : plugins) {
+			if (!isBuildPluginRegistered(plugin)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
-	 * Convenience method for determining whether any of the presented plugins are registered. 
+	 * Convenience method for determining whether any of the presented plugins
+	 * are registered based on the groupId, artifactId, and version.
 	 *
 	 * @param plugins the plugins to check (required)
 	 * @return whether any of the plugins are currently registered or not
 	 */
 	public boolean isAnyPluginsRegistered(List<Plugin> plugins) {
 		Assert.notNull(plugins, "Plugins to check is required");
-		return CollectionUtils.containsAny(buildPlugins, plugins);
+		for (Plugin plugin : plugins) {
+			if (isBuildPluginRegistered(plugin)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * Convenience method for determining whether a particular build plugin
-	 * is registered.
+	 * is registered based on the groupId, artifactId, and version.
 	 * 
 	 * @param plugin to check (required)
 	 * @return whether the build plugin is currently registered or not
 	 */
 	public boolean isBuildPluginRegistered(Plugin plugin) {
 		Assert.notNull(plugin, "Plugin to check is required");
-		return buildPlugins.contains(plugin);
+		for (Plugin existingPlugin : buildPlugins) {
+			boolean matchFound = true;
+			if (!existingPlugin.getGroupId().equals(plugin.getGroupId())) {
+				matchFound = false;
+			}
+			if (!existingPlugin.getArtifactId().equals(plugin.getArtifactId())) {
+				matchFound = false;
+			}
+			if (!existingPlugin.getVersion().equals(plugin.getVersion())) {
+				matchFound = false;
+			}
+			if (matchFound) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
