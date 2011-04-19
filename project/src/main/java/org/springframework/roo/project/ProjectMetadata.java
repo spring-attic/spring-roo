@@ -201,16 +201,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public boolean isBuildPluginRegistered(Plugin plugin) {
 		Assert.notNull(plugin, "Plugin to check is required");
 		for (Plugin existingPlugin : buildPlugins) {
-			boolean matchFound = true;
-			if (!existingPlugin.getGroupId().equals(plugin.getGroupId())) {
-				matchFound = false;
-			}
-			if (!existingPlugin.getArtifactId().equals(plugin.getArtifactId())) {
-				matchFound = false;
-			}
-			if (!existingPlugin.getVersion().equals(plugin.getVersion())) {
-				matchFound = false;
-			}
+			boolean matchFound = existingPlugin.getGroupId().equals(plugin.getGroupId());
+			matchFound &= existingPlugin.getArtifactId().equals(plugin.getArtifactId());
+			matchFound &= existingPlugin.getVersion().equals(plugin.getVersion());
 			if (matchFound) {
 				return true;
 			}

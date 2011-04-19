@@ -12,12 +12,10 @@ import org.w3c.dom.Element;
  */
 public final class Configuration {
 	private final Element configuration;
-	private final String configAsString;
 
 	public Configuration(Element configuration) {
 		Assert.notNull(configuration, "configuration must be specified");
 		this.configuration = configuration;
-		this.configAsString = XmlUtils.nodeToString(configuration);
 	}
 
 	public Element getConfiguration() {
@@ -27,7 +25,7 @@ public final class Configuration {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((configAsString == null) ? 0 : configAsString.hashCode());
+		result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
 		return result;
 	}
 
@@ -39,10 +37,6 @@ public final class Configuration {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		return configAsString.compareTo(o.configAsString);
-	}
-	
-	public String toString() {
-		return configAsString;
+		return XmlUtils.compareNodes(configuration, o.configuration) ? 0 : 1;
 	}
 }
