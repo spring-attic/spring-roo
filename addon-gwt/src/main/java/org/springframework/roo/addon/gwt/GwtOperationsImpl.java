@@ -93,9 +93,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
-		for (GwtPath path : GwtPath.values()) {
-			copyDirectoryContents(path);
-		}
+		copyDirectoryContents();
 
 		updateGaeHelper(projectOperations.getProjectMetadata().isGaeEnabled());
 
@@ -148,6 +146,11 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 					
 					// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated 
 					updateBuildPlugins(isGaeEnabled);
+
+					//Copy across any missing files, only if GAE state has changed and is now enabled
+					if (isGaeEnabled) {
+						copyDirectoryContents();
+					}
 				}
 			}
 		}
@@ -300,8 +303,17 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		updateFile(sourceAntPath, targetDirectory, segmentPackage, true, isGaeEnabled);
 	}
 
+	private void copyDirectoryContents() {
+		for (GwtPath path : GwtPath.values()) {
+			copyDirectoryContents(path);
+		}
+	}
+
 	private void copyDirectoryContents(GwtPath gwtPath) {
 		String sourceAntPath = gwtPath.sourceAntPath();
+		if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
+			return;
+		}
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectOperations.getProjectMetadata());
 		updateFile(sourceAntPath, targetDirectory, gwtPath.segmentPackage(), false, projectOperations.getProjectMetadata().isGaeEnabled());
 	}
@@ -383,9 +395,9 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	}
 
 	private CharSequence getGaeHookup() {
-		StringBuilder builder = new StringBuilder("    // AppEngine user authentication\n\n");
-		builder.append("    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.getLoginWidget());\n\n");
-		builder.append("    new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
+		StringBuilder builder = new StringBuilder("// AppEngine user authentication\n\n");
+		builder.append("new GaeLoginWidgetDriver(requestFactory).setWidget(shell.getLoginWidget());\n\n");
+		builder.append("new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
 		return builder.toString();
 	}
 }
