@@ -181,7 +181,11 @@ public final class XmlUtils {
 		try {
 			StringWriter writer = new StringWriter();
 			createIndentingTransformer().transform(new DOMSource(node), new StreamResult(writer));
-			return writer.toString();
+			StringBuilder sb = new StringBuilder();
+			for (String line : writer.toString().split("\n")) {
+				sb.append(line.trim()).append("\n");
+			}
+			return sb.toString();
 		} catch (TransformerException e) {
 			throw new IllegalStateException(e);
 		}
