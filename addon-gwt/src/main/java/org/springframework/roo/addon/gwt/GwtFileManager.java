@@ -15,8 +15,6 @@ public interface GwtFileManager {
 
 	void write(String destFile, String newContents);
 
-	void write(ClassOrInterfaceTypeDetails typeDetails);
-
 	void write(ClassOrInterfaceTypeDetails typeDetails, boolean includeWarning);
 
 	void write(List<ClassOrInterfaceTypeDetails> typeDetails, boolean includeWarning);

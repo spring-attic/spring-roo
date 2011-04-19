@@ -41,10 +41,6 @@ public class GwtFileManagerImpl implements GwtFileManager {
 		}
 	}
 
-	public void write(ClassOrInterfaceTypeDetails typeDetails) {
-		write(typeDetails, false);
-	}
-
 	public void write(ClassOrInterfaceTypeDetails typeDetails, boolean includeWarning) {
 		String destFile = typeLocationService.getPhysicalLocationCanonicalPath(typeDetails.getDeclaredByMetadataId());
 		includeWarning &= !destFile.endsWith(".xml");
