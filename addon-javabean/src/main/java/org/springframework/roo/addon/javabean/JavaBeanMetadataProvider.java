@@ -50,6 +50,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	}
 
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
 	}
