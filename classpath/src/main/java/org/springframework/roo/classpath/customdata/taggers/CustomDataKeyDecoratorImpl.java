@@ -4,16 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.jvnet.inflector.Noun;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsBuilder;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.support.util.Assert;
 
@@ -27,9 +31,18 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 	private HashMap<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
+	private HashMap<String, String> pluralMap = new HashMap<String, String>();
 
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
 		MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(memberDetails);
+
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+				if (!pluralMap.containsKey(memberHoldingTypeDetails.getDeclaredByMetadataId())) {
+					pluralMap.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), getInflectorPlural(memberHoldingTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH));
+				}
+			}
+		}
 
 		// Locate any requests that we add custom data to identifiable java structures
 		for (FieldMatcher fieldTagger : getFieldTaggers()) {
@@ -39,7 +52,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		}
 
 		for (MethodMatcher methodTagger : getMethodTaggers()) {
-			for (MethodMetadata methodMetadata : methodTagger.matches(memberDetails.getDetails())) {
+			for (MethodMetadata methodMetadata : methodTagger.matches(memberDetails.getDetails(), pluralMap)) {
 				memberDetailsBuilder.tag(methodMetadata, methodTagger.getCustomDataKey(), methodTagger.getTagValue(methodMetadata));
 			}
 		}
@@ -57,6 +70,22 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		}
 
 		return memberDetailsBuilder.build();
+	}
+
+	/**
+	 * This method returns the plural term as per inflector. ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
+	 *
+	 * @param term The term to be pluralized
+	 * @param locale Locale
+	 * @return pluralized term
+	 */
+	public String getInflectorPlural(String term, Locale locale) {
+		try {
+			return Noun.pluralOf(term, locale);
+		} catch (RuntimeException re) {
+			// Inflector failed (see for example ROO-305), so don't pluralize it
+			return term;
+		}
 	}
 
 	public void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher) {

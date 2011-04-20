@@ -14,6 +14,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -72,6 +73,10 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		this.additionalSuffix = additionalSuffix;
 	}
 
+	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+		return null; //TODO: This needs to be dealt with -JT
+	}
+
 	public CustomDataKey<MethodMetadata> getCustomDataKey() {
 		return customDataKey;
 	}
@@ -80,11 +85,11 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		return null;
 	}
 
-	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, HashMap<String, String> pluralMap) {
 		List<FieldMetadata> fields = getFieldsInterestedIn(memberHoldingTypeDetailsList);
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		Set<JavaSymbolName> fieldNames = new HashSet<JavaSymbolName>();
-		JavaSymbolName userDefinedMethodName = getUserDefinedMethod(memberHoldingTypeDetailsList);
+		JavaSymbolName userDefinedMethodName = getUserDefinedMethod(memberHoldingTypeDetailsList, pluralMap);
 		if (userDefinedMethodName == null) {
 			for (FieldMetadata fieldMetadata : fields) {
 				fieldNames.add(new JavaSymbolName(getPrefix() + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())));
@@ -118,11 +123,11 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		}
 	}
 
-	private JavaSymbolName getUserDefinedMethod(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+	private JavaSymbolName getUserDefinedMethod(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, HashMap<String, String> pluralMap) {
 		if (catalystAnnotationType == null || userDefinedNameAttribute == null) {
 			return null;
 		}
-		String suffix = suffixPlural || suffixSingular ? getSuffix(memberHoldingTypeDetailsList, suffixSingular) : "";
+		String suffix = suffixPlural || suffixSingular ? getSuffix(memberHoldingTypeDetailsList, suffixSingular, pluralMap) : "";
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
 			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails && !Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
 				for (AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
@@ -139,7 +144,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		return defaultName == null ? null : new JavaSymbolName(defaultName + suffix);
 	}
 
-	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular) {
+	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, HashMap<String, String> pluralMap) {
 		String plural = "";
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
 			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails && !Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
@@ -155,7 +160,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 						break;
 					}
 				}
-				plural = getInflectorPlural(memberHoldingTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
+				plural = pluralMap.get(memberHoldingTypeDetails.getDeclaredByMetadataId());//getInflectorPlural(memberHoldingTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
 			}
 		}
 		return plural;

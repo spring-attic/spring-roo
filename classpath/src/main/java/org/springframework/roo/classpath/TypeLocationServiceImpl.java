@@ -52,6 +52,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	private Map<List<JavaType>, List<String>> cache = new HashMap<List<JavaType>, List<String>>();
 	private Map<Object, List<String>> tagBasedCache = new HashMap<Object, List<String>>();
+	private Map<String, ClassOrInterfaceTypeDetails> projectJavaTypes = new HashMap<String, ClassOrInterfaceTypeDetails>();
 
 	protected void activate(ComponentContext context) {
 		dependencyRegistry.addNotificationListener(this);
@@ -66,6 +67,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 			// Change to Java, so drop the cache
 			cache.clear();
 			tagBasedCache.clear();
+			projectJavaTypes.put(upstreamDependency, getClassOrInterfaceTypeDetails(upstreamDependency));
 		}
 	}
 
@@ -189,7 +191,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 	
 	private List<ClassOrInterfaceTypeDetails> getProjectJavaTypes() {
-		PathResolver pathResolver = projectOperations.getPathResolver();
+		/*PathResolver pathResolver = projectOperations.getPathResolver();
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		List<ClassOrInterfaceTypeDetails> projectTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 		
@@ -212,7 +214,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 					projectTypes.add(located);
 				}
 			}
-		}
-		return projectTypes;
+		}*/
+		return new ArrayList<ClassOrInterfaceTypeDetails>(projectJavaTypes.values());
 	}
 }
