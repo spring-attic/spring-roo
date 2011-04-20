@@ -54,7 +54,8 @@ public abstract class MemberFindingUtils {
 		}
 		for (MethodMetadata method : memberHoldingTypeDetails.getDeclaredMethods()) {
 			if (method.getMethodName().equals(methodName)) {
-				if (parameters.equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes()))) {
+				List<JavaType> paramTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
+				if (paramTypes.containsAll(parameters)) {
 					return method;
 				}
 			}

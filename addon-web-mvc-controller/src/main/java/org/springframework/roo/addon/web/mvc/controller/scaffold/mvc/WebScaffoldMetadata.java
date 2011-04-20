@@ -343,7 +343,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			// Mandatory input is missing (ROO-589)
 			return null;
 		}
-		
+
 		JavaSymbolName methodName = new JavaSymbolName("create");
 		
 		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
@@ -653,12 +653,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
-			if (method.getMethodName().equals(methodName)) {
-				return method;
-			}
-		}
-		return null;
+		return MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
 	}
 	
 	private String getShortName(JavaType type) {
