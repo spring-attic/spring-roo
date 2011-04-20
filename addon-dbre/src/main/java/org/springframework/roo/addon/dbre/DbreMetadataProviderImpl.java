@@ -13,6 +13,7 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -37,6 +38,7 @@ import org.springframework.roo.project.Path;
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
 	@Reference private DbreModelService dbreModelService;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -86,6 +88,19 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 
 		// Search for database-managed entities
 		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
+
+		boolean found = false;
+		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
+			if (managedEntity.getName().equals(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName())) {
+				found = true;
+				break;
+			}
+		}
+		if (!found){
+			String mid = physicalTypeMetadataProvider.findIdentifier(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
+			metadataDependencyRegistry.registerDependency(mid, metadataIdentificationString);
+			return null;
+		}
 
 		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityFields, entityMethods, identifierField, embeddedIdentifierHolder, versionField, managedEntities, database);
 	}
