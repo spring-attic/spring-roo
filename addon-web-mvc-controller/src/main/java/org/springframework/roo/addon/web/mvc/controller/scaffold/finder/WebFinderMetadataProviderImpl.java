@@ -44,11 +44,6 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 		addMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
 	}
 	
-	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
-	}
-
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(governorPhysicalTypeMetadata);
@@ -76,13 +71,10 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 		if (!annotationValues.isExposeFinders()) {
 			return null;
 		}
+		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		Set<FinderMetadataDetails> dynamicFinderMethodsAndFields = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
-
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
-
-		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dynamicFinderMethodsAndFields);
+		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, formBackingObjectMemberDetails, relatedApplicationTypeMetadata, dynamicFinderMethodsAndFields);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
