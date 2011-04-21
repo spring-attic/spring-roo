@@ -17,7 +17,6 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsBuilder;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.support.util.Assert;
 
@@ -74,7 +73,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
 	/**
 	 * This method returns the plural term as per inflector. ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
-	 *
+	 * 
 	 * @param term The term to be pluralized
 	 * @param locale Locale
 	 * @return pluralized term

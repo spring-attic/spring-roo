@@ -1,25 +1,22 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import org.jvnet.inflector.Noun;
-import org.springframework.roo.model.CustomDataKey;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 /**
  * {@link MethodMetadata} specific implementation of {@link Matcher}. Matches
@@ -56,26 +53,18 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	}
 
 	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular) {
-		this.customDataKey = customDataKey;
-		this.catalystAnnotationType = catalystAnnotationType;
-		this.userDefinedNameAttribute = userDefinedNameAttribute;
-		this.defaultName = defaultName;
+		this(customDataKey, catalystAnnotationType, userDefinedNameAttribute, defaultName);
 		this.suffixPlural = suffixPlural;
 		this.suffixSingular = suffixSingular;
 	}
 
 	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular, String additionalSuffix) {
-		this.customDataKey = customDataKey;
-		this.catalystAnnotationType = catalystAnnotationType;
-		this.userDefinedNameAttribute = userDefinedNameAttribute;
-		this.defaultName = defaultName;
-		this.suffixPlural = suffixPlural;
-		this.suffixSingular = suffixSingular;
+		this(customDataKey, catalystAnnotationType, userDefinedNameAttribute, defaultName, suffixPlural, suffixSingular);
 		this.additionalSuffix = additionalSuffix;
 	}
 
 	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
-		return null; //TODO: This needs to be dealt with -JT
+		return null; // TODO: This needs to be dealt with -JT
 	}
 
 	public CustomDataKey<MethodMetadata> getCustomDataKey() {
@@ -128,7 +117,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 
 	private ClassOrInterfaceTypeDetails getMostConcreteClassOrInterfaceTypeDetails(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = null;
-		//The last ClassOrInterfaceTypeDetails is the most concrete as dictated by the logic in MemberDetailsScannerImpl
+		// The last ClassOrInterfaceTypeDetails is the most concrete as dictated by the logic in MemberDetailsScannerImpl
 		for (MemberHoldingTypeDetails aMemberHoldingTypeDetailsList : memberHoldingTypeDetailsList) {
 			if (aMemberHoldingTypeDetailsList instanceof ClassOrInterfaceTypeDetails) {
 				classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) aMemberHoldingTypeDetailsList;

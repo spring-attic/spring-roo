@@ -102,49 +102,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.addField(getRndField());
 		builder.addField(getDataField());
 
-		Set<JavaSymbolName> fieldsAddedToItd = new HashSet<JavaSymbolName>();
-		for (JavaType entityNeedingCollaborator : requiredDataOnDemandCollaborators) {
-			JavaType collaboratorType = getCollaboratingType(entityNeedingCollaborator);
-			String collaboratingFieldName = getCollaboratingFieldName(entityNeedingCollaborator).getSymbolName();
-
-			JavaSymbolName fieldSymbolName = new JavaSymbolName(collaboratingFieldName);
-			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
-			if (candidate != null) {
-				// We really expect the field to be correct if we're going to rely on it
-				Assert.isTrue(candidate.getFieldType().equals(collaboratorType), "Field '" + collaboratingFieldName + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be of type '" + collaboratorType.getFullyQualifiedTypeName() + "'");
-				Assert.isTrue(Modifier.isPrivate(candidate.getModifier()), "Field '" + collaboratingFieldName + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be private");
-				Assert.notNull(MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), new JavaType("org.springframework.beans.factory.annotation.Autowired")), "Field '" + collaboratingFieldName + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be @Autowired");
-				// It's ok, so we can move onto the new field
-				continue;
-			}
-
-			// Must make the field
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
-			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType);
-			FieldMetadata field = fieldBuilder.build();
-
-			// Add it to the ITD, if it hasn't already been
-			if (!fieldsAddedToItd.contains(field.getFieldName())) {
-				fieldsAddedToItd.add(field.getFieldName());
-				builder.addField(field);
-				fieldsAddedToItd.add(field.getFieldName());
-			}
-		}
+		addFieldsToBuilder();
 
 		builder.addMethod(getNewTransientEntityMethod());
 		builder.addMethod(getEmbeddedIdMethod());
 			
-		List<JavaSymbolName> buildMethodNames = new ArrayList<JavaSymbolName>();
-		for (MethodMetadataBuilder itdMethod : builder.getDeclaredMethods()) {
-			buildMethodNames.add(itdMethod.getMethodName());
-		}
-		for (MethodMetadata fieldInitializerMethod : getFieldInitializerMethods()) {
-			if (!buildMethodNames.contains(fieldInitializerMethod.getMethodName())) {
-				builder.addMethod(fieldInitializerMethod);
-				buildMethodNames.add(fieldInitializerMethod.getMethodName());
-			}
-		}
+		addMethodsToBuilder();
 		
 		builder.addMethod(getSpecificPersistentEntityMethod());
 		builder.addMethod(getRandomPersistentEntityMethod());
@@ -257,6 +220,38 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 	}
 
+	private void addFieldsToBuilder() {
+		Set<JavaSymbolName> fields = new HashSet<JavaSymbolName>();
+		for (JavaType entityNeedingCollaborator : requiredDataOnDemandCollaborators) {
+			JavaType collaboratorType = getCollaboratingType(entityNeedingCollaborator);
+			String collaboratingFieldName = getCollaboratingFieldName(entityNeedingCollaborator).getSymbolName();
+
+			JavaSymbolName fieldSymbolName = new JavaSymbolName(collaboratingFieldName);
+			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
+			if (candidate != null) {
+				// We really expect the field to be correct if we're going to rely on it
+				Assert.isTrue(candidate.getFieldType().equals(collaboratorType), "Field '" + collaboratingFieldName + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be of type '" + collaboratorType.getFullyQualifiedTypeName() + "'");
+				Assert.isTrue(Modifier.isPrivate(candidate.getModifier()), "Field '" + collaboratingFieldName + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be private");
+				Assert.notNull(MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), new JavaType("org.springframework.beans.factory.annotation.Autowired")), "Field '" + collaboratingFieldName + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be @Autowired");
+				// It's ok, so we can move onto the new field
+				continue;
+			}
+
+			// Must make the field
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType);
+			FieldMetadata field = fieldBuilder.build();
+
+			// Add it to the ITD, if it hasn't already been
+			if (!fields.contains(field.getFieldName())) {
+				fields.add(field.getFieldName());
+				builder.addField(field);
+				fields.add(field.getFieldName());
+			}
+		}
+	}
+
 	/**
 	 * @return the "getNewTransientEntity(int index):Entity" method (never returns null)
 	 */
@@ -343,6 +338,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
+	}
+
+	private void addMethodsToBuilder() {
+		List<JavaSymbolName> methodNames = new ArrayList<JavaSymbolName>();
+		for (MethodMetadataBuilder itdMethod : builder.getDeclaredMethods()) {
+			methodNames.add(itdMethod.getMethodName());
+		}
+		for (MethodMetadata fieldInitializerMethod : getFieldInitializerMethods()) {
+			if (!methodNames.contains(fieldInitializerMethod.getMethodName())) {
+				builder.addMethod(fieldInitializerMethod);
+				methodNames.add(fieldInitializerMethod.getMethodName());
+			}
+		}
 	}
 
 	public List<MethodMetadata> getFieldInitializerMethods() {
