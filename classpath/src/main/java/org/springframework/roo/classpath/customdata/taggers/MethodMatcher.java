@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 import java.lang.reflect.Modifier;
@@ -107,63 +108,52 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		return methods;
 	}
 
-	/**
-	 * This method returns the plural term as per inflector. ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
-	 * 
-	 * @param term The term to be pluralized
-	 * @param locale Locale
-	 * @return pluralized term
-	 */
-	public String getInflectorPlural(String term, Locale locale) {
-		try {
-			return Noun.pluralOf(term, locale);
-		} catch (RuntimeException re) {
-			// Inflector failed (see for example ROO-305), so don't pluralize it
-			return term;
-		}
-	}
-
 	private JavaSymbolName getUserDefinedMethod(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, HashMap<String, String> pluralMap) {
 		if (catalystAnnotationType == null || userDefinedNameAttribute == null) {
 			return null;
 		}
 		String suffix = suffixPlural || suffixSingular ? getSuffix(memberHoldingTypeDetailsList, suffixSingular, pluralMap) : "";
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails && !Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
-				for (AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
-					if (annotationMetadata.getAnnotationType().equals(catalystAnnotationType)) {
-						AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
-						if (annotationAttributeValue != null) {
-							return new JavaSymbolName(annotationAttributeValue.getValue().toString() + suffix);
-						}
-						break;
-					}
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
+		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
+			if (annotationMetadata.getAnnotationType().equals(catalystAnnotationType)) {
+				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
+				if (annotationAttributeValue != null) {
+					return new JavaSymbolName(annotationAttributeValue.getValue().toString() + suffix);
 				}
+				break;
 			}
 		}
 		return defaultName == null ? null : new JavaSymbolName(defaultName + suffix);
 	}
 
-	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, HashMap<String, String> pluralMap) {
-		String plural = "";
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails && !Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
-				if (singular) {
-					return memberHoldingTypeDetails.getName().getSimpleTypeName();
-				}
-				for (AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
-					if (annotationMetadata.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.plural.RooPlural"))) {
-						AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
-						if (annotationAttributeValue != null) {
-							return annotationAttributeValue.getValue().toString();
-						}
-						break;
-					}
-				}
-				plural = pluralMap.get(memberHoldingTypeDetails.getDeclaredByMetadataId());//getInflectorPlural(memberHoldingTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
+	private ClassOrInterfaceTypeDetails getMostConcreteClassOrInterfaceTypeDetails(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = null;
+		//The last ClassOrInterfaceTypeDetails is the most concrete as dictated by the logic in MemberDetailsScannerImpl
+		for (MemberHoldingTypeDetails aMemberHoldingTypeDetailsList : memberHoldingTypeDetailsList) {
+			if (aMemberHoldingTypeDetailsList instanceof ClassOrInterfaceTypeDetails) {
+				classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) aMemberHoldingTypeDetailsList;
 			}
 		}
-		return plural;
+		Assert.notNull(classOrInterfaceTypeDetails, "No concrete type found; cannot continue");
+		return classOrInterfaceTypeDetails;
+
+	}
+
+	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, HashMap<String, String> pluralMap) {
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
+		if (singular) {
+			return classOrInterfaceTypeDetails.getName().getSimpleTypeName();
+		}
+		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
+			if (annotationMetadata.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.plural.RooPlural"))) {
+				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
+				if (annotationAttributeValue != null) {
+					return annotationAttributeValue.getValue().toString();
+				}
+				break;
+			}
+		}
+		return pluralMap.get(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 	}
 
 	private List<FieldMetadata> getFieldsInterestedIn(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
