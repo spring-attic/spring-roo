@@ -354,7 +354,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		String simpleFieldTypeName = field.getFieldType().getSimpleTypeName();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (" + entityName + " != null) {");
+		bodyBuilder.appendFormalLine("if (this." + entityIdName + " != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("if (this." + entityName + " == null || this." + entityName + ".getId() != this." + entityIdName + ") {");
 		bodyBuilder.indent();
