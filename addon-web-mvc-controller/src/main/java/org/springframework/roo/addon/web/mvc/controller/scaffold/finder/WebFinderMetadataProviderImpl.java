@@ -28,7 +28,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Provides {@link WebFinderMetadata}.
+ * Implementation of {@link WebFinderMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.1.3
