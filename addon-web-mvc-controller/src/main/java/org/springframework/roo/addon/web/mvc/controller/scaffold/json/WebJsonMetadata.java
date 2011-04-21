@@ -518,12 +518,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
-			if (method.getMethodName().equals(methodName)) {
-				return method;
-			}
-		}
-		return null;
+		return MemberFindingUtils.getMethod(memberDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
 	}
 	
 	private String getShortName(JavaType type) {
