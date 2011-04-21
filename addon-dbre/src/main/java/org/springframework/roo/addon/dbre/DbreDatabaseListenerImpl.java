@@ -2,7 +2,6 @@ package org.springframework.roo.addon.dbre;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -50,6 +50,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -62,6 +63,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements IdentifierService, FileEventListener {
+	private static final Logger logger = HandlerUtils.getLogger(DbreDatabaseListenerImpl.class);
 	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
 	private static final JavaType ROO_IDENTIFIER = new JavaType(RooIdentifier.class.getName());
 	private static final String IDENTIFIER_TYPE = "identifierType";
@@ -146,10 +148,8 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			if (!table.isJoinTable()) {
 				JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
 				if (typeLocationService.findClassOrInterface(javaType) != null) {
-					// Type exists but does not have @RooDbManaged annotation
-					MutableClassOrInterfaceTypeDetails unmanagedEntity = (MutableClassOrInterfaceTypeDetails) typeLocationService.getClassOrInterface(javaType);
-					unmanagedEntity.updateTypeAnnotation(getRooDbManagedAnnotation().build(), Collections.<JavaSymbolName> emptySet());
-					updateOrDeleteManagedEntity(unmanagedEntity, database);
+					// Type exists but is not annotated with @RooDbManaged
+					logger.warning("Type '" + javaType.getFullyQualifiedTypeName() + "' for table '" + table.getName() + "' is not database managed (not annotated with @RooDbManaged)");
 				} else {
 					table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
 					newEntities.add(createNewManagedEntityFromTable(javaType, table));
@@ -399,6 +399,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 					break;
 				}
 			}
+			
 		}
 	}
 

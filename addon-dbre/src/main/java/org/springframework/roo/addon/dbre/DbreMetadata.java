@@ -184,7 +184,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 			JavaSymbolName fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(foreignTableName) + fieldSuffix);
 			JavaType fieldType = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-			Assert.notNull(fieldType, getErrorMsg(foreignTableName, table.getName()));
+			Assert.notNull(fieldType, "Attempted to create one-to-one field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName, table.getName()));
 
 			// Fields are stored in a field-keyed map first before adding them to the builder.
 			// This ensures the fields from foreign keys with multiple columns will only get created once.
@@ -205,12 +205,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		for (ForeignKey exportedKey : table.getExportedKeys()) {
-			if (exportedKey.getForeignTable().isJoinTable()) {
+			if (exportedKey.getForeignTable() != null && exportedKey.getForeignTable().isJoinTable()) {
 				continue;
 			}
 			String foreignTableName = exportedKey.getForeignTableName();
 			Table foreignTable = database.getTable(foreignTableName);
-			Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but was referenced by table '" + table.getName() + "'");
+			Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but has a foreign-key reference to table '" + table.getName() + "'");
 
 			if (!isOneToOne(foreignTable, foreignTable.getImportedKey(exportedKey.getName()))) {
 				continue;
@@ -220,7 +220,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			JavaSymbolName fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(foreignTableName) + fieldSuffix);
 
 			JavaType fieldType = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-			Assert.notNull(fieldType, getErrorMsg(foreignTableName));
+			Assert.notNull(fieldType, "Attempted to create one-to-one mapped-by field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName));
 
 			// Check for existence of same field - ROO-1691
 			while (true) {
@@ -296,7 +296,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(foreignTableName) + fieldSuffix);
 			}
 			JavaType fieldType = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-			Assert.notNull(fieldType, getErrorMsg(foreignTableName, table.getName()));
+			Assert.notNull(fieldType, "Attempted to create many-to-one field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName, table.getName()));
 
 			// Fields are stored in a field-keyed map first before adding them to the builder.
 			// This ensures the fields from foreign keys with multiple columns will only get created once.
@@ -312,7 +312,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, Table joinTable, Table inverseSideTable) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = DbreTypeUtils.findTypeForTable(managedEntities, inverseSideTable);
-		Assert.notNull(element, getErrorMsg(inverseSideTable.getName()));
+		Assert.notNull(element, "Attempted to create many-to-many owning-side field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' " + getErrorMsg(inverseSideTable.getName()));
+
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
@@ -359,7 +360,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, Table owningSideTable) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = DbreTypeUtils.findTypeForTable(managedEntities, owningSideTable);
-		Assert.notNull(element, getErrorMsg(owningSideTable.getName()));
+		Assert.notNull(element, "Attempted to create many-to-many inverse-side field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(owningSideTable.getName()));
+
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
@@ -457,7 +459,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> params = new ArrayList<JavaType>();
 
 		JavaType element = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-		Assert.notNull(element, getErrorMsg(foreignTableName));
+		Assert.notNull(element, "Attempted to create one-to-many mapped-by field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName));
+
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.ONE_TO_MANY);
@@ -864,11 +867,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private String getErrorMsg(String tableName) {
-		return "Type for table '" + tableName + "' could not be found";
+		return " but type for table '" + tableName + "' could not be found or is not database managed (not annotated with @RooDbManaged)";
 	}
 
 	private String getErrorMsg(String tableName, String referenceTableName) {
-		return getErrorMsg(tableName) + " but was referenced by table '" + referenceTableName + "'";
+		return getErrorMsg(tableName) + " and table '" + tableName + "' has a foreign-key reference to table '" + referenceTableName + "'";
 	}
 
 	public static final String getMetadataIdentiferType() {
