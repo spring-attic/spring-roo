@@ -167,7 +167,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				bodyBuilder.appendFormalLine("for (int i = 0; i < " + name + ".size(); i++) {");
 				bodyBuilder.indent();
 				bodyBuilder.appendFormalLine("if (i > 0) queryBuilder.append(\" AND\");");
-				bodyBuilder.appendFormalLine("queryBuilder.append(\" :" + name + "_item\").append(i).append(\" MEMBER OF " + governorTypeDetails.getName().getSimpleTypeName().toLowerCase() + "." + name + "\");");
+				bodyBuilder.appendFormalLine("queryBuilder.append(\" :" + name + "_item\").append(i).append(\" MEMBER OF o." + name + "\");");
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
 				if (collectionTypeNames.size() > ++position) {
