@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -95,7 +96,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 		return identifierResults.get(pkType);
 	}
-	
+
 	private void deserializeDatabase() {
 		Database database = dbreModelService.getDatabase();
 		if (database != null) {
@@ -106,7 +107,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	private void reverseEngineer(Database database) {
 		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
-		
+
 		// Lookup the relevant destination package if not explicitly given
 		JavaPackage destinationPackage = database.getDestinationPackage();
 		if (destinationPackage == null) {
@@ -121,7 +122,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 			destinationPackage = projectMetadata.getTopLevelPackage();
 		}
-		
+
 		// Set the destination package in the database
 		database.setDestinationPackage(destinationPackage);
 
@@ -143,18 +144,26 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
-				table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
-				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
+				JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
+				if (typeLocationService.findClassOrInterface(javaType) != null) {
+					// Type exists but does not have @RooDbManaged annotation
+					MutableClassOrInterfaceTypeDetails unmanagedEntity = (MutableClassOrInterfaceTypeDetails) typeLocationService.getClassOrInterface(javaType);
+					unmanagedEntity.updateTypeAnnotation(getRooDbManagedAnnotation().build(), Collections.<JavaSymbolName> emptySet());
+					updateOrDeleteManagedEntity(unmanagedEntity, database);
+				} else {
+					table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
+					newEntities.add(createNewManagedEntityFromTable(javaType, table));
+				}
 			}
 		}
-		
+
 		// Create integration tests if required
 		if (database.isTestAutomatically()) {
 			for (ClassOrInterfaceTypeDetails entity : newEntities) {
 				integrationTestOperations.newIntegrationTest(entity.getName());
 			}
 		}
-		
+
 		// Notify
 		List<ClassOrInterfaceTypeDetails> allEntities = new LinkedList<ClassOrInterfaceTypeDetails>();
 		allEntities.addAll(newEntities);
@@ -177,7 +186,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			}
 		}
 	}
-	
+
 	private Set<ClassOrInterfaceTypeDetails> getManagedIdentifiers() {
 		Set<ClassOrInterfaceTypeDetails> managedIdentifierTypes = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 
@@ -194,7 +203,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	private Table updateOrDeleteManagedEntity(ClassOrInterfaceTypeDetails managedEntity, Database database) {
 		// Update changes to @RooEntity attributes
-		AnnotationMetadata rooEntityAnnotation =  MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, ROO_ENTITY);
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, ROO_ENTITY);
 		Assert.notNull(rooEntityAnnotation, "@RooEntity annotation not found on " + managedEntity.getName().getFullyQualifiedTypeName());
 		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(rooEntityAnnotation);
 
@@ -235,13 +244,11 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Update the annotation on disk
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) managedEntity;
 		mutableTypeDetails.updateTypeAnnotation(rooEntityBuilder.build(), attributesToDeleteIfPresent);
-		
+
 		return table;
 	}
 
-	private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(Table table, JavaPackage destinationPackage) {
-		JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
-
+	private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(JavaType javaType, Table table) {
 		// Create type annotations for new entity
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
@@ -264,9 +271,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		annotations.add(rooEntityBuilder);
 
 		// Add @RooDbManaged
-		AnnotationMetadataBuilder rooDbManagedBuilder = new AnnotationMetadataBuilder(new JavaType(RooDbManaged.class.getName()));
-		rooDbManagedBuilder.addBooleanAttribute("automaticallyDelete", true);
-		annotations.add(rooDbManagedBuilder);
+		annotations.add(getRooDbManagedAnnotation());
 
 		JavaType superclass = new JavaType("java.lang.Object");
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
@@ -280,11 +285,17 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
 		typeManagementService.generateClassFile(entityType);
-		
+
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
-		
+
 		return entityType;
+	}
+
+	private AnnotationMetadataBuilder getRooDbManagedAnnotation() {
+		AnnotationMetadataBuilder rooDbManagedBuilder = new AnnotationMetadataBuilder(new JavaType(RooDbManaged.class.getName()));
+		rooDbManagedBuilder.addBooleanAttribute("automaticallyDelete", true);
+		return rooDbManagedBuilder;
 	}
 
 	private boolean hasVersionField(Table table) {

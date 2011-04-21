@@ -104,6 +104,22 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' is not an interface or class");
 		return (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 	}
+	
+	public ClassOrInterfaceTypeDetails findClassOrInterface(JavaType requiredClassOrInterface) {
+		String metadataIdentificationString = physicalTypeMetadataProvider.findIdentifier(requiredClassOrInterface);
+		if (metadataIdentificationString == null) {
+			return null;
+		}
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(metadataIdentificationString);
+		if (physicalTypeMetadata == null) {
+			return null;
+		}
+		PhysicalTypeDetails physicalTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (physicalTypeDetails == null || !(physicalTypeDetails instanceof ClassOrInterfaceTypeDetails)) {
+			return null;
+		}
+		return (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+	}
 
 	public void processTypesWithTag(Object tag, LocatedTypeCallback callback) {
 		List<String> locatedPhysicalTypeMids = cache.get(tag);
@@ -132,7 +148,6 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
 		List<String> locatedPhysicalTypeMids = cache.get(annotationsToDetect);
-		
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
 			
