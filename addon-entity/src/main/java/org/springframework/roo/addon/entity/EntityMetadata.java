@@ -55,7 +55,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
 	private static final JavaType PERSISTENCE_CONTEXT = new JavaType("javax.persistence.PersistenceContext");
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
-	private static final JavaType QUERY = new JavaType("javax.persistence.Query");
 
 	private EntityMetadata parent;
 	private EntityAnnotationValues annotationValues;
@@ -994,12 +993,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 		
-		String typeName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : governorTypeDetails.getName().getSimpleTypeName();
+		String entityName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
-			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + typeName + " o\").getSingleResult()).longValue();");
+			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + entityName + " o\").getSingleResult()).longValue();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + typeName + " o\", Long.class).getSingleResult();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + entityName + " o\", Long.class).getSingleResult();");
 		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
@@ -1033,13 +1032,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		String typeName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : governorTypeDetails.getName().getSimpleTypeName();
+		String entityName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\").getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\").getResultList();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).getResultList();");
 		}
  		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
@@ -1071,55 +1070,46 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
-			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
+			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + returnType + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		InvocableMemberBodyBuilder bodyBuilder;
-		if (isGaeEnabled) {
-			addTransactionalAnnotation(annotations);
-			bodyBuilder = getGaeFindMethodBody();
-		} else {
-			bodyBuilder = new InvocableMemberBodyBuilder();
-			if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
-				bodyBuilder.appendFormalLine("if (" + idFieldName + " == null || " + idFieldName + ".length() == 0) return null;");
-			} else if (!getIdentifierField().getFieldType().isPrimitive()) {
-				bodyBuilder.appendFormalLine("if (" + idFieldName + " == null) return null;");
-			}
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, " + idFieldName + ");");
-		}
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
-	}
-
-	private InvocableMemberBodyBuilder getGaeFindMethodBody() {
-		builder.getImportRegistrationResolver().addImport(QUERY);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		String typeName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : governorTypeDetails.getName().getSimpleTypeName();
-
-		String idFieldName = getIdentifierField().getFieldName().getSymbolName();
+		bodyBuilder = new InvocableMemberBodyBuilder();
+		
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
 			bodyBuilder.appendFormalLine("if (" + idFieldName + " == null || " + idFieldName + ".length() == 0) return null;");
 		} else if (!getIdentifierField().getFieldType().isPrimitive()) {
 			bodyBuilder.appendFormalLine("if (" + idFieldName + " == null) return null;");
 		}
-		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o WHERE o." + idFieldName + " = :" + idFieldName + "\").setParameter(\"" + idFieldName + "\", " + idFieldName + ");");
- 		bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " result = null;");
-		bodyBuilder.appendFormalLine("List results = query.getResultList();");
-		bodyBuilder.appendFormalLine("if (results.size() > 0) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("result = (" + governorTypeDetails.getName().getSimpleTypeName() + ") results.get(0);");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return result;");
-		return bodyBuilder;
+		
+		if (isDataNucleusEnabled) {
+			String entityName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : returnType.getSimpleTypeName();
+			bodyBuilder.appendFormalLine("try {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine("return (" + governorTypeDetails.getName().getSimpleTypeName() + ") " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o WHERE o." + idFieldName + " = :" + idFieldName + "\").setParameter(\"" + idFieldName + "\", " + idFieldName + ").getSingleResult();");
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("} catch (Exception e) {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine("return null;");
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("}");
+		} else {
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + returnType.getSimpleTypeName() + ".class, " + idFieldName + ");");
+		}
+		
+		if (isGaeEnabled) {
+			addTransactionalAnnotation(annotations);
+		}
+
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
-	
+
 	/**
 	 * @return the find entries method (may return null)
 	 */
@@ -1149,13 +1139,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		String typeName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : governorTypeDetails.getName().getSimpleTypeName();
+		String entityName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : governorTypeDetails.getName().getSimpleTypeName();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + typeName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		}
  		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
