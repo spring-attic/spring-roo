@@ -25,27 +25,25 @@ public class VideoStreamEmbeddedProvider extends AbstractEmbeddedProvider {
 	
 	public boolean embed(String url, String viewName) {
 		if (url.contains("ustream.tv")) {
-			// expected format http://www.ustream.tv/flash/live/1/4424524
+			// Expected format http://www.ustream.tv/flash/live/1/4424524
 			String[] split = url.split("/");
 			if (split.length > 6) {
 				Map<String, String> options = new HashMap<String, String>();
 				options.put("provider", VideoStreamProvider.USTREAM.name());
 				options.put("id", split[6]);
 				return install(viewName, options);
-			} else {
-				return false;
 			}
+			return false;
 		} else if (url.contains("livestream.com")) {
-			// expected format http://www.livestream.com/wkrg_oil_spill
+			// Expected format http://www.livestream.com/wkrg_oil_spill
 			String[] split = url.split("/");
 			if (split.length > 3) {
 				Map<String, String> options = new HashMap<String, String>();
 				options.put("provider", VideoStreamProvider.LIVESTREAM.name());
 				options.put("id", split[3]);
 				return install(viewName, options);
-			} else {
-				return false;
 			}
+			return false;
 		}
 		return false;
 	}

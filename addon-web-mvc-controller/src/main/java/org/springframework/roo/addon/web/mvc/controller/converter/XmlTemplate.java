@@ -42,9 +42,8 @@ public class XmlTemplate {
 		if (rootElementCallback.doWithElement(document, root)) {
 			XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	public interface DomElementCallback {
@@ -57,7 +56,5 @@ public class XmlTemplate {
 		 * @return true if any changes were made that require saving, false otherwise
 		 */
 		boolean doWithElement(Document document, Element rootElement);
-	
 	}
-
 }

@@ -46,10 +46,10 @@ public class ControllerCommands implements CommandMarker {
 	public boolean isNewControllerAvailable() {
 		return controllerOperations.isNewControllerAvailable();
 	}
-			
+
 	@CliCommand(value = "web mvc all", help = "Scaffold Spring MVC controllers for all project entities without an existing controller") 
 	public void webMvcAll(
-			@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") JavaPackage javaPackage) {
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") JavaPackage javaPackage) {
 		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Could not obtain ProjectMetadata");
@@ -61,10 +61,10 @@ public class ControllerCommands implements CommandMarker {
 	
 	@CliCommand(value = "web mvc scaffold", help = "Create a new scaffold Controller (ie where Roo maintains CRUD functionality automatically)") 
 	public void webMvcScaffold(
-			@CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") JavaType controller, 
-			@CliOption(key = "backingType", mandatory = false, optionContext = "update,project", unspecifiedDefaultValue = "*", help = "The name of the form backing type which the controller exposes to the web tier") JavaType backingType, 
-			@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path, 
-			@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") String disallowedOperations) {
+		@CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") JavaType controller, 
+		@CliOption(key = "backingType", mandatory = false, optionContext = "update,project", unspecifiedDefaultValue = "*", help = "The name of the form backing type which the controller exposes to the web tier") JavaType backingType, 
+		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path, 
+		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") String disallowedOperations) {
 		
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(backingType, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata == null) {
@@ -105,7 +105,7 @@ public class ControllerCommands implements CommandMarker {
 	@Deprecated
 	@CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller") 
 	public void generateAll(
-			@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") JavaPackage javaPackage) {
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") JavaPackage javaPackage) {
 		
 		controllerOperations.setup();
 		webMvcAll(javaPackage);

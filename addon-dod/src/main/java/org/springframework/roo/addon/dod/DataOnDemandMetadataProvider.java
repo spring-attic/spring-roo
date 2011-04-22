@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.dod;
 
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;

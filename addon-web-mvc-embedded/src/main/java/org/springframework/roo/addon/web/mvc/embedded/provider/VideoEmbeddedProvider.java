@@ -27,40 +27,39 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 	
 	public boolean embed(String url, String viewName) {
 		if (url.contains("youtube.com")) {
-			// expected format: http://www.youtube.com/watch?v=Gb1Z0lfl52I
+			// Expected format: http://www.youtube.com/watch?v=Gb1Z0lfl52I
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", VideoProvider.YOUTUBE.name());
 			options.put("id", url.substring(url.indexOf("v=") + 2));
 			return install(viewName, options);
 		} else if (url.contains("video.google.")) {
-			// expected format: http://video.google.com/videoplay?docid=1753096859715615067#
+			// Expected format: http://video.google.com/videoplay?docid=1753096859715615067#
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", VideoProvider.GOOGLE_VIDEO.name());
 			options.put("id", url.substring(url.indexOf("docid=") + 6));
 			return install(viewName, options);
 		} else if (url.contains("vimeo.com")) {
-			// expected format http://vimeo.com/11262623
+			// Expected format http://vimeo.com/11262623
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", VideoProvider.VIMEO.name());
 			options.put("id", url.substring(url.indexOf("vimeo.com/") + 10));
 			return install(viewName, options);
 		} else if (url.contains("viddler.com")) {
-			// expected format http://www.viddler.com/explore/failblog/videos/715/
+			// Expected format http://www.viddler.com/explore/failblog/videos/715/
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", VideoProvider.VIDDLER.name());
 			options.put("id", getViddlerId(url));
 			return install(viewName, options);
 		} else if (url.contains("screenr.com")) {
-			// expected format http://screenr.com/GlR
+			// Expected format http://screenr.com/GlR
 			String[] split = url.split("/");
 			if (split.length > 3) {
 				Map<String, String> options = new HashMap<String, String>();
 				options.put("provider", VideoProvider.SCREENR.name());
 				options.put("id", split[3]);
 				return install(viewName, options);
-			} else {
-				return false;
 			}
+			return false;
 		}
 		return false;
 	}

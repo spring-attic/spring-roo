@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Implementation of operations that are available via the Roo shell.
@@ -23,13 +24,12 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 @Service
 @Component
-@Reference(name="embeddedProvider", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=EmbeddedProvider.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
+@Reference(name = "embeddedProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = EmbeddedProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) 
 public class EmbeddedOperationsImpl implements EmbeddedOperations {
-	
+	private static final Logger logger = HandlerUtils.getLogger(EmbeddedOperationsImpl.class);
 	@Reference private MetadataService metadataService;
 	private Object mutex = this;
 	private Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
-	private Logger log = Logger.getLogger(getClass().getName());
 	
 	public boolean isCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
@@ -41,7 +41,7 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 				return true;
 			}
 		}
-		log.warning("Could not find a matching provider for this URL");
+		logger.warning("Could not find a matching provider for this URL");
 		return false;
 	}
 	
@@ -51,7 +51,7 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 				return true;
 			}
 		}
-		log.warning("Could not find a matching implementation for this 'web mvc embed' type");
+		logger.warning("Could not find a matching implementation for this 'web mvc embed' type");
 		return false;
 	}
 	

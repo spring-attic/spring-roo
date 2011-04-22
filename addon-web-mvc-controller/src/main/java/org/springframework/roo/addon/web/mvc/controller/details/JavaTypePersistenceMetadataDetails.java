@@ -14,7 +14,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.2
  */
 public class JavaTypePersistenceMetadataDetails {
-	
 	private FieldMetadata identifierField;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata versionAccessorMethod;

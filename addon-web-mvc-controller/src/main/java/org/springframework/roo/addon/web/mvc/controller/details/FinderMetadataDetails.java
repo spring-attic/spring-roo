@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.2
  */
 public class FinderMetadataDetails implements Comparable<FinderMetadataDetails>, Cloneable {
-	
 	private String finderName;
 	private MethodMetadata finderMethodMetadata;
 	private List<FieldMetadata> finderMethodParamFields;

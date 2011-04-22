@@ -38,9 +38,8 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
 				options.put("provider", DocumentProvider.SCRIBD.name());
 				options.put("id", split[4]);
 				return install(viewName, options);
-			} else {
-				return false;
 			}
+			return false;
 		} else if (url.contains("docs.google.") && url.contains("present")) {
 			// expected format http://docs.google.com/present/view?id=dd8rf8t9_31c9f2fcgd&revision=_latest&start=0&theme=blank&authkey=CLj5iZwJ&cwj=true
 			String qStart = url.substring(url.indexOf("id=") + 3);
@@ -65,10 +64,7 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
 		if (DocumentProvider.SLIDESHARE.name().equals(provider) && id.startsWith("http")) {
 			id = getSlideShareId(id);
 		}
-		Element document = new XmlElementBuilder("embed:document", XmlUtils.getDocumentBuilder().newDocument())
-									.addAttribute("id", "doc_" + id)
-									.addAttribute("documentId", id)
-									.addAttribute("provider", provider.toLowerCase()).build();
+		Element document = new XmlElementBuilder("embed:document", XmlUtils.getDocumentBuilder().newDocument()).addAttribute("id", "doc_" + id).addAttribute("documentId", id).addAttribute("provider", provider.toLowerCase()).build();
 		document.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(document));
 		installJspx(getViewName(viewName, provider.toLowerCase()), null, document);
 		return true;

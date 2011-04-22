@@ -100,14 +100,14 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 		String beanName = annotationDriven.getAttribute("conversion-service");
 		if (! StringUtils.hasText(beanName)) {
 			return false;
-		} else {
-			Element bean = XmlUtils.findFirstElement("/beans/bean[@id=\"" + beanName + "\"]", root);
-			String classAttribute = bean.getAttribute("class");
-			Assert.isTrue(classAttribute.endsWith(CONVERSION_SERVICE_SIMPLE_TYPE), 
-					"Found custom ConversionService installed in webmvc-config.xml. " +
-					"Remove the conversion-service attribute, let Spring ROO 1.1.1 (or higher), install the new application-wide " + 
-					"ApplicationConversionServiceFactoryBean and then use that to register your custom converters and formatters.");
-			return true;
 		}
+		
+		Element bean = XmlUtils.findFirstElement("/beans/bean[@id=\"" + beanName + "\"]", root);
+		String classAttribute = bean.getAttribute("class");
+		StringBuilder sb = new StringBuilder("Found custom ConversionService installed in webmvc-config.xml. ");
+		sb.append("Remove the conversion-service attribute, let Spring ROO 1.1.1 (or higher), install the new application-wide ");
+		sb.append("ApplicationConversionServiceFactoryBean and then use that to register your custom converters and formatters.");
+		Assert.isTrue(classAttribute.endsWith(CONVERSION_SERVICE_SIMPLE_TYPE), sb.toString());
+		return true;
 	}
 }

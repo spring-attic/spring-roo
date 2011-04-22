@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
 public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 	
 	public boolean embed(String url, String viewName) {
-		// expected http://picasaweb.google.com.au/stsmedia/SydneyByNight
+		// Expected http://picasaweb.google.com.au/stsmedia/SydneyByNight
 		if (url.contains("picasaweb.google.")) {
 			String [] split = url.split("/");
 			if (split.length > 4) {
@@ -33,10 +33,8 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 				options.put("userId", split[3]);
 				options.put("albumId", getPicasaId(url));
 				return install(viewName, options);
-			} else {
-				return false;
 			}
-		// expected http://www.flickr.com/photos/45203414@N06/
+			return false;
 		} else if (url.contains("flickr.")) {
 			String [] split = url.split("/");
 			if (split.length > 4) {
@@ -45,9 +43,8 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 				options.put("userId", split[4]);
 				options.put("albumId", split.length > 5 ? split[5] : split[4]);
 				return install(viewName, options);
-			} else {
-				return false;
 			}
+			return false;
 		}
 		return false;
 	}
@@ -63,11 +60,7 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 		String userId = options.get("userId");
 		String albumId = options.get("albumId");
 		installTagx("photos");
-		Element photos = new XmlElementBuilder("embed:photos", XmlUtils.getDocumentBuilder().newDocument())
-									.addAttribute("id", "photos_" + userId + "_" + albumId)
-									.addAttribute("albumId", albumId)
-									.addAttribute("userId", userId)
-									.addAttribute("provider", provider.toLowerCase()).build();
+		Element photos = new XmlElementBuilder("embed:photos", XmlUtils.getDocumentBuilder().newDocument()).addAttribute("id", "photos_" + userId + "_" + albumId).addAttribute("albumId", albumId).addAttribute("userId", userId).addAttribute("provider", provider.toLowerCase()).build();
 		photos.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(photos));
 		installJspx(getViewName(viewName, provider.toLowerCase()), null, photos);
 		return true;
