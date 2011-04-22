@@ -41,8 +41,8 @@ import org.springframework.roo.project.Path;
 @Service
 public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	private Map<JavaType, String> entityToDodMidMap = new HashMap<JavaType, String>();
-	private Map<String, JavaType> dodMidToEntityMap = new HashMap<String, JavaType>();
+	private Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
+	private Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);

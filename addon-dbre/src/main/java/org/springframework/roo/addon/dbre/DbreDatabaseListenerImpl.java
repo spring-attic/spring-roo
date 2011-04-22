@@ -2,9 +2,9 @@ package org.springframework.roo.addon.dbre;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,7 +102,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private void deserializeDatabase() {
 		Database database = dbreModelService.getDatabase();
 		if (database != null) {
-			identifierResults = new HashMap<JavaType, List<Identifier>>();
+			identifierResults = new LinkedHashMap<JavaType, List<Identifier>>();
 			reverseEngineer(database);
 		}
 	}

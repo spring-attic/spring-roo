@@ -1,8 +1,8 @@
 package org.springframework.roo.model;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,10 +16,8 @@ import org.springframework.roo.support.util.Assert;
  *
  */
 public final class CustomDataImpl implements CustomData {
-
+	public static final CustomData NONE = new CustomDataImpl(new LinkedHashMap<Object, Object>());
 	private Map<Object, Object> customData;
-	
-	public static final CustomData NONE = new CustomDataImpl(new HashMap<Object, Object>());
 	
 	public CustomDataImpl(Map<Object, Object> customData) {
 		Assert.notNull(customData, "Custom data required");

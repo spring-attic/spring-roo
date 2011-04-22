@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -53,7 +53,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	}
 	
 	/** key: file identifier, value: new textual content */
-	private Map<String, String> deferredFileWrites = new HashMap<String, String>();
+	private Map<String, String> deferredFileWrites = new LinkedHashMap<String, String>();
 
 	public boolean exists(String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "File identifier required");

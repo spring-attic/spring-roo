@@ -1,7 +1,7 @@
 package org.springframework.roo.model;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +17,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public final class CustomDataBuilder implements Builder<CustomData> {
-	private Map<Object, Object> customData = new HashMap<Object, Object>();
+	private Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
 	
 	public CustomDataBuilder() {}
 	

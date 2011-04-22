@@ -2,7 +2,7 @@ package org.springframework.roo.project;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public abstract class AbstractPathResolver implements PathResolver {
 	private List<PathInformation> pathOrder = new ArrayList<PathInformation>();
 	
 	/** Cached map of the paths */
-	private Map<Path,PathInformation> pathCache = new HashMap<Path, PathInformation>();
+	private Map<Path, PathInformation> pathCache = new LinkedHashMap<Path, PathInformation>();
 	
 	/**
 	 * Called by the {@link #init()} method when it wishes to obtain a list of paths to register.
