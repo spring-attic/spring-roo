@@ -1,37 +1,38 @@
 package org.springframework.roo.addon.gwt;
 
+import java.util.List;
+
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
-import java.util.List;
-
 class GwtProxyProperty {
-	private final ProjectMetadata projectMetadata;
-	private final String name;
-	private final String getter;
-	private final JavaType type;
+	private ProjectMetadata projectMetadata;
 	private PhysicalTypeMetadata ptmd;
+	private JavaType type;
+	private String name;
+	private List<AnnotationMetadata> annotations;
+	private String getter;
 
-	public GwtProxyProperty(ProjectMetadata projectMetadata, JavaType type, PhysicalTypeMetadata ptmd) {
+	public GwtProxyProperty(ProjectMetadata projectMetadata, PhysicalTypeMetadata ptmd, JavaType type) {
+		Assert.notNull(type, "Type required");
 		this.projectMetadata = projectMetadata;
-		this.type = type;
 		this.ptmd = ptmd;
-		this.getter = null;
-		this.name = null;
+		this.type = type;
 	}
 
-	public GwtProxyProperty(ProjectMetadata projectMetadata, JavaType type, PhysicalTypeMetadata ptmd, String name, String accessorMethodName) {
-		this.projectMetadata = projectMetadata;
-		this.type = type;
-		this.ptmd = ptmd;
-		this.getter = accessorMethodName;
+	public GwtProxyProperty(ProjectMetadata projectMetadata, PhysicalTypeMetadata ptmd, JavaType type, String name, List<AnnotationMetadata> annotations, String getter) {
+		this(projectMetadata, ptmd, type);
 		this.name = name;
+		this.annotations = annotations;
+		this.getter = getter;
 	}
 
 	public String getName() {
@@ -51,11 +52,11 @@ class GwtProxyProperty {
 	}
 
 	public boolean isBoolean() {
-		return type != null && type.equals(JavaType.BOOLEAN_OBJECT);
+		return type.equals(JavaType.BOOLEAN_OBJECT);
 	}
 
 	public boolean isDate() {
-		return type != null && type.equals(new JavaType("java.util.Date"));
+		return type.equals(new JavaType("java.util.Date"));
 	}
 
 	public boolean isPrimitive() {
@@ -74,7 +75,7 @@ class GwtProxyProperty {
 	}
 
 	public boolean isString() {
-		return type != null && type.equals(JavaType.STRING_OBJECT);
+		return type.equals(JavaType.STRING_OBJECT);
 	}
 
 	public String getBinder() {
@@ -156,11 +157,37 @@ class GwtProxyProperty {
 		if (type.getParameters().size() > 0) {
 			arg = type.getParameters().get(0);
 		}
-		return GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata) + ".CollectionRenderer.of(" + new GwtProxyProperty(projectMetadata, arg, ptmd).getRenderer() + ")";
+		return GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata) + ".CollectionRenderer.of(" + new GwtProxyProperty(projectMetadata, ptmd, arg).getRenderer() + ")";
 	}
 
 	public String getFormatter() {
-		return isCollectionOfProxy() ? getCollectionRenderer() + ".render" : isDate() ? "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format" : isProxy() ? getProxyRendererType() + ".instance().render" : "String.valueOf";
+		if (isCollectionOfProxy()) {
+			return getCollectionRenderer() + ".render";
+		} else if (isDate()) {
+			String formatter = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format";
+			if (annotations == null || annotations.isEmpty()) {
+				return formatter;
+			}
+			
+			String style = "";
+			for (AnnotationMetadata annotation : annotations) {
+				if (annotation.getAnnotationType().equals(new JavaType("org.springframework.format.annotation.DateTimeFormat"))) {
+					AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
+					if (attr != null) {
+						style = (String) attr.getValue();
+						break;
+					}
+				}
+			}
+			if (StringUtils.hasText(style) && !style.equals("S-")) {
+				formatter = "DateTimeFormat.getFormat(\"" + style + "\").format";
+			}
+			return formatter;
+		} else if (isProxy()) {
+			return getProxyRendererType() + ".instance().render";
+		} else {
+			return "String.valueOf";
+		}
 	}
 
 	public String getRenderer() {
@@ -171,8 +198,8 @@ class GwtProxyProperty {
 		return getProxyRendererType(projectMetadata, isCollectionOfProxy() ? type.getParameters().get(0) : type);
 	}
 
-	public static String getProxyRendererType(ProjectMetadata pmd, JavaType javaType) {
-		return GwtType.EDIT_RENDERER.getPath().packageName(pmd) + "." + javaType.getSimpleTypeName() + "Renderer";
+	public static String getProxyRendererType(ProjectMetadata projectMetadata, JavaType javaType) {
+		return GwtType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + javaType.getSimpleTypeName() + "Renderer";
 	}
 
 	public String getCheckboxSubtype() {
@@ -211,7 +238,7 @@ class GwtProxyProperty {
 	}
 
 	public boolean isCollection() {
-		return type != null && (type.getFullyQualifiedTypeName().equals("java.util.List") || type.getFullyQualifiedTypeName().equals("java.util.Set"));
+		return type.getFullyQualifiedTypeName().equals("java.util.List") || type.getFullyQualifiedTypeName().equals("java.util.Set");
 	}
 
 	boolean isEnum() {
@@ -242,7 +269,7 @@ class GwtProxyProperty {
 	}
 
 	public boolean isCollectionOfProxy() {
-		return type.getParameters().size() != 0 && isCollection() && new GwtProxyProperty(projectMetadata, type.getParameters().get(0), ptmd).isProxy();
+		return type.getParameters().size() != 0 && isCollection() && new GwtProxyProperty(projectMetadata, ptmd, type.getParameters().get(0)).isProxy();
 	}
 
 	public JavaType getValueType() {

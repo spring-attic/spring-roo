@@ -20,9 +20,12 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -173,17 +176,18 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		buildType(GwtType.MOBILE_ACTIVITIES);
 
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
-
 		for (MethodMetadata proxyMethod : convertedProxyMethods) {
 			JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(proxyMethod).getSymbolName()));
 			JavaType propertyType = proxyMethod.getReturnType();
 			PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(propertyType, Path.SRC_MAIN_JAVA));
-
-			if (propertyType.isCommonCollectionType()) {
+			if (propertyType.isCommonCollectionType() && !propertyType.getParameters().isEmpty()) {
 				ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(propertyType.getParameters().get(0), Path.SRC_MAIN_JAVA));
 			}
+			
+			FieldMetadata field = MemberFindingUtils.getDeclaredField(governorTypeDetails, propertyName);
+			List<AnnotationMetadata> annotations = field != null ? field.getAnnotations() : Collections.<AnnotationMetadata> emptyList();
 
-			GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(projectOperations.getProjectMetadata(), propertyType, ptmd, propertyName.getSymbolName(), proxyMethod.getMethodName().getSymbolName());
+			GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(projectOperations.getProjectMetadata(), ptmd, propertyType, propertyName.getSymbolName(), annotations, proxyMethod.getMethodName().getSymbolName());
 			clientSideTypeMap.put(propertyName, gwtProxyProperty);
 		}
 
