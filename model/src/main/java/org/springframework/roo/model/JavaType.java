@@ -50,6 +50,11 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
 
+	// Used for wildcard type parameters; it must be one or the other
+	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
+	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
+	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_"); // List<?>
+
 	private List<JavaType> parameters = new LinkedList<JavaType>();
 	private JavaSymbolName argName = null;
 	private int array = 0;
@@ -139,11 +144,6 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public String getFullyQualifiedTypeName() {
 		return fullyQualifiedTypeName;
 	}
-
-	// Used for wildcard type parameters; it must be one or the other
-	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
-	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
-	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_"); // List<?>
 
 	/**
 	 * Obtains the name of this type, including type parameters. It will be formatted in a manner compatible with non-static use.

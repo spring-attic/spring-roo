@@ -1,21 +1,5 @@
 package org.springframework.roo.support.util;
 
-/*
- * Copyright 2002-2008 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,17 +37,11 @@ import java.util.TreeSet;
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
-
 	private static final String FOLDER_SEPARATOR = "/";
-
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
-
 	private static final String TOP_PATH = "..";
-
 	private static final String CURRENT_PATH = ".";
-
 	private static final char EXTENSION_SEPARATOR = '.';
-
 
 	//---------------------------------------------------------------------
 	// General convenience methods for working with Strings
@@ -151,7 +129,7 @@ public abstract class StringUtils {
 			return false;
 		}
 		int strLen = str.length();
-		for (int i = 0; i < strLen; i++) {
+		for (int i = 0, n = strLen; i < n; i++) {
 			if (Character.isWhitespace(str.charAt(i))) {
 				return true;
 			}
@@ -336,7 +314,7 @@ public abstract class StringUtils {
 	 * @param substring the substring to match at the given index
 	 */
 	public static boolean substringMatch(CharSequence str, int index, CharSequence substring) {
-		for (int j = 0; j < substring.length(); j++) {
+		for (int j = 0, n = substring.length(); j < n; j++) {
 			int i = index + j;
 			if (i >= str.length() || str.charAt(i) != substring.charAt(j)) {
 				return false;
@@ -412,7 +390,7 @@ public abstract class StringUtils {
 			return inString;
 		}
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < inString.length(); i++) {
+		for (int i = 0, n = inString.length(); i < n; i++) {
 			char c = inString.charAt(i);
 			if (charsToDelete.indexOf(c) == -1) {
 				sb.append(c);
@@ -734,7 +712,7 @@ public abstract class StringUtils {
 		}
 		List<String> result = new ArrayList<String>();
 		result.addAll(Arrays.asList(array1));
-		for (int i = 0; i < array2.length; i++) {
+		for (int i = 0, n = array2.length; i < n; i++) {
 			String str = array2[i];
 			if (!result.contains(str)) {
 				result.add(str);
@@ -796,7 +774,7 @@ public abstract class StringUtils {
 			return new String[0];
 		}
 		String[] result = new String[array.length];
-		for (int i = 0; i < array.length; i++) {
+		for (int i = 0, n = array.length; i < n; i++) {
 			String element = array[i];
 			result[i] = (element != null ? element.trim() : null);
 		}
@@ -814,7 +792,7 @@ public abstract class StringUtils {
 			return array;
 		}
 		Set<String> set = new TreeSet<String>();
-		for (int i = 0; i < array.length; i++) {
+		for (int i = 0, n = array.length; i < n; i++) {
 			set.add(array[i]);
 		}
 		return toStringArray(set);
@@ -878,7 +856,7 @@ public abstract class StringUtils {
 		}
 		
 		Properties result = new Properties();
-		for (int i = 0; i < array.length; i++) {
+		for (int i = 0, n = array.length; i < n; i++) {
 			String element = array[i];
 			if (charsToDelete != null) {
 				element = deleteAny(array[i], charsToDelete);
