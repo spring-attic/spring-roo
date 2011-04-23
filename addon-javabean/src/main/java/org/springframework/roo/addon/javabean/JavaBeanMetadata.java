@@ -334,7 +334,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
 		bodyBuilder.appendFormalLine("for (Key key : " + entityIdsName + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(collectionElementType + " entity = " + simpleCollectionElementTypeName + ".find" + simpleCollectionElementTypeName + "(key.getId());");
+		bodyBuilder.appendFormalLine(simpleCollectionElementTypeName + " entity = " + simpleCollectionElementTypeName + ".find" + simpleCollectionElementTypeName + "(key.getId());");
 		bodyBuilder.appendFormalLine("if (entity != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");

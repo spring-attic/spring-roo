@@ -131,27 +131,30 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
-		if (StringUtils.hasText(upstreamDependency) && MetadataIdentificationUtils.isValid(upstreamDependency)) {
-			if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-				boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
-				boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-				if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
-					wasGaeEnabled = isGaeEnabled;
-					
-					// Update ApplicationRequestFactory
-					gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY);
-					
-					// Update the GaeHelper type
-					updateGaeHelper(isGaeEnabled);
-					
-					// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated 
-					updateBuildPlugins(isGaeEnabled);
+		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
+			return;
+		}
+		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+			return;
+		}
+		
+		boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
+		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+		if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
+			wasGaeEnabled = isGaeEnabled;
 
-					//Copy across any missing files, only if GAE state has changed and is now enabled
-					if (isGaeEnabled) {
-						copyDirectoryContents();
-					}
-				}
+			// Update ApplicationRequestFactory
+			gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY);
+
+			// Update the GaeHelper type
+			updateGaeHelper(isGaeEnabled);
+
+			// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated
+			updateBuildPlugins(isGaeEnabled);
+
+			// Copy across any missing files, only if GAE state has changed and is now enabled
+			if (isGaeEnabled) {
+				copyDirectoryContents();
 			}
 		}
 	}

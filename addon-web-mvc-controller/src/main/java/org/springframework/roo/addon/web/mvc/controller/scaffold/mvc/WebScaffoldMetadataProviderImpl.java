@@ -123,9 +123,12 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 			AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("registerConverters"));
 			if (attr != null) {
 				if (Boolean.FALSE.equals(attr.getValue())) {
-					throw new IllegalStateException("Found registerConverters=false in scaffolded controller " + controller + ". " +
-							"Remove this property from all controllers and let Spring ROO install the new application-wide ApplicationConversionServiceFactoryBean. " +
-							"Then move your custom getXxxConverter() methods to it, delete the GenericConversionService field and the @PostContruct method.");
+					StringBuilder sb = new StringBuilder();
+					sb.append("Found registerConverters=false in scaffolded controller ");
+					sb.append(controller).append(". ");
+					sb.append("Remove this property from all controllers and let Spring ROO install the new application-wide ApplicationConversionServiceFactoryBean. ");
+					sb.append("Then move your custom getXxxConverter() methods to it, delete the GenericConversionService field and the @PostContruct method.");
+					throw new IllegalStateException(sb.toString());
 				}
 			}
 		}

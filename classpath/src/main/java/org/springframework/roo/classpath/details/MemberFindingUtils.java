@@ -380,7 +380,7 @@ public abstract class MemberFindingUtils {
 	 */
 	public static MethodMetadata getMostConcreteMethodWithTag(MemberDetails memberDetails, Object tagKey) {
 		List<MethodMetadata> taggedMethods = getMethodsWithTag(memberDetails, tagKey);
-		if (taggedMethods.size() == 0) {
+		if (taggedMethods.isEmpty()) {
 			return null;
 		} 
 		return taggedMethods.get(0);
@@ -439,7 +439,7 @@ public abstract class MemberFindingUtils {
 		Assert.notNull(memberDetails, "MemberDetails required");
 		Assert.notNull(tag, "Custom data tag required");
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = getMemberHoldingTypeDetailsWithTag(memberDetails, tag);
-		if (memberHoldingTypeDetailsList.size() == 0) {
+		if (memberHoldingTypeDetailsList.isEmpty()) {
 			return null;
 		}
 		return memberHoldingTypeDetailsList.get(memberHoldingTypeDetailsList.size() - 1);
