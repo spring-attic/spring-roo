@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
@@ -170,17 +171,38 @@ class GwtProxyProperty {
 			}
 			
 			String style = "";
-			for (AnnotationMetadata annotation : annotations) {
-				if (annotation.getAnnotationType().equals(new JavaType("org.springframework.format.annotation.DateTimeFormat"))) {
-					AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
-					if (attr != null) {
-						style = (String) attr.getValue();
-						break;
-					}
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+			if (annotation != null) {
+				AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
+				if (attr != null) {
+					style = (String) attr.getValue();
 				}
 			}
 			if (StringUtils.hasText(style) && !style.equals("S-")) {
 				formatter = "DateTimeFormat.getFormat(\"" + style + "\").format";
+			}
+			return formatter;
+		} else if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.FLOAT_OBJECT) || type.equals(JavaType.DOUBLE_OBJECT) || type.equals(new JavaType("java.math.BigInteger")) || type.equals(new JavaType("java.math.BigDecimal"))) {
+			String formatter = "String.valueOf";
+			if (annotations == null || annotations.isEmpty()) {
+				return formatter;
+			}
+			
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("org.springframework.format.annotation.NumberFormat"));
+			if (annotation != null) {
+				AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
+				if (attr != null) {
+					String style =  attr.getValue().toString();
+					if ("org.springframework.format.annotation.NumberFormat.Style.CURRENCY".equals(style)) {
+						formatter = "NumberFormat.getCurrencyFormat().format";
+					} else if ("org.springframework.format.annotation.NumberFormat.Style.PERCENT".equals(style)) {
+						formatter = "NumberFormat.getPercentFormat().format";
+					} else {
+						formatter = "NumberFormat.getDecimalFormat().format";
+					}
+				} else {
+					formatter = "NumberFormat.getDecimalFormat().format";
+				}
 			}
 			return formatter;
 		} else if (isProxy()) {

@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -25,7 +26,7 @@ public class {{=className}} extends Composite implements ProxyDetailsView<{{=pro
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-  private static {{=className}} instance;
+	private static {{=className}} instance;
 
 	{{=proxy}} proxy;
 	{{#fields}}
@@ -37,22 +38,22 @@ public class {{=className}} extends Composite implements ProxyDetailsView<{{=pro
 
 	private Delegate delegate;
 
-  public static {{=className}} instance() {
-    if (instance == null) {
-      instance = new {{=className}}();
-    }
-    
-    return instance;
-  }
+	public static {{=className}} instance() {
+		if (instance == null) {
+			instance = new {{=className}}();
+		}
+
+		return instance;
+	}
 
 	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));
 	}
 
-  	public Widget asWidget() {
+	public Widget asWidget() {
 		return this;
 	}
-  
+
 	public boolean confirm(String msg) {
 		return Window.confirm(msg);
 	}

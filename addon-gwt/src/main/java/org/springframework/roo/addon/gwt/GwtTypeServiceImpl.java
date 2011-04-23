@@ -264,7 +264,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 		JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(method).getSymbolName()));
 		if (!isAllowableReturnType(method)) {
-			displayWarning("The field type, " + method.getReturnType().getFullyQualifiedTypeName() + " of '" + method.getMethodName().getSymbolName() + "' in type " + memberHoldingTypeDetail.getName().getSimpleTypeName() + " is not currently support by GWT and will not be added to the scaffolded application.");
+			displayWarning("The field type " + method.getReturnType().getFullyQualifiedTypeName() + " of '" + method.getMethodName().getSymbolName() + "' in type " + memberHoldingTypeDetail.getName().getSimpleTypeName() + " is not currently support by GWT and will not be added to the scaffolded application.");
 			return false;
 		}
 		if (propertyName.getSymbolName().equals("owner")) {
