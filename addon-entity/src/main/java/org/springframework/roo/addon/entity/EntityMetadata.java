@@ -1091,7 +1091,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return (" + governorTypeDetails.getName().getSimpleTypeName() + ") " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o WHERE o." + idFieldName + " = :" + idFieldName + "\").setParameter(\"" + idFieldName + "\", " + idFieldName + ").getSingleResult();");
 			bodyBuilder.indentRemove();
-			bodyBuilder.appendFormalLine("} catch (Exception e) {");
+			bodyBuilder.appendFormalLine("} catch (javax.persistence.NoResultException e) {");
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return null;");
 			bodyBuilder.indentRemove();
