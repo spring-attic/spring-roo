@@ -22,8 +22,7 @@ import java.util.Set;
  * An {@link com.google.gwt.activity.shared.Activity Activity} that requests and
  * displays detailed information on a given {{=proxy}}.
  */
-public class {{=className}} extends AbstractActivity
-		implements ProxyDetailsView.Delegate, {{=isScaffoldMobileActivity}} {
+public class {{=className}} extends AbstractActivity implements ProxyDetailsView.Delegate, {{=isScaffoldMobileActivity}} {
 
 	private final ApplicationRequestFactory requests;
 	private final PlaceController placeController;

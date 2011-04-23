@@ -23,8 +23,7 @@ import java.util.List;
  * Wraps {{=proxy}} edit and create activities to manage extra portions of their
  * views, like value pickers.
  */
-public class {{=className}} implements Activity,
-    {{=isScaffoldMobileActivity}} {
+public class {{=className}} implements Activity, {{=isScaffoldMobileActivity}} {
 
   /**
    * The view used by this activity.

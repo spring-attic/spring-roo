@@ -36,9 +36,7 @@ import java.util.Set;
 /**
  * Displays an editor for a Set of {{=proxy}} objects.
  */
-public class {{=className}} extends Composite
-    implements ValueAwareEditor<Set<{{=proxy}}>>,
-    LeafValueEditor<Set<{{=proxy}}>> {
+public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{=proxy}}>>, LeafValueEditor<Set<{{=proxy}}>> {
 
   interface Binder extends UiBinder<Widget, {{=className}}> {
 

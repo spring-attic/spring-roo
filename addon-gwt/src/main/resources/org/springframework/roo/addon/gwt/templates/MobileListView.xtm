@@ -23,8 +23,7 @@ public class {{=className}} extends MobileProxyListView<{{=proxy}}> {
 	/**
 	 * The renderer used to render cells.
 	 */
-	private static class CellRenderer extends
-			AbstractSafeHtmlRenderer<{{proxy}}> {
+	private static class CellRenderer extends AbstractSafeHtmlRenderer<{{proxy}}> {
 		private final String dateStyle = ScaffoldMobileApp.getMobileListResources().cellListStyle().dateProp();
 		private final String secondaryStyle = ScaffoldMobileApp.getMobileListResources().cellListStyle().secondaryProp();
 		{{#mobileProperties}}

@@ -16,8 +16,7 @@ import java.util.List;
 /**
  * Activity that requests and displays all {{=proxy}}.
  */
-public class {{=className}} extends AbstractProxyListActivity<{{=proxy}}>
-		implements {{=isScaffoldMobileActivity}} {
+public class {{=className}} extends AbstractProxyListActivity<{{=proxy}}> implements {{=isScaffoldMobileActivity}} {
 
 	private final {{=requestFactory}} requests;
 
