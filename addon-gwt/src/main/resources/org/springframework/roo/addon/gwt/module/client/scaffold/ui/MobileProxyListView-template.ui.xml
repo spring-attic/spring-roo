@@ -27,7 +27,8 @@
 		<g:Button
 				styleName='{style.createButton}'
 				ui:field='newButton'/>
-		<b:CellList
+		<b:SimplePager display='{list}' location='RIGHT'/>
+        <b:CellList
 				ui:field='list'
 				addStyleNames='{style.list}'
 				pageSize='8'/>
