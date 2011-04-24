@@ -17,11 +17,15 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
@@ -46,16 +50,14 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class GwtTemplateServiceImpl implements GwtTemplateService {
 	@Reference private FileManager fileManager;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
-		JavaType governorTypeName = governorTypeDetails.getName();
-		Path governorTypePath = PhysicalTypeIdentifier.getPath(governorTypeDetails.getDeclaredByMetadataId());
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeDetails.getName());
 
 		Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap = new HashMap<GwtType, ClassOrInterfaceTypeDetails>();
 		Map<GwtType, String> xmlTemplates = new HashMap<GwtType, String>();
@@ -63,13 +65,13 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			if (gwtType.getTemplate() == null) {
 				continue;
 			}
-			TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(gwtType, governorTypeDetails, mirrorTypeMap, clientSideTypeMap, entityMetadata);
+			TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(gwtType, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
 			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
 			gwtType.dynamicallyResolveMethodsToWatch(mirrorTypeMap.get(GwtType.PROXY), clientSideTypeMap, projectMetadata);
 			templateTypeDetailsMap.put(gwtType, getTemplateDetails(dataDictionary, gwtType.getTemplate(), mirrorTypeMap.get(gwtType)));
 
 			if (gwtType.isCreateUiXml()) {
-				dataDictionary = buildMirrorDataDictionary(gwtType, governorTypeDetails, mirrorTypeMap, clientSideTypeMap, entityMetadata);
+				dataDictionary = buildMirrorDataDictionary(gwtType, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
 				String contents = getTemplateContents(gwtType.getTemplate() + "UiXml", dataDictionary);
 				xmlTemplates.put(gwtType, contents);
 			}
@@ -233,7 +235,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	private TemplateDataDictionary buildStandardDataDictionary(GwtType type) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 
-		JavaType javaType = GwtUtils.getDestinationJavaType(type, projectMetadata);
+		JavaType javaType = new JavaType(getFullyQualifiedTypeName(type, projectMetadata));
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
 		for (GwtType reference : type.getReferences()) {
 			addReference(dataDictionary, reference);
@@ -250,7 +252,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		addImport(dataDictionary, gwtType.getPath().packageName(projectMetadata) + "." + simpleName + gwtType.getSuffix());
 	}
 
-	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type, ClassOrInterfaceTypeDetails governorTypeDetails, Map<GwtType, JavaType> mirrorTypeMap, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, EntityMetadata entityMetadata) {
+	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type, ClassOrInterfaceTypeDetails governorTypeDetails, Map<GwtType, JavaType> mirrorTypeMap, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		JavaType proxyType = mirrorTypeMap.get(GwtType.PROXY);
 		JavaType javaType = mirrorTypeMap.get(type);
@@ -263,23 +265,32 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 		addImport(dataDictionary, proxyType.getFullyQualifiedTypeName());
 
+		String pluralMetadataKey = PluralMetadata.createIdentifier(governorTypeDetails.getName(), Path.SRC_MAIN_JAVA);
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
+		String plural = pluralMetadata.getPlural();
+		
+		String simpleTypeName = governorTypeDetails.getName().getSimpleTypeName();
+
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
 		dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
 		dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(projectMetadata));
 		dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
 		dataDictionary.setVariable("uiPackage", GwtPath.MANAGED_UI.packageName(projectMetadata));
-		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
-		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
-		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
+		dataDictionary.setVariable("name", simpleTypeName);
+		dataDictionary.setVariable("pluralName", plural);
+		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(simpleTypeName));
 		dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
-		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
+		dataDictionary.setVariable("pluralName", plural);
 		dataDictionary.setVariable("proxyRenderer", GwtProxyProperty.getProxyRendererType(projectMetadata, proxyType));
 		String proxyFields = null;
 		GwtProxyProperty primaryProperty = null;
 		GwtProxyProperty secondaryProperty = null;
 		GwtProxyProperty dateProperty = null;
 		Set<String> importSet = new HashSet<String>();
+		
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), governorTypeDetails);
+		 
 		for (GwtProxyProperty gwtProxyProperty : clientSideTypeMap.values()) {
 			// Determine if this is the primary property.
 			if (primaryProperty == null) {
@@ -312,7 +323,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			}
 
 			dataDictionary.addSection("fields").setVariable("field", gwtProxyProperty.getName());
-			if (!isReadOnly(gwtProxyProperty.getName(), governorTypeDetails, entityMetadata)) {
+			if (!isReadOnly(gwtProxyProperty.getName(), governorTypeDetails, memberDetails)) {
 				dataDictionary.addSection("editViewProps").setVariable("prop", gwtProxyProperty.forEditView());
 			}
 
@@ -325,7 +336,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			propertiesSection.setVariable("propRenderer", gwtProxyProperty.getRenderer());
 			propertiesSection.setVariable("propReadable", gwtProxyProperty.getReadableName());
 
-			if (!isReadOnly(gwtProxyProperty.getName(), governorTypeDetails, entityMetadata)) {
+			if (!isReadOnly(gwtProxyProperty.getName(), governorTypeDetails, memberDetails)) {
 				TemplateDataDictionary editableSection = dataDictionary.addSection("editableProperties");
 				editableSection.setVariable("prop", gwtProxyProperty.getName());
 				editableSection.setVariable("propId", proxyType.getSimpleTypeName() + "_" + gwtProxyProperty.getName());
@@ -409,7 +420,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	}
 
 	private JavaType getDestinationJavaType(GwtType destType) {
-		return new JavaType(GwtUtils.getFullyQualifiedTypeName(destType, projectOperations.getProjectMetadata()));
+		return new JavaType(getFullyQualifiedTypeName(destType, projectOperations.getProjectMetadata()));
 	}
 
 	private void addReference(TemplateDataDictionary dataDictionary, GwtType type) {
@@ -417,13 +428,17 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
-	private boolean isReadOnly(String name, ClassOrInterfaceTypeDetails governorTypeDetails, EntityMetadata entityMetadata) {
-		FieldMetadata versionField = entityMetadata.getVersionField();
-		FieldMetadata idField = entityMetadata.getIdentifierField();
-		Assert.notNull(versionField, "Version unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
-		Assert.notNull(idField, "Id unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
-		JavaSymbolName versionPropertyName = versionField.getFieldName();
+	private boolean isReadOnly(String name, ClassOrInterfaceTypeDetails governorTypeDetails, MemberDetails memberDetails) {
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
+		Assert.isTrue(!idFields.isEmpty(), "Id unavailable for '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' - required for GWT support");
+		FieldMetadata idField = idFields.get(0);
 		JavaSymbolName idPropertyName = idField.getFieldName();
+		
+		List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_FIELD);
+		Assert.isTrue(!versionFields.isEmpty(), "Version unavailable for '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' - required for GWT support");
+		FieldMetadata versionField = versionFields.get(0);
+		JavaSymbolName versionPropertyName = versionField.getFieldName();
+		
 		return name.equals(idPropertyName.getSymbolName()) || name.equals(versionPropertyName.getSymbolName());
 	}
 
@@ -455,5 +470,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		}
 
 		return javaType;
+	}
+	
+	private String getFullyQualifiedTypeName(GwtType gwtType, ProjectMetadata projectMetadata) {
+		return gwtType.getPath().packageName(projectMetadata) + "." + gwtType.getTemplate();
 	}
 }

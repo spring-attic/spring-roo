@@ -15,20 +15,23 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
+import javax.xml.parsers.DocumentBuilder;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.details.AbstractIdentifiableAnnotatedJavaStructureBuilder;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.IdentifiableAnnotatedJavaStructure;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -36,9 +39,9 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -58,8 +61,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
 
 /**
  * Provides a basic implementation of {@link GwtTypeService}.
@@ -83,8 +84,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	/**
 	 * Return the type arg for the client side method, given the domain method return type.
-	 * If domainMethodReturnType is List<Integer> or Set<Integer>, returns the same.
-	 * If domainMethodReturnType is List<Employee>, return List<EmployeeProxy>
+	 * If domain method return type is List<Integer> or Set<Integer>, returns the same.
+	 * If domain method return type is List<Employee>, return List<EmployeeProxy>
 	 *
 	 * @param type
 	 * @param projectMetadata
@@ -94,16 +95,16 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	public JavaType getGwtSideLeafType(JavaType type, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType) {
 		if (type.isPrimitive()) {
 			if (!requestType) {
-				GwtUtils.checkPrimitive(type);
+				checkPrimitive(type);
 			}
-			return GwtUtils.convertPrimitiveType(type);
+			return convertPrimitiveType(type);
 		}
 
-		if (GwtUtils.isCommonType(type)) {
+		if (isTypeCommon(type)) {
 			return type;
 		}
 
-		if (GwtUtils.isCollectionType(type)) {
+		if (isCollectionType(type)) {
 			List<JavaType> args = type.getParameters();
 			if (args != null && args.size() == 1) {
 				JavaType elementType = args.get(0);
@@ -113,11 +114,11 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		}
 
 		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		if (GwtUtils.isDomainObject(type, ptmd)) {
-			if (GwtUtils.isEmbeddable(ptmd)) {
+		if (isDomainObject(type, ptmd)) {
+			if (isEmbeddable(ptmd)) {
 				throw new IllegalStateException("GWT does not currently support embedding objects in entities, such as '" + type.getSimpleTypeName() + "' in '" + governorType.getSimpleTypeName() + "'.");
 			}
-			return GwtUtils.getDestinationJavaType(type, GwtType.PROXY, projectMetadata);
+			return getDestinationJavaType(type, GwtType.PROXY, projectMetadata);
 		}
 		return type;
 	}
@@ -221,10 +222,11 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	public List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
 		List<MethodMetadata> proxyMethods = new LinkedList<MethodMetadata>();
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails).getDetails();
+		MemberDetails memberDetails =  memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
+		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetails.getDetails();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
 			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
-				if (GwtUtils.isPublicAccessor(method)) {
+				if (isPublicAccessor(method)) {
 					if (isValidMethodReturnType(method, memberHoldingTypeDetail)) {
 						proxyMethods.add(method);
 					}
@@ -235,24 +237,26 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails).getDetails();
 		List<MethodMetadata> requestMethods = new LinkedList<MethodMetadata>();
-		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
-				if (Modifier.isPublic(method.getModifier())) {
-					if (MetadataIdentificationUtils.getMetadataClass(memberHoldingTypeDetail.getDeclaredByMetadataId()).equals(EntityMetadata.class.getName())) {
-						EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(memberHoldingTypeDetail.getDeclaredByMetadataId());
-						if (GwtUtils.isRequestMethod(entityMetadata, method)) {
-							JavaType gwtType = getGwtSideLeafType(method.getReturnType(), getProjectMetadata(), governorTypeDetails.getName(), true);
-							MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
-							methodBuilder.setReturnType(gwtType);
-							requestMethods.add(methodBuilder.build());
-						}
-					}
-				}
-			}
-		}
+		MemberDetails memberDetails =  memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.COUNT_ALL_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.FIND_ALL_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
 		return requestMethods;
+	}
+	
+	private void setRequestMethod(List<MethodMetadata> requestMethods, ClassOrInterfaceTypeDetails governorTypeDetails, MemberDetails memberDetails, Object tagKey) {
+		MethodMetadata method = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, tagKey);
+		if (method == null) {
+			return;
+		}
+		JavaType gwtType = getGwtSideLeafType(method.getReturnType(), getProjectMetadata(), governorTypeDetails.getName(), true);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
+		methodBuilder.setReturnType(gwtType);
+		requestMethods.add(methodBuilder.build());
 	}
 
 	public boolean isValidMethodReturnType(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail) {
@@ -279,7 +283,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		JavaType propertyType = method.getReturnType();
 		boolean inSourcePath = false;
 		for (String sourcePath : sourcePaths) {
-			boolean collectionTypeInSourcePath = GwtUtils.isCollectionType(propertyType) && propertyType.getParameters().size() == 1 && propertyType.getParameters().get(0).getPackage().getFullyQualifiedPackageName().startsWith(sourcePath);
+			boolean collectionTypeInSourcePath = isCollectionType(propertyType) && propertyType.getParameters().size() == 1 && propertyType.getParameters().get(0).getPackage().getFullyQualifiedPackageName().startsWith(sourcePath);
 			if (propertyType.getPackage().getFullyQualifiedPackageName().startsWith(sourcePath) || collectionTypeInSourcePath) {
 				inSourcePath = true;
 				break;
@@ -294,7 +298,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	public boolean isDomainObject(JavaType type) {
 		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		return GwtUtils.isDomainObject(type, ptmd);
+		return isDomainObject(type, ptmd);
 	}
 
 	private ClassOrInterfaceTypeDetailsBuilder createAbstractBuilder(ClassOrInterfaceTypeDetailsBuilder concreteClass, List<MemberHoldingTypeDetails> extendsTypesDetails) {
@@ -315,7 +319,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 				ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
 				abstractConstructor.setModifier(constructorMetadata.getModifier());
 
-				HashMap<JavaSymbolName, JavaType> typeMap = GwtUtils.resolveTypes(extendsTypeDetails.getName(), concreteClass.getExtendsTypes().get(0));
+				HashMap<JavaSymbolName, JavaType> typeMap = resolveTypes(extendsTypeDetails.getName(), concreteClass.getExtendsTypes().get(0));
 
 				for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
 					JavaType newType = type.getJavaType();
@@ -369,7 +373,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 					for (FieldMetadataBuilder fieldBuilder : templateClassBuilder.getDeclaredFields()) {
 						if (fieldBuilder.getFieldName().equals(fieldName)) {
 							FieldMetadataBuilder abstractFieldBuilder = new FieldMetadataBuilder(abstractClassBuilder.getDeclaredByMetadataId(), fieldBuilder.build());
-							abstractClassBuilder.addField(GwtUtils.convertModifier(abstractFieldBuilder));
+							abstractClassBuilder.addField(convertModifier(abstractFieldBuilder));
 							fieldsToRemove.add(fieldBuilder);
 							break;
 						}
@@ -384,7 +388,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 						if (methodBuilder.getMethodName().equals(methodName)) {
 							if (destType.getWatchedMethods().get(methodName).containsAll(AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodBuilder.getParameterTypes()))) {
 								MethodMetadataBuilder abstractMethodBuilder = new MethodMetadataBuilder(abstractClassBuilder.getDeclaredByMetadataId(), methodBuilder.build());
-								abstractClassBuilder.addMethod(GwtUtils.convertModifier(abstractMethodBuilder));
+								abstractClassBuilder.addMethod(convertModifier(abstractMethodBuilder));
 								methodsToRemove.add(methodBuilder);
 								break;
 							}
@@ -446,6 +450,21 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		}
 	}
 
+	private void checkPrimitive(JavaType type) {
+		if (type.isPrimitive() && !JavaType.VOID_PRIMITIVE.equals(type)) {
+			String to = type.getSimpleTypeName();
+			String from = to.toLowerCase();
+			throw new IllegalStateException("GWT does not currently support primitive types in an entity. Please change any '" + from + "' entity property types to 'java.lang." + to + "'.");
+		}
+	}
+
+	private JavaType convertPrimitiveType(JavaType type) {
+		if (type != null && !JavaType.VOID_PRIMITIVE.equals(type) && type.isPrimitive()) {
+			return new JavaType(type.getFullyQualifiedTypeName());
+		}
+		return type;
+	}
+
 	private boolean isAllowableReturnType(MethodMetadata method) {
 		return isAllowableReturnType(method.getReturnType());
 	}
@@ -455,24 +474,98 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	private boolean isCommonType(JavaType type) {
-		return GwtUtils.isCommonType(type) || (GwtUtils.isCollectionType(type) && type.getParameters().size() == 1 && isAllowableReturnType(type.getParameters().get(0)));
+		return isTypeCommon(type) || (isCollectionType(type) && type.getParameters().size() == 1 && isAllowableReturnType(type.getParameters().get(0)));
+	}
+	
+	private boolean isTypeCommon(JavaType type) {
+		return JavaType.BOOLEAN_OBJECT.equals(type) ||
+				JavaType.CHAR_OBJECT.equals(type) ||
+				JavaType.BYTE_OBJECT.equals(type) ||
+				JavaType.SHORT_OBJECT.equals(type) ||
+				JavaType.INT_OBJECT.equals(type) ||
+				JavaType.LONG_OBJECT.equals(type) ||
+				JavaType.FLOAT_OBJECT.equals(type) ||
+				JavaType.DOUBLE_OBJECT.equals(type) ||
+				JavaType.STRING_OBJECT.equals(type) ||
+				new JavaType("java.util.Date").equals(type) ||
+				new JavaType("java.math.BigDecimal").equals(type) ||
+				type.isPrimitive() && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(type.getFullyQualifiedTypeName());
+	}
+	
+	private boolean isEnum(JavaType type) {
+		return isEnum((PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA)));
 	}
 
 	private boolean isPrimitive(JavaType type) {
-		return type.isPrimitive() || (GwtUtils.isCollectionType(type) && type.getParameters().size() == 1 && isPrimitive(type.getParameters().get(0)));
+		return type.isPrimitive() || (isCollectionType(type) && type.getParameters().size() == 1 && isPrimitive(type.getParameters().get(0)));
 	}
 
-	private boolean isEntity(JavaType type) {
-		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+	private boolean isEntity(PhysicalTypeMetadata ptmd) {
 		if (ptmd == null) {
 			return false;
 		}
-		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), new JavaType(RooEntity.class.getName()));
+		
+		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), new JavaType("org.springframework.roo.addon.entity.RooEntity"));
 		return annotationMetadata != null;
 	}
 
-	private boolean isEnum(JavaType type) {
-		return GwtUtils.isEnum((PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA)));
+	private boolean isEntity(JavaType type) {
+		return isEntity((PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA)));
+	}
+
+	private boolean isCollectionType(JavaType returnType) {
+		return returnType.getFullyQualifiedTypeName().equals("java.util.List") || returnType.getFullyQualifiedTypeName().equals("java.util.Set");
+	}
+
+	private boolean isEnum(PhysicalTypeMetadata ptmd) {
+		return ptmd != null && ptmd.getMemberHoldingTypeDetails() != null && ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
+	}
+
+	private boolean isEmbeddable(PhysicalTypeMetadata ptmd) {
+		if (ptmd == null) {
+			return false;
+		}
+		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), new JavaType("javax.persistence.Embeddable"));
+		return annotationMetadata != null;
+	}
+
+	private boolean isRequestFactoryCompatible(JavaType type) {
+		return isCommonType(type) || isCollectionType(type);
+	}
+
+	private JavaType getDestinationJavaType(JavaType physicalType, GwtType mirrorType, ProjectMetadata projectMetadata) {
+		return GwtUtils.convertGovernorTypeNameIntoKeyTypeName(physicalType, mirrorType, projectMetadata);
+	}
+	
+	private boolean isPublicAccessor(MethodMetadata method) {
+		return Modifier.isPublic(method.getModifier()) && !method.getReturnType().equals(JavaType.VOID_PRIMITIVE) && method.getParameterTypes().size() == 0 && (method.getMethodName().getSymbolName().startsWith("get"));
+	}
+
+	private boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
+		return !isEnum(ptmd)
+				&& isEntity(ptmd)
+				&& !(isRequestFactoryCompatible(returnType))
+				&& !isEmbeddable(ptmd);
+	}
+
+	private HashMap<JavaSymbolName, JavaType> resolveTypes(JavaType generic, JavaType typed) {
+		HashMap<JavaSymbolName, JavaType> typeMap = new HashMap<JavaSymbolName, JavaType>();
+		boolean typeCountMatch = generic.getParameters().size() == typed.getParameters().size();
+		Assert.isTrue(typeCountMatch, "Type count must match.");
+
+		int i = 0;
+		for (JavaType genericParamType : generic.getParameters()) {
+			typeMap.put(genericParamType.getArgName(), typed.getParameters().get(i));
+			i++;
+		}
+		return typeMap;
+	}
+	
+	private <T extends AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure>> T convertModifier(T builder) {
+		if (Modifier.isPrivate(builder.getModifier())) {
+			builder.setModifier(Modifier.PROTECTED);
+		}
+		return builder;
 	}
 
 	private ProjectMetadata getProjectMetadata() {

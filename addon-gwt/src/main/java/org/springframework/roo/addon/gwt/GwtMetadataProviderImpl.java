@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.gwt;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,14 +11,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -26,6 +28,8 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -36,6 +40,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -62,10 +67,12 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class GwtMetadataProviderImpl implements GwtMetadataProvider {
+	private static Logger logger = HandlerUtils.getLogger(GwtMetadataProviderImpl.class);
 	@Reference private FileManager fileManager;
 	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplateService gwtTemplateService;
 	@Reference private GwtTypeService gwtTypeService;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProjectOperations projectOperations;
@@ -103,18 +110,30 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			return null;
 		}
 
-		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		// Obtain the governor's information
+		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeId);
 		if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid() || !(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
 			return null;
 		}
 
 		ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
+ 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), governorTypeDetails);
+ 		if (memberDetails == null) {
+ 			return null;
+ 		}
+		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
+		if (persistenceMemberHoldingTypeDetails == null || Modifier.isAbstract(persistenceMemberHoldingTypeDetails.getModifier())) {
+			return null;
+		}
+
+		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
+		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
+		MethodMetadata findAllMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ALL_METHOD);
+		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.COUNT_ALL_METHOD);
 
 		// We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
-		if (!GwtUtils.isMappable(governorTypeDetails, entityMetadata)) {
+		if (!isMappable(persistenceMemberHoldingTypeDetails.getName().getFullyQualifiedTypeName(), memberDetails, findEntriesMethod, findMethod, findAllMethod, countMethod)) {
 			return null;
 		}
 
@@ -125,7 +144,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		for (MethodMetadata method : proxyMethods) {
 			JavaType returnType = method.getReturnType().isCommonCollectionType() && method.getReturnType().getParameters().size() != 0 ? method.getReturnType().getParameters().get(0) : method.getReturnType();
 			if (gwtTypeService.isDomainObject(returnType) && !method.getReturnType().equals(governorTypeName)) {
-				JavaType proxyType = GwtUtils.convertGovernorTypeNameIntoKeyTypeName(GwtType.PROXY, projectMetadata, returnType);
+				JavaType proxyType = GwtUtils.convertGovernorTypeNameIntoKeyTypeName(returnType, GwtType.PROXY, projectMetadata);
 				PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(proxyType, Path.SRC_MAIN_JAVA));
 				if (ptmd == null) {
 					Set<String> set = new HashSet<String>();
@@ -149,7 +168,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 		List<MethodMetadata> requestMethods = gwtTypeService.getRequestMethods(governorTypeDetails);
 
-		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, governorTypeDetails, projectMetadata, convertedProxyMethods, requestMethods, entityMetadata);
+		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, governorTypeDetails, projectMetadata, convertedProxyMethods, requestMethods, findAllMethod, findMethod, findEntriesMethod, countMethod);
 		gwtFileManager.write(gwtMetadata.buildProxy(), true);
 		gwtFileManager.write(gwtMetadata.buildRequest(), true);
 
@@ -187,7 +206,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			FieldMetadata field = MemberFindingUtils.getDeclaredField(governorTypeDetails, propertyName);
 			List<AnnotationMetadata> annotations = field != null ? field.getAnnotations() : Collections.<AnnotationMetadata> emptyList();
 
-			GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(projectOperations.getProjectMetadata(), ptmd, propertyType, propertyName.getSymbolName(), annotations, proxyMethod.getMethodName().getSymbolName());
+			GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(projectMetadata, ptmd, propertyType, propertyName.getSymbolName(), annotations, proxyMethod.getMethodName().getSymbolName());
 			clientSideTypeMap.put(propertyName, gwtProxyProperty);
 		}
 
@@ -281,6 +300,53 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		if (get(downstreamDependency) != null) {
 			metadataDependencyRegistry.notifyDownstream(downstreamDependency);
 		}
+	}
+
+	private boolean isMappable(String typeName, MemberDetails memberDetails, MethodMetadata findEntriesMethod, MethodMetadata findMethod, MethodMetadata findAllMethod, MethodMetadata countMethod) {
+		if (findAllMethod == null) {
+			logger.severe("GWT support requires that a proxied entity has a findAll method for type " + typeName);
+			return false;
+		}
+		if (findEntriesMethod == null) {
+			logger.severe("GWT support requires that a proxied entity has a findEntries method for type " + typeName);
+			return false;
+		}
+		if (countMethod == null) {
+			logger.severe("GWT support requires that a proxied entity has a count method for type " + typeName);
+			return false;
+		}
+
+		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
+		if (persistMethod == null) {
+			logger.severe("GWT support requires that a proxied entity has a persist method for type " + typeName);
+			return false;
+		}
+		
+		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
+		if (removeMethod == null) {
+			logger.severe("GWT support requires that a proxied entity has a remove method for type " + typeName);
+			return false;
+		}
+		
+		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		if (identifierAccessorMethod == null) {
+			logger.severe("GWT support requires that a proxied entity has an @Id field accessor method for type " + typeName);
+			return false;
+		}
+		
+		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
+		if (versionAccessorMethod == null) {
+			logger.severe("GWT support requires that a proxied entity has an @Version field accessor method for type " + typeName);
+			return false;
+		}
+		
+		List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_FIELD);
+		if (!versionFields.isEmpty() && !versionFields.get(0).getFieldName().getSymbolName().equals("version")) {
+			logger.severe("GWT support requires that an @Version field be named \"version\" (found \"" + versionFields.get(0).getFieldName().getSymbolName() + "\") for " + typeName);
+			return false;
+		}
+		
+		return true;
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {

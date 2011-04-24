@@ -841,7 +841,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
-			return userMethod;//tagMethod(userMethod, tag);
+			return userMethod; 
 		}
 		
 		// Create the method
@@ -890,7 +890,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();//tagMethod(methodBuilder.build(), tag);
+		return methodBuilder.build();
 	}
 	
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations, boolean isPersistMethod) {

@@ -1,10 +1,10 @@
 package org.springframework.roo.addon.gwt;
 
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.model.JavaSymbolName;
-
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.model.JavaSymbolName;
 
 /**
  * Interface for {@link GwtTemplateServiceImpl}.

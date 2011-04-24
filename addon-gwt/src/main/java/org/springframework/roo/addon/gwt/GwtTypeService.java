@@ -1,12 +1,12 @@
 package org.springframework.roo.addon.gwt;
 
+import java.util.List;
+
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
-
-import java.util.List;
 
 /**
  * Interface for {@link GwtTypeServiceImpl}.

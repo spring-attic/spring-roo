@@ -1,16 +1,16 @@
 package org.springframework.roo.addon.gwt;
 
-import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.ProjectMetadata;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ProjectMetadata;
 
 public enum GwtType {
 	// Represents mirror types classes. There are one of these for each entity mirrored by Roo.

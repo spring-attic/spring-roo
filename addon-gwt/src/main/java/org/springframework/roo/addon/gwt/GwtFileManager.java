@@ -1,8 +1,8 @@
 package org.springframework.roo.addon.gwt;
 
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-
 import java.util.List;
+
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 
 /**
  * Provides a basic implementation of {@link GwtFileManager} which encapsulates

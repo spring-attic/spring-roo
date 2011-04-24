@@ -4,14 +4,15 @@ import hapax.Template;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
 import hapax.parser.TemplateParser;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.FileCopyUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * Loads hapax templates from the classpath.

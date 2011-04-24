@@ -18,14 +18,12 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -63,64 +61,64 @@ import org.xml.sax.SAXException;
 public class GwtMetadata extends AbstractMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = GwtMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-
-	private EntityMetadata entityMetadata;
+	private ClassOrInterfaceTypeDetails governorTypeDetails;
+	private ProjectMetadata projectMetadata;
+	private List<MethodMetadata> proxyMethods;
+	private List<MethodMetadata> requestMethods;
 	private MethodMetadata findAllMethod;
 	private MethodMetadata findMethod;
 	private MethodMetadata countMethod;
 	private MethodMetadata findEntriesMethod;
 
-	private List<MethodMetadata> proxyMethods;
-	private List<MethodMetadata> requestMethods;
-	private ClassOrInterfaceTypeDetails governorTypeDetails;
-	private ProjectMetadata projectMetadata;
-
-	public GwtMetadata(String identifier, ClassOrInterfaceTypeDetails governorTypeDetails, ProjectMetadata projectMetadata, List<MethodMetadata> proxyMethods, List<MethodMetadata> requestMethods, EntityMetadata entityMetadata) {
+	public GwtMetadata(String identifier, ClassOrInterfaceTypeDetails governorTypeDetails, ProjectMetadata projectMetadata, List<MethodMetadata> proxyMethods, List<MethodMetadata> requestMethods, MethodMetadata findAllMethod, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata countMethod) {
 		super(identifier);
-
 		Assert.notNull(governorTypeDetails, "Governor details are required");
 		Assert.notNull(projectMetadata, "ProjectMetadata is required");
 		Assert.notNull(proxyMethods, "Proxy methods are required");
 		Assert.notNull(requestMethods, "Request methods are required");
-		Assert.notNull(entityMetadata, "Entity Metadata is required");
-
+		Assert.notNull(findAllMethod, "findAllMethod required");
+		Assert.notNull(findMethod, "findMethod required");
+		Assert.notNull(findEntriesMethod, "findEntriesMethod required");
+		Assert.notNull(countMethod, "countMethod required");
 		this.governorTypeDetails = governorTypeDetails;
 		this.projectMetadata = projectMetadata;
 		this.proxyMethods = proxyMethods;
 		this.requestMethods = requestMethods;
-		this.entityMetadata = entityMetadata;
-		resolveEntityInformation();
+		this.findAllMethod = findAllMethod;
+		this.findMethod = findMethod;
+		this.findEntriesMethod = findEntriesMethod;
+		this.countMethod = countMethod;
 	}
 
-	private void resolveEntityInformation() {
-		if (entityMetadata == null || !entityMetadata.isValid()) {
-			return;
-		}
+//	private void resolveEntityInformation() {
+//		if (entityMetadata == null || !entityMetadata.isValid()) {
+//			return;
+//		}
 
 		// Lookup special fields
-		String typeName = governorTypeDetails.getName().getFullyQualifiedTypeName();
+	//	String typeName = governorTypeDetails.getName().getFullyQualifiedTypeName();
 
-		FieldMetadata idField = entityMetadata.getIdentifierField();
-		Assert.notNull(idField, "GWT support requires an @Id field for " + typeName);
+//		FieldMetadata idField = entityMetadata.getIdentifierField();
+//		Assert.notNull(idField, "GWT support requires an @Id field for " + typeName);
 
-		FieldMetadata versionField = entityMetadata.getVersionField();
-		Assert.notNull(versionField, "GWT support requires an @Version field for " + typeName);
-		JavaSymbolName versionPropertyName = versionField.getFieldName();
-		Assert.isTrue("version".equals(versionPropertyName.getSymbolName()), "GWT support requires that an @Version field be named \"version\" (found \"" + versionPropertyName + "\") for " + typeName);
+	//	FieldMetadata versionField = entityMetadata.getVersionField();
+//		Assert.notNull(versionField, "GWT support requires an @Version field for " + typeName);
+//		JavaSymbolName versionPropertyName = versionField.getFieldName();
+//		Assert.isTrue("version".equals(versionPropertyName.getSymbolName()), "GWT support requires that an @Version field be named \"version\" (found \"" + versionPropertyName + "\") for " + typeName);
 
 		// Lookup the find and count methods and store them
-		findAllMethod = entityMetadata.getFindAllMethod();
-		Assert.notNull(findAllMethod, "GWT support requires a findAll method for " + typeName);
+	//	findAllMethod = entityMetadata.getFindAllMethod();
+	//	Assert.notNull(findAllMethod, "GWT support requires a findAll method for " + typeName);
 
-		findMethod = entityMetadata.getFindMethod();
-		Assert.notNull(findMethod, "GWT support requires a find method for " + typeName);
+	//	findMethod = entityMetadata.getFindMethod();
+	//	Assert.notNull(findMethod, "GWT support requires a find method for " + typeName);
 
-		findEntriesMethod = entityMetadata.getFindEntriesMethod();
-		Assert.notNull(findEntriesMethod, "GWT support requires a findEntries method for " + typeName);
+	//	findEntriesMethod = entityMetadata.getFindEntriesMethod();
+	//	Assert.notNull(findEntriesMethod, "GWT support requires a findEntries method for " + typeName);
 
-		countMethod = entityMetadata.getCountMethod();
-		Assert.notNull(countMethod, "GWT support requires a count method for " + typeName);
-	}
+//		countMethod = entityMetadata.getCountMethod();
+//		Assert.notNull(countMethod, "GWT support requires a count method for " + typeName);
+//	}
 
 	public ClassOrInterfaceTypeDetails buildProxy() {
 		String destinationMetadataId = getDestinationMetadataId(GwtType.PROXY);
@@ -221,7 +219,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			is.setCharacterStream(new StringReader(templateContents));
 
 			Document templateDocument = builder.parse(is);
-
 			is = new InputSource();
 			is.setCharacterStream(new FileReader(destFile));
 			Document existingDocument = builder.parse(is);
@@ -287,7 +284,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 					StreamResult result = new StreamResult(new StringWriter());
 					DOMSource source = new DOMSource(existingDocument);
 					transformer.transform(source, result);
-
 					return result.getWriter().toString();
 				}
 			}
@@ -299,8 +295,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 	}
 
 	private MethodMetadataBuilder getRequestMethod(String destinationMetadataId, MethodMetadata methodMetaData) {
-		if (methodMetaData.getMethodName().equals(countMethod.getMethodName()) || methodMetaData.getMethodName().equals(findMethod.getMethodName()) ||
-				methodMetaData.getMethodName().equals(findAllMethod.getMethodName()) || methodMetaData.getMethodName().equals(findEntriesMethod.getMethodName())) {
+		if (methodMetaData.getMethodName().equals(countMethod.getMethodName()) || methodMetaData.getMethodName().equals(findMethod.getMethodName()) || methodMetaData.getMethodName().equals(findAllMethod.getMethodName()) || methodMetaData.getMethodName().equals(findEntriesMethod.getMethodName())) {
 			List<JavaType> methodReturnTypeArgs = Collections.singletonList(methodMetaData.getReturnType());
 			JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, methodReturnTypeArgs);
 			return getRequestMethod(destinationMetadataId, methodMetaData, methodReturnType);
@@ -321,7 +316,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 	 * @return the MID to the mirror class applicable for the current governor (never null)
 	 */
 	private String getDestinationMetadataId(GwtType gwtType) {
-		return PhysicalTypeIdentifier.createIdentifier(GwtUtils.convertGovernorTypeNameIntoKeyTypeName(gwtType, projectMetadata, governorTypeDetails.getName()), Path.SRC_MAIN_JAVA);
+		return PhysicalTypeIdentifier.createIdentifier(GwtUtils.convertGovernorTypeNameIntoKeyTypeName(governorTypeDetails.getName(), gwtType, projectMetadata), Path.SRC_MAIN_JAVA);
 	}
 
 	/**
