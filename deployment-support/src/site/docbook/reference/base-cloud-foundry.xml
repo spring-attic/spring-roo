@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xml:id="base-cloud-foundry" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="base-cloud-foundry"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:ns5="http://www.w3.org/1998/Math/MathML"
@@ -10,7 +11,7 @@
 
   <para>VMware <link xlink:href="www.cloudfoundry.org">Cloud Foundry</link> is
   a recently-released platform as a service (PaaS) offering for developers on
-  many popular programming languages, including Java. </para>
+  many popular programming languages, including Java.</para>
 
   <para>Spring Roo provides comprehensive integration with Cloud Foundry. With
   Roo you can easily login to Cloud Foundry, view your applications, bind to
@@ -24,7 +25,7 @@
     <para>The Cloud Foundry add-on provides the mechanism through which Cloud
     Foundry features are available in Spring Roo. To install this add-on, you
     simply load Spring Roo 1.1.3 and type (most of which can be completed
-    using the TAB key, or CTRL + SPACE if using STS): </para>
+    using the TAB key, or CTRL + SPACE if using STS):</para>
 
     <programlisting>pgp automatic trust 
 addon install bundle --bundleSymbolicName org.springframework.roo.addon.cloud.foundry </programlisting>
@@ -41,7 +42,7 @@ addon install bundle --bundleSymbolicName org.springframework.roo.addon.cloud.fo
     instructs Roo to download and install the Cloud Foundry support. The
     add-on is successfully installed once you see the “Successfully installed
     add-on: Spring Roo - Addon - Cloud Foundry [version: a.b.c.d]” message on
-    your screen. </para>
+    your screen.</para>
 
     <para>As with all Roo add-ons, you could also install the Cloud Foundry
     add-on by simply attempting to use it. To follow this alternate
@@ -76,6 +77,9 @@ cloud foundry login</programlisting>
     After installing the Cloud Foundry add-on you will first need to login. To
     do this, use the following command:</para>
 
+	<section>
+    <title>Logging In</title>
+    
     <programlisting>cloud foundry login</programlisting>
 
     <para>This command takes in three options: email, password, and
@@ -85,7 +89,11 @@ cloud foundry login</programlisting>
     you login, Roo will store these locally for you. The cloudControllerUrl
     defaults the Cloud service provided by VMware, api.cloudfoundry.com, but
     can be changed to point to private Cloud Foundry instances.</para>
+    
+    </section>
 
+	 <section>
+    <title>The Commands</title>
     <para>After logging in a many new Cloud Foundry comands will be presented
     to you. You can see these by typing "cloud foundry" in the shell and then
     pressing TAB.</para>
@@ -95,7 +103,11 @@ cloud foundry login</programlisting>
         <imagedata fileref="images/cloud-foundry/CloudFoundryFromTheRooShell.png"></imagedata>
       </imageobject>
     </mediaobject>
+    
+     </section>
 
+	<section>
+    <title>Deploying Your Application</title>
     <para>As the creation of sample application that will be used in this
     chapter has already been covered in the <link linkend="base-gwt">GWT
     chapter</link> we will skip to the deploying it.</para>
@@ -109,7 +121,7 @@ cloud foundry login</programlisting>
     project. If a WAR isn't found the "CREATE" option presented. By selecting
     create you will trigger a Maven package, which will create a deployable
     application. Onece the application has been successfully deployed when you
-    see "The application 'new-expenses' was successfully pushed". </para>
+    see "The application 'new-expenses' was successfully pushed".</para>
 
     <mediaobject>
       <imageobject>
@@ -117,6 +129,11 @@ cloud foundry login</programlisting>
                    fileref="images/cloud-foundry/CloudFoundryDeploy.png"></imagedata>
       </imageobject>
     </mediaobject>
+    
+    </section>
+    
+    <section>
+    <title>Viewing Your Applications</title>
 
     <para>After running the above command, and assuming that you had created a
     project in the first place your application will be deployed to Cloud
@@ -129,14 +146,19 @@ cloud foundry login</programlisting>
                    fileref="images/cloud-foundry/CloudFoundryApps.png"></imagedata>
       </imageobject>
     </mediaobject>
+    
 
     <para>There are two other application deployed, both of which are started
     and bound to services. You will also notice that a URL has been mapped to
-    the each application and hat the application that was just deployed
+    the each application and that the application that was just deployed
     "new-expenses" is currently stopped and no services have been bound to it.
     The URL has been created and mapped based on the application name, which
-    is what Roo defaults to if a URL is not provided. </para>
+    is what Roo defaults to if a URL is not provided.</para>
+    
+    </section>
 
+	<section>
+    <title>Binding Services</title>
     <mediaobject>
       <imageobject>
         <imagedata align="center"
@@ -171,8 +193,12 @@ cloud foundry login</programlisting>
     before we do lets take a look at how much memory has been assigned to the
     application. To do this we run "cloud foundry view app memory". When we
     first deployed the application no memory value was specified so, as you
-    can see below, the default value provisioned is 256 megabytes. </para>
+    can see below, the default value provisioned is 256 megabytes.</para>
+    
+    </section>
 
+	<section>
+    <title>Provisioning Memory</title>
     <mediaobject>
       <imageobject>
         <imagedata align="center"
@@ -182,9 +208,14 @@ cloud foundry login</programlisting>
 
     <para>To change the alotted memory we could run "cloud foundry update app
     memory --appName new-expenses" but as GWT allows state to be stored client
-    side the default should be enough. Now that we have verified that we
+    side the default should be enough.</para>
+    </section>
+    
+    <section>
+    <title>Starting Your Application</title>
+    <para>Now that we have verified that we
     should have enough memory to start we simple run "cloud foundry start app
-    --appName new-expenses". </para>
+    --appName new-expenses".</para>
 
     <mediaobject>
       <imageobject>
@@ -192,9 +223,10 @@ cloud foundry login</programlisting>
                    fileref="images/cloud-foundry/CloudFoundryStartApp.png"></imagedata>
       </imageobject>
     </mediaobject>
+    
 
-    <para>To verify the application has actually start simple navigate to the
-    URL mapped to the application, in this case it is
+    <para>To verify that the application has actually started simply navigate
+    to the URL you previously mapped to the application, in this case it is
     "new-expenses.cloudfoundry.com", and you should see your
     application.</para>
 
@@ -204,7 +236,7 @@ cloud foundry login</programlisting>
                    fileref="images/cloud-foundry/CloudFoundryNewExpenses.png"></imagedata>
       </imageobject>
     </mediaobject>
-
+	</section>
     <para></para>
   </section>
 
