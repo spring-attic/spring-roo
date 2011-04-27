@@ -1,7 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -105,7 +106,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			if (embeddedIdFields.size() > 1) {
 				throw new IllegalStateException("Found multiple embedded ID fields in " + backingType.getFullyQualifiedTypeName() + " type. Only one is allowed.");
 			} else if (embeddedIdFields.size() == 1) {
-				Map<Object, JavaSymbolName> jsonMethodNames = new HashMap<Object, JavaSymbolName>();
+				Map<Object, JavaSymbolName> jsonMethodNames = new LinkedHashMap<Object, JavaSymbolName>();
 				MemberDetails fieldMemberDetails = getMemberDetails(embeddedIdFields.get(0).getFieldType());
 				MethodMetadata fromJsonMethod = MemberFindingUtils.getMostConcreteMethodWithTag(fieldMemberDetails, CustomDataJsonTags.FROM_JSON_METHOD);
 				if (fromJsonMethod != null) {
@@ -135,8 +136,8 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	
 	private Map<JavaType, List<MethodMetadata>> findRelevantTypes(JavaType type, String metadataIdentificationString) {
 		MemberDetails memberDetails = getMemberDetails(type);
-		Map<JavaType, List<MethodMetadata>> types = new HashMap<JavaType, List<MethodMetadata>>();
-		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
+		Map<JavaType, List<MethodMetadata>> types = new LinkedHashMap<JavaType, List<MethodMetadata>>();
+		List<MethodMetadata> locatedAccessors = new LinkedList<MethodMetadata>();
 		
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		int counter = 0;
