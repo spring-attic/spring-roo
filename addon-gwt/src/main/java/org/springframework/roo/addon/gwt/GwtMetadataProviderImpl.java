@@ -116,14 +116,16 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid() || !(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
 			return null;
 		}
-
 		ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (governorTypeDetails == null || Modifier.isAbstract(governorTypeDetails.getModifier())) {
+			return null;
+		}
  		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), governorTypeDetails);
  		if (memberDetails == null) {
  			return null;
  		}
 		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
-		if (persistenceMemberHoldingTypeDetails == null || Modifier.isAbstract(persistenceMemberHoldingTypeDetails.getModifier())) {
+		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
 
