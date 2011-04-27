@@ -22,8 +22,6 @@ import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.Identifier;
 import org.springframework.roo.addon.entity.IdentifierService;
-import org.springframework.roo.addon.entity.RooEntity;
-import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -64,8 +62,8 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements IdentifierService, FileEventListener {
 	private static final Logger logger = HandlerUtils.getLogger(DbreDatabaseListenerImpl.class);
-	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
-	private static final JavaType ROO_IDENTIFIER = new JavaType(RooIdentifier.class.getName());
+	private static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");
+	private static final JavaType ROO_IDENTIFIER = new JavaType("org.springframework.roo.addon.entity.RooIdentifier");
 	private static final String IDENTIFIER_TYPE = "identifierType";
 	private static final String VERSION_FIELD = "versionField";
 	private static final String VERSION = "version";
@@ -417,7 +415,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		Iterator<? extends AnnotationMetadata> typeAnnotationIterator = typeAnnotations.iterator();
 		while (hasRequiredAnnotations && typeAnnotationIterator.hasNext()) {
 			JavaType annotationType = typeAnnotationIterator.next().getAnnotationType();
-			hasRequiredAnnotations &= (annotationType.getFullyQualifiedTypeName().equals(RooDbManaged.class.getName()) || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.javabean.RooJavaBean") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.tostring.RooToString") || annotationType.getFullyQualifiedTypeName().equals(RooEntity.class.getName()));
+			hasRequiredAnnotations &= (annotationType.getFullyQualifiedTypeName().equals(RooDbManaged.class.getName()) || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.javabean.RooJavaBean") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.tostring.RooToString") || annotationType.equals(ROO_ENTITY));
 		}
 
 		if (!hasRequiredAnnotations || typeAnnotations.size() != 4) {

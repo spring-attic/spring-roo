@@ -3,7 +3,6 @@ package org.springframework.roo.addon.dbre;
 import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -81,7 +80,7 @@ public abstract class DbreTypeUtils {
 
 		if (!StringUtils.hasText(tableName)) {
 			// The search continues...
-			annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType(RooEntity.class.getName()));
+			annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
 			if (annotation != null) {
 				AnnotationAttributeValue<?> tableAttribute = annotation.getAttribute(new JavaSymbolName("table"));
 				if (tableAttribute != null) {
