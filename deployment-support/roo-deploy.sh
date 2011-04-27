@@ -298,6 +298,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
     rm $WORK_DIR/bundle/servlet-api-*.jar
     rm $WORK_DIR/bundle/slf4j-*.jar
     rm $WORK_DIR/bundle/spring-*.jar
+    # These have to be removed as the Cloud Foundry add-on requires dependencies that are not bundled and thus must be installed via the shell.
+    rm $WORK_DIR/bundle/*cloud.foundry*.jar
+    rm $WORK_DIR/bundle/*cloud-foundry-api*.jar
+    rm $WORK_DIR/bundle/*AppCloudClient*.jar
     mv $WORK_DIR/bundle/org.springframework.roo.bootstrap-*.jar $WORK_DIR/bin
     mv $WORK_DIR/bundle/org.apache.felix.framework-*.jar $WORK_DIR/bin
     cp $ROO_HOME/bootstrap/src/main/bin/* $WORK_DIR/bin
