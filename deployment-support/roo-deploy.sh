@@ -288,6 +288,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     mkdir -p $WORK_DIR/samples
     cp $ROO_HOME/annotations/target/*-$VERSION.jar $WORK_DIR/annotations
     cp $ROO_HOME/target/all/*.jar $WORK_DIR/bundle
+    rm $WORK_DIR/bundle/org.springframework.roo.annotations-$VERSION.jar
     rm $WORK_DIR/bundle/*jsch*.jar
     rm $WORK_DIR/bundle/*jgit*.jar
     rm $WORK_DIR/bundle/*git*.jar
