@@ -55,6 +55,12 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		addMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
 	}
 	
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		removeMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
+	}
+	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
