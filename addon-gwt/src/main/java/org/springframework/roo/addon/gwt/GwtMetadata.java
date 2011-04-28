@@ -90,36 +90,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		this.countMethod = countMethod;
 	}
 
-//	private void resolveEntityInformation() {
-//		if (entityMetadata == null || !entityMetadata.isValid()) {
-//			return;
-//		}
-
-		// Lookup special fields
-	//	String typeName = governorTypeDetails.getName().getFullyQualifiedTypeName();
-
-//		FieldMetadata idField = entityMetadata.getIdentifierField();
-//		Assert.notNull(idField, "GWT support requires an @Id field for " + typeName);
-
-	//	FieldMetadata versionField = entityMetadata.getVersionField();
-//		Assert.notNull(versionField, "GWT support requires an @Version field for " + typeName);
-//		JavaSymbolName versionPropertyName = versionField.getFieldName();
-//		Assert.isTrue("version".equals(versionPropertyName.getSymbolName()), "GWT support requires that an @Version field be named \"version\" (found \"" + versionPropertyName + "\") for " + typeName);
-
-		// Lookup the find and count methods and store them
-	//	findAllMethod = entityMetadata.getFindAllMethod();
-	//	Assert.notNull(findAllMethod, "GWT support requires a findAll method for " + typeName);
-
-	//	findMethod = entityMetadata.getFindMethod();
-	//	Assert.notNull(findMethod, "GWT support requires a find method for " + typeName);
-
-	//	findEntriesMethod = entityMetadata.getFindEntriesMethod();
-	//	Assert.notNull(findEntriesMethod, "GWT support requires a findEntries method for " + typeName);
-
-//		countMethod = entityMetadata.getCountMethod();
-//		Assert.notNull(countMethod, "GWT support requires a count method for " + typeName);
-//	}
-
 	public ClassOrInterfaceTypeDetails buildProxy() {
 		String destinationMetadataId = getDestinationMetadataId(GwtType.PROXY);
 
