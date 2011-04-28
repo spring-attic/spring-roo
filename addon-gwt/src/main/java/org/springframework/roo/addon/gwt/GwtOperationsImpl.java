@@ -116,6 +116,18 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 
 		// Update persistence.xml
 		updatePersistenceXml();
+
+		// Do a "get" for every .java file, thus ensuring the metadata is fired
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
+		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
+		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+			String fullPath = srcRoot.getRelativeSegment(fd.getCanonicalPath());
+			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
+			JavaType javaType = new JavaType(fullPath);
+			String id = GwtMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+			metadataService.get(id);
+		}
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
