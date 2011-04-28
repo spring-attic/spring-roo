@@ -870,8 +870,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return " but type for table '" + tableName + "' could not be found or is not database managed (not annotated with @RooDbManaged)";
 	}
 
-	private String getErrorMsg(String tableName, String referenceTableName) {
-		return getErrorMsg(tableName) + " and table '" + tableName + "' has a foreign-key reference to table '" + referenceTableName + "'";
+	private String getErrorMsg(String foreignTableName, String tableName) {
+		return getErrorMsg(foreignTableName) + " and table '" + tableName + "' has a foreign-key reference to table '" + foreignTableName + "'";
 	}
 
 	public static final String getMetadataIdentiferType() {
