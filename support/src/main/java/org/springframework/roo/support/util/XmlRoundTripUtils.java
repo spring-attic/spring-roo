@@ -27,7 +27,7 @@ public abstract class XmlRoundTripUtils {
 		try {
 		  digest = MessageDigest.getInstance("sha-1");
 		} catch (NoSuchAlgorithmException e) {
-			new IllegalStateException("Could not create hash key for identifier");
+			throw new IllegalStateException("Could not create hash key for identifier");
 		}
 	}
 	
