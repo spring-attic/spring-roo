@@ -17,7 +17,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
@@ -304,49 +303,40 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 	private boolean isMappable(String typeName, MemberDetails memberDetails, MethodMetadata findEntriesMethod, MethodMetadata findMethod, MethodMetadata findAllMethod, MethodMetadata countMethod) {
 		if (findAllMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has a findAll method for type " + typeName);
 			return false;
 		}
 		if (findEntriesMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has a findEntries method for type " + typeName);
 			return false;
 		}
 		if (countMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has a count method for type " + typeName);
 			return false;
 		}
 		if (findMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has a find method for type " + typeName);
 			return false;
 		}
 
 		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
 		if (persistMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has a persist method for type " + typeName);
 			return false;
 		}
 		
 		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
 		if (removeMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has a remove method for type " + typeName);
 			return false;
 		}
 		
 		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		if (identifierAccessorMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has an @Id field accessor method for type " + typeName);
 			return false;
 		}
 		
 		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
 		if (versionAccessorMethod == null) {
-			//logger.severe("GWT support requires that a proxied entity has an @Version field accessor method for type " + typeName);
 			return false;
 		}
 		
 		List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_FIELD);
 		if (!versionFields.isEmpty() && !versionFields.get(0).getFieldName().getSymbolName().equals("version")) {
-			//logger.severe("GWT support requires that an @Version field be named \"version\" (found \"" + versionFields.get(0).getFieldName().getSymbolName() + "\") for " + typeName);
 			return false;
 		}
 		
