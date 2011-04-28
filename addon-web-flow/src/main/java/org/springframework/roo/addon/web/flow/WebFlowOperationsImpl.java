@@ -107,7 +107,20 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
 			public boolean doWithElement(Document document, Element root) {
-				if (null == XmlUtils.findFirstElement("/beans/import[@resource='webflow-config.xml']", root)) {
+				if (XmlUtils.findFirstElement("/beans/bean[@id='conversionService']", root) == null) {
+					Element conversionServiceBean = document.createElement("bean");
+					conversionServiceBean.setAttribute("id", "conversionService");
+					conversionServiceBean.setAttribute("class", "org.springframework.format.support.FormattingConversionServiceFactoryBean");
+					root.appendChild(conversionServiceBean);
+					return true;
+				}
+				return false;
+			}
+		});
+
+		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
+			public boolean doWithElement(Document document, Element root) {
+				if (XmlUtils.findFirstElement("/beans/import[@resource='webflow-config.xml']", root) == null) {
 					Element importSWF = document.createElement("import");
 					importSWF.setAttribute("resource", "webflow-config.xml");
 					root.appendChild(importSWF);
