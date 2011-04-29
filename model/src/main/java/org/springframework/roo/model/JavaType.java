@@ -354,7 +354,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType && ((JavaType) obj).parameters.containsAll(parameters);
+		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType && this.array == ((JavaType) obj).array && ((JavaType) obj).parameters.containsAll(parameters);
 	}
 
 	public final int compareTo(JavaType o) {
