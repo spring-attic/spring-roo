@@ -227,10 +227,6 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			return InstallOrUpgradeStatus.INVALID_OBR_URL;
 		}
 
-		if (shell == null) { // Workaround for ROO-2190
-			return InstallOrUpgradeStatus.SHELL_RESTART_NEEDED;
-		}
-
 		int count = countBundles();
 		boolean requiresWrappedCoreDependency = bundleVersion.getDescription().contains("#wrappedCoreDependency");
 
@@ -536,7 +532,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		logger.info("[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version");
 	}
 
-	@SuppressWarnings("unchecked") private boolean isTrustedKey(List<PGPPublicKeyRing> keys, String keyId) {
+	@SuppressWarnings("unchecked") 
+	private boolean isTrustedKey(List<PGPPublicKeyRing> keys, String keyId) {
 		for (PGPPublicKeyRing keyRing : keys) {
 			Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
 			while (it.hasNext()) {
