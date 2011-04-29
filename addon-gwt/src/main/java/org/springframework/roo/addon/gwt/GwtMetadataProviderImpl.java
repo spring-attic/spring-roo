@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -40,7 +39,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -67,7 +65,6 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class GwtMetadataProviderImpl implements GwtMetadataProvider {
-	private static Logger logger = HandlerUtils.getLogger(GwtMetadataProviderImpl.class);
 	@Reference private FileManager fileManager;
 	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplateService gwtTemplateService;
@@ -336,7 +333,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		}
 		
 		List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_FIELD);
-		if (!versionFields.isEmpty() && !versionFields.get(0).getFieldName().getSymbolName().equals("version")) {
+		if (versionFields.isEmpty() || (!versionFields.isEmpty() && !versionFields.get(0).getFieldName().getSymbolName().equals("version"))) {
 			return false;
 		}
 		
