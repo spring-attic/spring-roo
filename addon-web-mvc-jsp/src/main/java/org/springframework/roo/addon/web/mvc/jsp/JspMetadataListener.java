@@ -95,7 +95,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formbackingType.getFullyQualifiedTypeName());
 
 		// Install web artifacts only if Spring MVC config is missing
-		// TODO: remove this call when 'controller' commands are gone
+		// TODO: Remove this call when 'controller' commands are gone
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views"))) {
 			jspOperations.installCommonViewArtefacts();
@@ -126,7 +126,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), relatedTypeMd);
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
-
 		if (controllerPath.startsWith("/")) {
 			controllerPath = controllerPath.substring(1);
 		}
@@ -158,7 +157,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
 			JavaSymbolName menuItemId = new JavaSymbolName("new");
-			// add 'create new' menu item
+			// Add 'create new' menu item
 			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formbackingType.getSimpleTypeName()).getReadableSymbolName());
 			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
@@ -173,7 +172,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath);
 		}
-		// setup labels for i18n support
+		// Setup labels for i18n support
 		String resourceId = XmlUtils.convertId("label." + formbackingType.getFullyQualifiedTypeName().toLowerCase());
 		properties.put(resourceId, new JavaSymbolName(formbackingType.getSimpleTypeName()).getReadableSymbolName());
 
@@ -228,7 +227,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			for (FinderMetadataDetails finderDetails : finderMethodsDetails) {
 				String finderName = finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName();
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
-				// finders only get scaffolded if the finder name is not too long (see ROO-1027)
+				// Finders only get scaffolded if the finder name is not too long (see ROO-1027)
 				if (listPath.length() > 244) {
 					continue;
 				}
@@ -247,7 +246,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", properties, true, false);
 
-		// clean up links to finders which are removed by now
+		// Clean up links to finders which are removed by now
 		menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems);
 
 		return new JspMetadata(metadataIdentificationString, webScaffoldMetadata);
@@ -288,12 +287,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			} catch (IOException ioe) {
 				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 			} finally {
-				if (byteArrayOutputStream != null) {
-					try {
-						byteArrayOutputStream.close();
-					} catch (IOException ignore) {
-					}
-				}
+				try {
+					byteArrayOutputStream.close();
+				} catch (IOException ignored) {}
 			}
 		}
 
