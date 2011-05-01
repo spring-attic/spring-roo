@@ -215,7 +215,7 @@
       ask to add a persistence provider will JPA be installed, and only when
       you add a field using JavaBean Validation annotations will that library
       be installed. The same holds true for Spring Security, Spring Web Flow
-      and the other technologies Roo supports. With Roo you really do smart
+      and the other technologies Roo supports. With Roo you really do start
       small and incrementally add technologies if and when you want to, which
       is consistent with Roo's philosophy of there being <link
       linkend="intro-why-use-it-no-engineering-tradeoffs">no engineering
@@ -644,7 +644,7 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
     of how Roo works. To help you learn Roo we ship several sample scripts
     that can be used to build new applications. These sample scripts can be
     found in your $ROO_HOME/samples directory. You can run any sample script
-    by using the follow command format:</para>
+    by using the following command format:</para>
 
     <programlisting>$ <emphasis role="bold">mkdir sample</emphasis>
 $ <emphasis role="bold">cd sample</emphasis>
@@ -708,7 +708,7 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
     <para>The next step is to complete the <link linkend="beginning">Beginning
     With Roo: The Tutorial</link> chapter. In the tutorial chapter you'll
     learn how to use Roo with your preferred IDE and how flexible and natural
-    is to develop with Roo. After that you should read the <link
+    it is to develop with Roo. After that you should read the <link
     linkend="architecture">application architecture</link> chapter to
     understand what Roo applications look like. From there you might wish to
     wrap up the recommended tour of Roo with a skim over the <link
