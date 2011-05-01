@@ -39,6 +39,6 @@ public class UndoEvent {
 	public enum UndoOperation {
 		UNDO,
 		RESET,
-		FLUSH;
+		FLUSH
 	}
 }

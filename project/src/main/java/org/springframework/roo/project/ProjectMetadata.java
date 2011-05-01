@@ -377,7 +377,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		if (!gwtEnabled) {
 			String gwtXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, StringUtils.replace(topLevelPackage.getFullyQualifiedPackageName(), ".", File.separator) + "/ApplicationScaffold.gwt.xml");
 			File file = new File(gwtXmlPath);
-			gwtEnabled |= file.exists();
+			gwtEnabled = file.exists();
 		}
 		
 		return gwtEnabled;
