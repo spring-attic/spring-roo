@@ -58,7 +58,7 @@ public class FileDetails implements Comparable<FileDetails> {
 
 	/**
 	 * Each {@link FileDetails} is known by its canonical file name, which is also the format used for
-	 * Ant path matching etc. This method provides the canoncial file name without forcing the user to
+	 * Ant path matching etc. This method provides the canonical file name without forcing the user to
 	 * deal with the exceptions that would arise from using {@link File} directly. 
 	 * 
 	 * @return the canonical path.
@@ -82,7 +82,7 @@ public class FileDetails implements Comparable<FileDetails> {
 		try {
 			return file.getCanonicalPath();
 		} catch (IOException ioe) {
-			throw new IllegalStateException("Cannot determine canoncial path for '" + file + "'", ioe);
+			throw new IllegalStateException("Cannot determine canonical path for '" + file + "'", ioe);
 		}
 	}
 
@@ -105,7 +105,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	}
 	
 	/**
-	 * Determines whether the presented Ant path matches this {@link FileDetails} canoncial path.
+	 * Determines whether the presented Ant path matches this {@link FileDetails} canonical path.
 	 * 
 	 * <p>
 	 * The presented path must be in Ant syntax. It should include a full prefix that is
@@ -133,7 +133,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	 * If an empty string is returned from this method, it denotes the child was actually
 	 * the same identifier as the parent. 
 	 * 
-	 * @param childCanonicalPath the confirmed child of this instance (required; use canoncial path)
+	 * @param childCanonicalPath the confirmed child of this instance (required; use canonical path)
 	 * @return the relative path within the parent instance (never null)
 	 */
 	public String getRelativeSegment(String childCanonicalPath) {

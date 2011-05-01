@@ -148,7 +148,7 @@ public class TilesOperationsImpl implements TilesOperations {
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new TilesDtdResolver());
 			try {
-				tilesView = builder.parse(new File(viewFile));
+				tilesView = builder.parse(fileManager.getInputStream(viewFile));
 			} catch (SAXException se) {
 				throw new IllegalStateException("Unable to parse the tiles " + viewFile + " file", se);
 			} catch (IOException ioe) {

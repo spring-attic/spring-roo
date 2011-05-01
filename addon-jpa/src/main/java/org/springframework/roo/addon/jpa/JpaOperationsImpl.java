@@ -976,10 +976,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (!fileManager.exists(persistenceXmlPath)) {
 			throw new IllegalStateException("Failed to find " + persistenceXmlPath);
 		}
-		FileDetails fileDetails = fileManager.readFile(persistenceXmlPath);
 		Document document = null;
 		try {
-			InputStream inputStream = new FileInputStream(fileDetails.getFile());
+			InputStream inputStream = fileManager.getInputStream(persistenceXmlPath);
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setErrorHandler(null);
 			document = builder.parse(inputStream);
