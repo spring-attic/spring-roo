@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -172,7 +174,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 	public String buildUiXml(String templateContents, String destFile) {
 		try {
-			Transformer transformer = XmlUtils.createIndentingTransformer();
+
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new EntityResolver() {
 				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
@@ -189,6 +191,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 			is.setCharacterStream(new StringReader(templateContents));
 
 			Document templateDocument = builder.parse(is);
+
+			if (!new File(destFile).exists()) {
+				return transformXml(templateDocument);
+			}
+
 			is = new InputSource();
 			is.setCharacterStream(new FileReader(destFile));
 			Document existingDocument = builder.parse(is);
@@ -205,6 +212,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 				HashMap<String, Element> existingElementMap = new LinkedHashMap<String, Element>();
 				for (Element element : XmlUtils.findElements("//*[@id]", existingHoldingElement)) {
 					existingElementMap.put(element.getAttribute("id"), element);
+				}
+
+				if (existingElementMap.keySet().containsAll(templateElementMap.values())) {
+					return transformXml(existingDocument);
 				}
 
 				ArrayList<Element> elementsToAdd = new ArrayList<Element>();
@@ -250,18 +261,21 @@ public class GwtMetadata extends AbstractMetadataItem {
 					}
 				}
 
-				if (elementsToAdd.size() > 0 || elementsToRemove.size() > 0) {
-					StreamResult result = new StreamResult(new StringWriter());
-					DOMSource source = new DOMSource(existingDocument);
-					transformer.transform(source, result);
-					return result.getWriter().toString();
-				}
+				return transformXml(existingDocument);
 			}
 
-			return templateContents;
+			return transformXml(templateDocument);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	private String transformXml(Document document) throws TransformerException {
+		Transformer transformer = XmlUtils.createIndentingTransformer();
+		StreamResult result = new StreamResult(new StringWriter());
+		DOMSource source = new DOMSource(document);
+		transformer.transform(source, result);
+		return result.getWriter().toString();
 	}
 
 	private MethodMetadataBuilder getRequestMethod(String destinationMetadataId, MethodMetadata methodMetaData) {

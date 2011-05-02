@@ -227,10 +227,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 			if (gwtType.isCreateUiXml()) {
 				String destFile = gwtType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + mirrorTypeMap.get(gwtType).getSimpleTypeName() + ".ui.xml";
-				String contents = templateDataHolder.getXmlTemplates().get(gwtType);
-				if (fileManager.exists(destFile)) {
-					contents = gwtMetadata.buildUiXml(templateDataHolder.getXmlTemplates().get(gwtType), destFile);
-				}
+				String contents = gwtMetadata.buildUiXml(templateDataHolder.getXmlTemplates().get(gwtType), destFile);
 				xmlToBeWritten.put(destFile, contents);
 			}
 		}
