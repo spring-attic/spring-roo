@@ -67,6 +67,9 @@ public abstract class XmlRoundTripUtils {
 	 * @return the new document if changes are necessary, null if no changes are necessary
 	 */
 	public static boolean compareDocuments(Document original, Document proposed) {
+		if (XmlUtils.compareNodes(original, proposed)) {
+			return false;
+		}
 		boolean originalDocumentAdjusted = false;
 		originalDocumentAdjusted = checkNamespaces(original, proposed, originalDocumentAdjusted);
 		originalDocumentAdjusted = addOrUpdateElements(original.getDocumentElement(), proposed.getDocumentElement(), originalDocumentAdjusted);
