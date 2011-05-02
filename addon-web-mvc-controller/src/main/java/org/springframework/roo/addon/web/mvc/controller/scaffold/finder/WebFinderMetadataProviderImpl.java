@@ -79,8 +79,7 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		Set<FinderMetadataDetails> dynamicFinderMethodsAndFields = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 
 		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dynamicFinderMethodsAndFields);
 	}

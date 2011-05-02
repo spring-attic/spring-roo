@@ -70,7 +70,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		// We know governor type details are non-null and can be safely cast
 		JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
 
-		MemberDetails memberDetails = getMemberDetails(javaType);
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		if (memberDetails == null) {
 			return null;
 		}

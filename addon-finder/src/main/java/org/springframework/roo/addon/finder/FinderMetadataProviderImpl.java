@@ -68,7 +68,7 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.notNull(classOrInterfaceTypeDetails, "Governor failed to provide class type details, in violation of superclass contract");
 		
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(FinderMetadataProviderImpl.class.getName(), classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		
 		// Using SortedMap to ensure that if they have > 1 finder the ITD source emits in the same predictable order each finder
 		SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();

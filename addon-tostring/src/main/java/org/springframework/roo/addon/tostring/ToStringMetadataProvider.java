@@ -44,7 +44,7 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		if (memberDetails == null) {
 			return null;
 		}

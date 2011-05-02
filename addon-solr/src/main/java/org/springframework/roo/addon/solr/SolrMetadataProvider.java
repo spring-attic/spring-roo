@@ -77,7 +77,7 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 			beanPlural = pluralMetadata.getPlural();
 		}
 		
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(SolrMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		Map<MethodMetadata, FieldMetadata> accessorDetails = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		for (MethodMetadata methodMetadata : MemberFindingUtils.getMethods(memberDetails)) {
 			if (isMethodOfInterest(methodMetadata)) {

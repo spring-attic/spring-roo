@@ -144,7 +144,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 						}
 					}
 				} else {
-					for (MemberHoldingTypeDetails member : memberDetailsScanner.getMemberDetails(JavaBeanMetadataProvider.class.getName(), governorTypeDetails).getDetails()) {
+					for (MemberHoldingTypeDetails member : getMemberDetails(governorTypeDetails.getName()).getDetails()) {
 						for (FieldMetadata field : member.getDeclaredFields()) {
 							if (field.getFieldName().getSymbolName().equals("id")) {
 								return field;
