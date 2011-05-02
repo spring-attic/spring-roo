@@ -176,7 +176,8 @@ public final class XmlUtils {
 			node1.normalize();
 			node2.normalize();
 		}
-		return node1.isEqualNode(node2);
+		//Comparison is based on String or node equivalence to ensure all equality bases are covered
+		return nodeToString(node1).equals(nodeToString(node2)) || node1.isEqualNode(node2);
 	}
 
 	/**
