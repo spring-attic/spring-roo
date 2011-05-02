@@ -2,6 +2,7 @@ package org.springframework.roo.addon.tostring;
 
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -11,7 +12,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -44,14 +44,23 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(ToStringMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
+		if (memberDetails == null) {
+			return null;
+		}
+
+		List<MethodMetadata> methods = MemberFindingUtils.getMethods(memberDetails);
+		if (methods.isEmpty()) {
+			return null;
+		}
 
 		SortedSet<MethodMetadata> locatedAccessors = new TreeSet<MethodMetadata>(new Comparator<MethodMetadata>() {
 			public int compare(MethodMetadata l, MethodMetadata r) {
 				return l.getMethodName().compareTo(r.getMethodName());
 			}
 		});
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		
+		for (MethodMetadata method : methods) {
 			if (BeanInfoUtils.isAccessorMethod(method)) {
 				locatedAccessors.add(method);
 				// Track any changes to that method (eg it goes away)
