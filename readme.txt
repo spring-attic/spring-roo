@@ -203,7 +203,7 @@ changes with:
 
   git status
 
-You can use "gwt add -A" if you just want to add everything you see.
+You can use "git add -A" if you just want to add everything you see.
 
 Next you need to make a commit. Do this via:
 
