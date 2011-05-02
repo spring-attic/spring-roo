@@ -112,7 +112,11 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 		
-		List<FieldMetadata> elegibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formbackingType, memberDetails, metadataIdentificationString);
+		List<FieldMetadata> eligibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formbackingType, memberDetails, metadataIdentificationString);
+
+		if (eligibleFields.size() == 0) {
+			return null;
+		}
 
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = webMetadataService.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataIdentificationString);
 		
@@ -123,7 +127,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			return null;
 		}
 
-		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), relatedTypeMd);
+		JspViewManager viewManager = new JspViewManager(eligibleFields, webScaffoldMetadata.getAnnotationValues(), relatedTypeMd);
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 		if (controllerPath.startsWith("/")) {
