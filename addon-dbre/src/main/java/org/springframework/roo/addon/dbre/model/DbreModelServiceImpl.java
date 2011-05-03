@@ -3,7 +3,6 @@ package org.springframework.roo.addon.dbre.model;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -26,7 +24,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -42,7 +39,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class DbreModelServiceImpl implements DbreModelService {
-	private static final Logger logger = HandlerUtils.getLogger(DbreModelServiceImpl.class);
 	@Reference private ConnectionProvider connectionProvider;
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -92,14 +88,12 @@ public class DbreModelServiceImpl implements DbreModelService {
  
 		InputStream inputStream = null;
 		try {
-			FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
-			inputStream = new FileInputStream(fileDetails.getFile());
-			Database database = DatabaseXmlUtils.readDatabaseStructureFromInputStream(inputStream);
+			inputStream = fileManager.getInputStream(dbreXmlPath);
+			Database database = DatabaseXmlUtils.readDatabase(inputStream);
 			cacheDatabase(database);
 			return database;
 		} catch (Exception e) {
-			logger.warning(e.getMessage());
-			return null;
+			throw new IllegalStateException(e);
 		} finally {
 			if (inputStream != null) {
 				try {
@@ -130,15 +124,6 @@ public class DbreModelServiceImpl implements DbreModelService {
 		}
 	}
 	
-	public void serializeDatabase(Database database, OutputStream outputStream, boolean displayOnly) {
-		Assert.notNull(database, "Database required");
-		Assert.notNull(outputStream, "Output stream required");
-		DatabaseXmlUtils.writeDatabaseStructureToOutputStream(database, outputStream);
-		if (!displayOnly) {
-			fileManager.createOrUpdateTextFileIfRequired(getDbreXmlPath(), outputStream.toString(), true);
-		}
-	}
-
 	private void cacheDatabase(Database database) {
 		if (database != null) {
 			lastSchema = database.getSchema();

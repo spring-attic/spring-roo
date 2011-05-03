@@ -58,17 +58,17 @@ public class SolrOperationsImpl implements SolrOperations {
 
 		updateSolrProperties(solrServerUrl);
 
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
-		Element root = document.getDocumentElement();
+		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
+		Element root = appCtx.getDocumentElement();
 
 		if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 			if (root.getAttribute("xmlns:task").length() == 0) {
 				root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
 				root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
 			}
-			root.appendChild(new XmlElementBuilder("task:annotation-driven", document).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
-			root.appendChild(new XmlElementBuilder("task:executor", document).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
+			root.appendChild(new XmlElementBuilder("task:annotation-driven", appCtx).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
+			root.appendChild(new XmlElementBuilder("task:executor", appCtx).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
 		}
 
 		Element solrServer = XmlUtils.findFirstElement("/beans/bean[@id='solrServer']", root);
@@ -76,24 +76,19 @@ public class SolrOperationsImpl implements SolrOperations {
 			return;
 		}
 
-		root.appendChild(new XmlElementBuilder("bean", document).addAttribute("id", "solrServer").addAttribute("class", "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer").addChild(new XmlElementBuilder("constructor-arg", document).addAttribute("value", "${solr.serverUrl}").build()).build());
-		
+		root.appendChild(new XmlElementBuilder("bean", appCtx).addAttribute("id", "solrServer").addAttribute("class", "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer").addChild(new XmlElementBuilder("constructor-arg", appCtx).addAttribute("value", "${solr.serverUrl}").build()).build());
 		XmlUtils.removeTextNodes(root);
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		
+		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appCtx), false);
 	}
 
 	private void updateSolrProperties(String solrServerUrl) {
 		String solrPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties");
-		MutableFile solrMutableFile = null;
-
+		boolean solrExists = fileManager.exists(solrPath);
 		Properties props = new Properties();
-
 		try {
 			if (fileManager.exists(solrPath)) {
-				solrMutableFile = fileManager.updateFile(solrPath);
-				props.load(solrMutableFile.getInputStream());
-			} else {
-				solrMutableFile = fileManager.createFile(solrPath);
+				props.load(fileManager.getInputStream(solrPath));
 			}
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
@@ -102,12 +97,19 @@ public class SolrOperationsImpl implements SolrOperations {
 		props.put("solr.serverUrl", solrServerUrl);
 		props.put("executor.poolSize", "10");
 
+		OutputStream outputStream = null;
 		try {
-			OutputStream outputStream = solrMutableFile.getOutputStream();
+			MutableFile mutableFile = solrExists ? fileManager.updateFile(solrPath) : fileManager.createFile(solrPath);
+			outputStream = mutableFile.getOutputStream();
 			props.store(outputStream, "Updated at " + new Date());
-			outputStream.close();
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException ignored) {}
+			}
 		}
 	}
 

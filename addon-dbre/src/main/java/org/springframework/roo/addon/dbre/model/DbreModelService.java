@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.OutputStream;
 import java.util.Set;
 
 /**
@@ -65,16 +64,4 @@ public interface DbreModelService {
 	 * @return the database metadata if available (null if cannot connect to the database or the schema is not found)
 	 */
 	Database refreshDatabase(Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables);
-	
-	/**
-	 * Writes the database metadata to an output stream.
-	 * 
-	 * <p>
-	 * It is the responsibility of the caller to close the output stream when finished.
-	 * 
-	 * @param database the database metadata (required)
-	 * @param outputStream the output stream to write to (required)
-	 * @param displayOnly whether the serialization operation is for instrospection purposes only or for the Roo-managed DBRE XML file
-	 */
-	void serializeDatabase(Database database, OutputStream outputStream, boolean displayOnly);
 }

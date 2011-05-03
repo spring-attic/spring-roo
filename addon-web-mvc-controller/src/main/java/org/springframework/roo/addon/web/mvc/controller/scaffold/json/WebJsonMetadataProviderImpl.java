@@ -17,7 +17,6 @@ import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnno
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -80,8 +79,7 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 			return null;
 		}
 		
-		//ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);// memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 
 		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedMd, finderDetails, jsonMetadata);
 	}

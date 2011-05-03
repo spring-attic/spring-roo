@@ -28,7 +28,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -71,19 +70,15 @@ public class JmsOperationsImpl implements JmsOperations {
 	public void installJms(JmsProvider jmsProvider, String name, JmsDestinationType destinationType) {
 		Assert.isTrue(isInstallJmsAvailable(), "Project not available");
 		Assert.notNull(jmsProvider, "JMS provider required");
-		
-		String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
 
-		MutableFile mutableFile = null;
+		String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
 		Document document;
 		try {
 			if (fileManager.exists(jmsContextPath)) {
-				mutableFile = fileManager.updateFile(jmsContextPath);
-				document = XmlUtils.readXml(mutableFile.getInputStream());
+				document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));
 			} else {
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-jms-template.xml");
 				Assert.notNull(templateInputStream, "Could not acquire applicationContext-jms.xml template");
-				mutableFile = fileManager.createFile(jmsContextPath);
 				document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 			}
 		} catch (Exception e) {
@@ -109,7 +104,8 @@ public class JmsOperationsImpl implements JmsOperations {
 		}
 
 		XmlUtils.removeTextNodes(root);
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		
+		fileManager.createOrUpdateTextFileIfRequired(jmsContextPath, XmlUtils.nodeToString(document), false);
 
 		updateConfiguration(jmsProvider);
 	}
@@ -145,19 +141,19 @@ public class JmsOperationsImpl implements JmsOperations {
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		
 		if (async) {
-			MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
-			Document document = XmlUtils.readXml(mutableFile.getInputStream());
-			Element root = document.getDocumentElement();
+			String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+			Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
+			Element root = appCtx.getDocumentElement();
 			
 			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 				if (root.getAttribute("xmlns:task").length() == 0) {
 					root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
 					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
 				}
-				root.appendChild(new XmlElementBuilder("task:annotation-driven", document).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
-				root.appendChild(new XmlElementBuilder("task:executor", document).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
+				root.appendChild(new XmlElementBuilder("task:annotation-driven", appCtx).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
+				root.appendChild(new XmlElementBuilder("task:executor", appCtx).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
 				
-				XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+				fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appCtx), false);
 
 				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "jms.properties", "executor.poolSize", "10", true);
 			}
@@ -196,8 +192,8 @@ public class JmsOperationsImpl implements JmsOperations {
 		PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(declaredByMetadataId, physicalLocationCanonicalPath, typeDetailsBuilder.build());
 		physicalTypeMetadataProvider.createPhysicalType(toCreate);
 
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml"));
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
+		Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));
 		Element root = document.getDocumentElement();
 		
 		Element listenerContainer = XmlUtils.findFirstElementByName("jms:listener-container", root);
@@ -222,7 +218,7 @@ public class JmsOperationsImpl implements JmsOperations {
 			listenerContainer.appendChild(jmsListener);
 		}
 
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		fileManager.createOrUpdateTextFileIfRequired(jmsContextPath, XmlUtils.nodeToString(document), false);
 	}
 
 	private void updateConfiguration(JmsProvider jmsProvider) {

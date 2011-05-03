@@ -165,10 +165,10 @@ public final class XmlUtils {
 	public static boolean compareNodes(Node node1, Node node2) {
 		Assert.notNull(node1, "First node required");
 		Assert.notNull(node2, "Second node required");
-		//The documents need to be cloned as normalization has side-effects
+		// The documents need to be cloned as normalization has side-effects
 		node1 = node1.cloneNode(true);
 		node2 = node2.cloneNode(true);
-		//The documents need to be normalized before comparison takes place to remove any formatting that interfere with comparison
+		// The documents need to be normalized before comparison takes place to remove any formatting that interfere with comparison
 		if (node1 instanceof Document && node2 instanceof Document) {
 			((Document) node1).normalizeDocument();
 			((Document) node2).normalizeDocument();

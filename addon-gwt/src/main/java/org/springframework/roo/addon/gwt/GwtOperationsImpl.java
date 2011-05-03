@@ -21,7 +21,6 @@ import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -167,11 +166,9 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	}
 	
 	private void updateEclipsePlugin() {
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
-		Document pom = XmlUtils.readXml(mutableFile.getInputStream());
-		Element root = pom.getDocumentElement();
-
-		boolean hasChanged = false;
+		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
+		Element root = document.getDocumentElement();
 
 		// Add GWT buildCommand
 		Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
@@ -179,12 +176,11 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		String gwtBuildCommandName = "com.google.gwt.eclipse.core.gwtProjectValidator";
 		Element gwtBuildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + gwtBuildCommandName + "']", additionalBuildcommandsElement);
 		if (gwtBuildCommandElement == null) {
-			Element nameElement = pom.createElement("name");
+			Element nameElement = document.createElement("name");
 			nameElement.setTextContent(gwtBuildCommandName);
-			gwtBuildCommandElement = pom.createElement("buildCommand");
+			gwtBuildCommandElement = document.createElement("buildCommand");
 			gwtBuildCommandElement.appendChild(nameElement);
 			additionalBuildcommandsElement.appendChild(gwtBuildCommandElement);
-			hasChanged = true;
 		}
 
 		// Add GWT projectnature
@@ -193,42 +189,31 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		String gwtProjectnatureName = "com.google.gwt.eclipse.core.gwtNature";
 		Element gwtProjectnatureElement = XmlUtils.findFirstElement("projectnature[name = '" + gwtProjectnatureName + "']", additionalProjectnaturesElement);
 		if (gwtProjectnatureElement == null) {
-			gwtProjectnatureElement = new XmlElementBuilder("projectnature", pom).setText(gwtProjectnatureName).build();
+			gwtProjectnatureElement = new XmlElementBuilder("projectnature", document).setText(gwtProjectnatureName).build();
 			additionalProjectnaturesElement.appendChild(gwtProjectnatureElement);
-			hasChanged = true;
 		}
 
-		if (hasChanged) {
-			mutableFile.setDescriptionOfChange("Updated GWT buildCommand and projectnature in maven-eclipse-plugin");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
-		}
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}
 
 	private void updateBuildOutputDirectory() {
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
-		Document pom = XmlUtils.readXml(mutableFile.getInputStream());
-		Element root = pom.getDocumentElement();
-
-		boolean hasChanged = false;
+		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
+		Element root = document.getDocumentElement();
 
 		String outputDirectoryText = "${project.build.directory}/${project.build.finalName}/WEB-INF/classes";
 		Element outputDirectoryElement = XmlUtils.findFirstElement("/project/build/outputDirectory", root);
 		if (outputDirectoryElement != null) {
 			if (!outputDirectoryElement.getTextContent().equals(outputDirectoryText)) {
 				outputDirectoryElement.setTextContent(outputDirectoryText);
-				hasChanged = true;
 			}
 		} else {
-			outputDirectoryElement = new XmlElementBuilder("outputDirectory", pom).setText(outputDirectoryText).build();
+			outputDirectoryElement = new XmlElementBuilder("outputDirectory", document).setText(outputDirectoryText).build();
 			Element buildElement = XmlUtils.findRequiredElement("/project/build", root);
 			buildElement.appendChild(outputDirectoryElement);
-			hasChanged = true;
 		}
 
-		if (hasChanged) {
-			mutableFile.setDescriptionOfChange("Added outputDirectory");
-			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
-		}
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}
 
 	private void updateRepositories(Element configuration) {
@@ -258,8 +243,8 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	}
 
 	private void updateWebXml() {
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
-		Document webXml = XmlUtils.readXml(mutableFile.getInputStream());
+		String webXmlpath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		Document webXml = XmlUtils.readXml(fileManager.getInputStream(webXmlpath));
 		Element root = webXml.getDocumentElement();
 
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXml, null);
@@ -287,20 +272,20 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		}
 
 		removeIfFound("/web-app/error-page", root);
-		mutableFile.setDescriptionOfChange("Managed security filter and security-constraint in web.xml");
-		XmlUtils.writeXml(mutableFile.getOutputStream(), webXml);
+		
+		fileManager.createOrUpdateTextFileIfRequired(webXmlpath, XmlUtils.nodeToString(webXml), false);
 	}
 
 	private void updatePersistenceXml() {
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
-		Document persistenceXml = XmlUtils.readXml(mutableFile.getInputStream());
+		String persistencePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		Document persistenceXml = XmlUtils.readXml(fileManager.getInputStream(persistencePath));
 		Element root = persistenceXml.getDocumentElement();
 
 		for (Element persistenceUnitElement : XmlUtils.findElements("persistence-unit", root)) {
 			Element provider = XmlUtils.findFirstElement("provider", persistenceUnitElement);
 			if (provider != null && "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider".equals(provider.getTextContent()) && !projectOperations.getProjectMetadata().isGaeEnabled()) {
 				persistenceUnitElement.getParentNode().removeChild(persistenceUnitElement);
-				XmlUtils.writeXml(mutableFile.getOutputStream(), persistenceXml);
+				fileManager.createOrUpdateTextFileIfRequired(persistencePath, XmlUtils.nodeToString(persistenceXml), false);
 				break;
 			}
 		}

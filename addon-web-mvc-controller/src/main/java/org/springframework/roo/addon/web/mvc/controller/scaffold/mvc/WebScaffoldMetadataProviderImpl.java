@@ -111,8 +111,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
-		//ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);//memberDetailsScanner.getMemberDetails(this.getClass().getName(), cid);
+		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns);
 	}

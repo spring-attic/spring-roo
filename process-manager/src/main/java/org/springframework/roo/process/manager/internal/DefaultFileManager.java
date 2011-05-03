@@ -1,5 +1,6 @@
 package org.springframework.roo.process.manager.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -61,6 +62,10 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	}
 
 	public InputStream getInputStream(String fileIdentifier) {
+		if (deferredFileWrites.containsKey(fileIdentifier)) {
+			return new ByteArrayInputStream(deferredFileWrites.get(fileIdentifier).getBytes());
+		}
+		
 		File file = new File(fileIdentifier);
 		Assert.isTrue(file.exists(), "File '" + fileIdentifier + "' does not exist");
 		Assert.isTrue(file.isFile(), "Path '" + fileIdentifier + "' is not a file");
@@ -157,7 +162,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 				}
 			}
 		} finally {
-			deferredFileWrites.clear();
+			clear();
 		}
 	}
 	
