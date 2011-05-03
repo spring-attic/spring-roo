@@ -1,7 +1,11 @@
 package org.springframework.roo.addon.cloud.foundry.converter;
 
-import com.vmware.appcloud.client.CloudService;
-import com.vmware.appcloud.client.ServiceConfiguration;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,7 +17,6 @@ import org.springframework.roo.addon.cloud.foundry.model.CloudDeployableFile;
 import org.springframework.roo.addon.cloud.foundry.model.CloudFile;
 import org.springframework.roo.addon.cloud.foundry.model.CloudLoginEmail;
 import org.springframework.roo.addon.cloud.foundry.model.CloudUri;
-import org.springframework.roo.classpath.converters.LastUsed;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.MavenOperationsImpl;
@@ -22,11 +25,8 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
+import com.vmware.appcloud.client.CloudService;
+import com.vmware.appcloud.client.ServiceConfiguration;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
@@ -40,7 +40,6 @@ public class CloudFoundryConverter implements Converter {
 	private static final Logger logger = Logger.getLogger(CloudFoundryConverter.class.getName());
 	private static final String CREATE_OPTION = "CREATE";
 	private static final String MEMORY_OPTION_SUFFIX = "MB";
-	@Reference private LastUsed lastUsed;
 	@Reference private CloudFoundrySession session;
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;

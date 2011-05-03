@@ -32,8 +32,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Base64;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.TransmissionAwareUaaService;
@@ -41,12 +39,12 @@ import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.BasicProxyService;
+import org.springframework.uaa.client.protobuf.UaaClient;
 
 import com.vmware.appcloud.client.AppCloudClient;
 import com.vmware.appcloud.client.CloudApplication;
 import com.vmware.appcloud.client.CloudService;
 import com.vmware.appcloud.client.ServiceConfiguration;
-import org.springframework.uaa.client.protobuf.UaaClient;
 
 @Component
 @Service
@@ -58,11 +56,10 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	private static final String URL_KEY = "url";
 	private static final String ROO_KEY = "Roo == Java + Productivity";
 	private static final String VCLOUD_KEY = "vCloud Prefs";
+	
+	@Reference private UaaService uaaService;
 	private Preferences preferences = getPreferencesFor(CloudFoundrySessionImpl.class);
 	UaaClient.Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
-
-	@Reference private UaaService uaaService;
-
 	private UaaAwareAppCloudClient client;
 	private List<String> appNames = new ArrayList<String>();
 	private List<String> provisionedServices = new ArrayList<String>();
@@ -72,7 +69,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 
 	protected void deactivate(ComponentContext cc) {
 		if (uaaService instanceof TransmissionAwareUaaService) {
-			((TransmissionAwareUaaService)uaaService).removeTransmissionEventListener(this);
+			((TransmissionAwareUaaService) uaaService).removeTransmissionEventListener(this);
 		}
 
 		if (client != null) {
@@ -80,17 +77,19 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 		try {
 			preferences.flush();
-		} catch (BackingStoreException ignored) {}
+		} catch (BackingStoreException ignored) {
+		}
 	}
 
 	protected void activate(ComponentContext context) {
-		//TODO: Replace with call to VersionHelper.getProductFromDictionary(..) available in UAA 1.0.3
+		// TODO: Replace with call to VersionHelper.getProductFromDictionary(..) available in UAA 1.0.3
+		@SuppressWarnings("rawtypes")
 		Dictionary d = context.getBundleContext().getBundle().getHeaders();
 		Object bundleVersion = d.get("Bundle-Version");
 		Object gitCommitHash = d.get("Git-Commit-Hash");
 		product = VersionHelper.getProduct("Cloud Foundry Java API", bundleVersion == null ? "0.0.0.RELEASE" : bundleVersion.toString(), gitCommitHash == null ? null : gitCommitHash.toString());
 		if (uaaService instanceof TransmissionAwareUaaService) {
-			((TransmissionAwareUaaService)uaaService).addTransmissionEventListener(this);
+			((TransmissionAwareUaaService) uaaService).addTransmissionEventListener(this);
 		}
 	}
 
@@ -107,7 +106,6 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	}
 
 	public void login(String email, String password, String cloudControllerUrl) {
-
 		boolean storeCredentials = StringUtils.hasText(email) && StringUtils.hasText(password);
 
 		if (!StringUtils.hasText(cloudControllerUrl)) {
@@ -118,7 +116,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 			} else if (urlMatches.size() == 1) {
 				cloudControllerUrl = urlMatches.get(0);
 			} else {
-				//We set the default URL only after no stored URL is found
+				// We set the default URL only after no stored URL is found
 				cloudControllerUrl = UaaAwareAppCloudClient.VCLOUD_URL;
 			}
 		}
@@ -170,7 +168,8 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 				try {
 					putPreference(VCLOUD_KEY, crypt(encodeLoginPrefEntries(new ArrayList<String>(entries)).getBytes(), Cipher.ENCRYPT_MODE));
 					logger.info("Credentials saved.");
-				} catch (Exception ignored) {}
+				} catch (Exception ignored) {
+				}
 
 			}
 			logger.info("Logged in successfully with email address '" + email + "'");
@@ -180,14 +179,15 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	}
 
 	public void putPreference(String prefKey, String prefValue) throws BackingStoreException, UnsupportedEncodingException {
-			preferences.putByteArray(prefKey, prefValue.getBytes("UTF-8"));
-			preferences.flush();
+		preferences.putByteArray(prefKey, prefValue.getBytes("UTF-8"));
+		preferences.flush();
 	}
 
 	public String getPreference(String prefKey) {
 		try {
 			return new String(preferences.getByteArray(prefKey, EMPTY_STRING.getBytes("UTF-8")), "UTF-8");
-		} catch (UnsupportedEncodingException ignored) {}
+		} catch (UnsupportedEncodingException ignored) {
+		}
 		return "";
 	}
 
@@ -294,7 +294,6 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		return sb.toString();
 	}
 
-
 	private Map<String, String> decodeLoginPrefEntry(String encodedEntry) {
 		Map<String, String> map = new HashMap<String, String>();
 		if (!StringUtils.hasText(encodedEntry)) {
@@ -306,8 +305,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 			if (valuePair.length == 2) {
 				try {
 					map.put(valuePair[0], new String(Base64.decode(valuePair[1].getBytes())));
-				} catch (IOException ignored) {
-				}
+				} catch (IOException ignored) {}
 			}
 		}
 		return map;
@@ -340,7 +338,8 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		Cipher cipher = getCipher(opmode);
 		try {
 			return new String(cipher.doFinal(input));
-		} catch (Exception ignored) {}
+		} catch (Exception ignored) {
+		}
 		return "";
 	}
 

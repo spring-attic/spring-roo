@@ -48,9 +48,7 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Service
 public class CloudFoundryOperationsImpl extends AbstractFlashingObject implements CloudFoundryOperations {
 	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
-
 	@Reference private CloudFoundrySession session;
-
 	private AppCloudClient client = null;
 
 	public void info() {
