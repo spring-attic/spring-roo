@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,10 +52,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 
 	public void installConversionService(final JavaPackage thePackage) {
 		String webMvcConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-		Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath + " doesn't exist");
+		Assert.isTrue(fileManager.exists(webMvcConfigPath), "'" + webMvcConfigPath + "' does not exist");
 		
-		MutableFile mutableFile = fileManager.updateFile(webMvcConfigPath);
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Document document = XmlUtils.readXml(fileManager.getInputStream(webMvcConfigPath));
 		Element root = document.getDocumentElement();
 		
 		Element annotationDriven = XmlUtils.findFirstElementByName("mvc:annotation-driven", root);
@@ -66,12 +64,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 		annotationDriven.setAttribute("conversion-service", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME);
 		
-		Element conversionServiceBean = new XmlElementBuilder("bean", document)
-											.addAttribute("id", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME)
-											.addAttribute("class", thePackage.getFullyQualifiedPackageName() + "." + ConversionServiceOperations.CONVERSION_SERVICE_SIMPLE_TYPE)
-										.build();
+		Element conversionServiceBean = new XmlElementBuilder("bean", document).addAttribute("id", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME).addAttribute("class", thePackage.getFullyQualifiedPackageName() + "." + ConversionServiceOperations.CONVERSION_SERVICE_SIMPLE_TYPE).build();
 		root.appendChild(conversionServiceBean);
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		
+		fileManager.createOrUpdateTextFileIfRequired(webMvcConfigPath, XmlUtils.nodeToString(document), false);
 		
 		registerWebFlowConversionServiceExposingInterceptor();
 	}
@@ -88,35 +84,22 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			return;
 		}
 
-		MutableFile mutableFile = fileManager.updateFile(webFlowConfigPath);
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Document document = XmlUtils.readXml(fileManager.getInputStream(webFlowConfigPath));
 		Element root = document.getDocumentElement();
 		
 		if (XmlUtils.findFirstElement("/beans/bean[@id='" + ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME + "']", root) == null) {
-			Element conversionServiceExposingInterceptor = new XmlElementBuilder("bean", document)
-																.addAttribute("class", "org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor")
-																.addAttribute("id", ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME)
-																.addChild(new XmlElementBuilder("constructor-arg", document)
-																				.addAttribute("ref", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME)
-																			.build())
-															.build();
+			Element conversionServiceExposingInterceptor = new XmlElementBuilder("bean", document).addAttribute("class", "org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor").addAttribute("id", ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME).addChild(new XmlElementBuilder("constructor-arg", document).addAttribute("ref", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME).build()).build();
 			root.appendChild(conversionServiceExposingInterceptor);
 		}
 		Element flowHandlerMapping = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.webflow.mvc.servlet.FlowHandlerMapping']", root);
 		if (flowHandlerMapping != null) {
 			if (XmlUtils.findFirstElement("property[@name='interceptors']/array/ref[@bean='" + ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME + "']", flowHandlerMapping) == null) {
-				Element interceptors = new XmlElementBuilder("property", document)
-											.addAttribute("name", "interceptors")
-											.addChild(new XmlElementBuilder("array", document)
-															.addChild(new XmlElementBuilder("ref", document)
-																			.addAttribute("bean", ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME)
-																		.build())
-														.build())
-										.build();
+				Element interceptors = new XmlElementBuilder("property", document).addAttribute("name", "interceptors").addChild(new XmlElementBuilder("array", document).addChild(new XmlElementBuilder("ref", document).addAttribute("bean", ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME).build()).build()).build();
 				flowHandlerMapping.appendChild(interceptors);
 			}
 		}
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		
+		fileManager.createOrUpdateTextFileIfRequired(webFlowConfigPath, XmlUtils.nodeToString(document), false);
 	}
 
 	private void copyWebXml() {
@@ -133,13 +116,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			return;
 		}
 
-		MutableFile mutableFile = null;
 		Document document;
-		InputStream templateInputStream;
 		try {
-			templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
 			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
-			mutableFile = fileManager.createFile(webXmlPath);
 			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -149,11 +129,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.setDisplayName(projectName, document, null);
 		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
-
-		try {
-			templateInputStream.close();
-		} catch (IOException ignored) {}
+		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), true);
 
 		fileManager.scan();
 	}
@@ -163,11 +139,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Verify that the web.xml already exists
-		String webXmlFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-		Assert.isTrue(fileManager.exists(webXmlFile), "'" + webXmlFile + "' does not exist");
+		String webXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath + "' does not exist");
 
-		MutableFile mutableFile = fileManager.updateFile(webXmlFile);
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Document document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
 
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("defaultHtmlEscape", "true"), document, "Enable escaping of form submission contents");
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), document, null);
@@ -183,7 +158,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", document, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", document, null);
 
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), false);
 	}
 
 	private void createWebApplicationContext() {
@@ -199,14 +174,11 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			return;
 		}
 
-		MutableFile mutableFile = null;
 		Document document;
-		InputStream templateInputStream;
 		try {
-			templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
 			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
-			mutableFile = fileManager.createFile(webConfigFile);
-			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			document = XmlUtils.readXml(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -214,11 +186,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Element root = (Element) document.getFirstChild();
 		XmlUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
 		
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
-
-		try {
-			templateInputStream.close();
-		} catch (IOException ignored) {}
+		fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(document), true);
 
 		fileManager.scan();
 	}

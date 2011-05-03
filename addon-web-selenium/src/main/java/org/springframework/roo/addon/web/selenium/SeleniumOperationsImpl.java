@@ -31,7 +31,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -93,13 +92,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 		
-		MutableFile mutableFile = null;
 		Document document;
 		try {
 			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(),  "selenium-template.xhtml");
 			Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
-			mutableFile = fileManager.createFile(seleniumPath);
-			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			document = XmlUtils.readXml(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -145,7 +142,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		tbody.appendChild(clickAndWaitCommand(document, "//input[@id='proceed']" ));	
 		
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		fileManager.createOrUpdateTextFileIfRequired(seleniumPath, XmlUtils.nodeToString(document), false);
 
 		manageTestSuite(relativeTestFilePath, name, serverURL);
 		
@@ -155,24 +152,21 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	private void manageTestSuite(String testPath, String name, String serverURL) {
 		String relativeTestFilePath = "selenium/test-suite.xhtml";
 		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
-		MutableFile seleniumMutableFile = null;
 		
 		Document suite;
 		try {
 			if (fileManager.exists(seleniumPath)) {
-				seleniumMutableFile = fileManager.updateFile(seleniumPath);
-				suite = XmlUtils.getDocumentBuilder().parse(seleniumMutableFile.getInputStream());
+				suite = XmlUtils.readXml(fileManager.getInputStream(seleniumPath));
 			} else {
-				seleniumMutableFile = fileManager.createFile(seleniumPath);
 				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-test-suite-template.xhtml");
 				Assert.notNull(templateInputStream, "Could not acquire selenium test suite template");
-				suite = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+				suite = XmlUtils.readXml(templateInputStream);
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} 
 		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
 		
 		Element root = (Element) suite.getLastChild();
@@ -189,19 +183,19 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		
 		XmlUtils.findRequiredElement("/html/body/table", root).appendChild(tr);
 		
-		XmlUtils.writeXml(seleniumMutableFile.getOutputStream(), suite);
+		fileManager.createOrUpdateTextFileIfRequired(seleniumPath, XmlUtils.nodeToString(suite), false);
 		
 		menuOperations.addMenuItem(new JavaSymbolName("SeleniumTests"), new JavaSymbolName("Test"), "Test", "selenium_menu_test_suite", "/resources/" + relativeTestFilePath, "si_");
 	}
 	
 	private void installMavenPlugin(){
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		MutableFile mutableFile = fileManager.updateFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		String pom = pathResolver.getIdentifier(Path.ROOT, "/pom.xml");
+		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = (Element) document.getLastChild();
 		
 		// Stop if the plugin is already installed
-		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='selenium-maven-plugin']", root) != null) {
+		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'selenium-maven-plugin']", root) != null) {
 			return;
 		}
 		
@@ -238,7 +232,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		
 		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
 
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}
 	
 	private Node clickAndWaitCommand(Document document, String linkTarget){

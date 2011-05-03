@@ -24,7 +24,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -54,14 +53,18 @@ public class MailOperationsImpl implements MailOperations {
 	}
 
 	public boolean isManageEmailAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
+		return projectOperations.isProjectAvailable() && fileManager.exists(getContextPath());
+	}
+
+	private String getContextPath() {
+		return projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 	}
 
 	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
 		Assert.hasText(hostServer, "Host server name required");
 
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		String contextPath = getContextPath();
+		Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		Element root = document.getDocumentElement();
 
 		boolean installDependencies = true;
@@ -141,7 +144,8 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		XmlUtils.removeTextNodes(root);
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+
+		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 		
 		if (installDependencies) {
 			updateConfiguration();
@@ -151,8 +155,8 @@ public class MailOperationsImpl implements MailOperations {
 	}
 
 	public void configureTemplateMessage(String from, String subject) {		
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		String contextPath = getContextPath();
+		Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		Element root = document.getDocumentElement();
 
 		Map<String, String> props = new HashMap<String, String>();
@@ -192,7 +196,8 @@ public class MailOperationsImpl implements MailOperations {
 			root.appendChild(smmBean);
 			
 			XmlUtils.removeTextNodes(root);
-			XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+			
+			fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 		}
 
 		if (props.size() > 0) {
@@ -221,8 +226,8 @@ public class MailOperationsImpl implements MailOperations {
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, modifier, annotations, fieldName, new JavaType("org.springframework.mail.MailSender"));
 		mutableTypeDetails.addField(fieldBuilder.build());
 
-		MutableFile mutableFile = fileManager.updateFile(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
-		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		String contextPath = getContextPath();
+		Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		Element root = document.getDocumentElement();
 
 		Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
@@ -271,7 +276,7 @@ public class MailOperationsImpl implements MailOperations {
 				root.appendChild(new XmlElementBuilder("task:annotation-driven", document).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
 				root.appendChild(new XmlElementBuilder("task:executor", document).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
 				
-				XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+				fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 
 				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "email.properties", "executor.poolSize", "10", true);
 			}

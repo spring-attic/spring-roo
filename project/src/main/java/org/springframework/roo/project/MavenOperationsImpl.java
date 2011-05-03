@@ -15,7 +15,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -94,8 +93,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			versionElement.setTextContent("1." + majorJavaVersion);
 		}
 
-		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
-		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.ROOT, "pom.xml"), XmlUtils.nodeToString(pom), true);
 
 		// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
 		if (majorJavaVersion == 5) {

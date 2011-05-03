@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.web.flow;
 
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,16 +27,10 @@ public class XmlTemplate {
 	 * @param rootElementCallback A callback with the logic that needs to be applied.
 	 */
 	public void update(String resolvedPathIdentifier, DomElementCallback rootElementCallback) {
-		MutableFile mutableFile = fileManager.updateFile(resolvedPathIdentifier);
-		Document document = null;
-		try {
-			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document document = XmlUtils.readXml(fileManager.getInputStream(resolvedPathIdentifier));
 		Element root = document.getDocumentElement();
 		if (rootElementCallback.doWithElement(document, root)) {
-			XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+			fileManager.createOrUpdateTextFileIfRequired(resolvedPathIdentifier, XmlUtils.nodeToString(document), false);
 		}
 	}
 

@@ -27,7 +27,6 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -92,14 +91,12 @@ public class JsfOperationsImpl implements JsfOperations {
 		if (hasWebXml()) {
 			return;
 		}
-		
-		MutableFile mutableFile = null;
+
 		Document document;
 		try {
 			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
 			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
-			mutableFile = fileManager.createFile(getWebXmlFile());
-			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			document = XmlUtils.readXml(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -108,7 +105,7 @@ public class JsfOperationsImpl implements JsfOperations {
 		WebXmlUtils.setDisplayName(projectName, document, null);
 		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		fileManager.createOrUpdateTextFileIfRequired(getWebXmlFile(), XmlUtils.nodeToString(document), false);
 	
 		fileManager.scan();
 	}

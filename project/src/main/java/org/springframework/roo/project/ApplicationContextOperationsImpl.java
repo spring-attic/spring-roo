@@ -7,7 +7,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -31,20 +30,18 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 		
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml");
-		Document pom;
+		Document document;
 		try {
-			pom = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml");
+			document = XmlUtils.readXml(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 		
-		Element root = pom.getDocumentElement();
+		Element root = document.getDocumentElement();
 		XmlUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
 
-		PathResolver pathResolver = projectMetadata.getPathResolver();
-		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
-		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+		fileManager.createOrUpdateTextFileIfRequired(projectMetadata.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"), XmlUtils.nodeToString(document), false);
 
 		fileManager.scan();
 	}

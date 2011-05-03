@@ -41,7 +41,6 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -177,7 +176,10 @@ public class JspOperationsImpl implements JspOperations {
 				throw new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 			}
 		}
-		XmlUtils.writeXml(fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), document);
+
+		String viewFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx");
+		fileManager.createOrUpdateTextFileIfRequired(viewFile, XmlUtils.nodeToString(document), false);
+
 		installView(new JavaSymbolName(viewName), path, title, category, registerStaticController);
 	}
 
@@ -202,25 +204,18 @@ public class JspOperationsImpl implements JspOperations {
 		tilesOperations.addViewDefinition(folderName, folderName + "/" + lcViewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName + "/" + lcViewName + ".jspx");
 
 		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
-
 		if (registerStaticController && fileManager.exists(mvcConfig)) {
-			MutableFile mvcConfigFile = fileManager.updateFile(mvcConfig);
-			Document doc;
-			try {
-				doc = XmlUtils.getDocumentBuilder().parse(mvcConfigFile.getInputStream());
-			} catch (Exception e) {
-				throw new IllegalStateException("Could not parse " + mvcConfig, e);
-			}
+			Document document = XmlUtils.readXml(fileManager.getInputStream(mvcConfig));
 
-			if (null == XmlUtils.findFirstElement("/beans/view-controller[@path='" + folderName + "/" + lcViewName + "']", doc.getDocumentElement())) {
-				Element sibling = XmlUtils.findFirstElement("/beans/view-controller", doc.getDocumentElement());
-				Element view = new XmlElementBuilder("mvc:view-controller", doc).addAttribute("path", folderName + "/" + lcViewName).build();
+			if (null == XmlUtils.findFirstElement("/beans/view-controller[@path='" + folderName + "/" + lcViewName + "']", document.getDocumentElement())) {
+				Element sibling = XmlUtils.findFirstElement("/beans/view-controller", document.getDocumentElement());
+				Element view = new XmlElementBuilder("mvc:view-controller", document).addAttribute("path", folderName + "/" + lcViewName).build();
 				if (sibling != null) {
 					sibling.getParentNode().insertBefore(view, sibling);
 				} else {
-					doc.getDocumentElement().appendChild(view);
+					document.getDocumentElement().appendChild(view);
 				}
-				XmlUtils.writeXml(mvcConfigFile.getOutputStream(), doc);
+				fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(document), false);
 			}
 		}
 	}
@@ -380,25 +375,18 @@ public class JspOperationsImpl implements JspOperations {
 
 		// Add config to MVC app context
 		String mvcConfig = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-		MutableFile mutableMvcConfigFile = fileManager.updateFile(mvcConfig);
-		Document mvcConfigDocument;
-		try {
-			mvcConfigDocument = XmlUtils.getDocumentBuilder().parse(mutableMvcConfigFile.getInputStream());
-		} catch (Exception ex) {
-			throw new IllegalStateException("Could not open Spring MVC config file '" + mvcConfig + "'", ex);
-		}
-
+		Document mvcConfigDocument = XmlUtils.readXml(fileManager.getInputStream(mvcConfig));
 		Element beans = mvcConfigDocument.getDocumentElement();
 
-		if (null != XmlUtils.findFirstElement("/beans/bean[@id='tilesViewResolver']", beans) || null != XmlUtils.findFirstElement("/beans/bean[@id='tilesConfigurer']", beans)) {
+		if (null != XmlUtils.findFirstElement("/beans/bean[@id = 'tilesViewResolver']", beans) || null != XmlUtils.findFirstElement("/beans/bean[@id = 'tilesConfigurer']", beans)) {
 			return; // Tiles is already configured, nothing to do
 		}
 
-		InputStream configTemplateInputStream = TemplateUtils.getTemplate(getClass(), "tiles/tiles-mvc-config-template.xml");
-		Assert.notNull(configTemplateInputStream, "Could not acquire dependencies.xml file");
 		Document configDoc;
 		try {
-			configDoc = XmlUtils.getDocumentBuilder().parse(configTemplateInputStream);
+			InputStream configTemplateInputStream = TemplateUtils.getTemplate(getClass(), "tiles/tiles-mvc-config-template.xml");
+			Assert.notNull(configTemplateInputStream, "Could not acquire dependencies.xml file");
+			configDoc = XmlUtils.readXml(configTemplateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -411,11 +399,7 @@ public class JspOperationsImpl implements JspOperations {
 			beans.appendChild(importedBean);
 		}
 
-		XmlUtils.writeXml(mutableMvcConfigFile.getOutputStream(), mvcConfigDocument);
-		try {
-			configTemplateInputStream.close();
-		} catch (IOException ignore) {
-		}
+		fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(mvcConfigDocument), false);
 	}
 
 	/**
@@ -512,24 +496,12 @@ public class JspOperationsImpl implements JspOperations {
 
 		// Setup language definition in languages.jspx
 		String footerFileLocation = targetDirectory + "/WEB-INF/views/footer.jspx";
-		MutableFile footerFile = null;
-
-		Document footer = null;
-		try {
-			if (fileManager.exists(footerFileLocation)) {
-				footerFile = fileManager.updateFile(footerFileLocation);
-				footer = XmlUtils.getDocumentBuilder().parse(footerFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not aquire the footer.jspx file");
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Document footer = XmlUtils.readXml(fileManager.getInputStream(footerFileLocation));
 
 		if (null == XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().getLanguage() + "']", footer.getDocumentElement())) {
 			Element span = XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
 			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().getLanguage()).addAttribute("label", i18n.getLanguage()).build());
-			XmlUtils.writeXml(footerFile.getOutputStream(), footer);
+			fileManager.createOrUpdateTextFileIfRequired(footerFileLocation, XmlUtils.nodeToString(footer), false);
 		}
 		
 		// Record use of add-on (most languages are implemented via public add-ons)
