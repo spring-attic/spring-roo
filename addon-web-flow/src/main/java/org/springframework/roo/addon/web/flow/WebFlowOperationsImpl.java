@@ -89,6 +89,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		tilesOperations.addViewDefinition(flowId, flowId + "/*", TilesOperations.DEFAULT_TEMPLATE, webRelativeFlowPath + "/{1}.jspx");
 
 		updateConfiguration();
+		webMvcOperations.registerWebFlowConversionServiceExposingInterceptor();
 	}
 
 	private void installWebFlowConfiguration() {

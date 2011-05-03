@@ -10,6 +10,10 @@ import org.springframework.roo.model.JavaPackage;
  * @since 1.1.1
  */
 public interface ConversionServiceOperations {
+	
+	public static final String CONVERSION_SERVICE_SIMPLE_TYPE = "ApplicationConversionServiceFactoryBean";
+	public static final String CONVERSION_SERVICE_BEAN_NAME = "applicationConversionService";
+	public static final String CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME = "conversionServiceExposingInterceptor";
 
 	/**
 	 * Installs a sub-type of FormattingConversionServiceFactoryBean in the given package and plugs it 

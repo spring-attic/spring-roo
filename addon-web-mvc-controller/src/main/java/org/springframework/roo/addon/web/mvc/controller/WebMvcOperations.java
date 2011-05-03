@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import org.springframework.roo.model.JavaPackage;
+
 /**
  * Interface for {@link WebMvcOperationsImpl}.
  * 
@@ -18,4 +20,8 @@ public interface WebMvcOperations {
 	void installMinmalWebArtefacts();
 	
 	void installAllWebMvcArtifacts();
+	
+	void installConversionService(JavaPackage thePackage);
+	
+	void registerWebFlowConversionServiceExposingInterceptor();
 }

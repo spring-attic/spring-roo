@@ -8,6 +8,8 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.web.mvc.controller.converter.ConversionServiceOperations;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
@@ -16,8 +18,10 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -45,6 +49,74 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		installMinmalWebArtefacts();
 		manageWebXml();
 		updateConfiguration();
+	}
+
+	public void installConversionService(final JavaPackage thePackage) {
+		String webMvcConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath + " doesn't exist");
+		
+		MutableFile mutableFile = fileManager.updateFile(webMvcConfigPath);
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
+		
+		Element annotationDriven = XmlUtils.findFirstElementByName("mvc:annotation-driven", root);
+		if (isConversionServiceConfigured(root, annotationDriven)) {
+			// Conversion service already defined, moving on.
+			return;
+		}
+		annotationDriven.setAttribute("conversion-service", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME);
+		
+		Element conversionServiceBean = new XmlElementBuilder("bean", document)
+											.addAttribute("id", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME)
+											.addAttribute("class", thePackage.getFullyQualifiedPackageName() + "." + ConversionServiceOperations.CONVERSION_SERVICE_SIMPLE_TYPE)
+										.build();
+		root.appendChild(conversionServiceBean);
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+		
+		registerWebFlowConversionServiceExposingInterceptor();
+	}
+	
+	public void registerWebFlowConversionServiceExposingInterceptor() {
+		String webFlowConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webflow-config.xml");
+		if (! fileManager.exists(webFlowConfigPath)) {
+			// No web flow configured, moving on.
+			return;
+		}
+		
+		if (!isConversionServiceConfigured()) {
+			// We only need to install the ConversionServiceExposingInterceptor for Web Flow if a custom conversion service is present.
+			return;
+		}
+
+		MutableFile mutableFile = fileManager.updateFile(webFlowConfigPath);
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
+		
+		if (XmlUtils.findFirstElement("/beans/bean[@id='" + ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME + "']", root) == null) {
+			Element conversionServiceExposingInterceptor = new XmlElementBuilder("bean", document)
+																.addAttribute("class", "org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor")
+																.addAttribute("id", ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME)
+																.addChild(new XmlElementBuilder("constructor-arg", document)
+																				.addAttribute("ref", ConversionServiceOperations.CONVERSION_SERVICE_BEAN_NAME)
+																			.build())
+															.build();
+			root.appendChild(conversionServiceExposingInterceptor);
+		}
+		Element flowHandlerMapping = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.webflow.mvc.servlet.FlowHandlerMapping']", root);
+		if (flowHandlerMapping != null) {
+			if (XmlUtils.findFirstElement("property[@name='interceptors']/array/ref[@bean='" + ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME + "']", flowHandlerMapping) == null) {
+				Element interceptors = new XmlElementBuilder("property", document)
+											.addAttribute("name", "interceptors")
+											.addChild(new XmlElementBuilder("array", document)
+															.addChild(new XmlElementBuilder("ref", document)
+																			.addAttribute("bean", ConversionServiceOperations.CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME)
+																		.build())
+														.build())
+										.build();
+				flowHandlerMapping.appendChild(interceptors);
+			}
+		}
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
 	private void copyWebXml() {
@@ -162,5 +234,32 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		projectOperations.addDependencies(dependencies);
 		
 		projectOperations.updateProjectType(ProjectType.WAR);
+	}
+
+	private boolean isConversionServiceConfigured() {
+		String webMvcConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath + " doesn't exist");
+		
+		MutableFile mutableFile = fileManager.updateFile(webMvcConfigPath);
+		Document document = XmlUtils.readXml(mutableFile.getInputStream());
+		Element root = document.getDocumentElement();
+		
+		Element annotationDriven = XmlUtils.findFirstElementByName("mvc:annotation-driven", root);
+		return isConversionServiceConfigured(root, annotationDriven);
+	}
+	
+	private boolean isConversionServiceConfigured(Element root, Element annotationDriven) {
+		String beanName = annotationDriven.getAttribute("conversion-service");
+		if (! StringUtils.hasText(beanName)) {
+			return false;
+		}
+		
+		Element bean = XmlUtils.findFirstElement("/beans/bean[@id=\"" + beanName + "\"]", root);
+		String classAttribute = bean.getAttribute("class");
+		StringBuilder sb = new StringBuilder("Found custom ConversionService installed in webmvc-config.xml. ");
+		sb.append("Remove the conversion-service attribute, let Spring ROO 1.1.1 (or higher), install the new application-wide ");
+		sb.append("ApplicationConversionServiceFactoryBean and then use that to register your custom converters and formatters.");
+		Assert.isTrue(classAttribute.endsWith(ConversionServiceOperations.CONVERSION_SERVICE_SIMPLE_TYPE), sb.toString());
+		return true;
 	}
 }

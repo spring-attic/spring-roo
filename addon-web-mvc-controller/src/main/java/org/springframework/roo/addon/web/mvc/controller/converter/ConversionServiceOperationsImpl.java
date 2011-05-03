@@ -7,21 +7,15 @@ import java.io.InputStreamReader;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.controller.converter.XmlTemplate.DomElementCallback;
+import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * A default implementation of {@link ConversionServiceOperations}.
@@ -32,24 +26,21 @@ import org.w3c.dom.Element;
 @Component 
 @Service
 public class ConversionServiceOperationsImpl implements ConversionServiceOperations {
-	public static final String CONVERSION_SERVICE_SIMPLE_TYPE = "ApplicationConversionServiceFactoryBean";
-	public static final String CONVERSION_SERVICE_BEAN_NAME = "applicationConversionService";
 	@Reference private FileManager fileManager;
-	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private WebMvcOperations webMvcOperations;
 
 	public ConversionServiceOperationsImpl() {}
 
-	public ConversionServiceOperationsImpl(FileManager fileManager, ProjectOperations projectOperations, TypeLocationService typeLocationService) {
+	public ConversionServiceOperationsImpl(FileManager fileManager, TypeLocationService typeLocationService) {
 		// For testing
 		this.fileManager = fileManager;
-		this.projectOperations = projectOperations;
 		this.typeLocationService = typeLocationService;
 	}
 
 	public void installConversionService(JavaPackage thePackage) {
 		installJavaClass(thePackage);
-		manageWebMvcConfig(thePackage);
+		webMvcOperations.installConversionService(thePackage);
 		fileManager.scan();
 	}
 
@@ -68,46 +59,5 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
 		}
-	}
-
-	void manageWebMvcConfig(final JavaPackage thePackage) {
-		String webMvcConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-		Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath + " doesn't exists");		
-
-		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
-			public boolean doWithElement(Document document, Element root) {
-				Element annotationDriven = XmlUtils.findFirstElementByName("mvc:annotation-driven", root);
-				if (isConversionServiceConfigured(root, annotationDriven)) {
-					return false;
-				}
-				annotationDriven.setAttribute("conversion-service", CONVERSION_SERVICE_BEAN_NAME);
-
-				Element conversionServiceBean = document.createElement("bean");
-				conversionServiceBean.setAttribute("id", CONVERSION_SERVICE_BEAN_NAME);
-				conversionServiceBean.setAttribute("class", thePackage.getFullyQualifiedPackageName() + "." + CONVERSION_SERVICE_SIMPLE_TYPE);
-				
-				root.appendChild(conversionServiceBean);
-				root.insertBefore(document.createTextNode("\n\t"), conversionServiceBean);
-				root.insertBefore(document.createComment("Installs application converters and formatters"), conversionServiceBean);
-				root.insertBefore(document.createTextNode("\n\t"), conversionServiceBean);
-				
-				return true;
-			}
-		});
-	}
-
-	boolean isConversionServiceConfigured(Element root, Element annotationDriven) {
-		String beanName = annotationDriven.getAttribute("conversion-service");
-		if (! StringUtils.hasText(beanName)) {
-			return false;
-		}
-		
-		Element bean = XmlUtils.findFirstElement("/beans/bean[@id=\"" + beanName + "\"]", root);
-		String classAttribute = bean.getAttribute("class");
-		StringBuilder sb = new StringBuilder("Found custom ConversionService installed in webmvc-config.xml. ");
-		sb.append("Remove the conversion-service attribute, let Spring ROO 1.1.1 (or higher), install the new application-wide ");
-		sb.append("ApplicationConversionServiceFactoryBean and then use that to register your custom converters and formatters.");
-		Assert.isTrue(classAttribute.endsWith(CONVERSION_SERVICE_SIMPLE_TYPE), sb.toString());
-		return true;
 	}
 }
