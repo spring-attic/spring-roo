@@ -3,7 +3,6 @@ package org.springframework.roo.classpath;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,10 +20,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataNotificationListener;
-import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -47,7 +43,7 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true) 
 @Service 
-public class TypeLocationServiceImpl implements TypeLocationService, MetadataNotificationListener, MetadataProvider {
+public class TypeLocationServiceImpl implements TypeLocationService, MetadataNotificationListener {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
@@ -56,14 +52,13 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	private Map<List<JavaType>, List<String>> cache = new HashMap<List<JavaType>, List<String>>();
 	private Map<Object, List<String>> tagBasedCache = new HashMap<Object, List<String>>();
-	private Map<String, ClassOrInterfaceTypeDetails> projectJavaTypes = new HashMap<String, ClassOrInterfaceTypeDetails>();
 
 	protected void activate(ComponentContext context) {
-		dependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		dependencyRegistry.addNotificationListener(this);
 	}
 
 	protected void deactivate(ComponentContext context) {
-		dependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		dependencyRegistry.removeNotificationListener(this);
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
@@ -71,12 +66,6 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 			// Change to Java, so drop the cache
 			cache.clear();
 			tagBasedCache.clear();
-			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getClassOrInterfaceTypeDetails(upstreamDependency);
-			if (classOrInterfaceTypeDetails != null) {
-				projectJavaTypes.put(upstreamDependency, classOrInterfaceTypeDetails);
-			} else {
-				projectJavaTypes.remove(upstreamDependency);
-			}
 		}
 	}
 
@@ -104,7 +93,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' is not an interface or class");
 		return (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 	}
-	
+
 	public ClassOrInterfaceTypeDetails findClassOrInterface(JavaType requiredClassOrInterface) {
 		String metadataIdentificationString = physicalTypeMetadataProvider.findIdentifier(requiredClassOrInterface);
 		if (metadataIdentificationString == null) {
@@ -122,7 +111,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void processTypesWithTag(Object tag, LocatedTypeCallback callback) {
-		List<String> locatedPhysicalTypeMids = cache.get(tag);
+		List<String> locatedPhysicalTypeMids = tagBasedCache.get(tag);
 		
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
@@ -141,13 +130,14 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		}
 		
 		for (String locatedPhysicalTypeMid : locatedPhysicalTypeMids) {
-			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetailsFromCache(locatedPhysicalTypeMid);
+			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedPhysicalTypeMid);
 			callback.process(located);
 		}
 	}
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
 		List<String> locatedPhysicalTypeMids = cache.get(annotationsToDetect);
+		
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
 			
@@ -167,7 +157,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		}
 		
 		for (String locatedPhysicalTypeMid : locatedPhysicalTypeMids) {
-			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetailsFromCache(locatedPhysicalTypeMid);
+			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedPhysicalTypeMid);
 			callback.process(located);
 		}
 	}
@@ -208,27 +198,17 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 
 	private ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails(String physicalTypeMid) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid);
-		if (physicalTypeMetadata != null && physicalTypeMetadata.isValid() && physicalTypeMetadata.getMemberHoldingTypeDetails() != null && physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+		if (physicalTypeMetadata != null && physicalTypeMetadata.getMemberHoldingTypeDetails() != null && physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			return (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		}
 		return null;
 	}
-
-	private ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetailsFromCache(String physicalTypeMid) {
-		return projectJavaTypes.get(physicalTypeMid);
-	}
 	
-	private Collection<ClassOrInterfaceTypeDetails> getProjectJavaTypes() {
-		if (projectJavaTypes.size() == 0) {
-			refreshProjectJavaTypes();
-		}
-		return projectJavaTypes.values();
-	}
-
-	private void refreshProjectJavaTypes() {
+	private List<ClassOrInterfaceTypeDetails> getProjectJavaTypes() {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
-
+		List<ClassOrInterfaceTypeDetails> projectTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+		
 		for (FileDetails file : fileManager.findMatchingAntPath(pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java")) {
 			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
@@ -245,17 +225,10 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 				String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 				ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(physicalTypeMid);
 				if (located != null) {
-					projectJavaTypes.put(located.getDeclaredByMetadataId(), located);
+					projectTypes.add(located);
 				}
 			}
 		}
-	}
-
-	public String getProvidesType() {
-		return MetadataIdentificationUtils.create(TypeLocationServiceImpl.class.getName());
-	}
-
-	public MetadataItem get(String metadataIdentificationString) {
-		return null;
+		return projectTypes;
 	}
 }
