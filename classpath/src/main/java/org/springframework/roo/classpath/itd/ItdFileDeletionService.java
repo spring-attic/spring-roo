@@ -52,7 +52,7 @@ public class ItdFileDeletionService implements FileEventListener {
 			String path = fileEvent.getFileDetails().getCanonicalPath();
 			int lastIndex = path.lastIndexOf("_Roo_");
 			String governorName = path.substring(0, lastIndex) + ".java";
-			if (!new File(governorName).exists()) {
+			if (!fileManager.exists(governorName)) {
 				// We just checked the disk, and the governor does not exist, so blow away the ITD
 				fileManager.delete(fileEvent.getFileDetails().getCanonicalPath());
 			}
@@ -65,7 +65,7 @@ public class ItdFileDeletionService implements FileEventListener {
 				String itdAntPath = governorName.substring(0, lastIndex) + "_Roo_*.aj";
 				for (FileDetails itd : fileManager.findMatchingAntPath(itdAntPath)) {
 					String itdCanonicalPath = itd.getCanonicalPath();
-					if (new File(itdCanonicalPath).exists()) {
+					if (fileManager.exists(itdCanonicalPath)) {
 						fileManager.delete(itdCanonicalPath);
 					}
 				}

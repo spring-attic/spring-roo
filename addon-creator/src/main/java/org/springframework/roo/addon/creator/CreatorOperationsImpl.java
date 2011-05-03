@@ -298,8 +298,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		Assert.hasText(fullPathFromRoot, "Text file name to write is required");
 		Assert.hasText(message, "Message required");
 		String path = pathResolver.getIdentifier(Path.ROOT, fullPathFromRoot);
-		File file = new File(path);
-		MutableFile mutableFile = file.exists() ? fileManager.updateFile(path) : fileManager.createFile(path);
+		MutableFile mutableFile = fileManager.exists(path) ? fileManager.updateFile(path) : fileManager.createFile(path);
 		byte[] input = message.getBytes();
 		try {
 			FileCopyUtils.copy(input, mutableFile.getOutputStream());
