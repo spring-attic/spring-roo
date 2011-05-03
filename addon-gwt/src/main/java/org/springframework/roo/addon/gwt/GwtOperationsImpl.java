@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -14,16 +13,16 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -54,10 +53,11 @@ import org.w3c.dom.Element;
 public class GwtOperationsImpl implements GwtOperations, MetadataNotificationListener {
 	@Reference private FileManager fileManager;
 	@Reference private GwtTypeService gwtTypeService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private WebMvcOperations mvcOperations;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private TypeLocationService typeLocationService;
 	private ComponentContext context;
 	private Boolean wasGaeEnabled = null;
 
@@ -117,15 +117,8 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		updatePersistenceXml();
 
 		// Do a "get" for every .java file, thus ensuring the metadata is fired
-		PathResolver pathResolver = projectOperations.getPathResolver();
-		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
-		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = srcRoot.getRelativeSegment(fd.getCanonicalPath());
-			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
-			JavaType javaType = new JavaType(fullPath);
-			String id = GwtMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-			metadataService.get(id);
+		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.getSrcMainJavaTypes()) {
+			metadataService.get(GwtMetadata.createIdentifier(classOrInterfaceTypeDetails.getName(), Path.SRC_MAIN_JAVA));
 		}
 	}
 

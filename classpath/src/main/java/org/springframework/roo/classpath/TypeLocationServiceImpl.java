@@ -116,7 +116,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
 			
-			for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes()) {
+			for (ClassOrInterfaceTypeDetails cid : getSrcMainJavaTypes()) {
 				MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(TypeLocationServiceImpl.class.getName(), cid);
 				if (MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, tag).size() > 0) {
 					locatedPhysicalTypeMids.add(cid.getDeclaredByMetadataId());
@@ -141,7 +141,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
 			
-			for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes()) {
+			for (ClassOrInterfaceTypeDetails cid : getSrcMainJavaTypes()) {
 				annotation: for (JavaType annotation : annotationsToDetect) {
 					if (MemberFindingUtils.getTypeAnnotation(cid, annotation) != null) {
 						locatedPhysicalTypeMids.add(cid.getDeclaredByMetadataId());
@@ -204,7 +204,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		return null;
 	}
 	
-	private List<ClassOrInterfaceTypeDetails> getProjectJavaTypes() {
+	public List<ClassOrInterfaceTypeDetails> getSrcMainJavaTypes() {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		List<ClassOrInterfaceTypeDetails> projectTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
