@@ -136,6 +136,28 @@ public interface FileManager {
 	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately);
 
 	/**
+	 * Provides a simple way to create or update a file, skipping any modification if the file's contents match the proposed contents. This should only
+	 * be called for text files.
+	 * 
+	 * <p>
+	 * This mechanism also automatically deletes an unwanted file if the new contents are zero bytes. If deleting, the existence of
+	 * the file need not be considered in advance (it will only delete if the file is present, but it will not fail if the file does not
+	 * exist or has been separately deleted).
+	 * 
+	 * <p>
+	 * Implementations guarantee to {@link #createDirectory(String)} as required to create any required parent directories.
+	 * 
+	 * <p>
+	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
+	 * 
+	 * @param fileIdentifier the file to create or update as appropriate (required)
+	 * @param newContents the replacement contents (required, but can be zero bytes if the file should be deleted)
+	 * @param descriptionOfChange the additional information about a change (can be null)
+	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
+	 */
+	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, String descriptionOfChange, boolean writeImmediately);
+
+	/**
 	 * Delegates to {@link FileMonitorService#findMatchingAntPath(String)}.
 	 * 
 	 * @param antPath the Ant path to evaluate, as per the canonical file path format (required)

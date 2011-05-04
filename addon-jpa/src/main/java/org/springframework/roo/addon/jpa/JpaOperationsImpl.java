@@ -372,6 +372,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		persistenceUnitElement.appendChild(properties);
 
 		fileManager.createOrUpdateTextFileIfRequired(persistencePath, XmlUtils.nodeToString(persistence), false);
+		
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE && (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2)) {
 			logger.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
 		}
@@ -738,6 +739,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
+		String descriptionOfChange = "";
 
 		// Manage GAE buildCommand
 		Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
@@ -750,10 +752,16 @@ public class JpaOperationsImpl implements JpaOperations {
 			gaeBuildCommandElement = document.createElement("buildCommand");
 			gaeBuildCommandElement.appendChild(nameElement);
 			additionalBuildcommandsElement.appendChild(gaeBuildCommandElement);
+			descriptionOfChange = "added GAE buildCommand to maven-eclipse-plugin";
 		} else if (!addToPlugin && gaeBuildCommandElement != null) {
 			additionalBuildcommandsElement.removeChild(gaeBuildCommandElement);
+			descriptionOfChange = "removed GAE buildCommand from maven-eclipse-plugin";
 		}
 
+		if (StringUtils.hasText(descriptionOfChange)) {
+			descriptionOfChange += "; ";
+		}
+		
 		// Manage GAE projectnature
 		Element additionalProjectnaturesElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalProjectnatures", root);
 		Assert.notNull(additionalProjectnaturesElement, "additionalProjectnatures element of the maven-eclipse-plugin required");
@@ -762,33 +770,38 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (addToPlugin && gaeProjectnatureElement == null) {
 			gaeProjectnatureElement = new XmlElementBuilder("projectnature", document).setText(gaeProjectnatureName).build();
 			additionalProjectnaturesElement.appendChild(gaeProjectnatureElement);
+			descriptionOfChange += "added GAE projectnature to maven-eclipse-plugin";
 		} else if (!addToPlugin && gaeProjectnatureElement != null) {
 			additionalProjectnaturesElement.removeChild(gaeProjectnatureElement);
+			descriptionOfChange += "removed GAE projectnature from maven-eclipse-plugin";
 		}
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	private void updateDataNucleusPlugin(boolean addToPlugin) {
 		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
-
-		// Manage GAE buildCommand
+	
+		// Manage mappingExcludes
 		Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);
 		if (configurationElement == null) {
 			return;
 		}
 
+		String descriptionOfChange = "";
 		Element mappingExcludesElement = XmlUtils.findFirstElement("mappingExcludes", configurationElement);
 		if (addToPlugin && mappingExcludesElement == null) {
 			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", document).setText("**/GaeAuthFilter.class").build();
 			configurationElement.appendChild(mappingExcludesElement);
+			descriptionOfChange = "added GAEAuthFilter mappingExcludes to maven-datanuclueus-plugin";
 		} else if (!addToPlugin && mappingExcludesElement != null) {
 			configurationElement.removeChild(mappingExcludesElement);
+			descriptionOfChange = "removed GAEAuthFilter mappingExcludes from maven-datanuclueus-plugin";
 		}
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {

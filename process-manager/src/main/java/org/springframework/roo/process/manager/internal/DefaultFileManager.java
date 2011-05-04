@@ -30,6 +30,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link FileManager}.
@@ -45,6 +46,12 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	@Reference private ProcessManager processManager;
 	@Reference private UndoManager undoManager;
 
+	/** key: file identifier, value: new textual content */
+	private Map<String, String> deferredFileWrites = new LinkedHashMap<String, String>();
+
+	/** key: file identifier, value: new description of change */
+	private Map<String, String> deferredDescriptionOfChanges = new LinkedHashMap<String, String>();
+
 	protected void activate(ComponentContext context) {
 		undoManager.addUndoListener(this);
 	}
@@ -53,9 +60,6 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		undoManager.removeUndoListener(this);
 	}
 	
-	/** key: file identifier, value: new textual content */
-	private Map<String, String> deferredFileWrites = new LinkedHashMap<String, String>();
-
 	public boolean exists(String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "File identifier required");
 		return new File(fileIdentifier).exists();
@@ -142,13 +146,23 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	}
 
 	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately) {
-		if (writeImmediately) {
-			createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
-		} else {
-			deferredFileWrites.put(fileIdentifier, newContents);
-		}
+		createOrUpdateTextFileIfRequired(fileIdentifier, newContents, "", writeImmediately);
 	}
 	
+	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, String descriptionOfChange, boolean writeImmediately) {
+		if (writeImmediately) {
+			createOrUpdateTextFileIfRequired(fileIdentifier, newContents, descriptionOfChange);
+		} else {
+			deferredFileWrites.put(fileIdentifier, newContents);
+			
+			String deferredDescriptionOfChange = StringUtils.defaultIfEmpty(deferredDescriptionOfChanges.get(fileIdentifier), "");
+			if (StringUtils.hasText(deferredDescriptionOfChange) && !deferredDescriptionOfChange.trim().endsWith(";")) {
+				deferredDescriptionOfChange += "; ";
+			} 
+			deferredDescriptionOfChanges.put(fileIdentifier, deferredDescriptionOfChange + StringUtils.trimToEmpty(descriptionOfChange));
+		}
+	}
+
 	public void commit() {
 		try {
 			for (String fileIdentifier : deferredFileWrites.keySet()) {
@@ -158,7 +172,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 						delete(fileIdentifier);
 					}
 				} else {
-					createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+					createOrUpdateTextFileIfRequired(fileIdentifier, newContents, StringUtils.trimToEmpty(deferredDescriptionOfChanges.get(fileIdentifier)));
 				}
 			}
 		} finally {
@@ -168,6 +182,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	
 	public void clear() {
 		deferredFileWrites.clear();
+		deferredDescriptionOfChanges.clear();
 	}
 
 	public int scan() {
@@ -183,7 +198,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		}
 	}
 
-	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents) {
+	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, String descriptionOfChange) {
 		MutableFile mutableFile = null;
 		if (exists(fileIdentifier)) {
 			// First verify if the file has even changed
@@ -203,6 +218,9 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
 		if (mutableFile != null) {
 			try {
+				if (StringUtils.hasText(descriptionOfChange)) {
+					mutableFile.setDescriptionOfChange(descriptionOfChange);
+				}
 				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", e);

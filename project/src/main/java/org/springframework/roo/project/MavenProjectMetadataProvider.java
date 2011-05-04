@@ -218,14 +218,21 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
 		Assert.notNull(dependenciesElement, "Dependencies unable to be found");
 
+		StringBuilder builder = new StringBuilder();
 		for (Dependency dependency : dependencies) {
 			if (projectMetadata.isDependencyRegistered(dependency)) {
 				continue;
 			}
 			dependenciesElement.appendChild(createDependencyElement(dependency, document));
+			builder.append(dependency.getSimpleDescription());
+			builder.append(", ");
 		}
+		if (builder.lastIndexOf(",") != -1) {
+			builder.delete(builder.lastIndexOf(","), builder.length());
+		}
+		builder.insert(0, "added " + (builder.indexOf(",") == -1 ? "dependency " : "dependencies "));
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), builder.toString(), false);
 	}
 
 	public void addDependency(Dependency dependency) {
@@ -242,8 +249,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element dependencies = XmlUtils.findFirstElement("/project/dependencies", root);
 		Assert.notNull(dependencies, "dependencies element not found");
 		dependencies.appendChild(createDependencyElement(dependency, document));
+		String descriptionOfChange = "added dependency " + dependency.getSimpleDescription();
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	public void removeDependencies(List<Dependency> dependencies) {
@@ -264,20 +272,26 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Assert.notNull(dependencies, "dependencies element not found");
 
 		int removeCount = 0;
+		StringBuilder builder = new StringBuilder();
 		for (Dependency dependency : dependencies) {
 			for (Element candidate : XmlUtils.findElements("dependency[artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersion() + "']", dependenciesElement)) {
 				dependenciesElement.removeChild(candidate);
+				builder.append(dependency.getSimpleDescription());
+				builder.append(", ");
 				removeCount++;
 			}
 		}
-
 		if (removeCount == 0) {
 			return;
 		}
+		if (builder.lastIndexOf(",") != -1) {
+			builder.delete(builder.lastIndexOf(","), builder.length());
+		}
+		builder.insert(0, "removed " + (builder.indexOf(",") == -1 ? "dependency " : "dependencies "));
 
 		XmlUtils.removeTextNodes(dependenciesElement);
-		
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), builder.toString(), false);
 	}
 
 	public void removeDependency(Dependency dependency) {
@@ -301,14 +315,21 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
 		Assert.notNull(pluginsElement, "Plugins unable to be found");
 
+		StringBuilder builder = new StringBuilder();
 		for (Plugin plugin : plugins) {
 			if (projectMetadata.isBuildPluginRegistered(plugin)) {
 				continue;
 			}
 			pluginsElement.appendChild(getPluginElement(plugin, document));
+			builder.append(plugin.getSimpleDescription());
+			builder.append(", ");
 		}
+		if (builder.lastIndexOf(",") != -1) {
+			builder.delete(builder.lastIndexOf(","), builder.length());
+		}
+		builder.insert(0, "added " + (builder.indexOf(",") == -1 ? "plugin " : "plugins "));
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), builder.toString(), false);
 	}
 
 	public void addBuildPlugin(Plugin plugin) {
@@ -325,8 +346,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
 		Assert.notNull(pluginsElement, "plugins element not found");
 		pluginsElement.appendChild(getPluginElement(plugin, document));
+		String descriptionOfChange = "added plugin " + plugin.getArtifactId();
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	public void removeBuildPlugins(List<Plugin> plugins) {
@@ -347,20 +369,26 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Assert.notNull(plugins, "plugins element not found");
 
 		int removeCount = 0;
+		StringBuilder builder = new StringBuilder();
 		for (Plugin plugin : plugins) {
 			for (Element candidate : XmlUtils.findElements("plugin[artifactId = '" + plugin.getArtifactId() + "' and version = '" + plugin.getVersion() + "']", pluginsElement)) {
 				pluginsElement.removeChild(candidate);
+				builder.append(plugin.getSimpleDescription());
+				builder.append(", ");
 				removeCount++;
 			}
 		}
-
 		if (removeCount == 0) {
 			return;
 		}
+		if (builder.lastIndexOf(",") != -1) {
+			builder.delete(builder.lastIndexOf(","), builder.length());
+		}
+		builder.insert(0, "removed " + (builder.indexOf(",") == -1 ? "plugin " : "plugins "));
 
 		XmlUtils.removeTextNodes(pluginsElement);
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), builder.toString(), false);
 	}
 
 	public void removeBuildPlugin(Plugin plugin) {
@@ -408,8 +436,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 
 		packaging.setTextContent(projectType.getType());
+		String descriptionOfChange = "updated project type to " + projectType.getType();
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	private void addRepositories(List<Repository> repositories, String containingPath, String path) {
@@ -435,6 +464,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element repositoriesElement = XmlUtils.findFirstElement("/project/" + containingPath, root);
 		Assert.notNull(repositoriesElement, containingPath + " element not found");
 
+		StringBuilder builder = new StringBuilder();
 		for (Repository repository : repositories) {
 			if (path.equals("pluginRepository")) {
 				if (projectMetadata.isPluginRepositoryRegistered(repository)) {
@@ -447,9 +477,15 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 
 			repositoriesElement.appendChild(createRepositoryElement(document, repository, path));
+			builder.append(repository.getUrl());
+			builder.append(", ");
 		}
+		if (builder.lastIndexOf(",") != -1) {
+			builder.delete(builder.lastIndexOf(","), builder.length());
+		}
+		builder.insert(0, "added " + (builder.indexOf(",") == -1 ? path : containingPath) + " ");
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), builder.toString(), false);
 	}
 
 	private Element createDependencyElement(Dependency dependency, Document document) {
@@ -544,8 +580,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			repositoriesElement = document.createElement(containingPath);
 		}
 		repositoriesElement.appendChild(createRepositoryElement(document, repository, path));
+		String descriptionOfChange = "added " + path + " " + repository.getId();
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	private void removeRepository(Repository repository, String path) {
@@ -565,14 +602,16 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
 
+		String descriptionOfChange = "";
 		for (Element candidate : XmlUtils.findElements(path, root)) {
 			if (repository.equals(new Repository(candidate))) {
 				candidate.getParentNode().removeChild(candidate);
+				descriptionOfChange = "removed repository " + repository.getId();
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	private Element getPluginElement(Plugin plugin, Document document) {
@@ -652,20 +691,21 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
 
+		String descriptionOfChange = "";
 		Element existing = XmlUtils.findFirstElement("/project/properties/" + property.getName(), root);
 		if (existing != null) {
 			existing.setTextContent(property.getValue());
+			descriptionOfChange = "updated property '" + property.getName() + "' to '" + property.getValue() + "'";
 		} else {
 			Element properties = XmlUtils.findFirstElement("/project/properties", root);
 			if (null == properties) {
 				properties = document.createElement("properties");
 			}
-
 			Element propertyElement = new XmlElementBuilder(property.getName(), document).setText(property.getValue()).build();
 			properties.appendChild(propertyElement);
 		}
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	public void removeProperty(Property property) {
@@ -679,17 +719,19 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
 
+		String descriptionOfChange = "";
 		Element propertiesElement = XmlUtils.findFirstElement("/project/properties", root);
 		for (Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
 			if (property.equals(new Property(candidate))) {
 				propertiesElement.removeChild(candidate);
+				descriptionOfChange = "removed property " + property.getName();
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
 
 		XmlUtils.removeTextNodes(propertiesElement);
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	public void addFilter(Filter filter) {
@@ -704,9 +746,11 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element root = document.getDocumentElement();
 
 		Element buildElement = XmlUtils.findFirstElement("/project/build", root);
+		String descriptionOfChange = "";
 		Element existing = XmlUtils.findFirstElement("filters/filter['" + filter.getValue() + "']", buildElement);
 		if (existing != null) {
 			existing.setTextContent(filter.getValue());
+			descriptionOfChange = "updated filter '" + filter.getValue() + "'";
 		} else {
 			Element filtersElement = XmlUtils.findFirstElement("filters", buildElement);
 			if (filtersElement == null) {
@@ -717,9 +761,10 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			filterElement.setTextContent(filter.getValue());
 			filtersElement.appendChild(filterElement);
 			buildElement.appendChild(filtersElement);
+			descriptionOfChange = "added filter '" + filter.getValue() + "'";
 		}
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	public void removeFilter(Filter filter) {
@@ -737,10 +782,12 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (filtersElement == null) {
 			return;
 		}
-		
+
+		String descriptionOfChange = "";
 		for (Element candidate : XmlUtils.findElements("filter", filtersElement)) {
 			if (filter.equals(new Filter(candidate))) {
 				filtersElement.removeChild(candidate);
+				descriptionOfChange = "Removed filter '" + filter.getValue() + "'";
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
@@ -749,10 +796,10 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (filterElements.isEmpty()) {
 			filtersElement.getParentNode().removeChild(filtersElement);
 		}
-		
+
 		XmlUtils.removeTextNodes(root);
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	public void addResource(Resource resource) {
@@ -797,8 +844,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		resourcesElement.appendChild(resourceElement);
 		buildElement.appendChild(resourcesElement);
+		String descriptionOfChange = "added resource with " + resource.getSimpleDescription();
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	public void removeResource(Resource resource) {
@@ -816,10 +864,11 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (resourcesElement == null) {
 			return;
 		}
-		
+		String descriptionOfChange = "";
 		for (Element candidate : XmlUtils.findElements("resource[directory = '" + resource.getDirectory().getName() + "']", resourcesElement)) {
 			if (resource.equals(new Resource(candidate))) {
 				resourcesElement.removeChild(candidate);
+				descriptionOfChange = "Removed resource with " + resource.getSimpleDescription();
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
@@ -831,7 +880,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		XmlUtils.removeTextNodes(root);
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	// Remove an element identified by dependency, whenever it occurs at path
@@ -846,17 +895,19 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
 
+		String descriptionOfChange = "";
 		Element dependenciesElement = XmlUtils.findFirstElement(containingPath, root);
 		for (Element candidate : XmlUtils.findElements(path, root)) {
 			if (dependency.equals(new Dependency(candidate))) {
 				dependenciesElement.removeChild(candidate);
+				descriptionOfChange = "removed dependency " + dependency.getSimpleDescription();
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
 
 		XmlUtils.removeTextNodes(dependenciesElement);
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 
 	// Remove an element identified by plugin, whenever it occurs at path
@@ -871,16 +922,18 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
 
+		String descriptionOfChange = "";
 		Element pluginsElement = XmlUtils.findFirstElement(containingPath, root);
 		for (Element candidate : XmlUtils.findElements(path, root)) {
 			if (plugin.equals(new Plugin(candidate))) {
 				pluginsElement.removeChild(candidate);
+				descriptionOfChange = "removed plugin " + plugin.getArtifactId();
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
 
 		XmlUtils.removeTextNodes(pluginsElement);
 
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
 }

@@ -61,7 +61,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		// Now start a thread that will undertake a background poll every second
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				// Unsynchonized lookup of terminated status to avoid anything blocking the termination of the thread
+				// Unsynchronized lookup of terminated status to avoid anything blocking the termination of the thread
 				while (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
 					// We only bother doing a poll if we seem to be available (a proper synchronized check happens later)
 					if (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE) {
@@ -190,7 +190,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				} else {
 					fileMonitorService.scanAll();
 				}
-				undoManager.flush(); // in case something else happened as a result of event notifications above
+				undoManager.flush(); // In case something else happened as a result of event notifications above
 			}
 			
 			// It all seems to have worked, so clear the undo history
