@@ -57,17 +57,22 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 
 	@Override
 	protected void notifyForGenericListener(String upstreamDependency) {
-		super.notifyForGenericListener(upstreamDependency);
-		if (StringUtils.hasText(upstreamDependency) && MetadataIdentificationUtils.isValid(upstreamDependency)) {
-			if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-				boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
-				boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-				if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
-					wasGaeEnabled = isGaeEnabled;
-					for (String producedMid : producedMids) {
-						metadataService.get(producedMid, true);
-					}
-				}
+		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
+			return;
+		}
+		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+			return;
+		}
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		if (projectMetadata == null || !projectMetadata.isValid()) {
+			return;
+		}
+		boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+		if (projectMetadata.isGwtEnabled() && hasGaeStateChanged) {
+			wasGaeEnabled = isGaeEnabled;
+			for (String producedMid : producedMids) {
+				metadataService.get(producedMid, true);
 			}
 		}
 	}
@@ -134,21 +139,22 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 
 	private FieldMetadata getIdentifierField(ClassOrInterfaceTypeDetails governorTypeDetails) {
 		for (AnnotationMetadata annotation : governorTypeDetails.getAnnotations()) {
-			if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooEntity")) {
-				AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("identifierField"));
-				if (value != null) {
-					FieldMetadata possibleIdentifierField = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName(String.valueOf(value.getValue())));
-					for (AnnotationMetadata fieldAnnotation : possibleIdentifierField.getAnnotations()) {
-						if (fieldAnnotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Id")) {
-							return possibleIdentifierField;
-						}
+			if (!annotation.getAnnotationType().getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooEntity")) {
+				continue;
+			}
+			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("identifierField"));
+			if (value != null) {
+				FieldMetadata possibleIdentifierField = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName(String.valueOf(value.getValue())));
+				for (AnnotationMetadata fieldAnnotation : possibleIdentifierField.getAnnotations()) {
+					if (fieldAnnotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Id")) {
+						return possibleIdentifierField;
 					}
-				} else {
-					for (MemberHoldingTypeDetails member : getMemberDetails(governorTypeDetails.getName()).getDetails()) {
-						for (FieldMetadata field : member.getDeclaredFields()) {
-							if (field.getFieldName().getSymbolName().equals("id")) {
-								return field;
-							}
+				}
+			} else {
+				for (MemberHoldingTypeDetails member : getMemberDetails(governorTypeDetails.getName()).getDetails()) {
+					for (FieldMetadata field : member.getDeclaredFields()) {
+						if (field.getFieldName().getSymbolName().equals("id")) {
+							return field;
 						}
 					}
 				}
