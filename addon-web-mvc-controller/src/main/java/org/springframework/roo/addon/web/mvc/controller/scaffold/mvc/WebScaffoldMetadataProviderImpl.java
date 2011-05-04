@@ -46,8 +46,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
 	@Reference private WebMetadataService webMetadataService;
-	private Map<JavaType, String> entityToDodMidMap = new HashMap<JavaType, String>();
-	private Map<String, JavaType> dodMidToEntityMap = new HashMap<String, JavaType>();
+	private Map<JavaType, String> entityToWebScaffoldMidMap = new HashMap<JavaType, String>();
+	private Map<String, JavaType> webScaffoldMidToEntityMap = new HashMap<String, JavaType>();
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -62,11 +62,11 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
-		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
+		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
-		String localMid = entityToDodMidMap.get(governor);
+		String localMid = entityToWebScaffoldMidMap.get(governor);
 		if (localMid == null) {
-			// No DOD is not interested in this JavaType, so let's move on
+			// Not interested in this JavaType, so let's move on
 			return null;
 		}
 		
@@ -81,14 +81,14 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 			return null;
 		}
 		
-		// Remember that this entity JavaType matches up with this DOD's metadata identification string
+		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing the previous association
-		JavaType oldEntity = dodMidToEntityMap.get(metadataIdentificationString);
+		JavaType oldEntity = webScaffoldMidToEntityMap.get(metadataIdentificationString);
 		if (oldEntity != null) {
-			entityToDodMidMap.remove(oldEntity);
+			entityToWebScaffoldMidMap.remove(oldEntity);
 		}
-		entityToDodMidMap.put(annotationValues.getFormBackingObject(), metadataIdentificationString);
-		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getFormBackingObject());
+		entityToWebScaffoldMidMap.put(annotationValues.getFormBackingObject(), metadataIdentificationString);
+		webScaffoldMidToEntityMap.put(metadataIdentificationString, annotationValues.getFormBackingObject());
 		
 		// Lookup the form backing object's metadata
 		JavaType formBackingType = annotationValues.getFormBackingObject();
