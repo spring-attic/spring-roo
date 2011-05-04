@@ -117,7 +117,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		updatePersistenceXml();
 
 		// Do a "get" for every .java file, thus ensuring the metadata is fired
-		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.getSrcMainJavaTypes()) {
+		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
 			metadataService.get(GwtMetadata.createIdentifier(classOrInterfaceTypeDetails.getName(), Path.SRC_MAIN_JAVA));
 		}
 	}
