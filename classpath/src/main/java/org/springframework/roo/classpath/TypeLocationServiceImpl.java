@@ -116,7 +116,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
 			
-			for (ClassOrInterfaceTypeDetails cid : getSrcMainJavaTypes()) {
+			for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
 				MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(TypeLocationServiceImpl.class.getName(), cid);
 				if (MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, tag).size() > 0) {
 					locatedPhysicalTypeMids.add(cid.getDeclaredByMetadataId());
@@ -141,7 +141,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
 			
-			for (ClassOrInterfaceTypeDetails cid : getSrcMainJavaTypes()) {
+			for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
 				annotation: for (JavaType annotation : annotationsToDetect) {
 					if (MemberFindingUtils.getTypeAnnotation(cid, annotation) != null) {
 						locatedPhysicalTypeMids.add(cid.getDeclaredByMetadataId());
@@ -204,12 +204,12 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		return null;
 	}
 	
-	public List<ClassOrInterfaceTypeDetails> getSrcMainJavaTypes() {
+	public List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(Path path) {
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
+		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(path)), null);
 		List<ClassOrInterfaceTypeDetails> projectTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 		
-		for (FileDetails file : fileManager.findMatchingAntPath(pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java")) {
+		for (FileDetails file : fileManager.findMatchingAntPath(pathResolver.getRoot(path) + File.separatorChar + "**" + File.separatorChar + "*.java")) {
 			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
 			JavaType javaType;
@@ -221,8 +221,8 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 			if (id != null) {
 				// Now I've found it, let's work out the Path it is from
-				Path path = PhysicalTypeIdentifier.getPath(id);
-				String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, path);
+				Path locatedPath = PhysicalTypeIdentifier.getPath(id);
+				String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, locatedPath);
 				ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(physicalTypeMid);
 				if (located != null) {
 					projectTypes.add(located);

@@ -8,7 +8,6 @@ import java.util.List;
 import org.springframework.roo.support.util.Assert;
 
 public class Bundle {
-
     private String symbolicName;
     private float ranking;
     private float searchRelevance;
@@ -80,9 +79,8 @@ public class Bundle {
 				}
 			}
 			throw new IllegalStateException("Unable to find bundle with key " + bundleKey);
-		} else {
-			return getLatestVersion();
 		}
+		return getLatestVersion();
 	}
 
 	public int hashCode() {
@@ -123,7 +121,7 @@ public class Bundle {
 			public int compare(Bundle o1, Bundle o2) {
 				if (o1.getSearchRelevance() < o2.getSearchRelevance()) return -1;
 				else if (o1.getSearchRelevance() > o2.getSearchRelevance()) return 1;
-				//order by ranking if search relevance is equal
+				// Order by ranking if search relevance is equal
 				else {
 					if (o1.getRanking() == o2.getRanking()) return 0;
 					else if (o1.getRanking() < o2.getRanking()) return 1;

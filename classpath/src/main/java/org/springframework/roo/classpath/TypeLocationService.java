@@ -78,9 +78,9 @@ public interface TypeLocationService {
 	Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(Object tag);
 
 	/**
-	 * Returns a list of {@link ClassOrInterfaceTypeDetails} that are contained within {@link Path.SRC_MAIN_JAVA}.
+	 * Returns a list of {@link ClassOrInterfaceTypeDetails} that are contained within the specified {@link Path}.
 	 *
-	 * @return a list of ClassOrInterfaceTypeDetails that are within src/main/java.
+	 * @return a list of ClassOrInterfaceTypeDetails contained in path.
 	 */
-	List<ClassOrInterfaceTypeDetails> getSrcMainJavaTypes();
+	List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(Path path);
 }
