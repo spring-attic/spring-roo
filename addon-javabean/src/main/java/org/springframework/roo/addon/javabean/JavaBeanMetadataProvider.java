@@ -98,12 +98,14 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	}
 
 	private FieldMetadata isGaeInterested(FieldMetadata field) {
+		// We are not interested if the field is annotated with @javax.persistence.Transient
 		for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
 			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Transient")) {
 				return null;
 			}
 		}
 		JavaType fieldType = field.getFieldType();
+		// If the field is a common collection type we need to get the element type
 		if (fieldType.isCommonCollectionType()) {
 			if (fieldType.getParameters().isEmpty()) {
 				return null;
