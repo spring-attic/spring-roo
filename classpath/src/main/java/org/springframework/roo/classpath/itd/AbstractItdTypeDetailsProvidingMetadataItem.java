@@ -21,10 +21,10 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadataItem implements ItdTypeDetailsProvidingMetadataItem {
 	protected ClassOrInterfaceTypeDetails governorTypeDetails;
 	protected ItdTypeDetails itdTypeDetails;
+	protected ItdTypeDetailsBuilder builder;
 	protected JavaType destination;
 	protected JavaType aspectName;
 	protected PhysicalTypeMetadata governorPhysicalTypeMetadata;
-	protected ItdTypeDetailsBuilder builder;
 	
 	/**
 	 * Validates input and constructs a superclass that implements {@link ItdTypeDetailsProvidingMetadataItem}.

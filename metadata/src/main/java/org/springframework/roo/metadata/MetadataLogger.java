@@ -33,44 +33,43 @@ import java.util.SortedSet;
  * 
  * @author Ben Alex
  * @since 1.1.2
- *
  */
 public interface MetadataLogger {
 
 	/**
 	 * @return the currently active trace level (0 = none, 1 = major events, 2 = all events)
 	 */
-	public abstract int getTraceLevel();
+	int getTraceLevel();
 
 	/**
 	 * Enable low-level tracing of event delivery information. Defaults to level 0 (none).
 	 * 
 	 * @param trace the level (0 = none, 1 = major events, 2 = all events)
 	 */
-	public abstract void setTraceLevel(int trace);
+	void setTraceLevel(int trace);
 
 	/**
 	 * @return a snapshot of timing statistics that have been collated so far (never null, but may be empty)
 	 */
-	public abstract SortedSet<MetadataTimingStatistic> getTimings();
+	SortedSet<MetadataTimingStatistic> getTimings();
 
 	/**
 	 * Increments the current stack level. The current stack level determines the indentation of logged messages.
 	 * It is required that for every increment, a corresponding {@link #decrementLevel()} is invoked.
 	 */
-	public void startEvent();
+	void startEvent();
 
 	/**
 	 * Decrements the current stack level.
 	 */
-	public void stopEvent();
+	void stopEvent();
 
 	/**
 	 * Logs a message against the given event identifier.
 	 * 
 	 * @param message to log (required)
 	 */
-	public abstract void log(String message);
+	void log(String message);
 
 	/**
 	 * Starts the timer counting against the responsible class. The timer must eventually be {@link #stopTimer()}, but
@@ -78,12 +77,11 @@ public interface MetadataLogger {
 	 * 
 	 * @param responsibleClass the class responsible for this timing (required)
 	 */
-	public abstract void startTimer(String responsibleClass);
+	void startTimer(String responsibleClass);
 
 	/**
 	 * Stops the most recently started timer. This is mandatory and must be in the reverse order timers were started.
 	 * When a timer stops is also when we update its timings.
 	 */
-	public abstract void stopTimer();
-
+	void stopTimer();
 }
