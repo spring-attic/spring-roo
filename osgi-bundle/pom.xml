@@ -90,6 +90,7 @@
 				<version>1.6</version>
 				<executions>
 					<execution>
+						<!-- copies the JARs we have built locally (eg bootstrap JAR) that noone else depends on into the target/all -->
 						<id>copy-jars-for-roo-dev-or-assembly</id>
 						<phase>package</phase>
 						<configuration>
