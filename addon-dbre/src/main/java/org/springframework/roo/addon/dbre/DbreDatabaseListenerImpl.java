@@ -387,24 +387,24 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private void deleteManagedType(ClassOrInterfaceTypeDetails managedEntity) {
-		if (isEntityDeletable(managedEntity)) {
-			deleteJavaType(managedEntity.getName());
+		if (!isEntityDeletable(managedEntity)) {
+			return;
+		}
+		deleteJavaType(managedEntity.getName());
 
-			JavaType identifierType = getIdentifierType(managedEntity.getName());
-			for (ClassOrInterfaceTypeDetails managedIdentifier : getManagedIdentifiers()) {
-				if (managedIdentifier.getName().equals(identifierType)) {
-					deleteJavaType(identifierType);
-					break;
-				}
+		JavaType identifierType = getIdentifierType(managedEntity.getName());
+		for (ClassOrInterfaceTypeDetails managedIdentifier : getManagedIdentifiers()) {
+			if (managedIdentifier.getName().equals(identifierType)) {
+				deleteJavaType(identifierType);
+				break;
 			}
-			
 		}
 	}
 
 	private boolean isEntityDeletable(ClassOrInterfaceTypeDetails managedEntity) {
-		AnnotationMetadata dbManagedAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, new JavaType(RooDbManaged.class.getName()));
-		AnnotationAttributeValue<?> attribute = null;
-		if (dbManagedAnnotation == null || (attribute = dbManagedAnnotation.getAttribute(new JavaSymbolName("automaticallyDelete"))) == null || !(Boolean) attribute.getValue()) {
+		String declaredByMetadataId = DbreMetadata.createIdentifier(managedEntity.getName(), Path.SRC_MAIN_JAVA);
+		DbreMetadata dbreMetadata = (DbreMetadata) metadataService.get(declaredByMetadataId);
+		if (dbreMetadata == null || !dbreMetadata.isAutomaticallyDelete()) {
 			return false;
 		}
 

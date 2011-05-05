@@ -61,6 +61,12 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+		// We need to parse the annotation, which we expect to be present
+		DbManagedAnnotationValues annotationValues = new DbManagedAnnotationValues(governorPhysicalTypeMetadata);
+		if (!annotationValues.isAnnotationFound()) {
+			return null;
+		}
+
 		// Abort if the database couldn't be deserialized. This can occur if the DBRE XML file has been deleted or is empty.
 		Database database = dbreModelService.getDatabaseFromCache();
 		if (database == null) {
@@ -102,7 +108,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityFields, entityMethods, identifierField, embeddedIdentifierHolder, versionField, managedEntities, database);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, entityFields, entityMethods, identifierField, embeddedIdentifierHolder, versionField, managedEntities, database);
 	}
 
 	private FieldMetadata getIdentifierField(MemberDetails memberDetails, String metadataIdentificationString) {

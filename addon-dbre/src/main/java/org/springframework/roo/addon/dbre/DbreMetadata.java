@@ -34,7 +34,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -80,6 +79,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String MAPPED_BY = "mappedBy";
 	private static final String REFERENCED_COLUMN = "referencedColumnName";
 
+	private DbManagedAnnotationValues annotationValues;
 	private List<? extends FieldMetadata> entityFields;
 	private List<? extends MethodMetadata> entityMethods;
 	private FieldMetadata identifierField;
@@ -87,26 +87,22 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata versionField;
 	private Set<ClassOrInterfaceTypeDetails> managedEntities;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<? extends FieldMetadata> entityFields, List<? extends MethodMetadata> entityMethods, FieldMetadata identifierField, EmbeddedIdentifierHolder embeddedIdentifierHolder, FieldMetadata versionField, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DbManagedAnnotationValues annotationValues, List<? extends FieldMetadata> entityFields, List<? extends MethodMetadata> entityMethods, FieldMetadata identifierField, EmbeddedIdentifierHolder embeddedIdentifierHolder, FieldMetadata versionField, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
+		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(entityFields, "Entity fields required");
 		Assert.notNull(entityMethods, "Entity methods required");
 		Assert.notNull(managedEntities, "Managed entities required");
 		Assert.notNull(database, "Database required");
 
+		this.annotationValues = annotationValues;
 		this.entityFields = entityFields;
 		this.entityMethods = entityMethods;
 		this.identifierField = identifierField;
 		this.embeddedIdentifierHolder = embeddedIdentifierHolder;
 		this.versionField = versionField;
 		this.managedEntities = managedEntities;
-
-		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooDbManaged.class.getName()));
-		if (annotation != null) {
-			AutoPopulationUtils.populate(this, annotation);
-		}
 
 		Table table = database.getTable(DbreTypeUtils.getTableName(governorTypeDetails));
 		if (table == null) {
@@ -874,6 +870,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return getErrorMsg(foreignTableName) + " and table '" + tableName + "' has a foreign-key reference to table '" + foreignTableName + "'";
 	}
 
+	public boolean isAutomaticallyDelete() {
+		return annotationValues.isAutomaticallyDelete();
+	}
+	
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
