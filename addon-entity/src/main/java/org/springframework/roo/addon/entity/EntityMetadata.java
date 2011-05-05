@@ -60,12 +60,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private MemberDetails memberDetails;
 	private boolean noArgConstructor;
 	private String plural;
-	private String identifierColumn;
-	private JavaType identifierType;
-	private String identifierField;
-	private String identifierColumnDefinition;
-	private int identifierColumnSize;
-	private int identifierScale;
+	
+	private Identifier identifier;
 	private boolean isGaeEnabled;
 	private boolean isDataNucleusEnabled;
 	private boolean isVMforceEnabled;
@@ -87,15 +83,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.noArgConstructor = noArgConstructor;
 		this.plural = StringUtils.capitalize(plural);
 		
-		identifierType = annotationValues.getIdentifierType();
-		identifierField = annotationValues.getIdentifierField();
-		identifierColumn = annotationValues.getIdentifierColumn();
+		// Process the identifier service result
+		processIdentifier(identifierServiceResult);
+		
 		isGaeEnabled = projectMetadata.isGaeEnabled();
 		isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
 		isVMforceEnabled = projectMetadata.isVMforceEnabled();
-
-		// Process the identifier service result
-		processIdentifier(identifierServiceResult);
 		
 		// Add @Entity or @MappedSuperclass annotation
 		builder.addAnnotation(annotationValues.isMappedSuperclass() ? getMappedSuperclassAnnotation() : getEntityAnnotation());
@@ -152,19 +145,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We have potential identifier information from an IdentifierService.
 		// We only use this identifier information if the user did NOT provide ANY identifier-related attributes on @RooEntity....
 		Assert.isTrue(identifierServiceResult.size() == 1, "Identifier service indicates " + identifierServiceResult.size() + " fields illegally for a entity '" + destination.getFullyQualifiedTypeName() + "' (should only be one identifier field given this is an entity, not an Identifier class)");
-		Identifier id = identifierServiceResult.iterator().next();
-		if (identifierType == null) {
-			identifierType = id.getFieldType();
-		}
-		if (!StringUtils.hasText(identifierField)) {
-			identifierField = id.getFieldName().getSymbolName();
-		}
-		if (!StringUtils.hasText(identifierColumn)) {
-			identifierColumn = id.getColumnName();
-		}
-		identifierColumnDefinition = id.getColumnDefinition();
-		identifierColumnSize = id.getColumnSize();
-		identifierScale = id.getScale();
+		identifier = identifierServiceResult.iterator().next();
 	}
 
 	public AnnotationMetadata getEntityAnnotation() {
@@ -395,11 +376,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
-		if (!StringUtils.hasText(identifierField)) {
-			// Force a default
-			identifierField = "id";
-		}
-		
+		String identifierField = getIdentifierFieldName();
+
 		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
 		JavaSymbolName idField;
@@ -421,10 +399,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// We need to create one
 		
-		if (identifierType == null) {
-			// Force a default
-			identifierType = JavaType.LONG_OBJECT;
-		} 
+		JavaType identifierType = getIdentifierType();
 		if (isVMforceEnabled) {
 			identifierType = JavaType.STRING_OBJECT;
 		}
@@ -462,6 +437,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType)));
 			annotations.add(generatedValueBuilder);
 
+			String identifierColumn = StringUtils.trimToEmpty(getIdentifierColumn());
 			String columnName = idField.getSymbolName();
 			if (StringUtils.hasText(identifierColumn)) {
 				// User has specified an alternate column name
@@ -470,19 +446,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 			AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 			columnBuilder.addStringAttribute("name", columnName);
-			if (StringUtils.hasText(identifierColumnDefinition)) {
-				columnBuilder.addStringAttribute("columnDefinition", identifierColumnDefinition);
+			if (identifier != null && StringUtils.hasText(identifier.getColumnDefinition())) {
+				columnBuilder.addStringAttribute("columnDefinition", identifier.getColumnDefinition());
 			}
 			
 			// Add length attribute for String field
-			if (identifierColumnSize > 0 && identifierColumnSize < 4000 && identifierType.equals(JavaType.STRING_OBJECT)) {
-				columnBuilder.addIntegerAttribute("length", identifierColumnSize);
+			if (identifier != null && identifier.getColumnSize() > 0 && identifier.getColumnSize() < 4000 && identifierType.equals(JavaType.STRING_OBJECT)) {
+				columnBuilder.addIntegerAttribute("length", identifier.getColumnSize());
 			}
 			
 			// Add precision and scale attributes for numeric field
-			if (identifierScale > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(new JavaType("java.math.BigDecimal")))) {
-				columnBuilder.addIntegerAttribute("precision", identifierColumnSize);
-				columnBuilder.addIntegerAttribute("scale", identifierScale);
+			if (identifier != null && identifier.getScale() > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(new JavaType("java.math.BigDecimal")))) {
+				columnBuilder.addIntegerAttribute("precision", identifier.getColumnSize());
+				columnBuilder.addIntegerAttribute("scale", identifier.getScale());
 			}
 
 			annotations.add(columnBuilder);
@@ -490,10 +466,46 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType).build();
 	}
-	
+
 	public FieldMetadata getIdentifierField(List<FieldMetadata> identifierFields, JavaType identifierType) {
 		Assert.isTrue(identifierFields.size() == 1, "More than one field was annotated with @" + identifierType.getSimpleTypeName() + " in '" + destination.getFullyQualifiedTypeName() + "'");
 		return new FieldMetadataBuilder(identifierFields.get(0)).build();
+	}
+
+	private String getIdentifierFieldName() {
+		String identifierField;
+		if (StringUtils.hasText(annotationValues.getIdentifierField())) {
+			identifierField = annotationValues.getIdentifierField();
+		} else if (identifier != null && identifier.getFieldName() != null) {
+			identifierField = identifier.getFieldName().getSymbolName();
+		} else {
+			// Force a default
+			identifierField = "id";
+		}
+		return identifierField;
+	}
+	
+	private JavaType getIdentifierType() {
+		JavaType identifierType;
+		if (annotationValues.getIdentifierType() != null) {
+			identifierType = annotationValues.getIdentifierType();
+		} else if (identifier != null && identifier.getFieldType() != null) {
+			identifierType = identifier.getFieldType();
+		} else {
+			// Force a default
+			identifierType = JavaType.LONG_OBJECT;
+		}
+		return identifierType;
+	}
+
+	private String getIdentifierColumn() {
+		String identifierColumn = "";
+		if (StringUtils.hasText(annotationValues.getIdentifierColumn())) {
+			identifierColumn = annotationValues.getIdentifierColumn();
+		} else if (identifier != null && StringUtils.hasText(identifier.getColumnName())){
+			identifierColumn = identifier.getColumnName();
+		}
+		return identifierColumn;
 	}
 
 	/**
