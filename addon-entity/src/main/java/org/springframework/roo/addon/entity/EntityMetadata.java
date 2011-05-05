@@ -22,7 +22,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
@@ -87,15 +86,16 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.memberDetails = memberDetails;
 		this.noArgConstructor = noArgConstructor;
 		this.plural = StringUtils.capitalize(plural);
-		identifierColumn = annotationValues.getIdentifierColumn();
+		
 		identifierType = annotationValues.getIdentifierType();
 		identifierField = annotationValues.getIdentifierField();
+		identifierColumn = annotationValues.getIdentifierColumn();
 		isGaeEnabled = projectMetadata.isGaeEnabled();
 		isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
 		isVMforceEnabled = projectMetadata.isVMforceEnabled();
 
-		// Process values from the annotation, if present
-		processAnnotation(identifierServiceResult);
+		// Process the identifier service result
+		processIdentifier(identifierServiceResult);
 		
 		// Add @Entity or @MappedSuperclass annotation
 		builder.addAnnotation(annotationValues.isMappedSuperclass() ? getMappedSuperclassAnnotation() : getEntityAnnotation());
@@ -145,28 +145,26 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 
-	private void processAnnotation(List<Identifier> identifierServiceResult) {
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
-		if (annotation != null) {
-			AutoPopulationUtils.populate(this, annotation);
-			
-			if (identifierServiceResult != null) {
-				// We have potential identifier information from an IdentifierService.
-				// We only use this identifier information if the user did NOT provide ANY identifier-related attributes on @RooEntity....
-				List<JavaSymbolName> attributeNames = annotation.getAttributeNames();
-				if (!attributeNames.contains(new JavaSymbolName("identifierType")) && !attributeNames.contains(new JavaSymbolName("identifierField")) && !attributeNames.contains(new JavaSymbolName("identifierColumn"))) {
-					// User has not specified any identifier information, so let's use what IdentifierService offered
-					Assert.isTrue(identifierServiceResult.size() == 1, "Identifier service indicates " + identifierServiceResult.size() + " fields illegally for a entity " + destination + " (should only be one identifier field given this is an entity, not an Identifier class)");
-					Identifier id = identifierServiceResult.iterator().next();
-					identifierColumn = id.getColumnName();
-					identifierField = id.getFieldName().getSymbolName();
-					identifierType = id.getFieldType();
-					identifierColumnDefinition = id.getColumnDefinition();
-					identifierColumnSize = id.getColumnSize();
-					identifierScale = id.getScale();
-				}
-			}
+	private void processIdentifier(List<Identifier> identifierServiceResult) {
+		if (identifierServiceResult == null || identifierServiceResult.isEmpty()) {
+			return;
 		}
+		// We have potential identifier information from an IdentifierService.
+		// We only use this identifier information if the user did NOT provide ANY identifier-related attributes on @RooEntity....
+		Assert.isTrue(identifierServiceResult.size() == 1, "Identifier service indicates " + identifierServiceResult.size() + " fields illegally for a entity '" + destination.getFullyQualifiedTypeName() + "' (should only be one identifier field given this is an entity, not an Identifier class)");
+		Identifier id = identifierServiceResult.iterator().next();
+		if (identifierType == null) {
+			identifierType = id.getFieldType();
+		}
+		if (!StringUtils.hasText(identifierField)) {
+			identifierField = id.getFieldName().getSymbolName();
+		}
+		if (!StringUtils.hasText(identifierColumn)) {
+			identifierColumn = id.getColumnName();
+		}
+		identifierColumnDefinition = id.getColumnDefinition();
+		identifierColumnSize = id.getColumnSize();
+		identifierScale = id.getScale();
 	}
 
 	public AnnotationMetadata getEntityAnnotation() {
@@ -422,6 +420,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// We need to create one
+		
+		if (identifierType == null) {
+			// Force a default
+			identifierType = JavaType.LONG_OBJECT;
+		} 
+		if (isVMforceEnabled) {
+			identifierType = JavaType.STRING_OBJECT;
+		}
+		
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")));
 		JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
@@ -479,10 +486,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}
 
 			annotations.add(columnBuilder);
-		}
-		
-		if (isVMforceEnabled) {
-			identifierType = JavaType.STRING_OBJECT;
 		}
 
 		return new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType).build();

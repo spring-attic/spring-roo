@@ -14,8 +14,8 @@ import org.springframework.roo.model.JavaType;
  */
 public class EntityAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
-	@AutoPopulate private JavaType identifierType = JavaType.LONG_OBJECT;
-	@AutoPopulate private String identifierField = "id";
+	@AutoPopulate private JavaType identifierType;
+	@AutoPopulate private String identifierField = "";
 	@AutoPopulate private String identifierColumn = "";
 	@AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
 	@AutoPopulate private String versionField = "version";
