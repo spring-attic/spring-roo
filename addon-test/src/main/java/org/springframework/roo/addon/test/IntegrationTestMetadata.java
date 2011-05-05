@@ -135,8 +135,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Add the data on demand field if the user did not define it on the governor directly
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName("dod"));
 		if (field != null) {
-			Assert.isTrue(field.getFieldType().equals(dodGovernor), "Field 'dod' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be of type '" + dodGovernor.getFullyQualifiedTypeName() + "'");
-			Assert.notNull(MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.beans.factory.annotation.Autowired")), "Field 'dod' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be annotated with @Autowired");
+			Assert.isTrue(field.getFieldType().equals(dodGovernor), "Field 'dod' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + dodGovernor.getFullyQualifiedTypeName() + "'");
+			Assert.notNull(MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.beans.factory.annotation.Autowired")), "Field 'dod' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @Autowired");
 		} else {
 			// Add the field via the ITD
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -151,7 +151,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaType helperType = new JavaType("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
 		FieldMetadata helperField = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName("helper"));
 		if (helperField != null) {
-			Assert.isTrue(helperField.getFieldType().getFullyQualifiedTypeName().equals(helperType.getFullyQualifiedTypeName()), "Field 'helper' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be of type '" + helperType.getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(helperField.getFieldType().getFullyQualifiedTypeName().equals(helperType.getFullyQualifiedTypeName()), "Field 'helper' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + helperType.getFullyQualifiedTypeName() + "'");
 		} else {
 			// Add the field via the ITD
 			String initializer = "new LocalServiceTestHelper(new com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig())";
@@ -166,7 +166,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaSymbolName setUpMethodName = new JavaSymbolName("setUp");
 		MethodMetadata setUpMethod = MemberFindingUtils.getMethod(governorTypeDetails, setUpMethodName, parameters);
 		if (setUpMethod != null) {
-			Assert.notNull(MemberFindingUtils.getAnnotationOfType(setUpMethod.getAnnotations(), new JavaType("org.junit.BeforeClass")), "Method 'setUp' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be annotated with @BeforeClass");
+			Assert.notNull(MemberFindingUtils.getAnnotationOfType(setUpMethod.getAnnotations(), new JavaType("org.junit.BeforeClass")), "Method 'setUp' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @BeforeClass");
 		} else {
 			// Add the method via the ITD
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -184,7 +184,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaSymbolName tearDownMethodName = new JavaSymbolName("tearDown");
 		MethodMetadata tearDownMethod = MemberFindingUtils.getMethod(governorTypeDetails, tearDownMethodName, parameters);
 		if (tearDownMethod != null) {
-			Assert.notNull(MemberFindingUtils.getAnnotationOfType(tearDownMethod.getAnnotations(), new JavaType("org.junit.AfterClass")), "Method 'tearDown' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be annotated with @AfterClass");
+			Assert.notNull(MemberFindingUtils.getAnnotationOfType(tearDownMethod.getAnnotations(), new JavaType("org.junit.AfterClass")), "Method 'tearDown' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @AfterClass");
 		} else {
 			// Add the method via the ITD
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();

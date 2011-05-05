@@ -184,7 +184,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 			JavaSymbolName fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(foreignTableName) + fieldSuffix);
 			JavaType fieldType = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-			Assert.notNull(fieldType, "Attempted to create one-to-one field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName, table.getName()));
+			Assert.notNull(fieldType, "Attempted to create one-to-one field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName, table.getName()));
 
 			// Fields are stored in a field-keyed map first before adding them to the builder.
 			// This ensures the fields from foreign keys with multiple columns will only get created once.
@@ -220,7 +220,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			JavaSymbolName fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(foreignTableName) + fieldSuffix);
 
 			JavaType fieldType = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-			Assert.notNull(fieldType, "Attempted to create one-to-one mapped-by field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName));
+			Assert.notNull(fieldType, "Attempted to create one-to-one mapped-by field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName));
 
 			// Check for existence of same field - ROO-1691
 			while (true) {
@@ -296,7 +296,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(foreignTableName) + fieldSuffix);
 			}
 			JavaType fieldType = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-			Assert.notNull(fieldType, "Attempted to create many-to-one field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName, table.getName()));
+			Assert.notNull(fieldType, "Attempted to create many-to-one field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName, table.getName()));
 
 			// Fields are stored in a field-keyed map first before adding them to the builder.
 			// This ensures the fields from foreign keys with multiple columns will only get created once.
@@ -312,7 +312,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, Table joinTable, Table inverseSideTable) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = DbreTypeUtils.findTypeForTable(managedEntities, inverseSideTable);
-		Assert.notNull(element, "Attempted to create many-to-many owning-side field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' " + getErrorMsg(inverseSideTable.getName()));
+		Assert.notNull(element, "Attempted to create many-to-many owning-side field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "' " + getErrorMsg(inverseSideTable.getName()));
 
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
@@ -360,7 +360,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, Table owningSideTable) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = DbreTypeUtils.findTypeForTable(managedEntities, owningSideTable);
-		Assert.notNull(element, "Attempted to create many-to-many inverse-side field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(owningSideTable.getName()));
+		Assert.notNull(element, "Attempted to create many-to-many inverse-side field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "'" + getErrorMsg(owningSideTable.getName()));
 
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
@@ -459,7 +459,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> params = new ArrayList<JavaType>();
 
 		JavaType element = DbreTypeUtils.findTypeForTableName(managedEntities, foreignTableName);
-		Assert.notNull(element, "Attempted to create one-to-many mapped-by field '"+ fieldName + "' in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName));
+		Assert.notNull(element, "Attempted to create one-to-many mapped-by field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "'" + getErrorMsg(foreignTableName));
 
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);

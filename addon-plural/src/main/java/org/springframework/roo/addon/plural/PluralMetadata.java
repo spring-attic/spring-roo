@@ -54,7 +54,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Compute the plural form, if needed
 		if ("".equals(this.value)) {
-			value = getInflectorPlural(governorTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
+			value = getInflectorPlural(destination.getSimpleTypeName(), Locale.ENGLISH);
 		}
 
 		// Create a representation of the desired output ITD

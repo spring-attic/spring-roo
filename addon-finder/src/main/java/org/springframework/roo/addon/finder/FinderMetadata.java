@@ -101,7 +101,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// To get this far we need to create the method...
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(governorTypeDetails.getName());
+		parameters.add(destination);
 		JavaType queryType = new JavaType("javax.persistence.Query");
 		JavaType typedQueryType = new JavaType("javax.persistence.TypedQuery", 0, DataType.TYPE, null, parameters);
 
@@ -147,7 +147,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Get the entityManager() method (as per ROO-216)
-		bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = " + destination.getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
 		List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
 		if (containsCollectionType) {
@@ -177,7 +177,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			if (isDataNucleusEnabled) {
 				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
 			} else {
-				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString(), " + governorTypeDetails.getName().getSimpleTypeName() + ".class);");
+				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString(), " + destination.getSimpleTypeName() + ".class);");
 			}
 			
 			for (int i = 0; i < parameterTypes.size(); i++) {
@@ -196,7 +196,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			if (isDataNucleusEnabled) {
 				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\");");
 			} else {
-				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class);");
+				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\", " + destination.getSimpleTypeName() + ".class);");
 			}
 		
 			for (JavaSymbolName name : parameterNames) {

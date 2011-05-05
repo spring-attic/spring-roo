@@ -64,7 +64,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		JavaType governor = itdTypeDetails.getName();
 		String localMid = entityToDodMidMap.get(governor);
 		if (localMid == null) {
-			// No DOD is interested in this JavaType, so let's move on
+			// No DOD is not interested in this JavaType, so let's move on
 			return null;
 		}
 		

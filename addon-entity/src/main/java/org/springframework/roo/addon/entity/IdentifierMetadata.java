@@ -229,7 +229,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			String requiredAccessorName = getRequiredAccessorName(field);
 			MethodMetadata accessor = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
 			if (accessor != null) {
-				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
 				accessor = getAccessor(field);
 			}
@@ -272,7 +272,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			paramTypes.add(field.getFieldType());
 			MethodMetadata mutator = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
 			if (mutator != null) {
-				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
 				mutator = getMutator(field);
 			}
@@ -391,7 +391,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			return null;
 		}
 
-		String typeName = governorTypeDetails.getName().getSimpleTypeName();
+		String typeName = destination.getSimpleTypeName();
 
 		// Create the method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

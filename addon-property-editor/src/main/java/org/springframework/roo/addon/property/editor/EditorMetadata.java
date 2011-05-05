@@ -71,7 +71,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Locate user-defined field
 		FieldMetadata userField = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (userField != null) {
-			Assert.isTrue(userField.getFieldType().equals(fieldType), "Field '" + fieldName + "' on '" + governorTypeDetails.getName() + "' must be of type '" + fieldType.getNameIncludingTypeParameters() + "'");
+			Assert.isTrue(userField.getFieldType().equals(fieldType), "Field '" + fieldName + "' on '" + destination + "' must be of type '" + fieldType.getNameIncludingTypeParameters() + "'");
 			return userField;
 		}
 
@@ -88,7 +88,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
-			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
+			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
 
@@ -118,7 +118,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (userMethod != null) {
-			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
+			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
 
