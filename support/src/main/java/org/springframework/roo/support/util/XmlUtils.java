@@ -35,6 +35,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSException;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
@@ -111,6 +112,14 @@ public final class XmlUtils {
 		}
 	}
 	
+	/**
+	 * Write an XML document to the OutputStream provided. This method will detect if the JDK supports the
+	 * DOM Level 3 "format-pretty-print" configuration and make use of it. If not found it will fall back to 
+	 * using formatting offered by TrAX. 
+	 * 
+	 * @param outputStream the output stream to write to. The stream is closed upon completion.
+	 * @param document the document to write.
+	 */
 	public static void writeFormattedXml(OutputStream outputStream, Document document) {
 		// Note that the "format-pretty-print" DOM configuration parameter can only be set in JDK 1.6+.
 		DOMImplementation domImplementation = document.getImplementation();
@@ -130,6 +139,9 @@ public final class XmlUtils {
 				}
 				if (registry != null) {
 					domImplementationLS = (DOMImplementationLS) registry.getDOMImplementation("LS");
+				} else {
+					// DOMImplementationRegistry not available. Falling back to TrAX.
+					writeXml(outputStream, document);
 				}
 			}
 			if (domImplementationLS != null) {
@@ -140,7 +152,17 @@ public final class XmlUtils {
 					LSOutput lsOutput = domImplementationLS.createLSOutput();
 					lsOutput.setEncoding("UTF-8");
 					lsOutput.setByteStream(outputStream);
+					try {
 					lsSerializer.write(document, lsOutput);
+					} catch (LSException lse) {
+						throw new IllegalStateException(lse);
+					} finally {
+						try {
+							outputStream.close();
+						} catch (IOException ignored) {
+							// Do nothing
+						}
+					}
 				} else {
 					// DOMConfiguration 'format-pretty-print' parameter not available. Falling back to TrAX.
 					writeXml(outputStream, document);
