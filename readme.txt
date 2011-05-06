@@ -30,7 +30,7 @@ need to add a $ROO_HOME variable. It is simply used in these docs.
 Next double-check you meet the installation requirements:
 
  * A proper installation of Java 6 or above
- * Maven 3.0.1+ properly installed and working with your Java 5+
+ * Maven 3.0.1+ properly installed and working with your Java 6+
  * Internet access so that Maven can download required dependencies
 
 Next you need to setup an environment variable called MAVEN_OPTS.
@@ -95,7 +95,7 @@ However, if you're doing a lot of builds you might prefer automation.
 One final note if you're new to GPG: don't lose your private key!
 Backup the secring.gpg file, as you'll need it to ever revoke your key
 or sign a replacement key (the public key servers offer no way to
-revoke a key unless you can sign the recovation request).
+revoke a key unless you can sign the revocation request).
 
 ======================================================================
 DEVELOPING WITHIN ECLIPSE
