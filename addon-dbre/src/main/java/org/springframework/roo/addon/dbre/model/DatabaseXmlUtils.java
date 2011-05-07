@@ -68,7 +68,7 @@ public abstract class DatabaseXmlUtils {
 			throw new IllegalStateException("Unable to read database from XML file", e);
 		} catch (Exception e) {
 			if (e.getMessage().contains("Invalid byte")) {
-				throw new IllegalStateException("Invalid content in XML file", e);
+				throw new IllegalStateException("Invalid content in XML file. There may hidden characters in the file, such as the byte order mark (BOM). Try re-saving the xml in a text editor", e);
 			}
 			throw new IllegalStateException(e);
 		}
