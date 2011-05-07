@@ -98,7 +98,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private void deserializeDatabase() {
-		Database database = dbreModelService.getDatabase();
+		Database database = dbreModelService.getDatabase(true);
 		if (database != null) {
 			identifierResults = new LinkedHashMap<JavaType, List<Identifier>>();
 			reverseEngineer(database);

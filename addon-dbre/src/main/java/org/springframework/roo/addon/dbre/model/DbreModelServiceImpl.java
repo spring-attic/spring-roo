@@ -73,23 +73,23 @@ public class DbreModelServiceImpl implements DbreModelService {
 		}
 	}
 
-	public Database getDatabaseFromCache() {
-		if (cachedIntrospections.containsKey(lastSchema)) {
+	public Database getDatabase(boolean evictCache) {
+		if (!evictCache && cachedIntrospections.containsKey(lastSchema)) {
 			return cachedIntrospections.get(lastSchema);
 		}
-		return null;
-	}
-
-	public Database getDatabase() {
+		if (evictCache && cachedIntrospections.containsKey(lastSchema)) {
+			cachedIntrospections.remove(lastSchema);
+		}
 		String dbreXmlPath = getDbreXmlPath();
 		if (!StringUtils.hasText(dbreXmlPath) || !fileManager.exists(dbreXmlPath)) {
 			return null;
 		}
- 
+
+		Database database = null;
 		InputStream inputStream = null;
 		try {
 			inputStream = fileManager.getInputStream(dbreXmlPath);
-			Database database = DatabaseXmlUtils.readDatabase(inputStream);
+			database = DatabaseXmlUtils.readDatabase(inputStream);
 			cacheDatabase(database);
 			return database;
 		} catch (Exception e) {
@@ -101,6 +101,11 @@ public class DbreModelServiceImpl implements DbreModelService {
 				} catch (IOException ignored) {}
 			}
 		}
+	}
+
+	public void writeDatabase(Database database) {
+		Document document = DatabaseXmlUtils.getDatabaseDocument(database);
+		fileManager.createOrUpdateTextFileIfRequired(getDbreXmlPath(), XmlUtils.nodeToString(document), true);
 	}
 	
 	public String getDbreXmlPath() {

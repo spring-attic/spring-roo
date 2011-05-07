@@ -73,13 +73,13 @@ public class DbreOperationsImpl implements DbreOperations {
 			logger.warning("Schema '" + schema.getName() + "' does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
 		} else {
 			try {
-				Document document = DatabaseXmlUtils.getDatabaseDocument(database);
 				if (displayOnly) {
+					Document document = DatabaseXmlUtils.getDatabaseDocument(database);
 					OutputStream outputStream = file != null ? new FileOutputStream(file) : new ByteArrayOutputStream();
 					XmlUtils.writeXml(outputStream, document);
 					logger.info(file != null ? "Database metadata written to file " + file.getAbsolutePath() : outputStream.toString());
 				} else {
-					fileManager.createOrUpdateTextFileIfRequired(dbreModelService.getDbreXmlPath(), XmlUtils.nodeToString(document), false);
+					dbreModelService.writeDatabase(database);
 				}
 			} catch (Exception e) {
 				throw new IllegalStateException(e);

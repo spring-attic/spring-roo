@@ -1,13 +1,11 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.EmptyStackException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -41,7 +39,7 @@ public abstract class DatabaseXmlUtils {
 
 	static Schema readSchemaWithDom(InputStream inputStream) {
 		Assert.notNull("Input stream required");
-		Document document = getDocument(inputStream);
+		Document document = XmlUtils.readXml(inputStream);
 		Element databaseElement = document.getDocumentElement();
 		return new Schema(databaseElement.getAttribute("schema"));
 	}
@@ -69,12 +67,15 @@ public abstract class DatabaseXmlUtils {
 		} catch (EmptyStackException e) {
 			throw new IllegalStateException("Unable to read database from XML file", e);
 		} catch (Exception e) {
+			if (e.getMessage().contains("Invalid byte")) {
+				throw new IllegalStateException("Invalid content in XML file", e);
+			}
 			throw new IllegalStateException(e);
 		}
 	}
 
 	static Database readDatabaseWithDom(InputStream inputStream) {
-		Document document = getDocument(inputStream);
+		Document document = XmlUtils.readXml(inputStream);
 		Element databaseElement = document.getDocumentElement();
 
 		Set<Table> tables = new LinkedHashSet<Table>();
@@ -254,20 +255,6 @@ public abstract class DatabaseXmlUtils {
 				index.addColumn(indexColumn);
 			}
 			table.addIndex(index);
-		}
-	}
-
-	private static Document getDocument(InputStream inputStream) {
-		try {
-			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-			builder.setErrorHandler(null);
-			return builder.parse(inputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		} finally {
-			try {
-				inputStream.close();
-			} catch (IOException ignored) {}
 		}
 	}
 }

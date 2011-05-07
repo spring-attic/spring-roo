@@ -3,6 +3,7 @@ package org.springframework.roo.addon.dbre;
 import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.Table;
+import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
