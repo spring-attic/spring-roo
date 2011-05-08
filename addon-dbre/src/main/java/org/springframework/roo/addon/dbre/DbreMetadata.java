@@ -201,7 +201,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		for (ForeignKey exportedKey : table.getExportedKeys()) {
-			if (exportedKey.getForeignTable() != null && exportedKey.getForeignTable().isJoinTable()) {
+			Assert.notNull(exportedKey.getForeignTable(), "Foreign key table for foreign key '" + exportedKey.getName() + "' in table '" + table.getName() + "' must not be null in determining a one-to-one relationship");
+			if (exportedKey.getForeignTable().isJoinTable()) {
 				continue;
 			}
 			String foreignTableName = exportedKey.getForeignTableName();
@@ -234,10 +235,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addOneToManyFields(Database database, Table table) {
+		Assert.notNull(table, "Table required");
 		if (table.isJoinTable()) {
 			return;
 		}
 		for (ForeignKey exportedKey : table.getExportedKeys()) {
+			Assert.notNull(exportedKey.getForeignTable(), "Foreign key table for foreign key '" + exportedKey.getName() + "' in table '" + table.getName() + "' must not be null in determining a one-to-many relationship");
 			if (exportedKey.getForeignTable().isJoinTable()) {
 				continue;
 			}
@@ -517,6 +520,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private boolean isOneToOne(Table table, ForeignKey foreignKey) {
 		Assert.notNull(table, "Table must not be null in determining a one-to-one relationship");
 		Assert.notNull(foreignKey, "Foreign key must not be null in determining a one-to-one relationship");
+		Assert.notNull(foreignKey.getForeignTable(), "Foreign key table for foreign key '" + foreignKey.getName() + "' in table '" + table.getName() + "' must not be null in determining a one-to-one relationship");
 		boolean equals = table.getPrimaryKeyCount() == foreignKey.getReferenceCount();
 		Iterator<Column> primaryKeyIterator = table.getPrimaryKeys().iterator();
 		while (equals && primaryKeyIterator.hasNext()) {

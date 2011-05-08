@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a table in the database model.
@@ -49,6 +50,7 @@ public class Table implements Serializable {
 	}
 
 	public void setName(String name) {
+		Assert.isTrue(StringUtils.hasText(name), "Table name required");
 		this.name = name;
 	}
 
@@ -114,6 +116,7 @@ public class Table implements Serializable {
 
 	public ForeignKey getImportedKey(String name) {
 		for (ForeignKey foreignKey : importedKeys) {
+			Assert.isTrue(StringUtils.hasText(foreignKey.getName()), "Foreign key name required");
 			if (foreignKey.getName().equalsIgnoreCase(name)) {
 				return foreignKey;
 			}

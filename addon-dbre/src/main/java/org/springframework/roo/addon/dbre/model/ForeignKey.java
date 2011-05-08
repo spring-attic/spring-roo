@@ -9,7 +9,7 @@ import org.springframework.roo.support.util.Assert;
 /**
  * Represents a database foreign key.
  * <p>
- * A foreign key is modelled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods.
+ * A foreign key is modeled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods.
  * 
  * @author Alan Stewart
  * @since 1.1
