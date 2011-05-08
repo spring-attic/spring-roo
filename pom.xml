@@ -145,6 +145,13 @@
             <organization>VMware</organization>
             <timezone>+10</timezone>
         </developer>
+        <developer>
+            <name>Andrew Swan</name>
+            <id>aswan</id>
+            <email>aswan at vmware.com</email>
+            <organization>VMware</organization>
+            <timezone>+10</timezone>
+        </developer>
     </developers>
     <dependencies>
         <dependency>
