@@ -137,18 +137,20 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
 		String targetTypeName = StringUtils.uncapitalize(targetType.getSimpleTypeName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.indent();
 		
 		StringBuilder sb = new StringBuilder("return new StringBuilder()");
 		for (int i=0; i < methods.size(); i++) {
 			if (i > 0) {
 				sb.append(".append(\" \")");
 			}
-			sb.append(".append(" + targetTypeName + "." + methods.get(i).getMethodName().getSymbolName() + "()");
-			sb.append(")");
+			sb.append(".append(").append(targetTypeName).append(".").append(methods.get(i).getMethodName().getSymbolName()).append("())");
 		}
 		sb.append(".toString();");
 		
 		bodyBuilder.appendFormalLine(sb.toString()); 
+		bodyBuilder.indentRemove();
+
 		MethodMetadataBuilder convert = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("convert"), JavaType.STRING_OBJECT, bodyBuilder);
 		convert.addParameterType(new AnnotatedJavaType(targetType, null));
 		convert.addParameterName(new JavaSymbolName(targetTypeName));
