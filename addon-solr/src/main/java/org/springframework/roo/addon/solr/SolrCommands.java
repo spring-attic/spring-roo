@@ -22,9 +22,14 @@ public class SolrCommands implements CommandMarker {
 	
 	@Reference private SolrOperations searchOperations;
 	
-	@CliAvailabilityIndicator({"solr setup","solr add","solr all"})
-	public boolean isInstallJmsAvailable() {
+	@CliAvailabilityIndicator({"solr setup"})
+	public boolean setupCommandAvailable() {
 		return searchOperations.isInstallSearchAvailable();
+	}
+	
+	@CliAvailabilityIndicator({"solr add","solr all"})
+	public boolean solrCommandAvailable() {
+		return searchOperations.isSearchAvailable();
 	}
 	
 	@CliCommand(value="solr setup", help="Install a support for Solr search integration")

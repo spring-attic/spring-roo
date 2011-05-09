@@ -42,7 +42,7 @@ import org.w3c.dom.Element;
 @Component 
 @Service 
 public class SolrOperationsImpl implements SolrOperations {
-	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.0");
+	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.1");
 	@Reference private FileManager fileManager;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
@@ -50,7 +50,15 @@ public class SolrOperationsImpl implements SolrOperations {
 	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isInstallSearchAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isProjectAvailable() && !solrPropsInstalled() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+	}
+	
+	public boolean isSearchAvailable() {
+		return solrPropsInstalled();
+	}
+	
+	private boolean solrPropsInstalled() {
+		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/spring/solr.properties"));
 	}
 
 	public void setupConfig(String solrServerUrl) {

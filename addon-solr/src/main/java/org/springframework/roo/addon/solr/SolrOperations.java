@@ -12,6 +12,8 @@ public interface SolrOperations {
 	
 	public boolean isInstallSearchAvailable();
 	
+	public boolean isSearchAvailable();
+	
 	public void setupConfig(String solrServerUrl);
 	
 	public void addSearch(JavaType javaType);
