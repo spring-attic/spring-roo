@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.embedded.AbstractEmbeddedProvider;
 import org.springframework.roo.addon.web.mvc.embedded.EmbeddedCompletor;
 import org.springframework.roo.support.style.ToStringCreator;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -76,6 +77,9 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		
 		if (VideoProvider.SCREENR.name().equals(provider)) {
 			id = getScreenrId("http://screenr.com/" + id);
+		}
+		if (id == null || id.length() == 0) {
+			return false;
 		}
 		installTagx("video");
 		Element video = new XmlElementBuilder("embed:video", XmlUtils.getDocumentBuilder().newDocument()).addAttribute("id", "video_" + id).addAttribute("videoId", id).addAttribute("provider", provider.toLowerCase()).build();
