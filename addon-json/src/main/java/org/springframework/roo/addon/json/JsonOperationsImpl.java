@@ -34,7 +34,7 @@ public class JsonOperationsImpl implements JsonOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 
-	public void annotateType(JavaType javaType, String rootName) {
+	public void annotateType(JavaType javaType, String rootName, boolean deepSerialize) {
 		Assert.notNull(javaType, "Java type required");
 
 		String id = physicalTypeMetadataProvider.findIdentifier(javaType);
@@ -57,14 +57,25 @@ public class JsonOperationsImpl implements JsonOperations {
 				if (rootName != null && rootName.length() > 0) {
 					annotationBuilder.addStringAttribute("rootName", rootName);
 				}
+				if (deepSerialize) {
+					annotationBuilder.addBooleanAttribute("deepSerialize", true);
+				}
 				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 			}
 		}
 	}
 	
-	public void annotateAll() {
+	public void annotateType(JavaType javaType, String rootName) {
+		annotateType(javaType, rootName, false);
+	}
+	
+	public void annotateAll(boolean deepSerialize) {
 		for (JavaType type: typeLocationService.findTypesWithAnnotation(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"))) {
-			annotateType(type, "");
+			annotateType(type, "", deepSerialize);
 		}
+	}
+	
+	public void annotateAll() {
+		annotateAll(false);
 	}
 }

@@ -18,6 +18,7 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
 	@AutoPopulate String toJsonArrayMethod = "toJsonArray";
 	@AutoPopulate String rootName = "";
+	@AutoPopulate boolean deepSerialize = false;
 
 	public JsonAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooJson.class.getName()));
@@ -42,5 +43,9 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 	
 	public String getRootName() {
 		return rootName;
+	}
+	
+	public boolean isDeepSerialize() {
+		return deepSerialize;
 	}
 }

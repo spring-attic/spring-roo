@@ -28,13 +28,14 @@ public class JsonCommands implements CommandMarker {
 	@CliCommand(value = "json add", help = "Adds @RooJson annotation to target type") 
 	public void add(
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply this annotation to") JavaType target,
-		@CliOption(key = "rootName", mandatory = false, help = "The root name which should be used to wrap the JSON document") String rootName) {
+		@CliOption(key = "rootName", mandatory = false, help = "The root name which should be used to wrap the JSON document") String rootName,
+		@CliOption(key = "deepSerialize", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Indication if deep serialization should be enabled.") boolean deep) {
 		
-		operations.annotateType(target, rootName);
+		operations.annotateType(target, rootName, deep);
 	}
 	
 	@CliCommand(value = "json all", help = "Adds @RooJson annotation to all types annotated with @RooJavaBean") 
-	public void all() {
-		operations.annotateAll();
+	public void all(@CliOption(key = "deepSerialize", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", mandatory = false, help = "Indication if deep serialization should be enabled") boolean deep) {
+		operations.annotateAll(deep);
 	}
 }

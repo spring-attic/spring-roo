@@ -79,7 +79,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String serializer = new JavaType("flexjson.JSONSerializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
-		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\").serialize(this);");
+		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\")" + (annotationValues.isDeepSerialize() ? ".deepSerialize(this)" : ".serialize(this)") + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_METHOD, null);
@@ -119,7 +119,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String serializer = new JavaType("flexjson.JSONSerializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
-		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\").serialize(collection);");
+		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\")" + (annotationValues.isDeepSerialize() ? ".deepSerialize(collection)" : ".serialize(collection)") + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, new JavaType("java.lang.String"), parameters, paramNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_ARRAY_METHOD, null);

@@ -53,5 +53,12 @@ public @interface RooJson {
 	 * @return the custom root name (optional)
 	 */
 	String rootName() default "";
+	
+	/**
+	 * Enable deep serialization of object graph
+	 * 
+	 * @return an indication if deep serialization should be enabled (defaults to false; optional)
+	 */
+	boolean deepSerialize() default false;
 }
 
