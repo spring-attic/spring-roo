@@ -1,18 +1,28 @@
 package org.springframework.roo.model;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Implementation of {@link ImportRegistrationResolver}.
+ * 
+ * @author Ben Alex
+ * @since 1.0
+ */
 public class ImportRegistrationResolverImpl implements ImportRegistrationResolver {
-
-	private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
-	private Set<JavaType> registeredImports = new HashSet<JavaType>();
+	private static final List<String> javaLangSimpleTypeNames = new LinkedList<String>();
 	private JavaPackage compilationUnitPackage;
+	private SortedSet<JavaType> registeredImports = new TreeSet<JavaType>(new Comparator<JavaType>() {
+		public int compare(JavaType o1, JavaType o2) {
+			return o1.getFullyQualifiedTypeName().compareTo(o2.getFullyQualifiedTypeName());
+		}});
 	
 	static {
 		javaLangSimpleTypeNames.add("Appendable");
@@ -139,11 +149,11 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		// Must be a class, so it's legal if there isn't an existing registration that conflicts
 		for (JavaType candidate : registeredImports) {
 			if (candidate.getSimpleTypeName().equals(javaType.getSimpleTypeName())) {
-				// conflict detected
+				// Conflict detected
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 	
@@ -191,5 +201,4 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		Assert.hasText(simpleTypeName, "Simple type name required");
 		return javaLangSimpleTypeNames.contains(simpleTypeName);
 	}
-
 }
