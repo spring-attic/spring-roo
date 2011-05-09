@@ -22,7 +22,8 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 	private SortedSet<JavaType> registeredImports = new TreeSet<JavaType>(new Comparator<JavaType>() {
 		public int compare(JavaType o1, JavaType o2) {
 			return o1.getFullyQualifiedTypeName().compareTo(o2.getFullyQualifiedTypeName());
-		}});
+		}
+	});
 	
 	static {
 		javaLangSimpleTypeNames.add("Appendable");
