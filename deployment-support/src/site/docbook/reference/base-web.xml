@@ -383,6 +383,15 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
     <para>At this point Roo will notice that the addition of the method and
     will remove it from the ITD much like overriding the toString() method in
     a Roo entity works.</para>
+
+    <para>Note, in some cases you may create a form backing entity which does
+    not contain any suitable fields for conversion. For example, the entity
+    may only contain a field indicating a relationship to another entity (ie
+    type one-to-one or one-to-many). Since Roo does not use these fields for
+    its generated converters it will simply omit the creation of a converter
+    for such form backing entities. In these cases you may have to provide
+    your own custom converter to convert from your entity to a suitable String
+    representation in order to prevent potential converter exceptions.</para>
   </section>
 
   <section xml:id="jsp-views">
