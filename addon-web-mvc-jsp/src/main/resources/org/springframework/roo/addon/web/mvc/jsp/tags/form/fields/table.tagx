@@ -127,7 +127,7 @@
                 </c:set>
                 <input alt="${fn:escapeXml(delete_label)}" class="image" src="${fn:escapeXml(delete_image_url)}" title="${fn:escapeXml(delete_label)}" type="image" value="${fn:escapeXml(delete_label)}" onclick="return confirm('${delete_confirm_msg}');" />
                 <c:if test="${not empty param.page}">
-                  <input name="page" type="hidden" value="${fn:escapeXml(param.page)}" />
+                  <input name="page" type="hidden" value="1" />
                 </c:if>
                 <c:if test="${not empty param.size}">
                   <input name="size" type="hidden" value="${fn:escapeXml(param.size)}" />
