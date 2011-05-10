@@ -40,26 +40,27 @@ public class FinderCommands implements CommandMarker {
 		@CliOption(key = "filter", mandatory = false, help = "A comma separated list of strings that must be present in a filter to be included") String filter) {
 
 		Assert.isTrue(depth >= 1, "Depth must be at least 1");
-		Set<String> requiredEntries = new HashSet<String>();
-		if (!"".equals(filter)) {
-			for (String requiredString : StringUtils.commaDelimitedListToSet(filter)) {
-				requiredEntries.add(requiredString.toLowerCase());
-			}
+		Assert.isTrue(depth <= 3, "Depth must not be greater than 3");
+		
+		SortedSet<String> finders = finderOperations.listFindersFor(typeName, depth);
+		if (!StringUtils.hasText(filter)) {
+			return finders;
 		}
+		
+		Set<String> requiredEntries = new HashSet<String>();
+		for (String requiredString : StringUtils.commaDelimitedListToSet(filter)) {
+			requiredEntries.add(requiredString.toLowerCase());
+		}
+		if (requiredEntries.isEmpty()) {
+			return finders;
+		}
+		
 		SortedSet<String> result = new TreeSet<String>();
-		for (String finder : finderOperations.listFindersFor(typeName, depth)) {
-			if (requiredEntries.size() == 0) {
-				result.add(finder);
-			} else {
-				boolean include = true;
-				for (String requiredString : requiredEntries) {
-					if (!finder.toLowerCase().contains(requiredString)) {
-						include = false;
-						break;
-					}
-				}
-				if (include) {
+		for (String finder : finders) {
+			required: for (String requiredEntry : requiredEntries) {
+				if (finder.toLowerCase().contains(requiredEntry)) {
 					result.add(finder);
+					break required;
 				}
 			}
 		}
@@ -71,6 +72,6 @@ public class FinderCommands implements CommandMarker {
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller or entity for which the finders are generated") JavaType typeName, 
 		@CliOption(key = { "finderName", "" }, mandatory = true, help = "The finder string as generated with the 'finder list' command") JavaSymbolName finderName) {
 		
-		finderOperations.installFinder(typeName, finderName);		
+		finderOperations.installFinder(typeName, finderName);
 	}	
 }

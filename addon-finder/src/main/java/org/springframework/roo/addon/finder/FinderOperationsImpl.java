@@ -37,7 +37,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Provides Finder add-on operations. 
+ * Implementation of {@link FinderOperations}.
  * 
  * @author Stefan Schmidt
  * @since 1.0

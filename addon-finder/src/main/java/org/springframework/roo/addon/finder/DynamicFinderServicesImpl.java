@@ -44,24 +44,23 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		Assert.notNull(exclusions, "Exclusions required");
 
 		SortedSet<JavaSymbolName> finders = new TreeSet<JavaSymbolName>();
-		SortedSet<JavaSymbolName> tempFinders = new TreeSet<JavaSymbolName>();
 
+		List<FieldMetadata> fields = MemberFindingUtils.getFields(memberDetails);
 		for (int i = 0; i < depth; i++) {
-			for (MemberHoldingTypeDetails typeDetails : memberDetails.getDetails()) {
-				for (FieldMetadata field : typeDetails.getDeclaredFields()) {
-					// Ignoring java.util.Map field types (see ROO-194)
-					if (field == null || field.getFieldType().equals(new JavaType(Map.class.getName()))) {
-						continue;
-					}
-					if (exclusions.contains(field.getFieldName())) {
-						continue;
-					}
-					if (i == 0) {
-						tempFinders.addAll(createFinders(field, finders, "find" + plural + "By", true));
-					} else {
-						tempFinders.addAll(createFinders(field, finders, "And", false));
-						tempFinders.addAll(createFinders(field, finders, "Or", false));
-					}
+			SortedSet<JavaSymbolName> tempFinders = new TreeSet<JavaSymbolName>();
+			for (FieldMetadata field : fields) {
+				// Ignoring java.util.Map field types (see ROO-194)
+				if (field == null || field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+					continue;
+				}
+				if (exclusions.contains(field.getFieldName())) {
+					continue;
+				}
+				if (i == 0) {
+					tempFinders.addAll(createFinders(field, finders, "find" + plural + "By", true));
+				} else {
+					tempFinders.addAll(createFinders(field, finders, "And", false));
+					tempFinders.addAll(createFinders(field, finders, "Or", false));
 				}
 			}
 			finders.addAll(tempFinders);
@@ -322,38 +321,42 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	private Set<JavaSymbolName> createFinders(FieldMetadata field, Set<JavaSymbolName> finders, String prepend, boolean isFirst) {
 		Set<JavaSymbolName> tempFinders = new HashSet<JavaSymbolName>();
 
-		if (isNumberOrDate(field.getFieldType().getFullyQualifiedTypeName())) {
+		if (isNumberOrDate(field.getFieldType())) {
 			for (ReservedToken keyWord : ReservedTokenHolder.NUMERIC_TOKENS) {
 				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
-		} else if (field.getFieldType().getFullyQualifiedTypeName().equals(String.class.getName())) {
+		} else if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
 			for (ReservedToken keyWord : ReservedTokenHolder.STRING_TOKENS) {
 				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
-		} else if (field.getFieldType().getFullyQualifiedTypeName().equals(Boolean.class.getName()) || field.getFieldType().getFullyQualifiedTypeName().equals(boolean.class.getName())) {
+		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
 			for (ReservedToken keyWord : ReservedTokenHolder.BOOLEAN_TOKENS) {
 				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
+		} else {
+			tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, ""));
 		}
-		tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, ""));
 
 		return tempFinders;
 	}
 
 	private Set<JavaSymbolName> populateFinders(Set<JavaSymbolName> finders, FieldMetadata field, String prepend, boolean isFirst, String keyWord) {
 		Set<JavaSymbolName> tempFinders = new HashSet<JavaSymbolName>();
-		
+	
 		if (isTransient(field)) {
-			// Not need to add transient fields
+			// No need to add transient fields
 		} else if (isFirst) {
-			tempFinders.add(new JavaSymbolName(prepend + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + keyWord));
+			String finderName = prepend + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + keyWord;
+			tempFinders.add(new JavaSymbolName(finderName));
 		} else {
 			for (JavaSymbolName finder : finders) {
-				if (!finder.getSymbolName().contains(field.getFieldName().getSymbolNameCapitalisedFirstLetter())) {
-					tempFinders.add(new JavaSymbolName(finder.getSymbolName() + prepend + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + keyWord));
+				String finderName = finder.getSymbolName();
+				if (!finderName.contains(field.getFieldName().getSymbolNameCapitalisedFirstLetter())) {
+					tempFinders.add(new JavaSymbolName(finderName + prepend + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + keyWord));
 				}
 			}
 		}
+
 		return tempFinders;
 	}
 	
@@ -361,14 +364,14 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return Modifier.isTransient(field.getModifier()) || field.getCustomData().keySet().contains(PersistenceCustomDataKeys.TRANSIENT_FIELD);
 	}
 
-	private boolean isNumberOrDate(String fullyQualifiedTypeName) {
-		return fullyQualifiedTypeName.equals(Double.class.getName()) ||
-				fullyQualifiedTypeName.equals(Float.class.getName()) ||
-				fullyQualifiedTypeName.equals(Integer.class.getName()) ||
-				fullyQualifiedTypeName.equals(Long.class.getName()) ||
-				fullyQualifiedTypeName.equals(Short.class.getName()) ||
-				fullyQualifiedTypeName.equals(Date.class.getName()) ||
-				fullyQualifiedTypeName.equals(Calendar.class.getName());
+	private boolean isNumberOrDate(JavaType fieldType) {
+		return fieldType.equals(JavaType.DOUBLE_OBJECT) ||
+				fieldType.equals(JavaType.FLOAT_OBJECT) ||
+				fieldType.equals(JavaType.INT_OBJECT) ||
+				fieldType.equals(JavaType.LONG_OBJECT) ||
+				fieldType.equals(JavaType.SHORT_OBJECT) ||
+				fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
+				fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName());
 	}
 	
 	/**

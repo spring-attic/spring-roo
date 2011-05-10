@@ -27,7 +27,7 @@ public interface DynamicFinderServices {
 	 * @param memberDetails the {@link MemberDetails} object to search (required)
 	 * @param plural the pluralised form of the entity name, which is used for finder method names (required)
 	 * @param depth the depth of combinations used for finder signatures combinations (a depth of 2 will combine a maximum of two attributes from the member details (required)
-	 * @param exclusions Field names which should not be contained in the suggested finders
+	 * @param exclusions field names which should not be contained in the suggested finders
 	 * @return immutable representation of all possible finder method signatures for the given depth (never returns null, but list may be empty)
 	 */
 	List<JavaSymbolName> getFinders(MemberDetails memberDetails, String plural, int depth, Set<JavaSymbolName> exclusions);
