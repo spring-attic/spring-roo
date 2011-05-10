@@ -12,6 +12,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -60,8 +61,11 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 			}
 		});
 		
+		ClassOrInterfaceTypeDetails governorType = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		
 		for (MethodMetadata method : methods) {
-			if (BeanInfoUtils.isAccessorMethod(method)) {
+			// Exclude cyclic self-references (ROO-325)
+			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(governorType.getName())) {
 				locatedAccessors.add(method);
 				// Track any changes to that method (eg it goes away)
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
