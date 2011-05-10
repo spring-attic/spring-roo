@@ -9,7 +9,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.embedded.AbstractEmbeddedProvider;
 import org.springframework.roo.addon.web.mvc.embedded.EmbeddedCompletor;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
