@@ -82,19 +82,23 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
 
-		if (jsonMetadata != null) {
-			this.jsonMetadata = jsonMetadata;
-			builder.addMethod(getJsonShowMethod());
-			builder.addMethod(getJsonListMethod());
+		this.jsonMetadata = jsonMetadata;
+		builder.addMethod(getJsonShowMethod());
+		builder.addMethod(getJsonListMethod());
+		if (annotationValues.isCreate()) {
 			builder.addMethod(getJsonCreateMethod());
 			builder.addMethod(getCreateFromJsonArrayMethod());
+		} 
+		if (annotationValues.isUpdate()) {
 			builder.addMethod(getJsonUpdateMethod());
 			builder.addMethod(getUpdateFromJsonArrayMethod());
+		}
+		if (annotationValues.isDelete()) {
 			builder.addMethod(getJsonDeleteMethod());
-			if (annotationValues.isExposeFinders() && dynamicFinderMethods.size() > 0) {
-				for (FinderMetadataDetails finder : new TreeSet<FinderMetadataDetails>(dynamicFinderMethods)) {
-					builder.addMethod(getFinderJsonMethod(finder));
-				}
+		}
+		if (annotationValues.isExposeFinders() && dynamicFinderMethods.size() > 0) {
+			for (FinderMetadataDetails finder : new TreeSet<FinderMetadataDetails>(dynamicFinderMethods)) {
+				builder.addMethod(getFinderJsonMethod(finder));
 			}
 		}
 		
