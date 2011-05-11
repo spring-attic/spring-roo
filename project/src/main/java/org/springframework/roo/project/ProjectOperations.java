@@ -341,7 +341,6 @@ public interface ProjectOperations {
 	@Deprecated
 	void buildPluginUpdate(Plugin plugin);
 
-	
 	/**
 	 * Allows addition of a property to the POM. 
 	 * 
