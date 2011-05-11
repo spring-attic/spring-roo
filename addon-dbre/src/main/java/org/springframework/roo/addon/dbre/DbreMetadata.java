@@ -492,9 +492,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		if (fieldType != null) {
-			if (isCompositeKeyColumn(reference.getLocalColumn()) || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
+		//	if (isCompositeKeyColumn(reference.getLocalColumn()) || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
 				addOtherJoinColumnAttributes(joinColumnBuilder);
-			}
+		//	}
 		}
 
 		return joinColumnBuilder;

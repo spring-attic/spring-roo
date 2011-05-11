@@ -112,6 +112,10 @@ public class DbreModelServiceImpl implements DbreModelService {
 		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml") : null;
 	}
 	
+	public String getNoSchemaString() {
+		return "no-schema-required";
+	}
+
 	public Database refreshDatabase(Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables) {
 		Assert.notNull(schema, "Schema required");
 

@@ -38,7 +38,7 @@ public class SchemaConverter implements Converter {
 					completions.add(schema.getName());
 				}
 			} else {
-				completions.add("no-schema-required");
+				completions.add(dbreModelService.getNoSchemaString());
 			}
 		} catch (Exception e) {
 			completions.add("unable-to-obtain-connection");

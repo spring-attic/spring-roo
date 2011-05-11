@@ -262,7 +262,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		if (StringUtils.hasText(table.getName())) {
 			rooEntityBuilder.addStringAttribute("table", table.getName());
 		}
-		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName())) {
+		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName()) && !table.getSchema().getName().equals(dbreModelService.getNoSchemaString())) {
 			rooEntityBuilder.addStringAttribute("schema", table.getSchema().getName());
 		}
 

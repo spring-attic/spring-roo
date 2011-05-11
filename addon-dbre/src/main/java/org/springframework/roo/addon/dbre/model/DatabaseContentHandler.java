@@ -109,6 +109,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	private Table getTable(Attributes attributes) {
 		Table table = new Table();
 		table.setName(attributes.getValue(DatabaseXmlUtils.NAME));
+		table.setSchema(new Schema(name));
 		if (StringUtils.hasText(attributes.getValue(DatabaseXmlUtils.DESCRIPTION))) {
 			table.setDescription(DatabaseXmlUtils.DESCRIPTION);
 		}

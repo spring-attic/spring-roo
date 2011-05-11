@@ -10,7 +10,7 @@ import java.util.Set;
  * @since 1.1
  */
 public interface DbreModelService {
-	
+
 	/**
 	 * Determines if the database uses schemas.
 	 * 
@@ -52,6 +52,13 @@ public interface DbreModelService {
 	 * @return a String representing the path of the dbre.xml file
 	 */
 	String getDbreXmlPath();
+	
+	/**
+	 * Returns the schema string for databases which do not support schemas, such as MySQL.
+	 * 
+	 * @return the string, "no-schema-required"
+	 */
+	String getNoSchemaString();
 
 	/**
 	 * Retrieves the database metadata from a JDBC connection.
