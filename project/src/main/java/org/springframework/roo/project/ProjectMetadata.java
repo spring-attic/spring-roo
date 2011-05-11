@@ -260,6 +260,8 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
+	 * Returns an unmodifiable set of the project's dependencies.
+	 * 
 	 * @return an unmodifiable representation of the dependencies (never null, but may be empty)
 	 */
 	public Set<Dependency> getDependencies() {
