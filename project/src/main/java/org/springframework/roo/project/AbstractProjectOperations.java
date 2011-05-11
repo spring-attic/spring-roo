@@ -374,6 +374,11 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendPluginAdditionNotifications(plugin);
 	}
 	
+	@Deprecated
+	public void buildPluginUpdate(Plugin plugin) {
+		updateBuildPlugin(plugin);
+	}
+
 	public final void addProperty(Property property) {
 		Assert.isTrue(isProjectAvailable(), "Property modification prohibited at this time");
 		Assert.notNull(property, "Property required");		

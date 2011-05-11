@@ -329,6 +329,20 @@ public interface ProjectOperations {
 	void updateBuildPlugin(Plugin plugin);
 	
 	/**
+	 * Verifies if the specified  build plugin is present. If it is present, silently returns. If it is not
+	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
+	 * Always adds the presented plugin.
+	 * 
+	 * <p>
+	 * This method is deprecated - use {@link #updateBuildPlugin(Plugin)} instead.
+	 * 
+	 * @param plugin the build plugin to update (required)
+	 */
+	@Deprecated
+	void buildPluginUpdate(Plugin plugin);
+
+	
+	/**
 	 * Allows addition of a property to the POM. 
 	 * 
 	 * <p>
