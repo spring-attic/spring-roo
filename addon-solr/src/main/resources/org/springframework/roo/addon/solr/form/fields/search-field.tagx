@@ -16,8 +16,8 @@
 	    <label for="_query_${field}_id"><spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}"/>:</label>
 	   	<input id="_query_${field}_id" name="q"/>
 	   	<div class="submit" id="${label}_submit">
-	        <spring:message code="button.find" var="search_button"/>
-	        <input id="proceed" type="submit" value="${search_button}"/>
+	        <spring:message code="button.find" var="search_button" htmlEscape="false"/>
+	        <input id="proceed" type="submit" value="${fn:escapeXml(search_button)}"/>
 	    </div>
 	</form:form>	
 </jsp:root>

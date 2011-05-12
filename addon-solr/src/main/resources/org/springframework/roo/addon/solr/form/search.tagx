@@ -11,15 +11,18 @@
     <c:set var="sec_id">
       <spring:escapeBody javaScriptEscape="true" >${id}</spring:escapeBody>
     </c:set>
-	<c:if test="${empty label}">
-		<spring:message code="label_${fn:toLowerCase(fn:substringAfter(sec_id,'_'))}" var="label"/>
-	</c:if>
+    <c:if test="${empty label}">
+      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(sec_id,'_'))}" var="label" htmlEscape="false" />
+    </c:if>
 
-	<script type="text/javascript">dojo.require('dijit.TitlePane')</script>
+    <script type="text/javascript">dojo.require('dijit.TitlePane')</script>
     <div id="_title_${sec_id}_id">
-        <spring:message arguments="${fn:escapeXml(label)}" code="entity_find" var="title_msg"/>
-        <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_${sec_id}_id', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title_msg}'}})); </script>
-		<jsp:doBody />
+      <spring:message arguments="${label}" code="entity_find" var="title_msg" htmlEscape="false" />
+      <c:set var="sec_title_msg">
+        <spring:escapeBody javaScriptEscape="true">${title_msg}</spring:escapeBody>
+      </c:set>
+      <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_${sec_id}_id', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${$sec_title_msg}'}})); </script>
+      <jsp:doBody />
     </div>
     
 </jsp:root>
