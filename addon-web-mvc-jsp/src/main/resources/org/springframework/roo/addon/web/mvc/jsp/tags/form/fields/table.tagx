@@ -141,7 +141,7 @@
         <td colspan="${colCounter}">
           <c:if test="${empty create or create}">
             <span class="new">
-              <spring:url value="/${path}" var="create_url">
+              <spring:url value="${path}" var="create_url">
                 <spring:param name="form" />
               </spring:url>
               <a href="${fn:escapeXml(create_url)}">
