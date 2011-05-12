@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.mvc.controller.scaffold.json;
 import java.beans.Introspector;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -149,17 +150,20 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		String beanShortName = getShortName(formBackingType);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + beanShortName + "." + javaTypePersistenceMetadataHolder.getFindMethod().getMethodName() + "(" + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + ");");
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		String responseEntityShortName = getShortName(new JavaType("org.springframework.http.ResponseEntity"));
+		String httpStatusShortName = getShortName(new JavaType("org.springframework.http.HttpStatus"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
 		bodyBuilder.appendFormalLine("if (" + beanShortName.toLowerCase() + " == null) {");
 		bodyBuilder.indent();
-		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
-		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
-		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
-		bodyBuilder.appendFormalLine("return new " + getShortName(new JavaType("org.springframework.http.ResponseEntity")) + "<String>(headers, " + getShortName(new JavaType("org.springframework.http.HttpStatus")) + ".NOT_FOUND);");
+		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(headers, " + httpStatusShortName + ".NOT_FOUND);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return " + beanShortName.toLowerCase() + "." + toJsonMethodName.getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + beanShortName.toLowerCase() + "." + toJsonMethodName.getSymbolName() + "(), headers, " +  httpStatusShortName + ".OK);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.Object"), paramTypes, paramNames, bodyBuilder);
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -200,9 +204,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(JavaType.STRING_OBJECT);
-		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, typeParams);
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
@@ -253,10 +255,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(JavaType.STRING_OBJECT);
-		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, typeParams);
-
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -286,9 +285,15 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String entityName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		bodyBuilder.appendFormalLine("return " + entityName + "." + toJsonArrayMethodName.getSymbolName() + "(" + entityName + "." + javaTypePersistenceMetadataHolder.getFindAllMethod().getMethodName() + "());");
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		String responseEntityShortName = getShortName(new JavaType("org.springframework.http.ResponseEntity"));
+		String httpStatusShortName = getShortName(new JavaType("org.springframework.http.HttpStatus"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
+		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + entityName + "." + toJsonArrayMethodName.getSymbolName() + "(" + entityName + "." + javaTypePersistenceMetadataHolder.getFindAllMethod().getMethodName() + "()), headers, " +  httpStatusShortName + ".OK);");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, bodyBuilder);
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -333,10 +338,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(JavaType.STRING_OBJECT);
-		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, typeParams);
-		
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -391,10 +393,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(JavaType.STRING_OBJECT);
-		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, typeParams);
-		
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));	
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -446,9 +445,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine(beanShortName.toLowerCase() + "." + javaTypePersistenceMetadataHolder.getRemoveMethod().getMethodName() + "();");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(JavaType.STRING_OBJECT);
-		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, typeParams);
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
@@ -513,9 +510,15 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		annotations.add(requestMapping);
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.ResponseBody")));
 		String shortBeanName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		bodyBuilder.appendFormalLine("return " + shortBeanName + "." + jsonMetadata.getToJsonArrayMethodName().getSymbolName().toString() + "(" + shortBeanName + "." + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
+		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
+		String responseEntityShortName = getShortName(new JavaType("org.springframework.http.ResponseEntity"));
+		String httpStatusShortName = getShortName(new JavaType("org.springframework.http.HttpStatus"));
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
+		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + shortBeanName + "." + jsonMetadata.getToJsonArrayMethodName().getSymbolName().toString() + "(" + shortBeanName + "." + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList()), headers, " +  httpStatusShortName + ".OK);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING_OBJECT, annotatedParamTypes, newParamNames, bodyBuilder);
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, returnType, annotatedParamTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
