@@ -118,6 +118,6 @@ public class Reference implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Reference [localColumnName=%s, foreignColumnName=%s]", localColumnName, foreignColumnName);
+		return String.format("Reference [localColumnName=%s, foreignColumnName=%s, insertableOrUpdatable=%s]", localColumnName, foreignColumnName, insertableOrUpdatable);
 	}
 }

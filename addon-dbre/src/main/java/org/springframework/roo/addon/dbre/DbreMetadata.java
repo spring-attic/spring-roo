@@ -493,16 +493,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		if (fieldType != null) {
 			if (isCompositeKeyColumn(reference.getLocalColumn()) || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
-				addOtherJoinColumnAttributes(joinColumnBuilder);
+				joinColumnBuilder.addBooleanAttribute("insertable", false);
+				joinColumnBuilder.addBooleanAttribute("updatable", false);
 			}
 		}
 
 		return joinColumnBuilder;
-	}
-
-	private void addOtherJoinColumnAttributes(AnnotationMetadataBuilder joinColumnBuilder) {
-		joinColumnBuilder.addBooleanAttribute("insertable", false);
-		joinColumnBuilder.addBooleanAttribute("updatable", false);
 	}
 
 	private AnnotationMetadataBuilder getJoinColumnsAnnotation(Set<Reference> references, JavaType fieldType) {

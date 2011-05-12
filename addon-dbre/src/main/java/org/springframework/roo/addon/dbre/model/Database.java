@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,7 +19,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Database implements Serializable {
-	private static final long serialVersionUID = -6699287170489794958L;
+	private static final long serialVersionUID = -189528984422073621L;
 
 	/** The name of the database model. Defaults to the catalog name if the schema name is not available. */
 	private String name;
@@ -107,7 +108,7 @@ public class Database implements Serializable {
 	private void initializeImportedKeys(Table table) {
 		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
 		Short keySequence = null;
-		Map<Column, Set<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, Set<ForeignKey>>();
+		Map<Column, List<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, List<ForeignKey>>();
 
 		for (ForeignKey foreignKey : table.getImportedKeys()) {
 			if (foreignKey.getForeignTable() != null) {
@@ -134,7 +135,7 @@ public class Database implements Serializable {
 					if (localColumn != null) {
 						reference.setLocalColumn(localColumn);
 
-						Set<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new LinkedHashSet<ForeignKey>();
+						List<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new LinkedList<ForeignKey>();
 						fkSet.add(foreignKey);
 						repeatedColumns.put(localColumn, fkSet);
 					}
@@ -149,22 +150,12 @@ public class Database implements Serializable {
 		}
 
 		// Mark repeated columns with insertable = false and updatable = false
-		for (Map.Entry<Column, Set<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
-			Set<ForeignKey> foreignKeys = entrySet.getValue();
-			if (foreignKeys.size() <= 1) {
-				continue;
-			}
-			fk: for (ForeignKey foreignKey : foreignKeys) {
-				if (foreignKey.getReferenceCount() == 1) {
-					Reference reference = foreignKey.getReferences().iterator().next();
-					reference.setInsertableOrUpdatable(false);
-					break fk;
-				}
-				
+		for (Map.Entry<Column, List<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
+			List<ForeignKey> foreignKeys = entrySet.getValue();
+			for (ForeignKey foreignKey : foreignKeys) {
 				for (Reference reference : foreignKey.getReferences()) {
 					reference.setInsertableOrUpdatable(false);
 				}
-				break fk;
 			}
 		}
 	}
@@ -237,5 +228,9 @@ public class Database implements Serializable {
 		if (equals) {
 			table.setJoinTable(true);
 		}
+	}
+
+	public String toString() {
+		return String.format("Database [name=%s, tables=%s, destinationPackage=%s, testAutomatically=%s, includeNonPortableAttributes=%s]", name, tables, destinationPackage, testAutomatically, includeNonPortableAttributes);
 	}
 }
