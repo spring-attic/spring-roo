@@ -346,7 +346,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     EXITED=$?
     if [[ ! "$EXITED" = "1" ]]; then
         log "Found gpg.passphrase in ~/.m2/settings.xml..."
-        PASSPHRASE=`grep "<gpg.passphrase>" ~/.m2/settings.xml | sed 's/<gpg.passphrase>//' | sed 's/<\/gpg.passphrase>//' | sed 's/ //g'`
+        PASSPHRASE=`grep "<gpg.passphrase>" ~/.m2/settings.xml | sed 's/.*<gpg.passphrase>//' | sed 's/<\/gpg.passphrase>.*//'`
         echo "$PASSPHRASE" | gpg $GPG_OPTS --batch --passphrase-fd 0 -a --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
     else
         log "gpg.passphrase NOT found in ~/.m2/settings.xml. Trying with gpg agent."
