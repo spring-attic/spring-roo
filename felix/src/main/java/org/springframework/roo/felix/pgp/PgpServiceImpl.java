@@ -200,7 +200,7 @@ public class PgpServiceImpl implements PgpService {
 			boolean stillTrust = true;
 			Iterator<PGPPublicKey> it = candidate.getPublicKeys();
 			while (it.hasNext()) {
-			    PGPPublicKey pgpKey = (PGPPublicKey) it.next();
+			    PGPPublicKey pgpKey = it.next();
 			    PgpKeyId candidateKeyId = new PgpKeyId(pgpKey);
 			    if (removed == null && candidateKeyId.equals(keyId)) {
 			    	stillTrust = false;

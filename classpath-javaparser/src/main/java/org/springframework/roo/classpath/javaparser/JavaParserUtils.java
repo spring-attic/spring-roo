@@ -270,12 +270,12 @@ public class JavaParserUtils  {
 			// not complete binding support from an AST
 			WildcardType wt = (WildcardType) internalType;
 			if (wt.getSuper() != null) {
-				ReferenceType rt = (ReferenceType) wt.getSuper();
+				ReferenceType rt = wt.getSuper();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
 				JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
 				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), effectiveType.getDataType(), JavaType.WILDCARD_SUPER, effectiveType.getParameters());
 			} else if (wt.getExtends() != null) {
-				ReferenceType rt = (ReferenceType) wt.getExtends();
+				ReferenceType rt = wt.getExtends();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
 				JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
 				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), effectiveType.getDataType(), JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());

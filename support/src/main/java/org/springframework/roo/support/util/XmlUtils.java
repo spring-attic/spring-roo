@@ -445,7 +445,7 @@ public final class XmlUtils {
 			Node child = children.item(i);
 			switch (child.getNodeType()) {
 				case Node.ELEMENT_NODE:
-					removeTextNodes((Element) child);
+					removeTextNodes(child);
 					break;
 				case Node.CDATA_SECTION_NODE:
 				case Node.TEXT_NODE:

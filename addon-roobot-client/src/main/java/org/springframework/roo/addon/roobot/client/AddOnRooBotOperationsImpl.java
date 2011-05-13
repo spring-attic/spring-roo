@@ -537,7 +537,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		for (PGPPublicKeyRing keyRing : keys) {
 			Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
 			while (it.hasNext()) {
-				PGPPublicKey pgpKey = (PGPPublicKey) it.next();
+				PGPPublicKey pgpKey = it.next();
 				if (new PgpKeyId(pgpKey).equals(new PgpKeyId(keyId))) {
 					return true;
 				}

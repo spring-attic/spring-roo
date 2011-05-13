@@ -109,7 +109,7 @@ public class PgpCommands implements CommandMarker {
 		for (PGPPublicKeyRing keyRing : keyRings) {
 			Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
 			while (it.hasNext()) {
-			    PGPPublicKey pgpKey = (PGPPublicKey)it.next();
+			    PGPPublicKey pgpKey = it.next();
 		        if (new PgpKeyId(pgpKey.getKeyID()).equals(keyId)) {
 		        	// We know about this key, so return a one-liner
 		        	StringBuilder sb = new StringBuilder();
@@ -138,7 +138,7 @@ public class PgpCommands implements CommandMarker {
 		Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
 		boolean first = true;
 		while (it.hasNext()) {
-		    PGPPublicKey pgpKey = (PGPPublicKey)it.next();
+		    PGPPublicKey pgpKey = it.next();
 		    if (first) {
 		        appendLine(sb, ">>>> KEY ID: " + new PgpKeyId(pgpKey) + " <<<<");
 			    appendLine(sb, "     More Info: " + pgpService.getKeyServerUrlToRetrieveKeyInformation(new PgpKeyId(pgpKey)));
