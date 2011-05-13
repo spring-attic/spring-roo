@@ -390,8 +390,8 @@ public class Choice {
     private String description;
 }</programlisting>
 
-    <para>At its heart, the above entity is simple a JPA entity that contains
-    two fields. The two fields contain JavaBean Validation API (JSR 303)
+    <para>The above entity is simply a JPA entity that contains two fields.
+    The two fields are annotated with JavaBean Validation API (JSR 303)
     annotations, which are useful if your JPA provider supports this standard
     (as is the case if you nominate Hibernate as your JPA provider) or you are
     using a Roo-scaffolded web application front end (in which case Roo will
@@ -529,7 +529,7 @@ public class Choice {
 
       <listitem>
         <para>it is preferred to place transactional boundaries and security
-        authorization metadta on the services layer (as opposed to a web
+        authorization metadata on the services layer (as opposed to a web
         controller)</para>
       </listitem>
     </itemizedlist>
@@ -555,11 +555,11 @@ public class Choice {
     <title>Goodbye DAOs</title>
 
     <para>One change many existing JEE developers will notice when using
-    Roo-based applications is there no DAO layer (or "Repository" layer). As
-    with the <link linkend="architecture-services">services layer</link>, we
-    have removed the DAO layer because it is not strictly essential to
-    creating the typical web applications that most people are trying to
-    build.</para>
+    Roo-based applications is that there is no DAO layer (or "Repository"
+    layer). As with the <link linkend="architecture-services">services
+    layer</link>, we have removed the DAO layer because it is not strictly
+    essential to creating the typical web applications that most people are
+    trying to build.</para>
 
     <para>If we reflect for a moment on the main motivations for DAOs, it is
     easy to see why these are not applicable in Roo applications:</para>
@@ -609,7 +609,7 @@ public class Choice {
           <para><emphasis>Non-JPA persistence</emphasis>: It is possible that
           certain entities are stored using a technology that does not have a
           JPA provider. In this case Roo does not support those entities out
-          of the box. However, if only a small number of entities are effected
+          of the box. However, if only a small number of entities are affected
           by this consideration there is no reason one or more hand-written
           ITDs could not be provided by the user in order to maintain
           conceptual parity with the remainder of the Roo application (which
@@ -670,9 +670,9 @@ public class Choice {
       </itemizedlist></para>
 
     <para>It's also worth observing that most modern RAD frameworks avoid DAO
-    layers and add persistence methods directly to entities. If you review
-    similar technologies to Roo, you will see this is avoidance of a DAO layer
-    is commonplace, mainstream and does not cause problems.</para>
+    layers and add persistence methods directly to entities. If you compare
+    similar technologies to Roo, you will see this avoidance of a DAO layer is
+    commonplace, mainstream and does not cause problems.</para>
 
     <para>Naturally you can still write DAOs by hand if you want to, but the
     majority of Roo add-ons will not be compatible with such DAOs. As such you
