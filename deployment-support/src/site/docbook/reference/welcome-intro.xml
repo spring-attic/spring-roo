@@ -433,8 +433,7 @@
       </listitem>
 
       <listitem>
-        <para>Apache Maven 2.0.9 or above installed and in the path (for use
-        with Roo-created projects; Roo itself does require Maven)</para>
+        <para>Apache Maven 2.0.9 or above installed and in the path</para>
       </listitem>
     </itemizedlist>
 
@@ -504,7 +503,7 @@ $ <emphasis role="bold">rmdir roo-test</emphasis></programlisting>
     Roo shell.</para>
 
     <para>At present the only configuration settings available is roo.bright.
-    This causes forground messages in the shell to be displayed with brighter
+    This causes foreground messages in the shell to be displayed with brighter
     colors. This is potentially useful if your background color is light (eg
     white). You can set the variable using the following commands:</para>
 
@@ -524,7 +523,7 @@ $ <emphasis role="bold">set ROO_OPTS="-Droo.bright=true"</emphasis>             
 
     <para>The purpose of this application is just to try out Roo. We won't
     explain what's going on in these steps, but don't worry - we'll do that in
-    the next chaper, <link linkend="beginning">Beginning With Roo: The
+    the next chapter, <link linkend="beginning">Beginning With Roo: The
     Tutorial</link>. We will try to teach you about some usability features as
     we go along, though.</para>
 
