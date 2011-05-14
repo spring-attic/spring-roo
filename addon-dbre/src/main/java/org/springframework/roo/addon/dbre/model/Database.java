@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,7 +18,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Database implements Serializable {
-	private static final long serialVersionUID = -189528984422073621L;
+	private static final long serialVersionUID = -6699287170489794958L;
 
 	/** The name of the database model. Defaults to the catalog name if the schema name is not available. */
 	private String name;
@@ -108,7 +107,7 @@ public class Database implements Serializable {
 	private void initializeImportedKeys(Table table) {
 		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
 		Short keySequence = null;
-		Map<Column, List<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, List<ForeignKey>>();
+		Map<Column, Set<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, Set<ForeignKey>>();
 
 		for (ForeignKey foreignKey : table.getImportedKeys()) {
 			if (foreignKey.getForeignTable() != null) {
@@ -135,7 +134,7 @@ public class Database implements Serializable {
 					if (localColumn != null) {
 						reference.setLocalColumn(localColumn);
 
-						List<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new LinkedList<ForeignKey>();
+						Set<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new LinkedHashSet<ForeignKey>();
 						fkSet.add(foreignKey);
 						repeatedColumns.put(localColumn, fkSet);
 					}
@@ -150,11 +149,13 @@ public class Database implements Serializable {
 		}
 
 		// Mark repeated columns with insertable = false and updatable = false
-		for (Map.Entry<Column, List<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
-			List<ForeignKey> foreignKeys = entrySet.getValue();
+		for (Map.Entry<Column, Set<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
+			Set<ForeignKey> foreignKeys = entrySet.getValue();
 			for (ForeignKey foreignKey : foreignKeys) {
-				for (Reference reference : foreignKey.getReferences()) {
-					reference.setInsertableOrUpdatable(false);
+				if (foreignKeys.size() > 1 || foreignKey.getForeignTableName().equals(table.getName())) {
+					for (Reference reference : foreignKey.getReferences()) {
+						reference.setInsertableOrUpdatable(false);
+					}
 				}
 			}
 		}
