@@ -245,7 +245,6 @@ public class JspViewManager {
 		div.appendChild(formFind);
 
 		for (FieldMetadata field: finderMetadataDetails.getFinderMethodParamFields()) {
-			
 			JavaType type = field.getFieldType();
 			JavaSymbolName paramName = field.getFieldName();
 			

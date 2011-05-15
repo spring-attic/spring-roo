@@ -19,7 +19,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Component(immediate=true)
 @Service
 public class I18nConverter implements Converter {
-	
 	@Reference private I18nSupport i18nSupport;
 
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
@@ -29,9 +28,8 @@ public class I18nConverter implements Converter {
 //		} else if (value.length() == 5) {
 //			String[] split = value.split("_");
 //			return i18nSupport.getLanguage(new Locale(split[0], split[1].toUpperCase(), ""));
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {

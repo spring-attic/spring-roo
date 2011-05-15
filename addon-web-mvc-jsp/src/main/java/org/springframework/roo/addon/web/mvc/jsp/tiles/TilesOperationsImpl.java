@@ -162,10 +162,9 @@ public class TilesOperationsImpl implements TilesOperations {
 		public InputSource resolveEntity (String publicId, String systemId) {
 			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {				
 				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
-			} else {
-				// Use the default behaviour
-				return null;
 			}
+			// Use the default behaviour
+			return null;
 		}
 	}
 }
