@@ -123,7 +123,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	
 	protected Map<JavaType, List<MethodMetadata>> findDomainTypesRequiringAConverter(String metadataIdentificationString) {
 		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
-		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = new HashMap<JavaType, List<MethodMetadata>>();
+		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = new LinkedHashMap<JavaType, List<MethodMetadata>>();
 		for (JavaType controller : typeLocationService.findTypesWithAnnotation(rooWebScaffold)) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
 			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metdata for type " + controller.getFullyQualifiedTypeName());

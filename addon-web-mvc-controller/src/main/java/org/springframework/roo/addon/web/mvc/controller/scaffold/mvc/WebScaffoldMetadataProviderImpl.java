@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold.mvc;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -46,8 +46,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
 	@Reference private WebMetadataService webMetadataService;
-	private Map<JavaType, String> entityToWebScaffoldMidMap = new HashMap<JavaType, String>();
-	private Map<String, JavaType> webScaffoldMidToEntityMap = new HashMap<String, JavaType>();
+	private Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
+	private Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);

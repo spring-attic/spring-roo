@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +54,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		Assert.notNull(menuItemId, "Menu item name required");
 		Assert.hasText(link, "Link required");
 		
-		Map<String, String> properties = new HashMap<String, String>();
+		Map<String, String> properties = new LinkedHashMap<String, String>();
 		
 		if (idPrefix == null || idPrefix.length() == 0) {
 			idPrefix = DEFAULT_MENU_ITEM_PREFIX;

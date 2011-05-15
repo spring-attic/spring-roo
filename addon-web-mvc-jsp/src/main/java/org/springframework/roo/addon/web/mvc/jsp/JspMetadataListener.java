@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -154,7 +154,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		JavaSymbolName categoryName = new JavaSymbolName(formbackingType.getSimpleTypeName());
 
-		Map<String, String> properties = new HashMap<String, String>();
+		Map<String, String> properties = new LinkedHashMap<String, String>();
 		properties.put("menu_category_" + categoryName.getSymbolName().toLowerCase() + "_label", categoryName.getReadableSymbolName());
 		
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
