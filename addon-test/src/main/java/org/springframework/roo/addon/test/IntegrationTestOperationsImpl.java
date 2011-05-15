@@ -148,10 +148,10 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 	}
 	
-	public void newTestStub(JavaType entity) {
-		Assert.notNull(entity, "Entity to produce a test stub for is required");
+	public void newTestStub(JavaType javaType) {
+		Assert.notNull(javaType, "Class to produce a test stub for is required");
 
-		JavaType name = new JavaType(entity + "Test");
+		JavaType name = new JavaType(javaType + "Test");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
 
 		if (metadataService.get(declaredByMetadataId) != null) {
@@ -169,8 +169,8 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		methodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.Test")));
 
-		// Get the entity so we can hopefully make a demo method that will be usable
-		String pid = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
+		// Get the class so we can hopefully make a demo method that will be usable
+		String pid = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(pid);
 		if (physicalTypeMetadata != null) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
@@ -199,9 +199,9 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			// Create instance of entity to test
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(pid);
 			fieldBuilder.setModifier(Modifier.PRIVATE);
-			fieldBuilder.setFieldName(new JavaSymbolName(StringUtils.uncapitalize(entity.getSimpleTypeName())));
-			fieldBuilder.setFieldType(entity);
-			fieldBuilder.setFieldInitializer("new " + entity.getFullyQualifiedTypeName() + "()");
+			fieldBuilder.setFieldName(new JavaSymbolName(StringUtils.uncapitalize(javaType.getSimpleTypeName())));
+			fieldBuilder.setFieldType(javaType);
+			fieldBuilder.setFieldInitializer("new " + javaType.getFullyQualifiedTypeName() + "()");
 			List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 			fields.add(fieldBuilder);
 			typeDetailsBuilder.setDeclaredFields(fields);

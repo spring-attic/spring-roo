@@ -32,9 +32,9 @@ public interface IntegrationTestOperations {
 	void newMockTest(JavaType entity);
 	
 	/**
-	 * Creates a test stub for the entity. Silently returns if the test file already exists.
+	 * Creates a test stub for the class. Silently returns if the test file already exists.
 	 * 
-	 * @param entity to produce a test stub for (required)
+	 * @param javaType to produce a test stub for (required)
 	 */
-	void newTestStub(JavaType entity);
+	void newTestStub(JavaType javaType);
 }

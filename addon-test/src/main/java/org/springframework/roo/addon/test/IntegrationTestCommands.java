@@ -61,15 +61,15 @@ public class IntegrationTestCommands implements CommandMarker {
 		integrationTestOperations.newMockTest(entity);
 	}
 	
-	@CliCommand(value = "test stub", help = "Creates a test stub for the specified entity")
+	@CliCommand(value = "test stub", help = "Creates a test stub for the specified class")
 	public void newTestStub(
-		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the entity this mock test is targeting") JavaType entity, 
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class this mock test is targeting") JavaType javaType, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(entity);
+			ReservedWords.verifyReservedWordsNotPresent(javaType);
 		}
 
-		integrationTestOperations.newTestStub(entity);
+		integrationTestOperations.newTestStub(javaType);
 	}
 }
