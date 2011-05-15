@@ -143,7 +143,6 @@ public class JpaOperationsImpl implements JpaOperations {
 			dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
 			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
 			dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
-			dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1", appCtx));
 			dataSource.appendChild(createPropertyElement("testOnBorrow", "true", appCtx));
 			dataSource.appendChild(createPropertyElement("testOnReturn", "true", appCtx));
 			dataSource.appendChild(createPropertyElement("testWhileIdle", "true", appCtx));
@@ -168,13 +167,23 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		if (dataSource != null) {
 			Element validationQueryElement = XmlUtils.findFirstElement("property[@name = 'validationQuery']", dataSource);
-			Element testOnBorrowElement = XmlUtils.findFirstElement("property[@name = 'testOnBorrow']", dataSource);
-			if (jdbcDatabase != JdbcDatabase.MYSQL && validationQueryElement != null && testOnBorrowElement != null) {
+			if (validationQueryElement != null) {
 				dataSource.removeChild(validationQueryElement);
-				dataSource.removeChild(testOnBorrowElement);
-			} else if (jdbcDatabase == JdbcDatabase.MYSQL && validationQueryElement == null && testOnBorrowElement == null) {
-				dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1 FROM DUAL", appCtx));
-				dataSource.appendChild(createPropertyElement("testOnBorrow", "true", appCtx));
+			}
+			String validationQuery = "";
+			switch (jdbcDatabase) {
+			case ORACLE:
+				validationQuery = "SELECT 1 FROM DUAL";
+				break;
+			case POSTGRES:
+				validationQuery = "SELECT version();";
+				break;
+			case MYSQL:
+				validationQuery = "SELECT 1";
+				break;
+			}
+			if (StringUtils.hasText(validationQuery)) {
+				dataSource.appendChild(createPropertyElement("validationQuery", validationQuery, appCtx));
 			}
 		}
 
@@ -936,15 +945,15 @@ public class JpaOperationsImpl implements JpaOperations {
 		return builder.toString();
 	}
 
-	private Element createPropertyElement(String name, String value, Document doc) {
-		Element property = doc.createElement("property");
+	private Element createPropertyElement(String name, String value, Document document) {
+		Element property = document.createElement("property");
 		property.setAttribute("name", name);
 		property.setAttribute("value", value);
 		return property;
 	}
 
-	private Element createRefElement(String name, String value, Document doc) {
-		Element property = doc.createElement("property");
+	private Element createRefElement(String name, String value, Document document) {
+		Element property = document.createElement("property");
 		property.setAttribute("name", name);
 		property.setAttribute("ref", value);
 		return property;
