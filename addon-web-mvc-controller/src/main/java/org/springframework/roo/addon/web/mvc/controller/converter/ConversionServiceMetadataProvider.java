@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
