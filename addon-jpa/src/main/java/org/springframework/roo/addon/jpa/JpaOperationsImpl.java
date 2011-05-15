@@ -143,6 +143,13 @@ public class JpaOperationsImpl implements JpaOperations {
 			dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
 			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
 			dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
+			dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1", appCtx));
+			dataSource.appendChild(createPropertyElement("testOnBorrow", "true", appCtx));
+			dataSource.appendChild(createPropertyElement("testOnReturn", "true", appCtx));
+			dataSource.appendChild(createPropertyElement("testWhileIdle", "true", appCtx));
+			dataSource.appendChild(createPropertyElement("timeBetweenEvictionRunsMillis", "1800000", appCtx));
+			dataSource.appendChild(createPropertyElement("numTestsPerEvictionRun", "3", appCtx));
+			dataSource.appendChild(createPropertyElement("minEvictableIdleTimeMillis", "1800000", appCtx));
 			root.appendChild(dataSource);
 			if (dataSourceJndi != null) {
 				dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
