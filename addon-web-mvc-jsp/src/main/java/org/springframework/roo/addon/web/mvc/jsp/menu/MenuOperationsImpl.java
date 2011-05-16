@@ -57,7 +57,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		Document document;
-		try {		
+		try {
 			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse menu.jspx" + (!StringUtils.hasText(e.getMessage()) ? "" : " (" + e.getMessage() + ")"), e);
@@ -109,7 +109,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		// Find any menu items under this category which have an id that starts with the menuItemIdPrefix
 		List<Element> elements = XmlUtils.findElements("//category[@id='c_" +  menuCategoryName.getSymbolName().toLowerCase() + "']//item[starts-with(@id, '" + FINDER_MENU_ITEM_PREFIX + "')]", document.getDocumentElement());
-		if(elements.size() == 0) {
+		if (elements.size() == 0) {
 			return;
 		}
 		for (Element element: elements) {
@@ -204,10 +204,10 @@ public class MenuOperationsImpl implements MenuOperations {
 			original = XmlUtils.readXml(fileManager.getInputStream(menuFileName));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
 				XmlUtils.removeTextNodes(original);
-				fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(original), false);
+				fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(original), true);
 			}
 		} else {
-			fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(proposed), false);
+			fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(proposed), true);
 		}
 	}
 }
