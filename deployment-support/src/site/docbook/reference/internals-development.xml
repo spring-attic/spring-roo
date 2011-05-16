@@ -28,14 +28,14 @@
 
             <itemizedlist>
               <listitem>
-                <para>Encourage to reusing of existing knowledge, skills and
+                <para>Encourage reuse of existing knowledge, skills and
                 experience</para>
               </listitem>
             </itemizedlist>
           </listitem>
 
           <listitem>
-            <para>Eliminate barriers to adoption , no runtime component,
+            <para>Eliminate barriers to adoption, no runtime component,
             minimal size, best possible development experience</para>
 
             <itemizedlist>
@@ -77,11 +77,11 @@
       </listitem>
 
       <listitem>
-        <para>Embrace the adantages of AspectJ</para>
+        <para>Embrace the advantages of AspectJ</para>
 
         <itemizedlist>
           <listitem>
-            <para>Use AspectJ intertype declarations (ITDs) for “active”
+            <para>Use AspectJ inter-type declarations (ITDs) for “active”
             generation</para>
 
             <itemizedlist>
@@ -92,7 +92,7 @@
           </listitem>
 
           <listitem>
-            <para>Delivers compilation unit separation of concern</para>
+            <para>Delivers compilation unit separation of concerns</para>
 
             <itemizedlist>
               <listitem>
@@ -129,7 +129,7 @@
 
         <itemizedlist>
           <listitem>
-            <para>Roo ownes *_Roo_*.aj files</para>
+            <para>Roo owns *_Roo_*.aj files</para>
 
             <itemizedlist>
               <listitem>
@@ -141,12 +141,12 @@
 
         <itemizedlist>
           <listitem>
-            <para>Every ITD providing add-on registers a 'suffix'
+            <para>Every ITD-providing add-on registers a 'suffix'
             (namespace)</para>
 
             <itemizedlist>
               <listitem>
-                <para>Eg 'Entity' becomes *_Roo_Entity.aj</para>
+                <para>E.g. the 'Entity' add-on provides *_Roo_Entity.aj</para>
               </listitem>
 
               <listitem>
@@ -287,7 +287,7 @@
   <section xml:id="development-source-repository">
     <title>Source Repository</title>
 
-    <para>We develop against a public Git repository for which you can
+    <para>We develop against a public Git repository from which you can
     anonymously checkout the code:</para>
 
     <para><programlisting>git clone git://git.springsource.org/roo/roo.git spring-roo</programlisting></para>
@@ -297,8 +297,8 @@
     or <link
     xlink:href="https://fisheye.springsource.org/changelog/spring-roo">https://fisheye.springsource.org/changelog/spring-roo</link>.</para>
 
-    <para>Roo itself uses Maven, so it's very easy to build standard package,
-    install, assembly and site goal PgP should be installed see 'Setting Up
+    <para>Roo itself uses Maven, so it's very easy to build the standard package,
+    install, assembly and site goals. PGP should be installed, see the 'Setting Up
     for Development' section below for details.</para>
   </section>
 
@@ -306,7 +306,7 @@
     <title>Setting Up for Development</title>
 
     <para>We maintain up-to-date documentation in the <code>readme.txt</code>
-    at the root of the checkout location. Please follow these instructions
+    in the root of the checkout location. Please follow these instructions
     carefully. </para>
   </section>
 
