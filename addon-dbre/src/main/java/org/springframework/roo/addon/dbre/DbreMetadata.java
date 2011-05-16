@@ -548,7 +548,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				fieldName = getUniqueFieldName(fieldName);
 			}
 
-			field = getField(fieldName, column, table.isIncludeNonPortableAttributes());
+			field = getField(fieldName, column, table.getName(), table.isIncludeNonPortableAttributes());
 
 			uniqueFields.put(fieldName, field);
 		}
@@ -605,8 +605,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return versionField != null && versionField.getFieldName().equals(fieldName);
 	}
 
-	private FieldMetadata getField(JavaSymbolName fieldName, Column column, boolean includeNonPortable) {
+	private FieldMetadata getField(JavaSymbolName fieldName, Column column, String tableName, boolean includeNonPortable) {
 		JavaType fieldType = column.getJavaType();
+		Assert.notNull(fieldType, "Field type for column '" + column.getName() + "' in table '"+ tableName +"' is null");
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();

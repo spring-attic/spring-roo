@@ -147,6 +147,7 @@ public class Column implements Serializable {
 				break;
 			case Types.DISTINCT:
 				jdbcType = "DISTINCT";
+				javaType = JavaType.STRING_OBJECT;
 				break;
 			case Types.REF:
 				jdbcType = "REF";
