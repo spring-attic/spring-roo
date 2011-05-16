@@ -260,7 +260,7 @@ public class JspViewManager {
 			if (type.isCommonCollectionType() && relatedDomainTypes.containsKey(getJavaTypeForField(field))) {
 				JavaTypeMetadataDetails collectionTypeMetadataHolder = relatedDomainTypes.get(getJavaTypeForField(field));
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataHolder = collectionTypeMetadataHolder.getPersistenceDetails();
-				if (collectionTypeMetadataHolder != null && typePersistenceMetadataHolder != null) {
+				if (typePersistenceMetadataHolder != null) {
 					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("required", "true").addAttribute("items", "${" + collectionTypeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(getJavaTypeForField(field))).build();
 					if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD)) {
 						fieldElement.setAttribute("multiple", "true");
@@ -287,6 +287,8 @@ public class JspViewManager {
 			fieldElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
 			formFind.appendChild(fieldElement);
 		}
+		
+		XmlUtils.removeTextNodes(document);
 		return document;
 	}
 
@@ -384,9 +386,8 @@ public class JspViewManager {
 				throw new IllegalStateException("Unable to determine the parameter type for the " + field.getFieldName().getSymbolName() + " field in " + formbackingType.getSimpleTypeName());
 			}
 			return parameters.get(0);
-		} else {
-			return field.getFieldType();
 		}
+		return field.getFieldType();
 	}
 
 	private String getPathForType(JavaType type) {

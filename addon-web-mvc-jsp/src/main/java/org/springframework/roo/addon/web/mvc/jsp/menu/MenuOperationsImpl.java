@@ -1,9 +1,6 @@
 package org.springframework.roo.addon.web.mvc.jsp.menu;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +11,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -79,10 +75,8 @@ public class MenuOperationsImpl implements MenuOperations {
 		Element category = XmlUtils.findFirstElement("//*[@id='c_" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
 			
 		// If not exists, create new one
-		if(category == null) {
-			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document)
-															.addAttribute("id", "c_" + menuCategoryName.getSymbolName().toLowerCase())
-														.build());
+		if (category == null) {
+			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document).addAttribute("id", "c_" + menuCategoryName.getSymbolName().toLowerCase()).build());
 			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
 			properties.put("menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "_label", menuCategoryName.getReadableSymbolName());
 		}
@@ -91,13 +85,9 @@ public class MenuOperationsImpl implements MenuOperations {
 		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		if (menuItem == null) {
-			menuItem = new XmlElementBuilder("menu:item", document)
-							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase())
-							.addAttribute("messageCode", globalMessageCode)
-							.addAttribute("url", link)
-						.build();
+			menuItem = new XmlElementBuilder("menu:item", document).addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase()).addAttribute("messageCode", globalMessageCode).addAttribute("url", link).build();
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
-			category.appendChild(menuItem);	
+			category.appendChild(menuItem);
 		}
 		if (writeProps) {
 			properties.put("menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
@@ -207,46 +197,17 @@ public class MenuOperationsImpl implements MenuOperations {
 		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx");
 	}
 	
-	/** return indicates if disk was changed (ie updated or created) */
-	private boolean writeToDiskIfNecessary(Document proposed) {
+	private void writeToDiskIfNecessary(Document proposed) {
 		Document original = null;
-		
-		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
-		MutableFile mutableFile = null;
 		String menuFileName = getMenuFileName();
-		if (fileManager.exists(menuFileName)) {	
-			try {
-				original = XmlUtils.getDocumentBuilder().parse(getMenuFile());
-			} catch (Exception e) {
-				throw new IllegalStateException("Could not parse file: " + menuFileName);
-			} 
-			Assert.notNull(original, "Unable to parse " + menuFileName);
+		if (fileManager.exists(menuFileName)) {
+			original = XmlUtils.readXml(fileManager.getInputStream(menuFileName));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-				mutableFile = fileManager.updateFile(menuFileName);
+				XmlUtils.removeTextNodes(original);
+				fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(original), false);
 			}
 		} else {
-			original = proposed;
-			mutableFile = fileManager.createFile(menuFileName);
-			Assert.notNull(mutableFile, "Could not create JSP file '" + menuFileName + "'");
+			fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(proposed), false);
 		}
-		
-		if (mutableFile != null) {
-			try {
-				// Build a string representation of the JSP
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
-				String jspContent = byteArrayOutputStream.toString();
-				byteArrayOutputStream.close();
-				// We need to write the file out (it's a new file, or the existing file has different contents)
-				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
-				// Return and indicate we wrote out the file
-				return true;
-			} catch (IOException ioe) {
-				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-			}
-		}
-		
-		// A file existed, but it contained the same content, so we return false
-		return false;
 	}
 }

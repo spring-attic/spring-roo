@@ -1,8 +1,6 @@
 package org.springframework.roo.addon.solr;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -33,7 +31,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -194,45 +191,17 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	}
 	
 	/** return indicates if disk was changed (ie updated or created) */
-	private boolean writeToDiskIfNecessary(String jspFilename, Document proposed) {
+	private void writeToDiskIfNecessary(String jspFilename, Document proposed) {
 		Document original = null;
-		
-		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
-		MutableFile mutableFile = null;
-		if (fileManager.exists(jspFilename)) {	
-			try {
-				original = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(jspFilename));
-			} catch (Exception e) {
-				throw new IllegalStateException("Could not parse file: " + jspFilename);
-			} 
-			Assert.notNull(original, "Unable to parse " + jspFilename);
+		if (fileManager.exists(jspFilename)) {
+			original = XmlUtils.readXml(fileManager.getInputStream(jspFilename));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-				mutableFile = fileManager.updateFile(jspFilename);
+				XmlUtils.removeTextNodes(original);
+				fileManager.createOrUpdateTextFileIfRequired(jspFilename, XmlUtils.nodeToString(original), false);
 			}
 		} else {
-			original = proposed;
-			mutableFile = fileManager.createFile(jspFilename);
-			Assert.notNull(mutableFile, "Could not create JSP file '" + jspFilename + "'");
+			fileManager.createOrUpdateTextFileIfRequired(jspFilename, XmlUtils.nodeToString(proposed), false);
 		}
-		
-		if (mutableFile != null) {
-			try {
-				// Build a string representation of the JSP
-				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
-				String jspContent = byteArrayOutputStream.toString();
-
-				// We need to write the file out (it's a new file, or the existing file has different contents)
-				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
-				// Return and indicate we wrote out the file
-				return true;
-			} catch (IOException ioe) {
-				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-			}
-		}
-		
-		// A file existed, but it contained the same content, so we return false
-		return false;
 	}
 
 	public String getProvidesType() {

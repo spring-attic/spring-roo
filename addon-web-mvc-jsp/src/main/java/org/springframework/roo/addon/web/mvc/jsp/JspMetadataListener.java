@@ -1,9 +1,6 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,7 +34,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -257,48 +253,17 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	}
 
 	/** return indicates if disk was changed (ie updated or created) */
-	private boolean writeToDiskIfNecessary(String jspFilename, Document proposed) {
+	private void writeToDiskIfNecessary(String jspFilename, Document proposed) {
 		Document original = null;
-
-		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
-		MutableFile mutableFile = null;
 		if (fileManager.exists(jspFilename)) {
-			try {
-				original = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(jspFilename));
-			} catch (Exception e) {
-				throw new IllegalStateException("Could not parse file: " + jspFilename);
-			}
-			Assert.notNull(original, "Unable to parse " + jspFilename);
+			original = XmlUtils.readXml(fileManager.getInputStream(jspFilename));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-				mutableFile = fileManager.updateFile(jspFilename);
+				XmlUtils.removeTextNodes(original);
+				fileManager.createOrUpdateTextFileIfRequired(jspFilename, XmlUtils.nodeToString(original), false);
 			}
 		} else {
-			original = proposed;
-			mutableFile = fileManager.createFile(jspFilename);
-			Assert.notNull(mutableFile, "Could not create JSP file '" + jspFilename + "'");
+			fileManager.createOrUpdateTextFileIfRequired(jspFilename, XmlUtils.nodeToString(proposed), false);
 		}
-
-		if (mutableFile != null) {
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			try {
-				// Build a string representation of the JSP
-				XmlUtils.writeXml(byteArrayOutputStream, original);
-				String jspContent = byteArrayOutputStream.toString();
-				// We need to write the file out (it's a new file, or the existing file has different contents)
-				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
-				// Return and indicate we wrote out the file
-				return true;
-			} catch (IOException ioe) {
-				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-			} finally {
-				try {
-					byteArrayOutputStream.close();
-				} catch (IOException ignored) {}
-			}
-		}
-
-		// A file existed, but it contained the same content, so we return false
-		return false;
 	}
 	
 	public void notify(String upstreamDependency, String downstreamDependency) {
