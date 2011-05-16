@@ -52,9 +52,11 @@
             <c:when test="${empty itemValue}">
               <c:choose>
                 <c:when test="${disableFormBinding}">
-                  <select id="_${sec_field}_id" name="${sec_field}" multiple="${multiple}">
-                    <c:forEach items="${items}" var="item">
-                      <option value="${item}">
+                  <c:choose>
+                    <c:when test="${multiple}">
+                      <select id="_${sec_field}_id" name="${sec_field}" multiple="${multiple}">
+                      <c:forEach items="${items}" var="item">
+                        <option value="${item}">
                         <c:choose>
                           <c:when test="${empty itemLabel}">
                             <spring:eval expression="item" />
@@ -63,17 +65,49 @@
                             <spring:eval expression="item[sec_itemLabel]"/>
                           </c:otherwise>
                         </c:choose>
-                      </option>
-                    </c:forEach>
-                  </select>
+                        </option>
+                      </c:forEach>
+                      </select>
+                    </c:when>
+                    <c:otherwise>
+                      <select id="_${sec_field}_id" name="${sec_field}">
+                      <c:forEach items="${items}" var="item">
+                        <option value="${item}">
+                        <c:choose>
+                          <c:when test="${empty itemLabel}">
+                            <spring:eval expression="item" />
+                          </c:when>
+                          <c:otherwise>
+                            <spring:eval expression="item[sec_itemLabel]"/>
+                          </c:otherwise>
+                        </c:choose>
+                        </option>
+                      </c:forEach>
+                      </select>
+                    </c:otherwise>
+                  </c:choose>
                 </c:when>
                 <c:otherwise>
                   <c:choose>
                     <c:when test="${empty itemLabel}">
-                      <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" />
+                      <c:choose>
+                        <c:when test="${multiple}">
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" />
+                        </c:when>
+                        <c:otherwise>
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" />
+                        </c:otherwise>
+                     </c:choose>
                     </c:when>
                     <c:otherwise>
-                      <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" itemLabel="${sec_itemLabel}"/>
+                      <c:choose>
+                        <c:when test="${multiple}">
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" itemLabel="${sec_itemLabel}"/>
+                        </c:when>
+                        <c:otherwise>
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" itemLabel="${sec_itemLabel}"/>
+                        </c:otherwise>
+                      </c:choose>
                     </c:otherwise>
                   </c:choose>
                   <br />
@@ -84,28 +118,62 @@
             <c:otherwise>
               <c:choose>
                 <c:when test="${disableFormBinding}">
-                  <select id="_${sec_field}_id" name="${sec_field}" multiple="${multiple}">
-                    <c:forEach items="${items}" var="item">
-                      <option value="${item[fn:escapeXml(itemValue)]}">
-                        <c:choose>
-                          <c:when test="${empty itemLabel}">
-                            <spring:eval expression="item" />
-                          </c:when>
-                          <c:otherwise>
-                            <spring:eval expression="item[sec_itemLabel]"/>
-                          </c:otherwise>
-                        </c:choose>
-                      </option>
-                    </c:forEach>
-                  </select>
+                  <c:choose>
+                    <c:when test="${multiple}">
+                      <select id="_${sec_field}_id" name="${sec_field}" multiple="${multiple}">
+                        <c:forEach items="${items}" var="item">
+                          <option value="${item[fn:escapeXml(itemValue)]}">
+                            <c:choose>
+                              <c:when test="${empty itemLabel}">
+                                <spring:eval expression="item" />
+                              </c:when>
+                              <c:otherwise>
+                                <spring:eval expression="item[sec_itemLabel]"/>
+                              </c:otherwise>
+                            </c:choose>
+                          </option>
+                        </c:forEach>
+                      </select>
+                    </c:when>
+                    <c:otherwise>
+                      <select id="_${sec_field}_id" name="${sec_field}" multiple="${multiple}">
+                        <c:forEach items="${items}" var="item">
+                          <option value="${item[fn:escapeXml(itemValue)]}">
+                            <c:choose>
+                              <c:when test="${empty itemLabel}">
+                                <spring:eval expression="item" />
+                              </c:when>
+                              <c:otherwise>
+                                <spring:eval expression="item[sec_itemLabel]"/>
+                              </c:otherwise>
+                            </c:choose>
+                          </option>
+                        </c:forEach>
+                      </select>
+                    </c:otherwise>
+                  </c:choose>
                 </c:when>
                 <c:otherwise>
                   <c:choose>
                     <c:when test="${empty itemLabel}">
-                      <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" itemValue="${fn:escapeXml(itemValue)}" />
+                      <c:choose>
+                        <c:when test="${multiple}">
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" itemValue="${fn:escapeXml(itemValue)}" />
+                        </c:when>
+                        <c:otherwise>
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" itemValue="${fn:escapeXml(itemValue)}" />
+                        </c:otherwise>
+                      </c:choose>
                     </c:when>
                     <c:otherwise>
-                      <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" itemValue="${fn:escapeXml(itemValue)}" itemLabel="${sec_itemLabel}"/>
+                      <c:choose>
+                        <c:when test="${multiple}">
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" multiple="${multiple}" itemValue="${fn:escapeXml(itemValue)}" itemLabel="${sec_itemLabel}"/>
+                        </c:when>
+                        <c:otherwise>
+                          <form:select id="_${sec_field}_id" items="${items}" path="${sec_field}" disabled="${disabled}" itemValue="${fn:escapeXml(itemValue)}" itemLabel="${sec_itemLabel}"/>
+                        </c:otherwise>
+                      </c:choose>
                     </c:otherwise>
                   </c:choose>
                   <br />
@@ -127,6 +195,5 @@
       </c:choose>
     </div>
     <br />
-
   </c:if>
 </jsp:root>
