@@ -208,14 +208,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private void setDateAnnotations(Identifier identifier, List<AnnotationMetadataBuilder> annotations) {
 		// Add JSR 220 @Temporal annotation to date fields
 		if (identifier.getFieldType().equals(new JavaType("java.util.Date"))) {
-			String temporalType;
-			if ("timestamp".equalsIgnoreCase(identifier.getColumnDefinition())) {
-				temporalType = "TIMESTAMP";
-			} else if ("time".equalsIgnoreCase(identifier.getColumnDefinition())) {
-				temporalType = "TIME";
-			} else {
-				temporalType = "DATE";
-			}
+			String temporalType = StringUtils.defaultIfEmpty(StringUtils.toUpperCase(identifier.getColumnDefinition()), "DATE");
 			AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"));
 			temporalBuilder.addEnumAttribute("value", new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(temporalType)));
 			annotations.add(temporalBuilder);
