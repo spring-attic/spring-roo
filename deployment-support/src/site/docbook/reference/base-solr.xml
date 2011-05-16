@@ -207,7 +207,7 @@
     <para>The @RooSolrSearchable annotation allows you to change all method
     names through their respective attributes in the annotation. Marking a
     method name with an empty String will instruct the Roo Solr add-on to not
-    generate that method (ie @RooSolrSearchable(preRemoveMethod="")).</para>
+    generate that method (i.e. @RooSolrSearchable(preRemoveMethod="")).</para>
 
     <para>By default all fields in a domain entity are indexed as dynamic
     fields (defined in the default schema.xml which Solr ships with). The
@@ -219,7 +219,7 @@ person.birthday_dt</programlisting></para>
     <para>This ensures each field is uniquely mapped across your domain model
     by prepending the entity name followed by the field name and field type
     (which is used to trigger the dynamic field mapping). You can change field
-    names by adding a @Field annotation to a field in the domain object (ie
+    names by adding a @Field annotation to a field in the domain object (i.e.
     Person) which contains your own field (you need to provide a field
     definition in the Solr schema for it as well):</para>
 

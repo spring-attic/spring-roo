@@ -469,7 +469,7 @@
 
       <listitem>
         <para>Copying static artefacts from the add-on jar into the user
-        project (ie CSS, images, tagx, configuration files, etc).</para>
+        project (i.e. CSS, images, tagx, configuration files, etc).</para>
       </listitem>
 
       <listitem>
@@ -713,7 +713,7 @@
     <title>Publishing to RooBot</title>
 
     <para>Once the release is complete you can check your Google Code project
-    to see that your add-on pom.xml has been updated to the new version (eg
+    to see that your add-on pom.xml has been updated to the new version (e.g.
     0.1.2.BUILD-SNAPSHOT), that a new tag has been committed to the
     <emphasis>tags</emphasis> directory and that the <emphasis>repo</emphasis>
     directory has been populated with all relevant artifacts seen in a typical
@@ -729,13 +729,13 @@
         <para>When reviewing file contents via the HTTP interface provided by
         Google Code, the reader is presented with HTML documents (which
         provide syntax highlighting, etc). To get access to the real (raw) URL
-        of a document (eg repo/repository.xml) you need to click the 'View raw
+        of a document (e.g. repo/repository.xml) you need to click the 'View raw
         file' link found in the 'File info' section in the right-hand menu.
         Example of a raw URL:
         http://&lt;project-name&gt;.googlecode.com/svn/repo/repository.xml.
         Make sure the version appendix is <emphasis
         role="bold">removed</emphasis> from the URL before clinicking the
-        'View raw file' link (ie
+        'View raw file' link (i.e.
         http://&lt;project-name&gt;.googlecode.com/svn/repo/repository.xml<emphasis
         role="bold">?r=25)</emphasis></para>
       </sidebar>The URL to the raw (see sidebar) repository.xml artefact can
@@ -759,7 +759,7 @@
       </listitem>
 
       <listitem>
-        <para>The resource URI must use the httppgp prefix ie: &lt;resource
+        <para>The resource URI must use the httppgp prefix i.e.: &lt;resource
         uri="httppgp://fr-test.googlecode.com/svn/…/&gt;</para>
       </listitem>
 

@@ -29,7 +29,7 @@
   linkend="command-index-poll-status">poll status</link>" or "<link
   linkend="command-index-metadata-for-id">metadata for id</link>") or
   sometimes aggregate the features provided by several individual base add-ons
-  (eg "<link linkend="command-index-entity">entity</link>
+  (e.g. "<link linkend="command-index-entity">entity</link>
   --testAutomatically").</para>
 
   <para>Add-ons that do not ship with Spring Roo but are nevertheless about to

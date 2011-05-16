@@ -230,7 +230,7 @@
       the late Jef Raskin's book, "<link
       xlink:href="http://en.wikipedia.org/wiki/The_Humane_Interface">The
       Humane Interface</link>". In the book Raskin argued we have a duty to
-      make things so easy to use that people naturally "habitate" to the
+      make things so easy to use that people naturally "habituate" to the
       interface, that text-based interfaces are often more appropriate than
       GUIs, and that your "locus of attention" is all that matters to you and
       a machine should never disrupt your locus of attention and randomly
@@ -504,7 +504,7 @@ $ <emphasis role="bold">rmdir roo-test</emphasis></programlisting>
 
     <para>At present the only configuration settings available is roo.bright.
     This causes foreground messages in the shell to be displayed with brighter
-    colors. This is potentially useful if your background color is light (eg
+    colors. This is potentially useful if your background color is light (e.g.
     white). You can set the variable using the following commands:</para>
 
     <para><programlisting>$ <emphasis role="bold">export ROO_OPTS="-Droo.bright=true"</emphasis>                   // Linux or Apple

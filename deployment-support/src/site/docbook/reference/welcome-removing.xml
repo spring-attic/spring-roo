@@ -299,7 +299,7 @@
     <code>.java</code> file that would benefit from them, but remember that
     Roo is "hands off by default". What that means is if you used the <link
     linkend="removing-step-by-step-1">push-in refactor</link> command to move
-    members (eg fields, methods, annotations etc) into the <code>.java</code>
+    members (e.g. fields, methods, annotations etc) into the <code>.java</code>
     file, Roo has no way of knowing that they originated from a push-in
     refactor as opposed to you having written them by hand. Roo therefore
     won't delete any members from your <code>.java</code> file or override

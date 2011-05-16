@@ -139,7 +139,7 @@
     as you made a mistake when entering a command or an add-on has a problem
     for whatever reason) the file system will automatically rollback to the
     state it was before the change was attempted. The cascading nature of many
-    changes (ie you add a field to a <code>.java</code> file and that changes
+    changes (i.e. you add a field to a <code>.java</code> file and that changes
     an AspectJ ITD and that in turn changes a web <code>.jspx</code> etc) is
     handled in the same unit of work and therefore rolled back as an atomic
     group when required.</para>
@@ -199,7 +199,7 @@
           some options which have a default value of '<code>*</code>'. This is
           the marker which indicates "the current context will be used for
           this command option unless you explicitly specify otherwise". You
-          change the context by simply working with a different Java type (ie
+          change the context by simply working with a different Java type (i.e.
           specify an operation that involves a different Java type and the
           context will change to that Java type).</para>
         </listitem>
@@ -346,7 +346,7 @@ quit
     File &gt; Import &gt; General &gt; Maven Projects menu option is
     sufficient.</para>
 
-    <para>Irrespective of how you import your project into Eclipse (ie via the
+    <para>Irrespective of how you import your project into Eclipse (i.e. via the
     <link linkend="command-index-perform-eclipse">perform eclipse</link>
     command or via m2eclipse) you should be aware that the project will not be
     a Web Tools Project (WTP) until such time as you install your first web
@@ -756,7 +756,7 @@ Successfully installed add-on: org.synyx.hades.roo.addon
     settings command it defaults to RELEASE - meaning only release versions
     will be upgraded (if upgrades for this level are available). Other
     stability levels to choose from are RELEASE_CANDIDATE, MILESTONE, and ANY
-    (ie snapshots).</para>
+    (i.e. snapshots).</para>
 
     <para>To list all available upgrades for currently installed add-ons you
     can use the <link linkend="command-index-addon-upgrade-available">addon

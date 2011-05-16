@@ -232,7 +232,7 @@
         role="bold">--disallowedOperations</emphasis> attribute helps you
         refine which methods should not be generated in the scaffolded Roo
         controller. If you want to prevent several methods from being
-        generated provide a comma-separated list (ie: --disallowedOperations
+        generated provide a comma-separated list (i.e.: --disallowedOperations
         delete,update,create). You can also specify which methods should be
         generated and which not in the PersonController.java source:</para>
 
@@ -386,7 +386,7 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
 
     <para>Note, in some cases you may create a form backing entity which does
     not contain any suitable fields for conversion. For example, the entity
-    may only contain a field indicating a relationship to another entity (ie
+    may only contain a field indicating a relationship to another entity (i.e.
     type one-to-one or one-to-many). Since Roo does not use these fields for
     its generated converters it will simply omit the creation of a converter
     for such form backing entities. In these cases you may have to provide
@@ -429,7 +429,7 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
     choose to do so). Typically jspx files in sub folders under WEB-INF/views
     are maintained in addition to the menu.jspx.</para>
 
-    <para>Here is an example of a typical roo managed jspx file (ie:
+    <para>Here is an example of a typical roo managed jspx file (i.e.:
     WEB-INF/views/people/update.jspx):</para>
 
     <para><programlisting>&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;
@@ -480,7 +480,7 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
       <listitem>
         <para>Roo provided tags are registered in the root element of the jspx
         document and are assigned a namespace. You should be able to see
-        element and attribute code completion when using a modern IDE (ie
+        element and attribute code completion when using a modern IDE (i.e.
         SpringSource Tool Suite)</para>
       </listitem>
 
@@ -581,7 +581,7 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
     of boolean type. This allows users to completely disable the rendering of
     a given tag (and potential sub tags). This is useful in cases where you
     don't wish individual fields in a form to be presented to the user but
-    rather have them autopopulated through other means (ie input
+    rather have them autopopulated through other means (i.e. input
     type="hidden"). The value of the render attribute can also be calculated
     dynamically through the Spring Expression Language (SpEL) or normal JSP
     expression language. The generated create.jspx in Roo application

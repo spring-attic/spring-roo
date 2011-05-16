@@ -146,8 +146,8 @@
 
     <para>The persistence setup command can be re-run at any time. This means
     you can change your ORM provider or database when you plan to move your
-    application between your development setup (eg Hibernate with HSQLDB) to
-    your production setup (eg EclipseLink with DB2). Of course this is a
+    application between your development setup (e.g. Hibernate with HSQLDB) to
+    your production setup (e.g. EclipseLink with DB2). Of course this is a
     convenience only. You'll naturally experience fewer deployment issues if
     you use the same platform for both development and production.</para>
 

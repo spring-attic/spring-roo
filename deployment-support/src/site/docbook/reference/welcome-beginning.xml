@@ -370,7 +370,7 @@ your entity and provide a legal Java field name. Use TAB to find an entity
 name, and '~' to refer to the top level package. Also remember to use TAB
 to access each mandatory argument for the command.
 
-Afer completing the mandatory arguments, press SPACE, type '--' and then TAB.
+After completing the mandatory arguments, press SPACE, type '--' and then TAB.
 The optional arguments shown reflect official JSR 303 Validation constraints.
 Feel free to use an optional argument, or delete '--' and hit ENTER.
 

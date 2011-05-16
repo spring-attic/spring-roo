@@ -180,7 +180,7 @@
     <itemizedlist>
       <listitem>
         <para>Run the <link linkend="command-index-backup">backup</link>
-        command using your currently-installed (ie existing) version of Spring
+        command using your currently-installed (i.e. existing) version of Spring
         Roo. This will help create a ZIP of your project, which may help if
         you need to revert. Don't install the new version of Roo until you've
         firstly completed this backup. Naturally you can skip this step if you

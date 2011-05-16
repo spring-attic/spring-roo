@@ -26,7 +26,7 @@
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>Your comments on this add-on eg "this is my comment!"; limit of 140 characters; no default value</para>
+                        <para>Your comments on this add-on e.g. "this is my comment!"; limit of 140 characters; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -416,7 +416,7 @@
         </section>
         <section xml:id="command-index-controller-scaffold">
             <title>controller scaffold</title>
-            <para>Create a new scaffold Controller (ie where we maintain CRUD automatically)</para>
+            <para>Create a new scaffold Controller (i.e. where we maintain CRUD automatically)</para>
             <programlisting><![CDATA[controller scaffold --class]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -460,7 +460,7 @@
         </section>
         <section xml:id="command-index-web-mvc-scaffold">
             <title>web mvc scaffold</title>
-            <para>Create a new scaffold Controller (ie where Roo maintains CRUD functionality automatically)</para>
+            <para>Create a new scaffold Controller (i.e. where Roo maintains CRUD functionality automatically)</para>
             <programlisting><![CDATA[web mvc scaffold --class]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -532,7 +532,7 @@
                 <varlistentry>
                     <term>--locale</term>
                     <listitem>
-                        <para>The locale abbreviation (ie: en, or more specific like en_AU, or de_DE); no default value (mandatory) </para>
+                        <para>The locale abbreviation (i.e.: en, or more specific like en_AU, or de_DE); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -690,8 +690,8 @@
         </section>
     </section>
     <section xml:id="command-index-dbre-commands">
-        <title>Dbre Commands</title>
-        <para>Dbre Commands are contained in org.springframework.roo.addon.dbre.DbreCommands.</para>
+        <title>DBRE Commands</title>
+        <para>DBRE Commands are contained in org.springframework.roo.addon.dbre.DbreCommands.</para>
         <section xml:id="command-index-database-introspect">
             <title>database introspect</title>
             <para>Displays database metadata</para>
@@ -841,7 +841,7 @@
                 <varlistentry>
                     <term>--location</term>
                     <listitem>
-                        <para>The location of the map (ie "Sydney, Australia"); no default value (mandatory) </para>
+                        <para>The location of the map (i.e. "Sydney, Australia"); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1256,7 +1256,7 @@
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The URL to add (eg http://felix.apache.org/obr/releases.xml); no default value (mandatory) </para>
+                        <para>The URL to add (e.g. http://felix.apache.org/obr/releases.xml); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1896,7 +1896,7 @@
         </section>
         <section xml:id="command-index-field-reference">
             <title>field reference</title>
-            <para>Adds a private reference field to an existing Java source file (eg the 'many' side of a many-to-one)</para>
+            <para>Adds a private reference field to an existing Java source file (e.g. the 'many' side of a many-to-one)</para>
             <programlisting><![CDATA[field reference --fieldName --type]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -1975,7 +1975,7 @@
         </section>
         <section xml:id="command-index-field-set">
             <title>field set</title>
-            <para>Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)</para>
+            <para>Adds a private Set field to an existing Java source file (e.g. the 'one' side of a many-to-one)</para>
             <programlisting><![CDATA[field set --fieldName --type]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -2371,8 +2371,8 @@
         </section>
     </section>
     <section xml:id="command-index-jms-commands">
-        <title>Jms Commands</title>
-        <para>Jms Commands are contained in org.springframework.roo.addon.jms.JmsCommands.</para>
+        <title>JMS Commands</title>
+        <para>JMS Commands are contained in org.springframework.roo.addon.jms.JmsCommands.</para>
         <section xml:id="command-index-field-jms-template">
             <title>field jms template</title>
             <para>insert a JmsTemplate field into an existing type</para>
@@ -2450,8 +2450,8 @@
         </section>
     </section>
     <section xml:id="command-index-jpa-commands">
-        <title>Jpa Commands</title>
-        <para>Jpa Commands are contained in org.springframework.roo.addon.jpa.JpaCommands.</para>
+        <title>JPA Commands</title>
+        <para>JPA Commands are contained in org.springframework.roo.addon.jpa.JpaCommands.</para>
         <section xml:id="command-index-database-properties-list">
             <title>database properties list</title>
             <para>Shows database configuration details</para>
@@ -2586,7 +2586,7 @@
         <para>Jsp Commands are contained in org.springframework.roo.addon.web.mvc.jsp.JspCommands.</para>
         <section xml:id="command-index-controller-class">
             <title>controller class</title>
-            <para>Create a new manual Controller (ie where you write the methods)</para>
+            <para>Create a new manual Controller (i.e. where you write the methods)</para>
             <programlisting><![CDATA[controller class --class]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -2598,14 +2598,14 @@
                 <varlistentry>
                     <term>--preferredMapping</term>
                     <listitem>
-                        <para>Indicates a specific request mapping path for this controller (eg /foo/); no default value</para>
+                        <para>Indicates a specific request mapping path for this controller (e.g. /foo/); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-web-mvc-controller">
             <title>web mvc controller</title>
-            <para>Create a new manual Controller (ie where you write the methods)</para>
+            <para>Create a new manual Controller (i.e. where you write the methods)</para>
             <programlisting><![CDATA[web mvc controller --class]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -2617,7 +2617,7 @@
                 <varlistentry>
                     <term>--preferredMapping</term>
                     <listitem>
-                        <para>Indicates a specific request mapping path for this controller (eg /foo/); no default value</para>
+                        <para>Indicates a specific request mapping path for this controller (e.g. /foo/); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2643,13 +2643,13 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>The path the static view to create in (required, ie '/foo/blah'); no default value (mandatory) </para>
+                        <para>The path the static view to create in (required, i.e. '/foo/blah'); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The view name the mapping this view should adopt (required, ie 'index'); no default value (mandatory) </para>
+                        <para>The view name the mapping this view should adopt (required, i.e. 'index'); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2687,13 +2687,13 @@
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>The path the static view to create in (required, ie '/foo/blah'); no default value (mandatory) </para>
+                        <para>The path the static view to create in (required, i.e. '/foo/blah'); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--viewName</term>
                     <listitem>
-                        <para>The view name the mapping this view should adopt (required, ie 'index'); no default value (mandatory) </para>
+                        <para>The view name the mapping this view should adopt (required, i.e. 'index'); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2892,7 +2892,7 @@
                 <varlistentry>
                     <term>--mavenCommand</term>
                     <listitem>
-                        <para>User-specified Maven command (eg test:test); no default value (mandatory) </para>
+                        <para>User-specified Maven command (e.g. test:test); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3020,7 +3020,7 @@
                 <varlistentry>
                     <term>--keyId</term>
                     <listitem>
-                        <para>The key ID to view (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                        <para>The key ID to view (e.g. 00B5050F or 0x00B5050F); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3051,7 +3051,7 @@
                 <varlistentry>
                     <term>--keyId</term>
                     <listitem>
-                        <para>The key ID to trust (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                        <para>The key ID to trust (e.g. 00B5050F or 0x00B5050F); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3064,7 +3064,7 @@
                 <varlistentry>
                     <term>--keyId</term>
                     <listitem>
-                        <para>The key ID to remove trust from (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                        <para>The key ID to remove trust from (e.g. 00B5050F or 0x00B5050F); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
