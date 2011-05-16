@@ -96,7 +96,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		Map<JavaType, Map<Object, JavaSymbolName>> types = new TreeMap<JavaType, Map<Object,JavaSymbolName>>();
 		for (JavaType controller : typeLocationService.findTypesWithAnnotation(rooWebScaffold)) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
-			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metdata for type " + controller.getFullyQualifiedTypeName());
+			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
 			JavaType backingType = webScaffoldAnnotationValues.getFormBackingObject();
 			MemberDetails memberDetails = getMemberDetails(backingType);
@@ -125,7 +125,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = new LinkedHashMap<JavaType, List<MethodMetadata>>();
 		for (JavaType controller : typeLocationService.findTypesWithAnnotation(rooWebScaffold)) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
-			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metdata for type " + controller.getFullyQualifiedTypeName());
+			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
 			relevantDomainTypes.putAll(findRelevantTypes(webScaffoldAnnotationValues.getFormBackingObject(), metadataIdentificationString));
 		}
