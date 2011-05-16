@@ -147,7 +147,7 @@
     <para><sidebar>
         <title>Roo's Four Add-On Creator Commands</title>
 
-        <para>With release 1.1 Spring Roo offers three commands to help
+        <para>With release 1.1 Spring Roo offers the following commands to help
         developers quickly create new add-ons:</para>
 
         <itemizedlist>
@@ -219,7 +219,7 @@
               </itemizedlist></para>
           </listitem>
         </itemizedlist>
-      </sidebar>Once you have installed Java, Maven, PGP, SVN tools and have
+      </sidebar>Once you have installed Java, Maven, PGP, and SVN tools, and have
     created and checked out your Google Code project, you can change into the
     &lt;project-name&gt; directory which should contain only the .svn
     directory at this stage. In the &lt;project-name&gt; directory you can
@@ -245,16 +245,16 @@
       <listitem>
         <para><emphasis role="bold">pom.xml</emphasis> - This is the Maven
         project configuration. This configuration ships with a number of
-        preinstalled Maven plugins which take facilitate the PGP artefact
+        preinstalled Maven plugins that facilitate the PGP artefact
         signing process as well as the project release process (including
-        tagging etc). It also adds OSGi and Felix dependencies to the add-on
-        project which are needed for it to run in the Roo Shell. Furthermore,
+        tagging etc). It also adds the OSGi and Felix dependencies needed
+        for the addon to run in the Roo Shell. Furthermore,
         several commonly used Spring Roo modules are preinstalled. These
         modules provide functionalities such as file system monitoring, Roo
         shell command registration, etc. More information about these
         functionalities is provided in the following sections.</para>
 
-        <para>The add-on developer should open up the pom.xml file and refine
+        <para>The add-on developer should open up the pom.xml file and modify
         some project specific references and documentation (marked in bold
         font):</para>
 
@@ -370,38 +370,37 @@
 
       <listitem>
         <para>The command type needs to implement the the <emphasis
-        role="bold">CommandMarker</emphasis> interface which Spring Roo uses
-        to scan for types which contribute commands to the Roo Shell.</para>
+        role="bold">CommandMarker</emphasis> interface, for which Spring Roo
+        scans to detect classes that contribute commands to the Roo Shell.</para>
       </listitem>
 
       <listitem>
         <para>The Felix <emphasis role="bold">@Reference</emphasis>
         annotations are used to inject services and components offered by
         other Spring Roo core components or even other add-ons. In this
-        example we are injecting a reference to the add-ons own
-        BatchOperations and the StaticFieldConverter component offered by the
+        example we are injecting a reference to the add-on's own
+        BatchOperations interface and the StaticFieldConverter component offered by the
         Roo Shell OSGi bundle. For Spring users, the Felix <emphasis
-        role="bold">@Reference</emphasis> is similar in its purpose to the
-        @Autowired or @Inject annotations.</para>
+        role="bold">@Reference</emphasis> is similar in purpose to the
+        @Autowired and @Inject annotations.</para>
       </listitem>
 
       <listitem>
         <para>The <emphasis role="bold">activate</emphasis> and <emphasis
-        role="bold">deactivate</emphasis> methods are methods which can
-        optionally be implemented to get access to the lifecycle of the bundle
-        which is managed by the underlying OSGi container. Roo add-on
+        role="bold">deactivate</emphasis> methods can optionally be
+        implemented to get access to the lifecycle of the addon's bundle
+        being managed by the underlying OSGi container. Roo add-on
         developers can use these lifecycle hooks for registration and
         deregistration of converters (typical use in command types) or for the
-        registration of metadata dependencies (typical for ITD providing
+        registration of metadata dependencies (typical for ITD-providing
         add-ons) or any other component initialization activities.</para>
       </listitem>
 
       <listitem>
-        <para>The use of Spring Roo's <emphasis
-        role="bold">@CliAvailabilityIndicator</emphasis> is optional and
-        allows you to specify when a command should be made available in the
-        Spring Roo Shell. Methods annotated with this annotation need to
-        return a boolean value to indicate when a command should be visible to
+        <para>The optional <emphasis role="bold">@CliAvailabilityIndicator</emphasis>
+        annotation allows you to limit when a command is available in the
+        Spring Roo Shell. Methods thus annotated should return a
+        boolean to indicate whether a command should be visible to
         the Roo Shell. For example, many commands are hidden before a project
         has been created.</para>
       </listitem>
@@ -414,8 +413,8 @@
         String value to contribute a log statement to the Spring Roo Shell.
         Another, more flexible, option to provide log statements in the Roo
         Shell is to register a standard JDK logger which allows the developer
-        to present color-coded messages to the user in the Roo shell. The
-        color coding depends on the log level (warning, info, error,
+        to present color-coded messages to the user in the Roo shell, with the
+        color coding being dependent on the log level (warning, info, error,
         etc).</para>
       </listitem>
 
@@ -423,14 +422,13 @@
         <para>The optional <emphasis role="bold">@CliOption</emphasis>
         annotation can be used to annotate method parameters. These parameters
         define command attributes which are presented as part of a command.
-        Roo will attempt to automatically convert user entered values into the
+        Roo will attempt to automatically convert user-entered values into the
         target type specified as the method parameter. In the example above
         Roo will convert a String value to the BatchPropertyName type. By
         default Roo offers converters for common number types, String, Date,
         Enum, Locale, boolean and Character. See the
         <emphasis>org.springframework.roo.shell.converters</emphasis> package
-        for examples if the implementation of a custom converter is
-        required.</para>
+        for examples if you need to implement a custom converter.</para>
       </listitem>
     </orderedlist>
   </section>
