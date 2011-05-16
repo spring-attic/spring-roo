@@ -40,7 +40,7 @@
       <listitem>
         <para>Listening for messages on a JMS queue and sending replies over
         JMS or SMTP (Roo can easily <link
-        linkend="command-index-jms-setup">setup JMS</link> message producers,
+        linkend="command-index-jms-setup">set up JMS</link> message producers,
         consumers and <link
         linkend="command-index-email-sender-setup">SMTP</link>)</para>
       </listitem>
@@ -111,7 +111,7 @@
       Roo projects use AspectJ's powerful inter-type declaration (ITD)
       features. This is where the real magic of Roo comes from, as it allows
       us to code generate members (artifacts like methods, fields etc) in a
-      different compilation unit (ie source file) from the normal .java code
+      different compilation unit (i.e. source file) from the normal .java code
       you'd write as a developer. Because the generated code is in a separate
       file, we can maintain that file's lifecycle and contents completely
       independently of whatever you are doing to the .java files. Your .java
@@ -318,10 +318,10 @@ public class com.aspectj.rocks.Hello extends java.lang.Object implements org.spr
       web content negotiation view resolution and REST support. It is possible
       (and indeed encouraged) to write your own web Spring MVC controllers in
       Roo applications, and you are also free to use alternate page rendering
-      technologies if you wish (ie not just JSP).</para>
+      technologies if you wish (i.e. not just JSP).</para>
 
       <para>Generally speaking Roo will not modify any Spring-related
-      configuration or setting file (eg properties) unless specifically
+      configuration or setting file (e.g. properties) unless specifically
       requested via a shell command. Roo also ensures that whenever it
       creates, modifies or deletes a file it explicitly tells you about this
       via a shell message. What this means is you can safely edit your Spring
@@ -400,7 +400,7 @@ public class Choice {
     to use them the relevant Roo field commands provide tab-completion
     compatible options for each. The first time you use one of these Roo field
     commands, Roo will add required JavaBean Validation API libraries to your
-    project (ie these libraries will not be in your project until you decide
+    project (i.e. these libraries will not be in your project until you decide
     to first use JavaBean Validation).</para>
 
     <para>What's interesting about the above entity is what you can actually
@@ -413,7 +413,7 @@ public class Choice {
     attributes on the <code>@RooEntity</code> annotation. You can also have
     Roo remove these services by simply removing the <code>@RooEntity</code>
     annotation from the class, in which case you'll be left with a normal JPA
-    @Entity that you'll need to manage by hand (eg provide your own
+    @Entity that you'll need to manage by hand (e.g. provide your own
     persistence methods, identifier, version etc).</para>
 
     <para>The <code>@RooJavaBean</code> annotation causes an accessor and
@@ -503,12 +503,12 @@ public class Choice {
 
       <listitem>
         <para>You need to invoke business logic outside the scope of a natural
-        web request (eg a timer task)</para>
+        web request (e.g. a timer task)</para>
       </listitem>
 
       <listitem>
         <para>Remote client access is required and it is therefore more
-        convenient to simply expose the methods via a remoting ptotocol</para>
+        convenient to simply expose the methods via a remoting protocol</para>
       </listitem>
 
       <listitem>
@@ -628,7 +628,7 @@ public class Choice {
           workflows will target a use case as opposed to the entities required
           to implement a use case. Further, the approach is unsafe as it is
           possible to transitively acquire one entity from another without
-          observing the authorisation rules (eg
+          observing the authorisation rules (e.g.
           <code>person.getPartner().getChildren().get(1).setFirstName("Ben")</code>).
           It is also quite crude in that it does not support transparent
           persistence correctly, in that the example modification of the first
@@ -643,7 +643,7 @@ public class Choice {
           <para><emphasis>Security auditing</emphasis>: In a similar argument
           to authorisation, sometimes DAOs are advocated for auditing
           purposes. For the same types of reasons expressed for authorisation,
-          this is a suboptimal approach. A better way is to use AOP (eg
+          this is a suboptimal approach. A better way is to use AOP (e.g.
           AspectJ field set pointcuts), a JPA flush event handle, or a
           trigger-like model within the database.</para>
         </listitem>
