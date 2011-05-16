@@ -60,7 +60,6 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 				return l.getMethodName().compareTo(r.getMethodName());
 			}
 		});
-		
 		ClassOrInterfaceTypeDetails governorType = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		
 		for (MethodMetadata method : methods) {
@@ -76,14 +75,7 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
-		// Determine if this ITD presents a method we're interested in (namely accessors)
-		for (MethodMetadata method : itdTypeDetails.getDeclaredMethods()) {
-			if (BeanInfoUtils.isAccessorMethod(method)) {
-				return getLocalMid(itdTypeDetails);
-			}
-		}
-		
-		return null;
+		return getLocalMid(itdTypeDetails);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

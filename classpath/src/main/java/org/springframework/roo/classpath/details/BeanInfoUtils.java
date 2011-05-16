@@ -81,7 +81,7 @@ public abstract class BeanInfoUtils {
 	 * @return true if the presented method is an accessor, otherwise false
 	 */
 	public static boolean isAccessorMethod(MethodMetadata method) {
-		return (method.getMethodName().getSymbolName().startsWith("get") || method.getMethodName().getSymbolName().startsWith("is")) && method.getParameterTypes().size() == 0 && Modifier.isPublic(method.getModifier());
+		return (method.getMethodName().getSymbolName().startsWith("get") || method.getMethodName().getSymbolName().startsWith("is")) && method.getParameterTypes().isEmpty() && Modifier.isPublic(method.getModifier());
 	}
 	
 	/**

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -140,7 +139,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		}
 	}
 	
-	private Connection getConnection(boolean displayAddOns) throws SQLException {
+	private Connection getConnection(boolean displayAddOns) {
 		if (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
 			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 			return connectionProvider.getConnection(connectionProperties, displayAddOns);

@@ -216,7 +216,6 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		
 		// Obtain the physical type
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(governorPhysicalTypeIdentifier);
-		
 		if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid()) {
 			// We can't get even basic information about the physical type, so abort (the ITD will be deleted by ItdFileDeletionService)
 			return null;
@@ -363,7 +362,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		String providesType = MetadataIdentificationUtils.getMetadataClass(memberHoldingTypeDetails.getDeclaredByMetadataId());
 		Path path = PhysicalTypeIdentifierNamingUtils.getPath(providesType, memberHoldingTypeDetails.getDeclaredByMetadataId());
 		
-		//  Produce the local MID we're going to use to make the request
+		// Produce the local MID we're going to use to make the request
 		return createLocalIdentifier(governorType, path);
 	}
 
