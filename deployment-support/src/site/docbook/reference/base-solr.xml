@@ -49,8 +49,8 @@
       </listitem>
 
       <listitem>
-        <para>Change into the solr examples directory: cd
-        apache-solr-1.4.0/examples</para>
+        <para>Change into the solr example directory: cd
+        apache-solr-1.4.0/example</para>
       </listitem>
 
       <listitem>
@@ -234,7 +234,7 @@ private Date birthDay;
     URL of the solr server location can be changed in the project
     src/main/resources/META-INF/spring/solr.properties config file.</para>
 
-    <para>Front-end (controller and MVC/JSP views) are currently
+    <para>Front-end (controller and MVC/JSP views) are currently a
     work-in-progress. However, the following Ajax Library offers a neat
     front-end for those who want to take this a step further: <link
     xlink:href="http://github.com/evolvingweb/ajax-solr">http://github.com/evolvingweb/ajax-solr</link>
