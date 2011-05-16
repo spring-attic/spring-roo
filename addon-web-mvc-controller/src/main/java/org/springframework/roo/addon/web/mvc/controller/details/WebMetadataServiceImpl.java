@@ -393,7 +393,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	
 	public MemberDetails getMemberDetails(JavaType javaType) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metdata for type " + javaType.getFullyQualifiedTypeName());
+		Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails classOrInterfaceDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceDetails);
 	}
