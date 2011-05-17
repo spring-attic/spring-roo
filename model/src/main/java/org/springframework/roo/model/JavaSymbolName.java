@@ -13,6 +13,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Ensures the field is properly formed.
  * 
  * @author Ben Alex
+ * @author Greg Turnquist
  * @since 1.0
  */
 public final class JavaSymbolName implements Comparable<JavaSymbolName> {
@@ -56,6 +57,14 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	public String getSymbolNameCapitalisedFirstLetter() {
 		return StringUtils.capitalize(symbolName);
 	}
+	
+	/**
+	 * @return the name of a setter for the symbol
+	 */
+	public String getSymbolNameTurnedIntoMutatorMethodName() {
+		return "set" + getSymbolNameCapitalisedFirstLetter();
+	}
+
 	
 	/**
 	 * @return the symbol name in human readable form

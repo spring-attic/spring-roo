@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dod;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,13 +17,11 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -34,6 +33,7 @@ import org.springframework.roo.project.Path;
  * Provides {@link DataOnDemandMetadata}.
  * 
  * @author Ben Alex
+ * @author Greg Turnquist
  * @since 1.0
  */
 @Component(immediate = true)
@@ -123,8 +123,11 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		
 		// Get the embedded identifier metadata holder - may be null if no embedded identifier exists
 		EmbeddedIdentifierHolder embeddedIdentifierHolder = getEmbeddedIdentifierHolder(memberDetails, metadataIdentificationString);
+		
+		// Get the list of embedded metadata holders - may be an empty list if no embedded identifier exists
+		List<EmbeddedHolder> embeddedHolders = getEmbeddedHolders(memberDetails, metadataIdentificationString);
 
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierHolder);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierHolder, embeddedHolders);
 	}
 
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
@@ -144,8 +147,8 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			
 			Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
 
-			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
-			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.VERSION_FIELD)) {
+			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one), or embedded types
+			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.VERSION_FIELD)) {
 				continue;
 			}
 
@@ -182,36 +185,42 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			return null;
 		}
 		
-		MemberHoldingTypeDetails identifierMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(identifierMemberDetails, PersistenceCustomDataKeys.IDENTIFIER_TYPE);
-		if (identifierMemberHoldingTypeDetails == null) {
-			return null;
-		}
-		
 		for (FieldMetadata field : MemberFindingUtils.getFields(identifierMemberDetails)) {
 			if (!(Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier()) || Modifier.isTransient(field.getModifier()))) {
 				metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 				identifierFields.add(field);
 			}
 		}
-		List<ConstructorMetadata> constructors = MemberFindingUtils.getConstructors(identifierMemberDetails);
-		for (ConstructorMetadata constructor : constructors) {
-			metadataDependencyRegistry.registerDependency(constructor.getDeclaredByMetadataId(), metadataIdentificationString);
-			if (hasExactFields(constructor, identifierFields)) {
-				return new EmbeddedIdentifierHolder(embeddedIdentifierField, identifierFields, constructor);
-			}
-		}
-		return null;
+		
+		return new EmbeddedIdentifierHolder(embeddedIdentifierField, identifierFields);
 	}
 	
-	private boolean hasExactFields(ConstructorMetadata constructor, List<FieldMetadata> identifierFields) {
-		List<JavaType> parameterTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes());
-		List<JavaType> fieldTypes = new LinkedList<JavaType> ();
-		List<JavaSymbolName> fieldNames = new LinkedList<JavaSymbolName>();
-		for (FieldMetadata identifierField : identifierFields) {
-			fieldTypes.add(identifierField.getFieldType());
-			fieldNames.add(identifierField.getFieldName());
+	private List<EmbeddedHolder> getEmbeddedHolders(MemberDetails memberDetails, String metadataIdentificationString) {
+		final List<EmbeddedHolder> embeddedHolders = new ArrayList<EmbeddedHolder>();
+		
+		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_FIELD);
+		if (fields.isEmpty()) {
+			return embeddedHolders;
 		}
-		return parameterTypes.size() == identifierFields.size() && parameterTypes.containsAll(fieldTypes) && constructor.getParameterNames().containsAll(fieldNames);
+		
+		for (FieldMetadata embeddedField : fields) {
+			MemberDetails embeddedMemberDetails = getMemberDetails(embeddedField.getFieldType());
+			if (embeddedMemberDetails == null) {
+				continue;
+			}
+			
+			final List<FieldMetadata> embeddedFields = new LinkedList<FieldMetadata>();
+	
+			for (FieldMetadata field : MemberFindingUtils.getFields(embeddedMemberDetails)) {
+				if (!(Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier()) || Modifier.isTransient(field.getModifier()))) {
+					metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
+					embeddedFields.add(field);
+				}
+			}
+			embeddedHolders.add(new EmbeddedHolder(embeddedField, embeddedFields));
+		}
+		
+		return embeddedHolders;
 	}
 
 	private DataOnDemandMetadata locateCollaboratingMetadata(String metadataIdentificationString, FieldMetadata field) {

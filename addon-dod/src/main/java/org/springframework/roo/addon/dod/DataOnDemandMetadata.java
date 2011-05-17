@@ -15,7 +15,6 @@ import java.util.Set;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -42,6 +41,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Greg Turnquist
  * @since 1.0
  */
 public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -63,12 +63,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators;
 	private JavaType entityType;
 	private EmbeddedIdentifierHolder embeddedIdentifierHolder;
+	private List<EmbeddedHolder> embeddedHolders;
 
 	private Map<MethodMetadata, String> fieldInitializers = new LinkedHashMap<MethodMetadata, String>();
-	private Map<FieldMetadata, String> embeddedIdInitializers = new LinkedHashMap<FieldMetadata, String>();
 	private List<JavaType> requiredDataOnDemandCollaborators = new LinkedList<JavaType>();
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -93,9 +93,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.locatedMutators = locatedMutators;
 		this.entityType = entityType;
 		this.embeddedIdentifierHolder = embeddedIdentifierHolder;
+		this.embeddedHolders = embeddedHolders;
 
 		// Calculate and store field initializers
-		storeEmbeddedIdInitializers();
 		storeFieldInitializers();
 
 		builder.addAnnotation(getComponentAnnotation());
@@ -106,6 +106,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		builder.addMethod(getNewTransientEntityMethod());
 		builder.addMethod(getEmbeddedIdMethod());
+		
+		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
+			builder.addMethod(getEmbeddedMethod(embeddedHolder));
+		}
 
 		addMethodsToBuilder();
 
@@ -277,8 +281,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getFullyQualifiedTypeName() + " obj = new " + entityType.getFullyQualifiedTypeName() + "();");
 
 		// Create the composite key embedded id if required
-		if (embeddedIdentifierHolder != null) {
+		if (hasEmbeddedIdentifier()) {
 			bodyBuilder.appendFormalLine(getEmbeddedIdMutatorMethod() + "(obj, index);");
+		}
+		
+		if (hasEmbedded()) {
+			for (EmbeddedHolder embeddedHolder : embeddedHolders) {
+				bodyBuilder.appendFormalLine(getEmbeddedMutatorMethod(embeddedHolder.getEmbeddedField()) + "(obj, index);");
+			}
 		}
 
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
@@ -308,34 +318,60 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return null;
 		}
 
-		StringBuilder builder = new StringBuilder();
-		for (FieldMetadata identifierField : embeddedIdInitializers.keySet()) {
-			String initializer = embeddedIdInitializers.get(identifierField);
-			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + embeddedIdentifierMutator.getSymbolName());
-			String constructorFieldInitializer = getConstructorFieldInitializer(identifierField, initializer, getRequiredMutatorName(identifierField));
-			builder.append(constructorFieldInitializer);
-		}
-
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.append(builder.toString());
 
 		// Create constructor for embedded id class
 		String identifierType = embeddedIdentifierHolder.getEmbeddedIdentifierField().getFieldType().getFullyQualifiedTypeName();
-		ConstructorMetadata constructorMetadata = embeddedIdentifierHolder.getIdentifierConstructor();
+		bodyBuilder.appendFormalLine(identifierType + " embeddedIdClass = new " + identifierType + "();");
+		
+		for (FieldMetadata field : embeddedIdentifierHolder.getIdentifierFields()) {
+			String initializer = getFieldInitializer(field, null);
+			bodyBuilder.appendFormalLine("embeddedIdClass." + field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName() + "(" + initializer + ");");
+		}
 
-		builder.delete(0, builder.length());
-		builder.append(identifierType).append(" embeddedIdClass = new ").append(identifierType);
-		builder.append("(");
-		builder.append(StringUtils.collectionToDelimitedString(constructorMetadata.getParameterNames(), ", "));
-		builder.append(");");
-
-		bodyBuilder.appendFormalLine(builder.toString());
 		bodyBuilder.appendFormalLine("obj." + embeddedIdentifierMutator + "(embeddedIdClass);");
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
 		paramNames.add(new JavaSymbolName("index"));
 
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		return methodBuilder.build();
+	}
+	
+	public MethodMetadata getEmbeddedMethod(EmbeddedHolder embeddedHolder) {
+		if (!hasEmbedded()) {
+			return null;
+		}
+	
+		JavaSymbolName methodName = getEmbeddedMutatorMethod(embeddedHolder.getEmbeddedField());
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(entityType);
+		paramTypes.add(JavaType.INT_PRIMITIVE);
+	
+		// Locate user-defined method
+		if (MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes) != null) {
+			// Method found in governor so do not create method in ITD
+			return null;
+		}
+		
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
+		// Create constructor for embedded class
+		String identifierType = embeddedHolder.getEmbeddedField().getFieldType().getFullyQualifiedTypeName();
+		bodyBuilder.appendFormalLine(identifierType + " embeddedClass = new " + identifierType + "();");
+
+		for (FieldMetadata field : embeddedHolder.getFields()) {
+			String initializer = getFieldInitializer(field, null);
+			bodyBuilder.appendFormalLine("embeddedClass." + field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName() + "(" + initializer + ");");
+		}
+
+		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutator() + "(embeddedClass);");
+	
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("obj"));
+		paramNames.add(new JavaSymbolName("index"));
+	
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -383,10 +419,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		return fieldInitializerMethods;
-	}
-
-	private String getConstructorFieldInitializer(FieldMetadata field, String initializer, JavaSymbolName mutatorName) {
-		return getFieldInitializer(field, initializer, mutatorName, false);
 	}
 
 	private String getFieldInitializer(FieldMetadata field, String initializer, JavaSymbolName mutatorName, boolean isMutatorField) {
@@ -763,15 +795,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return embeddedIdentifierHolder != null;
 	}
 
-	private void storeEmbeddedIdInitializers() {
-		if (!hasEmbeddedIdentifier()) {
-			return;
-		}
-
-		for (FieldMetadata field : embeddedIdentifierHolder.getIdentifierFields()) {
-			String initializer = getFieldInitializer(field, null);
-			embeddedIdInitializers.put(field, initializer);
-		}
+	public boolean hasEmbedded() {
+		return embeddedHolders != null && embeddedHolders.size() > 0;
 	}
 
 	private void storeFieldInitializers() {
@@ -947,10 +972,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
 	}
 
-	private JavaSymbolName getRequiredMutatorName(FieldMetadata field) {
-		return new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
-	}
-
 	private JavaSymbolName getEmbeddedIdMutatorMethod() {
 		List<JavaSymbolName> fieldNames = new ArrayList<JavaSymbolName>();
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
@@ -974,7 +995,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				break;
 			}
 		}
-		return new JavaSymbolName("set" + StringUtils.capitalize(embeddedIdField.getSymbolName()));
+		return new JavaSymbolName(embeddedIdField.getSymbolNameTurnedIntoMutatorMethodName());
+	}
+	
+	private JavaSymbolName getEmbeddedMutatorMethod(FieldMetadata field) {
+		JavaSymbolName embeddedField = new JavaSymbolName("embedded" + field.getFieldName().getSymbolNameCapitalisedFirstLetter());
+		return new JavaSymbolName(embeddedField.getSymbolNameTurnedIntoMutatorMethodName());
 	}
 
 	public String toString() {
