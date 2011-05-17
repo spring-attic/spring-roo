@@ -112,9 +112,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.addMethod(getNewTransientEntityMethod());
 		builder.addMethod(getEmbeddedIdMethod());
 		
-//		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
-//			builder.addMethod(getEmbeddedMethod(embeddedHolder));
-//		}
+		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
+			builder.addMethod(getEmbeddedMethod(embeddedHolder));
+		}
 
 		addMethodsToBuilder();
 
