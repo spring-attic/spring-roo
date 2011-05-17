@@ -271,7 +271,7 @@ RELEASE PROCEDURE:
    mvn clean site
    ./roo-deploy.sh -c assembly -tv (use -t for extra tests)
 
-2. Verify the assembly ZIP looks good:
+2. Verify the assembly ZIP ($ROO_HOME/target/roo-deploy/dist/*.zip) looks good:
 
    * Assembly ZIP unzips and is of a sensible size
    * Assembly ZIP contains both PDF and HTML documentation

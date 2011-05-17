@@ -311,8 +311,8 @@ if [[ "$COMMAND" = "assembly" ]]; then
     cp $ROO_HOME/bootstrap/readme.txt $WORK_DIR/
     cp `find $ROO_HOME -iname legal-\*.txt` $WORK_DIR/legal
     cp `find $ROO_HOME -iname \*.roo | grep -v "/target/"` $WORK_DIR/samples
-    cp -r $ROO_HOME/deployment-support/target/site/reference/pdf/ $WORK_DIR/docs/pdf
-    cp -r $ROO_HOME/deployment-support/target/site/reference/html/ $WORK_DIR/docs/html
+    cp -r $ROO_HOME/deployment-support/target/site/reference/pdf/ $WORK_DIR/docs
+    cp -r $ROO_HOME/deployment-support/target/site/reference/html/ $WORK_DIR/docs
 
     # Prepare to write the ZIP
     log "Cleaning $DIST_DIR" 

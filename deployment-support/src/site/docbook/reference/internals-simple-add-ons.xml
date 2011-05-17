@@ -440,18 +440,19 @@
     do most of the work behind Roo's passive generation principle (active
     generation is taken care of by AspectJ Intertype declarations (ITDs) -
     more about that later). Methods offered by the operations types provided
-    by the add-on are typically invoked by the accompanying commands type.
+    by the add-on are typically invoked by the accompanying "command" type.
     Alternatively, operations types can also be invoked by other add-ons (this
     is a rather unusual case).</para>
 
     <para>Implementations of the operations interface need to be annotated
     with the Felix <emphasis role="bold">@Component</emphasis> and <emphasis
     role="bold">@Service</emphasis> annotations to make their functionality
-    within Roo's OSGi container. Dependencies can be injected into operations
+    available within Roo's OSGi container. Dependencies can be injected into
+    operations
     types via the Felix <emphasis role="bold">@Reference</emphasis>
     annotation. If the dependency exists in a package which is not yet
-    registered in the add-on pom.xml you need to add the dependency there to
-    make the relevant bundle to the add-on classpath.</para>
+    registered in the add-on's pom.xml, you need to add the dependency there
+    to add the relevant bundle to the add-on's classpath.</para>
 
     <para>The Add-On Creator generated project includes example code which
     uses Roo's source path abstractions, file manager and various Util classes
