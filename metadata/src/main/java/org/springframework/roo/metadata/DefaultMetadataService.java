@@ -29,7 +29,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-@Component
+@Component(immediate = true)
 @Service
 @Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultMetadataService extends AbstractMetadataCache implements MetadataService {
@@ -129,15 +129,15 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 					}
 					return null;
 				}
-				
-				// Infinite loop management
-				activeRequests.add(metadataIdentificationString);
 
 				// Get the destination
 				String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString));
 				MetadataProvider p = providerMap.get(mdClassId);
 				Assert.notNull(p, "No metadata provider is currently registered to provide metadata for identifier '" + metadataIdentificationString + "' (class '" + mdClassId + "')");
-				
+
+                // Infinite loop management
+				activeRequests.add(metadataIdentificationString);
+
 				// Obtain the item
 				if (metadataLogger.getTraceLevel() > 0) {
 					metadataLogger.log("Get " + metadataIdentificationString + " from " + p.getClass().getName());
@@ -175,7 +175,11 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				}
 				return result;
 
-			} finally {
+			} catch (Exception e) {
+                //TODO: At the very least the MID should be removed from the active requests upon an exception being caught. There may be scope to wrap the exception and let it bubble up, but I am unsure on this point (JT - 18/05/11)
+                activeRequests.remove(metadataIdentificationString);
+                return null;
+            } finally {
 				// We use another try..finally block as we want to ensure exceptions don't prevent our metadataLogger.stopEvent()
 				try {
 					// Have we processed all requests? If so, handle any retries we recorded
