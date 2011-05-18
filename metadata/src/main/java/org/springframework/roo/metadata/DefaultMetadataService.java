@@ -135,7 +135,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				MetadataProvider p = providerMap.get(mdClassId);
 				Assert.notNull(p, "No metadata provider is currently registered to provide metadata for identifier '" + metadataIdentificationString + "' (class '" + mdClassId + "')");
 
-                // Infinite loop management
+				// Infinite loop management
 				activeRequests.add(metadataIdentificationString);
 
 				// Obtain the item
@@ -176,10 +176,11 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				return result;
 
 			} catch (Exception e) {
-                //TODO: At the very least the MID should be removed from the active requests upon an exception being caught. There may be scope to wrap the exception and let it bubble up, but I am unsure on this point (JT - 18/05/11)
-                activeRequests.remove(metadataIdentificationString);
-                return null;
-            } finally {
+				// TODO: At the very least the MID should be removed from the active requests upon an exception being caught. There may be scope to wrap the exception and let it bubble up, but I am
+				// unsure on this point (JT - 18/05/11)
+				activeRequests.remove(metadataIdentificationString);
+				return null;
+			} finally {
 				// We use another try..finally block as we want to ensure exceptions don't prevent our metadataLogger.stopEvent()
 				try {
 					// Have we processed all requests? If so, handle any retries we recorded
