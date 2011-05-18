@@ -473,7 +473,7 @@
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>
                 <artifactId>org.springframework.roo.wrapping.jgit</artifactId>
-                <version>0.9.3.0010</version>
+                <version>0.12.1.0010</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo.wrapping</groupId>

@@ -8,3 +8,4 @@ annotations/src/main/java/org
 *.iml
 *.iws
 .idea
+*.aj

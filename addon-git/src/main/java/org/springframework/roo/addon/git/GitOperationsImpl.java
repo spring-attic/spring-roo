@@ -12,6 +12,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -58,8 +59,11 @@ public class GitOperationsImpl implements GitOperations {
 		try {
 			Git git = new Git(repository);
 			git.add().addFilepattern(".").call();
-			RevCommit rev = git.commit().setAll(true).setCommitter(person).setAuthor(person).setMessage(message).call();
-			logger.info("Git commit " + rev.getTree().getId().name() + " [" + message + "]");
+			Status status = git.status().call();
+			if (status.getChanged().size() > 0 || status.getAdded().size() > 0 || status.getModified().size() > 0 || status.getRemoved().size() > 0) {
+				RevCommit rev = git.commit().setAll(true).setCommitter(person).setAuthor(person).setMessage(message).call();
+				logger.info("Git commit " + rev.getTree().getId().name() + " [" + message + "]");
+			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not commit changes to local Git repository", e);
 		}
