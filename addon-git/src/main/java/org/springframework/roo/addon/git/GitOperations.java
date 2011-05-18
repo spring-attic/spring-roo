@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.git;
 
-import java.util.Set;
 
 /**
  * Operations offered by Git addon.
@@ -19,16 +18,37 @@ public interface GitOperations {
 	void commitAllChanges(String message);
 	
 	/**
-	 * Triggers Git revert.
+	 * Triggers Git reset (hard).
 	 * 
-	 * @param noOfCommitsToRevert number of commits to revert (HEAD - n)
+	 * @param noOfCommitsToReset number of commits to reset (HEAD - n)
 	 * @param message Commit message
 	 */
-	void revertCommit(int noOfCommitsToRevert, String message);
+	void reset(int noOfCommitsToReset, String message);
 	
+	/**
+	 * Triggers revert of last commit.
+	 * @param message Commit message
+	 */
+	void revertLastCommit(String message);
+	
+	/**
+	 * Present git log.
+	 * @param maxHistory
+	 */
 	void log(int maxHistory);
 	
+	/**
+	 * Trigger revert of commit with given rev string.
+	 * 
+	 * @param revstr
+	 * @param message
+	 */
 	void revertCommit(String revstr, String message);
+	
+	/**
+	 * Trigger git push.
+	 */
+	void push();
 	
 	/**
 	 * Convenience access to the Git config (allows setting config options)
@@ -44,8 +64,6 @@ public interface GitOperations {
 	 */
 	void setup();
 	
-	Set<String> getExclusions();
-	
 	/**
 	 * Check if Git commands are available in Shell. Depends on presence of 
 	 * .git repository.
@@ -60,4 +78,11 @@ public interface GitOperations {
 	 * @return availability
 	 */
 	boolean isSetupCommandAvailable();
+	
+	/**
+	 * Check if automatic commit is enabled for successful Roo commands.
+	 * 
+	 * @return automaticCommit
+	 */
+	boolean isAutomaticCommit();
 }

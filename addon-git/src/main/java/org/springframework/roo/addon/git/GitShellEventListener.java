@@ -36,7 +36,7 @@ public class GitShellEventListener implements ShellStatusListener {
 	}
 
 	public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
-		if (isGitEnabled() && newStatus.getStatus().equals(Status.EXECUTION_SUCCESS)) {
+		if (newStatus.getStatus().equals(Status.EXECUTION_SUCCESS) && isGitEnabled() && gitOperations.isAutomaticCommit()) {
 			gitOperations.commitAllChanges(newStatus.getMessage());
 		}
 	}

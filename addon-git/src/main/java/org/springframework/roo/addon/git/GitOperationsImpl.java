@@ -1,30 +1,24 @@
 package org.springframework.roo.addon.git;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.RefRename;
-import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.PushResult;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -44,7 +38,6 @@ public class GitOperationsImpl implements GitOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	private PersonIdent person;
-	private Set<String> exclusions = new HashSet<String>();
 
 	public boolean isGitCommandAvailable() {
 		return hasDotGit();
@@ -52,6 +45,10 @@ public class GitOperationsImpl implements GitOperations {
 
 	public boolean isSetupCommandAvailable() {
 		return !hasDotGit();
+	}
+	
+	public boolean isAutomaticCommit() {
+		return getRepository().getConfig().getBoolean("roo", "automaticCommit", true);
 	}
 
 	public void commitAllChanges(String message) {
@@ -70,10 +67,14 @@ public class GitOperationsImpl implements GitOperations {
 	}
 
 	public void push() {
-		// Transport transport = Transport.open(repository,
-		// repository.getConfig().getString("remote \"origin\"", null, "url"));
-		// final org.eclipse.jgit.transport.PushResult pr = transport.push(null,
-		// );
+		Git git = new Git(getRepository());
+		try {
+			for (PushResult result : git.push().setPushAll().call()) {
+				logger.info(result.getMessages());
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException("Unable to perform push operation ", e);
+		}
 	}
 
 	public void log(int maxHistory) {
@@ -81,7 +82,7 @@ public class GitOperationsImpl implements GitOperations {
 		Git git = new Git(repository);
 		try {
 			int counter = 0;
-			logger.info("---------- Start Git log ----------");
+			logger.warning("---------- Start Git log ----------");
 			for (RevCommit commit : git.log().call()) {
 				logger.info("commit id: " + commit.getName());
 				logger.info("message:   " + commit.getFullMessage());
@@ -89,18 +90,53 @@ public class GitOperationsImpl implements GitOperations {
 				if (++counter >= maxHistory)
 					break;
 			}
-			logger.info("---------- End Git log ----------");
+			logger.warning("---------- End Git log ----------");
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not parse git log", e);
 		}
 	}
 
-	public void revertCommit(int noOfCommitsToRevert, String message) {
-		revertCommit(Constants.HEAD + "~" + noOfCommitsToRevert, message);
+	public void reset(int noOfCommitsToRevert, String message) {
+		Repository repository = getRepository();
+		RevCommit commit = findCommit(Constants.HEAD + "~" + noOfCommitsToRevert, repository);
+		if (commit == null) {
+			return;
+		}
+		
+		try {
+			Git git = new Git(repository);
+			git.reset().setRef(commit.getName()).setMode(ResetType.HARD).call();
+			// Commit changes
+			commitAllChanges(message);
+			logger.info("Reset of last " + (noOfCommitsToRevert + 1) + " successful.");
+		} catch (Exception e) {
+			throw new IllegalStateException("Reset did not succeed.", e);
+		}
+	}
+	
+	public void revertLastCommit(String message) {
+		revertCommit(Constants.HEAD + "~0", message);
 	}
 
 	public void revertCommit(String revstr, String message) {
 		Repository repository = getRepository();
+		RevCommit commit = findCommit(revstr, repository);
+		if (commit == null) {
+			return;
+		}
+		
+		try {
+			Git git = new Git(repository);
+			git.revert().include(commit).call();
+			// Commit changes
+			commitAllChanges(message);
+			logger.info("Revert of commit " + revstr + " successful.");
+		} catch (Exception e) {
+			throw new IllegalStateException("Revert of commit " + revstr + " did not succeed.", e);
+		}
+	}
+	
+	private RevCommit findCommit(String revstr, Repository repository) {
 		RevWalk walk = new RevWalk(repository);
 		RevCommit commit = null;
 		try {
@@ -108,36 +144,11 @@ public class GitOperationsImpl implements GitOperations {
 		} catch (MissingObjectException e1) {
 			logger.warning("Could not find commit with id: " + revstr);
 		} catch (IncorrectObjectTypeException e1) {
-			logger.warning("The provided rev does is not a commit: " + revstr);
+			logger.warning("The provided rev is not a commit: " + revstr);
 		} catch (Exception ignore) {} finally {
 			walk.release();
 		}
-
-		if (commit == null) {
-			return;
-		}
-
-		try {
-			// Create a tmp branch with commits up to the rev
-			createBranch(repository, commit, "refs/heads/tmp");
-
-			// Rename master branch to backup-
-			RefRename renameMaster = repository.renameRef("refs/heads/master", "refs/heads/backup-" + commit.getId().abbreviate(5).name());
-			renameMaster.rename();
-
-			// Rename tmp branch to master
-			RefRename renameTmp = repository.renameRef("refs/heads/tmp", "refs/heads/master");
-			renameTmp.rename();
-
-			// Make sure we are on master
-			checkoutBranch(repository, "refs/heads/master");
-			System.out.println(repository.getFullBranch());
-
-			// Commit changes
-			commitAllChanges(message);
-		} catch (Exception e) {
-			throw new IllegalStateException("Revert of commit " + revstr + " did not succeed.", e);
-		}
+		return commit;
 	}
 
 	public void setConfig(String category, String key, String value) {
@@ -179,12 +190,6 @@ public class GitOperationsImpl implements GitOperations {
 				throw new IllegalStateException("Could not install " + Constants.GITIGNORE_FILENAME + " file in project", e);
 			}
 		}
-
-		loadGitIgnore();
-	}
-
-	public Set<String> getExclusions() {
-		return exclusions;
 	}
 
 	private Repository getRepository() {
@@ -200,46 +205,5 @@ public class GitOperationsImpl implements GitOperations {
 
 	private boolean hasDotGit() {
 		return fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
-	}
-
-	private void createBranch(Repository repository, ObjectId objectId, String branchName) throws IOException {
-		RefUpdate updateRef = repository.updateRef(branchName);
-		updateRef.setNewObjectId(objectId);
-		updateRef.forceUpdate();
-		updateRef.update();
-	}
-
-	private boolean checkoutBranch(Repository repository, String branchName) throws IllegalStateException, IOException {
-		RevWalk walk = new RevWalk(repository);
-		RevCommit head = walk.parseCommit(repository.resolve(Constants.HEAD));
-		RevCommit branch = walk.parseCommit(repository.resolve(branchName));
-		DirCacheCheckout dco = new DirCacheCheckout(repository, head.getTree().getId(), repository.lockDirCache(), branch.getTree().getId());
-		dco.setFailOnConflict(true);
-		boolean success = dco.checkout();
-		walk.release();
-		// Update the HEAD
-		RefUpdate refUpdate = repository.updateRef(Constants.HEAD);
-		refUpdate.link(branchName);
-		return success;
-	}
-
-	private void loadGitIgnore() {
-		exclusions.clear();
-		String gitIgnore = pathResolver.getIdentifier(Path.ROOT, Constants.GITIGNORE_FILENAME);
-		if (fileManager.exists(gitIgnore)) {
-			BufferedReader reader = null;
-			try {
-				reader = new BufferedReader(new FileReader(gitIgnore));
-				String line;
-				while ((line = reader.readLine()) != null) {
-					exclusions.add(line);
-				}
-			} catch (Exception ignored) {
-			} finally {
-				try {
-					if (reader != null) reader.close();
-				} catch (IOException ignored) {}
-			}
-		}
 	}
 }

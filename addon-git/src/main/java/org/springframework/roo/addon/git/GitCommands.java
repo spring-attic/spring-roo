@@ -39,7 +39,8 @@ public class GitCommands implements CommandMarker {
 		@CliOption(key = { "userName" }, mandatory = false, help = "The user name") String userName, 
 		@CliOption(key = { "email" }, mandatory = false, help = "The user email") String email, 
 		@CliOption(key = { "repoUrl" }, mandatory = false, help = "The URL of the remote repository") String repoUrl, 
-		@CliOption(key = { "colorCoding" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Enable color coding of commands in OS shell") boolean color) {
+		@CliOption(key = { "colorCoding" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Enable color coding of commands in OS shell") boolean color,
+		@CliOption(key = { "automaticCommit" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Enable automatic commit after successful execution of Roo shell command") Boolean automaticCommit) {
 
 		if (userName != null && userName.length() > 0) {
 			revisionControl.setConfig("user", "name", userName);
@@ -55,6 +56,7 @@ public class GitCommands implements CommandMarker {
 			revisionControl.setConfig("color", "branch", "auto");
 			revisionControl.setConfig("color", "status", "auto");
 		}
+		revisionControl.setConfig("roo", "automaticCommit", automaticCommit.toString());
 	}
 
 	@CliCommand(value = "git commit all", help = "Trigger a commit manually for the project") 
@@ -62,12 +64,17 @@ public class GitCommands implements CommandMarker {
 		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
 		revisionControl.commitAllChanges(message);
 	}
-
-	@CliCommand(value = "git revert last", help = "Revert (last x) commit(s)") 
-	public void revertLast(
-		@CliOption(key = { "commitCount" }, mandatory = false, help = "Number of commits to revert") Integer history, 
+	
+	@CliCommand(value = "git reset", help = "Reset (hard) last (x) commit(s)") 
+	public void resetLast(
+		@CliOption(key = { "commitCount" }, mandatory = false, help = "Number of commits to reset") Integer history, 
 		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		revisionControl.revertCommit(history == null ? 1 : history, message);
+		revisionControl.reset(history == null ? 0 : history, message);
+	}
+
+	@CliCommand(value = "git revert last", help = "Revert last commit") 
+	public void revertLast(@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
+		revisionControl.revertLastCommit(message);
 	}
 
 	@CliCommand(value = "git revert commit", help = "Roll project back to a specific commit") 
@@ -75,6 +82,11 @@ public class GitCommands implements CommandMarker {
 		@CliOption(key = { "revString" }, mandatory = true, help = "Commit id") String revstr, 
 		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
 		revisionControl.revertCommit(revstr, message);
+	}
+	
+	@CliCommand(value = "git push", help = "Roll project back to a specific commit") 
+	public void push() {
+		revisionControl.push();
 	}
 
 	@CliCommand(value = "git log", help = "Commit log") 
