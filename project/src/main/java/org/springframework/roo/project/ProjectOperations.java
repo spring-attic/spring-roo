@@ -171,6 +171,20 @@ public interface ProjectOperations {
 	 * @param groupId the group id of the dependency (required)
 	 * @param artifactId the artifact id of the dependency (required)
 	 * @param version the version of the dependency (required)
+	 * @param scope the scope of the dependency
+	 */
+	void addDependency(String groupId, String artifactId, String version, DependencyScope scope);
+
+	/**
+	 * Allows addition of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
 	 */
 	void addDependency(String groupId, String artifactId, String version);
 

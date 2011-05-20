@@ -239,14 +239,18 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendDependencyAdditionNotifications(dependency);
 	}
 	
-	public final void addDependency(String groupId, String artifactId, String version) {
+	public final void addDependency(String groupId, String artifactId, String version, DependencyScope scope) {
 		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
-		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
+		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, scope);
 		projectMetadataProvider.addDependency(dependency);
 		sendDependencyAdditionNotifications(dependency);
+	}
+
+	public final void addDependency(String groupId, String artifactId, String version) {
+		addDependency(groupId, artifactId, version, DependencyScope.COMPILE);
 	}
 	
 	public final void removeDependencies(List<Dependency> dependencies) {

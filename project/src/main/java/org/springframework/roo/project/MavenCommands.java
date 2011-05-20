@@ -45,9 +45,10 @@ public class MavenCommands implements CommandMarker {
 	public void addDependency(
 		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") String groupId, 
 		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
-		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version) {
+		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version, 
+		@CliOption(key = "scope", mandatory = false, help = "The scope of the dependency") DependencyScope scope) {
 		
-		mavenOperations.addDependency(groupId, artifactId, version);
+		mavenOperations.addDependency(groupId, artifactId, version, scope);
 	}
 
 	@CliCommand(value = "dependency remove", help = "Removes an existing dependency from the Maven project object model (POM)")
