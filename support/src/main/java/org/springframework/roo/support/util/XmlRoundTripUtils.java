@@ -21,11 +21,11 @@ import org.w3c.dom.NodeList;
  * 
  */
 public abstract class XmlRoundTripUtils {
-	
 	private static MessageDigest digest;
+	
 	static {
 		try {
-		  digest = MessageDigest.getInstance("sha-1");
+			digest = MessageDigest.getInstance("sha-1");
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException("Could not create hash key for identifier");
 		}
@@ -44,7 +44,7 @@ public abstract class XmlRoundTripUtils {
 		sb.append(element.getTagName());
 		NamedNodeMap attributes = element.getAttributes();
 		SortedMap<String, String> attrKVStore = Collections.synchronizedSortedMap(new TreeMap<String, String>());
-		for (int i = 0; i < attributes.getLength(); i++) {
+		for (int i = 0, n = attributes.getLength(); i < n; i++) {
 			Node attr = attributes.item(i);
 			if (!"z".equals(attr.getNodeName()) && !attr.getNodeName().startsWith("_")) {
 				attrKVStore.put(attr.getNodeName(), attr.getNodeValue());
@@ -96,7 +96,7 @@ public abstract class XmlRoundTripUtils {
 	
 	private static boolean addOrUpdateElements(Element original, Element proposed, boolean originalDocumentChanged) {
 		NodeList proposedChildren = proposed.getChildNodes();
-		for (int i = 0; i < proposedChildren.getLength(); i++) { // Check proposed elements and compare to originals to find out if we need to add or replace elements
+		for (int i = 0, n = proposedChildren.getLength(); i < n; i++) { // Check proposed elements and compare to originals to find out if we need to add or replace elements
 			Node node = proposedChildren.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element proposedElement = (Element) node;
@@ -149,13 +149,13 @@ public abstract class XmlRoundTripUtils {
 	
 	private static boolean removeElements(Element original, Element proposed, boolean originalDocumentChanged) {
 		NodeList originalChildren = original.getChildNodes();
-		for (int i = 0; i < originalChildren.getLength(); i++) { // Check original elements and compare to proposed to find out if we need to remove elements
+		for (int i = 0, n = originalChildren.getLength(); i < n; i++) { // Check original elements and compare to proposed to find out if we need to remove elements
 			Node node = originalChildren.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element originalElement = (Element) node;
 				String originalId = originalElement.getAttribute("id");
 				if (originalId.length() != 0) { // Only proposed elements with an id will be considered
-					Element proposedElement = XmlUtils.findFirstElement("//*[@id='" + originalId + "']", proposed);		
+					Element proposedElement = XmlUtils.findFirstElement("//*[@id='" + originalId + "']", proposed);
 					if (null == proposedElement && (originalElement.getAttribute("z").equals(calculateUniqueKeyFor(originalElement)) || originalElement.getAttribute("z").equals("?"))) { //remove original element given the proposed document has no element with a matching id
 						originalElement.getParentNode().removeChild(originalElement);
 						originalDocumentChanged = true;
@@ -173,7 +173,7 @@ public abstract class XmlRoundTripUtils {
 		}
 		NamedNodeMap attributes = a.getAttributes();
 		int customAttributeCounter = 0;
-		for (int i = 0; i < attributes.getLength(); i++) {
+		for (int i = 0, n = attributes.getLength(); i < n; i++) {
 			Node node = attributes.item(i);
 			if (!node.getNodeName().startsWith("_")) {
 				if (!node.getNodeName().equals("z") && (b.getAttribute(node.getNodeName()).length() == 0 || !b.getAttribute(node.getNodeName()).equals(node.getNodeValue()))) {
