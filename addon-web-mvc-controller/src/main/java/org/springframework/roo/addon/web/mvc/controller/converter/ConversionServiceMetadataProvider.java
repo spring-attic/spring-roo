@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.felix.scr.annotations.Component;
@@ -82,19 +83,34 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
 		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
-		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString);
+		
+		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(new JavaType(RooWebScaffold.class.getName()));
+		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
 		if (relevantDomainTypes.isEmpty()) { 
 			// No ITD needed
 			return null;
 		}
 		
-		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, relevantDomainTypes, findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString));
+		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
+		
+		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
 	
-	protected Map<JavaType, Map<Object, JavaSymbolName>> findCompositePrimaryKeyTypesRequiringAConverter(String metadataIdentificationString) {
-		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
+	private Map<JavaType, List<MethodMetadata>> findDomainTypesRequiringAConverter(String metadataIdentificationString, Set<JavaType> controllers) {
+		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = new LinkedHashMap<JavaType, List<MethodMetadata>>();
+		for (JavaType controller : controllers) {
+			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
+			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
+			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
+			Map<JavaType, List<MethodMetadata>> relevantTypes = findRelevantTypes(webScaffoldAnnotationValues.getFormBackingObject(), metadataIdentificationString);
+			relevantDomainTypes.putAll(relevantTypes);
+		}
+		return relevantDomainTypes;
+	}
+	
+	private Map<JavaType, Map<Object, JavaSymbolName>> findCompositePrimaryKeyTypesRequiringAConverter(String metadataIdentificationString, Set<JavaType> controllers) {
 		Map<JavaType, Map<Object, JavaSymbolName>> types = new TreeMap<JavaType, Map<Object,JavaSymbolName>>();
-		for (JavaType controller : typeLocationService.findTypesWithAnnotation(rooWebScaffold)) {
+		for (JavaType controller : controllers) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
 			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
@@ -119,19 +135,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		}
 		return types;
 	}
-	
-	protected Map<JavaType, List<MethodMetadata>> findDomainTypesRequiringAConverter(String metadataIdentificationString) {
-		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
-		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = new LinkedHashMap<JavaType, List<MethodMetadata>>();
-		for (JavaType controller : typeLocationService.findTypesWithAnnotation(rooWebScaffold)) {
-			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
-			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
-			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
-			relevantDomainTypes.putAll(findRelevantTypes(webScaffoldAnnotationValues.getFormBackingObject(), metadataIdentificationString));
-		}
-		return relevantDomainTypes;
-	}
-	
+
 	private Map<JavaType, List<MethodMetadata>> findRelevantTypes(JavaType type, String metadataIdentificationString) {
 		MemberDetails memberDetails = getMemberDetails(type);
 		Map<JavaType, List<MethodMetadata>> types = new LinkedHashMap<JavaType, List<MethodMetadata>>();

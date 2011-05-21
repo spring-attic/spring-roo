@@ -89,7 +89,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		this.dateTypes = dateTypes;
 		
-		if (javaTypeMetadataHolder.getPersistenceDetails() != null && javaTypeMetadataHolder.getPersistenceDetails().getRooIdentifierFields().size() > 0) {
+		if (javaTypeMetadataHolder.getPersistenceDetails() != null && !javaTypeMetadataHolder.getPersistenceDetails().getRooIdentifierFields().isEmpty()) {
 			this.compositePk = true;
 			builder.addField(getConversionServiceField());
 			builder.addConstructor(getConstructor());

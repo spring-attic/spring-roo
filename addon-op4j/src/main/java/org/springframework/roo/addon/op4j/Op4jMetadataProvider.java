@@ -41,8 +41,7 @@ public final class Op4jMetadataProvider extends AbstractItdMetadataProvider {
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = Op4jMetadata.getJavaType(metadataIdentificationString);
 		Path path = Op4jMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {

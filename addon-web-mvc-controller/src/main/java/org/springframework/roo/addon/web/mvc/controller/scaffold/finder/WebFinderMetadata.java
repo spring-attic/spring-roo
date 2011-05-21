@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
@@ -79,8 +80,9 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
 		
-		if (annotationValues.isExposeFinders() && dynamicFinderMethods.size() > 0) { // No need for null check of entityMetadata.getDynamicFinders as it guarantees non-null (but maybe empty list)
-			for (FinderMetadataDetails finder : new TreeSet<FinderMetadataDetails>(dynamicFinderMethods)) {
+		if (annotationValues.isExposeFinders() && !dynamicFinderMethods.isEmpty()) { // No need for null check of entityMetadata.getDynamicFinders as it guarantees non-null (but maybe empty list)
+			SortedSet<FinderMetadataDetails> finders = new TreeSet<FinderMetadataDetails>(dynamicFinderMethods);
+			for (FinderMetadataDetails finder : finders) {
 				builder.addMethod(getFinderFormMethod(finder));
 				builder.addMethod(getFinderMethod(finder));
 			}

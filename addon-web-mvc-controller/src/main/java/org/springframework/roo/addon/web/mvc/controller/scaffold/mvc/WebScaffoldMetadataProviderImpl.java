@@ -43,6 +43,7 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true) 
 @Service 
 public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements WebScaffoldMetadataProvider {
+	private static final JavaType ROO_WEB_SCAFFOLD = new JavaType(RooWebScaffold.class.getName());
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
 	@Reference private WebMetadataService webMetadataService;
@@ -52,13 +53,13 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
+		addMetadataTrigger(ROO_WEB_SCAFFOLD);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
+		removeMetadataTrigger(ROO_WEB_SCAFFOLD);
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
@@ -81,32 +82,32 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 			return null;
 		}
 		
+		// Lookup the form backing object's metadata
+		JavaType formBackingType = annotationValues.getFormBackingObject();
+		
+		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
+		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formBackingType.getFullyQualifiedTypeName());
+		MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingObjectPhysicalTypeMetadata);
+		
+		MemberHoldingTypeDetails formBackingMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
+		if (formBackingMemberHoldingTypeDetails == null) {
+			return null;
+		}
+
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing the previous association
 		JavaType oldEntity = webScaffoldMidToEntityMap.get(metadataIdentificationString);
 		if (oldEntity != null) {
 			entityToWebScaffoldMidMap.remove(oldEntity);
 		}
-		entityToWebScaffoldMidMap.put(annotationValues.getFormBackingObject(), metadataIdentificationString);
-		webScaffoldMidToEntityMap.put(metadataIdentificationString, annotationValues.getFormBackingObject());
-		
-		// Lookup the form backing object's metadata
-		JavaType formBackingType = annotationValues.getFormBackingObject();
-		
+		entityToWebScaffoldMidMap.put(formBackingType, metadataIdentificationString);
+		webScaffoldMidToEntityMap.put(metadataIdentificationString, formBackingType);
+
 		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
-		
-		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
-		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formBackingType.getFullyQualifiedTypeName());
-		MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingObjectPhysicalTypeMetadata);
-		
-		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
-		if (memberHoldingTypeDetails == null) {
-			return null;
-		}
-		
+
 		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(memberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-		
+		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
@@ -118,12 +119,11 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	
 	void installConversionService(JavaType governor) {
 		JavaType rooConversionService = new JavaType(RooConversionService.class.getName());
-		if (typeLocationService.findTypesWithAnnotation(rooConversionService).size() > 0) {
+		if (!typeLocationService.findTypesWithAnnotation(rooConversionService).isEmpty()) {
 			return;
 		}
-		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
-		for (ClassOrInterfaceTypeDetails controller : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(rooWebScaffold)) {
-			AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(controller, rooWebScaffold);
+		for (ClassOrInterfaceTypeDetails controller : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
+			AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(controller, ROO_WEB_SCAFFOLD);
 			AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("registerConverters"));
 			if (attr != null) {
 				if (Boolean.FALSE.equals(attr.getValue())) {
