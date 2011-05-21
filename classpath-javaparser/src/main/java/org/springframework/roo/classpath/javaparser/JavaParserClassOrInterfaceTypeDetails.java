@@ -638,6 +638,11 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 
 	protected static void addEnumConstant(CompilationUnitServices compilationUnitServices, List<EnumConstantDeclaration> constants, JavaSymbolName name) {
 		// Determine location to insert
+		for (EnumConstantDeclaration constant : constants) {
+			if (constant.getName().equals(name.getSymbolName())) {
+				throw new IllegalArgumentException("Enum constant '" + name.getSymbolName() + "' already exists");
+			}
+		}
 		EnumConstantDeclaration newEntry = new EnumConstantDeclaration(name.getSymbolName());
 		constants.add(constants.size(), newEntry);
 	}
