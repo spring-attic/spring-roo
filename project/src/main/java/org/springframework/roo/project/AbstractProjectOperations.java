@@ -244,6 +244,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
+		if (scope == null) {
+			scope = DependencyScope.COMPILE;
+		}
 		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, scope);
 		projectMetadataProvider.addDependency(dependency);
 		sendDependencyAdditionNotifications(dependency);
