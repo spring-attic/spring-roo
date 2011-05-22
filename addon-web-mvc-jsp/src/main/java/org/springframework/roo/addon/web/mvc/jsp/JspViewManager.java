@@ -398,11 +398,11 @@ public class JspViewManager {
 
 	private void addCommonAttributes(FieldMetadata field, Element fieldElement) {
 		AnnotationMetadata annotationMetadata;
-		if (field.getFieldType().equals(new JavaType(Integer.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName()) || field.getFieldType().equals(new JavaType(Short.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName()) || field.getFieldType().equals(new JavaType(Long.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
+		if (field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName()) || field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName()) || field.getFieldType().equals(new JavaType(Long.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_integer");
 		} else if (uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_email");
-		} else if (field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
+		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_number");
 		}
 		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")))) {
