@@ -81,7 +81,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			// Not interested in persitence identifiers and version fields
+			// Not interested in persistence identifiers and version fields
 			if (javaTypePersistenceMetadataDetails != null && isPersistenceIdentifierOrVersionMethod(method, javaTypePersistenceMetadataDetails)) {
 				continue;
 			}
