@@ -12,10 +12,8 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -99,15 +97,7 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
-		// Determine if this ITD presents a method we're interested in (namely mutators)
-		for (MethodMetadata method : itdTypeDetails.getDeclaredMethods()) {
-			if (BeanInfoUtils.isMutatorMethod(method)) {
-				// We care about this ITD, so formally request an update so we can scan for it and process it
-				return getLocalMid(itdTypeDetails);
-			}
-		}
-		
-		return null;
+		return getLocalMid(itdTypeDetails);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

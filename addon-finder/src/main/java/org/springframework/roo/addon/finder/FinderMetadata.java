@@ -3,6 +3,7 @@ package org.springframework.roo.addon.finder;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -36,7 +37,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private MethodMetadata entityManagerMethod;
 	private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
 	private boolean isDataNucleusEnabled;
-	private List<MethodMetadata> dynamicFinderMethods;
+	private List<MethodMetadata> dynamicFinderMethods =  new LinkedList<MethodMetadata>();
 	
 	public FinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, boolean isDataNucleusEnabled, MethodMetadata entityManagerMethod, SortedMap<JavaSymbolName, QueryHolder> queryHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -52,7 +53,6 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.queryHolders = queryHolders;
 		this.isDataNucleusEnabled = isDataNucleusEnabled;
 				
-		List<MethodMetadata> dynamicFinderMethods = new ArrayList<MethodMetadata>();
 		for (JavaSymbolName finderName : queryHolders.keySet()) {
 			MethodMetadata methodMetadata = getDynamicFinderMethod(finderName);
 			builder.addMethod(methodMetadata);
@@ -61,7 +61,6 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
-		this.dynamicFinderMethods = Collections.unmodifiableList(dynamicFinderMethods);
 	}
 	
 	/**
@@ -73,7 +72,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return a non-null, immutable representation of currently-available finder methods (never returns null, but may be empty)
 	 */
 	public List<MethodMetadata> getAllDynamicFinders() {
-		return dynamicFinderMethods;
+		return Collections.unmodifiableList(dynamicFinderMethods);
 	}
 		
 	/**
