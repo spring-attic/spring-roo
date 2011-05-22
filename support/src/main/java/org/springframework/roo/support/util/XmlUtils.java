@@ -2,7 +2,6 @@ package org.springframework.roo.support.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -215,7 +214,7 @@ public final class XmlUtils {
 	 */
 	public static String nodeToString(Node node) {
 		try {
-			Writer writer = new BufferedWriter(new StringWriter());
+			StringWriter writer = new StringWriter();
 			createIndentingTransformer().transform(new DOMSource(node), new StreamResult(writer));
 			return writer.toString();
 		} catch (TransformerException e) {
