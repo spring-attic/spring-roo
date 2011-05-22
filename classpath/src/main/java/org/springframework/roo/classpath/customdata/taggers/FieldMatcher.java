@@ -58,7 +58,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 	private AnnotationMetadata getMatchingAnnotation(FieldMetadata field) {
 		for (AnnotationMetadata fieldAnnotation : field.getAnnotations()) {
 			for (AnnotationMetadata matchingAnnotation : annotations) {
-				if (fieldAnnotation.getAnnotationType().equals(matchingAnnotation.getAnnotationType())) {
+				if (fieldAnnotation.getAnnotationType().getFullyQualifiedTypeName().equals(matchingAnnotation.getAnnotationType().getFullyQualifiedTypeName())) {
 					return fieldAnnotation;
 				}
 			}

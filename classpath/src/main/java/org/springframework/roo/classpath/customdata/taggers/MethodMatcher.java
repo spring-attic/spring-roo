@@ -104,7 +104,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		String suffix = suffixPlural || suffixSingular ? getSuffix(memberHoldingTypeDetailsList, suffixSingular, pluralMap) : "";
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
 		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
-			if (annotationMetadata.getAnnotationType().equals(catalystAnnotationType)) {
+			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals(catalystAnnotationType.getFullyQualifiedTypeName())) {
 				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
 				if (annotationAttributeValue != null) {
 					return new JavaSymbolName(annotationAttributeValue.getValue().toString() + suffix);
@@ -125,7 +125,6 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		}
 		Assert.notNull(classOrInterfaceTypeDetails, "No concrete type found; cannot continue");
 		return classOrInterfaceTypeDetails;
-
 	}
 
 	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, HashMap<String, String> pluralMap) {
@@ -134,7 +133,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 			return classOrInterfaceTypeDetails.getName().getSimpleTypeName();
 		}
 		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
-			if (annotationMetadata.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.plural.RooPlural"))) {
+			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals("org.springframework.roo.addon.plural.RooPlural")) {
 				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 				if (annotationAttributeValue != null) {
 					return annotationAttributeValue.getValue().toString();
