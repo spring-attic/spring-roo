@@ -157,14 +157,14 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			}
 		}
 		
-		if (locatedAccessors.size() > 0) {
+		if (!locatedAccessors.isEmpty()) {
 			types.put(type, locatedAccessors);
 		}
 		return types;
 	}
 	
 	private boolean isMethodOfInterest(MethodMetadata method, MemberDetails memberDetails) {
-		if (! BeanInfoUtils.isAccessorMethod(method)) {
+		if (!BeanInfoUtils.isAccessorMethod(method)) {
 			return false; // Only interested in accessors
 		}
 		if (method.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {

@@ -1,5 +1,6 @@
 package org.springframework.roo.process.manager.internal;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,7 +21,6 @@ import org.springframework.roo.support.util.Assert;
  *
  */
 public class DefaultMutableFile implements MutableFile {
-
 	private File file;
 	private NotifiableFileMonitorService fileMonitorService;
 	private ManagedMessageRenderer managedMessageRenderer;
@@ -49,7 +49,7 @@ public class DefaultMutableFile implements MutableFile {
 		Assert.isTrue(file.isFile(), "A mutable file must actually be a file (not a directory)");
 		Assert.isTrue(file.exists(), "A mutable file must actually exist");
 		try {
-			return new FileInputStream(file);
+			return new BufferedInputStream(new FileInputStream(file));
 		} catch (IOException ioe) {
 			throw new IllegalStateException("Unable to acquire input stream for file '" + getCanonicalPath() + "'", ioe);
 		}

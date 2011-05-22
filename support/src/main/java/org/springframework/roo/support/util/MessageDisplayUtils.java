@@ -1,5 +1,6 @@
 package org.springframework.roo.support.util;
 
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
@@ -46,7 +47,7 @@ public abstract class MessageDisplayUtils {
 			throw new IllegalStateException("Could not locate '" + fileName + "'");
 		}
 		try {
-			String message = FileCopyUtils.copyToString(new InputStreamReader(stream));
+			String message = FileCopyUtils.copyToString(new InputStreamReader(new BufferedInputStream(stream)));
 			logger.log(level, message);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

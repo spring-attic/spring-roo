@@ -2,7 +2,6 @@ package org.springframework.roo.addon.web.mvc.jsp.tiles;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
@@ -112,7 +111,7 @@ public class TilesOperationsImpl implements TilesOperations {
 			File f = new File(tilesDefinition);
 			String existing = null;
 			try {
-				existing = FileCopyUtils.copyToString(new FileReader(f));
+				existing = FileCopyUtils.copyToString(f);
 			} catch (IOException ignoreAndJustOverwriteIt) {}
 			
 			if (!viewContent.equals(existing)) {

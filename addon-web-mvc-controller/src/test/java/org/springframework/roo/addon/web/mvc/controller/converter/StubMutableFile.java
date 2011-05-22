@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,9 +19,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.1
  */
 public class StubMutableFile implements MutableFile {
-
 	private final File file;
-
 	private final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
 	public StubMutableFile() {
@@ -42,7 +41,7 @@ public class StubMutableFile implements MutableFile {
 
 	public InputStream getInputStream() {
 		try {
-			return new FileInputStream(file);
+			return new BufferedInputStream(new FileInputStream(file));
 		} catch (IOException ioe) {
 			throw new IllegalStateException("Unable to acquire input stream for file '" + getCanonicalPath() + "'", ioe);
 		}

@@ -1,6 +1,7 @@
 package org.springframework.roo.shell.jline;
 
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -181,7 +182,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		};
 		addShellStatusListener(statusListener);
 		return new ConsoleReader(
-			new FileInputStream(FileDescriptor.in),
+			new BufferedInputStream(new FileInputStream(FileDescriptor.in)),
         	new PrintWriter(
         		new OutputStreamWriter(ansiOut,
         			// Default to Cp850 encoding for Windows console output (ROO-439)

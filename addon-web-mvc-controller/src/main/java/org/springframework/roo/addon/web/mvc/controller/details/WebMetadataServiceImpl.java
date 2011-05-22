@@ -364,6 +364,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 						if (formBackingObjectValue.getValue().equals(type)) {
 							webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(coitd.getName(), Path.SRC_MAIN_JAVA);
 							webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
+							break;
 						}
 					}
 				}

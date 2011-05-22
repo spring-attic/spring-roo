@@ -1,5 +1,6 @@
 package org.springframework.roo.shell;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,7 +54,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		long started = new Date().getTime();
 		InputStream inputStream = null;
 		try {
-			inputStream = new FileInputStream(resource);
+			inputStream = new BufferedInputStream(new FileInputStream(resource));
 		} catch (FileNotFoundException tryTheClassLoaderInstead) {}
 		
 		if (inputStream == null) {

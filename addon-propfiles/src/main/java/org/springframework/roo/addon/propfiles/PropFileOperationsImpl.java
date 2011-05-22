@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.propfiles;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -169,7 +170,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		try {
 			if (fileManager.exists(filePath)) {
-				loadProps(props, new FileInputStream(filePath));
+				loadProps(props, new BufferedInputStream(new FileInputStream(filePath)));
 			} else {
 				throw new IllegalStateException("Properties file not found");
 			}
@@ -197,7 +198,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		try {
 			if (fileManager.exists(filePath)) {
-				loadProps(props, new FileInputStream(filePath));
+				loadProps(props, new BufferedInputStream(new FileInputStream(filePath)));
 			} else {
 				throw new IllegalStateException("Properties file not found");
 			}

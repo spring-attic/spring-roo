@@ -1,10 +1,12 @@
 package org.springframework.roo.addon.backup;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -104,7 +106,7 @@ public class BackupOperationsImpl implements BackupOperations {
 				}
 				zip(files[i], base, zos);
 			} else {
-				FileInputStream in = new FileInputStream(files[i]);
+				InputStream in = new BufferedInputStream(new FileInputStream(files[i]));
 				ZipEntry entry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1));
 				zos.putNextEntry(entry);
 				while (-1 != (read = in.read(buffer))) {

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -330,7 +331,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetFilename).getOutputStream());
 				} else {
 					// Read template and insert the user's package
-					String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
+					String input = FileCopyUtils.copyToString(new InputStreamReader(new BufferedInputStream(url.openStream())));
 
 					String topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName();
 					input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);

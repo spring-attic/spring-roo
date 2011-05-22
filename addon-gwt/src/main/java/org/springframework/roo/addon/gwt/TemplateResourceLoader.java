@@ -5,6 +5,7 @@ import hapax.TemplateException;
 import hapax.TemplateLoader;
 import hapax.parser.TemplateParser;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -78,7 +79,7 @@ public class TemplateResourceLoader implements TemplateLoader {
 		Assert.notNull(is, "template path required");
 		String contents;
 		try {
-			contents = FileCopyUtils.copyToString(new InputStreamReader(is));
+			contents = FileCopyUtils.copyToString(new InputStreamReader(new BufferedInputStream(is)));
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}

@@ -174,7 +174,6 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 					metadataLogger.log("Returning " + metadataIdentificationString);
 				}
 				return result;
-
 			} catch (Exception e) {
 				// TODO: At the very least the MID should be removed from the active requests upon an exception being caught. There may be scope to wrap the exception and let it bubble up, but I am
 				// unsure on this point (JT - 18/05/11)

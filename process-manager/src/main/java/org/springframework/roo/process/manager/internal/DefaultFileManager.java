@@ -1,9 +1,9 @@
 package org.springframework.roo.process.manager.internal;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
@@ -67,14 +67,14 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
 	public InputStream getInputStream(String fileIdentifier) {
 		if (deferredFileWrites.containsKey(fileIdentifier)) {
-			return new ByteArrayInputStream(deferredFileWrites.get(fileIdentifier).getBytes());
+			return new BufferedInputStream(new ByteArrayInputStream(deferredFileWrites.get(fileIdentifier).getBytes()));
 		}
 		
 		File file = new File(fileIdentifier);
 		Assert.isTrue(file.exists(), "File '" + fileIdentifier + "' does not exist");
 		Assert.isTrue(file.isFile(), "Path '" + fileIdentifier + "' is not a file");
 		try {
-			return new FileInputStream(new File(fileIdentifier));
+			return new BufferedInputStream(new FileInputStream(new File(fileIdentifier)));
 		} catch (IOException ioe) {
 			throw new IllegalStateException("Could not obtain input stream to file '" + fileIdentifier + "'", ioe);
 		}
@@ -205,7 +205,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 			File file = new File(fileIdentifier);
 			String existing = null;
 			try {
-				existing = FileCopyUtils.copyToString(new FileReader(file));
+				existing = FileCopyUtils.copyToString(file);
 			} catch (IOException ignored) {}
 
 			if (!newContents.equals(existing)) {

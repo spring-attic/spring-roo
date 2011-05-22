@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -158,7 +159,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		FileDetails fileDetails = fileManager.readFile(persistenceXmlPath);
 		Document document = null;
 		try {
-			InputStream is = new FileInputStream(fileDetails.getFile());
+			InputStream is = new BufferedInputStream(new FileInputStream(fileDetails.getFile()));
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setErrorHandler(null);
 			document = builder.parse(is);
