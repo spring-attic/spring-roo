@@ -590,7 +590,7 @@ public class SimpleParser implements Parser {
 									}
 									if (paramType != null && candidate.supports(paramType, include.optionContext())) {
 										// Try to invoke this usable converter
-										candidate.convertFromText("*", null, include.optionContext());
+										candidate.convertFromText("*", paramType, include.optionContext());
 										// If we got this far, the converter is happy with "*" so we need not bother the user with entering the data in themselves
 										break;
 									}
