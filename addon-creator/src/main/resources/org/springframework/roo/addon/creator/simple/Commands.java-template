@@ -90,7 +90,7 @@ public class __APP_NAME__Commands implements CommandMarker { // All command type
 	@CliCommand(value = "say hello", help = "Prints welcome message to the Roo shell")
 	public void sayHello(
 		@CliOption(key = "name", mandatory = true, help = "State your name") String name, // A mandatory command attribute
-		@CliOption(key = "contryOfOrigin", mandatory = false, help = "Country of orgin") __APP_NAME__PropertyName country) {
+		@CliOption(key = "countryOfOrigin", mandatory = false, help = "Country of orgin") __APP_NAME__PropertyName country) {
 		
 		log.info("Welcome " + name + "!");
 		log.warning("Country of origin: " + (country == null ? __APP_NAME__PropertyName.NOT_SPECIFIED.getPropertyName() : country.getPropertyName()));
