@@ -75,11 +75,11 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 		this.addOnSearch = null;
 	}
 	
-	protected void bindConverter(Converter c) {
+	protected void bindConverter(Converter<?> c) {
 		add(c);
 	}
 
-	protected void unbindConverter(Converter c) {
+	protected void unbindConverter(Converter<?> c) {
 		remove(c);
 	}
 

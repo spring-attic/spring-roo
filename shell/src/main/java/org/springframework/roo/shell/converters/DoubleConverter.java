@@ -10,11 +10,10 @@ import org.springframework.roo.shell.MethodTarget;
  *
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
-public class DoubleConverter implements Converter {
+public class DoubleConverter implements Converter<Double> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Double convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new Double(value);
 	}
 
@@ -25,5 +24,4 @@ public class DoubleConverter implements Converter {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return Double.class.isAssignableFrom(requiredType) || double.class.isAssignableFrom(requiredType);
 	}
-
 }

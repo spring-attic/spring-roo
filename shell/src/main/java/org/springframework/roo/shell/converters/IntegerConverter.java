@@ -12,9 +12,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class IntegerConverter implements Converter {
+public class IntegerConverter implements Converter<Integer> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Integer convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new Integer(value);
 	}
 
@@ -25,5 +25,4 @@ public class IntegerConverter implements Converter {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return Integer.class.isAssignableFrom(requiredType) || int.class.isAssignableFrom(requiredType);
 	}
-
 }

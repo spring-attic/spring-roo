@@ -12,9 +12,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class FloatConverter implements Converter {
+public class FloatConverter implements Converter<Float> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Float convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new Float(value);
 	}
 

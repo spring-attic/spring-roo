@@ -16,7 +16,7 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class DateConverter implements Converter {
+public class DateConverter implements Converter<Date> {
 	
 	private DateFormat dateFormat;
 	
@@ -28,7 +28,7 @@ public class DateConverter implements Converter {
 		this.dateFormat = dateFormat;
 	}
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Date convertFromText(String value, Class<?> requiredType, String optionContext) {
 		try {
 			return dateFormat.parse(value);
 		} catch (ParseException e) {

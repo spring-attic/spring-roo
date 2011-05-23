@@ -18,13 +18,13 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class IncludeExcludeTablesConverter implements Converter {
+public class IncludeExcludeTablesConverter implements Converter<Set<String>> {
 
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return Set.class.isAssignableFrom(requiredType) && (optionContext.contains("include-tables") || optionContext.contains("exclude-tables"));
 	}
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Set<String> convertFromText(String value, Class<?> requiredType, String optionContext) {
 		Set<String> tables = new LinkedHashSet<String>();
 		StringTokenizer st = new StringTokenizer(value, " ");
 		while (st.hasMoreTokens()) {

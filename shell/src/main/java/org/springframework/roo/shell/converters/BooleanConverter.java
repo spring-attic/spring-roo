@@ -12,9 +12,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class BooleanConverter implements Converter {
+public class BooleanConverter implements Converter<Boolean> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Boolean convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if("true".equalsIgnoreCase(value) || "1".equals(value) || "yes".equalsIgnoreCase(value)) {
 			return new Boolean(true);
 		} else if("false".equalsIgnoreCase(value) || "0".equals(value) || "no".equalsIgnoreCase(value)) {

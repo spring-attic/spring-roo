@@ -20,11 +20,11 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class AddOnBundleSymbolicNameConverter implements Converter {
+public class AddOnBundleSymbolicNameConverter implements Converter<AddOnBundleSymbolicName> {
 
 	private @Reference AddOnRooBotOperations addonManagerOperations;
 	
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public AddOnBundleSymbolicName convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new AddOnBundleSymbolicName(value.trim());
 	}
 	

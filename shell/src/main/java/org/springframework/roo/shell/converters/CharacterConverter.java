@@ -12,9 +12,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class CharacterConverter implements Converter {
+public class CharacterConverter implements Converter<Character> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Character convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new Character(value.charAt(0));
 	}
 

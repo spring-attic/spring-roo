@@ -15,9 +15,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.1
  *
  */
-public class LocaleConverter implements Converter {
+public class LocaleConverter implements Converter<Locale> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Locale convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value.length() == 2) {
 			//in case only a simpele ISO-639 code is provided we use that code also for the country (ie 'de_DE')
 			return new Locale(value, value.toUpperCase()); 

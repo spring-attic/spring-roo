@@ -16,9 +16,9 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class JavaSymbolNameConverter implements Converter {
+public class JavaSymbolNameConverter implements Converter<JavaSymbolName> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public JavaSymbolName convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}

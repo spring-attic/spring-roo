@@ -13,9 +13,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class BigIntegerConverter implements Converter {
+public class BigIntegerConverter implements Converter<BigInteger> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public BigInteger convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new BigInteger(value);
 	}
 

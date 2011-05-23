@@ -10,7 +10,7 @@ import org.springframework.roo.shell.Converter;
  * @since 1.0
  *
  */
-public interface StaticFieldConverter extends Converter {
+public interface StaticFieldConverter extends Converter<Object> {
 
 	void add(Class<?> clazz);
 

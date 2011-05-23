@@ -11,9 +11,9 @@ import org.springframework.roo.shell.SimpleParser;
  * @author Ben Alex
  * @since 1.0
  */
-public class AvailableCommandsConverter implements Converter {
+public class AvailableCommandsConverter implements Converter<String> {
 
-	public Object convertFromText(String text, Class<?> requiredType, String optionContext) {
+	public String convertFromText(String text, Class<?> requiredType, String optionContext) {
 		return text;
 	}
 

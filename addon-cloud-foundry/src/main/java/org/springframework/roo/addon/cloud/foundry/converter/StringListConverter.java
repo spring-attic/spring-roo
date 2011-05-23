@@ -10,13 +10,13 @@ import java.util.List;
 
 @Service
 @Component
-public class StringListConverter implements Converter {
+public class StringListConverter implements Converter<List<String>> {
 
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return List.class.isAssignableFrom(requiredType);
 	}
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public List<String> convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null) {
 			return null;
 		}

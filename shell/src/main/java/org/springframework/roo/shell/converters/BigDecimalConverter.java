@@ -13,9 +13,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class BigDecimalConverter implements Converter {
+public class BigDecimalConverter implements Converter<BigDecimal> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public BigDecimal convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new BigDecimal(value);
 	}
 

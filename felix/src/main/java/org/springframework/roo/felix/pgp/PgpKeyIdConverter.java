@@ -17,11 +17,11 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class PgpKeyIdConverter implements Converter {
+public class PgpKeyIdConverter implements Converter<PgpKeyId> {
 
 	@Reference private PgpService pgpService;
 	
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public PgpKeyId convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new PgpKeyId(value.trim());
 	}
 	
@@ -39,5 +39,4 @@ public class PgpKeyIdConverter implements Converter {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return PgpKeyId.class.isAssignableFrom(requiredType);
 	}
-
 }

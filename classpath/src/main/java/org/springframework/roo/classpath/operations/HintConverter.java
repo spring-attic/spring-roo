@@ -13,14 +13,14 @@ import org.springframework.roo.shell.MethodTarget;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Service
 @Component
-public class HintConverter implements Converter {
+public class HintConverter implements Converter<String> {
+	
 	@Reference private HintOperations hintOperations;
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public String convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return value;
 	}
 
@@ -32,5 +32,4 @@ public class HintConverter implements Converter {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return String.class.isAssignableFrom(requiredType) && optionContext.contains("topics");
 	}
-
 }

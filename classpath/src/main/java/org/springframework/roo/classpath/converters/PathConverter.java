@@ -19,7 +19,7 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class PathConverter implements Converter {
+public class PathConverter implements Converter<Path> {
 
 	private SortedSet<String> legalValues = new TreeSet<String>();
 	
@@ -34,7 +34,7 @@ public class PathConverter implements Converter {
 	}
 	
 	// TODO: Allow context to limit to source paths only, limit to resource paths only 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Path convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value) || !legalValues.contains(value)) {
 			return null;
 		}

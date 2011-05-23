@@ -19,14 +19,15 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class SchemaConverter implements Converter {
+public class SchemaConverter implements Converter<Schema> {
+	
 	@Reference private DbreModelService dbreModelService;
 
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return Schema.class.isAssignableFrom(requiredType);
 	}
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Schema convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new Schema(value);
 	}
 

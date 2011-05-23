@@ -25,12 +25,13 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class JavaPackageConverter implements Converter {
+public class JavaPackageConverter implements Converter<JavaPackage> {
+	
 	@Reference private LastUsed lastUsed;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
 	
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public JavaPackage convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}

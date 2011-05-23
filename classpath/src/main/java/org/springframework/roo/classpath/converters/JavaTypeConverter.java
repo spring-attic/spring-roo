@@ -37,13 +37,14 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component
 @Service
-public class JavaTypeConverter implements Converter {
+public class JavaTypeConverter implements Converter<JavaType> {
+	
 	@Reference private LastUsed lastUsed;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
 	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public JavaType convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}

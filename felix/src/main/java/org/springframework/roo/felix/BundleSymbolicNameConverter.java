@@ -22,7 +22,7 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component
 @Service
-public class BundleSymbolicNameConverter implements Converter {
+public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName> {
 
 	// handler service field is solely to ensure it starts before BundleSymbolicNameConverter
 	@Reference protected HttpPgpUrlStreamHandlerService handlerService;
@@ -37,7 +37,7 @@ public class BundleSymbolicNameConverter implements Converter {
 		this.context = null;
 	}
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public BundleSymbolicName convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new BundleSymbolicName(value.trim());
 	}
 	

@@ -18,10 +18,11 @@ import org.springframework.roo.shell.MethodTarget;
  */
 @Component(immediate=true)
 @Service
-public class I18nConverter implements Converter {
+public class I18nConverter implements Converter<I18n> {
+	
 	@Reference private I18nSupport i18nSupport;
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public I18n convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value.length() == 2) {
 			return i18nSupport.getLanguage(new Locale(value,"","")); 
 			// disabled due to ROO-1584

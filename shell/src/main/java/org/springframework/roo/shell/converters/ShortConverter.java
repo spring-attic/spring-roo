@@ -12,9 +12,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class ShortConverter implements Converter {
+public class ShortConverter implements Converter<Short> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Short convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new Short(value);
 	}
 

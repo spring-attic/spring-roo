@@ -17,7 +17,7 @@ import org.springframework.roo.support.util.FileUtils;
  * @since 1.0
  *
  */
-public abstract class FileConverter implements Converter {
+public abstract class FileConverter implements Converter<File> {
 
 	private static final String home = System.getProperty("user.home");
 
@@ -27,7 +27,7 @@ public abstract class FileConverter implements Converter {
 	 */
 	protected abstract File getWorkingDirectory();
 	
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public File convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new File(convertUserInputIntoAFullyQualifiedPath(value));
 	}
 	

@@ -12,9 +12,9 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-public class LongConverter implements Converter {
+public class LongConverter implements Converter<Long> {
 
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Long convertFromText(String value, Class<?> requiredType, String optionContext) {
 		return new Long(value);
 	}
 
