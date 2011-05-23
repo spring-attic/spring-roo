@@ -1,6 +1,5 @@
 package org.springframework.roo.project;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a project.
@@ -333,7 +331,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Locates the first occurence of a property for a given name and returns it.
+	 * Locates the first occurrence of a property for a given name and returns it.
 	 * 
 	 * @param name the property name (required)
 	 * @return the property if found otherwise null
@@ -365,24 +363,15 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Determines whether GWT is enabled in the project.
 	 * 
-	 * @return true if the gwt-maven-plugin is present in the pom.xml or the ApplicationScaffold.gwt.xml file exists, otherwise false
+	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isGwtEnabled() {
-		boolean gwtEnabled = false;
 		for (Plugin buildPlugin : buildPlugins) {
 			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
-				gwtEnabled = true;
-				break;
+				return true;
 			}
 		}
-		
-		if (!gwtEnabled) {
-			String gwtXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, StringUtils.replace(topLevelPackage.getFullyQualifiedPackageName(), ".", File.separator) + "/ApplicationScaffold.gwt.xml");
-			File file = new File(gwtXmlPath);
-			gwtEnabled = file.exists();
-		}
-		
-		return gwtEnabled;
+		return false;
 	}
 
 	
