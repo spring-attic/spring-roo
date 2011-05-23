@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.springframework.roo.shell.converters;
 
 import static org.junit.Assert.assertEquals;

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.springframework.roo.shell;
 
 import org.junit.Assert;

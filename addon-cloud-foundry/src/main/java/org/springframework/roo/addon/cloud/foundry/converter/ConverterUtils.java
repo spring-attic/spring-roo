@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.springframework.roo.addon.cloud.foundry.converter;
 
 /**
