@@ -12,15 +12,14 @@ import org.springframework.roo.shell.MethodTarget;
  * @author Alan Stewart
  * @since 1.0
  */
+@SuppressWarnings("all")
 public class EnumConverter implements Converter<Enum> {
 
-	@SuppressWarnings("all")
 	public Enum convertFromText(String value, Class<?> requiredType, String optionContext) {
 		Class<Enum> enumClass = (Class<Enum>) requiredType;
 		return Enum.valueOf(enumClass, value);
 	}
 
-	@SuppressWarnings("all")
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
 		Class<Enum> enumClass = (Class<Enum>) requiredType;
 		for (Enum enumValue : enumClass.getEnumConstants()) {
