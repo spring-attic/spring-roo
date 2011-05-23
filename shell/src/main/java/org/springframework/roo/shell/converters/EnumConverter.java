@@ -12,7 +12,7 @@ import org.springframework.roo.shell.MethodTarget;
  * @author Alan Stewart
  * @since 1.0
  */
-public class EnumConverter implements Converter<Enum<?>> {
+public class EnumConverter implements Converter<Enum> {
 
 	@SuppressWarnings("all")
 	public Enum convertFromText(String value, Class<?> requiredType, String optionContext) {

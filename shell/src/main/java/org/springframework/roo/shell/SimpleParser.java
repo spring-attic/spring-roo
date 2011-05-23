@@ -179,7 +179,6 @@ public class SimpleParser implements Parser {
 						}
 					}
 					if (c == null) {
-						System.out.println("requiredType: " + requiredType);
 						throw new IllegalStateException("TODO: Add basic type conversion");
 						// TODO Fall back to a normal SimpleTypeConverter and attempt conversion
 						// SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
@@ -187,10 +186,15 @@ public class SimpleParser implements Parser {
 					}
 					
 					// Use the converter
-					result = c.convertFromText(value, null, cliOption.optionContext());
+					result = c.convertFromText(value, requiredType, cliOption.optionContext());
+
+					// If the option has been specified to be mandatory then the result should never be null
+					if (result == null && cliOption.mandatory()) {
+						throw new IllegalStateException();
+					}
 					arguments.add(result);
 				} catch (RuntimeException e) {
-					logger.warning("Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
+					logger.warning(e.getClass().getName() + ": Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
 					if (e.getMessage() != null && e.getMessage().length() > 0) {
 						logger.warning(e.getMessage());
 					}
