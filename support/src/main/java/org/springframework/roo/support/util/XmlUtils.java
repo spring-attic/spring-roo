@@ -104,7 +104,10 @@ public final class XmlUtils {
 		
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 		try {
-			StreamResult streamResult = createUnixStreamResultForEntry(new BufferedOutputStream(outputStream));
+			if (!(outputStream instanceof BufferedOutputStream)) {
+				outputStream = new BufferedOutputStream(outputStream);
+			}
+			StreamResult streamResult = createUnixStreamResultForEntry(outputStream);
 			transformer.transform(new DOMSource(document), streamResult);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
