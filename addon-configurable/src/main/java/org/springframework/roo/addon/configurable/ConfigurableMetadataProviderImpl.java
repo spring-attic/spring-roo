@@ -30,6 +30,11 @@ public final class ConfigurableMetadataProviderImpl extends AbstractItdMetadataP
 		addMetadataTrigger(new JavaType(RooConfigurable.class.getName()));
 	}
 	
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		removeMetadataTrigger(new JavaType(RooConfigurable.class.getName()));
+	}
+
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		return new ConfigurableMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
 	}

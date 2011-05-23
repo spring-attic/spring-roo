@@ -26,6 +26,11 @@ public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		addMetadataTrigger(new JavaType(RooEditor.class.getName()));
 	}
 
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		removeMetadataTrigger(new JavaType(RooEditor.class.getName()));
+	}
+
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 
@@ -64,8 +69,7 @@ public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = EditorMetadata.getJavaType(metadataIdentificationString);
 		Path path = EditorMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
