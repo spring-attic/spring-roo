@@ -6,9 +6,8 @@ package org.springframework.roo.addon.cloud.foundry.converter;
 /**
  * Utility methods for use by converters.
  * 
- * TODO usable by other converters?
- * 
- * @author aswan moved from James' now-deleted CloudFoundryConverter
+ * @author Andrew Swan
+ * @since 1.2.0
  */
 public final class ConverterUtils {
 	

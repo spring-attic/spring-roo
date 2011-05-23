@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Converts between Strings (as displayed by and entered via the shell) and Roo domain objects
  * 
- * @author aswan parameterised for ROO-2460 and added comments 
+ * @author Andrew Swan 
  * @param <T> the domain type being converted to/from
  */
 public interface Converter<T> {

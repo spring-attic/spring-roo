@@ -13,8 +13,9 @@ import org.springframework.roo.shell.MethodTarget;
 /**
  * Provides conversion to and from Cloud Foundry model classes.
  *
- * @author James Tyrrell, Andrew Swan
- * @since 1.1.3
+ * @author James Tyrrell
+ * @author Andrew Swan
+ * @since 1.2.0
  */
 @Component
 @Service
