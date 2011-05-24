@@ -139,7 +139,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		List<MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(governorTypeDetails);
 		List<MethodMetadata> convertedProxyMethods = new LinkedList<MethodMetadata>();
 		boolean dependsOnSomething = false;
-		Set<String> sourcePaths = gwtTypeService.getSourcePaths();
 		for (MethodMetadata method : proxyMethods) {
 			JavaType returnType = method.getReturnType().isCommonCollectionType() && method.getReturnType().getParameters().size() != 0 ? method.getReturnType().getParameters().get(0) : method.getReturnType();
 			if (gwtTypeService.isDomainObject(returnType) && !method.getReturnType().equals(governorTypeName)) {
@@ -160,6 +159,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
 			methodBuilder.setReturnType(gwtType);
 			MethodMetadata convertedMethod = methodBuilder.build();
+			Set<String> sourcePaths = gwtTypeService.getSourcePaths();
 			if (gwtTypeService.isMethodReturnTypesInSourcePath(convertedMethod, governorTypeDetails, sourcePaths)) {
 				convertedProxyMethods.add(methodBuilder.build());
 			}

@@ -167,7 +167,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		try {
 			for (String fileIdentifier : deferredFileWrites.keySet()) {
 				String newContents = deferredFileWrites.get(fileIdentifier);
-				if (newContents.length() == 0) {
+				if (!StringUtils.hasText(newContents)) {
 					if (exists(fileIdentifier)) {
 						delete(fileIdentifier);
 					}

@@ -1,5 +1,6 @@
 package org.springframework.roo.project;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -363,15 +364,22 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Determines whether GWT is enabled in the project.
 	 * 
-	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
+	 * @return true if the gwt-maven-plugin is present in the pom.xml or the GWT module XML file exists, otherwise false
 	 */
 	public boolean isGwtEnabled() {
+		boolean gwtEnabled = false;
 		for (Plugin buildPlugin : buildPlugins) {
 			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
-				return true;
+				gwtEnabled = true;
+				break;
 			}
 		}
-		return false;
+		// TODO This is hacky - should not rely on pathResolver, the use of java.io.File, and the XML artifact itself being present. Should just be able to detect build plugin
+		if (!gwtEnabled) {
+			String gwtModuleXml = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "ApplicationScaffold.gwt.xml");
+			gwtEnabled = new File(gwtModuleXml).exists();
+		}
+		return gwtEnabled;
 	}
 
 	

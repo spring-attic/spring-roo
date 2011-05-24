@@ -130,10 +130,13 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
 			return;
 		}
-		
-		boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
+		ProjectMetadata projectMetdata = projectOperations.getProjectMetadata();
+		if (projectMetdata == null) {
+			return;
+		}
+		boolean isGaeEnabled = projectMetdata.isGaeEnabled();
 		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-		if (projectOperations.getProjectMetadata().isGwtEnabled() && hasGaeStateChanged) {
+		if (projectMetdata.isGwtEnabled() && hasGaeStateChanged) {
 			wasGaeEnabled = isGaeEnabled;
 
 			// Update ApplicationRequestFactory
@@ -288,7 +291,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	private void updateGaeHelper(boolean isGaeEnabled) {
 		String sourceAntPath = "module/client/scaffold/gae/GaeHelper-template.java";
 		String segmentPackage = "client.scaffold.gae";
-		String targetDirectory = projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", File.separator) + File.separator + "client" + File.separator + "scaffold" + File.separator + "gae");
+		String targetDirectory = projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "client" + File.separator + "scaffold" + File.separator + "gae");
 		updateFile(sourceAntPath, targetDirectory, segmentPackage, true, isGaeEnabled);
 	}
 
@@ -299,7 +302,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	}
 
 	private void copyDirectoryContents(GwtPath gwtPath) {
-		String sourceAntPath = gwtPath.sourceAntPath();
+		String sourceAntPath = gwtPath.getSourceAntPath();
 		if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
 			return;
 		}
@@ -320,7 +323,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 
 		for (URL url : urls) {
-			String fileName = url.getPath().substring(url.getPath().lastIndexOf(File.separator) + 1);
+			String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
 			fileName = fileName.replace("-template", "");
 			String targetFilename = targetDirectory + fileName;
 			try {
@@ -338,7 +341,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 					input = input.replace("__SEGMENT_PACKAGE__", segmentPackage);
 					input = input.replace("__PROJECT_NAME__", projectOperations.getProjectMetadata().getProjectName());
 
-					if ( isGaeEnabled) {
+					if (isGaeEnabled) {
 						input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
 						input = input.replace("__GAE_HOOKUP__", getGaeHookup());
 						input = input.replace("__GAE_REQUEST_TRANSPORT__", ", new GaeAuthRequestTransport(eventBus)");
