@@ -175,10 +175,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				}
 				return result;
 			} catch (Exception e) {
-				// TODO: At the very least the MID should be removed from the active requests upon an exception being caught. There may be scope to wrap the exception and let it bubble up, but I am
-				// unsure on this point (JT - 18/05/11)
 				activeRequests.remove(metadataIdentificationString);
-				return null;
+				throw new IllegalStateException(e);
 			} finally {
 				// We use another try..finally block as we want to ensure exceptions don't prevent our metadataLogger.stopEvent()
 				try {
