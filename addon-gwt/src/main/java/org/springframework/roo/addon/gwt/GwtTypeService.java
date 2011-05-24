@@ -33,6 +33,4 @@ public interface GwtTypeService {
 	boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, List<String> sourcePaths);
 
 	List<String> getSourcePaths();
-
-	boolean isGwtModuleXmlPresent();
 }

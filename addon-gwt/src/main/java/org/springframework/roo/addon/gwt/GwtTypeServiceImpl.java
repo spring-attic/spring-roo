@@ -2,7 +2,6 @@ package org.springframework.roo.addon.gwt;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +47,6 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -139,25 +137,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return extendsTypes;
 	}
 
-	public boolean isGwtModuleXmlPresent() {
-		try{
-			return fileManager.exists(getGwtModuleXml());
-		} catch (IllegalStateException e) {
-			return false;
-		}
-	}
-
-	private String getGwtModuleXml() {
-		String gwtModuleXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", File.separator) + File.separator + "*.gwt.xml");
-		Set<FileDetails> potentialXmlFiles = fileManager.findMatchingAntPath(gwtModuleXml);
-		if (potentialXmlFiles.size() == 1) {
-			return potentialXmlFiles.iterator().next().getCanonicalPath();
-		} else if (potentialXmlFiles.size() > 1) {
-			throw new IllegalStateException("Multiple gwt.xml files detected; cannot continue");
-		}
-		throw new IllegalStateException("No gwt.xml file detected; cannot continue");
-	}
-
 	public void buildType(GwtType type) {
 		if (GwtType.LIST_PLACE_RENDERER.equals(type)) {
 			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -178,40 +157,25 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public List<String> getSourcePaths() {
-		Assert.isTrue(isGwtModuleXmlPresent(), "GWT module's gwt.xml file not found; cannot continue");
-
-		MutableFile mutableGwtXml;
-		InputStream is = null;
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		builder.setEntityResolver(new EntityResolver() {
+			public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+				if (systemId.endsWith("gwt-module.dtd")) {
+					return new InputSource(TemplateUtils.getTemplate(GwtMetadata.class, "templates/gwt-module.dtd"));
+				}
+				
+				// Use the default behaviour
+				return null;
+			}
+		});
 		Document gwtXmlDoc;
 		try {
-			mutableGwtXml = fileManager.updateFile(getGwtModuleXml());
-			is = mutableGwtXml.getInputStream();
-			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-			builder.setEntityResolver(new EntityResolver() {
-				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-					if (systemId.endsWith("gwt-module.dtd")) {
-						return new InputSource(TemplateUtils.getTemplate(GwtMetadata.class, "templates/gwt-module.dtd"));
-					}
-					
-					// Use the default behaviour
-					return null;
-				}
-			});
-			gwtXmlDoc = builder.parse(mutableGwtXml.getInputStream());
+			gwtXmlDoc = builder.parse(fileManager.getInputStream(getGwtModuleXml()));
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		} finally {
-			if (is != null) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					throw new IllegalStateException(e);
-				}
-			}
 		}
-
 		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
-		ArrayList<String> sourcePaths = new ArrayList<String>();
+		List<String> sourcePaths = new LinkedList<String>();
 		List<Element> sourcePathElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
 		for (Element sourcePathElement : sourcePathElements) {
 			String path = projectOperations.getProjectMetadata().getTopLevelPackage() + "." + sourcePathElement.getAttribute("path");
@@ -219,6 +183,19 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		}
 
 		return sourcePaths;
+	}
+
+	private String getGwtModuleXml() {
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		String gwtModuleXml = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", File.separator) + File.separator + "*.gwt.xml");
+		Assert.isTrue(StringUtils.hasText(gwtModuleXml) && fileManager.exists(gwtModuleXml), "No GWT module xml file file detected; cannot continue");
+		Set<FileDetails> potentialXmlFiles = fileManager.findMatchingAntPath(gwtModuleXml);
+		if (potentialXmlFiles.size() == 1) {
+			return potentialXmlFiles.iterator().next().getCanonicalPath();
+		} else if (potentialXmlFiles.size() > 1) {
+			throw new IllegalStateException("Multiple GWT module xml files detected; cannot continue");
+		}
+		return gwtModuleXml;
 	}
 
 	public List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
