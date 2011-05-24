@@ -20,7 +20,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 @Service
 public class CloudUriConverter implements Converter<CloudUri> {
-	
 	@Reference private CloudFoundrySession session;
 
 	public CloudUri convertFromText(String value, Class<?> requiredType, String optionContext) {

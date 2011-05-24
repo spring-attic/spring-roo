@@ -20,7 +20,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 @Service
 public class CloudAppConverter implements Converter<CloudApp> {
-	
 	@Reference private CloudFoundrySession session;
 
 	public CloudApp convertFromText(String value, Class<?> requiredType, String optionContext) {

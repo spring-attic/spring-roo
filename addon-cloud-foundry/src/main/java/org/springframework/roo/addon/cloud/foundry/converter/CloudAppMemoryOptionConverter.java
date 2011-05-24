@@ -20,9 +20,7 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 @Service
 public class CloudAppMemoryOptionConverter implements Converter<CloudAppMemoryOption> {
-	
 	private static final String MEMORY_OPTION_SUFFIX = "MB";
-	
 	@Reference private CloudFoundrySession session;
 
 	public CloudAppMemoryOption convertFromText(String value, Class<?> requiredType, String optionContext) {

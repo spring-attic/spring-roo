@@ -21,7 +21,6 @@ import com.vmware.appcloud.client.CloudService;
 @Component
 @Service
 public class CloudServiceConverter implements Converter<CloudService> {
-	
 	@Reference private CloudFoundrySession session;
 
 	public CloudService convertFromText(String value, Class<?> requiredType, String optionContext) {

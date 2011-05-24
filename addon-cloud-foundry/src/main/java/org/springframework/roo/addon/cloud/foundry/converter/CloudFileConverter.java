@@ -21,7 +21,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 @Service
 public class CloudFileConverter implements Converter<CloudFile> {
-	
 	@Reference private CloudFoundrySession session;
 
 	public CloudFile convertFromText(String value, Class<?> requiredType, String optionContext) {
@@ -55,9 +54,7 @@ public class CloudFileConverter implements Converter<CloudFile> {
 				}
 				completions.add(path + option);
 			}
-		} catch (Exception ignored) {
-			// Ignored
-		}
+		} catch (Exception ignored) {}
 
 		return false;
 	}

@@ -27,10 +27,8 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 @Service
 public class CloudDeployableFileConverter implements Converter<CloudDeployableFile> {
-	
 	private static final Logger logger = Logger.getLogger(CloudDeployableFileConverter.class.getName());
 	private static final String CREATE_OPTION = "CREATE";
-	
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 
@@ -57,10 +55,9 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 				}
 			}
 			return null;
-		} else {
-			FileDetails fileToDeploy = fileManager.readFile(projectOperations.getPathResolver().getRoot(Path.ROOT) + value);
-			return new CloudDeployableFile(fileToDeploy);
 		}
+		FileDetails fileToDeploy = fileManager.readFile(projectOperations.getPathResolver().getRoot(Path.ROOT) + value);
+		return new CloudDeployableFile(fileToDeploy);
 	}
 
 	public boolean supports(Class<?> requiredType, String optionContext) {

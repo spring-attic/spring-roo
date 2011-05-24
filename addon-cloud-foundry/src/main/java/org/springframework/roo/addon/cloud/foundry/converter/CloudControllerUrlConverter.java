@@ -20,7 +20,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 @Service
 public class CloudControllerUrlConverter implements Converter<CloudControllerUrl> {
-	
 	@Reference private CloudFoundrySession session;
 
 	public CloudControllerUrl convertFromText(String value, Class<?> requiredType, String optionContext) {

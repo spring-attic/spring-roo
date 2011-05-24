@@ -21,7 +21,6 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Component
 @Service
 public class ServiceConfigurationConverter implements Converter<ServiceConfiguration> {
-	
 	@Reference private CloudFoundrySession session;
 
 	public ServiceConfiguration convertFromText(String value, Class<?> requiredType, String optionContext) {

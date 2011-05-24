@@ -7,6 +7,13 @@ package org.springframework.roo.addon.cloud.foundry.converter;
  * @since 1.2.0
  */
 public final class ConverterUtils {
+
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private ConverterUtils() {
+		// Empty
+	}
 	
 	/**
 	 * Returns the value of the given option from the given command line
@@ -23,12 +30,5 @@ public final class ConverterUtils {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Constructor is private to prevent instantiation
-	 */
-	private ConverterUtils() {
-		// Empty
 	}
 }
