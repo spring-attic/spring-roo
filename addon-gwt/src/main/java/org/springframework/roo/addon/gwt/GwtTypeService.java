@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.gwt;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -30,7 +31,9 @@ public interface GwtTypeService {
 
 	boolean isDomainObject(JavaType type);
 
-	boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, List<String> sourcePaths);
+	boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, Set<String> sourcePaths);
 
-	List<String> getSourcePaths();
+	Set<String> getSourcePaths();
+
+	boolean isGwtModuleXmlPresent();
 }

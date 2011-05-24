@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -137,6 +138,28 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return extendsTypes;
 	}
 
+	public boolean isGwtModuleXmlPresent() {
+		try{
+			// If not gwt.xml files are found in the project path then calling getGwtModuleXml() will thrown an exception and true will never be returned
+			getGwtModuleXml();
+			return true;
+		} catch (IllegalStateException e) {
+			return false;
+		}
+	}
+
+	private Set<String> getGwtModuleXml() {
+		String gwtModuleXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", File.separator) + File.separator + "*.gwt.xml");
+		Set<String> paths = new HashSet<String>();
+		for (FileDetails fileDetails : fileManager.findMatchingAntPath(gwtModuleXml)) {
+			paths.add(fileDetails.getCanonicalPath());
+		}
+		if (paths.size() < 1) {
+			throw new IllegalStateException("No gwt.xml file detected; cannot continue");
+		}
+		return paths;
+	}
+
 	public void buildType(GwtType type) {
 		if (GwtType.LIST_PLACE_RENDERER.equals(type)) {
 			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -156,26 +179,37 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		gwtFileManager.write(typesToBeWritten, type.isOverwriteConcrete());
 	}
 
-	public List<String> getSourcePaths() {
+	public Set<String> getSourcePaths() {
+		Set<String> sourcePaths = new HashSet<String>();
+		for (String gwtModuleCanonicalPath : getGwtModuleXml()) {
+			sourcePaths.addAll(getSourcePaths(gwtModuleCanonicalPath));
+		}
+		return sourcePaths;
+	}
+
+	public Set<String> getSourcePaths(String gwtModuleCanonicalPath) {
+		Assert.isTrue(isGwtModuleXmlPresent(), "GWT module's gwt.xml file not found; cannot continue");
+
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		builder.setEntityResolver(new EntityResolver() {
 			public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 				if (systemId.endsWith("gwt-module.dtd")) {
 					return new InputSource(TemplateUtils.getTemplate(GwtMetadata.class, "templates/gwt-module.dtd"));
 				}
-				
+
 				// Use the default behaviour
 				return null;
 			}
 		});
 		Document gwtXmlDoc;
 		try {
-			gwtXmlDoc = builder.parse(fileManager.getInputStream(getGwtModuleXml()));
+			gwtXmlDoc = builder.parse(fileManager.getInputStream(gwtModuleCanonicalPath));
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
+
 		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();
-		List<String> sourcePaths = new LinkedList<String>();
+		Set<String> sourcePaths = new HashSet<String>();
 		List<Element> sourcePathElements = XmlUtils.findElements("/module/source", gwtXmlRoot);
 		for (Element sourcePathElement : sourcePathElements) {
 			String path = projectOperations.getProjectMetadata().getTopLevelPackage() + "." + sourcePathElement.getAttribute("path");
@@ -183,19 +217,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		}
 
 		return sourcePaths;
-	}
-
-	private String getGwtModuleXml() {
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		String gwtModuleXml = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", File.separator) + File.separator + "*.gwt.xml");
-		Assert.isTrue(StringUtils.hasText(gwtModuleXml) && fileManager.exists(gwtModuleXml), "No GWT module xml file file detected; cannot continue");
-		Set<FileDetails> potentialXmlFiles = fileManager.findMatchingAntPath(gwtModuleXml);
-		if (potentialXmlFiles.size() == 1) {
-			return potentialXmlFiles.iterator().next().getCanonicalPath();
-		} else if (potentialXmlFiles.size() > 1) {
-			throw new IllegalStateException("Multiple GWT module xml files detected; cannot continue");
-		}
-		return gwtModuleXml;
 	}
 
 	public List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
@@ -257,7 +278,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return true;
 	}
 
-	public boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, List<String> sourcePaths) {
+	public boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, Set<String> sourcePaths) {
 		JavaType propertyType = method.getReturnType();
 		boolean inSourcePath = false;
 		for (String sourcePath : sourcePaths) {
