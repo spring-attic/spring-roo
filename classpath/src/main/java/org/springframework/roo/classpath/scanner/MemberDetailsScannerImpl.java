@@ -41,7 +41,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  *
  */
-@Component
+@Component(immediate=true)
 @Service
 @References(
 	value = { 
