@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
@@ -147,7 +148,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	private String getGwtModuleXml() {
-		String gwtModuleXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", "/") + "/*.gwt.xml");
+		String gwtModuleXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", File.separator) + File.separator + "*.gwt.xml");
 		Set<FileDetails> potentialXmlFiles = fileManager.findMatchingAntPath(gwtModuleXml);
 		if (potentialXmlFiles.size() == 1) {
 			return potentialXmlFiles.iterator().next().getCanonicalPath();
