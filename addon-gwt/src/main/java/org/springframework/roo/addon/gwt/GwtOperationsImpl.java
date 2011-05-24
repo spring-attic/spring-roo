@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
-import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -288,7 +288,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	private void updateGaeHelper(boolean isGaeEnabled) {
 		String sourceAntPath = "module/client/scaffold/gae/GaeHelper-template.java";
 		String segmentPackage = "client.scaffold.gae";
-		String targetDirectory = projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", "\\/") + "/client/scaffold/gae");;
+		String targetDirectory = projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replaceAll("\\.", File.separator) + File.separator + "client" + File.separator + "scaffold" + File.separator + "gae");
 		updateFile(sourceAntPath, targetDirectory, segmentPackage, true, isGaeEnabled);
 	}
 
@@ -308,8 +308,8 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	}
 
 	private void updateFile(String sourceAntPath, String targetDirectory, String segmentPackage, boolean overwrite, boolean isGaeEnabled) {
-		if (!targetDirectory.endsWith("/")) {
-			targetDirectory += "/";
+		if (!targetDirectory.endsWith(File.separator)) {
+			targetDirectory += File.separator;
 		}
 		if (!fileManager.exists(targetDirectory)) {
 			fileManager.createDirectory(targetDirectory);
@@ -320,7 +320,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 
 		for (URL url : urls) {
-			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+			String fileName = url.getPath().substring(url.getPath().lastIndexOf(File.separator) + 1);
 			fileName = fileName.replace("-template", "");
 			String targetFilename = targetDirectory + fileName;
 			try {
@@ -331,7 +331,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetFilename).getOutputStream());
 				} else {
 					// Read template and insert the user's package
-					String input = FileCopyUtils.copyToString(new InputStreamReader(new BufferedInputStream(url.openStream())));
+					String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
 
 					String topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName();
 					input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);

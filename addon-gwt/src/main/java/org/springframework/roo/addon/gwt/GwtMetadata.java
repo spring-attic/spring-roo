@@ -174,7 +174,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 	public String buildUiXml(String templateContents, String destFile) {
 		try {
-
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new EntityResolver() {
 				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {

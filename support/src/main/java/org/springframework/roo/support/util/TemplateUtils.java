@@ -1,6 +1,5 @@
 package org.springframework.roo.support.util;
 
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 
 /**
@@ -36,7 +35,7 @@ public abstract class TemplateUtils {
 	 */
 	public static InputStream getTemplate(Class<?> clazz, String templateFilename) {
 		String templatePath = getTemplatePath(clazz, templateFilename);
-		InputStream result = new BufferedInputStream(clazz.getResourceAsStream(templatePath));
+		InputStream result = clazz.getResourceAsStream(templatePath);
 		Assert.notNull(result, "Could not locate '" + templatePath + "' in classloader");
 		return result;
 	}
