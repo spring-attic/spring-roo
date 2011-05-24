@@ -18,7 +18,6 @@ import org.springframework.roo.metadata.internal.AbstractMetadataCache;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
-
 /**
  * Default implementation of {@link MetadataService}.
  * 
@@ -48,8 +47,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	private Boolean lock = new Boolean(true);
 
 	// Request control
-	private List<String> activeRequests = new ArrayList<String>(); // list to assist output "stacks" which show the order of requests
-	private List<String> keysToRetry = new ArrayList<String>();  // list to help us verify correct operation through logs (predictable ordering)
+	private List<String> activeRequests = new ArrayList<String>(); // List to assist output "stacks" which show the order of requests
+	private List<String> keysToRetry = new ArrayList<String>();  // List to help us verify correct operation through logs (predictable ordering)
 	
 	protected void bindMetadataProvider(MetadataProvider mp) {
 		synchronized (lock) {
@@ -234,7 +233,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			if (p instanceof MetadataNotificationListener) {
 				// The provider can directly handle this notification, so we just need to delegate directly to it.
 				// We rely on the provider to evict items from the cache if applicable.
-				((MetadataNotificationListener)p).notify(upstreamDependency, downstreamDependency);
+				((MetadataNotificationListener) p).notify(upstreamDependency, downstreamDependency);
 			} else {
 				// As per interface contract, we just ensure we evict the item and recreate it
 				// However, we only do this if the destination is an instance - if it's a class, "get" is not a meaningful operation.
@@ -266,11 +265,11 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		synchronized (lock) {
 			// Clear my own cache
 			super.evictAll();
-			
+
 			// Clear the caches of any metadata providers which support the interface
 			for (MetadataProvider p : providers) {
 				if (p instanceof MetadataCache) {
-					((MetadataCache)p).evictAll();
+					((MetadataCache) p).evictAll();
 				}
 			}
 		}
