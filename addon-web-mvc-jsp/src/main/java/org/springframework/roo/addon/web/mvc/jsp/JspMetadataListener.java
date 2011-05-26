@@ -121,7 +121,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		List<FieldMetadata> eligibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, metadataIdentificationString);
 		if (eligibleFields.isEmpty() && !pkFields) {
-			System.out.println("----------no fields to scaffold");
 			return null;
 		}
 
