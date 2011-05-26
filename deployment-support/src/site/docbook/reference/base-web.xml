@@ -49,9 +49,9 @@
     </listitem>
 
     <listitem>
-      <para>Integration of <link xlink:href="???">Apache Tiles</link>
-      templating framework to allow for structural customization of the Web
-      user interface</para>
+      <para>Integration of <link xlink:href="http://tiles.apache.org/">Apache
+      Tiles</link> templating framework to allow for structural customization
+      of the Web user interface</para>
     </listitem>
 
     <listitem>
