@@ -163,7 +163,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = null;
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
 		List<FieldMetadata> compositePkFields = new LinkedList<FieldMetadata>();
-		if (idFields.size() == 0) {
+		if (idFields.isEmpty()) {
 			idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 			if (idFields.size() != 1) {
 				return null;

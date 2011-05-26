@@ -382,7 +382,7 @@ public class JspViewManager {
 				return null;
 			}
 			List<JavaType> parameters = field.getFieldType().getParameters();
-			if (parameters.size() == 0) {
+			if (parameters.isEmpty()) {
 				throw new IllegalStateException("Unable to determine the parameter type for the " + field.getFieldName().getSymbolName() + " field in " + formbackingType.getSimpleTypeName());
 			}
 			return parameters.get(0);

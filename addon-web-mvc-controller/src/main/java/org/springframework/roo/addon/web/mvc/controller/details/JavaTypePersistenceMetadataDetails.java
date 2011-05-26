@@ -17,6 +17,7 @@ public class JavaTypePersistenceMetadataDetails {
 	private FieldMetadata identifierField;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata versionAccessorMethod;
+	
 	private MethodMetadata persistMethod;
 	private MethodMetadata mergeMethod;
 	private MethodMetadata removeMethod;
@@ -24,6 +25,7 @@ public class JavaTypePersistenceMetadataDetails {
 	private MethodMetadata findMethod;
 	private MethodMetadata countMethod;
 	private MethodMetadata findEntriesMethod;
+	
 	private List<String> finderNames;
 	private boolean isRooIdentifier;
 	private List<FieldMetadata> rooIdentifierFields;

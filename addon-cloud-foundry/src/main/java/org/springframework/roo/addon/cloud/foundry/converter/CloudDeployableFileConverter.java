@@ -72,7 +72,7 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 		String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
 		Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + "/**/*.war");
 		
-		if (fileDetails.size() == 0) {
+		if (fileDetails.isEmpty()) {
 			logger.warning("No deployable files found in the project directory. Please use the '" + CREATE_OPTION + "' option to build the war.");
 			completions.add(CREATE_OPTION);
 		}

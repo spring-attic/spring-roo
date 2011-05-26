@@ -180,7 +180,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				// We use another try..finally block as we want to ensure exceptions don't prevent our metadataLogger.stopEvent()
 				try {
 					// Have we processed all requests? If so, handle any retries we recorded
-					if (activeRequests.size() == 0) {
+					if (activeRequests.isEmpty()) {
 						List<String> thisRetry = new ArrayList<String>();
 						thisRetry.addAll(keysToRetry);
 						keysToRetry.clear();

@@ -109,7 +109,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		// Find any menu items under this category which have an id that starts with the menuItemIdPrefix
 		List<Element> elements = XmlUtils.findElements("//category[@id='c_" +  menuCategoryName.getSymbolName().toLowerCase() + "']//item[starts-with(@id, '" + FINDER_MENU_ITEM_PREFIX + "')]", document.getDocumentElement());
-		if (elements.size() == 0) {
+		if (elements.isEmpty()) {
 			return;
 		}
 		for (Element element: elements) {

@@ -265,7 +265,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			if (maxResults < 1) {
 				maxResults = 10;
 			}
-			if (bundleCache.size() == 0) {
+			if (bundleCache.isEmpty()) {
 				// We should refresh regardless in this case
 				refresh = true;
 			}
@@ -311,7 +311,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	public void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
 		synchronized (mutex) {
-			if (bundleCache.size() == 0) {
+			if (bundleCache.isEmpty()) {
 				// We should refresh regardless in this case
 				refresh = true;
 			}
@@ -509,7 +509,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			ArrayList<String> split = new ArrayList<String>(Arrays.asList(latest.getDescription().split("\\s")));
 			int lpr = linesPerResult;
 			while (split.size() > 0 && --lpr >= 0) {
-				while (!(split.size() == 0) && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77 : 80))) {
+				while (!(split.isEmpty()) && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77 : 80))) {
 					sb.append(split.get(0)).append(" ");
 					split.remove(0);
 				}
@@ -726,7 +726,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				}
 			} else {
 				while (split.size() > 0) {
-					while (!(split.size() == 0) && ((split.get(0).length() + sb.length()) < 79)) {
+					while (!(split.isEmpty()) && ((split.get(0).length() + sb.length()) < 79)) {
 						sb.append(split.get(0)).append(" ");
 						split.remove(0);
 					}

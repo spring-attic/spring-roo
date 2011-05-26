@@ -72,7 +72,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	public List<FileDetails> getMonitored() {
 		synchronized (lock) {
 			List<FileDetails> monitored = new ArrayList<FileDetails>();
-			if (requests.size() == 0) {
+			if (requests.isEmpty()) {
 				return monitored;
 			}
 
@@ -123,7 +123,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	
 	public int scanNotified() {
 		synchronized (lock) {
-			if (requests.size() == 0 || !isDirty()) {
+			if (requests.isEmpty() || !isDirty()) {
 				// There are no changes we can notify, so immediately return
 				return 0;
 			}
@@ -221,7 +221,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public int scanAll() {
 		synchronized (lock) {
-			if (requests.size() == 0) {
+			if (requests.isEmpty()) {
 				return 0;
 			}
 
@@ -319,10 +319,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	 * @param eventsToPublish to publish (not null, but can be empty)
 	 */
 	private void publish(List<FileEvent> eventsToPublish) {
-		if (eventsToPublish.size() == 0) {
+		if (eventsToPublish.isEmpty()) {
 			return;
 		}
-		if (fileEventListeners.size() == 0 || eventsToPublish.size() == 0) {
+		if (fileEventListeners.isEmpty() || eventsToPublish.isEmpty()) {
 			return;
 		}
 		for (FileEvent event : eventsToPublish) {

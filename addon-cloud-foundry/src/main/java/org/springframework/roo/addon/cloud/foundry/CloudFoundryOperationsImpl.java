@@ -104,7 +104,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			public void execute() throws Exception {
 				List<ServiceConfiguration> globalServices = client.getServiceConfigurations();
 				List<CloudService> localServices = client.getServices();
-				if (globalServices.size() == 0) {
+				if (globalServices.isEmpty()) {
 					logger.info("There are currently no services available.");
 				} else {
 					ShellTableRenderer table = new ShellTableRenderer("System Services", "Service", "Version", "Description");
@@ -114,7 +114,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 					logger.info(table.getOutput());
 				}
 
-				if (localServices.size() == 0) {
+				if (localServices.isEmpty()) {
 					logger.info("There are currently no provisioned services.");
 				} else {
 					ShellTableRenderer table = new ShellTableRenderer("Provisioned Services", "Name", "Service");
@@ -188,7 +188,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			@Override
 			public void execute() throws Exception {
 				List<CloudApplication> applications = client.getApplications();
-				if (applications.size() == 0) {
+				if (applications.isEmpty()) {
 					logger.info("No applications available.");
 					return;
 				}
@@ -309,7 +309,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 				Integer instances = getInteger(number);
 				if (instances == null) {
 					InstancesInfo instancesInfo = client.getApplicationInstances(appName);
-					if (instancesInfo.getInstances().size() == 0) {
+					if (instancesInfo.getInstances().isEmpty()) {
 						logger.info("No running instances for '" + appName + "'");
 					}
 				} else {
@@ -342,7 +342,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 					logger.severe(this.failureMessage);
 					return;
 				}
-				if (crashes.getCrashes().size() == 0) {
+				if (crashes.getCrashes().isEmpty()) {
 					logger.info("The application '" + appName + "' has never crashed");
 					return;
 				}
@@ -406,7 +406,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 			@Override
 			public void execute() throws Exception {
 				ApplicationStats stats = client.getApplicationStats(appName);
-				if (stats.getRecords().size() == 0) {
+				if (stats.getRecords().isEmpty()) {
 					logger.info("There is currently no stats for the application '" + appName + "'");
 					return;
 				}

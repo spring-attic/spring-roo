@@ -526,7 +526,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	private boolean isPublicAccessor(MethodMetadata method) {
-		return Modifier.isPublic(method.getModifier()) && !method.getReturnType().equals(JavaType.VOID_PRIMITIVE) && method.getParameterTypes().size() == 0 && (method.getMethodName().getSymbolName().startsWith("get"));
+		return Modifier.isPublic(method.getModifier()) && !method.getReturnType().equals(JavaType.VOID_PRIMITIVE) && method.getParameterTypes().isEmpty() && (method.getMethodName().getSymbolName().startsWith("get"));
 	}
 
 	private boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {

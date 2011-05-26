@@ -418,7 +418,7 @@ public class SimpleParser implements Parser {
 
 			// logger.info("RESULTS: '" + translated + "' " + StringUtils.collectionToCommaDelimitedString(targets));
 
-			if (targets.size() == 0) {
+			if (targets.isEmpty()) {
 				// Nothing matches the buffer they've presented
 				return cursor;
 			}
@@ -472,7 +472,7 @@ public class SimpleParser implements Parser {
 			}
 
 			// If they haven't specified any parameters yet, at least verify the command name is fully completed
-			if (options.size() == 0) {
+			if (options.isEmpty()) {
 				for (String value : cmd.value()) {
 					if (value.startsWith(buffer)) {
 						// They are potentially trying to type this command

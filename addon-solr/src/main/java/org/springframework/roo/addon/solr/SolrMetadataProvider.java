@@ -115,7 +115,7 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 	}
 	
 	private boolean isMethodOfInterest(MethodMetadata method) {
-		return method.getMethodName().getSymbolName().startsWith("get") && method.getParameterTypes().size() == 0 && Modifier.isPublic(method.getModifier());
+		return method.getMethodName().getSymbolName().startsWith("get") && method.getParameterTypes().isEmpty() && Modifier.isPublic(method.getModifier());
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

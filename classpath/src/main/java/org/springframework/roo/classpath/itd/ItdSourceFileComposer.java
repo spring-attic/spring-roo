@@ -138,7 +138,7 @@ public class ItdSourceFileComposer {
 	
 	private void appendTypeAnnotations() {
 		List<? extends AnnotationMetadata> typeAnnotations = itdTypeDetails.getAnnotations();
-		if (typeAnnotations == null || typeAnnotations.size() == 0) {
+		if (typeAnnotations == null || typeAnnotations.isEmpty()) {
 			return;
 		}
 		
@@ -158,7 +158,7 @@ public class ItdSourceFileComposer {
 	
 	private void appendFieldAnnotations() {
 		List<DeclaredFieldAnnotationDetails> fieldAnnotations = itdTypeDetails.getFieldAnnotations();
-		if (fieldAnnotations == null || fieldAnnotations.size() == 0) {
+		if (fieldAnnotations == null || fieldAnnotations.isEmpty()) {
 			return;
 		}
 		
@@ -183,7 +183,7 @@ public class ItdSourceFileComposer {
 	
 	private void appendMethodAnnotations() {
 		List<DeclaredMethodAnnotationDetails> methodAnnotations = itdTypeDetails.getMethodAnnotations();
-		if (methodAnnotations == null || methodAnnotations.size() == 0) {
+		if (methodAnnotations == null || methodAnnotations.isEmpty()) {
 			return;
 		}
 		
@@ -216,7 +216,7 @@ public class ItdSourceFileComposer {
 
 	private void appendExtendsTypes() {
 		List<JavaType> extendsTypes = itdTypeDetails.getExtendsTypes();
-		if (extendsTypes == null || extendsTypes.size() == 0) {
+		if (extendsTypes == null || extendsTypes.isEmpty()) {
 			return;
 		}
 		
@@ -241,7 +241,7 @@ public class ItdSourceFileComposer {
 	private void appendImplementsTypes() {
 		List<JavaType> implementsTypes = itdTypeDetails.getImplementsTypes();
 		
-		if (implementsTypes == null || implementsTypes.size() == 0) {
+		if (implementsTypes == null || implementsTypes.isEmpty()) {
 			return;
 		}
 		
@@ -265,7 +265,7 @@ public class ItdSourceFileComposer {
 
 	private void appendConstructors() {
 		List<? extends ConstructorMetadata> constructors = itdTypeDetails.getDeclaredConstructors();
-		if (constructors == null || constructors.size() == 0) {
+		if (constructors == null || constructors.isEmpty()) {
 			return;
 		}
 		content = true;
@@ -321,7 +321,7 @@ public class ItdSourceFileComposer {
 	
 	private void appendMethods() {
 		List<? extends MethodMetadata> methods = itdTypeDetails.getDeclaredMethods();
-		if (methods == null || methods.size() == 0) {
+		if (methods == null || methods.isEmpty()) {
 			return;
 		}
 		content = true;
@@ -330,7 +330,7 @@ public class ItdSourceFileComposer {
 
 	private void appendFields() {
 		List<? extends FieldMetadata> fields = itdTypeDetails.getDeclaredFields();
-		if (fields == null || fields.size() == 0) {
+		if (fields == null || fields.isEmpty()) {
 			return;
 		}
 		content = true;

@@ -155,7 +155,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService, Trans
 	}
 
 	public void flushIfPossible() {
-		if (bsnBuffer.size() == 0 && projectIdBuffer.size() == 0) {
+		if (bsnBuffer.isEmpty() && projectIdBuffer.isEmpty()) {
 			// Nothing to flush
 			return;
 		}

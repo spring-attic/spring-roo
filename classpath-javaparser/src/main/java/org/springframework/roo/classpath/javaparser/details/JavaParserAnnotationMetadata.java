@@ -299,7 +299,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 
 		// Create the AnnotationExpr; it varies depending on how many member-value pairs we need to present
 		AnnotationExpr annotationExpression = null;
-		if (memberValuePairs.size() == 0) {
+		if (memberValuePairs.isEmpty()) {
 			annotationExpression = new MarkerAnnotationExpr(nameToUse);
 		} else if (memberValuePairs.size() == 1 && (memberValuePairs.get(0).getName() == null || "value".equals(memberValuePairs.get(0).getName()))) {
 			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());

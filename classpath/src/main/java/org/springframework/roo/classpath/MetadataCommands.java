@@ -50,7 +50,7 @@ public class MetadataCommands implements CommandMarker {
 		sb.append("Identifier : ").append(metadataId).append(System.getProperty("line.separator"));
 		
 		Set<String> upstream = metadataDependencyRegistry.getUpstream(metadataId);
-		if (upstream.size() == 0) {
+		if (upstream.isEmpty()) {
 			sb.append("Upstream   : ").append(System.getProperty("line.separator"));
 		}
 
@@ -68,7 +68,7 @@ public class MetadataCommands implements CommandMarker {
 		}
 
 		Set<String> downstream = metadataDependencyRegistry.getDownstream(metadataId);
-		if (downstream.size() == 0) {
+		if (downstream.isEmpty()) {
 			sb.append("Downstream : ").append(System.getProperty("line.separator"));
 		}
 		for (String s : downstream) {

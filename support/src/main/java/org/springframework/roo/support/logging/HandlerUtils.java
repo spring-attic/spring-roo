@@ -68,7 +68,7 @@ public abstract class HandlerUtils {
 		}
 		
 		// Create a default DeferredLogHandler if no Handler was defined in the presented Logger
-		if (newHandlers.size() == 0) {
+		if (newHandlers.isEmpty()) {
 			ConsoleHandler consoleHandler = new ConsoleHandler();
 			consoleHandler.setFormatter(new Formatter() {
 				public String format(LogRecord record) {

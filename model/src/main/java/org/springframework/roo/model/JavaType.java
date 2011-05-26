@@ -170,7 +170,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 	private String getNameIncludingTypeParameters(boolean staticForm, ImportRegistrationResolver resolver, Map<String, String> types) {
 		if (DataType.PRIMITIVE == dataType) {
-			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
+			Assert.isTrue(parameters.isEmpty(), "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
 				return "int" + getArraySuffix();
 			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {

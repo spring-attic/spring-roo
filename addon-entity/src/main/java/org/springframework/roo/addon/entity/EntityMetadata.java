@@ -321,7 +321,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return null;
 		}
 		
-		if (governorTypeDetails.getDeclaredConstructors().size() == 0) {
+		if (governorTypeDetails.getDeclaredConstructors().isEmpty()) {
 			// Default constructor will apply, so quit
 			return null;
 		}

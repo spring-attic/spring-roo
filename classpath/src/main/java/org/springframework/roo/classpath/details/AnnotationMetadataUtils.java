@@ -61,7 +61,7 @@ public abstract class AnnotationMetadataUtils {
 			sb.append(annotation.getAnnotationType().getFullyQualifiedTypeName());
 		}
 
-		if (annotation.getAttributeNames().size() == 0) {
+		if (annotation.getAttributeNames().isEmpty()) {
 			return sb.toString();
 		}
 

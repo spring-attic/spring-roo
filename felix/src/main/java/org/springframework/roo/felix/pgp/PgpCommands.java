@@ -43,14 +43,14 @@ public class PgpCommands implements CommandMarker {
 	@CliCommand(value="pgp list trusted keys", help="Lists the keys you currently trust and have not been revoked at the time last downloaded from a public key server")
 	public String listTrustedKeys() {
 		List<PGPPublicKeyRing> keyRings = pgpService.getTrustedKeys();
-		if (keyRings.size() == 0) {
+		if (keyRings.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			appendLine(sb, "No keys trusted; use 'pgp trust' to add a key or 'pgp automatic trust' for automatic key addition");
 			return sb.toString();
 		}
 		StringBuilder sb = new StringBuilder();
 		for (PGPPublicKeyRing keyRing : keyRings) {
-            formatKeyRing(sb, keyRing);
+			formatKeyRing(sb, keyRing);
 		}
 		return sb.toString();
 	}

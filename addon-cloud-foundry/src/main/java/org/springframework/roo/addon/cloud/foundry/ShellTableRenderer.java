@@ -25,7 +25,7 @@ public class ShellTableRenderer {
 	}
 
 	public void addColumn(String heading) {
-		int position = columnMap.size() == 0 ? 0 : columnMap.size();
+		int position = columnMap.isEmpty() ? 0 : columnMap.size();
 		List<String> list = new ArrayList<String>();
 		list.add(heading);
 		list.add(getUnderline(heading.length()));
