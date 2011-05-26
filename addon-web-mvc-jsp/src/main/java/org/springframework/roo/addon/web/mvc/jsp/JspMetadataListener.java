@@ -113,9 +113,15 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (webScaffoldMetadata.getAnnotationValues().isDelete()) {
 			installImage("images/delete.png");
 		}
+		
+		boolean pkFields = false;
+		if (formBackingTypeMetadataDetails.getPersistenceDetails() != null && !formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields().isEmpty()) {
+			pkFields = true;
+		}
 
 		List<FieldMetadata> eligibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, metadataIdentificationString);
-		if (eligibleFields.isEmpty()) {
+		if (eligibleFields.isEmpty() && !pkFields) {
+			System.out.println("----------no fields to scaffold");
 			return null;
 		}
 

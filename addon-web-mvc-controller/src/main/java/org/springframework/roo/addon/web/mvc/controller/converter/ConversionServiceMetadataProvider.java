@@ -86,12 +86,12 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(new JavaType(RooWebScaffold.class.getName()));
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
-		if (relevantDomainTypes.isEmpty()) { 
+		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
+		
+		if (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes.isEmpty()) { 
 			// No ITD needed
 			return null;
 		}
-		
-		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
 		
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
