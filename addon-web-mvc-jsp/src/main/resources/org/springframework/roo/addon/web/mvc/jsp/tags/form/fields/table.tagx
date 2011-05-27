@@ -80,7 +80,9 @@
                   </spring:escapeBody>
                 </c:when>
                 <c:otherwise>
-                  <spring:eval expression="item[column]" var="colTxt"/>
+                  <c:set var="colTxt">
+                    <spring:eval expression="item[column]" />
+                  </c:set>
                 </c:otherwise>
               </c:choose>
               <c:choose>
