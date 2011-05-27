@@ -8,7 +8,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.project.Path;
 
 /**
- * Indicates a {@link MetadataService} that supports ITDs.
+ * Indicates a {@link MetadataProvider} that supports ITDs.
  * 
  * <p>
  * ITD usage in ROO adopts some conventions to facilitate ease of use.
