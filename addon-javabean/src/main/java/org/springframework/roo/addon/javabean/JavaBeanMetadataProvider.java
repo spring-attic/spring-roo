@@ -38,6 +38,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
+	private static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	private Set<String> producedMids = new LinkedHashSet<String>();
@@ -116,7 +117,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		try {
 			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(fieldType);
 			FieldMetadata identifierField = null;
-			if (projectOperations.getProjectMetadata().isGaeEnabled() && MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity")) != null) {
+			if (projectOperations.getProjectMetadata().isGaeEnabled() && MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, ROO_ENTITY) != null) {
 				identifierField = getIdentifierField(classOrInterfaceTypeDetails);
 			}
 			return identifierField;
@@ -146,7 +147,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 
 	private FieldMetadata getIdentifierField(ClassOrInterfaceTypeDetails governorTypeDetails) {
 		for (AnnotationMetadata annotation : governorTypeDetails.getAnnotations()) {
-			if (!annotation.getAnnotationType().getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooEntity")) {
+			if (!annotation.getAnnotationType().getFullyQualifiedTypeName().equals(ROO_ENTITY.getFullyQualifiedTypeName())) {
 				continue;
 			}
 			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("identifierField"));

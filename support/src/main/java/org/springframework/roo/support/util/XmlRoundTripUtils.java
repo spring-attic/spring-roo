@@ -14,7 +14,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Utilities related to Dround tripping XML documents
+ * Utilities related to round tripping XML documents
  * 
  * @author Stefan Schmidt
  * @since 1.1
@@ -98,7 +98,7 @@ public abstract class XmlRoundTripUtils {
 		NodeList proposedChildren = proposed.getChildNodes();
 		for (int i = 0, n = proposedChildren.getLength(); i < n; i++) { // Check proposed elements and compare to originals to find out if we need to add or replace elements
 			Node node = proposedChildren.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
+			if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
 				Element proposedElement = (Element) node;
 				String proposedId = proposedElement.getAttribute("id");
 				if (proposedId.length() != 0) { // Only proposed elements with an id will be considered
@@ -151,12 +151,12 @@ public abstract class XmlRoundTripUtils {
 		NodeList originalChildren = original.getChildNodes();
 		for (int i = 0, n = originalChildren.getLength(); i < n; i++) { // Check original elements and compare to proposed to find out if we need to remove elements
 			Node node = originalChildren.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
+			if (node != null && node.getNodeType() == Node.ELEMENT_NODE) {
 				Element originalElement = (Element) node;
 				String originalId = originalElement.getAttribute("id");
 				if (originalId.length() != 0) { // Only proposed elements with an id will be considered
 					Element proposedElement = XmlUtils.findFirstElement("//*[@id='" + originalId + "']", proposed);
-					if (null == proposedElement && (originalElement.getAttribute("z").equals(calculateUniqueKeyFor(originalElement)) || originalElement.getAttribute("z").equals("?"))) { //remove original element given the proposed document has no element with a matching id
+					if (null == proposedElement && (originalElement.getAttribute("z").equals(calculateUniqueKeyFor(originalElement)) || originalElement.getAttribute("z").equals("?"))) { // Remove original element given the proposed document has no element with a matching id
 						originalElement.getParentNode().removeChild(originalElement);
 						originalDocumentChanged = true;
 					}
@@ -175,7 +175,7 @@ public abstract class XmlRoundTripUtils {
 		int customAttributeCounter = 0;
 		for (int i = 0, n = attributes.getLength(); i < n; i++) {
 			Node node = attributes.item(i);
-			if (!node.getNodeName().startsWith("_")) {
+			if (node != null && !node.getNodeName().startsWith("_")) {
 				if (!node.getNodeName().equals("z") && (b.getAttribute(node.getNodeName()).length() == 0 || !b.getAttribute(node.getNodeName()).equals(node.getNodeValue()))) {
 					return false;
 				}
