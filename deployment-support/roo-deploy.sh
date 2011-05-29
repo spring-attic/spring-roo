@@ -121,7 +121,11 @@ tomcat_stop_start_get_stop() {
     type -P wget &>/dev/null || { l_error "wget not found. Aborting." >&2; exit 1; }
     log "Performing MVC testing; expecting GET success for URL: $@"
     pushd /tmp/rootest &>/dev/null
-    MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    else
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
         # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
         log "kill -9 of old mvn tomcat:run with PID $MVN_TOMCAT_PID"
@@ -139,7 +143,11 @@ tomcat_stop_start_get_stop() {
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "wget failed: $@ (returned code $EXITED)" >&2; exit 1;
     fi
-    MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    else
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    fi
     if [ ! "$MVN_TOMCAT_PID" = "" ]; then
         log "Terminating background mvn tomcat:run process with PID $MVN_TOMCAT_PID"
         kill $MVN_TOMCAT_PID
