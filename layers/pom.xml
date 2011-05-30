@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.roo</groupId>
@@ -8,24 +7,10 @@
 		<version>1.2.0.BUILD-SNAPSHOT</version>
 		<relativePath>../osgi-roo-bundle</relativePath>
 	</parent>
-	<artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
+	<artifactId>org.springframework.roo.layers</artifactId>
 	<packaging>bundle</packaging>
-	<name>Spring Roo - Addon - Web MVC Controller</name>
-	<description>Configuration and integration of Spring MVC controllers in the target project.</description>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<junitArtifactName>junit:junit</junitArtifactName>
-					<includes>
-						<include>**/*Tests.java</include>
-					</includes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	<name>Spring Roo - Application Layering Support</name>
+	<description>Support for common layering options in Java Enterprise Applications</description>
 	<dependencies>
         <!-- OSGi -->
          <dependency>
@@ -42,26 +27,6 @@
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
         <!-- Roo -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.configurable</artifactId>
-            
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.finder</artifactId>
-            
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.plural</artifactId>
-            
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.json</artifactId>
-            
-        </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>
@@ -105,11 +70,6 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.layers</artifactId>
             
         </dependency>
 	</dependencies>

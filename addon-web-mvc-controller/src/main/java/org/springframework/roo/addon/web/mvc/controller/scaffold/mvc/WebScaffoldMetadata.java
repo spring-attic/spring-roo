@@ -34,6 +34,7 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
@@ -65,7 +66,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private JavaTypeMetadataDetails javaTypeMetadataHolder;
 	private boolean compositePk = false;
 
-	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, MemberDetails memberDetails, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes) {
+	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, MemberDetails memberDetails, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, MemberTypeAdditions findAllAdditions) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -100,7 +101,15 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getCreateFormMethod(dependentTypes));
 		}
 		builder.addMethod(getShowMethod());
-		builder.addMethod(getListMethod());
+		if (findAllAdditions != null) {
+			builder.addMethod(getListMethod(findAllAdditions));
+			
+			// TODO: move this copying of MD into separate Utils type
+			for (FieldMetadataBuilder field : findAllAdditions.getClassOrInterfaceTypeDetailsBuilder().getDeclaredFields()) {
+				builder.addField(field.build());
+			}
+		}
+		
 		if (annotationValues.isUpdate()) {
 			builder.addMethod(getUpdateMethod());
 			builder.addMethod(getUpdateFormMethod());
@@ -223,7 +232,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getListMethod() {
+	private MethodMetadata getListMethod(MemberTypeAdditions findAllAdditions) {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindEntriesMethod() == null || javaTypePersistenceMetadataHolder.getCountMethod() == null  || javaTypePersistenceMetadataHolder.getFindAllMethod() == null) {
 			// Mandatory input is missing (ROO-589)
@@ -278,7 +287,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural + "\", " + formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + javaTypePersistenceMetadataHolder.getFindAllMethod().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural + "\", " + findAllAdditions.getMethodBody() + ");");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		if (!dateTypes.isEmpty()) {

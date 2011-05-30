@@ -29,10 +29,13 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.layers.LayerService;
+import org.springframework.roo.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of  {@link WebScaffoldMetadataProvider}.
@@ -47,6 +50,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
 	@Reference private WebMetadataService webMetadataService;
+	@Reference private LayerService layerService;
 	private Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
 	private Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
@@ -113,8 +117,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns);
+		
+		MemberTypeAdditions findAllAdditions = layerService.integrateFindAllMethod(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(formBackingType.getSimpleTypeName())), formBackingType);
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, findAllAdditions);
 	}
 	
 	void installConversionService(JavaType governor) {
