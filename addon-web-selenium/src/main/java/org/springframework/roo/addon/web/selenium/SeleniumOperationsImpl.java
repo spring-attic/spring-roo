@@ -6,6 +6,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
@@ -118,7 +120,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formBackingType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
-		
+
 		// Add composite PK identifier fields if needed
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(formBackingType, memberDetails, null);
 		if (javaTypePersistenceMetadataDetails != null && javaTypePersistenceMetadataDetails.getRooIdentifierFields().size() > 0) {
@@ -131,10 +133,12 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			}
 		}
 		
+		List<FieldMetadata> fields = new LinkedList<FieldMetadata>();
 		// Add all other fields
 		for (FieldMetadata field : webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, null)) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				tbody.appendChild(typeCommand(document, field));
+				fields.add(field);
 			} else {
 				// tbody.appendChild(typeKeyCommand(selenium, field));
 			}
@@ -142,8 +146,13 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		tbody.appendChild(clickAndWaitCommand(document, "//input[@id='proceed']" ));	
 		
+		// Add verifications for all other fields
+		for (FieldMetadata field : fields) {
+			tbody.appendChild(verifyTextCommand(document, formBackingType, field));
+		}
+		
 		fileManager.createOrUpdateTextFileIfRequired(seleniumPath, XmlUtils.nodeToString(document), false);
-
+		
 		manageTestSuite(relativeTestFilePath, name, serverURL);
 		
 		installMavenPlugin();
@@ -265,6 +274,21 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return tr;
 	}
 	
+	private Node verifyTextCommand(Document document, JavaType formBackingType, FieldMetadata field){
+		Node tr = document.createElement("tr");				
+		
+		Node td1 = tr.appendChild(document.createElement("td"));
+		td1.setTextContent("verifyText");
+		
+		Node td2 = tr.appendChild(document.createElement("td"));
+		td2.setTextContent(XmlUtils.convertId("_s_" + formBackingType.getFullyQualifiedTypeName() + "_" + field.getFieldName().getSymbolName() + "_" + field.getFieldName().getSymbolName() + "_id"));
+		
+		Node td3 = tr.appendChild(document.createElement("td"));	
+		td3.setTextContent(convertToInitializer(field));		
+			
+		return tr;
+	}
+	
 //	private Node typeKeyCommand(Document document, FieldMetadata field){
 //		Node tr = document.createElement("tr");				
 //		
@@ -327,7 +351,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			}
 			
 		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {		
-			initializer = new Boolean(true).toString();
+			initializer = new Boolean(false).toString();
 		} else if (field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
 			initializer = new Integer(index).toString();
 		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
