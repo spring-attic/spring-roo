@@ -744,21 +744,34 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
     JSP tag library to restrict access to the relevant menu items in the
     <code>menu.jspx</code> file:</para>
 
-    <para><programlisting>&lt;div <emphasis role="bold">xmlns:sec="http://www.springframework.org/security/tags"</emphasis> ...&gt;
-	  &lt;jsp:output omit-xml-declaration="yes"/&gt;
-	  &lt;ul id="roo_menu"&gt;
-	  <emphasis role="bold">&lt;sec:authorize ifAllGranted="ROLE_ADMIN"&gt;</emphasis>
-      &lt;li id="web_mvc_jsp_topping_category"&gt;
-         ...
-      &lt;/li&gt;
-   &lt;/sec:authorize&gt;
-   &lt;li id="web_mvc_jsp_pizzaorder_category"&gt;
-         ...
-    &lt;/li&gt;
-&lt;/div&gt;</programlisting>This leaves the pizza order view visible to the
-    public. Obviously the delete and the update use case for the pizza order
-    view are not desirable. The easiest way to take care of this is to adjust
-    the <code>@RooWebScaffold</code> annotation in the
+    <para><programlisting>&lt;div xmlns:jsp="..." <emphasis role="bold">xmlns:sec="http://www.springframework.org/security/tags"</emphasis> id="menu" version="2.0"&gt;
+   &lt;jsp:directive.page contentType="text/html;charset=UTF-8"/&gt;
+   &lt;jsp:output omit-xml-declaration="yes"/&gt;
+   &lt;menu:menu id="_menu" z="nZaf43BjUg1iM0v70HJVEsXDopc="&gt;
+       <emphasis role="bold">&lt;sec:authorize ifAllGranted="ROLE_ADMIN"&gt;</emphasis>
+           &lt;menu:category id="c_topping" z="Xm13w68rCIyzL6WIzqBtcpfiNQU="&gt;
+              &lt;menu:item id="i_topping_new" .../&gt;
+              &lt;menu:item id="i_topping_list" .../&gt;
+           &lt;/menu:category&gt;
+           &lt;menu:category id="c_base" z="yTpmmNMm/hWoy3yf+aPcdUX2At8="&gt;
+              &lt;menu:item id="i_base_new" .../&gt;
+              &lt;menu:item id="i_base_list" .../&gt;
+           &lt;/menu:category&gt;
+           &lt;menu:category id="c_pizza" z="mXqKC1ELexS039/pkkCrZVcSry0="&gt;
+              &lt;menu:item id="i_pizza_new" .../&gt;
+              &lt;menu:item id="i_pizza_list" .../&gt;
+           &lt;/menu:category&gt;
+        <emphasis role="bold">&lt;/sec:authorize&gt;</emphasis>
+        &lt;menu:category id="c_pizzaorder" z="gBYiBODEJrzQe3q+el5ktXISc4U="&gt;
+            &lt;menu:item id="i_pizzaorder_new" .../&gt;
+            &lt;menu:item id="i_pizzaorder_list" .../&gt;
+        &lt;/menu:category&gt;
+    &lt;/menu:menu&gt;
+&lt;/div&gt;
+</programlisting>This leaves the pizza order view visible to the public.
+    Obviously the delete and the update use case for the pizza order view are
+    not desirable. The easiest way to take care of this is to adjust the
+    <code>@RooWebScaffold</code> annotation in the
     <code>PizzaOrderController.java</code> source:</para>
 
     <para><programlisting>@RooWebScaffold(path = "pizzaorder", 
