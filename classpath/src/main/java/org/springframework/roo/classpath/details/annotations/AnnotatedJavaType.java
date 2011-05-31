@@ -61,14 +61,15 @@ public final class AnnotatedJavaType {
 	 * Note that each returned {@link AnnotatedJavaType} will have no annotation metadata, as the input {@link JavaType}s
 	 * cannot store any such metadata.
 	 * 
-	 * @param javaTypes to convert (required)
+	 * @param javaTypes to convert; can be <code>null</code> for none
 	 * @return the equivalent {@link AnnotatedJavaType}s (never returns null)
 	 */
 	public static List<AnnotatedJavaType> convertFromJavaTypes(List<JavaType> javaTypes) {
-		Assert.notNull(javaTypes, "Java types required");
-		List<AnnotatedJavaType> result = new ArrayList<AnnotatedJavaType>();
-		for (JavaType javaType : javaTypes) {
-			result.add(convertFromJavaType(javaType));
+		final List<AnnotatedJavaType> result = new ArrayList<AnnotatedJavaType>();
+		if (javaTypes != null) {
+			for (JavaType javaType : javaTypes) {
+				result.add(convertFromJavaType(javaType));
+			}
 		}
 		return result;
 	}

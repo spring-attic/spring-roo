@@ -37,7 +37,20 @@ import java.util.TreeSet;
  * @see org.apache.commons.lang.StringUtils
  */
 public abstract class StringUtils {
-	private static final String FOLDER_SEPARATOR = "/";
+
+    /**
+     * Represents a failed index search.
+     * @since 1.1.5
+     */
+    public static final int INDEX_NOT_FOUND = -1;
+    
+    /**
+     * The empty String <code>""</code>.
+     * @since 1.1.5
+     */
+    public static final String EMPTY = "";
+    
+    private static final String FOLDER_SEPARATOR = "/";
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
 	private static final String TOP_PATH = "..";
 	private static final String CURRENT_PATH = ".";
@@ -305,6 +318,25 @@ public abstract class StringUtils {
 		String lcSuffix = suffix.toLowerCase();
 		return lcStr.equals(lcSuffix);
 	}
+	
+	/**
+	 * Returns the part of the given string that comes after the given separator,
+	 * ignoring case in both strings when performing this search. Examples:
+	 * <ul>
+	 *   <li><code>substringAfterIgnoreCase("ABC", "") = "ABC"</code></li>
+	 *   <li><code>substringAfterIgnoreCase("", "anything") = ""</code></li>
+	 *   <li><code>substringAfterIgnoreCase("ABC", "b") = "C"</code></li>
+	 *   <li><code>substringAfterIgnoreCase("abc", "d") = "abc"</code></li>
+	 * </ul>
+	 *  
+	 * @param string the string of which to return a substring; can't be <code>null</code>
+	 * @param separator the string after which to return the remainder; can't be <code>null</code>
+	 * @return the above substring in its original case
+	 */
+	public static String substringAfterIgnoreCase(final String string, final String separator) {
+		final int separatorIndex = string.toLowerCase().indexOf(separator.toLowerCase());
+		return string.substring(separatorIndex + separator.length());
+	}	
 
 	/**
 	 * Test whether the given string matches the given substring

@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedMap;
 
+import org.springframework.roo.addon.entity.EntityAnnotationValues;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -22,6 +23,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooEntity#finders()}.
@@ -31,17 +33,21 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = FinderMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
+	
+	// Fields
+	private final List<MethodMetadata> dynamicFinderMethods = new LinkedList<MethodMetadata>();
 	private MethodMetadata entityManagerMethod;
 	private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
 	private boolean isDataNucleusEnabled;
-	private List<MethodMetadata> dynamicFinderMethods =  new LinkedList<MethodMetadata>();
 	
 	public FinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, boolean isDataNucleusEnabled, MethodMetadata entityManagerMethod, SortedMap<JavaSymbolName, QueryHolder> queryHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
+		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is not valid");
 		Assert.notNull(entityManagerMethod, "EntityManager method required");
 		Assert.notNull(queryHolders, "Query holders required");
 		
@@ -85,7 +91,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @param finderName the dynamic finder method name
 	 * @return the user-defined method, or an ITD-generated method (never returns null)
 	 */
-	public MethodMetadata getDynamicFinderMethod(JavaSymbolName finderName) {
+	private MethodMetadata getDynamicFinderMethod(final JavaSymbolName finderName) {
 		Assert.notNull(finderName, "Dynamic finder method name is required");
 		Assert.isTrue(queryHolders.containsKey(finderName), "Undefined method name '" + finderName.getSymbolName() + "'");
 				
@@ -99,26 +105,23 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// To get this far we need to create the method...
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(destination);
-		JavaType queryType = new JavaType("javax.persistence.Query");
-		JavaType typedQueryType = new JavaType("javax.persistence.TypedQuery", 0, DataType.TYPE, null, parameters);
+		final List<JavaType> parameters = Collections.singletonList(destination);
+		final JavaType queryType = new JavaType("javax.persistence.Query");
+		final JavaType typedQueryType = new JavaType("javax.persistence.TypedQuery", 0, DataType.TYPE, null, parameters);
 
-		QueryHolder queryHolder = queryHolders.get(finderName);
-		String jpaQuery = queryHolder.getJpaQuery();
-		List<JavaType> parameterTypes = queryHolder.getParameterTypes();
-		List<JavaSymbolName> parameterNames = queryHolder.getParameterNames();
+		final QueryHolder queryHolder = queryHolders.get(finderName);
+		final List<JavaType> parameterTypes = queryHolder.getParameterTypes();
+		final List<JavaSymbolName> parameterNames = queryHolder.getParameterNames();
 		
-		// We declared the field in this ITD, so produce a public accessor for it
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		String methodName = finderName.getSymbolName();		
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final String methodName = finderName.getSymbolName();		
 		boolean containsCollectionType = false;
 
 		for (int i = 0; i < parameterTypes.size(); i++) {
-			String name = parameterNames.get(i).getSymbolName();
+			final String name = parameterNames.get(i).getSymbolName();
 			
-			StringBuilder length = new StringBuilder();
-			if (parameterTypes.get(i).equals(new JavaType("java.lang.String"))) {
+			final StringBuilder length = new StringBuilder();
+			if (JavaType.STRING_OBJECT.equals(parameterTypes.get(i))) {
 				length.append(" || ").append(parameterNames.get(i)).append(".length() == 0");
 			}
 			
@@ -148,13 +151,17 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Get the entityManager() method (as per ROO-216)
 		bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = " + destination.getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
-		List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
+		final List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
+		final String jpaQuery = queryHolder.getJpaQuery();
 		if (containsCollectionType) {
 			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + "\");");
 			boolean jpaQueryComplete = false;
 			for (int i = 0; i < parameterTypes.size(); i++) {
 				if (!jpaQueryComplete && !jpaQuery.trim().endsWith("WHERE") && !jpaQuery.trim().endsWith("AND") && !jpaQuery.trim().endsWith("OR")) {
-					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (methodName.substring(methodName.toLowerCase().indexOf(parameterNames.get(i).getSymbolName().toLowerCase()) + parameterNames.get(i).getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
+					// Work out whether this parameter should be AND'ed or OR'ed based on the next part of the method name
+					final String nextPartOfMethodName = StringUtils.substringAfterIgnoreCase(methodName, parameterNames.get(i).getSymbolName());
+					final String booleanOperator = nextPartOfMethodName.startsWith("And") ? "AND" : "OR";
+					bodyBuilder.appendFormalLine("queryBuilder.append(\" " + booleanOperator + "\");");
 					jpaQueryComplete = true;
 				}
 				if (parameterTypes.get(i).isCommonCollectionType()) {
@@ -162,7 +169,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				} 
 			}
 			int position = 0;
-			for (JavaSymbolName name: collectionTypeNames) {
+			for (final JavaSymbolName name: collectionTypeNames) {
 				bodyBuilder.appendFormalLine("for (int i = 0; i < " + name + ".size(); i++) {");
 				bodyBuilder.indent();
 				bodyBuilder.appendFormalLine("if (i > 0) queryBuilder.append(\" AND\");");
@@ -170,9 +177,18 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
 				if (collectionTypeNames.size() > ++position) {
-					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (methodName.substring(methodName.toLowerCase().indexOf(name.getSymbolName().toLowerCase()) + name.getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
+					final String nextPartOfMethodName = StringUtils.substringAfterIgnoreCase(methodName, name.getSymbolName());
+					final String booleanOperator = nextPartOfMethodName.startsWith("And") ? "AND" : "OR";
+					bodyBuilder.appendFormalLine("queryBuilder.append(\" " + booleanOperator + "\");");
 				}
-			}		
+			}
+			
+			// At this point the generated Java code has built the JPQL query; add the default "order by" expression(s) for ROO-241
+			final String orderByClause = getOrderByClause();
+			if (StringUtils.hasText(orderByClause)) {
+				bodyBuilder.appendFormalLine("queryBuilder.append(\"" + orderByClause + "\");");
+			}
+			
 			if (isDataNucleusEnabled) {
 				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
 			} else {
@@ -192,10 +208,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				}
 			}				
 		} else {
+			final String orderedQuery = jpaQuery + getOrderByClause();
 			if (isDataNucleusEnabled) {
-				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\");");
+				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + orderedQuery + "\");");
 			} else {
-				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\", " + destination.getSimpleTypeName() + ".class);");
+				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + orderedQuery + "\", " + destination.getSimpleTypeName() + ".class);");
 			}
 		
 			for (JavaSymbolName name : parameterNames) {
@@ -209,6 +226,18 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return methodBuilder.build();
 	}
 	
+	/**
+	 * Returns the order by clause to use for finders
+	 * 
+	 * @return an empty string if none applies, otherwise a JPQL "order by" clause with a leading space,
+	 * ready for appending to an existing JPA query 
+	 */
+	private String getOrderByClause() {
+		// At the moment we only support a default sort order (for ROO-241), not a custom sort order
+		final EntityAnnotationValues annotationValues = new EntityAnnotationValues(governorPhysicalTypeMetadata);
+		return annotationValues.getOrderByClause();
+	}
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

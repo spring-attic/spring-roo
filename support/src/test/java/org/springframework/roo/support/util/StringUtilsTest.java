@@ -31,4 +31,34 @@ public class StringUtilsTest {
 	public void testPadLeft2() {
 		assertEquals("99Foo", StringUtils.padLeft("Foo", 5, '9'));
 	}
+	
+	@Test
+	public void testSubstringAfterIgnoreCaseWithTwoEmptyStrings() {
+		assertEquals("", StringUtils.substringAfterIgnoreCase("", ""));
+	}
+	
+	@Test
+	public void testSubstringAfterIgnoreCaseWithEmptySeparator() {
+		assertEquals("Abc", StringUtils.substringAfterIgnoreCase("Abc", ""));
+	}
+	
+	@Test
+	public void testSubstringAfterIgnoreCaseWithEmptyString() {
+		assertEquals("", StringUtils.substringAfterIgnoreCase("", "x"));
+	}
+	
+	@Test
+	public void testSubstringAfterIgnoreCaseWithNonMatchingSeparator() {
+		assertEquals("Abc", StringUtils.substringAfterIgnoreCase("Abc", "x"));
+	}
+	
+	@Test
+	public void testSubstringAfterIgnoreCaseWithMatchingSeparatorInMiddle() {
+		assertEquals("C", StringUtils.substringAfterIgnoreCase("AbC", "B"));
+	}
+	
+	@Test
+	public void testSubstringAfterIgnoreCaseWithMatchingSeparatorAtEnd() {
+		assertEquals("", StringUtils.substringAfterIgnoreCase("AbC", "c"));
+	}
 }

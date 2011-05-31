@@ -1,6 +1,7 @@
 package org.springframework.roo.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,16 +31,17 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public final class JavaType implements Comparable<JavaType>, Cloneable {
-	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, DataType.TYPE, null, null);
-	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, DataType.TYPE, null, null);
-	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String", 0, DataType.TYPE, null, null);
-	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", 0, DataType.TYPE, null, null);
-	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short", 0, DataType.TYPE, null, null);
-	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer", 0, DataType.TYPE, null, null);
-	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long", 0, DataType.TYPE, null, null);
-	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float", 0, DataType.TYPE, null, null);
-	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double", 0, DataType.TYPE, null, null);
-	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void", 0, DataType.TYPE, null, null);
+	
+	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");
+	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character");
+	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String");
+	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte");
+	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
+	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer");
+	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long");
+	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float");
+	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double");
+	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void");
 	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", 0, DataType.PRIMITIVE, null, null);
@@ -55,13 +57,6 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
 	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_"); // List<?>
 
-	private List<JavaType> parameters = new LinkedList<JavaType>();
-	private JavaSymbolName argName = null;
-	private int array = 0;
-	private boolean defaultPackage;
-	private DataType dataType;
-	private String fullyQualifiedTypeName;
-	private String simpleTypeName;
 	private static final Set<String> commonCollectionTypes = new HashSet<String>();
 
 	static {
@@ -76,6 +71,32 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		commonCollectionTypes.add(HashSet.class.getName());
 	}
 
+	
+	/**
+	 * Construct a {@link JavaType} with full details. Recall that {@link JavaType} is immutable and therefore this is the only way of
+	 * setting these non-default values.
+	 * 
+	 * @param fullyQualifiedTypeName the name (as per the rules above)
+	 * @param array number of array indicies (0 = not an array, 1 = single dimensional array etc)
+	 * @param dataType the {@link DataType}
+	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
+	 * @param parameters the type parameters applicable (can be none if there aren't any)
+	 */
+	public static JavaType getInstance(String fullyQualifiedTypeName, int array, DataType dataType, JavaSymbolName argName, JavaType... parameters) {
+		// This method can't be another constructor as it would be ambiguous with
+		// the existing list-based one and thereby break backward compatibility.
+		return new JavaType(fullyQualifiedTypeName, array, dataType, argName, Arrays.asList(parameters));
+	}
+	
+	// Fields
+	private final List<JavaType> parameters;
+	private final JavaSymbolName argName;
+	private final int array;
+	private final boolean defaultPackage;
+	private final DataType dataType;
+	private final String fullyQualifiedTypeName;
+	private final String simpleTypeName;
+	
 	/**
 	 * Construct a JavaType.
 	 * <p>
@@ -103,7 +124,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
-	public JavaType(String fullyQualifiedTypeName, int array, DataType dataType, JavaSymbolName argName, List<JavaType> parameters) {
+	public JavaType(String fullyQualifiedTypeName, int array, DataType dataType, JavaSymbolName argName, Collection<? extends JavaType> parameters) {
 		Assert.hasText(fullyQualifiedTypeName, "Fully qualified type name required");
 		Assert.notNull(dataType, "Data type required");
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
@@ -125,8 +146,9 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 		this.array = array;
 		this.dataType = dataType;
+		this.parameters = new LinkedList<JavaType>();
 		if (parameters != null) {
-			this.parameters = parameters;
+			this.parameters.addAll(parameters);
 		}
 		this.argName = argName;
 	}

@@ -5,6 +5,8 @@ import org.springframework.roo.classpath.details.annotations.populator.AbstractA
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.ObjectUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a parsed {@link RooEntity} annotation.
@@ -37,6 +39,7 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String catalog = "";
 	@AutoPopulate private String inheritanceType = "";
 	@AutoPopulate private String entityName = "";
+	@AutoPopulate private String[] defaultSortOrder;
 
 	public EntityAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooEntity.class.getName()));
@@ -133,5 +136,26 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 
 	public String getEntityName() {
 		return entityName;
+	}
+	
+	/**
+	 * @see RooEntity#defaultSortOrder()
+	 * @return see above
+	 */
+	public String[] getDefaultSortOrder() {
+		return defaultSortOrder;
+	}
+	
+	/**
+	 * Returns the order by clause to use for finders
+	 * 
+	 * @return an empty string if none applies, otherwise a JPQL "order by" clause with a leading space,
+	 * ready for appending to an existing JPA query 
+	 */
+	public String getOrderByClause() {
+		if (ObjectUtils.isEmpty(defaultSortOrder) || !StringUtils.hasText(defaultSortOrder[0])) {
+			return "";
+		}
+		return " ORDER BY " + StringUtils.arrayToDelimitedString(defaultSortOrder, ", ");
 	}
 }

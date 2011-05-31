@@ -69,7 +69,7 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		
 		// Using SortedMap to ensure that if they have > 1 finder the ITD source emits in the same predictable order each finder
-		SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
+		final SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
 		for (String methodName : entityMetadata.getDynamicFinders()) {
 			JavaSymbolName finderName = new JavaSymbolName(methodName);
 			QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural(), entityMetadata.getEntityName());

@@ -101,6 +101,16 @@ public @interface RooEntity {
 	 * after the specified method name; mandatory)
 	 */
 	String countMethod() default "count";
+	
+	/**
+	 * @return the default JPQL expression(s) to use when sorting the results of a JPA finder; any references to
+	 * this entity's fields should be prefixed with <code>o.</code>. For example, the value array {"upper(o.fullName)", "o.birthDate desc"}
+	 * would result in the returned entities being sorted firstly by ascending full name (case-insensitively), then by descending birth
+	 * date. Any valid JPQL "order by" expressions can be used. For no default sorting, remove this attribute or set the first expression
+	 * to a single empty string.
+	 * @since 1.1.5
+	 */
+	String[] defaultSortOrder() default "";
 
 	/**
 	 * @return the prefix of the "findAll" method to generate (defaults to "findAll", with the plural of the entity appended

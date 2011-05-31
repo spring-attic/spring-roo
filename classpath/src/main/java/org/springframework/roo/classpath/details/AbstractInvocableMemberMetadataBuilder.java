@@ -15,7 +15,8 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1
  */
 public abstract class AbstractInvocableMemberMetadataBuilder<T extends InvocableMemberMetadata> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
-	private List<JavaSymbolName> parameterNames =  new ArrayList<JavaSymbolName>();
+	
+	private final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	private InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -26,7 +27,7 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 	
 	protected AbstractInvocableMemberMetadataBuilder(InvocableMemberMetadata existing) {
 		super(existing);
-		this.parameterNames = new ArrayList<JavaSymbolName>(existing.getParameterNames());
+		this.parameterNames.addAll(existing.getParameterNames());
 		this.parameterTypes = new ArrayList<AnnotatedJavaType>(existing.getParameterTypes());
 		this.throwsTypes = new ArrayList<JavaType>(existing.getThrowsTypes());
 		bodyBuilder.append(existing.getBody());
@@ -34,7 +35,7 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 
 	protected AbstractInvocableMemberMetadataBuilder(String declaredbyMetadataId, InvocableMemberMetadata existing) {
 		super(declaredbyMetadataId, existing);
-		this.parameterNames = new ArrayList<JavaSymbolName>(existing.getParameterNames());
+		this.parameterNames.addAll(existing.getParameterNames());
 		this.parameterTypes = new ArrayList<AnnotatedJavaType>(existing.getParameterTypes());
 		this.throwsTypes = new ArrayList<JavaType>(existing.getThrowsTypes());
 		bodyBuilder.append(existing.getBody());
@@ -56,8 +57,16 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 		return parameterNames;
 	}
 
-	public void setParameterNames(List<JavaSymbolName> parameterNames) {
-		this.parameterNames = parameterNames;
+	/**
+	 * Sets the parameter names to be used when building the invocable member
+	 * 
+	 * @param parameterNames defensively copied; can be <code>null</code> for none
+	 */
+	public void setParameterNames(final List<JavaSymbolName> parameterNames) {
+		this.parameterNames.clear();
+		if (parameterNames != null) {
+			this.parameterNames.addAll(parameterNames);
+		}
 	}
 
 	public List<AnnotatedJavaType> getParameterTypes() {

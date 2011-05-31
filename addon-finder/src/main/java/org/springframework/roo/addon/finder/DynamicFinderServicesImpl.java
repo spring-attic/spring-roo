@@ -84,15 +84,24 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		}
 
 		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
-		String jpaQuery = getJpaQuery(tokens, simpleTypeName, finderName, plural, entityName);
+		String jpaQuery = getJpaQuery(tokens, simpleTypeName, entityName);
 		List<JavaType> parameterTypes = getParameterTypes(tokens, finderName, plural);
 		List<JavaSymbolName> parameterNames = getParameterNames(tokens, finderName, plural);
 		return new QueryHolder(jpaQuery, parameterTypes, parameterNames, tokens);
 	}
 
-	private String getJpaQuery(List<Token> tokens, String simpleTypeName, JavaSymbolName finderName, String plural, String entityName) {
-		String typeName = StringUtils.hasText(entityName) ? entityName : simpleTypeName;
-		StringBuilder builder = new StringBuilder();
+	/**
+	 * Generates a JPA finder query for the given entity
+	 * 
+	 * @param tokens
+	 * @param simpleTypeName the simple name of the type to find; used if <code>entityName</code> is blank
+	 * @param plural
+	 * @param entityName the type of entity to find; can be blank to use the <code>simpleTypeName</code>
+	 * @return a valid JPQL query string
+	 */
+	String getJpaQuery(final List<Token> tokens, final String simpleTypeName, final String entityName) {
+		final String typeName = StringUtils.hasText(entityName) ? entityName : simpleTypeName;
+		final StringBuilder builder = new StringBuilder();
 		builder.append("SELECT o FROM ").append(typeName);
 		builder.append(" AS o WHERE ");
 		
@@ -100,7 +109,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		boolean isNewField = true;
 		boolean isFieldApplied = false;
 
-		for (Token token : tokens) {
+		for (final Token token : tokens) {
 			if (token instanceof ReservedToken) {
 				String reservedToken = token.getValue();
 				if (lastFieldToken == null) continue;
@@ -186,6 +195,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				builder.append(" = :").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 		}
+		// TODO add default "order by" clause for ROO-241
 		return builder.toString().trim();
 	}
 

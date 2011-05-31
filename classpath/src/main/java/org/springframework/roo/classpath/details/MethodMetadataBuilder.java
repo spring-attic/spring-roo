@@ -32,6 +32,17 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 		init(existing.getMethodName(), existing.getReturnType());
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param declaredbyMetadataId
+	 * @param modifier
+	 * @param methodName
+	 * @param returnType
+	 * @param parameterTypes
+	 * @param parameterNames can be <code>null</code> for none
+	 * @param bodyBuilder
+	 */
 	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, InvocableMemberBodyBuilder bodyBuilder) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);

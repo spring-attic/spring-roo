@@ -46,6 +46,9 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
+	private static final int PUBLIC_STATIC = Modifier.PUBLIC | Modifier.STATIC;
 	private static final String ENTITY_MANAGER_METHOD_NAME = "entityManager";
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -55,12 +58,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final JavaType PERSISTENCE_CONTEXT = new JavaType("javax.persistence.PersistenceContext");
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
+	// Fields
 	private EntityMetadata parent;
 	private EntityAnnotationValues annotationValues;
 	private MemberDetails memberDetails;
 	private boolean noArgConstructor;
 	private String plural;
-	
 	private Identifier identifier;
 	private boolean isGaeEnabled;
 	private boolean isDataNucleusEnabled;
@@ -979,7 +982,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
 		bodyBuilder.appendFormalLine("return em;");
-		int modifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
+		int modifier = PUBLIC_STATIC | Modifier.FINAL;
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
@@ -1015,9 +1018,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		} else {
 			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT COUNT(o) FROM " + entityName + " o\", Long.class).getSingleResult();");
 		}
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC_STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -1026,43 +1028,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the find all method (may return null)
 	 */
 	public MethodMetadata getFindAllMethod() {
-		if ("".equals(annotationValues.getFindAllMethod())) {
-			return null;
-		}
-		
-		// Method definition to find or build
-		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod() + plural);
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(destination);
-		JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
-		
-		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
-		if (userMethod != null) {
-			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
-			return userMethod;
-		}
-		
-		// Create method
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		String entityName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : destination.getSimpleTypeName();
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		if (isDataNucleusEnabled) {
-			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\").getResultList();");
-		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).getResultList();");
-		}
- 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		if (isGaeEnabled) {
-			addTransactionalAnnotation(annotations);
-		}
-		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		return getListFinderMethod(annotationValues.getFindAllMethod(), plural, null, null, "");
 	}
 
 	/**
@@ -1119,8 +1085,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC_STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -1129,47 +1094,79 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the find entries method (may return null)
 	 */
 	public MethodMetadata getFindEntriesMethod() {
-		if ("".equals(annotationValues.getFindEntriesMethod())) {
+		return getListFinderMethod(
+				annotationValues.getFindEntriesMethod(),
+				destination.getSimpleTypeName() + "Entries",
+				Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE),
+				Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults")),
+				".setFirstResult(firstResult).setMaxResults(maxResults)"
+		);
+	}
+	
+	/**
+	 * Returns the metadata for a list-finding method with the given properties
+	 * 
+	 * @param finderMethodPrefix the first part of the created method's name; blank means don't create it
+	 * @param finderMethodSuffix the second and final part of the created method's name; can't be blank if a prefix is provided
+	 * @param paramTypes the parameter types of the method to be created; can be <code>null</code> for none
+	 * @param paramNames the parameter names of the method to be created; must be the same size as the list of types; can be
+	 * <code>null</code> for none
+	 * @param filters the literal Java code for any filters to be added to the query; can be blank for none
+	 * @return <code>null</code> if no method is to be created (typically because the user has their own method with this signature)
+	 */
+	private MethodMetadata getListFinderMethod(final String finderMethodPrefix, final String finderMethodSuffix, final List<JavaType> paramTypes, final List<JavaSymbolName> paramNames, final String filters) {
+		if (!StringUtils.hasText(finderMethodPrefix)) {
 			return null;
 		}
+		Assert.hasText(finderMethodSuffix);
 		
 		// Method definition to find or build
-		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindEntriesMethod() + destination.getSimpleTypeName() + "Entries");
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
-		paramTypes.add(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("firstResult"));
-		paramNames.add(new JavaSymbolName("maxResults"));
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(destination);
-		JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
+		final JavaSymbolName methodName = new JavaSymbolName(finderMethodPrefix + finderMethodSuffix);
+		final JavaType returnType = JavaType.getInstance(List.class.getName(), 0, DataType.TYPE, null, destination);
 		
-		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		// Locate any user-defined method having this signature
+		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
 		
-		// Create method
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		String entityName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : destination.getSimpleTypeName();
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		// Create the method
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final StringBuilder jpql = new StringBuilder("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"" + getSelectAllQuery() + "\"");
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		} else {
-			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o\", " + destination.getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+			// Not DataNucleus, so we need to tell JPA the desired class
+			jpql.append(", " + destination.getSimpleTypeName() + ".class");
 		}
- 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+		jpql.append(")");
+		if (StringUtils.hasText(filters)) {
+			Assert.isTrue(filters.startsWith("."));
+			Assert.isTrue(filters.endsWith(")"));
+			jpql.append(filters);
+		}
+		jpql.append(".getResultList();");
+		bodyBuilder.appendFormalLine(jpql.toString());
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC_STATIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
+	}
+
+	/**
+	 * Returns the JPQL query that finds all instances of this entity
+	 * 
+	 * @return a valid JPQL query
+	 */
+	private String getSelectAllQuery() {
+		final String entityName = StringUtils.hasText(annotationValues.getEntityName()) ? annotationValues.getEntityName() : destination.getSimpleTypeName();
+		// Support for default sort order added for ROO-241
+		return "SELECT o FROM " + entityName + " o" + annotationValues.getOrderByClause();
 	}
 
 	private void addSuppressWarnings(List<AnnotationMetadataBuilder> annotations) {
