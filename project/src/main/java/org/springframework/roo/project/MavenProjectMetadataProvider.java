@@ -20,6 +20,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -92,44 +93,44 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Build dependencies list
 		Set<Dependency> dependencies = new HashSet<Dependency>();
-		for (Element dependency : XmlUtils.findElements("/project/dependencies/dependency", root)) {
-			dependencies.add(new Dependency(dependency));
+		for (Element dependencyElement : XmlUtils.findElements("/project/dependencies/dependency", root)) {
+			dependencies.add(new Dependency(dependencyElement));
 		}
 
 		// Build plugins list
 		Set<Plugin> buildPlugins = new HashSet<Plugin>();
-		for (Element plugin : XmlUtils.findElements("/project/build/plugins/plugin", root)) {
-			buildPlugins.add(new Plugin(plugin));
+		for (Element pluginElement : XmlUtils.findElements("/project/build/plugins/plugin", root)) {
+			buildPlugins.add(new Plugin(pluginElement));
 		}
 
 		// Build repositories list
 		Set<Repository> repositories = new HashSet<Repository>();
-		for (Element repository : XmlUtils.findElements("/project/repositories/repository", root)) {
-			repositories.add(new Repository(repository));
+		for (Element repositoryElement : XmlUtils.findElements("/project/repositories/repository", root)) {
+			repositories.add(new Repository(repositoryElement));
 		}
 
 		// Build plugin repositories list
 		Set<Repository> pluginRepositories = new HashSet<Repository>();
-		for (Element pluginRepository : XmlUtils.findElements("/project/pluginRepositories/pluginRepository", root)) {
-			pluginRepositories.add(new Repository(pluginRepository));
+		for (Element pluginRepositoryElement : XmlUtils.findElements("/project/pluginRepositories/pluginRepository", root)) {
+			pluginRepositories.add(new Repository(pluginRepositoryElement));
 		}
 
 		// Build properties list
 		Set<Property> pomProperties = new HashSet<Property>();
-		for (Element prop : XmlUtils.findElements("/project/properties/*", root)) {
-			pomProperties.add(new Property(prop));
+		for (Element propertyElement : XmlUtils.findElements("/project/properties/*", root)) {
+			pomProperties.add(new Property(propertyElement));
 		}
 
 		// Filters list
 		Set<Filter> filters = new HashSet<Filter>();
-		for (Element filter : XmlUtils.findElements("/project/build/filters/filter", root)) {
-			filters.add(new Filter(filter));
+		for (Element filterElement : XmlUtils.findElements("/project/build/filters/filter", root)) {
+			filters.add(new Filter(filterElement));
 		}
 
 		// Resources list
 		Set<Resource> resources = new HashSet<Resource>();
-		for (Element resource : XmlUtils.findElements("/project/build/resources/resource", root)) {
-			resources.add(new Resource(resource));
+		for (Element resourceElement : XmlUtils.findElements("/project/build/resources/resource", root)) {
+			resources.add(new Resource(resourceElement));
 		}
 
 		// Update window title with project name
@@ -503,26 +504,32 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		dependencyElement.appendChild(versionElement);
 
 		if (dependency.getType() != null) {
-			Element type = document.createElement("type");
-			type.setTextContent(dependency.getType().toString().toLowerCase());
+			Element typeElement = document.createElement("type");
+			typeElement.setTextContent(dependency.getType().toString().toLowerCase());
 			if (!DependencyType.JAR.equals(dependency.getType())) {
 				// Keep the XML short, we don't need "JAR" given it's the default
-				dependencyElement.appendChild(type);
+				dependencyElement.appendChild(typeElement);
 			}
 		}
 
 		if (dependency.getScope() != null) {
-			Element scope = document.createElement("scope");
-			scope.setTextContent(dependency.getScope().toString().toLowerCase());
+			Element scopeElement = document.createElement("scope");
+			scopeElement.setTextContent(dependency.getScope().toString().toLowerCase());
 			if (!DependencyScope.COMPILE.equals(dependency.getScope())) {
 				// Keep the XML short, we don't need "compile" given it's the default
-				dependencyElement.appendChild(scope);
+				dependencyElement.appendChild(scopeElement);
 			}
 			if (DependencyScope.SYSTEM.equals(dependency.getScope()) && dependency.getSystemPath() != null) {
-				Element systemPath = document.createElement("systemPath");
-				systemPath.setTextContent(dependency.getSystemPath());
-				dependencyElement.appendChild(systemPath);
+				Element systemPathElement = document.createElement("systemPath");
+				systemPathElement.setTextContent(dependency.getSystemPath());
+				dependencyElement.appendChild(systemPathElement);
 			}
+		}
+
+		if (dependency.getClassifier() != null) {
+			Element classifierElement = document.createElement("classifier");
+			classifierElement.setTextContent(dependency.getClassifier());
+			dependencyElement.appendChild(classifierElement);
 		}
 
 		// Add exclusions if they are defined
@@ -643,16 +650,16 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 				String id = execution.getId();
 				if (id != null && id.length() > 0) {
-					Element executionId = document.createElement("id");
-					executionId.setTextContent(id);
-					executionElement.appendChild(executionId);
+					Element executionIdElement = document.createElement("id");
+					executionIdElement.setTextContent(id);
+					executionElement.appendChild(executionIdElement);
 				}
 
 				String phase = execution.getPhase();
 				if (phase != null && phase.length() > 0) {
-					Element executionPhase = document.createElement("phase");
-					executionPhase.setTextContent(phase);
-					executionElement.appendChild(executionPhase);
+					Element executionPhaseElement = document.createElement("phase");
+					executionPhaseElement.setTextContent(phase);
+					executionElement.appendChild(executionPhaseElement);
 				}
 
 				Element goalsElement = document.createElement("goals");
