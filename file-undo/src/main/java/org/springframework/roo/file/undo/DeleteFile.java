@@ -16,13 +16,23 @@ import org.springframework.roo.support.util.FileCopyUtils;
  *
  */
 public class DeleteFile implements UndoableOperation {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(DeleteFile.class);
 
-	private FilenameResolver filenameResolver;
-	private File actual;
-	private File backup;
+	// Fields
+	private final FilenameResolver filenameResolver;
+	private final File actual;
+	private final File backup;
 	
-	public DeleteFile(UndoManager undoManager, FilenameResolver filenameResolver, File actual) {
+	/**
+	 * Constructor
+	 * 
+	 * @param undoManager cannot be <code>null</code>
+	 * @param filenameResolver cannot be <code>null</code>
+	 * @param actual the file to delete; must be an existing file (not a directory)
+	 */
+	public DeleteFile(final UndoManager undoManager, final FilenameResolver filenameResolver, final File actual) {
 		Assert.notNull(undoManager, "Undo manager required");
 		Assert.notNull(actual, "File required");
 		Assert.notNull(filenameResolver, "Filename resolver required");
@@ -34,7 +44,7 @@ public class DeleteFile implements UndoableOperation {
 			backup = File.createTempFile("DeleteFile", "tmp");
 			FileCopyUtils.copy(actual, backup);
 		} catch (IOException ioe) {
-			throw new IllegalStateException("Unable to make a backup of file '" + this.actual + "'", ioe);
+			throw new IllegalStateException("Unable to make a backup of file '" + actual + "'", ioe);
 		}
 		this.actual = actual;
 		this.actual.delete();
