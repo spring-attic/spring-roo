@@ -56,6 +56,7 @@ import org.w3c.dom.Document;
 @Component(immediate = true) 
 @Service 
 public final class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
+	private static final String WEB_INF_VIEWS = "/WEB-INF/views/";
 	@Reference private FileManager fileManager;
 	@Reference private JspOperations jspOperations;
 	@Reference private MenuOperations menuOperations;
@@ -93,8 +94,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, memberDetails, metadataIdentificationString);
 		JavaTypeMetadataDetails formbackingTypeMetadata = relatedTypeMd.get(formBackingType);
 		Assert.notNull(formbackingTypeMetadata, "Form backing type metadata required");
-		JavaTypePersistenceMetadataDetails formbackingTypePersistenceMetadata = formbackingTypeMetadata.getPersistenceDetails();
-		if (formbackingTypePersistenceMetadata == null) {
+		JavaTypePersistenceMetadataDetails formBackingTypePersistenceMetadata = formbackingTypeMetadata.getPersistenceDetails();
+		if (formBackingTypePersistenceMetadata == null) {
 			return null;
 		}
 
@@ -105,7 +106,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		Assert.notNull(projectMetadata, "Project metadata required");
 		PathResolver pathResolver = projectMetadata.getPathResolver();
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views"))) {
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, WEB_INF_VIEWS))) {
 			jspOperations.installCommonViewArtefacts();
 		}
 
@@ -118,7 +119,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 
 		List<FieldMetadata> eligibleFields = webMetadataService.getScaffoldEligibleFieldMetadata(formBackingType, memberDetails, metadataIdentificationString);
-		if (eligibleFields.isEmpty() && formbackingTypePersistenceMetadata.getRooIdentifierFields().isEmpty()) {
+		if (eligibleFields.isEmpty() && formBackingTypePersistenceMetadata.getRooIdentifierFields().isEmpty()) {
 			return null;
 		}
 
@@ -130,7 +131,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		
 		// Make the holding directory for this controller
-		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + controllerPath);
+		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, WEB_INF_VIEWS + controllerPath);
 		if (!fileManager.exists(destinationDirectory)) {
 			fileManager.createDirectory(destinationDirectory);
 		} else {
@@ -141,11 +142,11 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// By now we have a directory to put the JSPs inside
 		String listPath1 = destinationDirectory + "/list.jspx";
 		writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
-		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
+		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/list.jspx");
 
 		String showPath = destinationDirectory + "/show.jspx";
 		writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
-		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
+		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/show.jspx");
 
 		JavaSymbolName categoryName = new JavaSymbolName(formBackingType.getSimpleTypeName());
 
@@ -159,7 +160,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			// Add 'create new' menu item
 			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formBackingType.getSimpleTypeName()).getReadableSymbolName());
-			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
+			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/create.jspx");
 		} else {
 			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("new"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "create", controllerPath);
@@ -167,7 +168,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
 			writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument());
-			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/update.jspx");
+			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/update.jspx");
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath);
 		}
@@ -179,7 +180,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
 		properties.put(pluralResourceId, new JavaSymbolName(formBackingTypeMetadataDetails.getPlural()).getReadableSymbolName());
 		
-		if (formBackingTypeMetadataDetails.getPersistenceDetails() != null && formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields().size() > 0) {
+		if (formBackingTypeMetadataDetails.getPersistenceDetails() != null && !formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields().isEmpty()) {
 			for (FieldMetadata idField: formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields()) {
 				properties.put(XmlUtils.convertId(resourceId + "." + formBackingTypeMetadataDetails.getPersistenceDetails().getIdentifierField().getFieldName().getSymbolName() + "." + idField.getFieldName().getSymbolName().toLowerCase()), idField.getFieldName().getReadableSymbolName());
 			}
@@ -240,7 +241,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				for (JavaSymbolName paramName : finderDetails.getFinderMethodMetadata().getParameterNames()) {
 					properties.put(XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName());
 				}
-				tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName + ".jspx");
+				tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/" + finderName + ".jspx");
 			}
 		}
 		

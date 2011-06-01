@@ -44,7 +44,6 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 	}
 	
 	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
 	}
