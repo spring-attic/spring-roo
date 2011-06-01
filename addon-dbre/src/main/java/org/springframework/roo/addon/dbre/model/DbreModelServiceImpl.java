@@ -109,7 +109,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 	}
 	
 	public String getDbreXmlPath() {
-		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "DBRE XML") : null;
+		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml") : null;
 	}
 	
 	public String getNoSchemaString() {
