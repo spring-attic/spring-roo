@@ -304,9 +304,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		
 		Set<FinderMetadataDetails> finderMetadataDetails = new LinkedHashSet<FinderMetadataDetails>();
 		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		registerDependency(finderMetadataKey, metadataIdentificationString);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {
-			registerDependency(finderMetadataKey, metadataIdentificationString);
 			for (MethodMetadata method: finderMetadata.getAllDynamicFinders()) {
 				List<JavaSymbolName> paramNames = method.getParameterNames();
 				List<JavaType> paramTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
