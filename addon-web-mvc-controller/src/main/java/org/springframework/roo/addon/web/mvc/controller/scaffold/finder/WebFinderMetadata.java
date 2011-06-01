@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
@@ -66,9 +64,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
-		Assert.notNull(dynamicFinderMethods, "Finder methods required");
+		Assert.notNull(dynamicFinderMethods, "Dynamoic finder methods required");
 		Assert.notNull(memberDetails, "Member details required");
-		Assert.notNull(dynamicFinderMethods, "Array of dynamic finder methods cannot be null");
 		if (!isValid()) {
 			return;
 		}
@@ -77,15 +74,17 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		this.formBackingType = annotationValues.getFormBackingObject();
 		this.specialDomainTypes = specialDomainTypes;
 		this.memberDetails = memberDetails;
+		
+		if (dynamicFinderMethods.isEmpty()) {
+			return;
+		}
+
 		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
 		
-		if (annotationValues.isExposeFinders() && !dynamicFinderMethods.isEmpty()) { // No need for null check of entityMetadata.getDynamicFinders as it guarantees non-null (but maybe empty list)
-			SortedSet<FinderMetadataDetails> finders = new TreeSet<FinderMetadataDetails>(dynamicFinderMethods);
-			for (FinderMetadataDetails finder : finders) {
-				builder.addMethod(getFinderFormMethod(finder));
-				builder.addMethod(getFinderMethod(finder));
-			}
+		for (FinderMetadataDetails finder : dynamicFinderMethods) {
+			builder.addMethod(getFinderFormMethod(finder));
+			builder.addMethod(getFinderMethod(finder));
 		}
 		
 		itdTypeDetails = builder.build();

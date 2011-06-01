@@ -44,6 +44,7 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 	}
 	
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
 	}
@@ -71,12 +72,12 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
+		Set<FinderMetadataDetails> dynamicFinderMethods = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
-		Set<FinderMetadataDetails> dynamicFinderMethodsAndFields = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 
-		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dynamicFinderMethodsAndFields);
+		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dynamicFinderMethods);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
