@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -13,8 +12,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Table implements Serializable {
-	private static final long serialVersionUID = 5929578655573544100L;
+public class Table {
 	private String catalog;
 	private Schema schema;
 	private String name;

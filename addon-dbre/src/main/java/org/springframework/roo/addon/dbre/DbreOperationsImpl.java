@@ -59,7 +59,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
 		processDatabase(database, schema, null, false);
 		
-		// Update the pom.xml to add an exclusion for the dbre.xml file in the maven-war-plugin 
+		// Update the pom.xml to add an exclusion for the DBRE XML file in the maven-war-plugin 
 		updatePom();
 		
 		// Change the persistence.xml file to prevent tables being created and dropped.
@@ -98,7 +98,7 @@ public class DbreOperationsImpl implements DbreOperations {
 			// Project may not be a web project, so just exit 
 			return;
 		}
-		Element excludeElement = XmlUtils.findFirstElement(warPluginXPath + "/configuration/webResources/resource/excludes/exclude[text() = 'dbre.xml']", root);
+		Element excludeElement = XmlUtils.findFirstElement(warPluginXPath + "/configuration/webResources/resource/excludes/exclude[text() = 'DBRE XML']", root);
 		if (excludeElement != null) {
 			// <exclude> element is already there, so just exit 
 			return;
@@ -118,7 +118,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 
 		excludeElement = document.createElement("exclude");
-		excludeElement.setTextContent("dbre.xml");
+		excludeElement.setTextContent("DBRE XML");
 		excludesElement.appendChild(excludeElement);
 		
 		Element directoryElement = document.createElement("directory");

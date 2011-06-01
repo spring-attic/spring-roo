@@ -3,8 +3,8 @@ package org.springframework.roo.addon.dbre.model;
 import java.util.Set;
 
 /**
- * Retrieves database metadata from the dbre.xml file or a JDBC connection. 
- * Also writes database metadata to the dbre.xml file.
+ * Retrieves database metadata from the DBRE XML file or a JDBC connection. 
+ * Also writes database metadata to the DBRE XML file.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -32,7 +32,7 @@ public interface DbreModelService {
 	Set<Schema> getSchemas(boolean displayAddOns);
 	
 	/**
-	 * Reads the database metadata information from either a cache or from the dbre.xml file if possible.
+	 * Reads the database metadata information from either a cache or from the DBRE XML file if possible.
 	 * 
 	 * @param evictCache forces eviction of the database from the cache before attempting retrieval
 	 * @return the database metadata if it could be parsed, otherwise null if unavailable for any reason
@@ -40,16 +40,16 @@ public interface DbreModelService {
 	Database getDatabase(boolean evictCache);
 	
 	/**
-	 * Serializes the database to the dbre.xml file.
+	 * Serializes the database to the DBRE XML file.
 	 * 
 	 * @param database the database to be written out to disk
 	 */
 	void writeDatabase(Database database);
 
 	/**
-	 * Returns the identifier for the dbre.xml file.
+	 * Returns the identifier for the DBRE XML file.
 	 * 
-	 * @return a String representing the path of the dbre.xml file
+	 * @return a String representing the path of the DBRE XML file
 	 */
 	String getDbreXmlPath();
 	
