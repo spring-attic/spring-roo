@@ -98,7 +98,7 @@ public class DbreOperationsImpl implements DbreOperations {
 			// Project may not be a web project, so just exit 
 			return;
 		}
-		Element excludeElement = XmlUtils.findFirstElement(warPluginXPath + "/configuration/webResources/resource/excludes/exclude[text() = 'DBRE XML']", root);
+		Element excludeElement = XmlUtils.findFirstElement(warPluginXPath + "/configuration/webResources/resource/excludes/exclude[text() = 'dbre.xml']", root);
 		if (excludeElement != null) {
 			// <exclude> element is already there, so just exit 
 			return;
