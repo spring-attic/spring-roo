@@ -1,6 +1,5 @@
 package org.springframework.roo.layers;
 
-import org.springframework.roo.layers.external.repository.RepositoryJpaLayerProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -60,7 +59,7 @@ public abstract class LayerAdapter implements LayerProvider {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RepositoryJpaLayerProvider other = (RepositoryJpaLayerProvider) obj;
+		LayerProvider other = (LayerProvider) obj;
 		if (getLayerType() == null) {
 			if (other.getLayerType() != null)
 				return false;
