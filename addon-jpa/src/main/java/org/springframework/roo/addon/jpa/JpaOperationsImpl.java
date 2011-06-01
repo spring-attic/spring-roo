@@ -115,7 +115,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateFilters(configuration, ormProvider, jdbcDatabase);
 		updateResources(configuration, ormProvider, jdbcDatabase);
 		updateBuildPlugins(configuration, ormProvider, jdbcDatabase);
-		// System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
 	}
 
 	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String persistenceUnit) {
