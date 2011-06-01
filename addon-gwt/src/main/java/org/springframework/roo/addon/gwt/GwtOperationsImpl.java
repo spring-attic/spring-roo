@@ -151,8 +151,10 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 			//If there is a class that could possibly import from the appengine sdk, denoted here as having Gae in the type name, then we need to add the appengine-api-1.0-sdk dependency to the pom.xml file
 			String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
 			Set<FileDetails> files = fileManager.findMatchingAntPath(rootPath + "/**/*Gae*.java");
-			if (files.size() > 0) {
-				projectOperations.addDependency("com.google.appengine", "appengine-api-1.0-sdk", "1.4.3");
+			if (!files.isEmpty()) {
+				Element configuration = XmlUtils.getConfiguration(getClass());
+				Element gaeDependency = XmlUtils.findFirstElement("/configuration/gae/dependencies/dependency", configuration);
+				projectOperations.addDependency(new Dependency(gaeDependency));
 			}
 
 			// Copy across any missing files, only if GAE state has changed and is now enabled
@@ -362,7 +364,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 
 	private void updateBuildPlugins(boolean isGaeEnabled) {
 		Element configuration = XmlUtils.getConfiguration(getClass());
-		String xPath = "/configuration/gwt/plugins/plugin[@gae-enabled = '" + isGaeEnabled + "']";
+		String xPath = "/configuration/" + (isGaeEnabled ? "gae" : "gwt") + "/plugins/plugin";
 		Element pluginElement = XmlUtils.findFirstElement(xPath, configuration);
 		Assert.notNull(pluginElement, "gwt-maven-plugin required");
 		Plugin defaultPlugin = new Plugin(pluginElement);
