@@ -34,6 +34,7 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.layers.LayerUtils;
 import org.springframework.roo.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
@@ -103,11 +104,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		builder.addMethod(getShowMethod());
 		if (findAllAdditions != null) {
 			builder.addMethod(getListMethod(findAllAdditions));
-			
-			// TODO: move this copying of MD into separate Utils type
-			for (FieldMetadataBuilder field : findAllAdditions.getClassOrInterfaceTypeDetailsBuilder().getDeclaredFields()) {
-				builder.addField(field.build());
-			}
+			LayerUtils.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllAdditions.getClassOrInterfaceTypeDetailsBuilder(), builder);
 		}
 		
 		if (annotationValues.isUpdate()) {
