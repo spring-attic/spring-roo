@@ -34,6 +34,7 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.layers.CrudKey;
 import org.springframework.roo.layers.LayerUtils;
 import org.springframework.roo.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -67,7 +68,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private JavaTypeMetadataDetails javaTypeMetadataHolder;
 	private boolean compositePk = false;
 
-	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, MemberDetails memberDetails, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, MemberTypeAdditions findAllAdditions) {
+	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, MemberDetails memberDetails, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, Map<CrudKey, MemberTypeAdditions> crudAdditions, Map<String, MemberTypeAdditions> finderAdditions) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -102,9 +103,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getCreateFormMethod(dependentTypes));
 		}
 		builder.addMethod(getShowMethod());
-		if (findAllAdditions != null) {
-			builder.addMethod(getListMethod(findAllAdditions));
-			LayerUtils.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllAdditions.getClassOrInterfaceTypeDetailsBuilder(), builder);
+		MemberTypeAdditions findAllMethod = crudAdditions.get(CrudKey.FIND_ALL_METHOD);
+		if (findAllMethod != null) {
+			builder.addMethod(getListMethod(findAllMethod));
+			LayerUtils.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllMethod.getClassOrInterfaceTypeDetailsBuilder(), builder);
 		}
 		
 		if (annotationValues.isUpdate()) {
@@ -284,7 +286,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural + "\", " + findAllAdditions.getMethodBody() + ");");
+		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural + "\", " + findAllAdditions.getMethodSignature() + ");");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		if (!dateTypes.isEmpty()) {

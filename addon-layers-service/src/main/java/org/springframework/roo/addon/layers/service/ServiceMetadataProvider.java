@@ -47,7 +47,7 @@ public class ServiceMetadataProvider extends AbstractItdMetadataProvider {
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
-		return "Jpa_Dao";
+		return "Service";
 	}
 
 	public String getProvidesType() {

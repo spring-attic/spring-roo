@@ -1,6 +1,9 @@
 package org.springframework.roo.addon.layers.repository;
 
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -9,6 +12,9 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.layers.CrudKey;
+import org.springframework.roo.layers.LayerService;
+import org.springframework.roo.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 

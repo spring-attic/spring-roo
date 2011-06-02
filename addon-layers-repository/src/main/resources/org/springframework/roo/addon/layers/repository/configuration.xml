@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+	<repository>
+		<repository>
+			<id>spring-maven-snapshot</id>
+			<name>Spring Maven Snapshot Repository</name>
+			<url>http://maven.springframework.org/snapshot</url>
+		</repository>
+		<dependencies>
+			<dependency org="org.springframework.data" name="spring-data-jpa"
+				rev="1.0.0.BUILD-SNAPSHOT" />
+		</dependencies>
+	</repository>
+</configuration>

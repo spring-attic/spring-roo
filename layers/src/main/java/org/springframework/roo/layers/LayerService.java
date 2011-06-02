@@ -1,5 +1,10 @@
 package org.springframework.roo.layers;
 
+import java.util.Map;
+
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
 /**
  * 
  * @author Stefan Schmidt
@@ -7,4 +12,5 @@ package org.springframework.roo.layers;
  */
 public interface LayerService extends Crud {
 
+	Map<CrudKey, MemberTypeAdditions> collectMemberTypeAdditions(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 }

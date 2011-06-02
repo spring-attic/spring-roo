@@ -1,7 +1,5 @@
 package org.springframework.roo.layers;
 
-import java.util.List;
-
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -14,29 +12,29 @@ import org.springframework.roo.support.util.Assert;
 public class MemberTypeAdditions {
 	
 	private ClassOrInterfaceTypeDetailsBuilder classOrInterfaceDetailsBuilder;
-	private List<String> methodCall;
+	private String methodSignature;
 	
-	public MemberTypeAdditions(ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, List<String> methodBody) {
+	public MemberTypeAdditions(ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, String methodSignature) {
 		super();
 		Assert.notNull(classOrInterfaceTypeDetailsBuilder, "Class or member details builder required");
 		
 		this.classOrInterfaceDetailsBuilder = classOrInterfaceTypeDetailsBuilder;
-		this.methodCall = methodBody;
+		this.methodSignature = methodSignature;
 	}
 
 	public ClassOrInterfaceTypeDetailsBuilder getClassOrInterfaceTypeDetailsBuilder() {
 		return classOrInterfaceDetailsBuilder;
 	}
 
-	public List<String> getMethodBody() {
-		return methodCall;
+	public String getMethodSignature() {
+		return methodSignature;
 	}
 
 	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("memberHoldingTypeDetails", classOrInterfaceDetailsBuilder);
-		tsc.append("methodCall", methodCall);
+		tsc.append("methodSignature", methodSignature);
 		return tsc.toString();
 	}
 }

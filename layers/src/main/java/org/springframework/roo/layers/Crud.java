@@ -1,5 +1,7 @@
 package org.springframework.roo.layers;
 
+import java.util.Map;
+
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -10,24 +12,22 @@ import org.springframework.roo.model.JavaType;
  */
 interface Crud {
 
-	MemberTypeAdditions integratePersistMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType);
+	MemberTypeAdditions getPersistMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 
-	MemberTypeAdditions integrateUpdateMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType);
+	MemberTypeAdditions getUpdateMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 
-	MemberTypeAdditions integrateDeleteMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType);
+	MemberTypeAdditions getDeleteMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 
-	MemberTypeAdditions integrateFindMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType);
+	MemberTypeAdditions getFindMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 
-	MemberTypeAdditions integrateFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType);
+	MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 	
-	MemberTypeAdditions integrateFindEntriesMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType);
+	MemberTypeAdditions getFindEntriesMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 	
-	MemberTypeAdditions integrateCountMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType);
+	MemberTypeAdditions getCountMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
 	
 	/** 
 	 * integration with custom finders registered on the domain entity 
-	 * @param finderName
-	 * @return
 	 */
-	MemberTypeAdditions integrateFinderMethod(String declaredByMetadataId, String finderName, JavaType entityType);
+	Map<String, MemberTypeAdditions> getFinderMethods(String declaredByMetadataId, JavaType entityType, LayerType layerType, String ... finderNames);
 }

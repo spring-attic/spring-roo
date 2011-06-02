@@ -7,6 +7,7 @@ package org.springframework.roo.layers;
  */
 public enum LayerType implements Comparable<LayerType> {
 	
+	FIRST (0),
 	SERVICE (20),
 	REPOSITORY (40),
 	DAO (60),

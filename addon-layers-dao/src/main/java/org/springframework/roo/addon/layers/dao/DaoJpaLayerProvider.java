@@ -38,7 +38,7 @@ public class DaoJpaLayerProvider extends LayerAdapter {
 	private static final JavaType ANNOTATION_TYPE = new JavaType(RooDaoJpa.class.getName());
 	
 	@Override
-	public MemberTypeAdditions integrateDeleteMethod(String id, JavaSymbolName entityVariableName, JavaType entityType) {
+	public MemberTypeAdditions getDeleteMethod(String id, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		JavaSymbolName methodName = new JavaSymbolName("remove");
 		MemberDetails memberDetails = findMemberDetails(entityType);
 		if (memberDetails == null || MemberFindingUtils.getMethod(memberDetails, methodName, Arrays.asList(JavaType.LONG_OBJECT)) == null) {
@@ -47,7 +47,7 @@ public class DaoJpaLayerProvider extends LayerAdapter {
 		JavaSymbolName injectedFieldName = new JavaSymbolName(entityVariableName + "Dao");
 		ClassOrInterfaceTypeDetailsBuilder metadataBuilder = new ClassOrInterfaceTypeDetailsBuilder(id);
 		metadataBuilder.addField(new FieldMetadataBuilder(id, 0, injectedFieldName, new JavaType(entityType.getFullyQualifiedTypeName() + "Dao"), null).build());
-		return new MemberTypeAdditions(metadataBuilder, Arrays.asList(injectedFieldName.getSymbolName() + "." + methodName.getSymbolName() + "(" + entityVariableName.getSymbolName() + ");"));
+		return new MemberTypeAdditions(metadataBuilder, injectedFieldName.getSymbolName() + "." + methodName.getSymbolName() + "(" + entityVariableName.getSymbolName() + ");");
 	}
 	
 	private MemberDetails findMemberDetails(JavaType type) {

@@ -29,7 +29,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.layers.CrudKey;
 import org.springframework.roo.layers.LayerService;
+import org.springframework.roo.layers.LayerType;
 import org.springframework.roo.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -118,8 +120,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		
-		MemberTypeAdditions findAllAdditions = layerService.integrateFindAllMethod(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(formBackingType.getSimpleTypeName())), formBackingType);
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, findAllAdditions);
+		Map<CrudKey, MemberTypeAdditions> crudAdditions = layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(formBackingType.getSimpleTypeName())), formBackingType, LayerType.FIRST);
+		Map<String, MemberTypeAdditions> finderAdditions = layerService.getFinderMethods(metadataIdentificationString, formBackingType, LayerType.FIRST, "");
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions, finderAdditions);
 	}
 	
 	void installConversionService(JavaType governor) {

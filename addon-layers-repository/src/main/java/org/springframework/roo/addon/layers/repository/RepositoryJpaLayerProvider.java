@@ -35,7 +35,7 @@ public class RepositoryJpaLayerProvider extends LayerAdapter {
 	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 	
 	@Override
-	public MemberTypeAdditions integrateFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType) {
+	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		ClassOrInterfaceTypeDetails coitd = findMemberDetails(entityType);
 		if (coitd == null) {
 			return null;
@@ -46,7 +46,7 @@ public class RepositoryJpaLayerProvider extends LayerAdapter {
 		String repoField = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
 		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), coitd.getName()).build());
 		
-		return new MemberTypeAdditions(classBuilder, Arrays.asList(repoField + ".findAll()"));
+		return new MemberTypeAdditions(classBuilder, repoField + ".findAll()"); // TODO: retrieve method name from annotation values
 	}
 
 	private ClassOrInterfaceTypeDetails findMemberDetails(JavaType type) {
