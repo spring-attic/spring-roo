@@ -35,10 +35,6 @@ public class JsfCommands implements CommandMarker {
 	public void webJsfSetup(
 		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") JsfImplementation jsfImplementation) {
 		
-		if (jsfImplementation == null) {
-			jsfImplementation = JsfImplementation.ORACLE_MOJARRA;
-		}
-
 		jsfOperations.setup(jsfImplementation);
 	}
 
