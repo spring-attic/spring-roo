@@ -57,6 +57,7 @@ public class JpaCommands implements CommandMarker {
 		@CliOption(key = "databaseName", mandatory = false, help = "The database name to use") String databaseName, 
 		@CliOption(key = "userName", mandatory = false, help = "The username to use") String userName, 
 		@CliOption(key = "password", mandatory = false, help = "The password to use") String password,
+		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") String transactionManager,
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit) {
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE && ormProvider != OrmProvider.DATANUCLEUS) {
@@ -74,7 +75,7 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, persistenceUnit);
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, transactionManager, persistenceUnit);
 	}
 
 	@CliCommand(value = "database properties list", help = "Shows database configuration details")

@@ -24,7 +24,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	/** Constant for keyword "false" */
 	public static final JavaSymbolName FALSE = new JavaSymbolName("false");
 	
-	private String symbolName;
+	private final String symbolName;
 
 	/**
 	 * Construct a Java symbol name.

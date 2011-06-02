@@ -39,11 +39,9 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
 		int newHash = metadataItem.hashCode();
 		if (existing != null && newHash == existing) {
 			// No need to notify
-			//System.out.println(getClass().getSimpleName() + " notification saved " + metadataItem.getId() + " (hash " + newHash + ")");
 			return;
 		}
 		// To get this far, we need to notify and replace/add the metadata item's hash for future reference
-		//System.out.println(getClass().getSimpleName() + " notifying " + metadataItem.getId() + " (hash " + newHash + ")");
 		hashes.put(instanceId, newHash);
 		
 		// Eagerly insert into the cache to so any recursive gets for this metadata item will be returned successfully

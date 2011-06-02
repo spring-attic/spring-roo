@@ -100,6 +100,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 			return null;
 		}
 
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing the previous association
 		JavaType oldEntity = webScaffoldMidToEntityMap.get(metadataIdentificationString);
@@ -110,9 +113,6 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		webScaffoldMidToEntityMap.put(metadataIdentificationString, formBackingType);
 
 		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
-
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);

@@ -13,9 +13,12 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
@@ -84,6 +87,13 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
 		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
 		
+		AnnotationMetadata rooEntity = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
+		String transactionManager = null;
+		StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntity.getAttribute(new JavaSymbolName("transactionManager"));
+		if (transactionManagerAttr != null) {
+			transactionManager = transactionManagerAttr.getValue();
+		}
+		
 		boolean hasEmbeddedIdentifier = dataOnDemandMetadata.hasEmbeddedIdentifier();
 
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
@@ -92,8 +102,8 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 				break;
 			}
 		}
-				
-		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethod, flushMethod, mergeMethod, persistMethod, removeMethod, hasEmbeddedIdentifier);
+
+		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethod, flushMethod, mergeMethod, persistMethod, removeMethod, transactionManager, hasEmbeddedIdentifier);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

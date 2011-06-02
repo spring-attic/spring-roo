@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -12,8 +11,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Index implements Serializable {
-	private static final long serialVersionUID = -4874675730241979824L;
+public class Index{
 	private String name;
 	private boolean unique;
 	private Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();

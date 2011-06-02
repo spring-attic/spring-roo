@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.Serializable;
-
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -11,8 +9,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Reference implements Serializable {
-	private static final long serialVersionUID = -9110724955358470828L;
+public class Reference {
 
 	/** The local column. */
 	private Column localColumn;

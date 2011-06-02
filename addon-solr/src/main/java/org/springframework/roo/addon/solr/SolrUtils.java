@@ -24,7 +24,7 @@ public abstract class SolrUtils {
 			return "_f";
 		} else if (type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.DOUBLE_PRIMITIVE)) {
 			return "_d";
-		} else if (type.equals(new JavaType("java.util.Date")) || type.equals("java.util.Calendar")) {
+		} else if (type.equals(new JavaType("java.util.Date")) || type.equals(new JavaType("java.util.Calendar"))) {
 			return "_dt";
 		} else {
 			return "_t";

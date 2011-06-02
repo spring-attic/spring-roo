@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeSet;
 
 import org.springframework.roo.addon.json.JsonMetadata;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
@@ -97,8 +96,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (annotationValues.isDelete()) {
 			builder.addMethod(getJsonDeleteMethod());
 		}
-		if (annotationValues.isExposeFinders() && dynamicFinderMethods.size() > 0) {
-			for (FinderMetadataDetails finder : new TreeSet<FinderMetadataDetails>(dynamicFinderMethods)) {
+		if (annotationValues.isExposeFinders() && !dynamicFinderMethods.isEmpty()) {
+			for (FinderMetadataDetails finder : dynamicFinderMethods) {
 				builder.addMethod(getFinderJsonMethod(finder));
 			}
 		}

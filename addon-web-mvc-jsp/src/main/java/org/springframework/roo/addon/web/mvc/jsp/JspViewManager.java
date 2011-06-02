@@ -15,10 +15,10 @@ import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadata
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
@@ -38,16 +38,25 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class JspViewManager {
-	private List<FieldMetadata> fields;
-	private WebScaffoldAnnotationValues webScaffoldAnnotationValues;
+	
+	// Fields
+	private final JavaType formbackingType;
+	private final JavaTypeMetadataDetails formbackingTypeMetadata;
+	private final JavaTypePersistenceMetadataDetails formbackingTypePersistenceMetadata;
+	private final List<FieldMetadata> fields;
+	private final Map<JavaType, JavaTypeMetadataDetails> relatedDomainTypes;
 	private final String entityName;
 	private final String controllerPath;
-	private final JavaType formbackingType;
-	private Map<JavaType, JavaTypeMetadataDetails> relatedDomainTypes;
-	private JavaTypePersistenceMetadataDetails formbackingTypePersistenceMetadata;
-	private JavaTypeMetadataDetails formbackingTypeMetadata;
+	private final WebScaffoldAnnotationValues webScaffoldAnnotationValues;
 
-	public JspViewManager(List<FieldMetadata> fields, WebScaffoldAnnotationValues webScaffoldAnnotationValues, Map<JavaType, JavaTypeMetadataDetails> relatedDomainTypes) {
+	/**
+	 * Constructor
+	 * 
+	 * @param fields can't be <code>null</code>
+	 * @param webScaffoldAnnotationValues can't be <code>null</code>
+	 * @param relatedDomainTypes can't be <code>null</code>
+	 */
+	public JspViewManager(final List<FieldMetadata> fields, final WebScaffoldAnnotationValues webScaffoldAnnotationValues, final Map<JavaType, JavaTypeMetadataDetails> relatedDomainTypes) {
 		Assert.notNull(fields, "List of fields required");
 		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
 		Assert.notNull(relatedDomainTypes, "Related domain types required");
@@ -218,11 +227,12 @@ public class JspViewManager {
 		if (!"id".equals(formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName())) {
 			formUpdate.setAttribute("idField", formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName());
 		}
-		if (null == formbackingTypePersistenceMetadata.getVersionAccessorMethod()) {
+		final MethodMetadata versionAccessorMethod = formbackingTypePersistenceMetadata.getVersionAccessorMethod();
+		if (versionAccessorMethod == null) {
 			formUpdate.setAttribute("versionField", "none");
-		} else if (!"version".equals(BeanInfoUtils.getPropertyNameForJavaBeanMethod(formbackingTypePersistenceMetadata.getVersionAccessorMethod()))) {
-			String methodName = formbackingTypePersistenceMetadata.getVersionAccessorMethod().getMethodName().getSymbolName();
-			formUpdate.setAttribute("versionField", methodName.substring(3));
+		} else {
+			final String methodName = versionAccessorMethod.getMethodName().getSymbolName();
+			formUpdate.setAttribute("versionField", methodName.substring("get".length()));
 		}
 
 		createFieldsForCreateAndUpdate(fields, document, formUpdate, false);

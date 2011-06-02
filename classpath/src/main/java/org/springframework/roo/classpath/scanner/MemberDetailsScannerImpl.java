@@ -53,7 +53,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 	@Reference protected MetadataService metadataService;
 
 	// Mutex
-	private final Boolean lock = true;
+	private final Object lock = new Object();
 
 	private SortedSet<MetadataProvider> providers = new TreeSet<MetadataProvider>(new Comparator<MetadataProvider>() {
 		public int compare(MetadataProvider o1, MetadataProvider o2) {

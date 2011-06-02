@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.Serializable;
 
 /**
  * Represents a column of an index in the database model.
@@ -8,8 +7,7 @@ import java.io.Serializable;
  * @author Alan Stewart
  * @since 1.1
  */
-public class IndexColumn implements Serializable {
-	private static final long serialVersionUID = 4206711649555220093L;
+public class IndexColumn {
 	private String name;
 	private int size;
 

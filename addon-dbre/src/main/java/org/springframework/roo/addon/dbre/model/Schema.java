@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.Serializable;
 
 /**
  * Represents a schema in the database model.
@@ -8,8 +7,7 @@ import java.io.Serializable;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Schema implements Serializable {
-	private static final long serialVersionUID = -6755809630751422192L;
+public class Schema {
 	private String name;
 
 	public Schema(String name) {

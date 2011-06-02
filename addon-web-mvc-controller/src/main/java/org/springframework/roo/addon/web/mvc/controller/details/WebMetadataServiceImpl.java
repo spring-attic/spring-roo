@@ -6,13 +6,14 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
@@ -82,7 +83,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			// Not interested in persistence identifiers and version fields
-			if (javaTypePersistenceMetadataDetails != null && isPersistenceIdentifierOrVersionMethod(method, javaTypePersistenceMetadataDetails)) {
+			if (isPersistenceIdentifierOrVersionMethod(method, javaTypePersistenceMetadataDetails)) {
 				continue;
 			}
 			// Not interested in fields that are JPA transient fields or immutable fields
@@ -117,10 +118,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			JavaType type = method.getReturnType();
 			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
 				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-				if (null != field && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull"))) {
+				if (field != null && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null) {
 					MemberDetails typeMemberDetails = getMemberDetails(type);
-					JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataIdentificationString);
-					if (javaTypePersistenceMetadataHolder != null) {
+					if (getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataIdentificationString) != null) {
 						dependentTypes.add(getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
 					}
 				}
@@ -134,12 +134,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(memberDetails, "Member details required");
 		
 		Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString);
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			if (isPersistenceIdentifierOrVersionMethod(method, getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString))) {
+			if (isPersistenceIdentifierOrVersionMethod(method, javaTypePersistenceMetadataDetails)) {
 				continue;
 			}
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
@@ -160,7 +161,6 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details service required");
 		
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = null;
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
 		List<FieldMetadata> compositePkFields = new LinkedList<FieldMetadata>();
 		if (idFields.isEmpty()) {
@@ -186,19 +186,22 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
 		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.COUNT_ALL_METHOD);
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
+
 		List<String> dynamicFinderNames = new ArrayList<String>();
-		
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
 			if (mhtd.getCustomData().keySet().contains(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES)) {
 				dynamicFinderNames = (List<String>) mhtd.getCustomData().get(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES);
+				break;
 			}
 		}
 		
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = null;
 		if (identifierAccessor != null) {
 			registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
 			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
 					findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), compositePkFields);
-		}	
+		}
+			
 		return javaTypePersistenceMetadataDetails;
 	}
 	
@@ -302,11 +305,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
 		
-		Set<FinderMetadataDetails> finderMetadataDetails = new LinkedHashSet<FinderMetadataDetails>();
+		SortedSet<FinderMetadataDetails> finderMetadataDetails = new TreeSet<FinderMetadataDetails>();
 		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		registerDependency(finderMetadataKey, metadataIdentificationString);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {
-			registerDependency(finderMetadataKey, metadataIdentificationString);
 			for (MethodMetadata method: finderMetadata.getAllDynamicFinders()) {
 				List<JavaSymbolName> paramNames = method.getParameterNames();
 				List<JavaType> paramTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
@@ -329,7 +332,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				finderMetadataDetails.add(details);
 			}
 		}
-		return Collections.unmodifiableSet(finderMetadataDetails);
+		return Collections.unmodifiableSortedSet(finderMetadataDetails);
 	}
 	
 	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails) {

@@ -132,6 +132,11 @@ public @interface RooEntity {
 	String persistenceUnit() default "";
 	
 	/**
+	 * @return the name of the transaction manager (optional)
+	 */
+	String transactionManager() default "";
+
+	/**
 	 * @return whether to generated a @MappedSuperclass type annotation instead of @Entity (defaults to false).
 	 */
 	boolean mappedSuperclass() default false;

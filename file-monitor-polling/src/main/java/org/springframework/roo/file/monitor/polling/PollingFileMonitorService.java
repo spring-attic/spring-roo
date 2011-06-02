@@ -55,7 +55,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	private Set<String> notifyDeleted = new HashSet<String>();
 
 	// Mutex
-	private final Boolean lock = Boolean.TRUE;
+	private final Object lock = new Object();
 	
 	public final void add(FileEventListener e) {
 		synchronized (lock) {

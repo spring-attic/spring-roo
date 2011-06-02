@@ -76,12 +76,12 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
-		SortedMap<JavaType, JavaTypeMetadataDetails> relatedMd = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
+		SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		Set<FinderMetadataDetails> finderDetails = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 
-		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedMd, finderDetails, jsonMetadata);
+		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, finderDetails, jsonMetadata);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

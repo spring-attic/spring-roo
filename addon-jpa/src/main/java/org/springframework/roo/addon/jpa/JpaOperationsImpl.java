@@ -87,7 +87,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 	}
 
-	public void configureJpa(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
+	public void configureJpa(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String transactionManager, String persistenceUnit) {
 		// long start = System.currentTimeMillis();
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(jdbcDatabase, "JDBC database required");
@@ -98,7 +98,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Remove unnecessary artifacts not specific to current database and JPA provider
 		cleanup(configuration, ormProvider, jdbcDatabase);
 
-		updateApplicationContext(ormProvider, jdbcDatabase, jndi, persistenceUnit);
+		updateApplicationContext(ormProvider, jdbcDatabase, jndi, transactionManager, persistenceUnit);
 		updatePersistenceXml(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, persistenceUnit);
 		manageGaeXml(ormProvider, jdbcDatabase, applicationId);
 		updateVMforceConfigProperties(ormProvider, jdbcDatabase, userName, password);
@@ -115,10 +115,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateFilters(configuration, ormProvider, jdbcDatabase);
 		updateResources(configuration, ormProvider, jdbcDatabase);
 		updateBuildPlugins(configuration, ormProvider, jdbcDatabase);
-		// System.out.println("Elapsed time: " + (System.currentTimeMillis() - start));
 	}
 
-	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String persistenceUnit) {
+	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String transactionManager, String persistenceUnit) {
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		Element root = appCtx.getDocumentElement();
@@ -186,27 +185,25 @@ public class JpaOperationsImpl implements JpaOperations {
 				dataSource.appendChild(createPropertyElement("validationQuery", validationQuery, appCtx));
 			}
 		}
-
-		Element transactionManager = XmlUtils.findFirstElement("/beans/bean[@id = 'transactionManager']", root);
-		if (transactionManager == null) {
-			transactionManager = appCtx.createElement("bean");
-			transactionManager.setAttribute("id", "transactionManager");
-			transactionManager.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
-			if (StringUtils.hasText(persistenceUnit)) {
-				Element qualifier = appCtx.createElement("qualifier");
-				qualifier.setAttribute("value", persistenceUnit);
-				transactionManager.appendChild(qualifier);
-			}
-			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
-			root.appendChild(transactionManager);
+		
+		transactionManager = StringUtils.hasText(transactionManager) ? transactionManager : "transactionManager";
+		Element transactionManagerElement = XmlUtils.findFirstElement("/beans/bean[@id = '" + transactionManager + "']", root);
+		if (transactionManagerElement == null) {
+			transactionManagerElement = appCtx.createElement("bean");
+			transactionManagerElement.setAttribute("id", transactionManager);
+			transactionManagerElement.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
+			transactionManagerElement.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
+			root.appendChild(transactionManagerElement);
 		}
 
 		Element aspectJTxManager = XmlUtils.findFirstElement("/beans/annotation-driven", root);
 		if (aspectJTxManager == null) {
 			aspectJTxManager = appCtx.createElement("tx:annotation-driven");
 			aspectJTxManager.setAttribute("mode", "aspectj");
-			aspectJTxManager.setAttribute("transaction-manager", "transactionManager");
+			aspectJTxManager.setAttribute("transaction-manager", transactionManager);
 			root.appendChild(aspectJTxManager);
+		} else {
+			aspectJTxManager.setAttribute("transaction-manager", transactionManager);
 		}
 
 		Element entityManagerFactory = XmlUtils.findFirstElement("/beans/bean[@id = 'entityManagerFactory']", root);

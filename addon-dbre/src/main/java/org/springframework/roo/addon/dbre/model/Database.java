@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -17,8 +16,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Database implements Serializable {
-	private static final long serialVersionUID = -6699287170489794958L;
+public class Database {
 
 	/** The name of the database model. Defaults to the catalog name if the schema name is not available. */
 	private String name;

@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -14,8 +13,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class ForeignKey implements Serializable {
-	private static final long serialVersionUID = -45977088025460000L;
+public class ForeignKey {
 
 	/** The name of the foreign key, may be <code>null</code>. */
 	private String name;

@@ -16,12 +16,22 @@ import org.springframework.roo.support.util.FileCopyUtils;
  *
  */
 public class UpdateFile implements UndoableOperation {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(UpdateFile.class);
 
-	private FilenameResolver filenameResolver;
-	private File actual;
-	private File backup;
+	// Fields
+	private final FilenameResolver filenameResolver;
+	private final File actual;
+	private final File backup;
 	
+	/**
+	 * Constructor
+	 * 
+	 * @param undoManager cannot be <code>null</code>
+	 * @param filenameResolver cannot be <code>null</code>
+	 * @param actual the file to be updated; must be an existing file (not a directory)
+	 */
 	public UpdateFile(UndoManager undoManager, FilenameResolver filenameResolver, File actual) {
 		Assert.notNull(undoManager, "Undo manager required");
 		Assert.notNull(actual, "File required");
@@ -33,7 +43,7 @@ public class UpdateFile implements UndoableOperation {
 			backup = File.createTempFile("UpdateFile", "tmp");
 			FileCopyUtils.copy(actual, backup);
 		} catch (IOException ioe) {
-			throw new IllegalStateException("Unable to make a backup of file '" + this.actual + "'", ioe);
+			throw new IllegalStateException("Unable to make a backup of file '" + actual + "'", ioe);
 		}
 		this.actual = actual;
 		undoManager.add(this);
