@@ -53,6 +53,7 @@ public class EntityCommands implements CommandMarker {
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit,
+		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") String transactionManager,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
 		@CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") String entityName) {
 
@@ -100,6 +101,9 @@ public class EntityCommands implements CommandMarker {
 		}
 		if (persistenceUnit != null) {
 			rooEntityBuilder.addStringAttribute("persistenceUnit", persistenceUnit);
+		}
+		if (transactionManager != null) {
+			rooEntityBuilder.addStringAttribute("transactionManager", transactionManager);
 		}
 		if (mappedSuperclass) {
 			rooEntityBuilder.addBooleanAttribute("mappedSuperclass", mappedSuperclass);

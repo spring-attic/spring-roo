@@ -15,9 +15,7 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -56,9 +54,10 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private MethodMetadata mergeMethod;
 	private MethodMetadata persistMethod;
 	private MethodMetadata removeMethod;
+	private String transactionManager;
 	private boolean hasEmbeddedIdentifier;
 	
-	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MethodMetadata findAllMethod, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MethodMetadata mergeMethod, MethodMetadata persistMethod, MethodMetadata removeMethod, boolean hasEmbeddedIdentifier) {
+	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MethodMetadata findAllMethod, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MethodMetadata mergeMethod, MethodMetadata persistMethod, MethodMetadata removeMethod, String transactionManager, boolean hasEmbeddedIdentifier) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(projectMetadata, "Project metadata required");
@@ -85,6 +84,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		this.mergeMethod = mergeMethod;
 		this.persistMethod = persistMethod;
 		this.removeMethod = removeMethod;
+		this.transactionManager = transactionManager;
 		this.hasEmbeddedIdentifier = hasEmbeddedIdentifier;
 		
 		dodGovernor = DataOnDemandMetadata.getJavaType(dataOnDemandMetadata.getId());
@@ -115,21 +115,25 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	public void addRequiredIntegrationTestClassIntroductions() {
 		// Add an @RunWith(SpringJunit4ClassRunner) annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.junit.runner.RunWith")) == null) {
-			List<AnnotationAttributeValue<?>> runWithAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			runWithAttributes.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.springframework.test.context.junit4.SpringJUnit4ClassRunner")));
-			builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"), runWithAttributes));
+			AnnotationMetadataBuilder runWithBuilder = new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"));
+			runWithBuilder.addClassAttribute("value", "org.springframework.test.context.junit4.SpringJUnit4ClassRunner");
+			builder.addAnnotation(runWithBuilder);
 		}
 		
 		// Add an @ContextConfiguration("classpath:/applicationContext.xml") annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.test.context.ContextConfiguration")) == null) {
-			List<AnnotationAttributeValue<?>> ctxCfg = new ArrayList<AnnotationAttributeValue<?>>();
-			ctxCfg.add(new StringAttributeValue(new JavaSymbolName("locations"), "classpath:/META-INF/spring/applicationContext.xml"));
-			builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.test.context.ContextConfiguration"), ctxCfg));
+			AnnotationMetadataBuilder contextConfigurationBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.test.context.ContextConfiguration"));
+			contextConfigurationBuilder.addStringAttribute("locations", "classpath:/META-INF/spring/applicationContext.xml");
+			builder.addAnnotation(contextConfigurationBuilder);
 		}
 		
 		// Add an @Transactional, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.transaction.annotation.Transactional")) == null) {
-			builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional")));
+			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
+			if (StringUtils.hasText(transactionManager) && !"transactionManager".equals(transactionManager)) {
+				transactionalBuilder.addStringAttribute("value", transactionManager);
+			}
+			builder.addAnnotation(transactionalBuilder);
 		}
 	
 		// Add the data on demand field if the user did not define it on the governor directly

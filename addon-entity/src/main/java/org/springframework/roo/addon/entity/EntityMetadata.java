@@ -910,8 +910,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations, boolean isPersistMethod) {
 		AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
-		if (StringUtils.hasText(annotationValues.getPersistenceUnit())) {
-			transactionalBuilder.addStringAttribute("value", annotationValues.getPersistenceUnit());
+		if (StringUtils.hasText(annotationValues.getTransactionManager())) {
+			transactionalBuilder.addStringAttribute("value", annotationValues.getTransactionManager());
 		}
 		if (isGaeEnabled && isPersistMethod) {
 			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW")));

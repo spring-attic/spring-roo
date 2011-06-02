@@ -30,7 +30,8 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String findMethod = "find";
 	@AutoPopulate private String findEntriesMethod = "find";
 	@AutoPopulate private String[] finders;
-	@AutoPopulate private String persistenceUnit = "";
+	@AutoPopulate private String persistenceUnit = "";	
+	@AutoPopulate private String transactionManager = "";
 	@AutoPopulate private boolean mappedSuperclass = false;
 	@AutoPopulate private String table = "";
 	@AutoPopulate private String schema = "";
@@ -109,6 +110,10 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 
 	public String getPersistenceUnit() {
 		return persistenceUnit;
+	}
+
+	public String getTransactionManager() {
+		return transactionManager;
 	}
 
 	public boolean isMappedSuperclass() {
