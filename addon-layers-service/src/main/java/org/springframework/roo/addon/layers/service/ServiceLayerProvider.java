@@ -14,6 +14,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.layers.LayerAdapter;
 import org.springframework.roo.layers.LayerType;
 import org.springframework.roo.layers.MemberTypeAdditions;
@@ -48,10 +49,12 @@ public class ServiceLayerProvider extends LayerAdapter {
 		
 		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
-		String repoField = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), coitd.getName()).build());
-		
-		return new MemberTypeAdditions(classBuilder, repoField + ".findAll()"); // TODO: retrieve method name from annotation values
+		JavaType interfaceType = coitd.getImplementsTypes().get(0);
+		String repoField = StringUtils.uncapitalize(interfaceType.getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), interfaceType).build());
+//		@SuppressWarnings("unchecked")
+//		AnnotationAttributeValue<StringAttributeValue> findAllMethod = (AnnotationAttributeValue<StringAttributeValue>) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE).getAttribute(new JavaSymbolName("findAllMethod"));
+		return new MemberTypeAdditions(classBuilder, repoField + ".findAll()");
 	}
 	
 	private ClassOrInterfaceTypeDetails findMemberDetails(JavaType type) {

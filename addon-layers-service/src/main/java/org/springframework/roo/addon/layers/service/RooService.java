@@ -10,4 +10,5 @@ public @interface RooService {
 	
 	Class<?>[] domainTypes();
 
+	String findAllMethod() default "findAll";
 }

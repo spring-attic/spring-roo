@@ -14,6 +14,7 @@ import org.springframework.roo.model.JavaType;
 public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	@AutoPopulate private JavaType[] domainTypes = null;
+	@AutoPopulate private String findAllMethod = "findAll";
 	
 	public ServiceAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooService.class.getName()));
@@ -24,4 +25,7 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 		return domainTypes;
 	}
 
+	public String getFindAllMethod() {
+		return findAllMethod;
+	}
 }

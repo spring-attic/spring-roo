@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -29,23 +30,34 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component(immediate=true)
 @Service
-public class ServiceMetadataProvider extends AbstractItdMetadataProvider {
+public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
 	
 	@Reference private LayerService layerService;
 	
 	protected void activate(ComponentContext context) {
+//		metadataDependencyRegistry.registerDependency(ServiceClassMetadata.getMetadataIdentiferType(), getProvidesType());
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooService.class.getName()));
 	}
 
 	protected void deactivate(ComponentContext context) {
+//		metadataDependencyRegistry.deregisterDependency(ServiceClassMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooService.class.getName()));
 	}
 	
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+		ClassOrInterfaceTypeDetails classGovernor = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		List<JavaType> implementsTypes = classGovernor.getImplementsTypes();
+		JavaType interfaceType = implementsTypes.get(0);
+		PhysicalTypeMetadata interfaceTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(interfaceType, Path.SRC_MAIN_JAVA));
+		if (interfaceTypeMetadata == null) {
+			return null;
+		}
+		MemberDetails interfaceMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), (ClassOrInterfaceTypeDetails) interfaceTypeMetadata.getMemberHoldingTypeDetails());
+
 		ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(governorPhysicalTypeMetadata);
 		ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (coitd == null) {
@@ -55,32 +67,31 @@ public class ServiceMetadataProvider extends AbstractItdMetadataProvider {
 		if (domainTypes == null) {
 			return null;
 		}
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(ServiceMetadataProvider.class.getName(), coitd);
 		Map<JavaType,Map<CrudKey, MemberTypeAdditions>> allCrudAdditions = new HashMap<JavaType,Map<CrudKey,MemberTypeAdditions>>();
 		for (JavaType domainType : annotationValues.getDomainTypes()) {
 			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 			allCrudAdditions.put(domainType, layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(domainType.getSimpleTypeName())), domainType, LayerType.SERVICE));
 		}
-		return new ServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues, allCrudAdditions);
+		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, interfaceTypeMetadata, interfaceMemberDetails, annotationValues, allCrudAdditions);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
-		return "Service";
+		return "Service_Interface";
 	}
 
 	public String getProvidesType() {
-		return ServiceMetadata.getMetadataIdentiferType();
+		return ServiceInterfaceMetadata.getMetadataIdentiferType();
 	}
 
 	@Override
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
-		return ServiceMetadata.createIdentifier(javaType, path);
+		return ServiceInterfaceMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
-		JavaType javaType = ServiceMetadata.getJavaType(metadataIdentificationString);
-		Path path = ServiceMetadata.getPath(metadataIdentificationString);
+		JavaType javaType = ServiceInterfaceMetadata.getJavaType(metadataIdentificationString);
+		Path path = ServiceInterfaceMetadata.getPath(metadataIdentificationString);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 		return physicalTypeIdentifier;
 	}
