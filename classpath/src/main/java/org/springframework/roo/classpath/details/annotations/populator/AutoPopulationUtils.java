@@ -124,16 +124,24 @@ public abstract class AutoPopulationUtils {
 						// The field is a string array, the attribute is an array, so let's hope it's a string array
 						ArrayAttributeValue<?> castValue = (ArrayAttributeValue<?>) value;
 						List<String> result = new ArrayList<String>();
+						List<JavaType> result1 = new ArrayList<JavaType>();
 						for (AnnotationAttributeValue<?> val : castValue.getValue()) {
 							// For now we'll only support arrays of strings
 							if (fieldType.getComponentType().equals(String.class) && val instanceof StringAttributeValue) {
 								StringAttributeValue stringValue = (StringAttributeValue) val;
 								result.add(stringValue.getValue());
+							} else if (fieldType.getComponentType().equals(JavaType.class) && val instanceof ClassAttributeValue) {
+								ClassAttributeValue classValue = (ClassAttributeValue) val;
+								result1.add(classValue.getValue());
 							}
 						}
 						if (result.size() > 0) {
 							// We had at least one string array, so we change the field
 							field.set(target, result.toArray(new String[] {}));
+						}
+						if (result1.size() > 0) {
+							// We had at least one string array, so we change the field
+							field.set(target, result1.toArray(new JavaType[] {}));
 						}
 					}
 					// If not in the above list, it's unsupported so we silently skip

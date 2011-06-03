@@ -32,7 +32,7 @@ public class LayerServiceImpl implements LayerService {
 	
 	public MemberTypeAdditions getPersistMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			MemberTypeAdditions additions = provider.getPersistMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
@@ -45,7 +45,7 @@ public class LayerServiceImpl implements LayerService {
 
 	public MemberTypeAdditions getUpdateMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			MemberTypeAdditions additions = provider.getUpdateMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
@@ -58,7 +58,7 @@ public class LayerServiceImpl implements LayerService {
 	
 	public MemberTypeAdditions getDeleteMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			MemberTypeAdditions additions = provider.getDeleteMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
@@ -71,7 +71,7 @@ public class LayerServiceImpl implements LayerService {
 	
 	public MemberTypeAdditions getFindMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			MemberTypeAdditions additions = provider.getFindMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
@@ -84,7 +84,7 @@ public class LayerServiceImpl implements LayerService {
 
 	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			MemberTypeAdditions additions = provider.getFindAllMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
@@ -98,7 +98,7 @@ public class LayerServiceImpl implements LayerService {
 	public Map<String, MemberTypeAdditions> getFinderMethods(String declaredByMetadataId, JavaType entityType, LayerType layerType, String ... finderNames) {
 		// TODO: change this so multiple providers can contribute individual finders rather than all or nothing
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			Map<String, MemberTypeAdditions> additions = provider.getFinderMethods(declaredByMetadataId, entityType, layerType, finderNames);
@@ -111,7 +111,7 @@ public class LayerServiceImpl implements LayerService {
 	
 	public MemberTypeAdditions getFindEntriesMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			MemberTypeAdditions additions = provider.getFindEntriesMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
@@ -124,7 +124,7 @@ public class LayerServiceImpl implements LayerService {
 
 	public MemberTypeAdditions getCountMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
 		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() < layerType.getOrder()) {
+			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
 				continue;
 			}
 			MemberTypeAdditions additions = provider.getCountMethod(declaredByMetadataId, entityVariableName, entityType, layerType);

@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -11,6 +12,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -50,17 +52,17 @@ public class ServiceOperationsImpl implements ServiceOperations {
 		}
 		
 		// First build interface type
-		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(new JavaType(RooService.class.getName()));
-		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, projectOperations.getPathResolver().getPath(interfaceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
-		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		typeManagementService.generateClassFile(interfaceTypeBuilder.build());
 		
 		// Second build the implementing class
+		AnnotationMetadataBuilder classAnnotationMetadata = new AnnotationMetadataBuilder(new JavaType(RooService.class.getName()));
+		classAnnotationMetadata.addAttribute(new ArrayAttributeValue<ClassAttributeValue>(new JavaSymbolName("domainTypes"), Arrays.asList(new ClassAttributeValue(new JavaSymbolName("foo"), domainType))));
 		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
 		classTypeBuilder.addImplementsType(interfaceType);
+		classTypeBuilder.addAnnotation(classAnnotationMetadata.build());
 		typeManagementService.generateClassFile(classTypeBuilder.build());
 	}
 
