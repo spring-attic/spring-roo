@@ -16,9 +16,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.layers.CrudKey;
-import org.springframework.roo.layers.LayerUtils;
-import org.springframework.roo.layers.MemberTypeAdditions;
+import org.springframework.roo.project.layers.CrudKey;
+import org.springframework.roo.project.layers.LayerUtils;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;

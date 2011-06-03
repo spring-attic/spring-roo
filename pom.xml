@@ -69,7 +69,7 @@
         <module>addon-git</module>
         <module>addon-cloud-foundry</module>
         <module>annotations</module>
-        <module>layers</module>
+        <module>project-layers</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository</module>
         <module>addon-layers-dao</module>
@@ -779,7 +779,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.layers</artifactId>
+                <artifactId>org.springframework.roo.project.layers</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

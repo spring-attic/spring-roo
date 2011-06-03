@@ -7,7 +7,7 @@
 		<version>1.2.0.BUILD-SNAPSHOT</version>
 		<relativePath>../osgi-roo-bundle</relativePath>
 	</parent>
-	<artifactId>org.springframework.roo.layers</artifactId>
+	<artifactId>org.springframework.roo.project.layers</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Application Layering Support</name>
 	<description>Support for common layering options in Java Enterprise Applications</description>

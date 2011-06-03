@@ -1,4 +1,4 @@
-package org.springframework.roo.layers;
+package org.springframework.roo.project.layers;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;

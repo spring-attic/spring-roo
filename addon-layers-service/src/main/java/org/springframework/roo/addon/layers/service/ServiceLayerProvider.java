@@ -14,13 +14,12 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.layers.LayerAdapter;
-import org.springframework.roo.layers.LayerType;
-import org.springframework.roo.layers.MemberTypeAdditions;
-import org.springframework.roo.layers.Priority;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.layers.LayerAdapter;
+import org.springframework.roo.project.layers.LayerType;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
+import org.springframework.roo.project.layers.Priority;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
