@@ -66,7 +66,10 @@ public class JsfOperationsImpl implements JsfOperations {
 	}
 
 	public void setup(JsfImplementation jsfImplementation) {
-		Assert.notNull(jsfImplementation, "JSF implementation required");
+		if (jsfImplementation == null) {
+			jsfImplementation = JsfImplementation.ORACLE_MOJARRA;
+		}
+
 		updateConfiguration(jsfImplementation);
 		copyWebXml();
 	}
