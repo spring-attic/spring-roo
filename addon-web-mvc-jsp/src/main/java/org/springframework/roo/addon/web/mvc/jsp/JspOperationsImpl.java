@@ -1,21 +1,15 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.backup.BackupOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
@@ -37,20 +31,18 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.operations.AbstractOperations;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
-import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -67,9 +59,8 @@ import org.w3c.dom.Node;
  */
 @Component 
 @Service 
-public class JspOperationsImpl implements JspOperations {
+public class JspOperationsImpl extends AbstractOperations implements JspOperations {
 	private static Logger logger = HandlerUtils.getLogger(JspOperationsImpl.class);
-	@Reference private FileManager fileManager;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMvcOperations webMvcOperations;
@@ -81,11 +72,11 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference private BackupOperations backupOperations;
 
-	private ComponentContext context;
+//	private ComponentContext context;
 
-	protected void activate(ComponentContext context) {
-		this.context = context;
-	}
+//	protected void activate(ComponentContext context) {
+//		this.context = context;
+//	}
 	
 	public boolean isControllerAvailable() {
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
@@ -170,7 +161,7 @@ public class JspOperationsImpl implements JspOperations {
 		String lcViewName = viewName.toLowerCase();
 		if (document == null) {
 			try {
-				document = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "index-template.jspx"));
+				document = getDocumentTemplate("index-template.jspx");
 				XmlUtils.findRequiredElement("/div/message", document.getDocumentElement()).setAttribute("code", "label" + path.replace("/", "_") + "_" + lcViewName);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
@@ -382,82 +373,15 @@ public class JspOperationsImpl implements JspOperations {
 			return; // Tiles is already configured, nothing to do
 		}
 
-		Document configDoc;
-		try {
-			InputStream configTemplateInputStream = TemplateUtils.getTemplate(getClass(), "tiles/tiles-mvc-config-template.xml");
-			Assert.notNull(configTemplateInputStream, "Could not acquire dependencies.xml file");
-			configDoc = XmlUtils.readXml(configTemplateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		Document configDoc = getDocumentTemplate("tiles/tiles-mvc-config-template.xml");
 		Element configElement = configDoc.getDocumentElement();
 		List<Element> tilesConfig = XmlUtils.findElements("/config/bean", configElement);
-
 		for (Element bean : tilesConfig) {
 			Node importedBean = mvcConfigDocument.importNode(bean, true);
 			beans.appendChild(importedBean);
 		}
 
 		fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(mvcConfigDocument), false);
-	}
-
-	/**
-	 * This method will copy the contents of a directory to another if the resource does not already exist in the target directory
-	 * 
-	 * @param sourceAntPath the source path
-	 * @param targetDirectory the target directory
-	 */
-	private void copyDirectoryContents(String sourceAntPath, String targetDirectory, boolean replace) {
-		Assert.hasText(sourceAntPath, "Source path required");
-		Assert.hasText(targetDirectory, "Target directory required");
-
-		if (!targetDirectory.endsWith("/")) {
-			targetDirectory += "/";
-		}
-
-		if (!fileManager.exists(targetDirectory)) {
-			fileManager.createDirectory(targetDirectory);
-		}
-
-		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
-		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
-		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
-		for (URL url : urls) {
-			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
-			if (replace) {
-				BufferedReader in = null;
-				StringBuilder sb = new StringBuilder();
-				try {
-					in = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()));
-					while (true) {
-						int ch = in.read();
-						if (ch < 0) {
-							break;
-						}
-						sb.append((char) ch);
-					}
-				} catch (Exception e) {
-					throw new IllegalStateException(e);
-				} finally {
-					if (in != null) {
-						try {
-							in.close();
-						} catch (IOException ignored) {
-						}
-					}
-				}
-				fileManager.createOrUpdateTextFileIfRequired(targetDirectory + fileName, sb.toString(), false);
-			} else {
-				if (!fileManager.exists(targetDirectory + fileName)) {
-					try {
-						FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetDirectory + fileName).getOutputStream());
-					} catch (IOException e) {
-						throw new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-					}
-				}
-			}
-		}
 	}
 
 	public void installI18n(I18n i18n) {

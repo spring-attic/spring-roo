@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.jsf;
 
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,19 +20,18 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.operations.AbstractOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -47,9 +45,8 @@ import org.w3c.dom.Element;
  */
 @Component
 @Service
-public class JsfOperationsImpl implements JsfOperations {
+public class JsfOperationsImpl extends AbstractOperations implements JsfOperations {
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
-	@Reference private FileManager fileManager;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
@@ -62,7 +59,7 @@ public class JsfOperationsImpl implements JsfOperations {
 	}
 
 	public boolean isScaffoldAvailable() {
-		return isSetupAvailable() && hasWebXml();
+		return hasWebXml() && hasFacesConfig();
 	}
 
 	public void setup(JsfImplementation jsfImplementation) {
@@ -72,6 +69,10 @@ public class JsfOperationsImpl implements JsfOperations {
 
 		updateConfiguration(jsfImplementation);
 		copyWebXml();
+		copyFacesConfig();
+		copyDirectoryContents("images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
+
+		fileManager.scan();
 	}
 
 	public void generateAll(JavaPackage destinationPackage) {
@@ -86,7 +87,7 @@ public class JsfOperationsImpl implements JsfOperations {
 	}
 	
 	private String getWebXmlFile() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml");
 	}
 
 	private void copyWebXml() {
@@ -95,22 +96,34 @@ public class JsfOperationsImpl implements JsfOperations {
 			return;
 		}
 
-		Document document;
-		try {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
-			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
-			document = XmlUtils.readXml(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		
+		Document document = getDocumentTemplate("web-template.xml");
 		String projectName = projectOperations.getProjectMetadata().getProjectName();
 		WebXmlUtils.setDisplayName(projectName, document, null);
 		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		
 		fileManager.createOrUpdateTextFileIfRequired(getWebXmlFile(), XmlUtils.nodeToString(document), false);
-	
-		fileManager.scan();
+	}
+
+	private void copyFacesConfig() {
+		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
+		if (hasFacesConfig()) {
+			return;
+		}
+		
+		Document document = getDocumentTemplate("faces-config-template.xml");
+		String projectName = projectOperations.getProjectMetadata().getProjectName();
+		WebXmlUtils.setDisplayName(projectName, document, null);
+		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
+		
+		fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), XmlUtils.nodeToString(document), false);
+	}
+
+	private boolean hasFacesConfig() {
+		return fileManager.exists(getFacesConfigFile());
+	}
+
+	private String getFacesConfigFile() {
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/faces-config.xml");
 	}
 
 	private void updateConfiguration(JsfImplementation jsfImplementation) {
