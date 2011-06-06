@@ -194,7 +194,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), maxResultsAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 		
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -251,7 +251,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), maxResultsAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 		
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		MethodMetadata method = methodExists(methodName);
 		if (method != null) {
 			return method;
 		}
@@ -310,7 +310,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierField().getFieldType(), typeAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 		
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -358,7 +358,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), noAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), noAnnotations));
 
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -402,7 +402,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -468,7 +468,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), noAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), noAnnotations));
 		
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -520,7 +520,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierField().getFieldType(), typeAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 		
-		MethodMetadata updateFormMethod = methodExists(methodName, paramTypes);
+		MethodMetadata updateFormMethod = methodExists(methodName);
 		if (updateFormMethod != null) return updateFormMethod;
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -570,7 +570,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 
 			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + javaTypeMd.getPlural());
-			MethodMetadata addReferenceDataMethod = methodExists(populateMethodName, new ArrayList<AnnotatedJavaType>());
+			MethodMetadata addReferenceDataMethod = methodExists(populateMethodName);
 			if (addReferenceDataMethod != null) continue;
 
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -596,7 +596,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), new ArrayList<AnnotationMetadata>()));
 		
-		MethodMetadata encodeUrlPathSegmentMethod = methodExists(encodeUrlPathSegment, paramTypes);
+		MethodMetadata encodeUrlPathSegmentMethod = methodExists(encodeUrlPathSegment);
 		if (encodeUrlPathSegmentMethod != null) return encodeUrlPathSegmentMethod;
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -627,7 +627,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), new ArrayList<AnnotationMetadata>()));
 		
-		MethodMetadata addDateTimeFormatPatternsMethod = methodExists(addDateTimeFormatPatterns, paramTypes);
+		MethodMetadata addDateTimeFormatPatternsMethod = methodExists(addDateTimeFormatPatterns);
 		if (addDateTimeFormatPatternsMethod != null) return addDateTimeFormatPatternsMethod;
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -652,8 +652,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		return MemberFindingUtils.getMethod(memberDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+	private MethodMetadata methodExists(JavaSymbolName methodName) {
+		for (MethodMetadata md : MemberFindingUtils.getMethods(memberDetails)) {
+			if (md.getMethodName().equals(methodName)) {
+				return md;
+			}
+		}
+		return null;
 	}
 	
 	private String getShortName(JavaType type) {
