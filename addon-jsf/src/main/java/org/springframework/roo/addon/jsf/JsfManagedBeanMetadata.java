@@ -40,7 +40,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (!isValid()) {
 			return;
 		}
-				
+
 		if (!isValid()) {
 			return;
 		}
@@ -52,7 +52,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addAnnotation(getSessionScopedAnnotation());
 
 		builder.addField(getSampleField());
-			
+
 		builder.addMethod(getSampleMethod());
 		
 		// Create a representation of the desired output ITD
