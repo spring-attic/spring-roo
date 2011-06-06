@@ -6,11 +6,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -26,6 +28,7 @@ import org.w3c.dom.Document;
  */
 @Component(componentAbstract = true)
 public abstract class AbstractOperations {
+	protected static Logger logger = HandlerUtils.getLogger(AbstractOperations.class);
 	@Reference protected FileManager fileManager;
 	protected ComponentContext context;
 

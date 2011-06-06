@@ -5,7 +5,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -39,7 +38,6 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -60,7 +58,6 @@ import org.w3c.dom.Node;
 @Component 
 @Service 
 public class JspOperationsImpl extends AbstractOperations implements JspOperations {
-	private static Logger logger = HandlerUtils.getLogger(JspOperationsImpl.class);
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMvcOperations webMvcOperations;
@@ -71,12 +68,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	@Reference private I18nSupport i18nSupport;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference private BackupOperations backupOperations;
-
-//	private ComponentContext context;
-
-//	protected void activate(ComponentContext context) {
-//		this.context = context;
-//	}
 	
 	public boolean isControllerAvailable() {
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
