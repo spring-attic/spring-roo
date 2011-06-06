@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
@@ -73,7 +74,7 @@ public class ItdSourceFileComposer {
 		appendMethodAnnotations();
 		appendFields();
 		appendConstructors();
-		appendMethods();
+		appendMethods(itdTypeDetails.getGovernor().getPhysicalTypeCategory().equals(PhysicalTypeCategory.INTERFACE));
 		appendInnerTypes();
 		appendTerminator();
 		
@@ -319,13 +320,13 @@ public class ItdSourceFileComposer {
 		}
 	}
 	
-	private void appendMethods() {
+	private void appendMethods(boolean interfaceMethod) {
 		List<? extends MethodMetadata> methods = itdTypeDetails.getDeclaredMethods();
 		if (methods == null || methods.isEmpty()) {
 			return;
 		}
 		content = true;
-		writeMethods(methods, true);
+		writeMethods(methods, true, interfaceMethod);
 	}
 
 	private void appendFields() {
@@ -443,7 +444,7 @@ public class ItdSourceFileComposer {
 			
 			// Write out methods
 			this.indent();
-			writeMethods(innerType.getDeclaredMethods(), false);
+			writeMethods(innerType.getDeclaredMethods(), false, false);
 			this.indentRemove();
 			
 			this.appendIndent();
@@ -453,7 +454,7 @@ public class ItdSourceFileComposer {
 		}
 	}
 
-	private void writeMethods(List<? extends MethodMetadata> methods, boolean defineTarget) {
+	private void writeMethods(List<? extends MethodMetadata> methods, boolean defineTarget, boolean isInterfaceMethod) {
 		for (MethodMetadata method : methods) {
 			Assert.isTrue(method.getParameterTypes().size() == method.getParameterNames().size(), "Mismatched parameter names against parameter types");
 			
@@ -510,19 +511,23 @@ public class ItdSourceFileComposer {
 						this.append(", ");
 					}
 				}
-				this.append(" {");
 			} else {
-				this.append(") {");
+				append(")");
 			}
 			
-			this.newLine(false);
-			
-			// Add body
-			this.indent();
-			this.append(method.getBody());
-			this.indentRemove();
-			
-			this.appendFormalLine("}");
+			if (isInterfaceMethod) {
+				append(";");
+			} else {
+				append(" {");
+				this.newLine(false);
+				
+				// Add body
+				this.indent();
+				this.append(method.getBody());
+				this.indentRemove();
+				
+				this.appendFormalLine("}");
+			}
 			this.newLine();
 		}
 	}

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.layers.service;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -63,7 +64,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		}
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("test");
-		MethodMetadataBuilder builder = new MethodMetadataBuilder(getId(), 0, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), bodyBuilder);
+		MethodMetadataBuilder builder = new MethodMetadataBuilder(getId(), Modifier.ABSTRACT, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), bodyBuilder);
 		return builder.build();
 	}
 
