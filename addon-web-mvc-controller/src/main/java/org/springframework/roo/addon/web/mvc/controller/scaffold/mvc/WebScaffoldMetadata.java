@@ -168,7 +168,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private MethodMetadata getDeleteMethod() {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindMethod() == null || javaTypePersistenceMetadataHolder.getRemoveMethod() == null) {
-			// Mandatory input is missing (ROO-589)
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("delete");
@@ -230,7 +229,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private MethodMetadata getListMethod() {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindEntriesMethod() == null || javaTypePersistenceMetadataHolder.getCountMethod() == null  || javaTypePersistenceMetadataHolder.getFindAllMethod() == null) {
-			// Mandatory input is missing (ROO-589)
 			return null;
 		}
 
@@ -295,7 +293,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private MethodMetadata getShowMethod() {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindMethod() == null) {
-			// Mandatory input is missing (ROO-589)
 			return null;
 		}
 
@@ -341,7 +338,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private MethodMetadata getCreateMethod() {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getPersistMethod() == null) {
-			// Mandatory input is missing (ROO-589)
 			return null;
 		}
 
@@ -393,10 +389,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getCreateFormMethod(List<JavaTypeMetadataDetails> dependentTypes) {
-//		if (entityMetadata.getFindAllMethod() == null) {
-//			// Mandatory input is missing (ROO-589)
-//			return null;
-//		}
 		JavaSymbolName methodName = new JavaSymbolName("createForm");
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
@@ -450,7 +442,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private MethodMetadata getUpdateMethod() {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getMergeMethod() == null) {
-			// Mandatory input is missing (ROO-589)
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("update");
@@ -503,7 +494,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private MethodMetadata getUpdateFormMethod() {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindMethod() == null) {
-			// Mandatory input is missing (ROO-589)
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("updateForm");
