@@ -287,7 +287,8 @@ public class JspViewManager {
 				}
 			} else if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
 				fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("required", "true").addAttribute("dateTimePattern", "${" + entityName + "_" + paramName.getSymbolName().toLowerCase() + "_date_format}").build();
-			} else {
+			} 
+			if (fieldElement == null) {
 				fieldElement = new XmlElementBuilder("field:input", document).addAttribute("required", "true").build();
 			}
 			addCommonAttributes(field, fieldElement);

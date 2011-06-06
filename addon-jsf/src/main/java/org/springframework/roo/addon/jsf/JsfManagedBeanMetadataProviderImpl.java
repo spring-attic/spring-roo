@@ -35,8 +35,6 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractItdMetadat
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		// We know governor type details are non-null and can be safely cast
-
 		// We need to parse the annotation, which we expect to be present
 		JsfAnnotationValues annotationValues = new JsfAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound() || annotationValues.getEntity() == null) {

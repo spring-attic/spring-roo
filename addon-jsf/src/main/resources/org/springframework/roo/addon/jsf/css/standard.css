@@ -1,0 +1,172 @@
+/* main elements */
+body, div, td {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px; /* color: #666; */
+}
+
+body {
+    background-color: #fff;
+    text-align: center;
+}
+
+a img {
+    border: 0 none;
+    vertical-align: middle;
+
+}
+
+.wrapper {
+    width: 800px;
+    min-width: 800px;
+    max-width: 800px;
+    margin-right: auto;
+    margin-left: auto; /* fix max-width incompatibility in IE6 */
+    width: expression(document.body.clientWidth >  800 ? "800px" : "auto");
+    overflow: hidden;
+    display: block;
+}
+
+.menu {
+    width: 220px;
+    vertical-align: top;
+    text-align: left;
+    padding-right: 10px;
+}
+
+.listrow td {
+    height: 15px !important;
+}
+
+.content {
+    width: 570px;
+    height: auto;
+    vertical-align: top;
+    text-align: left;
+}
+
+.form_textarea  {
+
+    clear:both;
+    float:left;
+    min-width:250px;
+    min-height:50px;
+
+}
+
+.form_fieldlabel  {
+
+    margin-top: 5px;
+    clear:both;
+    float:left;
+
+}
+
+.form_field  {
+
+    clear:both;
+    float:left;
+
+}
+
+.form_button  {
+
+    margin-top: 10px;
+    clear:both;
+    float:right;
+
+}
+
+.ui-message-error  {
+
+    display:block;
+    float:left;
+
+}
+
+.delete {
+    background-image: url(../images/delete.png) !important;
+    width: 16px;
+    height: 16px;
+}
+
+.edit {
+    background-image: url(../images/edit.png) !important;
+    width: 16px;
+    height: 16px;
+}
+
+.view {
+    background-image: url(../images/view.png) !important;
+    width: 16px;
+    height: 16px;
+}
+
+.add {
+    background-image: url(../images/add.png) !important;
+    width: 16px;
+    height: 16px;
+    margin-left:-2px;
+    display:inline-block;
+}
+
+.header-option {
+    float:right;
+    font-size:10px;
+    margin-top:-2px;
+}
+
+.vote-header {
+
+    margin-top:0px !important;
+    margin-bottom:5px !important;
+    padding:7px 5px 7px 10px;
+    font-weight:normal !important;
+    font-size:18px;
+
+
+}
+
+#footer {
+    background:none repeat scroll 0 0 #FFFFFF;
+    border-color:#999999;
+    border-right:medium none;
+    border-style:solid none none;
+    border-width:1px medium medium;
+    margin-top:15px;
+    text-align:left;
+}
+
+.settings {
+    padding-right:5px;
+    float:right;
+}
+
+.hidden {
+    display:none;
+}
+
+.message {
+    display:inline-block;
+    font-size:14px;
+    margin-left:10px;
+    padding-top:10px;
+}
+
+.banner {
+    margin-top:5px;
+}
+
+.action-column {
+    width:100px;
+}
+
+.action-icon {
+    margin:0 2px;
+}
+
+.editChoiceForm {
+    height:140px;
+    width:330px;
+}
+
+

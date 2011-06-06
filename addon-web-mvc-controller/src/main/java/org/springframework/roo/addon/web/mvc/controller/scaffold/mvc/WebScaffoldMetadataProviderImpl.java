@@ -73,11 +73,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		JavaType governor = itdTypeDetails.getName();
 		String localMid = entityToWebScaffoldMidMap.get(governor);
 		if (localMid == null) {
-			// Not interested in this JavaType, so let's move on
 			return null;
 		}
 		
-		// Because localMid is not null, we know that it is a 
 		return localMid;
 	}
 	
