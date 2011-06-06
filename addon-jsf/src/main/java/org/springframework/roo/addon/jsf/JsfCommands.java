@@ -26,7 +26,7 @@ public class JsfCommands implements CommandMarker {
 		return jsfOperations.isSetupAvailable();
 	}
 
-	@CliAvailabilityIndicator({ "web jsf all", "web jsf scaffold" }) 
+	@CliAvailabilityIndicator({ "web jsf implementation", "web jsf all", "web jsf scaffold" }) 
 	public boolean isJsfAvailable() {
 		return jsfOperations.isScaffoldAvailable();
 	}
@@ -38,6 +38,13 @@ public class JsfCommands implements CommandMarker {
 		jsfOperations.setup(jsfImplementation);
 	}
 
+	@CliCommand(value = "web jsf implementation", help = "Change the JSF implementation") 
+	public void webJsfImplementation(
+		@CliOption(key = "name", mandatory = true, help = "The JSF implementation to use") JsfImplementation jsfImplementation) {
+		
+		jsfOperations.changeJsfImplementation(jsfImplementation);
+	}
+	
 	@CliCommand(value = "web jsf all", help = "Create JSF managed beans for all entities") 
 	public void webJsfAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new JSF managed beans will be placed") JavaPackage destinationPackage) {

@@ -55,7 +55,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	@Reference private Shell shell;
 
 	public boolean isSetupAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isProjectAvailable() && !hasWebXml() && !hasFacesConfig();
 	}
 
 	public boolean isScaffoldAvailable() {
@@ -67,12 +67,19 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			jsfImplementation = JsfImplementation.ORACLE_MOJARRA;
 		}
 
-		updateConfiguration(jsfImplementation);
+		changeJsfImplementation(jsfImplementation);
 		copyWebXml();
 		copyFacesConfig();
 		copyDirectoryContents("images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
+		copyDirectoryContents("css/*.css", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
+		copyDirectoryContents("css/skin/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin"), false);
+		copyDirectoryContents("css/skin/images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin/images"), false);
 
 		fileManager.scan();
+	}
+
+	public void changeJsfImplementation(JsfImplementation jsfImplementation) {
+		updateConfiguration(jsfImplementation);
 	}
 
 	public void generateAll(JavaPackage destinationPackage) {
@@ -111,9 +118,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 		
 		Document document = getDocumentTemplate("faces-config-template.xml");
-		String projectName = projectOperations.getProjectMetadata().getProjectName();
-		WebXmlUtils.setDisplayName(projectName, document, null);
-		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		
 		fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), XmlUtils.nodeToString(document), false);
 	}
