@@ -38,7 +38,7 @@ public class JsfCommands implements CommandMarker {
 		jsfOperations.setup(jsfImplementation);
 	}
 
-	@CliCommand(value = "web jsf implementation", help = "Change the JSF implementation") 
+	@CliCommand(value = "web jsf implementation", help = "Change JSF implementation") 
 	public void webJsfImplementation(
 		@CliOption(key = "name", mandatory = true, help = "The JSF implementation to use") JsfImplementation jsfImplementation) {
 		
@@ -52,7 +52,7 @@ public class JsfCommands implements CommandMarker {
 		jsfOperations.generateAll(destinationPackage);
 	}
 	
-	@CliCommand(value = "web jsf scaffold", help = "Create a JSF managed bean for an entity") 
+	@CliCommand(value = "web jsf scaffold", help = "Create JSF managed bean for an entity") 
 	public void webJsfScaffold(
 		@CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the JSF managed bean to be created") JavaType managedBean, 
 		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The entity which this JSF managed bean class will create and modify as required") JavaType entity) { 

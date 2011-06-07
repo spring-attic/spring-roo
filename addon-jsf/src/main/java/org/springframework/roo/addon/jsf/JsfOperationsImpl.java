@@ -74,6 +74,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		copyDirectoryContents("css/*.css", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
 		copyDirectoryContents("css/skin/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin"), false);
 		copyDirectoryContents("css/skin/images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin/images"), false);
+		copyDirectoryContents("templates/*.xhtml", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/templates"), false);
 
 		fileManager.scan();
 	}

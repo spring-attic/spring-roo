@@ -3,6 +3,7 @@ package org.springframework.roo.addon.jsf;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
@@ -13,6 +14,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link JsfManagedBeanMetadata}.
@@ -37,12 +39,13 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractItdMetadat
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		JsfAnnotationValues annotationValues = new JsfAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || annotationValues.getEntity() == null) {
+		JavaType entityType = annotationValues.getEntity();
+		if (!annotationValues.isAnnotationFound() || entityType == null) {
 			return null;
 		}
 
 		// Lookup the form backing object's metadata
-		MemberDetails memberDetails = getMemberDetails(annotationValues.getEntity());
+		MemberDetails memberDetails = getMemberDetails(entityType);
 		if (memberDetails == null) {
 			return null;
 		}
@@ -52,10 +55,14 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractItdMetadat
 			return null;
 		}
 		
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType, Path.SRC_MAIN_JAVA));
+		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
+		String plural = pluralMetadata.getPlural();
+
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
-		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues);
+		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
