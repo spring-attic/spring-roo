@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.javabean;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
@@ -11,7 +17,6 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -24,36 +29,33 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Metadata for {@link RooJavaBean}.
  *
  * @author Ben Alex
+ * @author Alan Stewart
  * @since 1.0
  */
 public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = JavaBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-
-	// From annotation
-	@AutoPopulate private boolean gettersByDefault = true;
-	@AutoPopulate private boolean settersByDefault = true;
-
+	private JavaBeanAnnotationValues annotationValues;
 	private Map<FieldMetadata, FieldMetadata> declaredFields;
 
-	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<FieldMetadata, FieldMetadata> declaredFields) {
+	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaBeanAnnotationValues annotationValues, Map<FieldMetadata, FieldMetadata> declaredFields) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
+		Assert.notNull(annotationValues, "Annotation values required");
+		Assert.notNull(declaredFields, "Declared fields required");
 
 		if (!isValid()) {
 			return;
 		}
+		if (declaredFields.isEmpty()) {
+			return;
+		}
 
+		this.annotationValues = annotationValues;
 		this.declaredFields = declaredFields;
 
 		// Process values from the annotation, if present
@@ -123,7 +125,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 
 		// Decide whether we need to produce the accessor method (see ROO-619 for reason we allow a getter for a final field)
-		if (this.gettersByDefault && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier())) {
+		if (annotationValues.isGettersByDefault() && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier())) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
 
@@ -161,7 +163,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		paramNames.add(field.getFieldName());
 
 		// Decide whether we need to produce the mutator method (disallowed for final fields as per ROO-36)
-		if (this.settersByDefault && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier()) && !Modifier.isFinal(field.getModifier())) {
+		if (annotationValues.isSettersByDefault() && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier()) && !Modifier.isFinal(field.getModifier())) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
