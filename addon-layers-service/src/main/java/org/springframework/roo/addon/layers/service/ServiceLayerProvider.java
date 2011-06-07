@@ -53,7 +53,7 @@ public class ServiceLayerProvider extends LayerAdapter {
 		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), interfaceType).build());
 //		@SuppressWarnings("unchecked")
 //		AnnotationAttributeValue<StringAttributeValue> findAllMethod = (AnnotationAttributeValue<StringAttributeValue>) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE).getAttribute(new JavaSymbolName("findAllMethod"));
-		return new MemberTypeAdditions(classBuilder, repoField + ".findAll()");
+		return new MemberTypeAdditions(classBuilder, repoField + ".findAll()"); // TODO get method name from @RooService annotation
 	}
 	
 	private ClassOrInterfaceTypeDetails findMemberDetails(JavaType type) {

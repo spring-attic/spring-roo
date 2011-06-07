@@ -1,11 +1,8 @@
 package org.springframework.roo.addon.layers.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -14,14 +11,8 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.project.layers.CrudKey;
-import org.springframework.roo.project.layers.LayerService;
-import org.springframework.roo.project.layers.LayerType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * 
@@ -32,17 +23,13 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
 	
-	@Reference private LayerService layerService;
-	
 	protected void activate(ComponentContext context) {
-//		metadataDependencyRegistry.registerDependency(ServiceClassMetadata.getMetadataIdentiferType(), getProvidesType());
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooService.class.getName()));
 	}
 
 	protected void deactivate(ComponentContext context) {
-//		metadataDependencyRegistry.deregisterDependency(ServiceClassMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooService.class.getName()));
 	}
@@ -67,12 +54,8 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 		if (domainTypes == null) {
 			return null;
 		}
-		Map<JavaType,Map<CrudKey, MemberTypeAdditions>> allCrudAdditions = new HashMap<JavaType,Map<CrudKey,MemberTypeAdditions>>();
-		for (JavaType domainType : annotationValues.getDomainTypes()) {
-			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
-			allCrudAdditions.put(domainType, layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(domainType.getSimpleTypeName())), domainType, LayerType.SERVICE));
-		}
-		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, interfaceTypeMetadata, interfaceMemberDetails, annotationValues, allCrudAdditions);
+
+		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, interfaceTypeMetadata, interfaceMemberDetails, annotationValues);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

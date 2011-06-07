@@ -3,7 +3,6 @@ package org.springframework.roo.addon.layers.service;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -11,19 +10,18 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.project.layers.CrudKey;
-import org.springframework.roo.project.layers.LayerUtils;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.CrudKey;
+import org.springframework.roo.project.layers.LayerUtils;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
@@ -51,8 +49,8 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Map<CrudKey, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			
 			MemberTypeAdditions findAllAdditions = crudAdditions.get(CrudKey.FIND_ALL_METHOD);
+			builder.addMethod(getFindAllMethod(domainType, findAllAdditions));
 			if (findAllAdditions != null) {
-				builder.addMethod(getFindAllMethod(domainType, findAllAdditions));
 				LayerUtils.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllAdditions.getClassOrInterfaceTypeDetailsBuilder(), builder);
 			}
 		}
