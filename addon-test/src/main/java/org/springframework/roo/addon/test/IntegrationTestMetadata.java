@@ -424,7 +424,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	public MethodMetadata getPersistMethodTest() {
-		if (!annotationValues.isPersist() || persistMethod == null) {
+		if (!annotationValues.isPersist() || flushMethod == null || persistMethod == null) {
 			// User does not want this method
 			return null;
 		}
