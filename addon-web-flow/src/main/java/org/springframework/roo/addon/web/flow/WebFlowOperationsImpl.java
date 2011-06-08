@@ -103,8 +103,9 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		String webMvcConfigPath = resolvedSpringConfigPath + "/webmvc-config.xml";
 		if (!fileManager.exists(webMvcConfigPath)) {
 			webMvcOperations.installAllWebMvcArtifacts();
-			jspOperations.installCommonViewArtefacts();
 		}
+		
+		jspOperations.installCommonViewArtefacts();
 
 		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
 			public boolean doWithElement(Document document, Element root) {
