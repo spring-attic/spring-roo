@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,8 +50,8 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
-	private Map<List<JavaType>, List<String>> cache = new HashMap<List<JavaType>, List<String>>();
-	private Map<Object, List<String>> tagBasedCache = new HashMap<Object, List<String>>();
+	private Map<List<JavaType>, List<String>> cache = new LinkedHashMap<List<JavaType>, List<String>>();
+	private Map<Object, List<String>> tagBasedCache = new LinkedHashMap<Object, List<String>>();
 
 	protected void activate(ComponentContext context) {
 		dependencyRegistry.addNotificationListener(this);
@@ -163,7 +163,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public Set<JavaType> findTypesWithAnnotation(List<JavaType> annotationsToDetect) {
-		final Set<JavaType> types = new HashSet<JavaType>();
+		final Set<JavaType> types = new LinkedHashSet<JavaType>();
 		processTypesWithAnnotation(annotationsToDetect, new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
 				types.add(located.getName());
@@ -177,7 +177,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect) {
-		final Set<ClassOrInterfaceTypeDetails> types = new HashSet<ClassOrInterfaceTypeDetails>();
+		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
 				types.add(located);
@@ -187,7 +187,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(Object tag) {
-		final Set<ClassOrInterfaceTypeDetails> types = new HashSet<ClassOrInterfaceTypeDetails>();
+		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 		processTypesWithTag(tag, new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
 				types.add(located);
