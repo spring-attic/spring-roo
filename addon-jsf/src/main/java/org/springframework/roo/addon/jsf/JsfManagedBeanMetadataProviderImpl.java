@@ -23,7 +23,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Provides {@link JsfManagedBeanMetadata}.
+ * Implementation of {@link JsfManagedBeanMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.2.0

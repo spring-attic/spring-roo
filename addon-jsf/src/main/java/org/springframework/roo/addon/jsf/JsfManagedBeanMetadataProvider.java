@@ -8,5 +8,4 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @author Alan Stewart
  * @since 1.2.0
  */
-public interface JsfManagedBeanMetadataProvider extends ItdTriggerBasedMetadataProvider {
-}
+public interface JsfManagedBeanMetadataProvider extends ItdTriggerBasedMetadataProvider {}

@@ -179,6 +179,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			dependencies.add(new Dependency(dependencyElement));
 		}
 		
+		List<Element> jsfDependencies = XmlUtils.findElements("/configuration/jsf/dependencies/dependency", configuration);
+		for (Element dependencyElement : jsfDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
+		}
+
 		projectOperations.addDependencies(dependencies);
 	}
 
