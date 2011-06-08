@@ -3,7 +3,7 @@ package org.springframework.roo.addon.entity;
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
- * Interface to {@link IdentifierMetadataProviderImpl}.
+ * Provides {@link IdentifierMetadata}.
  * 
  * @author Alan Stewart
  * @since 1.1
