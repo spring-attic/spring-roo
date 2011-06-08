@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.jsf;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,8 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -221,11 +226,13 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public void createManagedBean(JavaType managedBean, JavaType entity) {
+		installMenuBean(managedBean.getPackage());
+
 		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
 			return; 
 		}
-		
+
 		// Create type annotation for new managed bean
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
@@ -239,6 +246,25 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 	}
 	
+	private void installMenuBean(JavaPackage destinationPackage) {
+		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + ".MenuBean");
+		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		if (fileManager.exists(physicalPath)) {
+			return;
+		}
+		try {
+			InputStream template = TemplateUtils.getTemplate(getClass(), "MenuBean-template.java");
+			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
+			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
+			fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
+			
+			shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
+			shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
+		}
+	}
+
 	private String getImplementationXPath(List<JsfImplementation> jsfImplementations) {
 		StringBuilder builder = new StringBuilder("/configuration/jsf-implementations/jsf-implementation[");
 		for (int i = 0, n = jsfImplementations.size(); i < n; i++) {
