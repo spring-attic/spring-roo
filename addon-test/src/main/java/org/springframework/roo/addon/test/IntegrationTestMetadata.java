@@ -463,7 +463,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	public MethodMetadata getRemoveMethodTest() {
-		if (!annotationValues.isRemove() || findMethod == null || removeMethod == null) {
+		if (!annotationValues.isRemove() || findMethod == null || flushMethod == null || removeMethod == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
 		}
