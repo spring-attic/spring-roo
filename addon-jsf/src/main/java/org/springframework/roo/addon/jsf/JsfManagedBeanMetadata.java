@@ -177,9 +177,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getEntityMutatorMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("set" + entityType.getSimpleTypeName());
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(entityType);
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		parameterTypes.add(entityType);
+		MethodMetadata method = methodExists(methodName, parameterTypes);
 		if (method != null) return method;
 
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -189,7 +189,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -294,9 +294,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getTableVisibleMutatorMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("setTableVisible");
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(JavaType.BOOLEAN_PRIMITIVE);
-		MethodMetadata method = methodExists(methodName, paramTypes);
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		parameterTypes.add(JavaType.BOOLEAN_PRIMITIVE);
+		MethodMetadata method = methodExists(methodName, parameterTypes);
 		if (method != null) return method;
 
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -305,10 +305,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this.tableVisible = tableVisible;");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
-		
+
 	private ClassOrInterfaceTypeDetails getConverterInnerType() {
 		JavaType innerType = new JavaType(entityType.getSimpleTypeName() + "Converter");
 		if (MemberFindingUtils.getDeclaredInnerType(governorTypeDetails, innerType) != null) {
@@ -327,14 +327,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(facesContext);
 		paramTypes.add(uiComponent);
-		
+
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		parameterNames.add(new JavaSymbolName("context"));
 		parameterNames.add(new JavaSymbolName("component"));
 		parameterNames.add(new JavaSymbolName("value"));
 
 		String typeName = StringUtils.uncapitalize(entityType.getSimpleTypeName());
-		
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		// Create getAsObject method
