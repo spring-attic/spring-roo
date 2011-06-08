@@ -72,6 +72,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		Assert.notNull(projectMetadata, "Project metadata required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.hasText(plural, "Plural required for '" + identifier + "'");
+		Assert.notNull(memberDetails, "Member details required");
 		
 		if (!isValid()) {
 			return;

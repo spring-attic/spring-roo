@@ -15,9 +15,9 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.taggers.ConstructorMatcher;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
-import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.TypeMatcher;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -30,7 +30,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 
 /**
- * Provides {@link EntityMetadata}.
+ * Implementation of {@link EntityMetadataProvider}.
  * 
  * @author Ben Alex
  * @since 1.0

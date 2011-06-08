@@ -16,7 +16,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 
 /**
- * Provides {@link IdentifierMetadata}.
+ * Implementation of {@link IdentifierMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.1

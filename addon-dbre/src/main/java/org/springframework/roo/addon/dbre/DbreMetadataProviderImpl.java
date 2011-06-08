@@ -28,7 +28,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 /**
- * Provides {@link DbreMetadata}.
+ * Implementation of  {@link DbreMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.1

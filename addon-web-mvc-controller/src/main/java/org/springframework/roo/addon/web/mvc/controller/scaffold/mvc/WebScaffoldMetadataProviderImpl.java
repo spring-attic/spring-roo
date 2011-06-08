@@ -35,7 +35,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Implementation of  {@link WebScaffoldMetadataProvider}.
+ * Implementation of {@link WebScaffoldMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.0

@@ -3,7 +3,7 @@ package org.springframework.roo.addon.serializable;
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
- * Interface to {@link SerializableMetadataProviderImpl}.
+ * Provides {@link SerializableMetadata}.
  * 
  * @author Alan Stewart
  * @since 1.1

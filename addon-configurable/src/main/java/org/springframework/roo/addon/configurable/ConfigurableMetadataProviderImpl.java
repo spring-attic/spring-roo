@@ -11,12 +11,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 /**
- * Provides {@link ConfigurableMetadata}.
- * 
- * <p>
- * Generally other add-ons which depend on Spring's @Configurable annotation being present will add their
- * annotation as a trigger annotation to instances of {@link ConfigurableMetadataProvider}. This action will
- * guarantee any class with the added trigger annotation will made @Configurable.
+ * Implementation of {@link ConfigurableMetadataProvider}.
  * 
  * @author Ben Alex
  * @since 1.0
