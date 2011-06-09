@@ -315,6 +315,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return null;
 		}
 
+		if (locatedAccessors.isEmpty()) {
+			return null;
+		}
+		
 		JavaType uiComponent = new JavaType("javax.faces.component.UIComponent");
 		JavaType facesContext = new JavaType("javax.faces.context.FacesContext");
 		JavaType converter = new JavaType("javax.faces.convert.Converter");

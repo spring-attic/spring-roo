@@ -98,7 +98,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		JavaSymbolName fieldName = new JavaSymbolName("model");
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (field != null) return field;
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(PRIMEFACES_MENU_MODEL);
 
@@ -109,7 +109,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private ConstructorMetadata getConstructor() {
 		ConstructorMetadata constructor = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, new ArrayList<JavaType>());
 		if (constructor != null) return constructor;
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType("javax.el.ELContext"));
 		imports.addImport(new JavaType("javax.el.ExpressionFactory"));
@@ -127,13 +127,13 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("model = new DefaultMenuModel();");
 		bodyBuilder.appendFormalLine("Submenu submenu;");
 		bodyBuilder.appendFormalLine("MenuItem item;");
-		
+
 		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(managedBean.getAnnotations(), new JavaType(RooJsfManagedBean.class.getName()));
 			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("entity"));
 			JavaType entity = (JavaType) value.getValue();
 			String plural = getInflectorPlural(entity.getSimpleTypeName());
-			
+
 			bodyBuilder.appendFormalLine("");
 			bodyBuilder.appendFormalLine("submenu = new Submenu();");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
@@ -146,7 +146,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 			bodyBuilder.appendFormalLine("model.addSubmenu(submenu);");
 		}
-		
+
 		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		return constructorBuilder.build();

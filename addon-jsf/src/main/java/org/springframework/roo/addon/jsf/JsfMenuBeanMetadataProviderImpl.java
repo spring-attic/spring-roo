@@ -44,12 +44,12 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 	
 	@Override
 	protected String resolveDownstreamDependencyIdentifier(String upstreamDependency) {
-		String publishingProvider = MetadataIdentificationUtils.getMetadataClass(upstreamDependency);
-		if (publishingProvider.equals(MetadataIdentificationUtils.getMetadataClass(JsfManagedBeanMetadata.getMetadataIdentiferType()))) {
+		if (menuBeanMid != null || MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(JsfManagedBeanMetadata.getMetadataIdentiferType()))) {
 			// A JsfManagedBeanMetadata upstream MID has changed or become available for the first time
 			// It's OK to return null if we don't yet know the MID because its JavaType has never been found
 			return menuBeanMid;
 		}
+		
 		// It wasn't a JsfManagedBeanMetadata, so we can let the superclass handle it
 		// (it's expected it would be a PhysicalTypeIdentifier notification, as that's the only other thing we registered to receive)
 		return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
@@ -61,6 +61,10 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 		
 		// To get here we know the governor is the MenuBean so let's go ahead and create its ITD
 		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooJsfManagedBean.class.getName()));
+		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
+			metadataDependencyRegistry.registerDependency(managedBean.getDeclaredByMetadataId(), metadataIdentificationString);
+
+		}
 		return new JsfMenuBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans);
 	}
 

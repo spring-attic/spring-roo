@@ -1,7 +1,9 @@
 package org.springframework.roo.addon.jsf;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -12,10 +14,11 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
@@ -30,16 +33,27 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true) 
 @Service 
-public final class JsfManagedBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfManagedBeanMetadataProvider {
+public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
+	private Map<JavaType, String> entityToManagedBeandMidMap = new LinkedHashMap<JavaType, String>();
+	private Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
 	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooJsfManagedBean.class.getName()));
 	}
 
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooJsfManagedBean.class.getName()));
+	}
+
+	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
+		JavaType governor = itdTypeDetails.getName();
+		String localMid = entityToManagedBeandMidMap.get(governor);
+		return localMid == null ? null : localMid;
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -50,7 +64,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractItdMetadat
 			return null;
 		}
 
-		// Lookup the form backing object's metadata
+		// Lookup the entity's metadata
 		MemberDetails memberDetails = getMemberDetails(entityType);
 		if (memberDetails == null) {
 			return null;
@@ -60,40 +74,45 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractItdMetadat
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
-		
+
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+
+		// Remember that this entity JavaType matches up with this metadata identification string
+		// Start by clearing the previous association
+		JavaType oldEntity = managedBeanMidToEntityMap.get(metadataIdentificationString);
+		if (oldEntity != null) {
+			entityToManagedBeandMidMap.remove(oldEntity);
+		}
+		entityToManagedBeandMidMap.put(entityType, metadataIdentificationString);
+		managedBeanMidToEntityMap.put(metadataIdentificationString, entityType);
+
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
 		String plural = pluralMetadata.getPlural();
-		
+
 		List<MethodMetadata> locatedAccessors = findAccessors(memberDetails, metadataIdentificationString);
-		
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, locatedAccessors);
 	}
 
 	private List<MethodMetadata> findAccessors(MemberDetails memberDetails, String metadataIdentificationString) {
 		List<MethodMetadata> locatedAccessors = new LinkedList<MethodMetadata>();
-		
+
 		int counter = 0;
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+			// Track any changes to the method (eg it goes away)
+			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+			
 			if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
 				counter++;
 				locatedAccessors.add(method);
-				// Track any changes to that method (eg it goes away)
-				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			} 
-			
-			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(method.getReturnType())) {
-				// Track any related java types in the project
-				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			}
 		}
-		
+
 		return locatedAccessors;
 	}
-	
+
 	private boolean isMethodOfInterest(MethodMetadata method, MemberDetails memberDetails) {
 		if (!BeanInfoUtils.isAccessorMethod(method)) {
 			return false; // Only interested in accessors
