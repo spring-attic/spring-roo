@@ -363,7 +363,6 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		if (null != XmlUtils.findFirstElement("/beans/bean[@id = 'tilesViewResolver']", beans) || null != XmlUtils.findFirstElement("/beans/bean[@id = 'tilesConfigurer']", beans)) {
 			return; // Tiles is already configured, nothing to do
 		}
-
 		Document configDoc = getDocumentTemplate("tiles/tiles-mvc-config-template.xml");
 		Element configElement = configDoc.getDocumentElement();
 		List<Element> tilesConfig = XmlUtils.findElements("/config/bean", configElement);
@@ -371,8 +370,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 			Node importedBean = mvcConfigDocument.importNode(bean, true);
 			beans.appendChild(importedBean);
 		}
-
-		fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(mvcConfigDocument), false);
+		fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(mvcConfigDocument), true);
 	}
 
 	public void installI18n(I18n i18n) {
