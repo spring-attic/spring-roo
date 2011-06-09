@@ -54,7 +54,7 @@ import org.w3c.dom.Element;
  * @author Ben Alex
  * @since 1.1
  */
-@Component
+@Component(immediate=true)
 @Service
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private static final Logger logger = HandlerUtils.getLogger(AddOnRooBotOperationsImpl.class);
@@ -781,6 +781,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	private Map<String, Bundle> getUpgradableBundles(AddOnStabilityLevel asl) {
 		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
+		if (context == null) {
+			return bundles;
+		}
 		BundleContext bundleContext = context.getBundleContext();
 		for (org.osgi.framework.Bundle bundle : bundleContext.getBundles()) {
 			Bundle b = bundleCache.get(bundle.getSymbolicName());

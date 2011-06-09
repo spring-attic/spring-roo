@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.prime.com.tr/ui">
+<ui:composition>
+  <div id="footer" class="wrapper">
+    <h:form style="display:inline">
+      <h:panelGrid columns="4">
+        <h:outputLink value="../pages/main.jsf">Home</h:outputLink>
+        <h:panelGrid columns="4">
+          <h:outputText value="| Language:" />
+          <h:commandLink title="Switch language to English" action="#{localeBean.setSelectedLocale}">
+            <f:param name="locale" value="en" />
+            <h:graphicImage value="/images/en.png" alt="Switch language to English" styleClass="flag" />
+          </h:commandLink>
+          <h:commandLink title="Switch language to Deutsch" action="#{localeBean.setSelectedLocale}">
+            <f:param name="locale" value="de" />
+            <h:graphicImage value="/images/de.png" alt="Switch language to Deutsch" styleClass="flag" />
+          </h:commandLink>
+          <h:commandLink title="Switch language to Espanol" action="#{localeBean.setSelectedLocale}">
+            <f:param name="locale" value="es" />
+            <h:graphicImage value="/images/es.png" alt="Switch language to Espanol" styleClass="flag" />
+          </h:commandLink>
+        </h:panelGrid>
+        <p:themeSwitcher initialText="Change Theme" buttonPreText="Theme: " />
+        <h:panelGrid align="right">
+          <h:outputLink value="http://springsource.com">
+            <h:graphicImage value="/images/springsource-logo.png" />
+          </h:outputLink>
+        </h:panelGrid>
+      </h:panelGrid>
+    </h:form>
+  </div>
+</ui:composition>
+</html>

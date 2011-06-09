@@ -11,7 +11,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 /**
- * Provides {@link PluralMetadata}.
+ * Implementation of {@link PluralMetadataProvider}.
  * 
  * @author Ben Alex
  * @since 1.0

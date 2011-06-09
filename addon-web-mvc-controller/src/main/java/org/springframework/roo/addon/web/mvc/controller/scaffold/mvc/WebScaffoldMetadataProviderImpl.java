@@ -40,7 +40,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Implementation of  {@link WebScaffoldMetadataProvider}.
+ * Implementation of {@link WebScaffoldMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @since 1.0

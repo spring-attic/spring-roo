@@ -17,6 +17,8 @@ public interface JsfOperations {
 
 	void setup(JsfImplementation jsfImplementation);
 
+	void changeJsfImplementation(JsfImplementation jsfImplementation);
+
 	void generateAll(JavaPackage destinationPackage);
 
 	void createManagedBean(JavaType managedBean, JavaType entity);

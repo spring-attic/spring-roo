@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.jsf;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,8 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -55,7 +60,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	@Reference private Shell shell;
 
 	public boolean isSetupAvailable() {
-		return projectOperations.isProjectAvailable();
+		return projectOperations.isProjectAvailable() && !hasWebXml() && !hasFacesConfig();
 	}
 
 	public boolean isScaffoldAvailable() {
@@ -67,12 +72,20 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			jsfImplementation = JsfImplementation.ORACLE_MOJARRA;
 		}
 
-		updateConfiguration(jsfImplementation);
+		changeJsfImplementation(jsfImplementation);
 		copyWebXml();
 		copyFacesConfig();
 		copyDirectoryContents("images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
+		copyDirectoryContents("css/*.css", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
+		copyDirectoryContents("css/skin/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin"), false);
+		copyDirectoryContents("css/skin/images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin/images"), false);
+		copyDirectoryContents("templates/*.xhtml", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/templates"), false);
 
 		fileManager.scan();
+	}
+
+	public void changeJsfImplementation(JsfImplementation jsfImplementation) {
+		updateConfiguration(jsfImplementation);
 	}
 
 	public void generateAll(JavaPackage destinationPackage) {
@@ -111,9 +124,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 		
 		Document document = getDocumentTemplate("faces-config-template.xml");
-		String projectName = projectOperations.getProjectMetadata().getProjectName();
-		WebXmlUtils.setDisplayName(projectName, document, null);
-		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
 		
 		fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), XmlUtils.nodeToString(document), false);
 	}
@@ -169,6 +179,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			dependencies.add(new Dependency(dependencyElement));
 		}
 		
+		List<Element> jsfDependencies = XmlUtils.findElements("/configuration/jsf/dependencies/dependency", configuration);
+		for (Element dependencyElement : jsfDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
+		}
+
 		projectOperations.addDependencies(dependencies);
 	}
 
@@ -216,11 +231,13 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public void createManagedBean(JavaType managedBean, JavaType entity) {
+		installMenuBean(managedBean.getPackage());
+
 		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
 			return; 
 		}
-		
+
 		// Create type annotation for new managed bean
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
@@ -234,6 +251,25 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 	}
 	
+	private void installMenuBean(JavaPackage destinationPackage) {
+		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + ".MenuBean");
+		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		if (fileManager.exists(physicalPath)) {
+			return;
+		}
+		try {
+			InputStream template = TemplateUtils.getTemplate(getClass(), "MenuBean-template.java");
+			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
+			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
+			fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
+			
+			shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
+			shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
+		}
+	}
+
 	private String getImplementationXPath(List<JsfImplementation> jsfImplementations) {
 		StringBuilder builder = new StringBuilder("/configuration/jsf-implementations/jsf-implementation[");
 		for (int i = 0, n = jsfImplementations.size(); i < n; i++) {

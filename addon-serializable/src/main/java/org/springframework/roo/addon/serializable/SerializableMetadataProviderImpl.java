@@ -11,7 +11,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 /**
- * Provides {@link SerializableMetadata}.
+ * Implementation of {@link SerializableMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.1

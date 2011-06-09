@@ -1,25 +1,24 @@
 package org.springframework.roo.support.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Helper util class to allow more convenient handling of web.xml file in Web projects.
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public abstract class WebXmlUtils {
 	
 	/**
-	 * Set the displayname element in the web.xml document.
+	 * Set the display-name element in the web.xml document.
 	 * 
 	 * @param displayName (required)
 	 * @param webXml the web.xml document (required)
@@ -29,15 +28,15 @@ public abstract class WebXmlUtils {
 		Assert.hasText(displayName, "display name required");
 		Assert.notNull(webXml, "Web XML document required");
 		
-		Element displayNameE = XmlUtils.findFirstElement("/web-app/display-name", webXml.getDocumentElement());
-		if (displayNameE == null) {
-			displayNameE = webXml.createElement("display-name");
-			insertBetween(displayNameE, "the-start", "description", webXml);
+		Element displayNameElement = XmlUtils.findFirstElement("/web-app/display-name", webXml.getDocumentElement());
+		if (displayNameElement == null) {
+			displayNameElement = webXml.createElement("display-name");
+			insertBetween(displayNameElement, "the-start", "description", webXml);
 			if (comment != null && comment.length() > 0) {
-				addCommentBefore(displayNameE, comment, webXml);
+				addCommentBefore(displayNameElement, comment, webXml);
 			}
 		}
-		displayNameE.setTextContent(displayName);
+		displayNameElement.setTextContent(displayName);
 	}
 	
 	/**
@@ -51,15 +50,15 @@ public abstract class WebXmlUtils {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.hasText(description, "Description required");
 		
-		Element descriptionE = XmlUtils.findFirstElement("/web-app/description", webXml.getDocumentElement());
-		if (descriptionE == null) {
-			descriptionE = webXml.createElement("description");
-			insertBetween(descriptionE, "display-name[last()]", "context-param", webXml);
+		Element descriptionElement = XmlUtils.findFirstElement("/web-app/description", webXml.getDocumentElement());
+		if (descriptionElement == null) {
+			descriptionElement = webXml.createElement("description");
+			insertBetween(descriptionElement, "display-name[last()]", "context-param", webXml);
 			if (comment != null && comment.length() > 0) {
-				addCommentBefore(descriptionE, comment, webXml);
+				addCommentBefore(descriptionElement, comment, webXml);
 			}
 		}
-		descriptionE.setTextContent(description);
+		descriptionElement.setTextContent(description);
 	}
 	
 	/**

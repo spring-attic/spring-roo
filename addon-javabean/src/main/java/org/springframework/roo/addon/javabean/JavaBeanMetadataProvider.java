@@ -79,6 +79,11 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+		JavaBeanAnnotationValues annotationValues = new JavaBeanAnnotationValues(governorPhysicalTypeMetadata);
+		if (!annotationValues.isAnnotationFound()) {
+			return null;
+		}
+
 		// Work out the MIDs of the other metadata we depend on
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null || !projectMetadata.isValid()) {
@@ -95,7 +100,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		}
 
 		producedMids.add(metadataIdentificationString);
-		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, declaredFields);
+		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, declaredFields);
 	}
 
 	private FieldMetadata isGaeInterested(FieldMetadata field) {

@@ -24,7 +24,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Provides {@link FinderMetadata}.
+ * Implementation of {@link FinderMetadataProvider}.
  * 
  * @author Stefan Schmidt
  * @author Ben Alex

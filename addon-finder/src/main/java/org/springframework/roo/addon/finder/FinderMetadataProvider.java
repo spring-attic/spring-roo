@@ -3,7 +3,7 @@ package org.springframework.roo.addon.finder;
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
- * Interface to methods available on {@link FinderMetadataProviderImpl}.
+ * Provides {@link FinderMetadata}.
  * 
  * @author Alan Stewart
  * @since 1.1.2

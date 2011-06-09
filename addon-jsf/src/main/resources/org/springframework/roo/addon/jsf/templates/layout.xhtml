@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.prime.com.tr/ui">
+<f:view locale="#{localeBean.locale}" contentType="text/html">
+<h:head>
+    <ui:insert name="header">
+        <ui:include src="header.xhtml"/>
+    </ui:insert>
+</h:head>
+<h:body>
+    <h:panelGrid styleClass="wrapper" cellspacing="0" cellpadding="0">
+        <h:panelGrid cellspacing="0" cellpadding="0">
+            <h:form>
+                <h:link outcome="main">
+                    <h:graphicImage value="/images/banner-graphic.png" styleClass="banner"/>
+                </h:link>
+            </h:form>
+        </h:panelGrid>
+        <p/>
+        <h:panelGrid columns="2" cellspacing="0" cellpadding="0" columnClasses="menu,content">
+            <h:form>
+                <p:menu model="#{appBean.model}" effect="FADE" keepOpen="true" clickToHide="true" />
+            </h:form>
+            <h:panelGrid cellspacing="0" cellpadding="0" styleClass="content">
+                <ui:insert name="content"/>
+            </h:panelGrid>
+        </h:panelGrid>
+    </h:panelGrid>
+    <ui:insert name="footer">
+        <ui:include src="footer.xhtml"/>
+    </ui:insert>
+</h:body>
+</f:view>
+</html>
