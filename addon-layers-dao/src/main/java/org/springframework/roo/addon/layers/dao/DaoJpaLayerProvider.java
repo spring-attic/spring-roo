@@ -33,9 +33,12 @@ import org.springframework.roo.project.layers.Priority;
 @Service
 public class DaoJpaLayerProvider extends LayerAdapter {
 	
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
+	// Constants
 	private static final JavaType ANNOTATION_TYPE = new JavaType(RooDaoJpa.class.getName());
+
+	// Fields
+	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private TypeLocationService typeLocationService;
 	
 	@Override
 	public MemberTypeAdditions getDeleteMethod(String id, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
@@ -47,7 +50,7 @@ public class DaoJpaLayerProvider extends LayerAdapter {
 		JavaSymbolName injectedFieldName = new JavaSymbolName(entityVariableName + "Dao");
 		ClassOrInterfaceTypeDetailsBuilder metadataBuilder = new ClassOrInterfaceTypeDetailsBuilder(id);
 		metadataBuilder.addField(new FieldMetadataBuilder(id, 0, injectedFieldName, new JavaType(entityType.getFullyQualifiedTypeName() + "Dao"), null).build());
-		return new MemberTypeAdditions(metadataBuilder, injectedFieldName.getSymbolName() + "." + methodName.getSymbolName() + "(" + entityVariableName.getSymbolName() + ");");
+		return new MemberTypeAdditions(metadataBuilder, injectedFieldName.getSymbolName() + "." + methodName.getSymbolName() + "(" + entityVariableName.getSymbolName() + ")");
 	}
 	
 	private MemberDetails findMemberDetails(JavaType type) {
