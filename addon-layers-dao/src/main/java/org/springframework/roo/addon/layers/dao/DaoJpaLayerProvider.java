@@ -38,7 +38,7 @@ public class DaoJpaLayerProvider extends LayerAdapter {
 	private static final JavaType ANNOTATION_TYPE = new JavaType(RooDaoJpa.class.getName());
 	
 	@Override
-	public MemberTypeAdditions getDeleteMethod(String id, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
+	public MemberTypeAdditions getDeleteMethod(String id, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
 		JavaSymbolName methodName = new JavaSymbolName("remove");
 		MemberDetails memberDetails = findMemberDetails(entityType);
 		if (memberDetails == null || MemberFindingUtils.getMethod(memberDetails, methodName, Arrays.asList(JavaType.LONG_OBJECT)) == null) {
@@ -78,8 +78,8 @@ public class DaoJpaLayerProvider extends LayerAdapter {
 		return null;
 	}
 
-	public LayerType getLayerType() {
-		return LayerType.DAO;
+	public int getLayerPosition() {
+		return LayerType.DAO.getPosition();
 	}
 
 	public boolean supports(AnnotationMetadata annotation) {

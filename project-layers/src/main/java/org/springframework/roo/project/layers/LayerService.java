@@ -12,5 +12,5 @@ import org.springframework.roo.model.JavaType;
  */
 public interface LayerService extends Crud {
 
-	Map<CrudKey, MemberTypeAdditions> collectMemberTypeAdditions(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType);
+	Map<CrudKey, MemberTypeAdditions> collectMemberTypeAdditions(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition);
 }

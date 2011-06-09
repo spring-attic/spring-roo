@@ -48,6 +48,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	
 	private MethodMetadata getFindAllMethod(JavaType domainType) {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod());
+		// FIXME
 //		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
 //			return null;
 //		}

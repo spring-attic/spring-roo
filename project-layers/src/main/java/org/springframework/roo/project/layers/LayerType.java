@@ -5,13 +5,13 @@ package org.springframework.roo.project.layers;
  * @author Stefan Schmidt
  * @since 1.2
  */
-public enum LayerType implements Comparable<LayerType> {
+public enum LayerType {
 	
-	FIRST (0),
-	SERVICE (20),
-	REPOSITORY (40),
-	DAO (60),
-	ACTIVE_RECORD (80);
+	HIGHEST (100),
+	SERVICE (80),
+	REPOSITORY (60),
+	DAO (40),
+	ACTIVE_RECORD (20);
 	
 	private int order;
 	
@@ -19,7 +19,7 @@ public enum LayerType implements Comparable<LayerType> {
 		this.order = order;
 	}
 	
-	public int getOrder() {
+	public int getPosition() {
 		return order;
 	}
 }

@@ -42,7 +42,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CrudKey;
-import org.springframework.roo.project.layers.LayerUtils;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -111,7 +110,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		MemberTypeAdditions findAllMethod = crudAdditions.get(CrudKey.FIND_ALL_METHOD);
 		if (findAllMethod != null) {
 			builder.addMethod(getListMethod(findAllMethod));
-			LayerUtils.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllMethod.getClassOrInterfaceTypeDetailsBuilder(), builder);
+			findAllMethod.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllMethod.getClassOrInterfaceTypeDetailsBuilder(), builder);
 		}
 		
 		if (annotationValues.isUpdate()) {

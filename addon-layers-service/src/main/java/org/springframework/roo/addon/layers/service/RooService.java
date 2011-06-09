@@ -9,6 +9,8 @@ public @interface RooService {
 	public static final String DOMAIN_TYPES = "domainTypes";
 	
 	Class<?>[] domainTypes();
+	
+	//TODO:should we optionally support @Transactional?
 
 	String findAllMethod() default "findAll";
 }

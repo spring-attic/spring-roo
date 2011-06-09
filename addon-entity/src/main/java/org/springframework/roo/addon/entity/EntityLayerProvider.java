@@ -30,7 +30,7 @@ public class EntityLayerProvider extends LayerAdapter {
 	private static final Path PATH = Path.SRC_MAIN_JAVA;
 
 	@Override
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
+	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
 		EntityAnnotationValues rooEntityAnnotation = getRooEntityAnnotationValues(entityType);
 		String plural = getPlural(entityType);
 		if (rooEntityAnnotation == null || !StringUtils.hasText(rooEntityAnnotation.getFindAllMethod()) || plural == null) {
@@ -59,8 +59,8 @@ public class EntityLayerProvider extends LayerAdapter {
 		return pluralMetadata.getPlural();
 	}
 
-	public LayerType getLayerType() {
-		return LayerType.ACTIVE_RECORD;
+	public int getLayerPosition() {
+		return LayerType.ACTIVE_RECORD.getPosition();
 	}
 
 	public int priority() {

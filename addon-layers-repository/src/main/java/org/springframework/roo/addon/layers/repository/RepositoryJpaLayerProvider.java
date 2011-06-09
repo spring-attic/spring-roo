@@ -35,7 +35,7 @@ public class RepositoryJpaLayerProvider extends LayerAdapter {
 	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 	
 	@Override
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
+	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
 		ClassOrInterfaceTypeDetails coitd = findMemberDetails(entityType);
 		if (coitd == null) {
 			return null;
@@ -67,8 +67,8 @@ public class RepositoryJpaLayerProvider extends LayerAdapter {
 		return null;
 	}
 
-	public LayerType getLayerType() {
-		return LayerType.REPOSITORY;
+	public int getLayerPosition() {
+		return LayerType.REPOSITORY.getPosition();
 	}
 
 	public boolean supports(AnnotationMetadata annotation) {

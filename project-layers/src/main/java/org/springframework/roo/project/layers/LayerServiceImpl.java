@@ -1,6 +1,7 @@
 package org.springframework.roo.project.layers;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,12 +31,12 @@ public class LayerServiceImpl implements LayerService {
 	private Object mutex = this;
 	private Set<LayerProvider> providers = new TreeSet<LayerProvider>(new PersistenceProviderComparator());
 	
-	public MemberTypeAdditions getPersistMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+	public MemberTypeAdditions getPersistMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getPersistMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
+			MemberTypeAdditions additions = provider.getPersistMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
 			if (additions != null) {
 				return additions;
 			}
@@ -43,12 +44,12 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 
-	public MemberTypeAdditions getUpdateMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+	public MemberTypeAdditions getUpdateMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getUpdateMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
+			MemberTypeAdditions additions = provider.getUpdateMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
 			if (additions != null) {
 				return additions;
 			}
@@ -56,12 +57,12 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 	
-	public MemberTypeAdditions getDeleteMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+	public MemberTypeAdditions getDeleteMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getDeleteMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
+			MemberTypeAdditions additions = provider.getDeleteMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
 			if (additions != null) {
 				return additions;
 			}
@@ -69,12 +70,12 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 	
-	public MemberTypeAdditions getFindMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+	public MemberTypeAdditions getFindMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getFindMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
+			MemberTypeAdditions additions = provider.getFindMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
 			if (additions != null) {
 				return additions;
 			}
@@ -82,12 +83,12 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getFindAllMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
+			MemberTypeAdditions additions = provider.getFindAllMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
 			if (additions != null) {
 				return additions;
 			}
@@ -95,13 +96,13 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 	
-	public Map<String, MemberTypeAdditions> getFinderMethods(String declaredByMetadataId, JavaType entityType, LayerType layerType, String ... finderNames) {
+	public Map<String, MemberTypeAdditions> getFinderMethods(String declaredByMetadataId, JavaType entityType, int layerPosition, String ... finderNames) {
 		// TODO: change this so multiple providers can contribute individual finders rather than all or nothing
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			Map<String, MemberTypeAdditions> additions = provider.getFinderMethods(declaredByMetadataId, entityType, layerType, finderNames);
+			Map<String, MemberTypeAdditions> additions = provider.getFinderMethods(declaredByMetadataId, entityType, layerPosition, finderNames);
 			if (additions != null) {
 				return additions;
 			}
@@ -109,12 +110,12 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 	
-	public MemberTypeAdditions getFindEntriesMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+	public MemberTypeAdditions getFindEntriesMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getFindEntriesMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
+			MemberTypeAdditions additions = provider.getFindEntriesMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
 			if (additions != null) {
 				return additions;
 			}
@@ -122,12 +123,12 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 
-	public MemberTypeAdditions getCountMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
-		for (LayerProvider provider : Collections.unmodifiableSet(providers)) {
-			if (provider.getLayerType().getOrder() <= layerType.getOrder()) {
+	public MemberTypeAdditions getCountMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
+			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getCountMethod(declaredByMetadataId, entityVariableName, entityType, layerType);
+			MemberTypeAdditions additions = provider.getCountMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
 			if (additions != null) {
 				return additions;
 			}
@@ -135,15 +136,15 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 
-	public Map<CrudKey, MemberTypeAdditions> collectMemberTypeAdditions(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
+	public Map<CrudKey, MemberTypeAdditions> collectMemberTypeAdditions(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
 		Map<CrudKey, MemberTypeAdditions> additions = new HashMap<CrudKey, MemberTypeAdditions>();
-		additions.put(CrudKey.PERSIST_METHOD, getPersistMethod(declaredByMetadataId, entityVariableName, entityType, layerType));
-		additions.put(CrudKey.COUNT_METHOD, getCountMethod(declaredByMetadataId, entityVariableName, entityType, layerType));
-		additions.put(CrudKey.DELETE_METHOD, getDeleteMethod(declaredByMetadataId, entityVariableName, entityType, layerType));
-		additions.put(CrudKey.FIND_ALL_METHOD, getFindAllMethod(declaredByMetadataId, entityVariableName, entityType, layerType));
-		additions.put(CrudKey.FIND_ENTRIES_METHOD, getFindEntriesMethod(declaredByMetadataId, entityVariableName, entityType, layerType));
-		additions.put(CrudKey.FIND_METHOD, getFindMethod(declaredByMetadataId, entityVariableName, entityType, layerType));
-		additions.put(CrudKey.UPDATE_METHOD, getUpdateMethod(declaredByMetadataId, entityVariableName, entityType, layerType));
+		additions.put(CrudKey.PERSIST_METHOD, getPersistMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
+		additions.put(CrudKey.COUNT_METHOD, getCountMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
+		additions.put(CrudKey.DELETE_METHOD, getDeleteMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
+		additions.put(CrudKey.FIND_ALL_METHOD, getFindAllMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
+		additions.put(CrudKey.FIND_ENTRIES_METHOD, getFindEntriesMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
+		additions.put(CrudKey.FIND_METHOD, getFindMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
+		additions.put(CrudKey.UPDATE_METHOD, getUpdateMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
 		return Collections.unmodifiableMap(additions);
 	}
 
@@ -167,9 +168,9 @@ public class LayerServiceImpl implements LayerService {
 			if (provider1.equals(provider2)) {
 				return 0;
 			}
-			int difference = provider1.getLayerType().getOrder() - provider2.getLayerType().getOrder();
+			int difference = provider1.getLayerPosition() - provider2.getLayerPosition();
 			if (difference == 0) {
-				throw new IllegalStateException(provider1.getClass().getSimpleName() + " and " + provider2.getClass().getSimpleName() + " both have order = " + provider1.getLayerType().getOrder());
+				throw new IllegalStateException(provider1.getClass().getSimpleName() + " and " + provider2.getClass().getSimpleName() + " both have order = " + provider1.getLayerPosition());
 			}
 			return difference;
 		}

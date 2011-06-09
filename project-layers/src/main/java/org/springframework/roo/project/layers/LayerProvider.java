@@ -8,7 +8,5 @@ package org.springframework.roo.project.layers;
  */
 public interface LayerProvider extends Crud {
 	
-	LayerType getLayerType();
-	
-	int priority();
+	int getLayerPosition();
 }

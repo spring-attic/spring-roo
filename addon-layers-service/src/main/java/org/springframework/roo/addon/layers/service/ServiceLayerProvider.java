@@ -35,12 +35,8 @@ public class ServiceLayerProvider extends LayerAdapter {
 	private static final JavaType ANNOTATION_TYPE = new JavaType(RooService.class.getName());
 	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 
-	public LayerType getLayerType() {
-		return LayerType.SERVICE;
-	}
-
 	@Override
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, LayerType layerType) {
+	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
 		ClassOrInterfaceTypeDetails coitd = findMemberDetails(entityType);
 		if (coitd == null) {
 			return null;
@@ -75,11 +71,12 @@ public class ServiceLayerProvider extends LayerAdapter {
 		}
 		return null;
 	}
-
-	public boolean supports(AnnotationMetadata annotation) {
-		return annotation.getAnnotationType().equals(ANNOTATION_TYPE);
+	
+	public int getLayerPosition() {
+		return LayerType.SERVICE.getPosition();
 	}
 	
+	//TODO should this concern be moved to a more core type?
 	public int priority() {
 		return Priority.LOW.getNumericValue(); // Lowest priority because it's the default provider.
 	}

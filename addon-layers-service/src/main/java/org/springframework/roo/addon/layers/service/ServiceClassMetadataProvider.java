@@ -58,7 +58,7 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 		Map<JavaType,Map<CrudKey, MemberTypeAdditions>> allCrudAdditions = new HashMap<JavaType,Map<CrudKey,MemberTypeAdditions>>();
 		for (JavaType domainType : annotationValues.getDomainTypes()) {
 			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
-			allCrudAdditions.put(domainType, layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(domainType.getSimpleTypeName())), domainType, LayerType.SERVICE));
+			allCrudAdditions.put(domainType, layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(domainType.getSimpleTypeName())), domainType, LayerType.SERVICE.getPosition()));
 		}
 		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues, allCrudAdditions);
 	}

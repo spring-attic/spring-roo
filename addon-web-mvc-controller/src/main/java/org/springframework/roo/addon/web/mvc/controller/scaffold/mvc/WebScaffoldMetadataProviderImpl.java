@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold.mvc;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +29,13 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CrudKey;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -119,8 +118,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		
-		Map<CrudKey, MemberTypeAdditions> crudAdditions = layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(formBackingType.getSimpleTypeName())), formBackingType, LayerType.FIRST);
-		Map<String, MemberTypeAdditions> finderAdditions = layerService.getFinderMethods(metadataIdentificationString, formBackingType, LayerType.FIRST, "");
+		Map<CrudKey, MemberTypeAdditions> crudAdditions = layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(formBackingType.getSimpleTypeName())), formBackingType, LayerType.HIGHEST.getPosition());
+		Map<String, MemberTypeAdditions> finderAdditions = layerService.getFinderMethods(metadataIdentificationString, formBackingType, LayerType.HIGHEST.getPosition(), "");
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions, finderAdditions);
 	}
 	
