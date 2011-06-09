@@ -22,6 +22,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.uaa.client.util.Assert;
 
 /**
+ * The {@link ServiceOperations} implementation.
  * 
  * @author Stefan Schmidt
  * @since 1.2
@@ -65,5 +66,4 @@ public class ServiceOperationsImpl implements ServiceOperations {
 		classTypeBuilder.addAnnotation(classAnnotationMetadata.build());
 		typeManagementService.generateClassFile(classTypeBuilder.build());
 	}
-
 }
