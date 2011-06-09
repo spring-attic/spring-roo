@@ -148,16 +148,9 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
 				counter++;
 				locatedAccessors.add(method);
-				// Track any changes to that method (eg it goes away)
-			//	metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			} 
-			
-			if (BeanInfoUtils.isAccessorMethod(method) && webMetadataService.isApplicationType(method.getReturnType())) {
-				// Track any related java types in the project
-		//		metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			}
 		}
-		
+
 		if (!locatedAccessors.isEmpty()) {
 			types.put(type, locatedAccessors);
 		}
