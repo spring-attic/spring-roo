@@ -11,7 +11,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.layers.LayerAdapter;
+import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.project.layers.Priority;
@@ -25,9 +25,13 @@ import org.springframework.uaa.client.util.Assert;
  */
 @Component
 @Service
-public class EntityLayerProvider extends LayerAdapter {
-	@Reference private MetadataService metadataService;
+public class EntityLayerProvider extends CoreLayerProvider {
+	
+	// Constants
 	private static final Path PATH = Path.SRC_MAIN_JAVA;
+	
+	// Fields
+	@Reference private MetadataService metadataService;
 
 	@Override
 	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {

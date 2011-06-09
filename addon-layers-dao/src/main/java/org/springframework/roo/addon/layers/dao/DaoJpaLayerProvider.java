@@ -19,7 +19,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.LayerAdapter;
+import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.project.layers.Priority;
@@ -31,7 +31,7 @@ import org.springframework.roo.project.layers.Priority;
  */
 @Component
 @Service
-public class DaoJpaLayerProvider extends LayerAdapter {
+public class DaoJpaLayerProvider extends CoreLayerProvider {
 	
 	// Constants
 	private static final JavaType ANNOTATION_TYPE = new JavaType(RooDaoJpa.class.getName());

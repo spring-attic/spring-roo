@@ -15,7 +15,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.LayerAdapter;
+import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.project.layers.Priority;
@@ -28,11 +28,14 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component
 @Service
-public class RepositoryJpaLayerProvider extends LayerAdapter {
+public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
-	@Reference private TypeLocationService typeLocationService;
+	// Constants
 	private static final JavaType ANNOTATION_TYPE = new JavaType(RooRepositoryJpa.class.getName());
 	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
+	
+	// Fields
+	@Reference private TypeLocationService typeLocationService;
 	
 	@Override
 	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
