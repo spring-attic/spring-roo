@@ -14,7 +14,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -23,6 +22,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.uaa.client.util.Assert;
 
 /**
+ * The {@link ServiceOperations} implementation.
  * 
  * @author Stefan Schmidt
  * @since 1.2
@@ -66,5 +66,4 @@ public class ServiceOperationsImpl implements ServiceOperations {
 		classTypeBuilder.addAnnotation(classAnnotationMetadata.build());
 		typeManagementService.generateClassFile(classTypeBuilder.build());
 	}
-
 }
