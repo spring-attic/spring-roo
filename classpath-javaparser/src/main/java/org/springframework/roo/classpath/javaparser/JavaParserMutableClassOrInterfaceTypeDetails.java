@@ -194,6 +194,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends JavaParserClas
 			}
 		}
 		JavaParserFieldMetadata.removeField(this, members, fieldName);
+		flush();
 	}
 
 	public void addMethod(MethodMetadata methodMetadata) {
