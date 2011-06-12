@@ -127,9 +127,18 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("model = new DefaultMenuModel();");
 		bodyBuilder.appendFormalLine("Submenu submenu;");
 		bodyBuilder.appendFormalLine("MenuItem item;");
-
+		
 		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(managedBean.getAnnotations(), new JavaType(RooJsfManagedBean.class.getName()));
+			if (annotation ==  null) {
+				continue;
+			}
+			
+			AnnotationAttributeValue<?> includeOnMenuValue = annotation.getAttribute(new JavaSymbolName("includeOnMenu"));
+			if (includeOnMenuValue != null && !((Boolean) includeOnMenuValue.getValue()).booleanValue()) {
+				continue;
+			}
+
 			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("entity"));
 			JavaType entity = (JavaType) value.getValue();
 			String plural = getInflectorPlural(entity.getSimpleTypeName());
@@ -137,6 +146,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("");
 			bodyBuilder.appendFormalLine("submenu = new Submenu();");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
+
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setValue(\"List all " + plural + "\");");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".findAll" + plural + "}\", String.class, new Class[0]));");
@@ -144,6 +154,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("item.setHelpText(\"List all " + entity.getSimpleTypeName() + " domain objects\");");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
+
 			bodyBuilder.appendFormalLine("model.addSubmenu(submenu);");
 		}
 

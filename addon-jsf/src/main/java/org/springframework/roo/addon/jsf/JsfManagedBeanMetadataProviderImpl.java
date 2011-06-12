@@ -38,21 +38,20 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	private Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
 	protected void activate(ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
+	//	metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooJsfManagedBean.class.getName()));
 	}
 
 	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
+	//	metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooJsfManagedBean.class.getName()));
 	}
 
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
-		JavaType governor = itdTypeDetails.getName();
-		String localMid = entityToManagedBeandMidMap.get(governor);
+		String localMid = entityToManagedBeandMidMap.get(itdTypeDetails.getName());
 		return localMid == null ? null : localMid;
 	}
 

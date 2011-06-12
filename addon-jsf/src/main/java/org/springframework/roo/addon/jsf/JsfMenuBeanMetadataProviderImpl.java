@@ -44,7 +44,7 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 	
 	@Override
 	protected String resolveDownstreamDependencyIdentifier(String upstreamDependency) {
-		if (menuBeanMid != null || MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(JsfManagedBeanMetadata.getMetadataIdentiferType()))) {
+		if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(JsfManagedBeanMetadata.getMetadataIdentiferType()))) {
 			// A JsfManagedBeanMetadata upstream MID has changed or become available for the first time
 			// It's OK to return null if we don't yet know the MID because its JavaType has never been found
 			return menuBeanMid;
@@ -63,8 +63,8 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooJsfManagedBean.class.getName()));
 		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 			metadataDependencyRegistry.registerDependency(managedBean.getDeclaredByMetadataId(), metadataIdentificationString);
-
 		}
+		
 		return new JsfMenuBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans);
 	}
 
