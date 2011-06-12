@@ -4,7 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataNotificationListener;
@@ -45,13 +47,14 @@ import org.springframework.roo.support.util.Assert;
 @Service 
 public class TypeLocationServiceImpl implements TypeLocationService, MetadataNotificationListener {
 	@Reference private FileManager fileManager;
+	@Reference private FileMonitorService fileMonitorService;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
-	private Map<List<JavaType>, List<String>> cache = new LinkedHashMap<List<JavaType>, List<String>>();
-	private Map<Object, List<String>> tagBasedCache = new LinkedHashMap<Object, List<String>>();
+	private Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
+	private Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
 
 	protected void activate(ComponentContext context) {
 		dependencyRegistry.addNotificationListener(this);
@@ -64,8 +67,31 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	public void notify(String upstreamDependency, String downstreamDependency) {
 		if (upstreamDependency != null && PhysicalTypeIdentifier.isValid(upstreamDependency)) {
 			// Change to Java, so drop the cache
-			cache.clear();
-			tagBasedCache.clear();
+			ClassOrInterfaceTypeDetails cid = getClassOrInterfaceTypeDetails(upstreamDependency);
+			if (cid == null) return;
+			
+			// Iterate over the entire annotation cache
+			for (JavaType annotationDetected : annotationToMidMap.keySet()) {
+				if (MemberFindingUtils.getTypeAnnotation(cid, annotationDetected) != null) {
+					// This type has the annotation, so guarantee insertion
+					annotationToMidMap.get(annotationDetected).add(cid.getDeclaredByMetadataId());
+				} else {
+					// This type does not have the annotation, so guarantee removal
+					annotationToMidMap.get(annotationDetected).remove(cid.getDeclaredByMetadataId());
+				}
+			}
+			
+			// Iterate over the entire tag cache
+			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(TypeLocationServiceImpl.class.getName(), cid);
+			for (Object tagDetected : tagToMidMap.keySet()) {
+				if (!MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, tagDetected).isEmpty()) {
+					// This type has the tag, so guarantee insertion
+					tagToMidMap.get(tagDetected).add(cid.getDeclaredByMetadataId());
+				} else {
+					// This type does not have the tag, so guarantee removal
+					tagToMidMap.get(tagDetected).remove(cid.getDeclaredByMetadataId());
+				}
+			}
 		}
 	}
 
@@ -111,54 +137,49 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void processTypesWithTag(Object tag, LocatedTypeCallback callback) {
-		List<String> locatedPhysicalTypeMids = tagBasedCache.get(tag);
-		
-		if (locatedPhysicalTypeMids == null) {
-			locatedPhysicalTypeMids = new ArrayList<String>();
-			
+		boolean cacheAllowed = !fileMonitorService.isDirty();
+		if (cacheAllowed && tagToMidMap.containsKey(tag)) {
+			for (String locatedMid : tagToMidMap.get(tag)) {
+				ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedMid);
+				callback.process(located);
+			}
+		} else {
+			Set<String> locatedMids = new HashSet<String>();
 			for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
 				MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(TypeLocationServiceImpl.class.getName(), cid);
-				if (MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, tag).size() > 0) {
-					locatedPhysicalTypeMids.add(cid.getDeclaredByMetadataId());
+				if (!MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, tag).isEmpty()) {
+					locatedMids.add(cid.getDeclaredByMetadataId());
+					callback.process(cid);
 				}
 			}
-			
-			// Store in cache if anything was found
-			if (locatedPhysicalTypeMids.size() > 0) {
-				tagBasedCache.put(tag, locatedPhysicalTypeMids);
+
+			if (cacheAllowed) {
+				tagToMidMap.put(tag, locatedMids);
 			}
-		}
-		
-		for (String locatedPhysicalTypeMid : locatedPhysicalTypeMids) {
-			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedPhysicalTypeMid);
-			callback.process(located);
 		}
 	}
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
-		List<String> locatedPhysicalTypeMids = cache.get(annotationsToDetect);
-		
-		if (locatedPhysicalTypeMids == null) {
-			locatedPhysicalTypeMids = new ArrayList<String>();
-			
-			for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
-				annotation: for (JavaType annotation : annotationsToDetect) {
-					if (MemberFindingUtils.getTypeAnnotation(cid, annotation) != null) {
-						locatedPhysicalTypeMids.add(cid.getDeclaredByMetadataId());
-						break annotation;
+		boolean cacheAllowed = !fileMonitorService.isDirty();
+		for (JavaType annotationType : annotationsToDetect) {
+			if (cacheAllowed && annotationToMidMap.containsKey(annotationType)) {
+				for (String locatedMid : annotationToMidMap.get(annotationType)) {
+					ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedMid);
+					callback.process(located);
+				}
+			} else {
+				Set<String> locatedMids = new HashSet<String>();
+				for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
+					if (MemberFindingUtils.getTypeAnnotation(cid, annotationType) != null) {
+						locatedMids.add(cid.getDeclaredByMetadataId());
+						callback.process(cid);
 					}
 				}
+
+				if (cacheAllowed) {
+					annotationToMidMap.put(annotationType, locatedMids);
+				}
 			}
-			
-			// Store in cache if anything was found
-			if (locatedPhysicalTypeMids.size() > 0) {
-				cache.put(annotationsToDetect, locatedPhysicalTypeMids);
-			}
-		}
-		
-		for (String locatedPhysicalTypeMid : locatedPhysicalTypeMids) {
-			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedPhysicalTypeMid);
-			callback.process(located);
 		}
 	}
 
@@ -166,7 +187,9 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		final Set<JavaType> types = new LinkedHashSet<JavaType>();
 		processTypesWithAnnotation(annotationsToDetect, new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
-				types.add(located.getName());
+				if (located != null) {
+					types.add(located.getName());
+				}
 			}
 		});
 		return Collections.unmodifiableSet(types);
@@ -180,7 +203,9 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
-				types.add(located);
+				if (located != null) {
+					types.add(located);
+				}
 			}
 		});
 		return Collections.unmodifiableSet(types);
@@ -190,12 +215,19 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 		processTypesWithTag(tag, new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
-				types.add(located);
+				if (located != null) {
+					types.add(located);
+				}
 			}
 		});
 		return Collections.unmodifiableSet(types);
 	}
 
+	/**
+	 * Obtains the class or interface details for this physical type identifier, or null if it cannot be found.
+	 * @param physicalTypeMid to lookup (required)
+	 * @return the details (or null if unavailable)
+	 */
 	private ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails(String physicalTypeMid) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid);
 		if (physicalTypeMetadata != null && physicalTypeMetadata.getMemberHoldingTypeDetails() != null && physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
@@ -219,14 +251,15 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 				continue;
 			}
 			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
-			if (id != null) {
-				// Now I've found it, let's work out the Path it is from
-				Path locatedPath = PhysicalTypeIdentifier.getPath(id);
-				String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, locatedPath);
-				ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(physicalTypeMid);
-				if (located != null) {
-					projectTypes.add(located);
-				}
+			if (id == null) {
+				continue;
+			}
+			// Now I've found it, let's work out the Path it is from
+			Path locatedPath = PhysicalTypeIdentifier.getPath(id);
+			String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, locatedPath);
+			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(physicalTypeMid);
+			if (located != null) {
+				projectTypes.add(located);
 			}
 		}
 		return projectTypes;
