@@ -39,9 +39,8 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 @References(
 	value = { 
@@ -128,7 +127,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 					}
 					
 					// Determine the key the ITD provider uses for this particular type
-					String key = ((ItdMetadataProvider)mp).getIdForPhysicalJavaType(currentClass.getDeclaredByMetadataId());
+					String key = ((ItdMetadataProvider) mp).getIdForPhysicalJavaType(currentClass.getDeclaredByMetadataId());
 					Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(key), "ITD metadata provider '" + mp + "' returned an illegal key ('" + key + "'");
 
 					// Get the metadata and ensure we have ITD type details available
