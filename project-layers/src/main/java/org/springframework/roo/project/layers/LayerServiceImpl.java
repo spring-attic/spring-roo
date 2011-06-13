@@ -168,7 +168,7 @@ public class LayerServiceImpl implements LayerService {
 			if (provider1.equals(provider2)) {
 				return 0;
 			}
-			int difference = provider1.getLayerPosition() - provider2.getLayerPosition();
+			int difference = provider2.getLayerPosition() - provider1.getLayerPosition();
 			if (difference == 0) {
 				throw new IllegalStateException(provider1.getClass().getSimpleName() + " and " + provider2.getClass().getSimpleName() + " both have order = " + provider1.getLayerPosition());
 			}
