@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.layers.service;
 
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
@@ -36,30 +34,21 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 	
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		ClassOrInterfaceTypeDetails classGovernor = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		List<JavaType> implementsTypes = classGovernor.getImplementsTypes();
-		JavaType interfaceType = implementsTypes.get(0);
-		PhysicalTypeMetadata interfaceTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(interfaceType, Path.SRC_MAIN_JAVA));
-		if (interfaceTypeMetadata == null) {
-			return null;
-		}
-		MemberDetails interfaceMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), (ClassOrInterfaceTypeDetails) interfaceTypeMetadata.getMemberHoldingTypeDetails());
-
 		ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(governorPhysicalTypeMetadata);
 		ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (coitd == null) {
 			return null;
 		}
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
 		JavaType[] domainTypes = annotationValues.getDomainTypes();
 		if (domainTypes == null) {
 			return null;
 		}
-
-		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, interfaceTypeMetadata, interfaceMemberDetails, annotationValues);
+		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
-		return "Service_Interface";
+		return "Service";
 	}
 
 	public String getProvidesType() {

@@ -54,9 +54,14 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 //		}
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("ignore");
-		return new MethodMetadataBuilder(getId(), Modifier.ABSTRACT, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), bodyBuilder).build();
+		
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), bodyBuilder).build();
 	}
 
+	public ServiceAnnotationValues getServiceAnnotationValues() {
+		return annotationValues;
+	}
+	
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}

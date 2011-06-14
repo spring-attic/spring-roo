@@ -13,13 +13,13 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CrudKey;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -35,36 +35,44 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooService.class.getName()));
+		setIgnoreTriggerAnnotations(true);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooService.class.getName()));
 	}
 	
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(governorPhysicalTypeMetadata);
 		ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (coitd == null) {
 			return null;
 		}
-		JavaType[] domainTypes = annotationValues.getDomainTypes();
+		ServiceInterfaceMetadata serviceInterfaceMetadata = null;
+		for (JavaType type : coitd.getImplementsTypes()) {
+			if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) metadataService.get(ServiceInterfaceMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA))) != null) {
+				break;
+			}
+		}
+		if (serviceInterfaceMetadata == null || !serviceInterfaceMetadata.isValid()) {
+			return null;
+		}
+		ServiceAnnotationValues serviceAnnotationValues = serviceInterfaceMetadata.getServiceAnnotationValues();
+		JavaType[] domainTypes = serviceAnnotationValues.getDomainTypes();
 		if (domainTypes == null) {
 			return null;
 		}
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(ServiceClassMetadataProvider.class.getName(), coitd);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
 		Map<JavaType,Map<CrudKey, MemberTypeAdditions>> allCrudAdditions = new HashMap<JavaType,Map<CrudKey,MemberTypeAdditions>>();
-		for (JavaType domainType : annotationValues.getDomainTypes()) {
+		for (JavaType domainType : domainTypes) {
 			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 			allCrudAdditions.put(domainType, layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(domainType.getSimpleTypeName())), domainType, LayerType.SERVICE.getPosition()));
 		}
-		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues, allCrudAdditions);
+		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, serviceAnnotationValues, allCrudAdditions);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
-		return "Service_Class";
+		return "Service";
 	}
 
 	public String getProvidesType() {
