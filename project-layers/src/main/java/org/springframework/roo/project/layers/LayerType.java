@@ -1,13 +1,20 @@
 package org.springframework.roo.project.layers;
 
 /**
- * A level of layer within a user application
+ * Typical layers within a user application. Roo is not limited to these layers
+ * alone; layer-providing addons can specify any desired integer position in
+ * order to appear in the correct part of the application architecture relative
+ * to the core position values shown below.
  * 
  * @author Stefan Schmidt
  * @since 1.2
  */
 public enum LayerType {
 	
+	/**
+	 * The ultimate consumer of persistence-related operations, for example the
+	 * application's web or integration test layer.
+	 */
 	HIGHEST (100),
 	
 	/**
