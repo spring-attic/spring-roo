@@ -18,7 +18,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.project.layers.Priority;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -72,13 +71,5 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 
 	public int getLayerPosition() {
 		return LayerType.REPOSITORY.getPosition();
-	}
-
-	public boolean supports(AnnotationMetadata annotation) {
-		return annotation.getAnnotationType().equals(ANNOTATION_TYPE);
-	}
-	
-	public int priority() {
-		return Priority.LOW.getNumericValue(); // Lowest priority because it's the default provider.
 	}
 }

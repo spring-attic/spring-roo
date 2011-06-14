@@ -14,7 +14,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.project.layers.Priority;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
@@ -66,9 +65,4 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	public int getLayerPosition() {
 		return LayerType.ACTIVE_RECORD.getPosition();
 	}
-
-	public int priority() {
-		return Priority.LOW.getNumericValue();
-	}
-	
 }

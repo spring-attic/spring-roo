@@ -19,7 +19,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.project.layers.Priority;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -77,10 +76,5 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	
 	public int getLayerPosition() {
 		return LayerType.SERVICE.getPosition();
-	}
-	
-	//TODO should this concern be moved to a more core type?
-	public int priority() {
-		return Priority.LOW.getNumericValue(); // Lowest priority because it's the default provider.
 	}
 }
