@@ -68,12 +68,12 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 
 	@Override
 	protected String resolveDownstreamDependencyIdentifier(String upstreamDependency) {
-		String publishingProvider = MetadataIdentificationUtils.getMetadataClass(upstreamDependency);
-		if (publishingProvider.equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType()))) {
+		if (applicationConversionServiceFactoryBeanMid != null || MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType()))) {
 			// A WebScaffoldMetadata upstream MID has changed or become available for the first time
 			// It's OK to return null if we don't yet know the MID because its JavaType has never been found
 			return applicationConversionServiceFactoryBeanMid;
 		}
+
 		// It wasn't a WebScaffoldMetadata, so we can let the superclass handle it
 		// (it's expected it would be a PhysicalTypeIdentifier notification, as that's the only other thing we registered to receive)
 		return super.resolveDownstreamDependencyIdentifier(upstreamDependency);
@@ -82,8 +82,8 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
-		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
 		
+		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(new JavaType(RooWebScaffold.class.getName()));
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
@@ -142,19 +142,15 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		int counter = 0;
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+			// Track any changes to that method (eg it goes away)
+			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+
 			if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
 				counter++;
 				locatedAccessors.add(method);
-				// Track any changes to that method (eg it goes away)
-				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			} 
-			
-			if (BeanInfoUtils.isAccessorMethod(method) && webMetadataService.isApplicationType(method.getReturnType())) {
-				// Track any related java types in the project
-				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			}
 		}
-		
+
 		if (!locatedAccessors.isEmpty()) {
 			types.put(type, locatedAccessors);
 		}

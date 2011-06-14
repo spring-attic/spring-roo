@@ -75,7 +75,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
-		return entityToWebScaffoldMidMap.get(governor);
+		String localMid = entityToWebScaffoldMidMap.get(governor);
+		return localMid == null ? null : localMid;
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

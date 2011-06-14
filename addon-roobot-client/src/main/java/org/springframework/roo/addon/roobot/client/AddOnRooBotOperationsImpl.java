@@ -178,7 +178,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public void installAddOn(AddOnBundleSymbolicName bsn) {
+	public InstallOrUpgradeStatus installAddOn(AddOnBundleSymbolicName bsn) {
 		synchronized (mutex) {
 			Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
 			String bsnString = bsn.getKey();
@@ -188,13 +188,13 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			Bundle bundle = bundleCache.get(bsnString);
 			if (bundle == null) {
 				logger.warning("Could not find specified bundle with symbolic name: " + bsn.getKey());
-				return;
+				return InstallOrUpgradeStatus.FAILED;
 			}
-			installAddon(bundle.getBundleVersion(bsn.getKey()), bsn.getKey());
+			return installAddon(bundle.getBundleVersion(bsn.getKey()), bsn.getKey());
 		}
 	}
 
-	public void installAddOn(String bundleKey) {
+	public InstallOrUpgradeStatus installAddOn(String bundleKey) {
 		synchronized (mutex) {
 			Assert.hasText(bundleKey, "A valid bundle ID is required");
 			Bundle bundle = null;
@@ -203,13 +203,13 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			}
 			if (bundle == null) {
 				logger.warning("To install an addon a valid bundle ID is required");
-				return;
+				return InstallOrUpgradeStatus.FAILED;
 			}
-			installAddon(bundle.getBundleVersion(bundleKey), bundle.getSymbolicName());
+			return installAddon(bundle.getBundleVersion(bundleKey), bundle.getSymbolicName());
 		}
 	}
 
-	private void installAddon(BundleVersion bundleVersion, String bsn) {
+	private InstallOrUpgradeStatus installAddon(BundleVersion bundleVersion, String bsn) {
 		InstallOrUpgradeStatus status = installOrUpgradeAddOn(bundleVersion, bsn, true);
 		if (status.equals(InstallOrUpgradeStatus.SUCCESS)) {
 			logger.info("Successfully installed add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
@@ -220,6 +220,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		} else {
 			logger.warning("Unable to install add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
 		}
+		return status;
 	}
 
 	private InstallOrUpgradeStatus installOrUpgradeAddOn(BundleVersion bundleVersion, String bsn, boolean install) {
@@ -243,21 +244,30 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return success ? InstallOrUpgradeStatus.SUCCESS : InstallOrUpgradeStatus.FAILED;
 	}
 
-	public void removeAddOn(BundleSymbolicName bsn) {
+	public InstallOrUpgradeStatus removeAddOn(BundleSymbolicName bsn) {
 		synchronized (mutex) {
 			Assert.notNull(bsn, "Bundle symbolic name required");
 			boolean success = false;
 			int count = countBundles();
 			success = shell.executeCommand("osgi uninstall --bundleSymbolicName " + bsn.getKey());
+			InstallOrUpgradeStatus status;
 			if (count == countBundles() || !success) {
 				logger.warning("Unable to remove add-on: " + bsn.getKey());
+				status = InstallOrUpgradeStatus.FAILED;
 			} else {
 				logger.info("Successfully removed add-on: " + bsn.getKey());
+				status = InstallOrUpgradeStatus.SUCCESS;
 			}
+			return status;
 		}
 	}
 
 	public Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
+		List<Bundle> result = findAddons(showFeedback, searchTerms, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, communityOnly, requiresCommand);
+		return (result != null) ? result.size() : null;
+	}
+	
+	public List<Bundle> findAddons(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
 		synchronized (mutex) {
 			if (maxResults > 99) {
 				maxResults = 99;
@@ -297,7 +307,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				if (showFeedback) {
 					printResultList(filteredSearchResults, maxResults, linesPerResult);
 				}
-				return filteredSearchResults.size();
+				return filteredSearchResults;
 			}
 
 			// There is a problem with the add-on index
@@ -373,7 +383,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public void upgradeAddOn(AddOnBundleSymbolicName bsn) {
+	public InstallOrUpgradeStatus upgradeAddOn(AddOnBundleSymbolicName bsn) {
 		synchronized (mutex) {
 			Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
 			String bsnString = bsn.getKey();
@@ -383,7 +393,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			Bundle bundle = bundleCache.get(bsnString);
 			if (bundle == null) {
 				logger.warning("Could not find specified bundle with symbolic name: " + bsn.getKey());
-				return;
+				return InstallOrUpgradeStatus.FAILED;
 			}
 			BundleVersion bundleVersion = bundle.getBundleVersion(bsn.getKey());
 			InstallOrUpgradeStatus status = installOrUpgradeAddOn(bundleVersion, bsn.getKey(), false);
@@ -393,10 +403,11 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			} else if (status.equals(InstallOrUpgradeStatus.FAILED)) {
 				logger.warning("Unable to upgrade: " + bundle.getSymbolicName() + " [version: " + bundleVersion.getVersion() + "]");
 			}
+			return status;
 		}
 	}
 
-	public void upgradeAddOn(String bundleId) {
+	public InstallOrUpgradeStatus upgradeAddOn(String bundleId) {
 		synchronized (mutex) {
 			Assert.hasText(bundleId, "A valid bundle ID is required");
 			Bundle bundle = null;
@@ -405,7 +416,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			}
 			if (bundle == null) {
 				logger.warning("A valid bundle ID is required");
-				return;
+				return InstallOrUpgradeStatus.FAILED;
 			}
 			BundleVersion bundleVersion = bundle.getBundleVersion(bundleId);
 			InstallOrUpgradeStatus status = installOrUpgradeAddOn(bundleVersion, bundle.getSymbolicName(), false);
@@ -415,6 +426,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			} else if (status.equals(InstallOrUpgradeStatus.FAILED)) {
 				logger.warning("Unable to upgrade: " + bundle.getSymbolicName() + " [version: " + bundleVersion.getVersion() + "]");
 			}
+			return status;
 		}
 	}
 
@@ -824,10 +836,6 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	private String getVersionForCompatibility() {
 		return UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMinorVersion();
-	}
-	
-	private enum InstallOrUpgradeStatus {
-		SUCCESS, FAILED, INVALID_OBR_URL, PGP_VERIFICATION_NEEDED, SHELL_RESTART_NEEDED;
 	}
 	
 	private boolean isBundleInstalled(Bundle search) {

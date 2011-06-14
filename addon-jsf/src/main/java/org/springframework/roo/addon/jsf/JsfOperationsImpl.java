@@ -231,7 +231,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public void createManagedBean(JavaType managedBean, JavaType entity) {
-		installMenuBean(managedBean.getPackage());
+		installBean("MenuBean-template.java", managedBean.getPackage(), "MenuBean");
+		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
 
 		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
@@ -250,15 +251,15 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 	}
-	
-	private void installMenuBean(JavaPackage destinationPackage) {
-		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + ".MenuBean");
+
+	private void installBean(String templateName, JavaPackage destinationPackage, String beanName) {
+		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + beanName);
 		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}
 		try {
-			InputStream template = TemplateUtils.getTemplate(getClass(), "MenuBean-template.java");
+			InputStream template = TemplateUtils.getTemplate(getClass(), templateName);
 			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
 			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
@@ -269,7 +270,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
 		}
 	}
-
 	private String getImplementationXPath(List<JsfImplementation> jsfImplementations) {
 		StringBuilder builder = new StringBuilder("/configuration/jsf-implementations/jsf-implementation[");
 		for (int i = 0, n = jsfImplementations.size(); i < n; i++) {
