@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -24,14 +25,26 @@ import org.springframework.uaa.client.util.Assert;
  * @since 1.2
  */
 public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = ServiceInterfaceMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private ServiceAnnotationValues annotationValues;
-	private MemberDetails governorDetails;
 	
+	// Fields
+	private final MemberDetails governorDetails;
+	private final ServiceAnnotationValues annotationValues;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param identifier (required)
+	 * @param aspectName (required)
+	 * @param governorPhysicalTypeMetadata (required)
+	 * @param governorDetails (required)
+	 * @param annotationValues (required)
+	 */
 	public ServiceInterfaceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.notNull(governorDetails, "Governor member details required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
 		
@@ -39,22 +52,20 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		this.governorDetails = governorDetails;
 		
 		for (JavaType domainType : annotationValues.getDomainTypes()) {
-			builder.addMethod(getFindAllMethod(domainType));
+			builder.addMethod(getFindAllMethod(domainType));	// TODO add other methods once implemented
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 	
-	private MethodMetadata getFindAllMethod(JavaType domainType) {
-		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod());
-		// FIXME
-//		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
-//			return null;
-//		}
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("ignore");
-		
+	private MethodMetadata getFindAllMethod(final JavaType domainType) {
+		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod());
+		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
+			// The governor already declares this method
+			return null;
+		}
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), bodyBuilder).build();
 	}
 
