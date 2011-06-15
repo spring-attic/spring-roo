@@ -369,7 +369,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 				templateClassBuilder.getDeclaredFields().removeAll(fieldsToRemove);
 
-				ArrayList<MethodMetadataBuilder> methodsToRemove = new ArrayList<MethodMetadataBuilder>();
+				final List<MethodMetadataBuilder> methodsToRemove = new ArrayList<MethodMetadataBuilder>();
 				for (JavaSymbolName methodName : destType.getWatchedMethods().keySet()) {
 					for (MethodMetadataBuilder methodBuilder : templateClassBuilder.getDeclaredMethods()) {
 						if (methodBuilder.getMethodName().equals(methodName)) {
@@ -383,7 +383,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 					}
 				}
 
-				templateClassBuilder.getDeclaredMethods().removeAll(methodsToRemove);
+				templateClassBuilder.removeAll(methodsToRemove);
 
 				for (JavaType innerTypeName : destType.getWatchedInnerTypes()) {
 					for (ClassOrInterfaceTypeDetailsBuilder innerType : templateClassBuilder.getDeclaredInnerTypes()) {
@@ -396,7 +396,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 								ClassOrInterfaceTypeDetailsBuilder innerTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(innerType.build());
 								abstractClassBuilder.addInnerType(builder);
 								templateClassBuilder.getDeclaredInnerTypes().remove(innerType);
-								innerTypeBuilder.getDeclaredMethods().clear();
+								innerTypeBuilder.clearDeclaredMethods();
 								innerTypeBuilder.getDeclaredInnerTypes().clear();
 								innerTypeBuilder.getExtendsTypes().clear();
 								innerTypeBuilder.getExtendsTypes().add(new JavaType(builder.getName().getSimpleTypeName(), 0, DataType.TYPE, null, Collections.singletonList(new JavaType("V", 0, DataType.VARIABLE, null, new ArrayList<JavaType>()))));

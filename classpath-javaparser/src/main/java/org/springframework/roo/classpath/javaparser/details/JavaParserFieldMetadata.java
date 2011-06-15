@@ -195,7 +195,6 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		for (AnnotationMetadata annotation : field.getAnnotations()) {
 			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
-		
 
 		// Locate where to add this field; also verify if this field already exists
 		int nextFieldIndex = 0;

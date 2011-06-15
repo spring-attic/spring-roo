@@ -7,6 +7,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Builder for {@link MethodMetadata}.
@@ -68,5 +69,14 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 
 	public void setReturnType(JavaType returnType) {
 		this.returnType = returnType;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringCreator(this)
+			// Append the parts of the method that make up the Java signature
+			.append("methodName", methodName)
+			.append("parameterTypes", getParameterTypes())
+			.toString();
 	}
 }

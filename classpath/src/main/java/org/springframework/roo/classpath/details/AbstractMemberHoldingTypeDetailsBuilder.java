@@ -1,6 +1,8 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.roo.model.Builder;
@@ -13,23 +15,41 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1
  */
 public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
+	
+	// Fields
+	private final List<MethodMetadataBuilder> declaredMethods = new ArrayList<MethodMetadataBuilder>();
 	private List<ConstructorMetadataBuilder> declaredConstructors = new ArrayList<ConstructorMetadataBuilder>();
 	private List<FieldMetadataBuilder> declaredFields = new ArrayList<FieldMetadataBuilder>();
-	private List<MethodMetadataBuilder> declaredMethods = new ArrayList<MethodMetadataBuilder>();
 	private List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>();
 	private List<InitializerMetadataBuilder> declaredInitializers = new ArrayList<InitializerMetadataBuilder>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 
+	/**
+	 * Constructor
+	 *
+	 * @param declaredbyMetadataId
+	 */
 	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
-	
+
+	/**
+	 * Constructor
+	 *
+	 * @param existing
+	 */
 	protected AbstractMemberHoldingTypeDetailsBuilder(MemberHoldingTypeDetails existing) {
 		super(existing);
 		init(existing);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param declaredbyMetadataId
+	 * @param existing
+	 */
 	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId, MemberHoldingTypeDetails existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing);
@@ -71,12 +91,30 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		this.declaredFields = declaredFields;
 	}
 
+	/**
+	 * Returns the declared methods in this builder
+	 * 
+	 * @return an unmodifiable copy of this list
+	 */
 	public final List<MethodMetadataBuilder> getDeclaredMethods() {
-		return declaredMethods;
+		return Collections.unmodifiableList(declaredMethods);
 	}
 
-	public final void setDeclaredMethods(List<MethodMetadataBuilder> declaredMethods) {
-		this.declaredMethods = declaredMethods;
+	/**
+	 * Sets the declared methods for this builder; equivalent to calling
+	 * {@link #addMethod(MethodMetadataBuilder)} once for each item of the
+	 * given {@link Iterable}. 
+	 * 
+	 * @param declaredMethods the methods to set; can be <code>null</code> for 
+	 * none, otherwise the {@link Iterable} is defensively copied
+	 */
+	public final void setDeclaredMethods(final Iterable<? extends MethodMetadataBuilder> declaredMethods) {
+		this.declaredMethods.clear();
+		if (declaredMethods != null) {
+			for (final MethodMetadataBuilder methodBuilder : declaredMethods) {
+				addMethod(methodBuilder);
+			}
+		}
 	}
 
 	public List<ClassOrInterfaceTypeDetailsBuilder> getDeclaredInnerTypes() {
@@ -131,6 +169,13 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	protected void onAddField(FieldMetadataBuilder field) {}
 
+	/**
+	 * Adds the given method to this builder
+	 * 
+	 * @param method the method builder to add; ignored if <code>null</code> or
+	 * if its MID doesn't match this builder's MID
+	 * @return true if the state of this builder changed
+	 */
 	public final boolean addMethod(MethodMetadataBuilder method) {
 		if (method == null || !getDeclaredByMetadataId().equals(method.getDeclaredByMetadataId())) {
 			return false;
@@ -139,6 +184,12 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return declaredMethods.add(method);
 	}
 
+	/**
+	 * Subclasses can perform their own actions upon a method builder being
+	 * added. This implementation does nothing.
+	 * 
+	 * @param method the method being added; never <code>null</code>
+	 */
 	protected void onAddMethod(MethodMetadataBuilder method) {}
 
 	public final boolean addConstructor(ConstructorMetadata constructor) {
@@ -230,5 +281,26 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 			result.add(builder.build());
 		}
 		return result;
+	}
+
+    /**
+     * Removes the given methods from this builder
+     * 
+     * @param methodsToRemove can be <code>null</code> for none
+     * @return true if this builder changed as a result
+     * @see List#removeAll(Collection)
+     */
+	public boolean removeAll(final Collection<? extends MethodMetadataBuilder> methodsToRemove) {
+		if (methodsToRemove == null) {
+			return false;
+		}
+		return this.declaredMethods.removeAll(methodsToRemove);
+	}
+	
+	/**
+	 * Removes all declared methods from this builder
+	 */
+	public void clearDeclaredMethods() {
+		this.declaredMethods.clear();
 	}
 }

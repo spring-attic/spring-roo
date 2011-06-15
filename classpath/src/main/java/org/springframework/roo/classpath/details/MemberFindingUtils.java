@@ -41,14 +41,15 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Locates the specified method.
 	 * 
-	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
-	 * @param methodName to locate (required)
+	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search; can be <code>null</code>
+	 * @param methodName to locate; can be blank
 	 * @param parameters to locate (can be null if there are no parameters)
-	 * @return the method, or null if not found
+	 * @return the method, or <code>null</code> if not found
 	 */
 	public static MethodMetadata getDeclaredMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		Assert.notNull(methodName, "Method name required");
+		if (memberHoldingTypeDetails == null) {
+			return null;
+		}
 		if (parameters == null) {
 			parameters = new ArrayList<JavaType>();
 		}

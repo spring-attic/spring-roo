@@ -20,14 +20,11 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.operations.AbstractOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
@@ -226,11 +223,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			
 			// To get here, there is no listening managed bean, so add one
 			JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
-			createManagedBean(managedBean, entity);
+			createManagedBean(managedBean, entity, true);
 		}
 	}
 
-	public void createManagedBean(JavaType managedBean, JavaType entity) {
+	public void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu) {
 		installBean("MenuBean-template.java", managedBean.getPackage(), "MenuBean");
 		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
 
@@ -240,11 +237,14 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 
 		// Create type annotation for new managed bean
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType(RooJsfManagedBean.class.getName()));
+		annotationBuilder.addClassAttribute("entity", entity);
+		if (!includeOnMenu) {
+			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
+		}
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, Path.SRC_MAIN_JAVA);
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType(RooJsfManagedBean.class.getName()), attributes));
+		typeDetailsBuilder.addAnnotation(annotationBuilder);
 
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 
