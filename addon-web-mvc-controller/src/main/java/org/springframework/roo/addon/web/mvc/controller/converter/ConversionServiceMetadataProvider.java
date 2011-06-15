@@ -68,7 +68,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 
 	@Override
 	protected String resolveDownstreamDependencyIdentifier(String upstreamDependency) {
-		if (applicationConversionServiceFactoryBeanMid != null || MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType()))) {
+		if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType()))) {
 			// A WebScaffoldMetadata upstream MID has changed or become available for the first time
 			// It's OK to return null if we don't yet know the MID because its JavaType has never been found
 			return applicationConversionServiceFactoryBeanMid;
@@ -87,10 +87,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(new JavaType(RooWebScaffold.class.getName()));
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
-		if (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes.isEmpty()) { 
-			// No ITD needed
-			return null;
-		}
+
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
 	
@@ -100,6 +97,9 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
 			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
+			if (webScaffoldAnnotationValues.getFormBackingObject() == null) {
+				continue;
+			}
 			Map<JavaType, List<MethodMetadata>> relevantTypes = findRelevantTypes(webScaffoldAnnotationValues.getFormBackingObject(), metadataIdentificationString);
 			relevantDomainTypes.putAll(relevantTypes);
 		}
@@ -112,11 +112,14 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
 			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
-			JavaType backingType = webScaffoldAnnotationValues.getFormBackingObject();
-			MemberDetails memberDetails = getMemberDetails(backingType);
+			JavaType formBackingObject = webScaffoldAnnotationValues.getFormBackingObject();
+			if (formBackingObject == null) {
+				continue;
+			}
+			MemberDetails memberDetails = getMemberDetails(formBackingObject);
 			List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 			if (embeddedIdFields.size() > 1) {
-				throw new IllegalStateException("Found multiple embedded ID fields in " + backingType.getFullyQualifiedTypeName() + " type. Only one is allowed.");
+				throw new IllegalStateException("Found multiple embedded ID fields in " + formBackingObject.getFullyQualifiedTypeName() + " type. Only one is allowed.");
 			} else if (embeddedIdFields.size() == 1) {
 				Map<Object, JavaSymbolName> jsonMethodNames = new LinkedHashMap<Object, JavaSymbolName>();
 				MemberDetails fieldMemberDetails = getMemberDetails(embeddedIdFields.get(0).getFieldType());

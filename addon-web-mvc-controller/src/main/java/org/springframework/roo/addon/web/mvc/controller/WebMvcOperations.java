@@ -21,7 +21,13 @@ public interface WebMvcOperations {
 	
 	void installAllWebMvcArtifacts();
 	
-	void installConversionService(JavaPackage thePackage);
+	/**
+	 * Installs and configures an application-wide FormattingConversionServiceFactoryBean that can be used
+	 * to register application-specific Converters and Formatters. 
+	 * 
+	 * @param destinationPackage the package to install the conversion service class
+	 */
+	void installConversionService(JavaPackage destinationPackage);
 	
 	void registerWebFlowConversionServiceExposingInterceptor();
 }
