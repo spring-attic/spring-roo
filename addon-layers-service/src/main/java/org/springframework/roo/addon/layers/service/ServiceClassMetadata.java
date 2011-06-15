@@ -6,8 +6,11 @@ import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -28,31 +31,50 @@ import org.springframework.uaa.client.util.Assert;
  * @since 1.2
  */
 public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
+	private static final JavaType SERVICE_ANNOTATION = new JavaType("org.springframework.stereotype.Service");
 	private static final String PROVIDES_TYPE_STRING = ServiceClassMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private ServiceAnnotationValues annotationValues;
-	private MemberDetails governorDetails;
 	
+	// Fields
+	private final MemberDetails governorDetails;
+	private final ServiceAnnotationValues annotationValues;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param identifier the identifier for this item of metadata (required)
+	 * @param aspectName the Java type of the ITD (required)
+	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
+	 * @param governorDetails (required)
+	 * @param annotationValues (required)
+	 * @param allCrudAdditions (required)
+	 */
 	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, Map<CrudKey, MemberTypeAdditions>> allCrudAdditions) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.notNull(governorDetails, "Governor member details required");
+		Assert.notNull(allCrudAdditions, "CRUD additions required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
 		
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
 		
-		for (JavaType domainType : annotationValues.getDomainTypes()) {
+		for (final JavaType domainType : annotationValues.getDomainTypes()) {
 			Map<CrudKey, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			
-			MemberTypeAdditions findAllAdditions = crudAdditions.get(CrudKey.FIND_ALL_METHOD);
+			final MemberTypeAdditions findAllAdditions = crudAdditions.get(CrudKey.FIND_ALL_METHOD);
 			builder.addMethod(getFindAllMethod(domainType, findAllAdditions));
 			if (findAllAdditions != null) {
 				findAllAdditions.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllAdditions.getClassOrInterfaceTypeDetailsBuilder(), builder);
 			}
 		}
 		
-		builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.stereotype.Service")));
+		// Introduce the @Service annotation via the ITD if it's not already on the service's Java class
+		final AnnotationMetadata serviceAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorDetails, SERVICE_ANNOTATION);
+		if (serviceAnnotation == null) {
+			builder.addAnnotation(new AnnotationMetadataBuilder(SERVICE_ANNOTATION));
+		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -60,9 +82,10 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	
 	private MethodMetadata getFindAllMethod(JavaType domainType, MemberTypeAdditions findAllAdditions) {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod());
-//		if (MemberFindingUtils.getMethod(governorDetails, methodName, new ArrayList<JavaType>()) != null) {
-//			return null;
-//		}
+		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
+			// The governor already declares this method
+			return null;
+		}
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		// No further layer found, so let's create a simple dummy implementation
 		if (findAllAdditions == null) {
