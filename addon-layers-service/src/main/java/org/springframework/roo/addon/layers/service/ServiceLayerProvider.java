@@ -43,23 +43,18 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		if (coitd == null) {
 			return null;
 		}
-		
 		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
-		JavaType interfaceType = coitd.getImplementsTypes().get(0);
-		String repoField = StringUtils.uncapitalize(interfaceType.getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), interfaceType).build());
+		String fieldName = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
 //		@SuppressWarnings("unchecked")
 //		AnnotationAttributeValue<StringAttributeValue> findAllMethod = (AnnotationAttributeValue<StringAttributeValue>) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE).getAttribute(new JavaSymbolName("findAllMethod"));
-		return new MemberTypeAdditions(classBuilder, repoField + ".findAll()"); // TODO get method name from @RooService annotation
+		return new MemberTypeAdditions(classBuilder, fieldName + ".findAll()"); // TODO get method name from @RooService annotation
 	}
 	
 	private ClassOrInterfaceTypeDetails findMemberDetails(JavaType type) {
 		for (ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ANNOTATION_TYPE)) {
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE);
-			if (annotation == null) {
-				return null;
-			}
 			@SuppressWarnings("unchecked")
 			ArrayAttributeValue<AnnotationAttributeValue<JavaType>> domainTypes = (ArrayAttributeValue<AnnotationAttributeValue<JavaType>>) annotation.getAttribute(new JavaSymbolName(RooService.DOMAIN_TYPES));
 			if (domainTypes == null) {
