@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jsf;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +15,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -28,11 +30,13 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -52,6 +56,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private PropFileOperations propFileOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
@@ -61,7 +66,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public boolean isScaffoldAvailable() {
-		return hasWebXml() && hasFacesConfig();
+		return hasWebXml();
 	}
 
 	public void setup(JsfImplementation jsfImplementation) {
@@ -71,12 +76,12 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		changeJsfImplementation(jsfImplementation);
 		copyWebXml();
-		copyFacesConfig();
-		copyDirectoryContents("images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
-		copyDirectoryContents("css/*.css", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
-		copyDirectoryContents("css/skin/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin"), false);
-		copyDirectoryContents("css/skin/images/*.*", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin/images"), false);
-		copyDirectoryContents("templates/*.xhtml", projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/templates"), false);
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
+		copyDirectoryContents("css/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
+		copyDirectoryContents("css/skin/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin"), false);
+		copyDirectoryContents("css/skin/images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin/images"), false);
+		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/templates"), false);
 
 		fileManager.scan();
 	}
@@ -90,6 +95,94 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		
 		// Create JSF managed bean for each entity
 		generateManagedBeans(destinationPackage);
+	}
+
+	public void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu) {
+		installFacesConfig(managedBean.getPackage());
+		installI18n(managedBean.getPackage());
+		installBean("MenuBean-template.java", managedBean.getPackage(), "MenuBean");
+		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
+
+		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
+			// Type exists already - nothing to do
+			return; 
+		}
+
+		// Create type annotation for new managed bean
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType(RooJsfManagedBean.class.getName()));
+		annotationBuilder.addClassAttribute("entity", entity);
+		if (!includeOnMenu) {
+			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
+		}
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, Path.SRC_MAIN_JAVA);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.addAnnotation(annotationBuilder);
+
+		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+
+		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
+		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
+		
+		copyEntityTypePage(entity);
+	}
+
+	private void generateManagedBeans(JavaPackage destinationPackage) {
+		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
+		for (ClassOrInterfaceTypeDetails cid : cids) {
+			if (Modifier.isAbstract(cid.getModifier())) {
+				continue;
+			}
+			
+			JavaType entity = cid.getName();
+			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, path));
+			if (entityMetadata == null || (!entityMetadata.isValid())) {
+				continue;
+			}
+			
+			// Check to see if this entity metadata has a JSF metadata listening to it
+			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
+			if (dependencyRegistry.getDownstream(entityMetadata.getId()).contains(downstreamJsfMetadataId)) {
+				// There is already a JSF managed bean for this entity
+				continue;
+			}
+			
+			// To get here, there is no listening managed bean, so add one
+			JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
+			createManagedBean(managedBean, entity, true);
+		}
+	}
+
+	private void installI18n(JavaPackage destinationPackage) {
+		String packagePath = destinationPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar);
+		String i18nDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n");
+		if (!fileManager.exists(i18nDirectory + "/application.properties")) {
+			try {
+				String projectName = projectOperations.getProjectMetadata().getProjectName();
+				fileManager.createFile(i18nDirectory + "/application.properties");
+				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n/application.properties", "application_name", projectName.substring(0, 1).toUpperCase() + projectName.substring(1), true);
+				copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
+			} catch (Exception e) {
+				throw new IllegalStateException("Unable to create i18n files", e);
+			}
+		}
+	}
+	
+	private void copyEntityTypePage(JavaType entity) {
+		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
+		try {
+			InputStream template = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
+			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
+			input = input.replace("__DOMAIN_TYPE__", entity.getSimpleTypeName());
+			input = input.replace("__LC_DOMAIN_TYPE__", StringUtils.uncapitalize(entity.getSimpleTypeName()));
+
+			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
+			input = input.replace("__DOMAIN_TYPE_PLURAL__", entityMetadata.getPlural());
+
+			fileManager.createOrUpdateTextFileIfRequired(domainTypeFile, input, false);
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to create '" + domainTypeFile + "'", e);
+		}
 	}
 
 	private boolean hasWebXml() {
@@ -114,15 +207,20 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		fileManager.createOrUpdateTextFileIfRequired(getWebXmlFile(), XmlUtils.nodeToString(document), false);
 	}
 
-	private void copyFacesConfig() {
+	private void installFacesConfig(JavaPackage destinationPackage) {
 		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
 		if (hasFacesConfig()) {
 			return;
 		}
-		
-		Document document = getDocumentTemplate("faces-config-template.xml");
-		
-		fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), XmlUtils.nodeToString(document), false);
+
+		try {
+			InputStream template = TemplateUtils.getTemplate(getClass(), "faces-config-template.xml");
+			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
+			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
+			fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), input, false);
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to create 'faces.config.xml'", e);
+		}
 	}
 
 	private boolean hasFacesConfig() {
@@ -198,58 +296,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 
 		projectOperations.addRepositories(repositories);
-	}
-
-	private void generateManagedBeans(JavaPackage destinationPackage) {
-		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
-		for (ClassOrInterfaceTypeDetails cid : cids) {
-			if (Modifier.isAbstract(cid.getModifier())) {
-				continue;
-			}
-			
-			JavaType entity = cid.getName();
-			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, path));
-			if (entityMetadata == null || (!entityMetadata.isValid())) {
-				continue;
-			}
-			
-			// Check to see if this entity metadata has a JSF metadata listening to it
-			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
-			if (dependencyRegistry.getDownstream(entityMetadata.getId()).contains(downstreamJsfMetadataId)) {
-				// There is already a JSF managed bean for this entity
-				continue;
-			}
-			
-			// To get here, there is no listening managed bean, so add one
-			JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
-			createManagedBean(managedBean, entity, true);
-		}
-	}
-
-	public void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu) {
-		installBean("MenuBean-template.java", managedBean.getPackage(), "MenuBean");
-		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
-
-		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
-			// Type exists already - nothing to do
-			return; 
-		}
-
-		// Create type annotation for new managed bean
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType(RooJsfManagedBean.class.getName()));
-		annotationBuilder.addClassAttribute("entity", entity);
-		if (!includeOnMenu) {
-			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
-		}
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, Path.SRC_MAIN_JAVA);
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.addAnnotation(annotationBuilder);
-
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
-
-		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
-		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 	}
 
 	private void installBean(String templateName, JavaPackage destinationPackage, String beanName) {
