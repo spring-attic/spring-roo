@@ -32,30 +32,45 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ItdTypeDetails> {
-	private ClassOrInterfaceTypeDetails governor;
-	private JavaType aspect;
-	private boolean privilegedAspect;
-	private ImportRegistrationResolver importRegistrationResolver;
-	private List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
-	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
-	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
+	
+	// Fields
+	private final boolean privilegedAspect;
+	private final ClassOrInterfaceTypeDetails governor;
+	private final ImportRegistrationResolver importRegistrationResolver;
+	private final JavaType aspect;
+	private final List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+	private final List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
+	private final List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
 
+	/**
+	 * Constructor based on an existing ITD
+	 *
+	 * @param existing (required)
+	 */
 	public ItdTypeDetailsBuilder(ItdTypeDetails existing) {
 		super(existing.getDeclaredByMetadataId(), existing);
-		this.governor = existing.getGovernor();
 		this.aspect = existing.getAspect();
-		this.privilegedAspect = existing.isPrivilegedAspect();
+		this.governor = existing.getGovernor();
 		this.importRegistrationResolver = new ImportRegistrationResolverImpl(aspect.getPackage());
+		this.privilegedAspect = existing.isPrivilegedAspect();
 	}
 	
+	/**
+	 * Constructor
+	 *
+	 * @param declaredByMetadataId
+	 * @param governor (required)
+	 * @param aspect (required)
+	 * @param privilegedAspect
+	 */
 	public ItdTypeDetailsBuilder(String declaredByMetadataId, ClassOrInterfaceTypeDetails governor, JavaType aspect, boolean privilegedAspect) {
 		super(declaredByMetadataId);
 		Assert.notNull(governor, "Name (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
-		this.governor = governor;
 		this.aspect = aspect;
-		this.privilegedAspect = privilegedAspect;
+		this.governor = governor;
 		this.importRegistrationResolver = new ImportRegistrationResolverImpl(aspect.getPackage());
+		this.privilegedAspect = privilegedAspect;
 	}
 
 	public ItdTypeDetails build() {
@@ -70,7 +85,7 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	protected void onAddConstructor(ConstructorMetadataBuilder md) {
 		Assert.isNull(MemberFindingUtils.getDeclaredConstructor(governor, AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		Assert.isNull(MemberFindingUtils.getDeclaredConstructor(build(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
-		Assert.hasText(md.getBody(), "Method '" + md + "' failed to provide a body, despite being identified for ITD inclusion");
+		Assert.hasText(md.getBody(), "Constructor '" + md + "' failed to provide a body, despite being identified for ITD inclusion");
 	}
 
 	@Override 
@@ -83,7 +98,9 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	protected void onAddMethod(MethodMetadataBuilder md) {
 		Assert.isNull(MemberFindingUtils.getDeclaredMethod(governor, md.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Method '" + md.getMethodName() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		Assert.isNull(MemberFindingUtils.getDeclaredMethod(build(), md.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Method '" + md.getMethodName() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
-		Assert.hasText(md.getBody(), "Method '" + md + "' failed to provide a body, despite being identified for ITD inclusion");
+		if (!Modifier.isAbstract(md.getModifier())) {
+			Assert.hasText(md.getBody(), "Method '" + md + "' failed to provide a body, despite being identified for ITD inclusion");
+		}
 	}
 
 	@Override 
