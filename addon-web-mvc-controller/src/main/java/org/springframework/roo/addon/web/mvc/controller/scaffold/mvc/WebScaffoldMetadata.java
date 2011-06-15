@@ -228,7 +228,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getListMethod() {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
-		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindEntriesMethod() == null || javaTypePersistenceMetadataHolder.getCountMethod() == null  || javaTypePersistenceMetadataHolder.getFindAllMethod() == null) {
+		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindEntriesMethod() == null || javaTypePersistenceMetadataHolder.getCountMethod() == null || javaTypePersistenceMetadataHolder.getFindAllMethod() == null) {
 			return null;
 		}
 
