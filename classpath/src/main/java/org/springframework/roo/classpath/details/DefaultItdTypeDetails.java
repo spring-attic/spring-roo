@@ -207,4 +207,8 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
+
+	public boolean extendsType(final JavaType type) {
+		return this.extendsTypes.contains(type);
+	}
 }

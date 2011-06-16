@@ -1,7 +1,11 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -140,6 +144,10 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
     public Set<ImportMetadata> getRegisteredImports() {
         return Collections.unmodifiableSet(registeredImports);
     }
+
+	public boolean extendsType(final JavaType type) {
+		return this.extendsTypes.contains(type);
+	}
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

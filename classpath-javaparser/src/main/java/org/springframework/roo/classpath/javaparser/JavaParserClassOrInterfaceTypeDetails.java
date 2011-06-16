@@ -21,6 +21,17 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -47,16 +58,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * Java Parser implementation of {@link ClassOrInterfaceTypeDetails}.
  * <p/>
@@ -68,324 +69,30 @@ import java.util.Set;
  * @since 1.0.1
  */
 public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAccessorProvider implements ClassOrInterfaceTypeDetails, CompilationUnitServices {
-	private String declaredByMetadataId;
 
-	// To satisfy interface
-	private JavaType name;
-	private PhysicalTypeCategory physicalTypeCategory;
-	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
-	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
-	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
-	private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
-	private ClassOrInterfaceTypeDetails superclass = null;
-	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
-	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-	private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
-	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
-
-	// Internal use
-	protected CompilationUnit compilationUnit;
-	protected ClassOrInterfaceDeclaration clazz;
-	protected EnumDeclaration enumClazz;
-	private List<ImportDeclaration> imports;
-	private JavaPackage compilationUnitPackage;
-	protected Set<JavaSymbolName> typeParameterNames;
-	private List<TypeDeclaration> innerTypes = new ArrayList<TypeDeclaration>();
-
+	// Constants
 	static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
+	
+	static final String getCompilationUnitContents(final ClassOrInterfaceTypeDetails cit) {
+		Assert.notNull(cit, "Class or interface type details are required");
+		// Create a compilation unit to store the type to be created
+		final CompilationUnit compilationUnit = new CompilationUnit();
 
-	private int modifier = 0;
+		// NB: this import list is replaced at the end of this method by a sorted version
+		compilationUnit.setImports(new ArrayList<ImportDeclaration>());
 
-	public JavaParserClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
-		this(compilationUnit, null, typeDeclaration, declaredByMetadataId, typeName, metadataService, physicalTypeMetadataProvider);
-	}
-
-	private CompilationUnitServices getDefaultCompilationUnitServices() {
-		return new CompilationUnitServices() {
-			public List<ImportDeclaration> getImports() {
-				return imports;
-			}
-
-			public JavaPackage getCompilationUnitPackage() {
-				return compilationUnitPackage;
-			}
-
-			public List<TypeDeclaration> getInnerTypes() {
-				return innerTypes;
-			}
-
-			public JavaType getEnclosingTypeName() {
-				return name;
-			}
-
-			public PhysicalTypeCategory getPhysicalTypeCategory() {
-				return physicalTypeCategory;
-			}
-		};
-	}
-
-	public JavaParserClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, TypeDeclaration typeDeclaration, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
-		super(CustomDataImpl.NONE);
-		Assert.notNull(compilationUnit, "Compilation unit required");
-		Assert.notNull(typeDeclaration, "Unable to locate the class or interface declaration");
-
-		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
-		Assert.notNull(typeName, "Name required");
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(physicalTypeMetadataProvider, "Physical type metadata provider required");
-
-		this.name = typeName;
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.compilationUnit = compilationUnit;
-
-		imports = compilationUnit.getImports();
-		if (imports == null) {
-			imports = new ArrayList<ImportDeclaration>();
-			compilationUnit.setImports(imports);
+		if (!cit.getName().isDefaultPackage()) {
+			compilationUnit.setPackage(new PackageDeclaration(ASTHelper.createNameExpr(cit.getName().getPackage().getFullyQualifiedPackageName())));
 		}
 
-		compilationUnitPackage = typeName.getPackage();
+		// Add the class of interface declaration to the compilation unit
+		final List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
+		compilationUnit.setTypes(types);
 
-		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
+		// We pass in null as the 3rd argument as this denotes we're working with a top-level type
+		updateOutput(compilationUnit, null, cit, null);
 
-		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
-			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
-
-			if (this.clazz.isInterface()) {
-				physicalTypeCategory = PhysicalTypeCategory.INTERFACE;
-			} else {
-				physicalTypeCategory = PhysicalTypeCategory.CLASS;
-			}
-
-		} else if (typeDeclaration instanceof EnumDeclaration) {
-			this.enumClazz = (EnumDeclaration) typeDeclaration;
-			this.physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
-		}
-
-		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
-
-		if (enclosingCompilationUnitServices == null) {
-			enclosingCompilationUnitServices = getDefaultCompilationUnitServices();
-		}
-
-		final CompilationUnitServices finalCompilationUnitServices = enclosingCompilationUnitServices;
-		// A hybrid CompilationUnitServices must be provided that references the enclosing types imports and package
-		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
-			public List<ImportDeclaration> getImports() {
-				return finalCompilationUnitServices.getImports();
-			}
-
-			public JavaPackage getCompilationUnitPackage() {
-				return finalCompilationUnitServices.getCompilationUnitPackage();
-			}
-
-			public List<TypeDeclaration> getInnerTypes() {
-				return innerTypes;
-			}
-
-			public JavaType getEnclosingTypeName() {
-				return finalCompilationUnitServices.getEnclosingTypeName();
-			}
-
-			public PhysicalTypeCategory getPhysicalTypeCategory() {
-				return physicalTypeCategory;
-			}
-		};
-
-		for (ImportDeclaration importDeclaration : imports) {
-			if (importDeclaration.getName() instanceof QualifiedNameExpr) {
-				String qualifier = ((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString();
-				String simpleName = importDeclaration.getName().getName();
-				String fullName = qualifier + "." + simpleName;
-				// We want to calculate these...
-
-				JavaType type = new JavaType(fullName);
-				JavaPackage typePackage = type.getPackage();
-				ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
-				registeredImports.add(newImport.build());
-			}
-		}
-
-		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
-			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
-
-			// Determine the type name, adding type parameters if possible
-			JavaType newName = JavaParserUtils.getJavaType(compilationUnitServices, this.clazz);
-
-			// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
-			this.name = new JavaType(this.name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
-
-		}
-
-		// Verify the package declaration appears to be correct
-		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
-
-		// Convert Java Parser modifier into JDK modifier
-		this.modifier = JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers());
-
-		// Type parameters
-		typeParameterNames = new HashSet<JavaSymbolName>();
-		for (JavaType param : this.name.getParameters()) {
-			JavaSymbolName arg = param.getArgName();
-			// Fortunately type names can only appear at the top-level
-			if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg) && !JavaType.WILDCARD_EXTENDS.equals(arg) && !JavaType.WILDCARD_SUPER.equals(arg)) {
-				typeParameterNames.add(arg);
-			}
-		}
-
-		if (this.clazz != null) {
-			List<ClassOrInterfaceType> extendsList = this.clazz.getExtends();
-			if (extendsList != null) {
-				for (ClassOrInterfaceType candidate : extendsList) {
-					JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
-					extendsTypes.add(javaType);
-				}
-			}
-
-			// Obtain the superclass, if this is a class and one is available
-			if (physicalTypeCategory == PhysicalTypeCategory.CLASS && extendsTypes.size() == 1) {
-				JavaType superclass = extendsTypes.get(0);
-				String superclassId = physicalTypeMetadataProvider.findIdentifier(superclass);
-				PhysicalTypeMetadata superPtm = null;
-				if (superclassId != null) {
-					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
-				}
-				if (superPtm != null && superPtm.getMemberHoldingTypeDetails() != null && superPtm.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-					this.superclass = (ClassOrInterfaceTypeDetails) superPtm.getMemberHoldingTypeDetails();
-				}
-			}
-		}
-
-		if (this.enumClazz != null) {
-			List<EnumConstantDeclaration> constants = this.enumClazz.getEntries();
-			if (constants != null) {
-				for (EnumConstantDeclaration enumConstants : constants) {
-					this.enumConstants.add(new JavaSymbolName(enumConstants.getName()));
-				}
-			}
-		}
-
-		List<ClassOrInterfaceType> implementsList = this.clazz == null ? this.enumClazz.getImplements() : this.clazz.getImplements();
-		if (implementsList != null) {
-			for (ClassOrInterfaceType candidate : implementsList) {
-				JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
-				implementsTypes.add(javaType);
-			}
-		}
-
-		List<AnnotationExpr> annotationsList = this.clazz == null ? this.enumClazz.getAnnotations() : typeDeclaration.getAnnotations();
-		if (annotationsList != null) {
-			for (AnnotationExpr candidate : annotationsList) {
-				JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, compilationUnitServices);
-				annotations.add(md);
-			}
-		}
-
-		List<BodyDeclaration> members = this.clazz == null ? this.enumClazz.getMembers() : this.clazz.getMembers();
-
-		if (members != null) {
-			// Now we've finished declaring the type, we should introspect for any inner types that can thus be referred to in other body members
-			// We defer this until now because it's illegal to refer to an inner type in the signature of the enclosing type
-			for (BodyDeclaration bodyDeclaration : members) {
-				if (bodyDeclaration instanceof TypeDeclaration) {
-					// Found a type
-					innerTypes.add((TypeDeclaration) bodyDeclaration);
-				}
-			}
-
-			for (BodyDeclaration member : members) {
-				if (member instanceof FieldDeclaration) {
-					FieldDeclaration castMember = (FieldDeclaration) member;
-					for (VariableDeclarator var : castMember.getVariables()) {
-						FieldMetadata fieldMetadata = new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, compilationUnitServices, typeParameterNames);
-						declaredFields.add(fieldMetadata);
-					}
-				}
-				if (member instanceof MethodDeclaration) {
-					MethodDeclaration castMember = (MethodDeclaration) member;
-					MethodMetadata method = new JavaParserMethodMetadata(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames);
-					declaredMethods.add(method);
-				}
-				if (member instanceof ConstructorDeclaration) {
-					ConstructorDeclaration castMember = (ConstructorDeclaration) member;
-					ConstructorMetadata constructorMetadata = new JavaParserConstructorMetadata(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames);
-					declaredConstructors.add(constructorMetadata);
-				}
-				if (member instanceof TypeDeclaration) {
-					TypeDeclaration castMember = (TypeDeclaration) member;
-					JavaType innerType = new JavaType(castMember.getName());
-					String innerTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(innerType, PhysicalTypeIdentifier.getPath(declaredByMetadataId));
-					ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = new JavaParserClassOrInterfaceTypeDetails(compilationUnit, compilationUnitServices, castMember, innerTypeMetadataId, innerType, metadataService, physicalTypeMetadataProvider);
-					declaredInnerTypes.add(classOrInterfaceTypeDetails);
-				}
-			}
-		}
-	}
-
-	JavaParserClassOrInterfaceTypeDetails(String typeContents, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
-		this(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), JavaParserUtils.locateTypeDeclaration(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), typeName), declaredByMetadataId, typeName, metadataService, physicalTypeMetadataProvider);
-	}
-
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
-
-	public int getModifier() {
-		return modifier;
-	}
-
-	public ClassOrInterfaceTypeDetails getSuperclass() {
-		return superclass;
-	}
-
-	public PhysicalTypeCategory getPhysicalTypeCategory() {
-		return physicalTypeCategory;
-	}
-
-	public JavaType getName() {
-		return name;
-	}
-
-	public List<? extends ConstructorMetadata> getDeclaredConstructors() {
-		return Collections.unmodifiableList(declaredConstructors);
-	}
-
-	public List<JavaSymbolName> getEnumConstants() {
-		return Collections.unmodifiableList(enumConstants);
-	}
-
-	public List<? extends FieldMetadata> getDeclaredFields() {
-		return Collections.unmodifiableList(declaredFields);
-	}
-
-	public List<? extends MethodMetadata> getDeclaredMethods() {
-		return Collections.unmodifiableList(declaredMethods);
-	}
-
-	public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
-		return Collections.unmodifiableList(declaredInnerTypes);
-	}
-
-	public List<InitializerMetadata> getDeclaredInitializers() {
-		return Collections.unmodifiableList(declaredInitializers);
-	}
-
-	public List<JavaType> getExtendsTypes() {
-		return Collections.unmodifiableList(extendsTypes);
-	}
-
-	public List<JavaType> getImplementsTypes() {
-		return Collections.unmodifiableList(implementsTypes);
-	}
-
-	public Set<ImportMetadata> getRegisteredImports() {
-		return Collections.unmodifiableSet(registeredImports);
-	}
-
-	public List<AnnotationMetadata> getAnnotations() {
-		return Collections.unmodifiableList(annotations);
+		return compilationUnit.toString();
 	}
 
 	/**
@@ -613,29 +320,7 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 
 		compilationUnit.setImports(imports);
 	}
-
-	static final String getCompilationUnitContents(final ClassOrInterfaceTypeDetails cit) {
-		Assert.notNull(cit, "Class or interface type details are required");
-		// Create a compilation unit to store the type to be created
-		final CompilationUnit compilationUnit = new CompilationUnit();
-
-		// NB: this import list is replaced at the end of this method by a sorted version
-		compilationUnit.setImports(new ArrayList<ImportDeclaration>());
-
-		if (!cit.getName().isDefaultPackage()) {
-			compilationUnit.setPackage(new PackageDeclaration(ASTHelper.createNameExpr(cit.getName().getPackage().getFullyQualifiedPackageName())));
-		}
-
-		// Add the class of interface declaration to the compilation unit
-		final List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
-		compilationUnit.setTypes(types);
-
-		// We pass in null as the 3rd argument as this denotes we're working with a top-level type
-		updateOutput(compilationUnit, null, cit, null);
-
-		return compilationUnit.toString();
-	}
-
+	
 	protected static void addEnumConstant(CompilationUnitServices compilationUnitServices, List<EnumConstantDeclaration> constants, JavaSymbolName name) {
 		// Determine location to insert
 		for (EnumConstantDeclaration constant : constants) {
@@ -682,6 +367,363 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 
 		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents, true);
 	}
+	
+	// To satisfy interface
+	private final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+	private final List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+	private final List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
+	private final List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
+	private final List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
+	private final List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
+	private final List<JavaType> extendsTypes = new ArrayList<JavaType>();
+	private final List<JavaType> implementsTypes = new ArrayList<JavaType>();
+	private final List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+	private final Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
+	
+	private ClassOrInterfaceTypeDetails superclass;
+	private JavaType name;
+	private PhysicalTypeCategory physicalTypeCategory;
+
+	// Internal use
+	private final String declaredByMetadataId;
+	protected final CompilationUnit compilationUnit;
+	private final JavaPackage compilationUnitPackage;
+	protected final Set<JavaSymbolName> typeParameterNames;
+	private final List<TypeDeclaration> innerTypes = new ArrayList<TypeDeclaration>();
+
+	private int modifier;
+	protected ClassOrInterfaceDeclaration clazz;
+	protected EnumDeclaration enumClazz;
+	private List<ImportDeclaration> imports;
+
+	/**
+	 * Constructor
+	 *
+	 * @param compilationUnit
+	 * @param typeDeclaration
+	 * @param declaredByMetadataId
+	 * @param typeName
+	 * @param metadataService
+	 * @param physicalTypeMetadataProvider
+	 * @throws ParseException
+	 * @throws CloneNotSupportedException
+	 * @throws IOException
+	 */
+	public JavaParserClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+		this(compilationUnit, null, typeDeclaration, declaredByMetadataId, typeName, metadataService, physicalTypeMetadataProvider);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param compilationUnit
+	 * @param enclosingCompilationUnitServices
+	 * @param typeDeclaration
+	 * @param declaredByMetadataId
+	 * @param typeName
+	 * @param metadataService
+	 * @param physicalTypeMetadataProvider
+	 * @throws ParseException
+	 * @throws CloneNotSupportedException
+	 * @throws IOException
+	 */
+	public JavaParserClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, TypeDeclaration typeDeclaration, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+		super(CustomDataImpl.NONE);
+		Assert.notNull(compilationUnit, "Compilation unit required");
+		Assert.notNull(typeDeclaration, "Unable to locate the class or interface declaration");
+
+		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
+		Assert.notNull(typeName, "Name required");
+		Assert.notNull(metadataService, "Metadata service required");
+		Assert.notNull(physicalTypeMetadataProvider, "Physical type metadata provider required");
+
+		this.name = typeName;
+		this.declaredByMetadataId = declaredByMetadataId;
+		this.compilationUnit = compilationUnit;
+
+		imports = compilationUnit.getImports();
+		if (imports == null) {
+			imports = new ArrayList<ImportDeclaration>();
+			compilationUnit.setImports(imports);
+		}
+
+		compilationUnitPackage = typeName.getPackage();
+
+		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
+
+		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
+
+			if (this.clazz.isInterface()) {
+				physicalTypeCategory = PhysicalTypeCategory.INTERFACE;
+			} else {
+				physicalTypeCategory = PhysicalTypeCategory.CLASS;
+			}
+
+		} else if (typeDeclaration instanceof EnumDeclaration) {
+			this.enumClazz = (EnumDeclaration) typeDeclaration;
+			this.physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
+		}
+
+		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
+
+		if (enclosingCompilationUnitServices == null) {
+			enclosingCompilationUnitServices = getDefaultCompilationUnitServices();
+		}
+
+		final CompilationUnitServices finalCompilationUnitServices = enclosingCompilationUnitServices;
+		// A hybrid CompilationUnitServices must be provided that references the enclosing types imports and package
+		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
+			public List<ImportDeclaration> getImports() {
+				return finalCompilationUnitServices.getImports();
+			}
+
+			public JavaPackage getCompilationUnitPackage() {
+				return finalCompilationUnitServices.getCompilationUnitPackage();
+			}
+
+			public List<TypeDeclaration> getInnerTypes() {
+				return innerTypes;
+			}
+
+			public JavaType getEnclosingTypeName() {
+				return finalCompilationUnitServices.getEnclosingTypeName();
+			}
+
+			public PhysicalTypeCategory getPhysicalTypeCategory() {
+				return physicalTypeCategory;
+			}
+		};
+
+		for (ImportDeclaration importDeclaration : imports) {
+			if (importDeclaration.getName() instanceof QualifiedNameExpr) {
+				String qualifier = ((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString();
+				String simpleName = importDeclaration.getName().getName();
+				String fullName = qualifier + "." + simpleName;
+				// We want to calculate these...
+
+				JavaType type = new JavaType(fullName);
+				JavaPackage typePackage = type.getPackage();
+				ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
+				registeredImports.add(newImport.build());
+			}
+		}
+
+		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
+
+			// Determine the type name, adding type parameters if possible
+			JavaType newName = JavaParserUtils.getJavaType(compilationUnitServices, this.clazz);
+
+			// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
+			this.name = new JavaType(this.name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
+
+		}
+
+		// Verify the package declaration appears to be correct
+		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
+
+		// Convert Java Parser modifier into JDK modifier
+		this.modifier = JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers());
+
+		// Type parameters
+		typeParameterNames = new HashSet<JavaSymbolName>();
+		for (JavaType param : this.name.getParameters()) {
+			JavaSymbolName arg = param.getArgName();
+			// Fortunately type names can only appear at the top-level
+			if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg) && !JavaType.WILDCARD_EXTENDS.equals(arg) && !JavaType.WILDCARD_SUPER.equals(arg)) {
+				typeParameterNames.add(arg);
+			}
+		}
+
+		if (this.clazz != null) {
+			List<ClassOrInterfaceType> extendsList = this.clazz.getExtends();
+			if (extendsList != null) {
+				for (ClassOrInterfaceType candidate : extendsList) {
+					JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
+					extendsTypes.add(javaType);
+				}
+			}
+
+			// Obtain the superclass, if this is a class and one is available
+			if (physicalTypeCategory == PhysicalTypeCategory.CLASS && extendsTypes.size() == 1) {
+				JavaType superclass = extendsTypes.get(0);
+				String superclassId = physicalTypeMetadataProvider.findIdentifier(superclass);
+				PhysicalTypeMetadata superPtm = null;
+				if (superclassId != null) {
+					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
+				}
+				if (superPtm != null && superPtm.getMemberHoldingTypeDetails() != null && superPtm.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+					this.superclass = (ClassOrInterfaceTypeDetails) superPtm.getMemberHoldingTypeDetails();
+				}
+			}
+		}
+
+		if (this.enumClazz != null) {
+			List<EnumConstantDeclaration> constants = this.enumClazz.getEntries();
+			if (constants != null) {
+				for (EnumConstantDeclaration enumConstants : constants) {
+					this.enumConstants.add(new JavaSymbolName(enumConstants.getName()));
+				}
+			}
+		}
+
+		List<ClassOrInterfaceType> implementsList = this.clazz == null ? this.enumClazz.getImplements() : this.clazz.getImplements();
+		if (implementsList != null) {
+			for (ClassOrInterfaceType candidate : implementsList) {
+				JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
+				implementsTypes.add(javaType);
+			}
+		}
+
+		List<AnnotationExpr> annotationsList = this.clazz == null ? this.enumClazz.getAnnotations() : typeDeclaration.getAnnotations();
+		if (annotationsList != null) {
+			for (AnnotationExpr candidate : annotationsList) {
+				JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, compilationUnitServices);
+				annotations.add(md);
+			}
+		}
+
+		List<BodyDeclaration> members = this.clazz == null ? this.enumClazz.getMembers() : this.clazz.getMembers();
+
+		if (members != null) {
+			// Now we've finished declaring the type, we should introspect for any inner types that can thus be referred to in other body members
+			// We defer this until now because it's illegal to refer to an inner type in the signature of the enclosing type
+			for (BodyDeclaration bodyDeclaration : members) {
+				if (bodyDeclaration instanceof TypeDeclaration) {
+					// Found a type
+					innerTypes.add((TypeDeclaration) bodyDeclaration);
+				}
+			}
+
+			for (BodyDeclaration member : members) {
+				if (member instanceof FieldDeclaration) {
+					FieldDeclaration castMember = (FieldDeclaration) member;
+					for (VariableDeclarator var : castMember.getVariables()) {
+						FieldMetadata fieldMetadata = new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, compilationUnitServices, typeParameterNames);
+						declaredFields.add(fieldMetadata);
+					}
+				}
+				if (member instanceof MethodDeclaration) {
+					MethodDeclaration castMember = (MethodDeclaration) member;
+					MethodMetadata method = new JavaParserMethodMetadata(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames);
+					declaredMethods.add(method);
+				}
+				if (member instanceof ConstructorDeclaration) {
+					ConstructorDeclaration castMember = (ConstructorDeclaration) member;
+					ConstructorMetadata constructorMetadata = new JavaParserConstructorMetadata(declaredByMetadataId, castMember, compilationUnitServices, typeParameterNames);
+					declaredConstructors.add(constructorMetadata);
+				}
+				if (member instanceof TypeDeclaration) {
+					TypeDeclaration castMember = (TypeDeclaration) member;
+					JavaType innerType = new JavaType(castMember.getName());
+					String innerTypeMetadataId = PhysicalTypeIdentifier.createIdentifier(innerType, PhysicalTypeIdentifier.getPath(declaredByMetadataId));
+					ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = new JavaParserClassOrInterfaceTypeDetails(compilationUnit, compilationUnitServices, castMember, innerTypeMetadataId, innerType, metadataService, physicalTypeMetadataProvider);
+					declaredInnerTypes.add(classOrInterfaceTypeDetails);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param typeContents
+	 * @param declaredByMetadataId
+	 * @param typeName
+	 * @param metadataService
+	 * @param physicalTypeMetadataProvider
+	 * @throws ParseException
+	 * @throws CloneNotSupportedException
+	 * @throws IOException
+	 */
+	JavaParserClassOrInterfaceTypeDetails(String typeContents, String declaredByMetadataId, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+		this(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), JavaParserUtils.locateTypeDeclaration(JavaParser.parse(new ByteArrayInputStream(typeContents.getBytes())), typeName), declaredByMetadataId, typeName, metadataService, physicalTypeMetadataProvider);
+	}
+
+	private CompilationUnitServices getDefaultCompilationUnitServices() {
+		return new CompilationUnitServices() {
+			public List<ImportDeclaration> getImports() {
+				return imports;
+			}
+
+			public JavaPackage getCompilationUnitPackage() {
+				return compilationUnitPackage;
+			}
+
+			public List<TypeDeclaration> getInnerTypes() {
+				return innerTypes;
+			}
+
+			public JavaType getEnclosingTypeName() {
+				return name;
+			}
+
+			public PhysicalTypeCategory getPhysicalTypeCategory() {
+				return physicalTypeCategory;
+			}
+		};
+	}
+	
+	public String getDeclaredByMetadataId() {
+		return declaredByMetadataId;
+	}
+
+	public int getModifier() {
+		return modifier;
+	}
+
+	public ClassOrInterfaceTypeDetails getSuperclass() {
+		return superclass;
+	}
+
+	public PhysicalTypeCategory getPhysicalTypeCategory() {
+		return physicalTypeCategory;
+	}
+
+	public JavaType getName() {
+		return name;
+	}
+
+	public List<? extends ConstructorMetadata> getDeclaredConstructors() {
+		return Collections.unmodifiableList(declaredConstructors);
+	}
+
+	public List<JavaSymbolName> getEnumConstants() {
+		return Collections.unmodifiableList(enumConstants);
+	}
+
+	public List<? extends FieldMetadata> getDeclaredFields() {
+		return Collections.unmodifiableList(declaredFields);
+	}
+
+	public List<? extends MethodMetadata> getDeclaredMethods() {
+		return Collections.unmodifiableList(declaredMethods);
+	}
+
+	public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
+		return Collections.unmodifiableList(declaredInnerTypes);
+	}
+
+	public List<InitializerMetadata> getDeclaredInitializers() {
+		return Collections.unmodifiableList(declaredInitializers);
+	}
+
+	public List<JavaType> getExtendsTypes() {
+		return Collections.unmodifiableList(extendsTypes);
+	}
+
+	public List<JavaType> getImplementsTypes() {
+		return Collections.unmodifiableList(implementsTypes);
+	}
+
+	public Set<ImportMetadata> getRegisteredImports() {
+		return Collections.unmodifiableSet(registeredImports);
+	}
+
+	public List<AnnotationMetadata> getAnnotations() {
+		return Collections.unmodifiableList(annotations);
+	}
 
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
@@ -716,5 +758,9 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 
 	public JavaType getEnclosingTypeName() {
 		return name;
+	}
+
+	public boolean extendsType(final JavaType type) {
+		return this.extendsTypes.contains(type);
 	}
 }
