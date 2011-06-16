@@ -8,6 +8,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
@@ -32,7 +33,8 @@ import org.springframework.roo.project.layers.MemberTypeAdditions;
 public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 	
 	@Reference private LayerService layerService;
-	private final static int LAYER_POSITION = LayerType.SERVICE.getPosition();
+	private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
+	private static final Path SRC = Path.SRC_MAIN_JAVA;
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -51,31 +53,40 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 		}
 		ServiceInterfaceMetadata serviceInterfaceMetadata = null;
 		for (JavaType type : coitd.getImplementsTypes()) {
-			if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) metadataService.get(ServiceInterfaceMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA))) != null) {
+			if ((serviceInterfaceMetadata = (ServiceInterfaceMetadata) metadataService.get(ServiceInterfaceMetadata.createIdentifier(type, SRC))) != null) {
 				break;
 			}
 		}
 		if (serviceInterfaceMetadata == null || !serviceInterfaceMetadata.isValid()) {
 			return null;
 		}
+		metadataDependencyRegistry.registerDependency(serviceInterfaceMetadata.getId(), metadataIdentificationString);
 		ServiceAnnotationValues serviceAnnotationValues = serviceInterfaceMetadata.getServiceAnnotationValues();
 		JavaType[] domainTypes = serviceAnnotationValues.getDomainTypes();
 		if (domainTypes == null) {
 			return null;
 		}
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
+		
+		Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
 		Map<JavaType,Map<String, MemberTypeAdditions>> allCrudAdditions = new HashMap<JavaType,Map<String, MemberTypeAdditions>>();
 		Map<String, LinkedHashMap<JavaSymbolName, Object>> requiredMethods = new HashMap<String, LinkedHashMap<JavaSymbolName,Object>>();
 		requiredMethods.put(PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), new LinkedHashMap<JavaSymbolName, Object>());
 		for (JavaType domainType : domainTypes) {
-			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
+			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, SRC), metadataIdentificationString);
 			Map<String, MemberTypeAdditions> methodAdditions = new HashMap<String, MemberTypeAdditions>();
 			for (String method : requiredMethods.keySet()) {
 				methodAdditions.put(method, layerService.getMemberTypeAdditions(metadataIdentificationString, method, domainType, requiredMethods.get(method), LAYER_POSITION));
 			}
 			allCrudAdditions.put(domainType, methodAdditions);
+			
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(domainType, SRC));
+			if (pluralMetadata == null) {
+				return null;
+			}
+			domainTypePlurals.put(domainType, pluralMetadata.getPlural());
 		}
-		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, serviceAnnotationValues, allCrudAdditions);
+		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, serviceAnnotationValues, allCrudAdditions, domainTypePlurals);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

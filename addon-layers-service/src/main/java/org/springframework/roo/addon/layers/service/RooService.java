@@ -13,11 +13,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooService {
+	
+	public static final String FIND_ALL_METHOD = "findAll";
 	public static final String DOMAIN_TYPES = "domainTypes";
 	
 	Class<?>[] domainTypes();
 
-	String findAllMethod() default "findAll";
+	String findAllMethod() default FIND_ALL_METHOD;
 	
 	boolean transactional() default true;
 }

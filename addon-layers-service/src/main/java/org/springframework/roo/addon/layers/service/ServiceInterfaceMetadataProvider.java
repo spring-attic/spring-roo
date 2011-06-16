@@ -1,8 +1,12 @@
 package org.springframework.roo.addon.layers.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -41,10 +45,18 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 		}
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
 		JavaType[] domainTypes = annotationValues.getDomainTypes();
-		if (domainTypes == null) {
+		if (domainTypes == null || domainTypes.length == 0) {
 			return null;
 		}
-		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues);
+		Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
+		for (JavaType type : domainTypes) {
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+			if (pluralMetadata == null) {
+				return null;
+			}
+			domainTypePlurals.put(type, pluralMetadata.getPlural());
+		}
+		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues, domainTypePlurals);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

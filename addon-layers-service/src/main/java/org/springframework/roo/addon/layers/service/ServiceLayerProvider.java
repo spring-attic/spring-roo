@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -16,8 +17,11 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
@@ -39,6 +43,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private MetadataService metadataService;
 
 	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams) {
 		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
@@ -61,9 +66,13 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
 		String fieldName = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
 		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType, Path.SRC_MAIN_JAVA));
+		if (pluralMetadata == null) {
+			return null;
+		}
 //		@SuppressWarnings("unchecked")
-//		AnnotationAttributeValue<StringAttributeValue> findAllMethod = (AnnotationAttributeValue<StringAttributeValue>) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE).getAttribute(new JavaSymbolName("findAllMethod"));
-		return new MemberTypeAdditions(classBuilder, fieldName + ".findAll()"); // TODO get method name from @RooService annotation
+//		AnnotationAttributeValue<StringAttributeValue> findAllMethod = (AnnotationAttributeValue<StringAttributeValue>) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE).getAttribute(new JavaSymbolName(RooService.FIND_ALL_METHOD));
+		return new MemberTypeAdditions(classBuilder, fieldName + "." + RooService.FIND_ALL_METHOD + pluralMetadata.getPlural() + "()");
 	}
 	
 	private ClassOrInterfaceTypeDetails findMemberDetails(JavaType type) {

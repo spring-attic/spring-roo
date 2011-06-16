@@ -2,6 +2,7 @@ package org.springframework.roo.addon.layers.service;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -42,25 +43,27 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 * @param governorPhysicalTypeMetadata (required)
 	 * @param governorDetails (required)
 	 * @param annotationValues (required)
+	 * @param domainTypePlurals 
 	 */
-	public ServiceInterfaceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues) {
+	public ServiceInterfaceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, String> domainTypePlurals) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
+		Assert.notNull(domainTypePlurals, "Domain type plural values required");
 		
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
 		
 		for (JavaType domainType : annotationValues.getDomainTypes()) {
-			builder.addMethod(getFindAllMethod(domainType));	// TODO add other methods once implemented
+			builder.addMethod(getFindAllMethod(domainType, domainTypePlurals.get(domainType)));	// TODO add other methods once implemented
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 	
-	private MethodMetadata getFindAllMethod(final JavaType domainType) {
-		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod());
+	private MethodMetadata getFindAllMethod(final JavaType domainType, final String plural) {
+		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod() + plural);
 		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
 			// The governor already declares this method
 			return null;

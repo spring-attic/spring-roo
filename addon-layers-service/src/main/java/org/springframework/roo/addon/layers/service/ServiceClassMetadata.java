@@ -51,12 +51,14 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @param governorDetails (required)
 	 * @param annotationValues (required)
 	 * @param allCrudAdditions (required)
+	 * @param domainTypePlurals 
 	 */
-	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, Map<String, MemberTypeAdditions>> allCrudAdditions) {
+	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, Map<String, MemberTypeAdditions>> allCrudAdditions, Map<JavaType, String> domainTypePlurals) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(allCrudAdditions, "CRUD additions required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
+		Assert.notNull(domainTypePlurals, "Domain type plurals required");
 		
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
@@ -65,7 +67,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Map<String, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			
 			final MemberTypeAdditions findAllAdditions = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
-			builder.addMethod(getFindAllMethod(domainType, findAllAdditions));
+			builder.addMethod(getFindAllMethod(domainType, findAllAdditions, domainTypePlurals.get(domainType)));
 			if (findAllAdditions != null) {
 				findAllAdditions.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllAdditions.getClassOrInterfaceTypeDetailsBuilder(), builder);
 			}
@@ -89,8 +91,8 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		itdTypeDetails = builder.build();
 	}
 	
-	private MethodMetadata getFindAllMethod(JavaType domainType, MemberTypeAdditions findAllAdditions) {
-		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod());
+	private MethodMetadata getFindAllMethod(JavaType domainType, MemberTypeAdditions findAllAdditions, String plural) {
+		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod() + plural);
 		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
 			// The governor already declares this method
 			return null;
