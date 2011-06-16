@@ -34,6 +34,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	
 	// Constants
 	private static final JavaType SERVICE_ANNOTATION = new JavaType("org.springframework.stereotype.Service");
+	private static final JavaType TRANSACTIONAL_ANNOTATION = new JavaType("org.springframework.transaction.annotation.Transactional");
 	private static final String PROVIDES_TYPE_STRING = ServiceClassMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	
@@ -74,6 +75,14 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		final AnnotationMetadata serviceAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorDetails, SERVICE_ANNOTATION);
 		if (serviceAnnotation == null) {
 			builder.addAnnotation(new AnnotationMetadataBuilder(SERVICE_ANNOTATION));
+		}
+		
+		// Introduce the @Transactional annotation via the ITD if it's not already on the service's Java class
+		if (annotationValues.isTransactional()) {
+			final AnnotationMetadata transactionalAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorDetails, TRANSACTIONAL_ANNOTATION);
+			if (transactionalAnnotation == null) {
+				builder.addAnnotation(new AnnotationMetadataBuilder(TRANSACTIONAL_ANNOTATION));
+			}
 		}
 		
 		// Create a representation of the desired output ITD
