@@ -111,7 +111,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		MemberTypeAdditions findAllMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
 		if (findAllMethod != null) {
 			builder.addMethod(getListMethod(findAllMethod));
-			findAllMethod.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllMethod.getClassOrInterfaceTypeDetailsBuilder(), builder);
+			findAllMethod.copyAdditionsTo(builder);
 		}
 		
 		if (annotationValues.isUpdate()) {

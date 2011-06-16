@@ -69,7 +69,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			final MemberTypeAdditions findAllAdditions = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
 			builder.addMethod(getFindAllMethod(domainType, findAllAdditions, domainTypePlurals.get(domainType)));
 			if (findAllAdditions != null) {
-				findAllAdditions.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllAdditions.getClassOrInterfaceTypeDetailsBuilder(), builder);
+				findAllAdditions.copyAdditionsTo(builder);
 			}
 		}
 		

@@ -296,7 +296,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to return any data\", result.size() > 0);");
 			
-			findAllMethodAdditions.copyClassOrInterfaceTypeDetailsIntoTargetTypeBuilder(findAllMethodAdditions.getClassOrInterfaceTypeDetailsBuilder(), builder);
+			findAllMethodAdditions.copyAdditionsTo(builder);
 
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 			methodBuilder.setAnnotations(annotations);

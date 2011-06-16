@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -15,27 +17,53 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.1
  */
-public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails> {
+public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails> {
+	
+	// Fields
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
 	private ClassOrInterfaceTypeDetailsBuilder superclass;
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 	private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
 
+	/**
+	 * Constructor
+	 *
+	 * @param declaredbyMetadataId
+	 */
 	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param existing
+	 */
 	public ClassOrInterfaceTypeDetailsBuilder(ClassOrInterfaceTypeDetails existing) {
 		super(existing);
 		init(existing);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param declaredbyMetadataId
+	 * @param existing
+	 */
 	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, ClassOrInterfaceTypeDetails existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param declaredbyMetadataId
+	 * @param modifier
+	 * @param name
+	 * @param physicalTypeCategory
+	 */
 	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, int modifier, JavaType name, PhysicalTypeCategory physicalTypeCategory) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
@@ -103,5 +131,60 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 
 	public void setRegisteredImports(Set<ImportMetadata> registeredImports) {
 		this.registeredImports = registeredImports;
+	}
+	
+	/**
+	 * Copies this builder's modifications into the given ITD builder
+	 * 
+	 * @param targetBuilder the ITD builder to receive the additions (required)
+	 */
+	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder) {
+		
+		// Copy fields
+		for (FieldMetadataBuilder field : getDeclaredFields()) {
+			targetBuilder.addField(field.build());
+		}
+		
+		// Copy methods
+		for (MethodMetadataBuilder method : getDeclaredMethods()) {
+			targetBuilder.addMethod(method);
+		}
+		
+		// Copy annotations
+		for (AnnotationMetadataBuilder annotation : getAnnotations()) {
+			targetBuilder.addAnnotation(annotation);
+		}
+		
+		// Copy custom data
+		if (getCustomData() != null) {
+			CustomDataBuilder customDataBuilder = new CustomDataBuilder(getCustomData().build());
+			customDataBuilder.append(targetBuilder.getCustomData().build());
+			targetBuilder.setCustomData(customDataBuilder);
+		}
+		
+		// Copy constructors
+		for (ConstructorMetadataBuilder constructor : getDeclaredConstructors()) {
+			targetBuilder.addConstructor(constructor);
+		}
+		
+		// Copy initializers
+		for (InitializerMetadataBuilder initializer : getDeclaredInitializers()) {
+			targetBuilder.addInitializer(initializer);
+		}
+		
+		// Copy inner types
+		for (ClassOrInterfaceTypeDetailsBuilder innerType : getDeclaredInnerTypes()) {
+			targetBuilder.addInnerType(innerType);
+		}
+		
+		// Copy extends types
+		for (JavaType type : getExtendsTypes()) {
+			targetBuilder.addExtendsTypes(type);
+		}
+		
+		// Copy implements types
+		for (JavaType type : getImplementsTypes()) {
+			targetBuilder.addImplementsType(type);
+		}
 	}
 }
