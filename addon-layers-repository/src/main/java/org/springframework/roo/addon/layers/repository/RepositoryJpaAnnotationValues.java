@@ -14,7 +14,7 @@ import org.springframework.roo.model.JavaType;
 public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
 	@AutoPopulate private JavaType domainType = null;
-	@AutoPopulate private String removeMethod = RooRepositoryJpa.REMOVE_METHOD;
+	@AutoPopulate private String findAllMethod = RooRepositoryJpa.FIND_ALL;
 	
 	public RepositoryJpaAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooRepositoryJpa.class.getName()));
@@ -25,7 +25,7 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 		return domainType;
 	}
 
-	public String getRemoveMethod() {
-		return removeMethod;
+	public String getFindAllMethod() {
+		return findAllMethod;
 	}
 }

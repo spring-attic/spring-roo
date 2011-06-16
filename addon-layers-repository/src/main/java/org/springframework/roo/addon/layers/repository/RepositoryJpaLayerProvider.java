@@ -1,24 +1,28 @@
 package org.springframework.roo.addon.layers.repository;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.StringUtils;
+import org.springframework.uaa.client.util.Assert;
 
 /**
  * 
@@ -35,41 +39,71 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private MetadataService metadataService;
 	
-	@Override
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		ClassOrInterfaceTypeDetails coitd = findMemberDetails(entityType);
-		if (coitd == null) {
+	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams) {
+		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
+		Assert.notNull(methodIdentifier, "Method identifier required");
+		Assert.notNull(targetEntity, "Target enitity type required");
+		Assert.notNull(methodParams, "Method param names and types required (may be empty)");
+		
+		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
+			return getFindAllMethod(metadataId, targetEntity);
+		}
+		return null;
+	}
+
+	private MemberTypeAdditions getFindAllMethod(String metadataId, JavaType entityType) {
+		TypeContainer typeContainer = findInterfaceType(entityType);
+		if (typeContainer == null) {
 			return null;
 		}
 		
-		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
-		String repoField = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), coitd.getName()).build());
-		
-		return new MemberTypeAdditions(classBuilder, repoField + ".findAll()"); // TODO: retrieve method name from annotation values
+		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
+		return new MemberTypeAdditions(classBuilder, repoField + "." + typeContainer.getRepositoryJpaAnnotationValues().getFindAllMethod() + "()");
 	}
 
-	private ClassOrInterfaceTypeDetails findMemberDetails(JavaType type) {
+	private TypeContainer findInterfaceType(JavaType type) {
 		for (ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ANNOTATION_TYPE)) {
-			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE);
-			if (annotation == null) {
-				return null;
+			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(coitd.getName(), Path.SRC_MAIN_JAVA));
+			if (physicalTypeMetadata == null) {
+				continue;
 			}
-			@SuppressWarnings("unchecked")
-			AnnotationAttributeValue<JavaType> domainType = (AnnotationAttributeValue<JavaType>) annotation.getAttribute(new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE));
-			if (domainType == null) {
-				return null;
+			RepositoryJpaAnnotationValues repositoryJpaAnnotationValues = new RepositoryJpaAnnotationValues(physicalTypeMetadata);
+			if (!repositoryJpaAnnotationValues.getDomainType().equals(type)) {
+				continue;
 			}
-			if (domainType.getValue().equals(type)) {
-				return coitd;
-			}
+			return new TypeContainer(coitd, repositoryJpaAnnotationValues);
 		}
 		return null;
 	}
 
 	public int getLayerPosition() {
 		return LayerType.REPOSITORY.getPosition();
+	}
+	
+	/**
+	 * Container to hold {@link ClassOrInterfaceTypeDetails} and {@link RepositoryJpaAnnotationValues} 
+	 * for a given domain type;
+	 * 
+	 * @author Stefan Schmidt
+	 * @since 1.2
+	 */
+	private class TypeContainer {
+		private ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails;
+		private RepositoryJpaAnnotationValues repositoryJpaAnnotationValues;
+		public TypeContainer(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, RepositoryJpaAnnotationValues repositoryJpaAnnotationValues) {
+			this.classOrInterfaceTypeDetails = classOrInterfaceTypeDetails;
+			this.repositoryJpaAnnotationValues = repositoryJpaAnnotationValues;
+		}
+		public ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails() {
+			return classOrInterfaceTypeDetails;
+		}
+		public RepositoryJpaAnnotationValues getRepositoryJpaAnnotationValues() {
+			return repositoryJpaAnnotationValues;
+		}
 	}
 }

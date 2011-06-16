@@ -1,12 +1,16 @@
 package org.springframework.roo.addon.entity;
 
+import java.util.LinkedHashMap;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -28,25 +32,39 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	
 	// Constants
 	private static final Path PATH = Path.SRC_MAIN_JAVA;
+	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
 	
 	// Fields
 	@Reference private MetadataService metadataService;
 
-	@Override
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams) {
+		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
+		Assert.notNull(methodIdentifier, "Method identifier required");
+		Assert.notNull(targetEntity, "Target enitity type required");
+		Assert.notNull(methodParams, "Method param names and types required (may be empty)");
+		
+		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
+			return getFindAllMethod(metadataId, targetEntity);
+		}
+		return null;
+	}
+
+	private MemberTypeAdditions getFindAllMethod(String metadataId, JavaType entityType) {
 		EntityAnnotationValues rooEntityAnnotation = getRooEntityAnnotationValues(entityType);
+		if (rooEntityAnnotation == null) {
+			return null;
+		}
 		String plural = getPlural(entityType);
 		if (rooEntityAnnotation == null || !StringUtils.hasText(rooEntityAnnotation.getFindAllMethod()) || plural == null) {
 			return null;
 		}
-		
-		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId), entityType.getFullyQualifiedTypeName() + "." + rooEntityAnnotation.getFindAllMethod() + plural + "()");
+		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), entityType.getFullyQualifiedTypeName() + "." + rooEntityAnnotation.getFindAllMethod() + plural + "()");
 	}
 	
 	private EntityAnnotationValues getRooEntityAnnotationValues(JavaType javaType) {
 		Assert.notNull(javaType, "JavaType required");
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata == null) {
+		if (physicalTypeMetadata == null || physicalTypeMetadata.getMemberHoldingTypeDetails() == null || MemberFindingUtils.getAnnotationOfType(physicalTypeMetadata.getMemberHoldingTypeDetails().getAnnotations(), ROO_ENTITY) == null) {
 			return null;
 		}
 		return new EntityAnnotationValues(physicalTypeMetadata);

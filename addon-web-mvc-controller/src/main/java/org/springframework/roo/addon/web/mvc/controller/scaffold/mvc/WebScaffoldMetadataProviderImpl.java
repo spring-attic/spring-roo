@@ -32,12 +32,8 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.layers.CrudKey;
-import org.springframework.roo.project.layers.LayerService;
-import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link WebScaffoldMetadataProvider}.
@@ -56,7 +52,6 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ConversionServiceOperations conversionServiceOperations;
 	@Reference private WebMetadataService webMetadataService;
-	@Reference private LayerService layerService;
 	private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
@@ -117,10 +112,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-		
-		Map<CrudKey, MemberTypeAdditions> crudAdditions = layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(formBackingType.getSimpleTypeName())), formBackingType, LayerType.HIGHEST.getPosition());
-		Map<String, MemberTypeAdditions> finderAdditions = layerService.getFinderMethods(metadataIdentificationString, formBackingType, LayerType.HIGHEST.getPosition(), "");
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions, finderAdditions);
+		LinkedHashMap<String, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
 	}
 	
 	void installConversionService(JavaType governor) {

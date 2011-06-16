@@ -14,11 +14,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooRepositoryJpa {
 	
-	public static final String REMOVE_METHOD = "remove";
+	public static final String FIND_ALL = "findAll";
 	public static final String DOMAIN_TYPE = "domainType";
 	
 	Class<?> domainType();
 	
-	String removeMethod() default REMOVE_METHOD;
+	String getFindAllMethod() default FIND_ALL;
 
 }

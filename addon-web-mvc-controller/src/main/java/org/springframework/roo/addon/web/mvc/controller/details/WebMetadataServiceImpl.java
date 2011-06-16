@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +49,9 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.LayerService;
+import org.springframework.roo.project.layers.LayerType;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -66,6 +70,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private LayerService layerService;
 	
 	public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
@@ -391,5 +396,18 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails classOrInterfaceDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceDetails);
+	}
+	
+	public LinkedHashMap<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString) {
+		Map<String, LinkedHashMap<JavaSymbolName, Object>> requiredMethods = new HashMap<String, LinkedHashMap<JavaSymbolName,Object>>();
+		requiredMethods.put(PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), new LinkedHashMap<JavaSymbolName, Object>());
+		
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
+		LinkedHashMap<String, MemberTypeAdditions> methodAdditions = new LinkedHashMap<String, MemberTypeAdditions>();
+		for (String method : requiredMethods.keySet()) {
+			methodAdditions.put(method, layerService.getMemberTypeAdditions(metadataIdentificationString, method, domainType, requiredMethods.get(method), LayerType.HIGHEST.getPosition()));
+		}
+		
+		return methodAdditions;
 	}
 }

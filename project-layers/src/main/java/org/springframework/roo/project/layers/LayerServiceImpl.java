@@ -2,10 +2,8 @@ package org.springframework.roo.project.layers;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -34,121 +32,17 @@ public class LayerServiceImpl implements LayerService {
 
 	private final Set<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
 	
-	public MemberTypeAdditions getPersistMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams, int layerPosition) {
 		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
 			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getPersistMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
+			MemberTypeAdditions additions = provider.getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, methodParams);
 			if (additions != null) {
 				return additions;
 			}
 		}
 		return null;
-	}
-
-	public MemberTypeAdditions getUpdateMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
-			if (provider.getLayerPosition() >= layerPosition) {
-				continue;
-			}
-			MemberTypeAdditions additions = provider.getUpdateMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
-			if (additions != null) {
-				return additions;
-			}
-		}
-		return null;
-	}
-	
-	public MemberTypeAdditions getDeleteMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
-			if (provider.getLayerPosition() >= layerPosition) {
-				continue;
-			}
-			MemberTypeAdditions additions = provider.getDeleteMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
-			if (additions != null) {
-				return additions;
-			}
-		}
-		return null;
-	}
-	
-	public MemberTypeAdditions getFindMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
-			if (provider.getLayerPosition() >= layerPosition) {
-				continue;
-			}
-			MemberTypeAdditions additions = provider.getFindMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
-			if (additions != null) {
-				return additions;
-			}
-		}
-		return null;
-	}
-
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
-			if (provider.getLayerPosition() >= layerPosition) {
-				continue;
-			}
-			MemberTypeAdditions additions = provider.getFindAllMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
-			if (additions != null) {
-				return additions;
-			}
-		}
-		return null;
-	}
-	
-	public Map<String, MemberTypeAdditions> getFinderMethods(String declaredByMetadataId, JavaType entityType, int layerPosition, String ... finderNames) {
-		// TODO: change this so multiple providers can contribute individual finders rather than all or nothing
-		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
-			if (provider.getLayerPosition() >= layerPosition) {
-				continue;
-			}
-			Map<String, MemberTypeAdditions> additions = provider.getFinderMethods(declaredByMetadataId, entityType, layerPosition, finderNames);
-			if (additions != null) {
-				return additions;
-			}
-		}
-		return null;
-	}
-	
-	public MemberTypeAdditions getFindEntriesMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
-			if (provider.getLayerPosition() >= layerPosition) {
-				continue;
-			}
-			MemberTypeAdditions additions = provider.getFindEntriesMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
-			if (additions != null) {
-				return additions;
-			}
-		}
-		return null;
-	}
-
-	public MemberTypeAdditions getCountMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
-			if (provider.getLayerPosition() >= layerPosition) {
-				continue;
-			}
-			MemberTypeAdditions additions = provider.getCountMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition);
-			if (additions != null) {
-				return additions;
-			}
-		}
-		return null;
-	}
-
-	public Map<CrudKey, MemberTypeAdditions> collectMemberTypeAdditions(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
-		final Map<CrudKey, MemberTypeAdditions> additions = new HashMap<CrudKey, MemberTypeAdditions>();
-		additions.put(CrudKey.PERSIST_METHOD, getPersistMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
-		additions.put(CrudKey.COUNT_METHOD, getCountMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
-		additions.put(CrudKey.DELETE_METHOD, getDeleteMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
-		additions.put(CrudKey.FIND_ALL_METHOD, getFindAllMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
-		additions.put(CrudKey.FIND_ENTRIES_METHOD, getFindEntriesMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
-		additions.put(CrudKey.FIND_METHOD, getFindMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
-		additions.put(CrudKey.UPDATE_METHOD, getUpdateMethod(declaredByMetadataId, entityVariableName, entityType, layerPosition));
-		return Collections.unmodifiableMap(additions);
 	}
 
 	protected void bindLayerProvider(LayerProvider provider) {

@@ -1,17 +1,35 @@
 package org.springframework.roo.project.layers;
 
+import java.util.LinkedHashMap;
+
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+
 /**
  * Provides persistence-related methods at a given layer of the application.
  * 
  * @author Stefan Schmidt
  * @since 1.2
  */
-public interface LayerProvider extends Crud {
+public interface LayerProvider {
 	
 	/**
 	 * The priority of the core layers.
 	 */
 	int CORE_LAYER_PRIORITY = 0;
+	
+	/**
+	 * A layer provider should determine if it can provide {@link MemberTypeAdditions} for a given 
+	 * target entity and construct it accordingly. If it can not provide the requested functionality
+	 * it should simply return null;
+	 * 
+	 * @param metadataId Id of calling metadata provider
+	 * @param methodIdentifier specifies the method which is being requested
+	 * @param targetEntity specifies the target entity
+	 * @param methodParams parameters which are passed in to the method
+	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, null otherwise
+	 */
+	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams);
 	
 	/**
 	 * Returns the position of this layer relative to others. 

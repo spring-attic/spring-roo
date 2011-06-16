@@ -4,7 +4,9 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,4 +39,6 @@ public interface WebMetadataService {
 	JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString);
 
 	MemberDetails getMemberDetails(JavaType javaType);
+	
+	LinkedHashMap<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString);
 }

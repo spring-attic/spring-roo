@@ -1,6 +1,6 @@
 package org.springframework.roo.project.layers;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -14,18 +14,17 @@ import org.springframework.roo.model.JavaType;
  * @author Stefan Schmidt
  * @since 1.2
  */
-public interface LayerService extends Crud {
-
+public interface LayerService {
+	
 	/**
-	 * Returns a map of source code modifications for all supported
-	 * persistence-related operations of the given entity.
+	 * Returns source code modifications for a requested operation offered by a layer provider
 	 * 
-	 * @param declaredByMetadataId
-	 * @param entityVariableName
-	 * @param entityType the domain type for which persistence operations are being requested
-	 * @param layerPosition the position of the layer invoking this method;
-	 * higher values mean higher architectural layers
-	 * @return a non-<code>null</code> map
+	 * @param metadataId Id of calling metadata provider
+	 * @param methodIdentifier specifies the method which is being requested
+	 * @param targetEntity specifies the target entity
+	 * @param methodParams parameters which are passed in to the method
+	 * @param layerPosition the position of the layer invoking this method
+	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, null otherwise
 	 */
-	Map<CrudKey, MemberTypeAdditions> collectMemberTypeAdditions(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition);
+	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams, int layerPosition);
 }

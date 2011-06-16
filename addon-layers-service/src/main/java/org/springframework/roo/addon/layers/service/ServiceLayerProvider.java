@@ -1,11 +1,13 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -20,6 +22,7 @@ import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.StringUtils;
+import org.springframework.uaa.client.util.Assert;
 
 /**
  * 
@@ -37,16 +40,27 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
 
-	@Override
-	public MemberTypeAdditions getFindAllMethod(String declaredByMetadataId, JavaSymbolName entityVariableName, JavaType entityType, int layerPosition) {
+	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams) {
+		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
+		Assert.notNull(methodIdentifier, "Method identifier required");
+		Assert.notNull(targetEntity, "Target enitity type required");
+		Assert.notNull(methodParams, "Method param names and types required (may be empty)");
+		
+		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
+			return getFindAllMethod(metadataId, targetEntity);
+		}
+		return null;
+	}
+
+	private MemberTypeAdditions getFindAllMethod(String metadataId, JavaType entityType) {
 		ClassOrInterfaceTypeDetails coitd = findMemberDetails(entityType);
 		if (coitd == null) {
 			return null;
 		}
-		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
 		String fieldName = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(declaredByMetadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
+		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
 //		@SuppressWarnings("unchecked")
 //		AnnotationAttributeValue<StringAttributeValue> findAllMethod = (AnnotationAttributeValue<StringAttributeValue>) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE).getAttribute(new JavaSymbolName("findAllMethod"));
 		return new MemberTypeAdditions(classBuilder, fieldName + ".findAll()"); // TODO get method name from @RooService annotation

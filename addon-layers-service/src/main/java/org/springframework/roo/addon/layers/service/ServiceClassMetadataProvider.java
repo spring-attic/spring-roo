@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -9,6 +10,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -16,11 +18,9 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.layers.CrudKey;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * 
@@ -32,6 +32,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 	
 	@Reference private LayerService layerService;
+	private final static int LAYER_POSITION = LayerType.SERVICE.getPosition();
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -63,10 +64,16 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 			return null;
 		}
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
-		Map<JavaType,Map<CrudKey, MemberTypeAdditions>> allCrudAdditions = new HashMap<JavaType,Map<CrudKey,MemberTypeAdditions>>();
+		Map<JavaType,Map<String, MemberTypeAdditions>> allCrudAdditions = new HashMap<JavaType,Map<String, MemberTypeAdditions>>();
+		Map<String, LinkedHashMap<JavaSymbolName, Object>> requiredMethods = new HashMap<String, LinkedHashMap<JavaSymbolName,Object>>();
+		requiredMethods.put(PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), new LinkedHashMap<JavaSymbolName, Object>());
 		for (JavaType domainType : domainTypes) {
 			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
-			allCrudAdditions.put(domainType, layerService.collectMemberTypeAdditions(metadataIdentificationString, new JavaSymbolName(StringUtils.uncapitalize(domainType.getSimpleTypeName())), domainType, LayerType.SERVICE.getPosition()));
+			Map<String, MemberTypeAdditions> methodAdditions = new HashMap<String, MemberTypeAdditions>();
+			for (String method : requiredMethods.keySet()) {
+				methodAdditions.put(method, layerService.getMemberTypeAdditions(metadataIdentificationString, method, domainType, requiredMethods.get(method), LAYER_POSITION));
+			}
+			allCrudAdditions.put(domainType, methodAdditions);
 		}
 		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, serviceAnnotationValues, allCrudAdditions);
 	}
