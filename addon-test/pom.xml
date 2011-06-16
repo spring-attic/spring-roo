@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.roo</groupId>
-		<artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
-		<version>1.2.0.BUILD-SNAPSHOT</version>
-		<relativePath>../osgi-roo-bundle</relativePath>
-	</parent>
-	<artifactId>org.springframework.roo.addon.test</artifactId>
-	<packaging>bundle</packaging>
-	<name>Spring Roo - Addon - Automated Integration Testing</name>
-	<description>Integration of JUnit integration tests in the target project.</description>
-	<dependencies>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+        <version>1.2.0.BUILD-SNAPSHOT</version>
+        <relativePath>../osgi-roo-bundle</relativePath>
+    </parent>
+    <artifactId>org.springframework.roo.addon.test</artifactId>
+    <packaging>bundle</packaging>
+    <name>Spring Roo - Addon - Automated Integration Testing</name>
+    <description>Integration of JUnit integration tests in the target project.</description>
+    <dependencies>
         <!-- OSGi -->
-         <dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
@@ -31,62 +31,54 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.configurable</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.dod</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.plural</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.file.monitor</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.file.undo</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.metadata</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.model</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.process.manager</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.project</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            
         </dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.project.layers</artifactId>
+        </dependency>
+    </dependencies>
 </project>
