@@ -80,10 +80,12 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 			}
 			allCrudAdditions.put(domainType, methodAdditions);
 			
-			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(domainType, SRC));
+			String pluralId = PluralMetadata.createIdentifier(domainType, Path.SRC_MAIN_JAVA);
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {
 				return null;
 			}
+			metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
 			domainTypePlurals.put(domainType, pluralMetadata.getPlural());
 		}
 		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, serviceAnnotationValues, allCrudAdditions, domainTypePlurals);

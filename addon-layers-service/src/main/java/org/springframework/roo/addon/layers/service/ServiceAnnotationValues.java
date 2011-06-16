@@ -14,7 +14,7 @@ import org.springframework.roo.model.JavaType;
 public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	@AutoPopulate private JavaType[] domainTypes = null;
-	@AutoPopulate private String findAllMethod = "findAll";
+	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;
 	@AutoPopulate private boolean transactional = true;
 	
 	public ServiceAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {

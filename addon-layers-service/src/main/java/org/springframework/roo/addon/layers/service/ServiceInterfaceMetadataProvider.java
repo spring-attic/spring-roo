@@ -50,10 +50,12 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 		}
 		Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
 		for (JavaType type : domainTypes) {
-			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+			String pluralId = PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA);
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {
 				return null;
 			}
+			metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
 			domainTypePlurals.put(type, pluralMetadata.getPlural());
 		}
 		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues, domainTypePlurals);
