@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import org.junit.Test;
 
+@Deprecated
 public class ConversionServiceMetadataTests {
 	@Test public void test() {}
 /*

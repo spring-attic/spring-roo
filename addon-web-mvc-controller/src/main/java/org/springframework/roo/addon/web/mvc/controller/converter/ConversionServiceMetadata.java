@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -45,27 +44,31 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		// For testing
 	}
 
-	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<JavaType, List<MethodMetadata>> domainJavaTypes, Map<JavaType, Map<Object, JavaSymbolName>> compositePkTypes) {
+	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<JavaType, List<MethodMetadata>> relevantDomainTypes, Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.notNull(domainJavaTypes, "List of domain types required");
-		Assert.notNull(compositePkTypes, "List of PK types required");
+		Assert.notNull(relevantDomainTypes, "List of domain types required");
+		Assert.notNull(compositePrimaryKeyTypes, "List of PK types required");
 		
 		if (!isValid()) {
+			return;
+		}
+		
+		if (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes.isEmpty()) { 
 			return;
 		}
 
 		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
 		//loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
-		for (JavaType type: new TreeSet<JavaType>(domainJavaTypes.keySet())) {
+		for (JavaType type: new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
 			JavaType converterName = new JavaType(type.getSimpleTypeName() + "Converter");
-			ClassOrInterfaceTypeDetails converter = getConverter(type, converterName, domainJavaTypes.get(type));
+			ClassOrInterfaceTypeDetails converter = getConverter(type, converterName, relevantDomainTypes.get(type));
 			if (converter != null) {
 				builder.addInnerType(converter);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(new " + converterName + "());");
 			}
 		}
-		for (JavaType type: compositePkTypes.keySet()) {
-			for (ClassOrInterfaceTypeDetails converter: getCompositePkConverters(type, compositePkTypes.get(type))) {
+		for (JavaType type: compositePrimaryKeyTypes.keySet()) {
+			for (ClassOrInterfaceTypeDetails converter: getCompositePkConverters(type, compositePrimaryKeyTypes.get(type))) {
 				builder.addInnerType(converter);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(new " + converter.getName().getSimpleTypeName() + "());");
 			}
@@ -75,8 +78,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		builder.addMethod(getAfterPropertiesSetMethod(installMethod));
 		
 		itdTypeDetails = builder.build();
-		
-		new ItdSourceFileComposer(itdTypeDetails);
 	}
 	
 	private List<ClassOrInterfaceTypeDetails> getCompositePkConverters(JavaType targetType, Map<Object, JavaSymbolName> jsonMethodNames) {

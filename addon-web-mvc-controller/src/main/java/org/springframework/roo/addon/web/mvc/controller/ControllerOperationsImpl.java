@@ -95,12 +95,13 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		Assert.notNull(disallowedOperations, "Set of disallowed operations required");
 		Assert.hasText(path, "Controller base path required");
 
-		String resourceIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
+		webMvcOperations.installConversionService(controller.getPackage());
 
+		String resourceIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(resourceIdentifier)) {
-			return; //type exists already - nothing to do
+			return; // Type exists already - nothing to do
 		}
-			
+
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)

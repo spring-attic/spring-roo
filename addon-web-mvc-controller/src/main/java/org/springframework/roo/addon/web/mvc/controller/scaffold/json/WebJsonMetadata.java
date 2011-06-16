@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold.json;
 
-import java.beans.Introspector;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +72,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			return;
 		}
 		this.annotationValues = annotationValues;
-		this.entityName = uncapitalize(annotationValues.getFormBackingObject().getSimpleTypeName());
+		this.entityName = StringUtils.uncapitalize(annotationValues.getFormBackingObject().getSimpleTypeName());
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
 			this.entityName = "_" + entityName;
 		}
@@ -468,7 +467,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			JavaSymbolName fieldName = field.getFieldName();
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), uncapitalize(fieldName.getSymbolName())));
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), StringUtils.uncapitalize(fieldName.getSymbolName())));
 			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				attributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 			}
@@ -528,11 +527,6 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	
 	private String getShortName(JavaType type) {
 		return type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-	}
-	
-	private String uncapitalize(String term) {
-		// [ROO-1790] this is needed to adhere to the JavaBean naming conventions (see JavaBean spec section 8.8)
-		return Introspector.decapitalize(StringUtils.capitalize(term));
 	}
 
 	public String toString() {

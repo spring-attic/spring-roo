@@ -18,26 +18,24 @@ import org.springframework.roo.support.osgi.UrlFindingUtils;
  * @author Ben Alex
  * @since 1.1
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class JLineShellComponent extends JLineShell {
-
-	private ComponentContext context;
-	
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
+	private ComponentContext context;
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
-        Thread thread = new Thread(this, "Spring Roo JLine Shell");
-        thread.start();
+		Thread thread = new Thread(this, "Spring Roo JLine Shell");
+		thread.start();
 	}
-	
+
 	protected void deactivate(ComponentContext context) {
 		this.context = null;
 		closeShell();
 	}
-	
+
 	protected Set<URL> findUrls(String resourceName) {
 		return UrlFindingUtils.findUrls(context.getBundleContext(), "/" + resourceName);
 	}
@@ -51,5 +49,4 @@ public class JLineShellComponent extends JLineShell {
 	protected Parser getParser() {
 		return parser;
 	}
-
 }
