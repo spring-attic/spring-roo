@@ -17,7 +17,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -29,6 +28,8 @@ import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
 /**
+ * The {@link org.springframework.roo.project.layers.LayerProvider} that
+ * provides an application's service layer.
  * 
  * @author Stefan Schmidt
  * @since 1.2
