@@ -72,7 +72,6 @@
         <module>project-layers</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository</module>
-        <module>addon-layers-dao</module>
     </modules>
     <organization>
         <name>VMware, Inc</name>
@@ -790,11 +789,6 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.layers.repository</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.layers.dao</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
