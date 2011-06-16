@@ -12,8 +12,7 @@ import org.springframework.roo.support.ant.PathMatcher;
 import org.springframework.roo.support.util.Assert;
 
 public abstract class UrlFindingUtils {
-
-	private static final PathMatcher pathMatcher = new AntPathMatcher();
+	private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
 	/**
 	 * Locates {@link URL}s that represent a search of all bundles for a given resource.
@@ -21,7 +20,7 @@ public abstract class UrlFindingUtils {
 	 * @param context that can be used to obtain bundles to search (required)
 	 * @param resourceName the resource to locate (eg "/foo.txt" will find foo.txt in the root of each bundle)
 	 * @return null if there was a failure or a set containing zero or more entries (zero entries
-	 *              means the search was successful but the resource was simply not found)
+	 * means the search was successful but the resource was simply not found)
 	 */
 	public static final Set<URL> findUrls(BundleContext context, String resourceName) {
 		Assert.notNull(context, "Bundle context required to perform the search");
@@ -46,7 +45,6 @@ public abstract class UrlFindingUtils {
 		return results;
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	public static final Set<URL> findMatchingClasspathResources(BundleContext context, String antPathExpression) {
 		Assert.notNull(context, "Bundle context required to perform the search");
@@ -67,7 +65,7 @@ public abstract class UrlFindingUtils {
 				while (enumeration.hasMoreElements()) {
 					URL url = enumeration.nextElement();
 					String candidatePath = url.getPath();
-					if (pathMatcher.match(antPathExpression, candidatePath)) {
+					if (PATH_MATCHER.match(antPathExpression, candidatePath)) {
 						results.add(url);
 					}
 				}
@@ -78,6 +76,4 @@ public abstract class UrlFindingUtils {
 		
 		return results;
 	}
-
-	
 }

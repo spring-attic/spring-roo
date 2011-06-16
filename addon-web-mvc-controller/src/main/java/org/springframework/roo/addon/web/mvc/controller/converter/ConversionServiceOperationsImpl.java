@@ -23,6 +23,7 @@ import org.springframework.roo.support.util.TemplateUtils;
  * @author Rossen Stoyanchev
  * @since 1.1.1
  */
+@Deprecated
 @Component 
 @Service
 public class ConversionServiceOperationsImpl implements ConversionServiceOperations {

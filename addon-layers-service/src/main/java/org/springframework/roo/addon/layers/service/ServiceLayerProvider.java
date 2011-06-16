@@ -31,6 +31,8 @@ import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
 /**
+ * The {@link org.springframework.roo.project.layers.LayerProvider} that
+ * provides an application's service layer.
  * 
  * @author Stefan Schmidt
  * @since 1.2
