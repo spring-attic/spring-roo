@@ -348,7 +348,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				editableSection.setVariable("propReadable", gwtProxyProperty.getReadableName());
 			}
 
-			dataDictionary.setVariable("proxyRendererType", GwtType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxyType.getSimpleTypeName() + "Renderer");
+			dataDictionary.setVariable("proxyRendererType", proxyType.getSimpleTypeName() + "Renderer");
 
 			if (gwtProxyProperty.isProxy() || gwtProxyProperty.isEnum() || gwtProxyProperty.isCollectionOfProxy()) {
 				TemplateDataDictionary section = dataDictionary.addSection(gwtProxyProperty.isEnum() ? "setEnumValuePickers" : "setProxyValuePickers");
