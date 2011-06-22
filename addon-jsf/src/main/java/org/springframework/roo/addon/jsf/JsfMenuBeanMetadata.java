@@ -43,21 +43,20 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType PRIMEFACES_MENU_MODEL = new JavaType("org.primefaces.model.MenuModel");
 	private Set<ClassOrInterfaceTypeDetails> managedBeans;
+	private String projectName;
 
-	public JsfMenuBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Set<ClassOrInterfaceTypeDetails> managedBeans) {
+	public JsfMenuBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Set<ClassOrInterfaceTypeDetails> managedBeans, String projectName) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(managedBeans, "Managed beans required");
+		Assert.isTrue(StringUtils.hasText(projectName), "Project name required");
 
 		if (!isValid()) {
 			return;
 		}
-		
-		if (managedBeans.isEmpty()) {
-			return;
-		}
 
 		this.managedBeans = managedBeans;
+		this.projectName = projectName;
 
 		// Add @ManagedBean annotation if required
 		builder.addAnnotation(getManagedBeanAnnotation());
@@ -65,14 +64,19 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		// Add @SessionScoped annotation if required
 		builder.addAnnotation(getSessionScopedAnnotation());
 
-		// Add model field
-		builder.addField(getModelField());
-		
-		// Add constructor
-		builder.addConstructor(getConstructor());
-		
-		// Add model field accessor method
-		builder.addMethod(getModelAccessorMethod());
+		if (!managedBeans.isEmpty()) {
+			// Add menu model field
+			builder.addField(getMenuModelField());
+
+			// Add constructor
+			builder.addConstructor(getConstructor());
+
+			// Add model field accessor method
+			builder.addMethod(getModelAccessorMethod());
+		}
+
+		// Add application name accessor method
+		builder.addMethod(getApplicationAccessorMethod());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -94,8 +98,8 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return annotationBuilder.build();
 	}
 	
-	private FieldMetadata getModelField() {
-		JavaSymbolName fieldName = new JavaSymbolName("model");
+	private FieldMetadata getMenuModelField() {
+		JavaSymbolName fieldName = new JavaSymbolName("menuModel");
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (field != null) return field;
 
@@ -124,7 +128,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
 		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
 		bodyBuilder.appendFormalLine("");
-		bodyBuilder.appendFormalLine("model = new DefaultMenuModel();");
+		bodyBuilder.appendFormalLine("menuModel = new DefaultMenuModel();");
 		bodyBuilder.appendFormalLine("Submenu submenu;");
 		bodyBuilder.appendFormalLine("MenuItem item;");
 		
@@ -155,16 +159,17 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("item.setHelpText(\"List all " + entity.getSimpleTypeName() + " domain objects\");");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 
-			bodyBuilder.appendFormalLine("model.addSubmenu(submenu);");
+			bodyBuilder.appendFormalLine("menuModel.addSubmenu(submenu);");
 		}
 
 		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+		constructorBuilder.setModifier(Modifier.PUBLIC);
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		return constructorBuilder.build();
 	}
 
 	private MethodMetadata getModelAccessorMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("getModel");
+		JavaSymbolName methodName = new JavaSymbolName("getMenuModel");
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
 
@@ -172,9 +177,21 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		imports.addImport(PRIMEFACES_MENU_MODEL);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return model;");
+		bodyBuilder.appendFormalLine("return menuModel;");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, PRIMEFACES_MENU_MODEL, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		return methodBuilder.build();
+	}
+	
+	private MethodMetadata getApplicationAccessorMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("getAppName");
+		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
+		if (method != null) return method;
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return \"" + StringUtils.capitalize(projectName) + "\";");
+		
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 

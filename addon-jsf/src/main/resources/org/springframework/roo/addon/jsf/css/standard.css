@@ -45,31 +45,24 @@ a img {
 }
 
 .form_textarea  {
-
     clear:both;
     float:left;
     min-width:250px;
     min-height:50px;
-
 }
 
 .form_fieldlabel  {
-
     margin-top: 5px;
     clear:both;
     float:left;
-
 }
 
 .form_field  {
-
     clear:both;
     float:left;
-
 }
 
 .form_button  {
-
     margin-top: 10px;
     clear:both;
     float:right;
@@ -77,10 +70,8 @@ a img {
 }
 
 .ui-message-error  {
-
     display:block;
     float:left;
-
 }
 
 .delete {
@@ -115,15 +106,12 @@ a img {
     margin-top:-2px;
 }
 
-.vote-header {
-
+.app-header {
     margin-top:0px !important;
     margin-bottom:5px !important;
     padding:7px 5px 7px 10px;
     font-weight:normal !important;
     font-size:18px;
-
-
 }
 
 #footer {
@@ -168,5 +156,3 @@ a img {
     height:140px;
     width:330px;
 }
-
-

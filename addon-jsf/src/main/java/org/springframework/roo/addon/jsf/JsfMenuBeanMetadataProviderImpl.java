@@ -15,6 +15,9 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link JsfMenuBeanMetadataProvider}.
@@ -26,6 +29,7 @@ import org.springframework.roo.project.Path;
 @Service 
 public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfMenuBeanMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private ProjectOperations projectOperations;
 
 	// Stores the MID (as accepted by this JsfMenuBeanMetadataProvider) for the one (and only one) application-wide menu bean
 	private String menuBeanMid;
@@ -65,7 +69,10 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 			metadataDependencyRegistry.registerDependency(managedBean.getDeclaredByMetadataId(), metadataIdentificationString);
 		}
 		
-		return new JsfMenuBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans);
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		Assert.notNull(projectMetadata, "Project metadata required");
+
+		return new JsfMenuBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getProjectName());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

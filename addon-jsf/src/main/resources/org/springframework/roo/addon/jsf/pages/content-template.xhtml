@@ -10,8 +10,8 @@
     <ui:define name="content">
         <h:form prependId="false">
             <div>
-                <h1 class="title ui-widget-header ui-corner-all vote-header">
-                    __DOMAIN_TYPE_PLURAL__ <span class="header-option"> <p:commandButton value="Add __DOMAIN_TYPE__" image="add" action="#{__LC_DOMAIN_TYPE__Bean.create__DOMAIN_TYPE__}" oncomplete="new__DOMAIN_TYPE__Dialog.show()" update="new__DOMAIN_TYPE__Form" /> </span>
+                <h1 class="title ui-widget-header ui-corner-all app-header">
+                    __DOMAIN_TYPE_PLURAL__ <span class="header-option"> <p:commandButton value="#{messages.global_menu_new} __DOMAIN_TYPE__" image="add" action="#{__LC_DOMAIN_TYPE__Bean.create__DOMAIN_TYPE__}" oncomplete="new__DOMAIN_TYPE__Dialog.show()" update="new__DOMAIN_TYPE__Form" /> </span>
                 </h1>
             </div>
             <p:outputPanel layout="block" id="data">
