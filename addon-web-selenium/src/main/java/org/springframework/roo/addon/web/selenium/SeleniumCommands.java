@@ -14,12 +14,10 @@ import org.springframework.roo.shell.CommandMarker;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 @Component
 @Service
 public class SeleniumCommands implements CommandMarker {
-	
 	@Reference private SeleniumOperations seleniumOperations;
 	
 	@CliAvailabilityIndicator({"selenium test"})
@@ -27,11 +25,12 @@ public class SeleniumCommands implements CommandMarker {
 		return seleniumOperations.isProjectAvailable();
 	}
 	
-	@CliCommand(value="selenium test", help="Creates a new Selenium test for a particular controller")
+	@CliCommand(value = "selenium test", help = "Creates a new Selenium test for a particular controller")
 	public void generateTest(
-			@CliOption(key="controller", mandatory=true, help="Controller to create a Selenium test for") JavaType controller, 
-			@CliOption(key="name", mandatory=false, help="Name of the test") String name,
-			@CliOption(key="serverUrl", mandatory=false, unspecifiedDefaultValue="http://localhost:8080/", specifiedDefaultValue="http://localhost:8080/", help="URL of the server where the web application is available, including protocol, port and hostname") String url){
+		@CliOption(key = "controller", mandatory = true, help = "Controller to create a Selenium test for") JavaType controller, 
+		@CliOption(key = "name", mandatory = false, help = "Name of the test") String name, 
+		@CliOption(key = "serverUrl", mandatory = false, unspecifiedDefaultValue = "http://localhost:8080/", specifiedDefaultValue = "http://localhost:8080/", help = "URL of the server where the web application is available, including protocol, port and hostname") String url) {
+
 		seleniumOperations.generateTest(controller, name, url);
 	}
 }

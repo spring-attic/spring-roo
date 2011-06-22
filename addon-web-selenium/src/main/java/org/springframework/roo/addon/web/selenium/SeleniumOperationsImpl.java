@@ -123,7 +123,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		// Add composite PK identifier fields if needed
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(formBackingType, memberDetails, null);
-		if (javaTypePersistenceMetadataDetails != null && javaTypePersistenceMetadataDetails.getRooIdentifierFields().size() > 0) {
+		if (javaTypePersistenceMetadataDetails != null && !javaTypePersistenceMetadataDetails.getRooIdentifierFields().isEmpty()) {
 			for (FieldMetadata field : javaTypePersistenceMetadataDetails.getRooIdentifierFields()) {
 				if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 					FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
