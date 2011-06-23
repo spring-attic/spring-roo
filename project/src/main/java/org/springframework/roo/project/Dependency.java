@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -38,8 +39,9 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param version the version ID (required)
 	 * @param type the dependency type (required)
 	 * @param scope the dependency scope (required)
+	 * @param classifier the dependency classifier (required)
 	 */
-	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope) {
+	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope, String classifier) {
 		XmlUtils.assertElementLegal(groupId);
 		XmlUtils.assertElementLegal(artifactId);
 		Assert.notNull(version, "Version required");
@@ -50,6 +52,20 @@ public class Dependency implements Comparable<Dependency> {
 		this.version = version;
 		this.type = type;
 		this.scope = scope;
+		this.classifier = classifier;
+	}
+
+	/**
+	 * Creates an immutable {@link Dependency}.
+	 * 
+	 * @param groupId the group ID (required)
+	 * @param artifactId the artifact ID (required)
+	 * @param version the version ID (required)
+	 * @param type the dependency type (required)
+	 * @param scope the dependency scope (required)
+	 */
+	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope) {
+		this(groupId, artifactId, version, DependencyType.JAR, scope, "");
 	}
 
 	/**
@@ -253,7 +269,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @return a simple description, as would be used for console output
 	 */
 	public String getSimpleDescription() {
-		return groupId + ":" + artifactId + ":" + version;
+		return groupId + ":" + artifactId + ":" + version + (StringUtils.hasText(classifier) ? ":" + classifier : "");
 	}
 
 	public String toString() {
