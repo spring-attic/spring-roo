@@ -223,8 +223,6 @@ public class Dependency implements Comparable<Dependency> {
 		int result = 1;
 		result = prime * result + ((artifactId == null) ? 0 : artifactId.hashCode());
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		result = prime * result + ((classifier == null) ? 0 : classifier.hashCode());
 		return result;
@@ -244,12 +242,6 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		if (result == 0) {
 			result = version.compareTo(o.version);
-		}
-		if (result == 0 && type != null) {
-			result = type.compareTo(o.type);
-		}
-		if (result == 0 && scope != null) {
-			result = scope.compareTo(o.scope);
 		}
 		if (result == 0 && classifier != null) {
 			result = classifier.compareTo(o.classifier);
