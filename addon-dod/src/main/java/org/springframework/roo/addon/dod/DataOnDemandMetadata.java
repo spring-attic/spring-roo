@@ -439,22 +439,35 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(getTypeStr(fieldType) + " " + fieldName + " = " + initializer + ";");
 
 		if (fieldType.equals(JavaType.STRING_OBJECT)) {
+			boolean isUnique = false;
+			@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+			if (values != null && values.containsKey("unique")) {
+				isUnique = (Boolean) values.get("unique");
+			}
+
 			// Check for @Size or @Column with length attribute
 			AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 			if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
 				Integer maxValue = (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + maxValue + ") {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + maxValue + ");");
+				if (isUnique) {
+					bodyBuilder.appendFormalLine(fieldName + " = new Random().nextInt(10) + " + fieldName + ".substring(1, " + maxValue  + ");");
+				} else {
+					bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + maxValue + ");");
+				}
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
 			} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-				@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
 				if (values != null && values.containsKey("length")) {
 					Integer lengthValue = (Integer) values.get("length");
 					bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + lengthValue + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + lengthValue + ");");
+					if (isUnique) {
+						bodyBuilder.appendFormalLine(fieldName + " = new Random().nextInt(10) + " + fieldName + ".substring(1, " + lengthValue  + ");");
+					} else {
+						bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + lengthValue + ");");
+					}
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 				}
