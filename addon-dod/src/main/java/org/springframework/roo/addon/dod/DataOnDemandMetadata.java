@@ -458,8 +458,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				}
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
-			} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-				if (values != null && values.containsKey("length")) {
+			} else if (sizeAnnotation == null && values != null) {
+				if (values.containsKey("length")) {
 					Integer lengthValue = (Integer) values.get("length");
 					bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + lengthValue + ") {");
 					bodyBuilder.indent();
