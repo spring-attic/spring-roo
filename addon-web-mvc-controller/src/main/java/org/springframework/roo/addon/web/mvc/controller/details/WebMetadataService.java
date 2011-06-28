@@ -1,16 +1,16 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
+import org.springframework.roo.project.layers.PersistenceMethod;
 
 /**
  * Service to retrieve various metadata information for use by Web scaffolding add-ons.
@@ -40,5 +40,14 @@ public interface WebMetadataService {
 
 	MemberDetails getMemberDetails(JavaType javaType);
 	
-	LinkedHashMap<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString);
+	/**
+	 * Returns a map of {@link PersistenceMethod}s to the additions that need to
+	 * be made to the web tier code in order to invoke those methods for the
+	 * given domain type.
+	 * 
+	 * @param domainType
+	 * @param metadataIdentificationString
+	 * @return a non-<code>null</code> map
+	 */
+	Map<PersistenceMethod, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString);
 }

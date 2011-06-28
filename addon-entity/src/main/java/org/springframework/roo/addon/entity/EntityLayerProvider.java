@@ -1,23 +1,20 @@
 package org.springframework.roo.addon.entity;
 
-import java.util.LinkedHashMap;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
+import org.springframework.roo.project.layers.PersistenceMethod;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
@@ -28,7 +25,7 @@ import org.springframework.uaa.client.util.Assert;
  */
 @Component
 @Service
-public class EntityLayerProvider extends CoreLayerProvider {
+public class EntityLayerProvider extends CoreLayerProvider<PersistenceMethod> {
 	
 	// Constants
 	private static final Path PATH = Path.SRC_MAIN_JAVA;
@@ -36,17 +33,21 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	
 	// Fields
 	@Reference private MetadataService metadataService;
-
-	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams) {
+	
+	public boolean supports(final Class<?> methodType) {
+		return PersistenceMethod.class.equals(methodType);
+	}
+	
+	public MemberTypeAdditions getAdditions(final String metadataId, final JavaType targetEntity, final PersistenceMethod method) {
 		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
-		Assert.notNull(methodIdentifier, "Method identifier required");
+		Assert.notNull(method, "Method required");
 		Assert.notNull(targetEntity, "Target enitity type required");
-		Assert.notNull(methodParams, "Method param names and types required (may be empty)");
-		
-		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
-			return getFindAllMethod(metadataId, targetEntity);
+		switch (method) {
+			case FIND_ALL:
+				return getFindAllMethod(metadataId, targetEntity);
+			default:
+				return null;	// TODO
 		}
-		return null;
 	}
 
 	private MemberTypeAdditions getFindAllMethod(String metadataId, JavaType entityType) {

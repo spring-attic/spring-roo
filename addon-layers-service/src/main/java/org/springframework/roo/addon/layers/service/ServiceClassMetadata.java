@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -22,8 +21,9 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
+import org.springframework.roo.project.layers.PersistenceMethod;
 import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.uaa.client.util.Assert;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * 
@@ -53,7 +53,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @param allCrudAdditions (required)
 	 * @param domainTypePlurals 
 	 */
-	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, Map<String, MemberTypeAdditions>> allCrudAdditions, Map<JavaType, String> domainTypePlurals) {
+	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, Map<PersistenceMethod, MemberTypeAdditions>> allCrudAdditions, Map<JavaType, String> domainTypePlurals) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(allCrudAdditions, "CRUD additions required");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -64,9 +64,9 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.governorDetails = governorDetails;
 		
 		for (final JavaType domainType : annotationValues.getDomainTypes()) {
-			Map<String, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
+			final Map<PersistenceMethod, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			
-			final MemberTypeAdditions findAllAdditions = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
+			final MemberTypeAdditions findAllAdditions = crudAdditions.get(PersistenceMethod.FIND_ALL);
 			builder.addMethod(getFindAllMethod(domainType, findAllAdditions, domainTypePlurals.get(domainType)));
 			if (findAllAdditions != null) {
 				findAllAdditions.copyAdditionsTo(builder);
