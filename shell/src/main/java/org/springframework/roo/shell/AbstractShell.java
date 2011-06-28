@@ -36,7 +36,7 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
 	
 	// Constants
-	public static final String COMPLETION_KEY = "TAB";
+	public static String COMPLETION_KEY = "TAB";
 	private static final String MY_SLOT = AbstractShell.class.getName();
 	
 	// Fields
