@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -38,8 +39,9 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param version the version ID (required)
 	 * @param type the dependency type (required)
 	 * @param scope the dependency scope (required)
+	 * @param classifier the dependency classifier (required)
 	 */
-	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope) {
+	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope, String classifier) {
 		XmlUtils.assertElementLegal(groupId);
 		XmlUtils.assertElementLegal(artifactId);
 		Assert.notNull(version, "Version required");
@@ -50,6 +52,20 @@ public class Dependency implements Comparable<Dependency> {
 		this.version = version;
 		this.type = type;
 		this.scope = scope;
+		this.classifier = classifier;
+	}
+
+	/**
+	 * Creates an immutable {@link Dependency}.
+	 * 
+	 * @param groupId the group ID (required)
+	 * @param artifactId the artifact ID (required)
+	 * @param version the version ID (required)
+	 * @param type the dependency type (required)
+	 * @param scope the dependency scope (required)
+	 */
+	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope) {
+		this(groupId, artifactId, version, DependencyType.JAR, scope, "");
 	}
 
 	/**
@@ -223,8 +239,6 @@ public class Dependency implements Comparable<Dependency> {
 		int result = 1;
 		result = prime * result + ((artifactId == null) ? 0 : artifactId.hashCode());
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		result = prime * result + ((classifier == null) ? 0 : classifier.hashCode());
 		return result;
@@ -245,12 +259,6 @@ public class Dependency implements Comparable<Dependency> {
 		if (result == 0) {
 			result = version.compareTo(o.version);
 		}
-		if (result == 0 && type != null) {
-			result = type.compareTo(o.type);
-		}
-		if (result == 0 && scope != null) {
-			result = scope.compareTo(o.scope);
-		}
 		if (result == 0 && classifier != null) {
 			result = classifier.compareTo(o.classifier);
 		}
@@ -261,7 +269,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @return a simple description, as would be used for console output
 	 */
 	public String getSimpleDescription() {
-		return groupId + ":" + artifactId + ":" + version;
+		return groupId + ":" + artifactId + ":" + version + (StringUtils.hasText(classifier) ? ":" + classifier : "");
 	}
 
 	public String toString() {

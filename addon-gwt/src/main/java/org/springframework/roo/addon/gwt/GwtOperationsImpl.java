@@ -3,6 +3,7 @@ package org.springframework.roo.addon.gwt;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -321,14 +322,16 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		}
 
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
-		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
-		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
+		Iterable<URI> uris = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
+		Assert.notNull(uris, "Could not search bundles for resources for Ant Path '" + path + "'");
 
-		for (URL url : urls) {
-			String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
-			fileName = fileName.replace("-template", "");
-			String targetFilename = targetDirectory + fileName;
+		for (final URI uri : uris) {
+			String targetFilename = null;
 			try {
+				final URL url = uri.toURL();
+				String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+				fileName = fileName.replace("-template", "");
+				targetFilename = targetDirectory + fileName;
 				if (fileManager.exists(targetFilename) && !overwrite) {
 					continue;
 				}

@@ -3,9 +3,6 @@
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
               version="2.0">
-    <lifecycle>
-        <phase-listener>__PACKAGE__.listeners.LoginErrorPhaseListener</phase-listener>
-    </lifecycle>
     <application>
         <el-resolver>org.springframework.web.jsf.el.SpringBeanFacesELResolver</el-resolver>
         <resource-bundle>

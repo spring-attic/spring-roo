@@ -1,8 +1,8 @@
 package org.springframework.roo.addon.jsf;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -21,9 +21,11 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link JsfManagedBeanFormMetadataProvider}.
@@ -90,44 +92,62 @@ public final class JsfManagedBeanFormMetadataProviderImpl extends AbstractMember
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
 		String plural = pluralMetadata.getPlural();
 
-		List<MethodMetadata> locatedAccessors = findAccessors(memberDetails, metadataIdentificationString);
+		Map<FieldMetadata, MethodMetadata> locatedFieldsAndMutators = findFieldsAndMutators(memberDetails, metadataIdentificationString);
 
-		return new JsfManagedBeanFormMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, locatedAccessors);
+		return new JsfManagedBeanFormMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, locatedFieldsAndMutators);
 	}
 
-	private List<MethodMetadata> findAccessors(MemberDetails memberDetails, String metadataIdentificationString) {
-		List<MethodMetadata> locatedAccessors = new LinkedList<MethodMetadata>();
-
-		int counter = 0;
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-			// Track any changes to the method (eg it goes away)
-			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			
-			if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
-				counter++;
-				locatedAccessors.add(method);
-			} 
+	private Map<FieldMetadata, MethodMetadata> findFieldsAndMutators(MemberDetails memberDetails, String metadataIdentificationString) {
+		Map<FieldMetadata, MethodMetadata> locatedFieldsAndMutators = new LinkedHashMap<FieldMetadata,MethodMetadata>();
+		
+		for (FieldMetadata field : MemberFindingUtils.getFields(memberDetails)) {
+			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
+			String capitalizedFieldName = StringUtils.capitalize(field.getFieldName().getSymbolName());
+			String methodPrefix = field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) ? "is" : "get";
+			MethodMetadata accessor = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName(methodPrefix + capitalizedFieldName), new ArrayList<JavaType>());
+			if (accessor == null) {
+				continue;
+			}
+			if (accessor.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || accessor.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {
+				continue; 
+			}
+			MethodMetadata mutator = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("set" + capitalizedFieldName), Arrays.asList(field.getFieldType()));
+			if (mutator == null) {
+				continue;
+			}
+			locatedFieldsAndMutators.put(field, mutator);
 		}
-
-		return locatedAccessors;
+		return locatedFieldsAndMutators;
+//		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+//			// Track any changes to the method (eg it goes away)
+//			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+//			if (!(BeanInfoUtils.isMutatorMethod(method) || BeanInfoUtils.isAccessorMethod(method))) {
+//				continue; 
+//			}
+//			if (method.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {
+//				return false; 
+//			}
+//			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+//			if (field == null) {
+//				return false;
+//			}
+//
+//			if (isMethodOfInterest(method, memberDetails)) {
+//				locatedMutators.add(method);
+//			}
+//		}
+//		return locatedMutators;
 	}
 
 	private boolean isMethodOfInterest(MethodMetadata method, MemberDetails memberDetails) {
-		if (!BeanInfoUtils.isAccessorMethod(method)) {
-			return false; // Only interested in accessors
+		if (!(BeanInfoUtils.isMutatorMethod(method) || BeanInfoUtils.isAccessorMethod(method))) {
+			return false; 
 		}
 		if (method.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {
-			return false; // Only interested in methods which are not accessors for persistence version or id fields
+			return false; 
 		}
 		FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
 		if (field == null) {
-			return false;
-		}
-		JavaType fieldType = field.getFieldType();
-		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
-				|| isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
-				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) /* Not interested in embedded types */) {
 			return false;
 		}
 		return true;

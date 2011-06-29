@@ -1597,7 +1597,7 @@
                 <varlistentry>
                     <term>--dateFormat</term>
                     <listitem>
-                        <para>Indicates the style of the date format (ignored if dateTimeFormatPattern is specified); default: 'SHORT'</para>
+                        <para>Indicates the style of the date format (ignored if dateTimeFormatPattern is specified); default: 'MEDIUM'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>

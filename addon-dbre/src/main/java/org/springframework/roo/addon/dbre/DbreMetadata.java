@@ -649,7 +649,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			annotations.add(temporalBuilder);
 
 			AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-			dateTimeFormatBuilder.addStringAttribute("style", "S-");
+			dateTimeFormatBuilder.addStringAttribute("style", "M-");
 			annotations.add(dateTimeFormatBuilder);
 		}
 

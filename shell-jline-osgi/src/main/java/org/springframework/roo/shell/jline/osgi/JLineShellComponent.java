@@ -1,6 +1,6 @@
 package org.springframework.roo.shell.jline.osgi;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -21,6 +21,7 @@ import org.springframework.roo.support.osgi.UrlFindingUtils;
 @Component(immediate = true)
 @Service
 public class JLineShellComponent extends JLineShell {
+	
     @Reference private ExecutionStrategy executionStrategy;
     @Reference private Parser parser;
 	private ComponentContext context;
@@ -36,8 +37,8 @@ public class JLineShellComponent extends JLineShell {
 		closeShell();
 	}
 
-	protected Set<URL> findUrls(String resourceName) {
-		return UrlFindingUtils.findUrls(context.getBundleContext(), "/" + resourceName);
+	protected Set<URI> findUris(String resourceName) {
+		return UrlFindingUtils.findResource(context.getBundleContext(), "/" + resourceName);
 	}
 
 	@Override

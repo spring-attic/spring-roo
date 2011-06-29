@@ -496,7 +496,7 @@ Managed SRC_MAIN_JAVA/com/foo/Person_Roo_ToString.aj
     Person.java:</para>
 
     <para><programlisting>@Temporal(TemporalType.TIMESTAMP)
-@DateTimeFormat(style = "S-")
+@DateTimeFormat(style = "M-")
 private Date birthDay;
 </programlisting>You'll notice that the @Temporal annotation is part of the
     JPA specification and defines how date values are persisted to and

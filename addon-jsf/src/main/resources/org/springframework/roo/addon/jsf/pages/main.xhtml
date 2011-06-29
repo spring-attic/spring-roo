@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.prime.com.tr/ui">
+<ui:composition template="../templates/layout.xhtml">
+    <ui:define name="content">
+            <p:panel toggleable="true" toggleSpeed="250">
+                <f:facet name="header">
+                    <h:outputFormat value="#{messages.welcome_titlepane}">
+                        <f:param value="#{applicationBean.appName}"/>
+                    </h:outputFormat>
+                </f:facet>
+                <p/>
+                <h:outputText value="#{messages.welcome_text}"/>
+                <p/>
+            </p:panel>
+    </ui:define>
+</ui:composition>
+</html>

@@ -146,7 +146,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		
 		Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString);
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		List<MethodMetadata> methods = MemberFindingUtils.getMethods(memberDetails);
+		for (MethodMetadata method : methods) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
@@ -176,10 +177,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		List<FieldMetadata> compositePkFields = new LinkedList<FieldMetadata>();
 		if (idFields.isEmpty()) {
 			idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
-			if (idFields.size() != 1) {
+			if (idFields.isEmpty()) {
 				return null;
 			}
-			for (FieldMetadata field: MemberFindingUtils.getFields(getMemberDetails(idFields.get(0).getFieldType()))) {
+			List<FieldMetadata> fields = MemberFindingUtils.getFields(getMemberDetails(idFields.get(0).getFieldType()));
+			for (FieldMetadata field: fields) {
 				if (!field.getCustomData().keySet().contains(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD)) {
 					compositePkFields.add(field);
 				}
@@ -305,7 +307,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 						}
 					}
 				} else {
-					logger.warning("It is recommended to use @DateTimeFormat(style=\"S-\") on " + fieldMetadata.getFieldType().getFullyQualifiedTypeName() + "." + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
+					logger.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on " + fieldMetadata.getFieldType().getFullyQualifiedTypeName() + "." + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
 				}
 			}
 		}

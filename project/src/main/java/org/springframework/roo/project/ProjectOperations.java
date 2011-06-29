@@ -172,6 +172,21 @@ public interface ProjectOperations {
 	 * @param artifactId the artifact id of the dependency (required)
 	 * @param version the version of the dependency (required)
 	 * @param scope the scope of the dependency
+	 * @param classifier the classifier of the dependency
+	 */
+	void addDependency(String groupId, String artifactId, String version, DependencyScope scope, String classifier);
+
+	/**
+	 * Allows addition of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
+	 * @param scope the scope of the dependency
 	 */
 	void addDependency(String groupId, String artifactId, String version, DependencyScope scope);
 
@@ -209,6 +224,20 @@ public interface ProjectOperations {
 	 * @param dependency the dependency to remove (required)
 	 */
 	void removeDependency(Dependency dependency);
+
+	/**
+	 * Allows remove of an existing JAR dependency from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
+	 * @param classifier the classifier of the dependency
+	 */
+	void removeDependency(String groupId, String artifactId, String version, String classifier);
 
 	/**
 	 * Allows remove of an existing JAR dependency from the POM. 

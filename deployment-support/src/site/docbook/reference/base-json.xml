@@ -273,7 +273,7 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">deleteFromJson</emphas
         <para><programlisting>@RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, 
                 headers = "Accept=application/json")
 public String <emphasis role="bold">jsonFindVisitsByDescriptionAndVisitDate</emphasis>(@RequestParam("description") String desc, 
-        @RequestParam("visitDate") @DateTimeFormat(style = "S-") Date visitDate, Model model) {
+        @RequestParam("visitDate") @DateTimeFormat(style = "M-") Date visitDate, Model model) {
     return Visit.toJsonArray(Visit.findVisitsByDescriptionAndVisitDate(desc, visitDate).getResultList());
 }</programlisting>This method accepts a HTTP GET request with a number of
         request parameters which define the finder method as well as the

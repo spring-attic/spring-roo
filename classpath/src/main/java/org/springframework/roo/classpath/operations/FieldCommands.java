@@ -237,7 +237,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords, 
-		@CliOption(key = "dateFormat", mandatory = false, unspecifiedDefaultValue = "SHORT", specifiedDefaultValue = "SHORT", help = "Indicates the style of the date format (ignored if dateTimeFormatPattern is specified)") DateTime dateFormat, 
+		@CliOption(key = "dateFormat", mandatory = false, unspecifiedDefaultValue = "MEDIUM", specifiedDefaultValue = "MEDIUM", help = "Indicates the style of the date format (ignored if dateTimeFormatPattern is specified)") DateTime dateFormat, 
 		@CliOption(key = "timeFormat", mandatory = false, unspecifiedDefaultValue = "NONE", specifiedDefaultValue = "NONE", help = "Indicates the style of the time format (ignored if dateTimeFormatPattern is specified)") DateTime timeFormat, 
 		@CliOption(key = "dateTimeFormatPattern", mandatory = false, help = "Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a") String pattern) {
 

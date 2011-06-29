@@ -8,11 +8,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.JarFile;
@@ -33,14 +34,19 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  */
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
-	private static final String MY_SLOT = AbstractShell.class.getName();
-	protected final Logger logger = HandlerUtils.getLogger(getClass());
-    protected boolean inBlockComment = false;
-    protected ExitShellRequest exitShellRequest = null;
-	public static String shellPrompt = "roo> ";
-	public static String completionKeys = "TAB";
 	
-	protected abstract Set<URL> findUrls(String resourceName);
+	// Constants
+	public static String COMPLETION_KEY = "TAB";
+	private static final String MY_SLOT = AbstractShell.class.getName();
+	
+	// Fields
+	protected final Logger logger = HandlerUtils.getLogger(getClass());
+	
+    protected boolean inBlockComment;
+    protected ExitShellRequest exitShellRequest;
+    protected String shellPrompt = "roo> ";
+	
+	protected abstract Collection<URI> findUris(String resourceName);
 	protected abstract String getHomeAsString();
 	protected abstract ExecutionStrategy getExecutionStrategy();
 	protected abstract Parser getParser();
@@ -59,16 +65,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		
 		if (inputStream == null) {
 			// Try to find the resource via the classloader
-			Set<URL> urls = findUrls(resource.getName());
+			final Collection<URI> uris = findUris(resource.getName());
 			
 			// Handle search system failure
-			Assert.notNull(urls, "Unable to process classpath bundles to locate the script");
+			Assert.notNull(uris, "Unable to process classpath bundles to locate the script");
 			
 			// Handle the file simply not being present, but the search being OK
-			Assert.notEmpty(urls, "Resource '" + resource + "' not found on disk or in classpath");
-			Assert.isTrue(urls.size() == 1, "More than one '" + resource + "' was found in the classpath; unable to continue");
+			Assert.notEmpty(uris, "Resource '" + resource + "' not found on disk or in classpath");
+			Assert.isTrue(uris.size() == 1, "More than one '" + resource + "' was found in the classpath; unable to continue");
 			try {
-				inputStream = urls.iterator().next().openStream();
+				inputStream = uris.iterator().next().toURL().openStream();
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}

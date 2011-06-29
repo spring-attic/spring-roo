@@ -59,6 +59,7 @@ import org.w3c.dom.Element;
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private static final Logger logger = HandlerUtils.getLogger(AddOnRooBotOperationsImpl.class);
 	private static String ROOBOT_XML_URL = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
+	private static boolean rooBotIndexDownload = true;
 	@Reference private Shell shell;
 	@Reference private PgpService pgpService;
 	@Reference private UrlInputStreamService urlInputStreamService;
@@ -68,6 +69,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	private final Class<AddOnRooBotOperationsImpl> mutex = AddOnRooBotOperationsImpl.class;
 	private Preferences prefs;
+	private volatile Thread rooBotEagerDownload;
 	private List<String> noUpgradeBsnList = Arrays.asList(
 			"org.springframework.uaa.client", 
 			"org.springframework.roo.url.stream.jdk", 
@@ -104,17 +106,29 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		prefs = Preferences.userNodeForPackage(AddOnRooBotOperationsImpl.class);
 		bundleCache = new HashMap<String, Bundle>();
 		searchResultCache = new HashMap<String, Bundle>();
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				synchronized (mutex) {
-					populateBundleCache(true);
-				}
+		BundleContext bundleContext = context.getBundleContext();
+		if (bundleContext != null) {
+			String roobot = bundleContext.getProperty("roobot.url");
+			if (roobot != null && roobot.length() > 0) {
+				ROOBOT_XML_URL = roobot;
 			}
-		}, "Spring Roo RooBot Add-In Index Eager Download");
-		t.start();
-		String roobot = context.getBundleContext().getProperty("roobot.url");
-		if (roobot != null && roobot.length() > 0) {
-			ROOBOT_XML_URL = roobot;
+			rooBotIndexDownload = new Boolean(bundleContext.getProperty("roobot.index.dowload"));
+		}
+		if (rooBotIndexDownload) {
+			rooBotEagerDownload = new Thread(new Runnable() {
+				public void run() {
+					synchronized (mutex) {
+						populateBundleCache(true);
+					}
+				}
+			}, "Spring Roo RooBot Add-In Index Eager Download");
+			rooBotEagerDownload.start();
+		}
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		if (rooBotEagerDownload != null && rooBotEagerDownload.isAlive()) {
+			rooBotEagerDownload = null;
 		}
 	}
 

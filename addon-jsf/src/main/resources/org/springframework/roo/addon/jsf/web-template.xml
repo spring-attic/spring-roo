@@ -14,7 +14,7 @@
         <param-value>classpath*:META-INF/spring/applicationContext*.xml</param-value>
     </context-param>
     <context-param>
-        <param-name>primefaces.SKIN</param-name>
+        <param-name>primefaces.THEME</param-name>
         <param-value>none</param-value>
     </context-param>
     <filter>

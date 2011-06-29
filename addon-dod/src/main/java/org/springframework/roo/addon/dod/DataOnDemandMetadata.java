@@ -106,7 +106,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		builder.addMethod(getNewTransientEntityMethod());
 		builder.addMethod(getEmbeddedIdMethod());
-		
+
 		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
 			builder.addMethod(getEmbeddedMethod(embeddedHolder));
 		}
@@ -284,7 +284,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		if (hasEmbeddedIdentifier()) {
 			bodyBuilder.appendFormalLine(getEmbeddedIdMutatorMethod() + "(obj, index);");
 		}
-		
+
 		if (hasEmbedded()) {
 			for (EmbeddedHolder embeddedHolder : embeddedHolders) {
 				bodyBuilder.appendFormalLine(getEmbeddedMutatorMethod(embeddedHolder.getEmbeddedField()) + "(obj, index);");
@@ -323,7 +323,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create constructor for embedded id class
 		String identifierType = embeddedIdentifierHolder.getEmbeddedIdentifierField().getFieldType().getFullyQualifiedTypeName();
 		bodyBuilder.appendFormalLine(identifierType + " embeddedIdClass = new " + identifierType + "();");
-		
+
 		for (FieldMetadata field : embeddedIdentifierHolder.getIdentifierFields()) {
 			String initializer = getFieldInitializer(field, null);
 			bodyBuilder.appendFormalLine("embeddedIdClass." + field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName() + "(" + initializer + ");");
@@ -338,25 +338,25 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	public MethodMetadata getEmbeddedMethod(EmbeddedHolder embeddedHolder) {
 		if (!hasEmbedded()) {
 			return null;
 		}
-	
+
 		JavaSymbolName methodName = getEmbeddedMutatorMethod(embeddedHolder.getEmbeddedField());
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(entityType);
 		paramTypes.add(JavaType.INT_PRIMITIVE);
-	
+
 		// Locate user-defined method
 		if (MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes) != null) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
-		
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		
+
 		// Create constructor for embedded class
 		String identifierType = embeddedHolder.getEmbeddedField().getFieldType().getFullyQualifiedTypeName();
 		bodyBuilder.appendFormalLine(identifierType + " embeddedClass = new " + identifierType + "();");
@@ -367,11 +367,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutator() + "(embeddedClass);");
-	
+
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
 		paramNames.add(new JavaSymbolName("index"));
-	
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -439,22 +439,36 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(getTypeStr(fieldType) + " " + fieldName + " = " + initializer + ";");
 
 		if (fieldType.equals(JavaType.STRING_OBJECT)) {
+			boolean isUnique = false;
+			@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+			if (values != null && values.containsKey("unique")) {
+				isUnique = (Boolean) values.get("unique");
+			}
+
+			// Check for email annotation
 			// Check for @Size or @Column with length attribute
 			AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 			if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
 				Integer maxValue = (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
 				bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + maxValue + ") {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + maxValue + ");");
+				if (isUnique) {
+					bodyBuilder.appendFormalLine(fieldName + " = new Random().nextInt(10) + " + fieldName + ".substring(1, " + maxValue + ");");
+				} else {
+					bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + maxValue + ");");
+				}
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
-			} else if (sizeAnnotation == null && field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-				@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
-				if (values != null && values.containsKey("length")) {
+			} else if (sizeAnnotation == null && values != null) {
+				if (values.containsKey("length")) {
 					Integer lengthValue = (Integer) values.get("length");
 					bodyBuilder.appendFormalLine("if (" + fieldName + ".length() > " + lengthValue + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + lengthValue + ");");
+					if (isUnique) {
+						bodyBuilder.appendFormalLine(fieldName + " = new Random().nextInt(10) + " + fieldName + ".substring(1, " + lengthValue + ");");
+					} else {
+						bodyBuilder.appendFormalLine(fieldName + " = " + fieldName + ".substring(0, " + lengthValue + ");");
+					}
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 				}
@@ -470,7 +484,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else if (decimalMinAnnotation != null || decimalMaxAnnotation != null) {
 				doDecimalMinAndDecimalMax(field, decimalMinAnnotation, decimalMaxAnnotation, bodyBuilder, mutatorName, initializer, suffix);
 			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-				@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+				@SuppressWarnings("unchecked")
+				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
 				doColumnPrecisionAndScale(field, values, bodyBuilder, mutatorName, initializer, suffix);
 			}
 		} else if (isIntegerFieldType(fieldType)) {
@@ -832,33 +847,36 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				initializer = field.getFieldName().getSymbolName();
 			}
 
-			int maxLength = Integer.MAX_VALUE;
-
-			// Check for @Size
-			AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
-			if (sizeAnnotation != null) {
-				AnnotationAttributeValue<?> maxValue = sizeAnnotation.getAttribute(new JavaSymbolName("max"));
-				if (maxValue != null) {
-					maxLength = ((Integer) maxValue.getValue()).intValue();
-				}
-				AnnotationAttributeValue<?> minValue = sizeAnnotation.getAttribute(new JavaSymbolName("min"));
-				if (minValue != null) {
-					int minLength = ((Integer) minValue.getValue()).intValue();
-					Assert.isTrue(maxLength >= minLength, "@Size attribute 'max' must be greater than 'min' for field '" + field.getFieldName().getSymbolName() + "' in " + entityType.getFullyQualifiedTypeName());
-					if (initializer.length() + 2 < minLength) {
-						initializer = String.format("%1$-" + (minLength - 2) + "s", initializer).replace(' ', 'x');
-					}
-				}
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.hibernate.validator.constraints.Email")) != null) {
+				initializer = "\"foo\" + index + \"@bar.com\"";
 			} else {
-				if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-					@SuppressWarnings("unchecked") Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
-					if (columnValues.keySet().contains("length")) {
-						maxLength = ((Integer) columnValues.get("length")).intValue();
+				int maxLength = Integer.MAX_VALUE;
+
+				// Check for @Size
+				AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
+				if (sizeAnnotation != null) {
+					AnnotationAttributeValue<?> maxValue = sizeAnnotation.getAttribute(new JavaSymbolName("max"));
+					if (maxValue != null) {
+						maxLength = ((Integer) maxValue.getValue()).intValue();
+					}
+					AnnotationAttributeValue<?> minValue = sizeAnnotation.getAttribute(new JavaSymbolName("min"));
+					if (minValue != null) {
+						int minLength = ((Integer) minValue.getValue()).intValue();
+						Assert.isTrue(maxLength >= minLength, "@Size attribute 'max' must be greater than 'min' for field '" + field.getFieldName().getSymbolName() + "' in " + entityType.getFullyQualifiedTypeName());
+						if (initializer.length() + 2 < minLength) {
+							initializer = String.format("%1$-" + (minLength - 2) + "s", initializer).replace(' ', 'x');
+						}
+					}
+				} else {
+					if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
+						@SuppressWarnings("unchecked") Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+						if (columnValues.keySet().contains("length")) {
+							maxLength = ((Integer) columnValues.get("length")).intValue();
+						}
 					}
 				}
-			}
 
-			switch (maxLength) {
+				switch (maxLength) {
 				case 0:
 					initializer = "\"\"";
 					break;
@@ -874,6 +892,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					} else {
 						initializer = "\"" + initializer + "_\" + index";
 					}
+				}
 			}
 		} else if (fieldType.equals(new JavaType(Calendar.class.getName()))) {
 			String calendarString = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH)";
@@ -997,7 +1016,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		return new JavaSymbolName(embeddedIdField.getSymbolNameTurnedIntoMutatorMethodName());
 	}
-	
+
 	private JavaSymbolName getEmbeddedMutatorMethod(FieldMetadata field) {
 		JavaSymbolName embeddedField = new JavaSymbolName("embedded" + field.getFieldName().getSymbolNameCapitalisedFirstLetter());
 		return new JavaSymbolName(embeddedField.getSymbolNameTurnedIntoMutatorMethodName());

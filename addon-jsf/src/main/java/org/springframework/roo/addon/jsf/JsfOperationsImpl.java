@@ -32,6 +32,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
@@ -76,12 +77,17 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		changeJsfImplementation(jsfImplementation);
 		copyWebXml();
+		
 		PathResolver pathResolver = projectOperations.getPathResolver();
+		copyDirectoryContents("index.html", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/"), false);
 		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
 		copyDirectoryContents("css/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
 		copyDirectoryContents("css/skin/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin"), false);
 		copyDirectoryContents("css/skin/images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin/images"), false);
 		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/templates"), false);
+		copyDirectoryContents("pages/main.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/pages"), false);
+		
+		projectOperations.updateProjectType(ProjectType.WAR);
 
 		fileManager.scan();
 	}
@@ -100,7 +106,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	public void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu) {
 		installFacesConfig(managedBean.getPackage());
 		installI18n(managedBean.getPackage());
-		installBean("MenuBean-template.java", managedBean.getPackage(), "MenuBean");
+		installBean("ApplicationBean-template.java", managedBean.getPackage(), "ApplicationBean");
 		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
 
 		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
@@ -160,7 +166,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			try {
 				String projectName = projectOperations.getProjectMetadata().getProjectName();
 				fileManager.createFile(i18nDirectory + "/application.properties");
-				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n/application.properties", "application_name", projectName.substring(0, 1).toUpperCase() + projectName.substring(1), true);
+				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n/application.properties", "application_name", StringUtils.capitalize(projectName), true);
 				copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Unable to create i18n files", e);

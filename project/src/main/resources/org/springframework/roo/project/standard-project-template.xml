@@ -217,6 +217,7 @@
                 <version>2.8</version>
                 <configuration>
                     <printSummary>false</printSummary>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <excludes>
                         <exclude>**/*_Roo_*</exclude>
                     </excludes>
