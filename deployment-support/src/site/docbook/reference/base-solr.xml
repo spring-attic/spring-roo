@@ -225,7 +225,7 @@ person.birthday_dt</programlisting></para>
 
     <para><programlisting><emphasis role="bold">@Field</emphasis>("my:field:name:birthday")
 @Temporal(TemporalType.TIMESTAMP)
-@DateTimeFormat(style = "S-")
+@DateTimeFormat(style = "M-")
 private Date birthDay;
 </programlisting>To index existing DB entity tables each entity exposes a
     convenience method (example for Person entity):</para>
