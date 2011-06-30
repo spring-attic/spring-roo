@@ -76,7 +76,7 @@ public class SimpleParser implements Parser {
 				return null;
 			}
 			if (matchingTargets.size() > 1) {
-				logger.warning("Ambigious command '" + input + "' (for assistance press " + AbstractShell.COMPLETION_KEY + " or type \"hint\" then hit ENTER)");
+				logger.warning("Ambigious command '" + input + "' (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 				return null;
 			}
 			MethodTarget methodTarget = matchingTargets.iterator().next();
@@ -264,7 +264,7 @@ public class SimpleParser implements Parser {
 	}
 
 	protected void commandNotFound(Logger logger, String buffer) {
-		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.COMPLETION_KEY + " or type \"hint\" then hit ENTER)");
+		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 	}
 
 	private Set<MethodTarget> locateTargets(String buffer, boolean strictMatching, boolean checkAvailabilityIndicators) {
