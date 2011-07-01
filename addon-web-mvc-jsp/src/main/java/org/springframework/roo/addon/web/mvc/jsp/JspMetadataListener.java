@@ -276,9 +276,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	
 	public void notify(String upstreamDependency, String downstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
-			// old code, only used for a direct WebScaffoldMetadata listen
-			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType())), "Expected class-level notifications only for web scaffold metadata (not '" + upstreamDependency + "')");
-
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType javaType = WebScaffoldMetadata.getJavaType(upstreamDependency);
 			Path path = WebScaffoldMetadata.getPath(upstreamDependency);
@@ -290,9 +287,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				return;
 			}
 		} else {
-			// this is the generic fallback listener, ie from MetadataDependencyRegistry.addListener(this) in the activate() method
+			// This is the generic fallback listener, ie from MetadataDependencyRegistry.addListener(this) in the activate() method
 			
-			// get the metadata that just changed
+			// Get the metadata that just changed
 			MetadataItem metadataItem = metadataService.get(upstreamDependency);
 			
 			// We don't have to worry about physical type metadata, as we monitor the relevant .java once the DOD governor is first detected
@@ -314,9 +311,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			}
 			return;
 		}
-
-		// We should now have an instance-specific "downstream dependency" that can be processed by this class
-//		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
 
 		metadataService.get(downstreamDependency, true);
 	}
