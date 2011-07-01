@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -9,6 +10,7 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -25,7 +27,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.project.layers.PersistenceMethod;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
@@ -38,7 +39,7 @@ import org.springframework.uaa.client.util.Assert;
  */
 @Component
 @Service
-public class ServiceLayerProvider extends CoreLayerProvider<PersistenceMethod> {
+public class ServiceLayerProvider extends CoreLayerProvider {
 	
 	// Constants
 	private static final JavaType ANNOTATION_TYPE = new JavaType(RooService.class.getName());
@@ -49,15 +50,12 @@ public class ServiceLayerProvider extends CoreLayerProvider<PersistenceMethod> {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	
-	public boolean supports(final Class<?> methodType) {
-		return PersistenceMethod.class.equals(methodType);
-	}
-	
-	public MemberTypeAdditions getAdditions(final String metadataId, final JavaType targetEntity, final PersistenceMethod method) {
+
+	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams) {
 		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
-		Assert.notNull(method, "Method required");
+		Assert.notNull(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
+		Assert.notNull(methodParams, "Method param names and types required (may be empty)");
 		
 		ClassOrInterfaceTypeDetails coitd = findMemberDetails(targetEntity);
 		if (coitd == null) {
@@ -73,13 +71,10 @@ public class ServiceLayerProvider extends CoreLayerProvider<PersistenceMethod> {
 			return null;
 		}
 		metadataDependencyRegistry.registerDependency(PluralMetadata.createIdentifier(targetEntity, SRC), metadataId);
-		log("Getting additions for the method " + targetEntity.getSimpleTypeName() + "." + method);
-		switch (method) {
-			case FIND_ALL:
-				return getFindAllMethod(metadataId, coitd, annotationValues, plural);
-			default:
-				return null;	// TODO
+		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
+			return getFindAllMethod(metadataId, coitd, annotationValues, plural);
 		}
+		return null;
 	}
 
 	private MemberTypeAdditions getFindAllMethod(String metadataId, ClassOrInterfaceTypeDetails coitd, ServiceAnnotationValues serviceAnnotationValues, String plural) {

@@ -29,8 +29,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaType implements Comparable<JavaType>, Cloneable {
-	
+public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, DataType.TYPE, null, null);
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, DataType.TYPE, null, null);
 	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String", 0, DataType.TYPE, null, null);
@@ -353,16 +352,9 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 		return result;
 	}
 
-	public final boolean equals(final Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!(obj instanceof JavaType)) {
-			return false;
-		}
+	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		final JavaType otherType = (JavaType) obj;
-		return this.fullyQualifiedTypeName.equals(otherType.getFullyQualifiedTypeName()) && this.dataType == otherType.getDataType() && this.array == otherType.getArray() && otherType.getParameters().containsAll(parameters);
+		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType && this.array == ((JavaType) obj).array && ((JavaType) obj).parameters.containsAll(parameters);
 	}
 
 	public final int compareTo(JavaType o) {

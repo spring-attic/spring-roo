@@ -27,7 +27,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.project.layers.PersistenceMethod;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -102,7 +101,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-		final Map<PersistenceMethod, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
+		LinkedHashMap<String, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
 	}
 	

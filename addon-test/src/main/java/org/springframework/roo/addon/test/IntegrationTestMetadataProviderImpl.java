@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.test;
 
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
@@ -9,6 +10,8 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD;
+
+import java.util.LinkedHashMap;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -35,7 +38,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
-import org.springframework.roo.project.layers.PersistenceMethod;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -47,9 +49,6 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
-	
-	// Constants
-	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
@@ -102,7 +101,8 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, VERSION_ACCESSOR_METHOD);
 		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, COUNT_ALL_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FIND_METHOD);
-		final MemberTypeAdditions findAllMethodAdditions = layerService.getAdditions(metadataId, entity, LAYER_POSITION, PersistenceMethod.FIND_ALL);
+		final LinkedHashMap<JavaSymbolName, Object> findAllMethodParams = new LinkedHashMap<JavaSymbolName, Object>();
+		final MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, findAllMethodParams, LayerType.HIGHEST.getPosition());
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FIND_ENTRIES_METHOD);
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FLUSH_METHOD);
 		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, MERGE_METHOD);

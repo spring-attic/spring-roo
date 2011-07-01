@@ -1,20 +1,17 @@
 package org.springframework.roo.project.layers;
 
+import java.util.LinkedHashMap;
+
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Provides {@link MemberTypeAdditions} for some or all methods of a given type
- * <code>M</code>.
- *
+ * Provides persistence-related methods at a given layer of the application.
+ * 
  * @author Stefan Schmidt
- * @author Andrew Swan
- * @param <M> an enumeration of the methods recognised (but not necessarily
- * implemented) by this provider. If an addon wishes to support multiple sets of
- * methods (represented by several distinct enums), they need only create a 
- * separate {@link LayerProvider} implementation for each such enum.
  * @since 1.2
  */
-public interface LayerProvider<M extends Enum<M>> {
+public interface LayerProvider {
 	
 	/**
 	 * The priority of the core layers.
@@ -22,22 +19,17 @@ public interface LayerProvider<M extends Enum<M>> {
 	int CORE_LAYER_PRIORITY = 0;
 	
 	/**
-	 * Indicates whether this provider supports the given type of method
-	 * 
-	 * @param methodType an enum class
-	 * @return see above
-	 */
-	boolean supports(Class<?> methodType);
-	
-	/**
-	 * Returns the additions for the given method
+	 * A layer provider should determine if it can provide {@link MemberTypeAdditions} for a given 
+	 * target entity and construct it accordingly. If it can not provide the requested functionality
+	 * it should simply return null;
 	 * 
 	 * @param metadataId Id of calling metadata provider
+	 * @param methodIdentifier specifies the method which is being requested
 	 * @param targetEntity specifies the target entity
-	 * @param method the method for which the additions are required
-	 * @return <code>null</code> if this provider doesn't support this method
+	 * @param methodParams parameters which are passed in to the method
+	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, null otherwise
 	 */
-	MemberTypeAdditions getAdditions(String metadataId, JavaType targetEntity, M method);
+	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams);
 	
 	/**
 	 * Returns the position of this layer relative to others. 
