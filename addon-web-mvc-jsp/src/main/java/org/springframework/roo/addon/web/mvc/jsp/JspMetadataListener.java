@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.jsp;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +24,10 @@ import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -66,13 +69,16 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private WebMetadataService webMetadataService;
+	private Map<JavaType, String> formBackingObjectTypesToLocalMids = new HashMap<JavaType, String>();
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
+		metadataDependencyRegistry.addNotificationListener(this);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
+		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {
@@ -90,7 +96,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		MemberDetails memberDetails = webMetadataService.getMemberDetails(formBackingType);
 		JavaTypeMetadataDetails formBackingTypeMetadataDetails = webMetadataService.getJavaTypeMetadataDetails(formBackingType, memberDetails, metadataIdentificationString);
 		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formBackingType.getFullyQualifiedTypeName());
-
+		
+		formBackingObjectTypesToLocalMids.put(formBackingType, metadataIdentificationString);
+		
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, memberDetails, metadataIdentificationString);
 		JavaTypeMetadataDetails formbackingTypeMetadata = relatedTypeMd.get(formBackingType);
 		Assert.notNull(formbackingTypeMetadata, "Form backing type metadata required");
@@ -122,7 +130,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (eligibleFields.isEmpty() && formBackingTypePersistenceMetadata.getRooIdentifierFields().isEmpty()) {
 			return null;
 		}
-
 		JspViewManager viewManager = new JspViewManager(eligibleFields, webScaffoldMetadata.getAnnotationValues(), relatedTypeMd);
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
@@ -269,6 +276,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	
 	public void notify(String upstreamDependency, String downstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
+			// old code, only used for a direct WebScaffoldMetadata listen
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType())), "Expected class-level notifications only for web scaffold metadata (not '" + upstreamDependency + "')");
 
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
@@ -281,10 +289,34 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
 				return;
 			}
+		} else {
+			// this is the generic fallback listener, ie from MetadataDependencyRegistry.addListener(this) in the activate() method
+			
+			// get the metadata that just changed
+			MetadataItem metadataItem = metadataService.get(upstreamDependency);
+			
+			// We don't have to worry about physical type metadata, as we monitor the relevant .java once the DOD governor is first detected
+			if (metadataItem == null || !metadataItem.isValid() || !(metadataItem instanceof ItdTypeDetailsProvidingMetadataItem)) {
+				// There's something wrong with it or it's not for an ITD, so let's gracefully abort
+				return;
+			}
+			
+			// Let's ensure we have some ITD type details to actually work with
+			ItdTypeDetailsProvidingMetadataItem itdMetadata = (ItdTypeDetailsProvidingMetadataItem) metadataItem;
+			ItdTypeDetails itdTypeDetails = itdMetadata.getMemberHoldingTypeDetails();
+			if (itdTypeDetails == null) {
+				return;
+			}
+
+			String localMid = formBackingObjectTypesToLocalMids.get(itdTypeDetails.getGovernor().getName());
+			if (localMid != null) {
+				metadataService.get(localMid, true);
+			}
+			return;
 		}
 
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
-		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
+//		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
 
 		metadataService.get(downstreamDependency, true);
 	}
