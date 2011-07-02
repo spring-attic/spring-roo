@@ -31,7 +31,6 @@ import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.EnumDetails;
@@ -66,9 +65,11 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(dynamicFinderMethods, "Dynamoic finder methods required");
 		Assert.notNull(memberDetails, "Member details required");
+	
 		if (!isValid()) {
 			return;
 		}
+		
 		this.annotationValues = annotationValues;
 		this.controllerPath = annotationValues.getPath();
 		this.formBackingType = annotationValues.getFormBackingObject();
@@ -88,8 +89,6 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		itdTypeDetails = builder.build();
-
-		new ItdSourceFileComposer(itdTypeDetails);
 	}
 
 	public WebScaffoldAnnotationValues getAnnotationValues() {
