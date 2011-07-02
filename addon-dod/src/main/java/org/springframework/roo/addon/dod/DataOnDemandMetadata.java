@@ -75,15 +75,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(identifierAccessor, "Identifier accessor method required");
+		Assert.notNull(findMethod, "Find method required");
+		Assert.notNull(findEntriesMethod, "Find entries method required");
+		Assert.notNull(persistMethod, "Persist method required");
+		Assert.notNull(flushMethod, "Flush method required");
 		Assert.notNull(locatedMutators, "Located mutator methods map required");
 		Assert.notNull(entityType, "Entity type required");
 		Assert.notNull(embeddedHolders, "Embedded holders list required");
 
 		if (!isValid()) {
-			return;
-		}
-
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
 			return;
 		}
 
@@ -105,7 +105,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.addAnnotation(getComponentAnnotation());
 		builder.addField(getRndField());
 		builder.addField(getDataField());
-		
+
 		addCollaboratingDoDFieldsToBuilder();
 
 		builder.addMethod(getNewTransientEntityMethod());

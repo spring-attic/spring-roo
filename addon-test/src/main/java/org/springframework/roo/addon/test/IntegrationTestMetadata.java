@@ -62,12 +62,12 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		Assert.notNull(projectMetadata, "Project metadata required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(dataOnDemandMetadata, "Data on demand metadata required");
-
-		if (!isValid()) {
-			return;
+		
+		if (identifierAccessorMethod == null) {
+			valid = false;
 		}
-
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessorMethod == null) {
+		
+		if (!isValid()) {
 			return;
 		}
 
@@ -90,7 +90,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		dodGovernor = DataOnDemandMetadata.getJavaType(dataOnDemandMetadata.getId());
 		
 		addRequiredIntegrationTestClassIntroductions();
-
+		
 		// Add GAE LocalServiceTestHelper instance and @BeforeClass/@AfterClass methods if GAE is enabled
 		if (projectMetadata.isGaeEnabled()) {
 			isGaeSupported = true;

@@ -32,6 +32,7 @@ import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
@@ -73,11 +74,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(dependentTypes, "Dependent types list required");
-	
 		if (!isValid()) {
 			return;
 		}
-	
 		this.annotationValues = annotationValues;
 		this.entityName = uncapitalize(annotationValues.getFormBackingObject().getSimpleTypeName());
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
@@ -127,6 +126,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		
 		itdTypeDetails = builder.build();
+
+		new ItdSourceFileComposer(itdTypeDetails);
 	}
 
 	public WebScaffoldAnnotationValues getAnnotationValues() {
