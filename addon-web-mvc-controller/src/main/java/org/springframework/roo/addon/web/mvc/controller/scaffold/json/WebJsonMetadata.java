@@ -30,7 +30,6 @@ import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
@@ -71,6 +70,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (!isValid()) {
 			return;
 		}
+		
 		this.annotationValues = annotationValues;
 		this.entityName = StringUtils.uncapitalize(annotationValues.getFormBackingObject().getSimpleTypeName());
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
@@ -78,10 +78,14 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		}
 		this.formBackingType = annotationValues.getFormBackingObject();
 		this.memberDetails = memberDetails;
+		
 		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
-		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
+		if (javaTypeMetadataHolder == null) {
+			return;
+		}
 
 		this.jsonMetadata = jsonMetadata;
+		
 		builder.addMethod(getJsonShowMethod());
 		builder.addMethod(getJsonListMethod());
 		if (annotationValues.isCreate()) {
@@ -102,8 +106,6 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		}
 		
 		itdTypeDetails = builder.build();
-
-		new ItdSourceFileComposer(itdTypeDetails);
 	}
 
 	public WebScaffoldAnnotationValues getAnnotationValues() {
@@ -224,8 +226,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, parameters));
 
-		MethodMetadata existingMethod = methodExists(methodName, paramTypes);
-		if (existingMethod != null) return existingMethod;
+		MethodMetadata createFromJsonArrayMethod = methodExists(methodName, paramTypes);
+		if (createFromJsonArrayMethod != null) return createFromJsonArrayMethod;
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));
@@ -268,11 +270,9 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		// See if the type itself declared the method
 		JavaSymbolName methodName = new JavaSymbolName("listJson");
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
-		if (result != null) {
-			return result;
-		}
-		
+		MethodMetadata listJsonMethod = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
+		if (listJsonMethod != null)  return listJsonMethod;
+
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
@@ -311,8 +311,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, parameters));
 		
-		MethodMetadata jsonCreateMethod = methodExists(methodName, paramTypes);
-		if (jsonCreateMethod != null) return jsonCreateMethod;
+		MethodMetadata updateFromJsonMethod = methodExists(methodName, paramTypes);
+		if (updateFromJsonMethod != null) return updateFromJsonMethod;
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));
@@ -358,8 +358,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, parameters));
 		
-		MethodMetadata existingMethod = methodExists(methodName, paramTypes);
-		if (existingMethod != null) return existingMethod;
+		MethodMetadata updateFromJsonArrayMethod = methodExists(methodName, paramTypes);
+		if (updateFromJsonArrayMethod != null) return updateFromJsonArrayMethod;
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));
@@ -414,8 +414,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierField().getFieldType(), typeAnnotations));
 		
-		MethodMetadata method = methodExists(methodName, paramTypes);
-		if (method != null) return method;
+		MethodMetadata deleteFromJsonMethod = methodExists(methodName, paramTypes);
+		if (deleteFromJsonMethod != null) return deleteFromJsonMethod;
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()));
