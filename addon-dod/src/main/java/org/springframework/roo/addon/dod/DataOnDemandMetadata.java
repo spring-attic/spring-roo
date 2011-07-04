@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,7 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -66,6 +67,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private List<EmbeddedHolder> embeddedHolders;
 
 	private Map<MethodMetadata, String> fieldInitializers = new LinkedHashMap<MethodMetadata, String>();
+	private Map<FieldMetadata, Map<FieldMetadata, String>> embeddedFieldInitializers = new LinkedHashMap<FieldMetadata, Map<FieldMetadata, String>>();
 	private List<JavaType> requiredDataOnDemandCollaborators = new LinkedList<JavaType>();
 
 	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
@@ -73,14 +75,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(identifierAccessor, "Identifier accessor method required");
-		Assert.notNull(findMethod, "Find method required");
-		Assert.notNull(findEntriesMethod, "Find entries method required");
-		Assert.notNull(persistMethod, "Persist method required");
-		Assert.notNull(flushMethod, "Flush method required");
 		Assert.notNull(locatedMutators, "Located mutator methods map required");
 		Assert.notNull(entityType, "Entity type required");
+		Assert.notNull(embeddedHolders, "Embedded holders list required");
 
 		if (!isValid()) {
+			return;
+		}
+
+		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
 			return;
 		}
 
@@ -97,21 +100,24 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Calculate and store field initializers
 		storeFieldInitializers();
+		storeEmbeddedFieldInitializers();
 
 		builder.addAnnotation(getComponentAnnotation());
 		builder.addField(getRndField());
 		builder.addField(getDataField());
-
-		addFieldsToBuilder();
+		
+		addCollaboratingDoDFieldsToBuilder();
 
 		builder.addMethod(getNewTransientEntityMethod());
-		builder.addMethod(getEmbeddedIdMethod());
+
+		builder.addMethod(getEmbeddedIdMutatorMethod());
 
 		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
-			builder.addMethod(getEmbeddedMethod(embeddedHolder));
+			builder.addMethod(getEmbeddedClassMutatorMethod(embeddedHolder));
+			addEmbeddedClassFieldMutatorMethodsToBuilder(embeddedHolder);
 		}
 
-		addMethodsToBuilder();
+		addFieldMutatorMethodsToBuilder();
 
 		builder.addMethod(getSpecificPersistentEntityMethod());
 		builder.addMethod(getRandomPersistentEntityMethod());
@@ -168,11 +174,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 
 			// Candidate not found, so let's create one
+			ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+			imports.addImport(new JavaType("java.util.Random"));
+			imports.addImport(new JavaType("java.security.SecureRandom"));
+
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId());
 			fieldBuilder.setModifier(Modifier.PRIVATE);
 			fieldBuilder.setFieldName(fieldSymbolName);
 			fieldBuilder.setFieldType(new JavaType("java.util.Random"));
-			fieldBuilder.setFieldInitializer("new java.security.SecureRandom()");
+			fieldBuilder.setFieldInitializer("new SecureRandom()");
 			return fieldBuilder.build();
 		}
 	}
@@ -224,8 +234,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 	}
 
-	private void addFieldsToBuilder() {
-		Set<JavaSymbolName> fields = new HashSet<JavaSymbolName>();
+	private void addCollaboratingDoDFieldsToBuilder() {
+		Set<JavaSymbolName> fields = new LinkedHashSet<JavaSymbolName>();
 		for (JavaType entityNeedingCollaborator : requiredDataOnDemandCollaborators) {
 			JavaType collaboratorType = getCollaboratingType(entityNeedingCollaborator);
 			String collaboratingFieldName = getCollaboratingFieldName(entityNeedingCollaborator).getSymbolName();
@@ -241,15 +251,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				continue;
 			}
 
-			// Must make the field
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
-			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType);
-			FieldMetadata field = fieldBuilder.build();
-
-			// Add it to the ITD, if it hasn't already been
-			if (!fields.contains(field.getFieldName())) {
-				fields.add(field.getFieldName());
+			// Create field and add it to the ITD, if it hasn't already been
+			if (!fields.contains(fieldSymbolName)) {
+				// Must make the field
+				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+				annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType);
+				FieldMetadata field = fieldBuilder.build();
 				builder.addField(field);
 				fields.add(field.getFieldName());
 			}
@@ -277,20 +285,23 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Create method
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(new JavaType(entityType.getFullyQualifiedTypeName()));
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(entityType.getFullyQualifiedTypeName() + " obj = new " + entityType.getFullyQualifiedTypeName() + "();");
+		bodyBuilder.appendFormalLine(entityType.getSimpleTypeName() + " obj = new " + entityType.getSimpleTypeName() + "();");
 
-		// Create the composite key embedded id if required
+		// Create the composite key embedded id method call if required
 		if (hasEmbeddedIdentifier()) {
-			bodyBuilder.appendFormalLine(getEmbeddedIdMutatorMethod() + "(obj, index);");
+			bodyBuilder.appendFormalLine(getEmbeddedIdMutatorMethodName() + "(obj, index);");
 		}
 
-		if (hasEmbedded()) {
-			for (EmbeddedHolder embeddedHolder : embeddedHolders) {
-				bodyBuilder.appendFormalLine(getEmbeddedMutatorMethod(embeddedHolder.getEmbeddedField()) + "(obj, index);");
-			}
+		// Create a mutator method call for each embedded class
+		for (EmbeddedHolder embeddedHolder : embeddedHolders) {
+			bodyBuilder.appendFormalLine(getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField()) + "(obj, index);");
 		}
 
+		// Create mutator method calls for each entity field
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
 			bodyBuilder.appendFormalLine(mutator.getMethodName() + "(obj, index);");
 		}
@@ -301,13 +312,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 
-	public MethodMetadata getEmbeddedIdMethod() {
+	private MethodMetadata getEmbeddedIdMutatorMethod() {
 		if (!hasEmbeddedIdentifier()) {
 			return null;
 		}
 
 		JavaSymbolName embeddedIdentifierMutator = embeddedIdentifierHolder.getEmbeddedIdentifierMutator();
-		JavaSymbolName methodName = getEmbeddedIdMutatorMethod();
+		JavaSymbolName methodName = getEmbeddedIdMutatorMethodName();
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(entityType);
 		paramTypes.add(JavaType.INT_PRIMITIVE);
@@ -319,32 +330,34 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
 		// Create constructor for embedded id class
-		String identifierType = embeddedIdentifierHolder.getEmbeddedIdentifierField().getFieldType().getFullyQualifiedTypeName();
-		bodyBuilder.appendFormalLine(identifierType + " embeddedIdClass = new " + identifierType + "();");
-
-		for (FieldMetadata field : embeddedIdentifierHolder.getIdentifierFields()) {
-			String initializer = getFieldInitializer(field, null);
-			bodyBuilder.appendFormalLine("embeddedIdClass." + field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName() + "(" + initializer + ");");
+		JavaType embeddedIdentifierFieldType = embeddedIdentifierHolder.getEmbeddedIdentifierField().getFieldType(); 
+		imports.addImport(embeddedIdentifierFieldType);
+		
+		StringBuilder sb = new StringBuilder();
+		List<FieldMetadata> identifierFields = embeddedIdentifierHolder.getIdentifierFields();
+		for (int i = 0, n = identifierFields.size(); i < n; i++) {
+			FieldMetadata field = identifierFields.get(i);
+			sb.append(getFieldInitializer(field, null));
+			if (i < n - 1) {
+				sb.append(", ");
+			}
 		}
-
+		bodyBuilder.appendFormalLine(embeddedIdentifierFieldType.getSimpleTypeName() + " embeddedIdClass = new " + embeddedIdentifierFieldType.getSimpleTypeName() + "(" + sb.toString() + ");");
 		bodyBuilder.appendFormalLine("obj." + embeddedIdentifierMutator + "(embeddedIdClass);");
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
 		paramNames.add(new JavaSymbolName("index"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
-	public MethodMetadata getEmbeddedMethod(EmbeddedHolder embeddedHolder) {
-		if (!hasEmbedded()) {
-			return null;
-		}
-
-		JavaSymbolName methodName = getEmbeddedMutatorMethod(embeddedHolder.getEmbeddedField());
+	private MethodMetadata getEmbeddedClassMutatorMethod(EmbeddedHolder embeddedHolder) {
+		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField());
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(entityType);
 		paramTypes.add(JavaType.INT_PRIMITIVE);
@@ -356,41 +369,66 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
 		// Create constructor for embedded class
-		String identifierType = embeddedHolder.getEmbeddedField().getFieldType().getFullyQualifiedTypeName();
-		bodyBuilder.appendFormalLine(identifierType + " embeddedClass = new " + identifierType + "();");
-
+		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
+		imports.addImport(embeddedFieldType);
+		bodyBuilder.appendFormalLine(embeddedFieldType.getSimpleTypeName() + " embeddedClass = new " + embeddedFieldType.getSimpleTypeName() + "();");
 		for (FieldMetadata field : embeddedHolder.getFields()) {
-			String initializer = getFieldInitializer(field, null);
-			bodyBuilder.appendFormalLine("embeddedClass." + field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName() + "(" + initializer + ");");
+			bodyBuilder.appendFormalLine(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName() + "(embeddedClass, index);");
 		}
-
-		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutator() + "(embeddedClass);");
+		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
 		paramNames.add(new JavaSymbolName("index"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PRIVATE, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
+	
+	private JavaSymbolName getEmbeddedFieldMutatorMethodName(FieldMetadata embeddedField) {
+		return new JavaSymbolName(embeddedField.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
+	}
 
-	private void addMethodsToBuilder() {
-		List<JavaSymbolName> methodNames = new ArrayList<JavaSymbolName>();
-		for (MethodMetadataBuilder itdMethod : builder.getDeclaredMethods()) {
-			methodNames.add(itdMethod.getMethodName());
-		}
-		for (MethodMetadata fieldInitializerMethod : getFieldInitializerMethods()) {
-			if (!methodNames.contains(fieldInitializerMethod.getMethodName())) {
-				builder.addMethod(fieldInitializerMethod);
-				methodNames.add(fieldInitializerMethod.getMethodName());
+	private void addEmbeddedClassFieldMutatorMethodsToBuilder(EmbeddedHolder embeddedHolder) {
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("obj"));
+		paramNames.add(new JavaSymbolName("index"));
+
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
+		paramTypes.add(embeddedFieldType);
+		paramTypes.add(JavaType.INT_PRIMITIVE);
+
+		for (FieldMetadata field : embeddedHolder.getFields()) {
+			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+			
+			String initializer = getFieldInitializer(field, null);
+			JavaSymbolName fieldMutatorMethodName = new JavaSymbolName(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
+			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName));
+
+			JavaSymbolName embeddedClassMethodName = new JavaSymbolName(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+			MethodMetadata fieldInitializerMethod = methodBuilder.build();
+			if (MemberFindingUtils.getMethod(governorTypeDetails, embeddedClassMethodName, paramTypes) != null) {
+				// Method found in governor so do not create method in ITD
+				continue;
 			}
+
+			builder.addMethod(fieldInitializerMethod);
 		}
 	}
 
-	public List<MethodMetadata> getFieldInitializerMethods() {
-		List<MethodMetadata> fieldInitializerMethods = new LinkedList<MethodMetadata>();
+	private void addFieldMutatorMethodsToBuilder() {
+		for (MethodMetadata fieldInitializerMethod : getFieldMutatorMethods()) {
+			builder.addMethod(fieldInitializerMethod);
+		}
+	}
+
+	private List<MethodMetadata> getFieldMutatorMethods() {
+		List<MethodMetadata> fieldMutatorMethods = new LinkedList<MethodMetadata>();
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
@@ -412,16 +450,16 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutator.getMethodName().getSymbolName());
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.append(getFieldInitializer(locatedMutators.get(mutator).getField(), initializer, mutator.getMethodName(), true));
+			bodyBuilder.append(getFieldValidationBody(locatedMutators.get(mutator).getField(), initializer, mutator.getMethodName()));
 
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, mutator.getMethodName(), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-			fieldInitializerMethods.add(methodBuilder.build());
+			fieldMutatorMethods.add(methodBuilder.build());
 		}
 
-		return fieldInitializerMethods;
+		return fieldMutatorMethods;
 	}
 
-	private String getFieldInitializer(FieldMetadata field, String initializer, JavaSymbolName mutatorName, boolean isMutatorField) {
+	private String getFieldValidationBody(FieldMetadata field, String initializer, JavaSymbolName mutatorName) {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		String fieldName = field.getFieldName().getSymbolName();
@@ -445,7 +483,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				isUnique = (Boolean) values.get("unique");
 			}
 
-			// Check for email annotation
 			// Check for @Size or @Column with length attribute
 			AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 			if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
@@ -480,29 +517,30 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax"));
 
 			if (digitsAnnotation != null) {
-				doDigits(field, digitsAnnotation, bodyBuilder, mutatorName, initializer, suffix);
+				bodyBuilder.append(getDigitsBody(field, digitsAnnotation, suffix));
 			} else if (decimalMinAnnotation != null || decimalMaxAnnotation != null) {
-				doDecimalMinAndDecimalMax(field, decimalMinAnnotation, decimalMaxAnnotation, bodyBuilder, mutatorName, initializer, suffix);
+				bodyBuilder.append(getDecimalMinAndDecimalMaxBody(field, decimalMinAnnotation, decimalMaxAnnotation, suffix));
 			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
-				doColumnPrecisionAndScale(field, values, bodyBuilder, mutatorName, initializer, suffix);
+				@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+				bodyBuilder.append(getColumnPrecisionAndScaleBody(field, values, suffix));
 			}
 		} else if (isIntegerFieldType(fieldType)) {
 			// Check for @Min and @Max
-			doMinAndMax(field, bodyBuilder, mutatorName, initializer, suffix);
+			bodyBuilder.append(getMinAndMaxBody(field, suffix));
 		}
 
-		if (isMutatorField) {
-			bodyBuilder.appendFormalLine("obj." + mutatorName.getSymbolName() + "(" + fieldName + ");");
-		}
+		bodyBuilder.appendFormalLine("obj." + mutatorName.getSymbolName() + "(" + fieldName + ");");
 
 		return bodyBuilder.getOutput();
 	}
 
 	private String getTypeStr(JavaType fieldType) {
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(fieldType);
+		
 		String arrayStr = fieldType.isArray() ? "[]" : "";
-		String typeStr = fieldType.getFullyQualifiedTypeName();
+		String typeStr = fieldType.getSimpleTypeName();
+		
 		if (fieldType.getFullyQualifiedTypeName().equals(JavaType.FLOAT_PRIMITIVE.getFullyQualifiedTypeName()) && fieldType.isPrimitive()) {
 			typeStr = "float" + arrayStr;
 		} else if (fieldType.getFullyQualifiedTypeName().equals(JavaType.DOUBLE_PRIMITIVE.getFullyQualifiedTypeName()) && fieldType.isPrimitive()) {
@@ -521,7 +559,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return typeStr;
 	}
 
-	private void doDigits(FieldMetadata field, AnnotationMetadata digitsAnnotation, InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName mutatorName, String initializer, String suffix) {
+	private String getDigitsBody(FieldMetadata field, AnnotationMetadata digitsAnnotation, String suffix) {
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
 		Integer integerValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("integer")).getValue();
 		Integer fractionValue = (Integer) digitsAnnotation.getAttribute(new JavaSymbolName("fraction")).getValue();
 
@@ -530,9 +570,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", integerValue, '9') + "." + StringUtils.padRight("9", fractionValue, '9'));
 		if (fieldType.equals(BIG_DECIMAL)) {
-			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+			bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\");");
 		} else {
 			bodyBuilder.appendFormalLine("if (" + fieldName + " > " + maxValue.doubleValue() + suffix + ") {");
 			bodyBuilder.indent();
@@ -541,9 +581,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
+		
+		return bodyBuilder.getOutput();
 	}
 
-	private void doDecimalMinAndDecimalMax(FieldMetadata field, AnnotationMetadata decimalMinAnnotation, AnnotationMetadata decimalMaxAnnotation, InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName mutatorName, String initializer, String suffix) {
+	private String getDecimalMinAndDecimalMaxBody(FieldMetadata field, AnnotationMetadata decimalMinAnnotation, AnnotationMetadata decimalMaxAnnotation, String suffix) {
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
 
@@ -551,9 +595,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			String minValue = (String) decimalMinAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
 
 			if (fieldType.equals(BIG_DECIMAL)) {
-				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + minValue + "\")) == -1) {");
+				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + minValue + "\")) == -1) {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + minValue + "\");");
+				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + minValue + "\");");
 			} else {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " < " + minValue + suffix + ") {");
 				bodyBuilder.indent();
@@ -566,9 +610,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			String maxValue = (String) decimalMaxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
 
 			if (fieldType.equals(BIG_DECIMAL)) {
-				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\");");
 			} else {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " > " + maxValue + suffix + ") {");
 				bodyBuilder.indent();
@@ -583,9 +627,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Assert.isTrue(Double.parseDouble(maxValue) >= Double.parseDouble(minValue), "The value of @DecimalMax must be greater or equal to the value of @DecimalMin for field " + fieldName);
 
 			if (fieldType.equals(BIG_DECIMAL)) {
-				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + minValue + "\")) == -1 || " + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + minValue + "\")) == -1 || " + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\");");
 			} else {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " < " + minValue + suffix + " || " + fieldName + " > " + maxValue + suffix + ") {");
 				bodyBuilder.indent();
@@ -595,11 +639,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		}
+		
+		return bodyBuilder.getOutput();
 	}
 
-	private void doColumnPrecisionAndScale(FieldMetadata field, Map<String, Object> values, InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName mutatorName, String initializer, String suffix) {
+	private String getColumnPrecisionAndScaleBody(FieldMetadata field, Map<String, Object> values, String suffix) {
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
 		if (values == null || !values.containsKey("precision")) {
-			return;
+			return bodyBuilder.getOutput();
 		}
 
 		Integer precision = (Integer) values.get("precision");
@@ -611,9 +659,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		BigDecimal maxValue = new BigDecimal(StringUtils.padRight("9", (precision - scale), '9') + "." + StringUtils.padRight("9", scale, '9'));
 		if (fieldType.equals(BIG_DECIMAL)) {
-			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+			bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+			bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_DECIMAL.getSimpleTypeName() + "(\"" + maxValue + "\");");
 		} else {
 			bodyBuilder.appendFormalLine("if (" + fieldName + " > " + maxValue.doubleValue() + suffix + ") {");
 			bodyBuilder.indent();
@@ -622,9 +670,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
+
+		return bodyBuilder.getOutput(); 
 	}
 
-	private void doMinAndMax(FieldMetadata field, InvocableMemberBodyBuilder bodyBuilder, JavaSymbolName mutatorName, String initializer, String suffix) {
+	private String getMinAndMaxBody(FieldMetadata field, String suffix) {
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+
 		String fieldName = field.getFieldName().getSymbolName();
 		JavaType fieldType = field.getFieldType();
 
@@ -634,9 +686,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Number minValue = (Number) minAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
 
 			if (fieldType.equals(BIG_INTEGER)) {
-				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getFullyQualifiedTypeName() + "(\"" + minValue + "\")) == -1) {");
+				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + minValue + "\")) == -1) {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_INTEGER.getFullyQualifiedTypeName() + "(\"" + minValue + "\");");
+				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + minValue + "\");");
 			} else {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " < " + minValue + suffix + ") {");
 				bodyBuilder.indent();
@@ -649,9 +701,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Number maxValue = (Number) maxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
 
 			if (fieldType.equals(BIG_INTEGER)) {
-				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_INTEGER.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + maxValue + "\");");
 			} else {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " > " + maxValue + suffix + ") {");
 				bodyBuilder.indent();
@@ -666,9 +718,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Assert.isTrue(maxValue.longValue() >= minValue.longValue(), "The value of @Max must be greater or equal to the value of @Min for field " + fieldName);
 
 			if (fieldType.equals(BIG_INTEGER)) {
-				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getFullyQualifiedTypeName() + "(\"" + minValue + "\")) == -1 || " + fieldName + ".compareTo(new " + BIG_INTEGER.getFullyQualifiedTypeName() + "(\"" + maxValue + "\")) == 1) {");
+				bodyBuilder.appendFormalLine("if (" + fieldName + ".compareTo(new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + minValue + "\")) == -1 || " + fieldName + ".compareTo(new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + maxValue + "\")) == 1) {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_INTEGER.getFullyQualifiedTypeName() + "(\"" + maxValue + "\");");
+				bodyBuilder.appendFormalLine(fieldName + " = new " + BIG_INTEGER.getSimpleTypeName() + "(\"" + maxValue + "\");");
 			} else {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " < " + minValue + suffix + " || " + fieldName + " > " + maxValue + suffix + ") {");
 				bodyBuilder.indent();
@@ -678,6 +730,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		}
+		
+		return bodyBuilder.getOutput();
 	}
 
 	/**
@@ -781,9 +835,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Create the method body
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(new JavaType("java.util.ArrayList"));
+		imports.addImport(new JavaType("java.util.Iterator"));
+		imports.addImport(new JavaType("javax.validation.ConstraintViolationException"));
+		imports.addImport(new JavaType("javax.validation.ConstraintViolation"));
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String dataField = getDataField().getFieldName().getSymbolName();
-		bodyBuilder.appendFormalLine(dataField + " = " + entityType.getFullyQualifiedTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, " + annotationValues.getQuantity() + ");");
+		bodyBuilder.appendFormalLine(dataField + " = " + entityType.getSimpleTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, " + annotationValues.getQuantity() + ");");
 		bodyBuilder.appendFormalLine("if (data == null) throw new IllegalStateException(\"Find entries implementation for '" + entityType.getSimpleTypeName() + "' illegally returned null\");");
 		bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
 		bodyBuilder.indent();
@@ -791,11 +851,26 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("");
-		bodyBuilder.appendFormalLine(dataField + " = new java.util.ArrayList<" + getDataField().getFieldType().getParameters().get(0).getNameIncludingTypeParameters() + ">();");
+		bodyBuilder.appendFormalLine(dataField + " = new ArrayList<" + getDataField().getFieldType().getParameters().get(0).getNameIncludingTypeParameters() + ">();");
 		bodyBuilder.appendFormalLine("for (int i = 0; i < " + annotationValues.getQuantity() + "; i++) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(entityType.getFullyQualifiedTypeName() + " obj = " + getNewTransientEntityMethod().getMethodName() + "(i);");
+		bodyBuilder.appendFormalLine(entityType.getSimpleTypeName() + " obj = " + getNewTransientEntityMethod().getMethodName() + "(i);");
+		bodyBuilder.appendFormalLine("try {");
+		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("} catch (ConstraintViolationException e) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("StringBuilder msg = new StringBuilder();");
+		bodyBuilder.appendFormalLine("for (Iterator<ConstraintViolation<?>> it = e.getConstraintViolations().iterator(); it.hasNext();) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("ConstraintViolation<?> cv = it.next();");
+		bodyBuilder.appendFormalLine("msg.append(\"[\").append(cv.getConstraintDescriptor()).append(\":\").append(cv.getMessage()).append(\"=\").append(cv.getInvalidValue()).append(\"]\");");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("throw new RuntimeException(msg.toString(), e);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
 		bodyBuilder.indentRemove();
@@ -810,16 +885,21 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return embeddedIdentifierHolder != null;
 	}
 
-	public boolean hasEmbedded() {
-		return embeddedHolders != null && embeddedHolders.size() > 0;
-	}
-
 	private void storeFieldInitializers() {
 		for (MethodMetadata mutatorMethod : locatedMutators.keySet()) {
 			CollaboratingDataOnDemandMetadataHolder metadataHolder = locatedMutators.get(mutatorMethod);
-			FieldMetadata field = metadataHolder.getField();
-			String initializer = getFieldInitializer(field, metadataHolder.getDataOnDemandMetadata());
+			String initializer = getFieldInitializer(metadataHolder.getField(), metadataHolder.getDataOnDemandMetadata());
 			fieldInitializers.put(mutatorMethod, initializer);
+		}
+	}
+	
+	private void storeEmbeddedFieldInitializers() {
+		for (EmbeddedHolder embeddedHolder: embeddedHolders) {
+			Map<FieldMetadata, String> initializers = new LinkedHashMap<FieldMetadata, String>();
+			for (FieldMetadata field : embeddedHolder.getFields()) {
+				initializers.put(field, getFieldInitializer(field, null));
+			}
+			embeddedFieldInitializers.put(embeddedHolder.getEmbeddedField(), initializers);
 		}
 	}
 
@@ -828,16 +908,20 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		String initializer = "null";
 		String fieldInitializer = field.getFieldInitializer();
 		Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
 		// Date fields included for DataNucleus (
-		if (fieldType.equals(new JavaType(Date.class.getName()))) {
+		if (fieldType.equals(new JavaType(Date.class.getName()))) {			
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
-				initializer = "new java.util.Date(new java.util.Date().getTime() - 10000000L)";
+				imports.addImport(new JavaType("java.util.Date"));
+				initializer = "new Date(new Date().getTime() - 10000000L)";
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future")) != null) {
-				initializer = "new java.util.Date(new java.util.Date().getTime() + 10000000L)";
+				imports.addImport(new JavaType("java.util.Date"));
+				initializer = "new Date(new Date().getTime() + 10000000L)";
 			} else {
-				initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY), java.util.Calendar.getInstance().get(java.util.Calendar.MINUTE), java.util.Calendar.getInstance().get(java.util.Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime()";
-				// initializer = "new java.util.Date()";
+				imports.addImport(new JavaType("java.util.Calendar"));
+				imports.addImport(new JavaType("java.util.GregorianCalendar"));
+				initializer = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH), Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), Calendar.getInstance().get(Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime()";
 			}
 		} else if (fieldType.equals(JavaType.STRING_OBJECT)) {
 			if (fieldInitializer != null && fieldInitializer.contains("\"")) {
@@ -895,13 +979,16 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				}
 			}
 		} else if (fieldType.equals(new JavaType(Calendar.class.getName()))) {
-			String calendarString = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH)";
+			imports.addImport(new JavaType("java.util.Calendar"));
+			imports.addImport(new JavaType("java.util.GregorianCalendar"));
+			
+			String calendarString = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)";
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
 				initializer = calendarString + " - 1)";
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future")) != null) {
 				initializer = calendarString + " + 1)";
 			} else {
-				initializer = "java.util.Calendar.getInstance()";
+				initializer = "Calendar.getInstance()";
 			}
 		} else if (fieldType.equals(new JavaType("java.lang.String", 1, DataType.TYPE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ \"Y\", \"N\" }");
@@ -946,9 +1033,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(new JavaType("java.lang.Character", 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ 'Y', 'N' }");
 		} else if (fieldType.equals(BIG_DECIMAL)) {
-			initializer = BIG_DECIMAL.getFullyQualifiedTypeName() + ".valueOf(index)";
+			initializer = BIG_DECIMAL.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(BIG_INTEGER)) {
-			initializer = BIG_INTEGER.getFullyQualifiedTypeName() + ".valueOf(index)";
+			initializer = BIG_INTEGER.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(JavaType.BYTE_OBJECT)) {
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ")";
 		} else if (fieldType.equals(JavaType.BYTE_PRIMITIVE)) {
@@ -959,7 +1046,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			// Avoid circular references (ROO-562)
 			initializer = "obj";
 		} else if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
-			initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
+			imports.addImport(field.getFieldType());
+			initializer = field.getFieldType().getSimpleTypeName() + ".class.getEnumConstants()[0]";
 		} else if (collaboratingMetadata != null) {
 			requiredDataOnDemandCollaborators.add(field.getFieldType());
 
@@ -991,7 +1079,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
 	}
 
-	private JavaSymbolName getEmbeddedIdMutatorMethod() {
+	private JavaSymbolName getEmbeddedIdMutatorMethodName() {
 		List<JavaSymbolName> fieldNames = new ArrayList<JavaSymbolName>();
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
 			fieldNames.add(locatedMutators.get(mutator).getField().getFieldName());
@@ -1006,7 +1094,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			for (int i = 0; i < index; i++) {
 				fieldName = fieldName + "_";
 			}
-			fieldName = "embeddedId" + fieldName;
+			fieldName = "embeddedIdClass" + fieldName;
 
 			embeddedIdField = new JavaSymbolName(fieldName);
 			if (!fieldNames.contains(embeddedIdField)) {
@@ -1015,11 +1103,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 		}
 		return new JavaSymbolName(embeddedIdField.getSymbolNameTurnedIntoMutatorMethodName());
-	}
-
-	private JavaSymbolName getEmbeddedMutatorMethod(FieldMetadata field) {
-		JavaSymbolName embeddedField = new JavaSymbolName("embedded" + field.getFieldName().getSymbolNameCapitalisedFirstLetter());
-		return new JavaSymbolName(embeddedField.getSymbolNameTurnedIntoMutatorMethodName());
 	}
 
 	public String toString() {

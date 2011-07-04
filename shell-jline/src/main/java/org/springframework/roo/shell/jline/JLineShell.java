@@ -110,7 +110,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 
         flash(Level.FINE, "Spring Roo " + versionInfo(), Shell.WINDOW_TITLE_SLOT);
         
-        logger.info("Welcome to Spring Roo. For assistance press " + COMPLETION_KEY + " or type \"hint\" then hit ENTER.");
+        logger.info("Welcome to Spring Roo. For assistance press " + completionKeys + " or type \"hint\" then hit ENTER.");
         
         setShellStatus(Status.STARTED);
 

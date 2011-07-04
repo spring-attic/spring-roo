@@ -114,10 +114,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
-			return null;
-		}
-		
+
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = getLocatedMutators(memberDetails, metadataIdentificationString);
 		
@@ -174,7 +171,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	}
 
 	private EmbeddedIdentifierHolder getEmbeddedIdentifierHolder(MemberDetails memberDetails, String metadataIdentificationString) {
-		List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
+		final List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
 		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 		if (fields.isEmpty()) {
 			return null;
@@ -197,29 +194,29 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	
 	private List<EmbeddedHolder> getEmbeddedHolders(MemberDetails memberDetails, String metadataIdentificationString) {
 		final List<EmbeddedHolder> embeddedHolders = new ArrayList<EmbeddedHolder>();
-		
-		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_FIELD);
-		if (fields.isEmpty()) {
+
+		List<FieldMetadata> embeddedFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_FIELD);
+		if (embeddedFields.isEmpty()) {
 			return embeddedHolders;
 		}
 		
-		for (FieldMetadata embeddedField : fields) {
+		for (FieldMetadata embeddedField : embeddedFields) {
 			MemberDetails embeddedMemberDetails = getMemberDetails(embeddedField.getFieldType());
 			if (embeddedMemberDetails == null) {
 				continue;
 			}
-			
-			final List<FieldMetadata> embeddedFields = new LinkedList<FieldMetadata>();
-	
+
+			final List<FieldMetadata> fields = new LinkedList<FieldMetadata>();
+
 			for (FieldMetadata field : MemberFindingUtils.getFields(embeddedMemberDetails)) {
 				if (!(Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier()) || Modifier.isTransient(field.getModifier()))) {
 					metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
-					embeddedFields.add(field);
+					fields.add(field);
 				}
 			}
-			embeddedHolders.add(new EmbeddedHolder(embeddedField, embeddedFields));
+			embeddedHolders.add(new EmbeddedHolder(embeddedField, fields));
 		}
-		
+
 		return embeddedHolders;
 	}
 

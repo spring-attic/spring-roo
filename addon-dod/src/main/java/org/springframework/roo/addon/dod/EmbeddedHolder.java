@@ -22,12 +22,11 @@ public class EmbeddedHolder {
 		this.embeddedField = embeddedField;
 		this.fields = fields;
 	}
-
 	public FieldMetadata getEmbeddedField() {
 		return embeddedField;
 	}
 
-	public JavaSymbolName getEmbeddedMutator() {
+	public JavaSymbolName getEmbeddedMutatorMethodName() {
 		return new JavaSymbolName(embeddedField.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
 	}
 	

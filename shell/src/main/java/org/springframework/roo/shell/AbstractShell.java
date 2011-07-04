@@ -36,16 +36,19 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
 	
 	// Constants
-	public static String COMPLETION_KEY = "TAB";
 	private static final String MY_SLOT = AbstractShell.class.getName();
+
+	// Public static fields; don't rename, make final, or make non-public, as
+	// they are part of the public API, e.g. are changed by STS.
+	public static String completionKeys = "TAB";
+	public static String shellPrompt = "roo> ";
 	
-	// Fields
+	// Instance fields
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
-	
     protected boolean inBlockComment;
     protected ExitShellRequest exitShellRequest;
-    protected String shellPrompt = "roo> ";
 	
+    // Abstract methods
 	protected abstract Collection<URI> findUris(String resourceName);
 	protected abstract String getHomeAsString();
 	protected abstract ExecutionStrategy getExecutionStrategy();

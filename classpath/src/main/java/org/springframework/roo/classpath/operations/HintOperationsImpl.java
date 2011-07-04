@@ -41,7 +41,7 @@ public class HintOperationsImpl implements HintOperations {
 		}
 		try {
 			String message = bundle.getString(topic);
-			return message.replace("\r", System.getProperty("line.separator")).replace("${completion_key}", AbstractShell.COMPLETION_KEY);
+			return message.replace("\r", System.getProperty("line.separator")).replace("${completion_key}", AbstractShell.completionKeys);
 		} catch (MissingResourceException exception) {
 			return "Cannot find topic '" + topic + "'";
 		}

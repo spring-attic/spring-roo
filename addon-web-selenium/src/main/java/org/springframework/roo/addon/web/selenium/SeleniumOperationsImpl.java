@@ -34,6 +34,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -144,7 +145,9 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		// Add verifications for all other fields
 		for (FieldMetadata field : fields) {
-			tbody.appendChild(verifyTextCommand(document, formBackingType, field));
+			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
+				tbody.appendChild(verifyTextCommand(document, formBackingType, field));
+			}
 		}
 
 		fileManager.createOrUpdateTextFileIfRequired(seleniumPath, XmlUtils.nodeToString(document), false);
@@ -203,41 +206,14 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'selenium-maven-plugin']", root) != null) {
 			return;
 		}
-
-		Element dependencies = XmlUtils.findRequiredElement("/project/dependencies", root);
-		Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
+		
+		Element configuration = XmlUtils.getConfiguration(getClass());
+		Element plugin = XmlUtils.findFirstElement("/configuration/selenium/plugin", configuration);
 
 		// Now install the plugin itself
-		Element plugin = document.createElement("plugin");
-		Element groupId = document.createElement("groupId");
-		groupId.setTextContent("org.codehaus.mojo");
-		plugin.appendChild(groupId);
-		Element artifactId = document.createElement("artifactId");
-		artifactId.setTextContent("selenium-maven-plugin");
-		plugin.appendChild(artifactId);
-		Element version = document.createElement("version");
-		version.setTextContent("1.1");
-		plugin.appendChild(version);
-		Element configuration = document.createElement("configuration");
-		Element suite = document.createElement("suite");
-		String suitePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "selenium/test-suite.xhtml");
-		suitePath = suitePath.substring(pathResolver.getRoot(Path.ROOT).length() + 1);
-		suite.setTextContent(suitePath);
-		configuration.appendChild(suite);
-		Element browser = document.createElement("browser");
-		browser.setTextContent("*firefox");
-		configuration.appendChild(browser);
-		Element results = document.createElement("results");
-		results.setTextContent("${project.build.directory}/selenium.html");
-		configuration.appendChild(results);
-		Element startURL = document.createElement("startURL");
-		startURL.setTextContent("http://localhost:4444/");
-		configuration.appendChild(startURL);
-		plugin.appendChild(configuration);
-
-		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
-
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
+		if (plugin != null) {
+			projectOperations.addBuildPlugin(new Plugin(plugin));
+		}
 	}
 
 	private Node clickAndWaitCommand(Document document, String linkTarget) {

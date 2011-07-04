@@ -205,7 +205,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		this.ignoreTriggerAnnotations = ignoreTriggerAnnotations;
 	}
 
-	public final MetadataItem get(final String metadataIdentificationString) {
+	public final MetadataItem get(String metadataIdentificationString) {
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected request for '" + metadataIdentificationString + "' to this provider (which uses '" + getProvidesType() + "'");
 		
 		// Remove the upstream dependencies for this instance (we'll be recreating them later, if needed) 
@@ -272,17 +272,18 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			// trickle down via the class-level notification registered by convention by AbstractItdMetadataProvider subclasses (BPA 10 Dec 2010)
 			
 			// Quit if the subclass returned null or a metadata item they're not happy with; it might have experienced issues parsing etc
-			if (metadata != null && !metadata.isValid()) {
+			if (metadata == null || !metadata.isValid()) {
 				return null;
 			}
 			
-			// By this point we have a null or valid MetadataItem (but which might not contain any members for the ITD)
+			// By this point we have a valid MetadataItem, but it might not contain any members for the resulting ITD etc
 
 			// Handle the management of the ITD file
 			boolean deleteItdFile = false;
 			
-			if (metadata == null || metadata.getMemberHoldingTypeDetails() == null) {
-				// We have no members in this ITD, so delete it
+			if (metadata.getMemberHoldingTypeDetails() == null) {
+				// We have no members in this ITD, so its on-disk existence falls into question... :-)
+				// Exterminate it.
 				deleteItdFile = true;
 			}
 			

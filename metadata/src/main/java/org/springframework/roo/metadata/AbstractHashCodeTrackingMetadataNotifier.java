@@ -31,12 +31,9 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
 	 * Notifies downstream dependencies of a change if and only if the passed metadata item has a different hash code than the existing metadata item.
 	 * This is aimed at reducing needless notifications if nothing has actually changed since the last notification.
 	 * 
-	 * @param metadataItem the potentially-updated metadata item (if not <code>null</code>, must be a metadata item of the same class as all other items presented to this class)
+	 * @param metadataItem the potentially-updated metadata item (required; must be a metadata item of the same class as all other items presented to this class)
 	 */
-	protected void notifyIfRequired(final MetadataItem metadataItem) {
-		if (metadataItem == null) {
-			return;
-		}
+	protected void notifyIfRequired(MetadataItem metadataItem) {
 		String instanceId = MetadataIdentificationUtils.getMetadataInstance(metadataItem.getId());
 		Integer existing = hashes.get(instanceId);
 		int newHash = metadataItem.hashCode();
