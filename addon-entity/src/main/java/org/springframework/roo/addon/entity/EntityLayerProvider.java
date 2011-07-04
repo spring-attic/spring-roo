@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.entity;
 
-import java.util.LinkedHashMap;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -18,6 +16,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
+import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
@@ -37,11 +36,10 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	// Fields
 	@Reference private MetadataService metadataService;
 
-	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams) {
+	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, Pair<JavaType, JavaSymbolName>... methodParameters) {
 		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
 		Assert.notNull(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
-		Assert.notNull(methodParams, "Method param names and types required (may be empty)");
 		
 		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
 			return getFindAllMethod(metadataId, targetEntity);

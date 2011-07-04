@@ -11,8 +11,6 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD;
 
-import java.util.LinkedHashMap;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -101,8 +99,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, VERSION_ACCESSOR_METHOD);
 		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, COUNT_ALL_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FIND_METHOD);
-		final LinkedHashMap<JavaSymbolName, Object> findAllMethodParams = new LinkedHashMap<JavaSymbolName, Object>();
-		final MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, findAllMethodParams, LayerType.HIGHEST.getPosition());
+		final MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, LayerType.HIGHEST.getPosition());
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FIND_ENTRIES_METHOD);
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FLUSH_METHOD);
 		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, MERGE_METHOD);

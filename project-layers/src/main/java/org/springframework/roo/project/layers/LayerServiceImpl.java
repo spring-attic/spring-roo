@@ -3,7 +3,6 @@ package org.springframework.roo.project.layers;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -16,6 +15,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.Pair;
 
 /**
  * The {@link LayerService} implementation.
@@ -32,12 +32,15 @@ public class LayerServiceImpl implements LayerService {
 
 	private final Set<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
 	
-	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams, int layerPosition) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final int layerPosition,	final Pair<JavaType, JavaSymbolName>... methodParameters) {
+		Assert.hasText(metadataId, "metadataId is required");
+		Assert.hasText(methodIdentifier, "methodIdentifier is required");
+		Assert.notNull(targetEntity, "targetEntity is required");
 		for (LayerProvider provider : new ArrayList<LayerProvider>(providers)) {
 			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, methodParams);
+			MemberTypeAdditions additions = provider.getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, methodParameters);
 			if (additions != null) {
 				return additions;
 			}

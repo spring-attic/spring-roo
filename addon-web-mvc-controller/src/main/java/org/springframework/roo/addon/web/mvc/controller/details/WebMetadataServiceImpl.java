@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,7 +64,12 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class WebMetadataServiceImpl implements WebMetadataService {
+	
+	// Constants
+	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
+	
+	// Fields
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
@@ -400,16 +404,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceDetails);
 	}
 	
-	public LinkedHashMap<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString) {
-		Map<String, LinkedHashMap<JavaSymbolName, Object>> requiredMethods = new HashMap<String, LinkedHashMap<JavaSymbolName,Object>>();
-		requiredMethods.put(PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), new LinkedHashMap<JavaSymbolName, Object>());
-		
+	public Map<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
-		LinkedHashMap<String, MemberTypeAdditions> methodAdditions = new LinkedHashMap<String, MemberTypeAdditions>();
-		for (String method : requiredMethods.keySet()) {
-			methodAdditions.put(method, layerService.getMemberTypeAdditions(metadataIdentificationString, method, domainType, requiredMethods.get(method), LayerType.HIGHEST.getPosition()));
-		}
-		
-		return methodAdditions;
+		final MemberTypeAdditions findAllAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition());
+		return Collections.singletonMap(FIND_ALL_METHOD, findAllAdditions);
 	}
 }

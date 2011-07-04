@@ -1,9 +1,8 @@
 package org.springframework.roo.project.layers;
 
-import java.util.LinkedHashMap;
-
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Pair;
 
 /**
  * Provides persistence-related methods at a given layer of the application.
@@ -26,10 +25,10 @@ public interface LayerProvider {
 	 * @param metadataId Id of calling metadata provider
 	 * @param methodIdentifier specifies the method which is being requested
 	 * @param targetEntity specifies the target entity
-	 * @param methodParams parameters which are passed in to the method
+	 * @param methodParameters parameters which are passed in to the method
 	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, null otherwise
 	 */
-	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, LinkedHashMap<JavaSymbolName, Object> methodParams);
+	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, Pair<JavaType, JavaSymbolName>... methodParameters);
 	
 	/**
 	 * Returns the position of this layer relative to others. 
