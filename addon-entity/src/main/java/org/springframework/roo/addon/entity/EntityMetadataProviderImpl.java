@@ -83,15 +83,15 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(Arrays.asList(versionFieldTagger), PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD, true));
 		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(Arrays.asList(versionFieldTagger), PersistenceCustomDataKeys.VERSION_MUTATOR_METHOD, false));
 
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.PERSIST_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("persistMethod"), "persist"));
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.REMOVE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("removeMethod"), "remove"));
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FLUSH_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("flushMethod"), "flush"));
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.CLEAR_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("clearMethod"), "clear"));
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.MERGE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("mergeMethod"), "merge"));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.PERSIST_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("persistMethod"), EntityAnnotationValues.PERSIST_METHOD_DEFAULT));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.REMOVE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("removeMethod"), EntityAnnotationValues.REMOVE_METHOD_DEFAULT));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FLUSH_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("flushMethod"), EntityAnnotationValues.FLUSH_METHOD_DEFAULT));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.CLEAR_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("clearMethod"), EntityAnnotationValues.CLEAR_METHOD_DEFAULT));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.MERGE_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("mergeMethod"), EntityAnnotationValues.MERGE_METHOD_DEFAULT));
 
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.COUNT_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("countMethod"), "count", true, false));
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findAllMethod"), "findAll", true, false));
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findMethod"), "find", false, true));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.COUNT_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("countMethod"), EntityAnnotationValues.COUNT_METHOD_DEFAULT, true, false));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_ALL_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findAllMethod"), EntityAnnotationValues.FIND_ALL_METHOD_DEFAULT, true, false));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findMethod"), EntityAnnotationValues.FIND_METHOD_DEFAULT, false, true));
 		customDataKeyDecorator.registerMatcher(getClass().getName(), new MethodMatcher(PersistenceCustomDataKeys.FIND_ENTRIES_METHOD, new JavaType(RooEntity.class.getName()), new JavaSymbolName("findEntriesMethod"), "find", false, true, "Entries"));
 
 		customDataKeyDecorator.registerMatcher(getClass().getName(), new FieldMatcher(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD, getAnnotationMetadataList("javax.persistence.ManyToMany")));
