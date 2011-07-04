@@ -1,21 +1,9 @@
 package org.springframework.roo.addon.cloud.foundry;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-
-import javax.crypto.*;
-import javax.crypto.spec.DESKeySpec;
-
+import com.vmware.appcloud.client.AppCloudClient;
+import com.vmware.appcloud.client.CloudApplication;
+import com.vmware.appcloud.client.CloudService;
+import com.vmware.appcloud.client.ServiceConfiguration;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -30,10 +18,23 @@ import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.BasicProxyService;
 import org.springframework.uaa.client.protobuf.UaaClient;
 
-import com.vmware.appcloud.client.AppCloudClient;
-import com.vmware.appcloud.client.CloudApplication;
-import com.vmware.appcloud.client.CloudService;
-import com.vmware.appcloud.client.ServiceConfiguration;
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 @Component
 @Service
@@ -45,8 +46,9 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	private static final String URL_KEY = "url";
 	private static final String ROO_KEY = "Roo == Java + Productivity";
 	private static final String CLOUD_FOUNDRY_KEY = "Cloud Foundry Prefs";
-	
-	@Reference private UaaService uaaService;
+
+	@Reference
+	private UaaService uaaService;
 	private Preferences preferences = getPreferencesFor(CloudFoundrySessionImpl.class);
 	UaaClient.Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
 	private UaaAwareAppCloudClient client;
@@ -447,7 +449,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 			return url;
 		}
 
-		public String encode()  {
+		public String encode() {
 			if (!isValid()) {
 				throw new IllegalStateException("Credentials invalid; cannot continue");
 			}

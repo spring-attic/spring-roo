@@ -1,20 +1,6 @@
 package org.springframework.roo.addon.cloud.foundry;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import com.vmware.appcloud.client.AppCloudException;
+import com.vmware.appcloud.client.*;
 import org.json.simple.JSONObject;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.uaa.client.TransmissionEventListener;
@@ -26,15 +12,13 @@ import org.springframework.uaa.client.util.HexUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
-import com.vmware.appcloud.client.AppCloudClient;
-import com.vmware.appcloud.client.ApplicationStats;
-import com.vmware.appcloud.client.CloudApplication;
-import com.vmware.appcloud.client.CloudInfo;
-import com.vmware.appcloud.client.CloudService;
-import com.vmware.appcloud.client.CrashesInfo;
-import com.vmware.appcloud.client.InstancesInfo;
-import com.vmware.appcloud.client.ServiceConfiguration;
-import com.vmware.appcloud.client.UploadStatusCallback;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 public class UaaAwareAppCloudClient extends AppCloudClient implements TransmissionEventListener {
 
@@ -44,7 +28,9 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	private UaaService uaaService;
 	private Set<String> discoveredAppNames = new HashSet<String>();
 	private URL cloudControllerUrl;
-	/** key: method name, value: sorted map of HTTP response code keys to count of that response code */
+	/**
+	 * key: method name, value: sorted map of HTTP response code keys to count of that response code
+	 */
 	private Map<String, SortedMap<Integer, Integer>> methodToResponses = new HashMap<String, SortedMap<Integer, Integer>>();
 	private Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
 	private int cloudMajorVersion = 0;
@@ -70,7 +56,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			methodToResponses.clear();
 		}
 	}
-	
+
 	public void beforeTransmission(TransmissionType type) {
 		if (type == TransmissionType.UPLOAD) {
 			flushToUaa();
@@ -111,7 +97,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			registerFeatureUse(methodName, methodCallInfo);
 		}
 	}
-	
+
 	private void registerFeatureUse(String featureName, Map<String, Object> jsonPayload) {
 		jsonPayload.put("version", product.getMajorVersion() + "." + product.getMinorVersion() + "." + product.getPatchVersion());
 		String jsonAsString = JSONObject.toJSONString(jsonPayload);
@@ -162,7 +148,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.bindService(appName, serviceName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("bindService", resultCode, appName);
 		}
@@ -175,7 +161,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.createAndUploadAndStartApplication(appName, framework, memory, warFile, uris, serviceNames);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("createAndUploadAndStartApplication", resultCode, appName);
 		}
@@ -201,7 +187,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.createApplication(appName, framework, memory, uris, serviceNames);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("createApplication", resultCode, appName);
 		}
@@ -214,7 +200,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.createService(service);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("createService", resultCode);
 		}
@@ -227,7 +213,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.deleteAllApplications();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("deleteAllApplications", resultCode);
 		}
@@ -240,7 +226,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.deleteAllServices();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("deleteAllServices", resultCode);
 		}
@@ -253,7 +239,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.deleteApplication(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString() , he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("deleteApplication", resultCode, appName);
 		}
@@ -266,7 +252,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.deleteService(service);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("deleteService", resultCode);
 		}
@@ -279,7 +265,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getApplication(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getApplication", resultCode, appName);
 		}
@@ -292,7 +278,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getApplicationInstances(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getApplicationInstances", resultCode, appName);
 		}
@@ -305,7 +291,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getApplicationMemoryChoices();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getApplicationMemoryChoices", resultCode);
 		}
@@ -318,7 +304,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getApplications();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getApplications", resultCode);
 		}
@@ -331,7 +317,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getApplicationStats(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getApplicationStats", resultCode, appName);
 		}
@@ -344,7 +330,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getCloudControllerUrl();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getCloudControllerUrl", resultCode);
 		}
@@ -357,7 +343,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getCloudInfo();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getCloudInfo", resultCode);
 		}
@@ -370,7 +356,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getCrashes(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getCrashes", resultCode, appName);
 		}
@@ -383,7 +369,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getDefaultApplicationMemory(framework);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getDefaultApplicationMemory", resultCode);
 		}
@@ -396,7 +382,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getFile(appName, instanceIndex, filePath, requestCallback, responseHandler);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getFile", resultCode, appName);
 		}
@@ -409,7 +395,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getFile(appName, instanceIndex, filePath);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getFile", resultCode, appName);
 		}
@@ -422,7 +408,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getService(service);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getService", resultCode);
 		}
@@ -435,7 +421,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getServiceConfigurations();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getServiceConfigurations", resultCode);
 		}
@@ -448,7 +434,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.getServices();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("getServices", resultCode);
 		}
@@ -461,7 +447,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.login();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("login", resultCode);
 		}
@@ -474,7 +460,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			return super.loginIfNeeded();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("loginIfNeeded", resultCode);
 		}
@@ -487,7 +473,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.register(email, password);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("register", resultCode);
 		}
@@ -500,7 +486,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.rename(appName, newName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("rename", resultCode, appName);
 		}
@@ -513,7 +499,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.restartApplication(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("restartApplication", resultCode, appName);
 		}
@@ -526,7 +512,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.startApplication(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("startApplication", resultCode, appName);
 		}
@@ -539,7 +525,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.stopApplication(appName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("stopApplication", resultCode, appName);
 		}
@@ -552,7 +538,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.unbindService(appName, serviceName);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("unbindService", resultCode, appName);
 		}
@@ -565,7 +551,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.unregister();
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("unregister", resultCode);
 		}
@@ -578,7 +564,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.updateApplicationInstances(appName, instances);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("updateApplicationInstances", resultCode, appName);
 		}
@@ -591,7 +577,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.updateApplicationMemory(appName, memory);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("updateApplicationMemory", resultCode, appName);
 		}
@@ -604,7 +590,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.updateApplicationServices(appName, services);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("updateApplicationServices", resultCode, appName);
 		}
@@ -617,7 +603,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.updateApplicationUris(appName, uris);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("updateApplicationUris", resultCode, appName);
 		}
@@ -630,7 +616,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.uploadApplication(appName, warFile, callback);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("uploadApplication", resultCode, appName);
 		}
@@ -643,7 +629,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.uploadApplication(appName, warFile);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("uploadApplication", resultCode, appName);
 		}
@@ -656,7 +642,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 			super.uploadApplication(appName, warFilePath);
 		} catch (AppCloudException he) {
 			resultCode = he.getStatusCode().value();
-			throw new IllegalStateException("Operation could not be completed: "  + he.toString(), he);
+			throw new IllegalStateException("Operation could not be completed: " + he.toString(), he);
 		} finally {
 			recordHttpResult("uploadApplication", resultCode, appName);
 		}

@@ -1,5 +1,12 @@
 package org.springframework.roo.addon.cloud.foundry;
 
+import com.vmware.appcloud.client.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.shell.osgi.AbstractFlashingObject;
+import org.springframework.roo.support.util.StringUtils;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,23 +15,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.shell.osgi.AbstractFlashingObject;
-import org.springframework.roo.support.util.StringUtils;
-
-import com.vmware.appcloud.client.AppCloudClient;
-import com.vmware.appcloud.client.ApplicationStats;
-import com.vmware.appcloud.client.CloudApplication;
-import com.vmware.appcloud.client.CloudInfo;
-import com.vmware.appcloud.client.CloudService;
-import com.vmware.appcloud.client.CrashInfo;
-import com.vmware.appcloud.client.CrashesInfo;
-import com.vmware.appcloud.client.InstanceStats;
-import com.vmware.appcloud.client.InstancesInfo;
-import com.vmware.appcloud.client.ServiceConfiguration;
 
 /**
  * Operations for Cloud Foundry add-on.
@@ -48,7 +38,8 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Service
 public class CloudFoundryOperationsImpl extends AbstractFlashingObject implements CloudFoundryOperations {
 	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
-	@Reference private CloudFoundrySession session;
+	@Reference
+	private CloudFoundrySession session;
 	private AppCloudClient client = null;
 
 	public void info() {
@@ -225,7 +216,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 				CloudApplication cloudApplication = getApplication(appName);
 				List<String> finalUrls = urls;
 				if (finalUrls == null) {
-				    finalUrls = new ArrayList<String>();
+					finalUrls = new ArrayList<String>();
 					finalUrls.add(appName + ".cloudfoundry.com");
 				}
 				if (cloudApplication == null) {
@@ -462,7 +453,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 
 	public void renameApp(final String appName, final String newAppName) {
 		String failureMessage = "The application '" + appName + "'failed to be renamed";
-		String successMessage = "The application '" + appName + "' was successfully renamed as '"  + newAppName + "'";
+		String successMessage = "The application '" + appName + "' was successfully renamed as '" + newAppName + "'";
 		executeCommand(new CloudCommand(failureMessage, successMessage) {
 			@Override
 			public void execute() throws Exception {
