@@ -40,7 +40,7 @@ public class CloudFoundryCommands implements CommandMarker {
 	public void login(
 		@CliOption(key = "email", mandatory = false, help = "The user's email address") CloudLoginEmail loginEmail,
 		@CliOption(key = "password", mandatory = false, help = "The user's password") String password,
-		@CliOption(key = "cloudControllerUrl", mandatory = false, help = "The cloud controller to target. Defaults to '" + UaaAwareAppCloudClient.VCLOUD_URL + "'") CloudControllerUrl cloudControllerUrl) {
+		@CliOption(key = "cloudControllerUrl", mandatory = false, help = "The cloud controller to target. Defaults to '" + UaaAwareAppCloudClient.CLOUD_FOUNDRY_URL + "'") CloudControllerUrl cloudControllerUrl) {
 		
 		String url = null;
 		String email = null;
@@ -240,6 +240,11 @@ public class CloudFoundryCommands implements CommandMarker {
 		"cloud foundry deploy", "cloud foundry rename app", "cloud foundry update app memory"})
 	public boolean isCommandAvailable() {
 		return cloudFoundryOperations.isCloudFoundryCommandAvailable();
+	}
+
+	@CliCommand(value = "cloud foundry clear login details", help = "Clears all stored login information")
+	public void clearStoredLoginDetails() {
+		cloudFoundryOperations.clearStoredLoginDetails();
 	}
 
 	/*	

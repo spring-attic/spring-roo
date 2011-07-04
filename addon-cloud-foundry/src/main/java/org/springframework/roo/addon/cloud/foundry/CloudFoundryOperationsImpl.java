@@ -478,6 +478,10 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		});
 	}
 
+	public void clearStoredLoginDetails() {
+		session.clearStoredLoginDetails();
+	}
+
 	public void setup() {
 		//TODO: This is where a cloud environment profile would be added to the application config
 	}

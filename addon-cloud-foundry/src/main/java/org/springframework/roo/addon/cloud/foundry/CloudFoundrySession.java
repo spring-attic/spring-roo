@@ -30,4 +30,6 @@ public interface CloudFoundrySession {
 	List<String> getStoredEmails();
 
 	List<String> getStoredUrls();
+
+	void clearStoredLoginDetails();
 }
