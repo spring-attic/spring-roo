@@ -14,7 +14,6 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1.3
  */
 public class EntityAnnotationValues extends AbstractAnnotationValues {
-
 	public static final String PERSIST_METHOD_DEFAULT = "persist";
 	public static final String VERSION_FIELD_DEFAULT = "version";
 	public static final String VERSION_COLUMN_DEFAULT = "version";
@@ -74,7 +73,7 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	}
 
 	public String getVersionField() {
-		return StringUtils.hasText(versionField) ? versionField : VERSION_FIELD_DEFAULT;
+		return versionField;
 	}
 
 	public String getVersionColumn() {

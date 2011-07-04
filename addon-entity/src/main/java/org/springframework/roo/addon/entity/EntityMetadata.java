@@ -850,7 +850,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return getDelegateMethod(new JavaSymbolName(annotationValues.getMergeMethod()), "merge");
 	}
 	
-	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String entityManagerDelegate) {
+	private MethodMetadata getDelegateMethod(JavaSymbolName methodName, String methodDelegateName) {
 		// Method definition to find or build
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		
@@ -874,19 +874,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName + " == null) this." + entityManagerFieldName + " = " + entityManagerMethod.getMethodName().getSymbolName() + "();");
 		
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
-		if ("flush".equals(entityManagerDelegate)) {
+		if ("flush".equals(methodDelegateName)) {
 			addTransactionalAnnotation(annotations);
 			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".flush();");
-		} else if ("clear".equals(entityManagerDelegate)) {
+		} else if ("clear".equals(methodDelegateName)) {
 			addTransactionalAnnotation(annotations);
 			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".clear();");
-		} else if ("merge".equals(entityManagerDelegate)) {
+		} else if ("merge".equals(methodDelegateName)) {
 			addTransactionalAnnotation(annotations);
 			returnType = new JavaType(destination.getSimpleTypeName());
 			bodyBuilder.appendFormalLine(destination.getSimpleTypeName() + " merged = this." + entityManagerFieldName + ".merge(this);");
 			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + ".flush();");
 			bodyBuilder.appendFormalLine("return merged;");
-		} else if ("remove".equals(entityManagerDelegate)) {
+		} else if ("remove".equals(methodDelegateName)) {
 			addTransactionalAnnotation(annotations);
 			bodyBuilder.appendFormalLine("if (this." + entityManagerFieldName + ".contains(this)) {");
 			bodyBuilder.indent();
@@ -901,7 +901,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		} else {
 			// Persist
 			addTransactionalAnnotation(annotations, true);
-			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "." + entityManagerDelegate  + "(this);");
+			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "." + methodDelegateName  + "(this);");
 		}
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
