@@ -88,7 +88,10 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.MERGE_METHOD);
 		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
 		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
-		
+		if (persistMethod == null || flushMethod == null || findMethod == null || identifierAccessorMethod == null) {
+			return null;
+		}
+	
 		String transactionManager = null;
 		AnnotationMetadata rooEntity = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
 		if (rooEntity != null) {

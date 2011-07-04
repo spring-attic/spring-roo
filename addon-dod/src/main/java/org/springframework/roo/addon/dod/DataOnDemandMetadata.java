@@ -83,7 +83,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
+		if (findEntriesMethod == null) {
 			return;
 		}
 
