@@ -101,19 +101,6 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		boolean storeCredentials = StringUtils.hasText(email) && StringUtils.hasText(password);
 
 		if (!StringUtils.hasText(cloudControllerUrl)) {
-			List<CloudCredentials> urlMatches = getStoredUrlsForEmail(email);
-			if (urlMatches.size() > 1) {
-				logger.warning("Multiple cloud controller URLs are stored for the email address '" + email + "'. Please specify a cloud controller.");
-				return;
-			} else if (urlMatches.size() == 1) {
-				cloudControllerUrl = urlMatches.get(0).getUrl();
-			} else {
-				// We set the default URL only after no stored URL is found
-				cloudControllerUrl = UaaAwareAppCloudClient.CLOUD_FOUNDRY_URL;
-			}
-		}
-
-		if (!StringUtils.hasText(cloudControllerUrl)) {
 			cloudControllerUrl = UaaAwareAppCloudClient.CLOUD_FOUNDRY_URL;
 		}
 
