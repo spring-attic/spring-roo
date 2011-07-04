@@ -16,6 +16,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
@@ -125,6 +126,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
+		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
@@ -136,10 +138,10 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			return null;
 		}
 
-		List<MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(governorTypeDetails);
+		Map<JavaSymbolName, MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(governorTypeDetails);
 		List<MethodMetadata> convertedProxyMethods = new LinkedList<MethodMetadata>();
 		boolean dependsOnSomething = false;
-		for (MethodMetadata method : proxyMethods) {
+		for (MethodMetadata method : proxyMethods.values()) {
 			JavaType returnType = method.getReturnType().isCommonCollectionType() && method.getReturnType().getParameters().size() != 0 ? method.getReturnType().getParameters().get(0) : method.getReturnType();
 			if (gwtTypeService.isDomainObject(returnType) && !method.getReturnType().equals(governorTypeName)) {
 				JavaType proxyType = GwtUtils.convertGovernorTypeNameIntoKeyTypeName(returnType, GwtType.PROXY, projectMetadata);
