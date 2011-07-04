@@ -145,7 +145,9 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		// Add verifications for all other fields
 		for (FieldMetadata field : fields) {
-			tbody.appendChild(verifyTextCommand(document, formBackingType, field));
+			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
+				tbody.appendChild(verifyTextCommand(document, formBackingType, field));
+			}
 		}
 
 		fileManager.createOrUpdateTextFileIfRequired(seleniumPath, XmlUtils.nodeToString(document), false);
