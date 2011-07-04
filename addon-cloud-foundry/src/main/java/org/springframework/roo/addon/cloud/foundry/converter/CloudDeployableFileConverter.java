@@ -60,6 +60,15 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 			}
 			return null;
 		}
+		String oppositeFileSeparator = getOppositeFileSeparator();
+		if (value.contains(oppositeFileSeparator)) {
+			value = value.replaceAll(escapeString(oppositeFileSeparator), escapeString(File.separator));
+		}
+		String path = projectOperations.getPathResolver().getRoot(Path.ROOT) + value;
+		if (!new File(path).exists())  {
+			logger.severe("The file at path '" + path + "' doesn't exist; cannot continue");
+			return null;
+		}
 		FileDetails fileToDeploy = fileManager.readFile(projectOperations.getPathResolver().getRoot(Path.ROOT) + value);
 		return new CloudDeployableFile(fileToDeploy);
 	}
@@ -85,6 +94,16 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 		}
 
 		return false;
+	}
+
+	private String getOppositeFileSeparator() {
+		Character fileSeparator = File.separatorChar;
+		if (fileSeparator.equals('/')) {
+			return "\\";
+		} else if (fileSeparator.equals('\\')) {
+			return "/";
+		}
+		throw new IllegalStateException("Unexpected file separator character encountered; cannot continue");
 	}
 
 	public static String escapeString(String toEscape) {

@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 import org.springframework.roo.support.util.StringUtils;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -204,6 +205,15 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 	}
 
 	public void push(final String appName, final Integer instances, Integer memory, final String path, final List<String> urls) {
+		if (path == null) {
+			logger.severe("The file path cannot be null; cannot continue");
+			return;
+		}
+		File fileToDeploy = new File(path);
+		if (!fileToDeploy.exists()) {
+			logger.severe("The file at path '" + path + "' doesn't exist; cannot continue");
+			return;
+		}
 		if (memory == null) {
 			memory = 256;
 		}
@@ -404,11 +414,21 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 				ShellTableRenderer table = new ShellTableRenderer("App. Stats", "Instance", "CPU (Cores)", "Memory (limit)", "Disk (limit)", "Uptime");
 				for (InstanceStats instanceStats : stats.getRecords()) {
 					String instance = instanceStats.getId();
-					String cpu = instanceStats.getUsage().getCpu() + " (" + instanceStats.getCores() + ")";
-					String memory = roundTwoDecimals(instanceStats.getUsage().getMem() / 1024) + "M (" + instanceStats.getMemQuota() / (1024 * 1024) + "M)";
-					String disk = roundTwoDecimals(instanceStats.getUsage().getDisk() / (1024 * 1024)) + "M (" + instanceStats.getDiskQuota() / (1024 * 1024) + "M)";
-					String uptime = formatDurationInSeconds(instanceStats.getUptime());
-					table.addRow(instance, cpu, memory, disk, uptime);
+					InstanceStats.Usage usage = instanceStats.getUsage();
+					String cpu = "N/A";
+					String memory = "N/A";
+					String disk = "N/A";
+					if (usage != null) {
+						cpu = instanceStats.getUsage().getCpu() + " (" + instanceStats.getCores() + ")";
+						memory = roundTwoDecimals(instanceStats.getUsage().getMem() / 1024) + "M (" + instanceStats.getMemQuota() / (1024 * 1024) + "M)";
+						disk = roundTwoDecimals(instanceStats.getUsage().getDisk() / (1024 * 1024)) + "M (" + instanceStats.getDiskQuota() / (1024 * 1024) + "M)";
+					}
+					Double uptime = instanceStats.getUptime();
+					if (uptime == null) {
+						uptime = 0D;
+					}
+					String formattedUptime = formatDurationInSeconds(uptime);
+					table.addRow(instance, cpu, memory, disk, formattedUptime);
 				}
 				logger.info(table.getOutput());
 			}
