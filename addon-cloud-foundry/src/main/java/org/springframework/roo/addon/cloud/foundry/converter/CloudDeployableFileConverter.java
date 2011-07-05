@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.cloud.foundry.converter;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -11,14 +19,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Provides conversion to and from Cloud Foundry model classes.
@@ -32,10 +32,8 @@ import java.util.logging.Logger;
 public class CloudDeployableFileConverter implements Converter<CloudDeployableFile> {
 	private static final Logger logger = Logger.getLogger(CloudDeployableFileConverter.class.getName());
 	private static final String CREATE_OPTION = "CREATE";
-	@Reference
-	private FileManager fileManager;
-	@Reference
-	private ProjectOperations projectOperations;
+	@Reference private FileManager fileManager;
+	@Reference private ProjectOperations projectOperations;
 
 	public CloudDeployableFile convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value)) {

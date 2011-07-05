@@ -10,6 +10,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 
 @Deprecated
+@SuppressWarnings("unused")
 public class ConversionServiceOperationsImplTests {
 	private static final String WEB_MVC_CONFIG = "/org/springframework/roo/addon/web/mvc/controller/webmvc-config.xml";
 	@Mock private FileManager fileManager;

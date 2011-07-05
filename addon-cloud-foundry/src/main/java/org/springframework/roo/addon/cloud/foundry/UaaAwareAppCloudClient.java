@@ -1,6 +1,19 @@
 package org.springframework.roo.addon.cloud.foundry;
 
-import com.vmware.appcloud.client.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.json.simple.JSONObject;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.uaa.client.TransmissionEventListener;
@@ -12,26 +25,29 @@ import org.springframework.uaa.client.util.HexUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import com.vmware.appcloud.client.AppCloudClient;
+import com.vmware.appcloud.client.AppCloudException;
+import com.vmware.appcloud.client.ApplicationStats;
+import com.vmware.appcloud.client.CloudApplication;
+import com.vmware.appcloud.client.CloudInfo;
+import com.vmware.appcloud.client.CloudService;
+import com.vmware.appcloud.client.CrashesInfo;
+import com.vmware.appcloud.client.InstancesInfo;
+import com.vmware.appcloud.client.ServiceConfiguration;
+import com.vmware.appcloud.client.UploadStatusCallback;
 
 public class UaaAwareAppCloudClient extends AppCloudClient implements TransmissionEventListener {
-
 	public final static String CLOUD_FOUNDRY_URL = "http://api.cloudfoundry.com";
-
 	private final static int HTTP_SUCCESS_CODE = 200;
 	private UaaService uaaService;
 	private Set<String> discoveredAppNames = new HashSet<String>();
 	private URL cloudControllerUrl;
+	
 	/**
 	 * key: method name, value: sorted map of HTTP response code keys to count of that response code
 	 */
 	private Map<String, SortedMap<Integer, Integer>> methodToResponses = new HashMap<String, SortedMap<Integer, Integer>>();
+	
 	private Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
 	private int cloudMajorVersion = 0;
 	private int cloudMinorVersion = 0;
@@ -104,8 +120,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 		FeatureUse featureToRegister = FeatureUse.newBuilder().setName(featureName).setDateLastUsed(System.currentTimeMillis()).setMajorVersion(cloudMajorVersion).setMinorVersion(cloudMinorVersion).setPatchVersion(cloudPatchVersion).build();
 		try {
 			uaaService.registerFeatureUsage(product, featureToRegister, jsonAsString.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException ignore) {
-		}
+		} catch (UnsupportedEncodingException ignore) {}
 	}
 
 	private String sha256(String input) {

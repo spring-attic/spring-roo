@@ -1,9 +1,33 @@
 package org.springframework.roo.addon.cloud.foundry;
 
-import com.vmware.appcloud.client.AppCloudClient;
-import com.vmware.appcloud.client.CloudApplication;
-import com.vmware.appcloud.client.CloudService;
-import com.vmware.appcloud.client.ServiceConfiguration;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -18,23 +42,10 @@ import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.internal.BasicProxyService;
 import org.springframework.uaa.client.protobuf.UaaClient;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
+import com.vmware.appcloud.client.AppCloudClient;
+import com.vmware.appcloud.client.CloudApplication;
+import com.vmware.appcloud.client.CloudService;
+import com.vmware.appcloud.client.ServiceConfiguration;
 
 @Component
 @Service
@@ -47,8 +58,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	private static final String ROO_KEY = "Roo == Java + Productivity";
 	private static final String CLOUD_FOUNDRY_KEY = "Cloud Foundry Prefs";
 
-	@Reference
-	private UaaService uaaService;
+	@Reference private UaaService uaaService;
 	private Preferences preferences = getPreferencesFor(CloudFoundrySessionImpl.class);
 	UaaClient.Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
 	private UaaAwareAppCloudClient client;
@@ -75,8 +85,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 
 	protected void activate(ComponentContext context) {
 		// TODO: Replace with call to VersionHelper.getProductFromDictionary(..) available in UAA 1.0.3
-		@SuppressWarnings("rawtypes")
-		Dictionary d = context.getBundleContext().getBundle().getHeaders();
+		@SuppressWarnings("rawtypes") Dictionary d = context.getBundleContext().getBundle().getHeaders();
 		Object bundleVersion = d.get("Bundle-Version");
 		Object gitCommitHash = d.get("Git-Commit-Hash");
 		product = VersionHelper.getProduct("Cloud Foundry Java API", bundleVersion == null ? "0.0.0.RELEASE" : bundleVersion.toString(), gitCommitHash == null ? null : gitCommitHash.toString());
@@ -174,7 +183,6 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		} catch (BackingStoreException e) {
 			throw new IllegalStateException(e);
 		}
-
 	}
 
 	public byte[] getPreference(String prefKey) {
@@ -251,17 +259,6 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	private List<CloudCredentials> getStoredUrlsForEmail(String email) {
-		Set<CloudCredentials> cloudCredentialsList = getStoredLoginPrefs();
-		List<CloudCredentials> found = new ArrayList<CloudCredentials>();
-		for (CloudCredentials cloudCredentials : cloudCredentialsList) {
-			if (email != null && email.equals(cloudCredentials.getEmail())) {
-				found.add(cloudCredentials);
-			}
-		}
-		return found;
 	}
 
 	private List<CloudCredentials> getStoredEmailsForUrl(String url) {
@@ -475,10 +472,10 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 
-			CloudCredentials that = (CloudCredentials) o;
+			CloudCredentials clouldCredentials = (CloudCredentials) o;
 
-			if (email != null ? !email.equals(that.email) : that.email != null) return false;
-			if (url != null ? !url.equals(that.url) : that.url != null) return false;
+			if (email != null ? !email.equals(clouldCredentials.email) : clouldCredentials.email != null) return false;
+			if (url != null ? !url.equals(clouldCredentials.url) : clouldCredentials.url != null) return false;
 
 			return true;
 		}
