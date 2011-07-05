@@ -114,7 +114,6 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		
 		if (persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
 			return null;
 		}
