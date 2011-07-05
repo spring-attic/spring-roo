@@ -4,9 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
@@ -68,15 +67,9 @@ public abstract class AbstractOperations {
 		}
 
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
-		Iterable<URI> uris = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
-		Assert.notNull(uris, "Could not search bundles for resources for Ant Path '" + path + "'");
-		for (final URI uri : uris) {
-			URL url;
-			try {
-				url = uri.toURL();
-			} catch (MalformedURLException e1) {
-				throw new IllegalStateException(e1);
-			}
+		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
+		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
+		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			if (replace) {
 				BufferedReader in = null;
