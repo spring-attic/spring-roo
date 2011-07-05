@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.roo</groupId>
-		<artifactId>org.springframework.roo.osgi.bundle</artifactId>
-		<version>1.2.0.BUILD-SNAPSHOT</version>
-		<relativePath>../osgi-bundle</relativePath>
-	</parent>
-	<artifactId>org.springframework.roo.annotations</artifactId>
-	<packaging>bundle</packaging>
-	<name>Spring Roo - Annotations (ASLv2/GPLv3 Dual Licensed)</name>
-	<build>
-		<plugins>
-			<plugin> <!-- should move antrun to a pluginManagement section in root POM; similarly do this for all other plugins -->
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.6</version>
-				<executions>
-					<execution>
-						<id>generate-sources</id>
-						<phase>generate-sources</phase>
-						<configuration>
-							<target>
-								<delete dir="${basedir}/src/main/java/org/"/>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.osgi.bundle</artifactId>
+        <version>1.2.0.BUILD-SNAPSHOT</version>
+        <relativePath>../osgi-bundle</relativePath>
+    </parent>
+    <artifactId>org.springframework.roo.annotations</artifactId>
+    <packaging>bundle</packaging>
+    <name>Spring Roo - Annotations (ASLv2/GPLv3 Dual Licensed)</name>
+    <build>
+        <plugins>
+            <plugin> <!-- should move antrun to a pluginManagement section in root POM; similarly do this for all other plugins -->
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="${basedir}/src/main/java/org/" />
                                 <copy todir="${basedir}/src/main/java/" preservelastmodified="true">
                                     <fileset dir="${basedir}/..">
-                                        <include name="**/Roo*.java"/>
-                                        <exclude name="core/**"/>
+                                        <include name="**/Roo*.java" />
+                                        <exclude name="core/**" />
                                     </fileset>
                                     <!-- Discard the module names prefixes from each file path -->
-									<regexpmapper from="^(.*).src.main.java.(.*)$$" to="\2"/>
+                                    <regexpmapper from="^(.*).src.main.java.(.*)$$" to="\2" />
                                 </copy>
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>ant-contrib</groupId>
-						<artifactId>ant-contrib</artifactId>
-						<version>20020829</version>
-					</dependency>
-					<dependency>
-						<groupId>org.apache.ant</groupId>
-						<artifactId>ant-apache-regexp</artifactId>
-						<version>1.7.1</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-		</plugins>
-	</build>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>ant-contrib</groupId>
+                        <artifactId>ant-contrib</artifactId>
+                        <version>20020829</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-apache-regexp</artifactId>
+                        <version>1.7.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
 </project>

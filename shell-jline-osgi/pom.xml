@@ -5,14 +5,14 @@
         <groupId>org.springframework.roo</groupId>
         <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
         <version>1.2.0.BUILD-SNAPSHOT</version>
-		<relativePath>../osgi-roo-bundle</relativePath>
+        <relativePath>../osgi-roo-bundle</relativePath>
     </parent>
     <artifactId>org.springframework.roo.shell.jline.osgi</artifactId>
     <packaging>bundle</packaging>
     <name>Spring Roo - Shell - JLine (OSGi Launcher)</name>
     <dependencies>
         <!-- OSGi -->
-         <dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
@@ -29,22 +29,18 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support.osgi</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
-            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell.jline</artifactId>
-            
         </dependency>
         <!-- External modules -->
         <dependency>
@@ -56,18 +52,17 @@
             <artifactId>jansi</artifactId>
         </dependency>
     </dependencies>
-
     <build>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>maven-bundle-plugin</artifactId>
-          <configuration>
-            <instructions>
-              <Import-Package>*,org.fusesource.jansi;version="[1.4.0,2.0.0)";resolution:=optional</Import-Package>
-            </instructions>
-          </configuration>
-        </plugin>
-      </plugins>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Import-Package>*,org.fusesource.jansi;version="[1.4.0,2.0.0)";resolution:=optional</Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.roo</groupId>
-		<artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
-		<version>1.2.0.BUILD-SNAPSHOT</version>
-		<relativePath>../osgi-roo-bundle</relativePath>
-	</parent>
-	<artifactId>org.springframework.roo.model</artifactId>
-	<packaging>bundle</packaging>
-	<name>Spring Roo - Model</name>
-	<dependencies>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.roo</groupId>
+        <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+        <version>1.2.0.BUILD-SNAPSHOT</version>
+        <relativePath>../osgi-roo-bundle</relativePath>
+    </parent>
+    <artifactId>org.springframework.roo.model</artifactId>
+    <packaging>bundle</packaging>
+    <name>Spring Roo - Model</name>
+    <dependencies>
         <!-- OSGi -->
-         <dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
@@ -30,5 +30,5 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
         </dependency>
-	</dependencies>
+    </dependencies>
 </project>
