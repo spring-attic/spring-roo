@@ -103,9 +103,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addConstructor(getConstructor());
 		}
 
-		if (annotationValues.isCreate()) {
-			builder.addMethod(getCreateMethod());
+		MemberTypeAdditions persistMethod = crudAdditions.get(PersistenceCustomDataKeys.PERSIST_METHOD.name());
+		if (annotationValues.isCreate() && persistMethod != null) {
+			builder.addMethod(getCreateMethod(persistMethod));
 			builder.addMethod(getCreateFormMethod(dependentTypes));
+			persistMethod.copyAdditionsTo(builder);
 		}
 		builder.addMethod(getShowMethod());
 		MemberTypeAdditions findAllMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
@@ -341,9 +343,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getCreateMethod() {
+	private MethodMetadata getCreateMethod(MemberTypeAdditions persistMethod) {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
-		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getPersistMethod() == null) {
+		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod() == null) {
 			return null;
 		}
 
@@ -386,7 +388,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
-		bodyBuilder.appendFormalLine(entityName + "." + javaTypePersistenceMetadataHolder.getPersistMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine(persistMethod.getMethodSignature() + ";");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." + javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);

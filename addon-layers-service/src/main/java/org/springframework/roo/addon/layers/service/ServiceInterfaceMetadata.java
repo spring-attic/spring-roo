@@ -9,6 +9,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -17,6 +18,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.LayerUtils;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
@@ -30,6 +32,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = ServiceInterfaceMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final InvocableMemberBodyBuilder BODY = new InvocableMemberBodyBuilder();
 	
 	// Fields
 	private final MemberDetails governorDetails;
@@ -55,7 +58,8 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		this.governorDetails = governorDetails;
 		
 		for (JavaType domainType : annotationValues.getDomainTypes()) {
-			builder.addMethod(getFindAllMethod(domainType, domainTypePlurals.get(domainType)));	// TODO add other methods once implemented
+			builder.addMethod(getFindAllMethod(domainType, domainTypePlurals.get(domainType)));
+			builder.addMethod(getSaveMethod(domainType));
 		}
 		
 		// Create a representation of the desired output ITD
@@ -68,8 +72,16 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 			// The governor already declares this method
 			return null;
 		}
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), BODY).build();
+	}
+	
+	private MethodMetadata getSaveMethod(final JavaType domainType) {
+		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSaveMethod());
+		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null || annotationValues.getSaveMethod().equals("")) {
+			// The governor already declares this method
+			return null;
+		}
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), BODY).build();
 	}
 
 	public ServiceAnnotationValues getServiceAnnotationValues() {

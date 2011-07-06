@@ -37,6 +37,7 @@ import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.Pair;
 
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
@@ -103,7 +104,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FIND_ENTRIES_METHOD);
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, FLUSH_METHOD);
 		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, MERGE_METHOD);
-		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PERSIST_METHOD);
+		final MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataId, PERSIST_METHOD.name(), entity, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
 		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, REMOVE_METHOD);
 		
 		AnnotationMetadata rooEntity = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
@@ -123,7 +124,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 			}
 		}
 
-		return new IntegrationTestMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethod, persistMethod, removeMethod, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
+		return new IntegrationTestMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethod, persistMethodAdditions, removeMethod, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
 	}
 	
 	private ClassOrInterfaceTypeDetails getEntitySuperclass(JavaType entity) {

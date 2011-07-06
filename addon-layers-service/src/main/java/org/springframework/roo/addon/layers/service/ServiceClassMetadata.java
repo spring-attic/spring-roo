@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -21,6 +22,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.LayerUtils;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
@@ -40,7 +42,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	
 	// Fields
 	private final MemberDetails governorDetails;
-	private final ServiceAnnotationValues annotationValues;
+	private ServiceAnnotationValues annotationValues;
 	
 	/**
 	 * Constructor
@@ -60,8 +62,8 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Assert.notNull(governorDetails, "Governor member details required");
 		Assert.notNull(domainTypePlurals, "Domain type plurals required");
 		
-		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
+		this.annotationValues = annotationValues;
 		
 		for (final JavaType domainType : annotationValues.getDomainTypes()) {
 			Map<String, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
@@ -70,6 +72,11 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			builder.addMethod(getFindAllMethod(domainType, findAllAdditions, domainTypePlurals.get(domainType)));
 			if (findAllAdditions != null) {
 				findAllAdditions.copyAdditionsTo(builder);
+			}
+			final MemberTypeAdditions saveAdditions = crudAdditions.get(PersistenceCustomDataKeys.PERSIST_METHOD.name());
+			builder.addMethod(getSaveMethod(domainType, saveAdditions));
+			if (saveAdditions != null) {
+				saveAdditions.copyAdditionsTo(builder);
 			}
 		}
 		
@@ -93,7 +100,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	
 	private MethodMetadata getFindAllMethod(JavaType domainType, MemberTypeAdditions findAllAdditions, String plural) {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod() + plural);
-		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
+		if (findAllAdditions != null && MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
 			// The governor already declares this method
 			return null;
 		}
@@ -104,8 +111,22 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else {
 			bodyBuilder.appendFormalLine("return " + findAllAdditions.getMethodSignature() + ";");
 		}
-		
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), bodyBuilder).build();
+	}
+	
+	private MethodMetadata getSaveMethod(JavaType domainType, MemberTypeAdditions saveMethodAdditions) {
+		if (saveMethodAdditions != null && MemberFindingUtils.getMethod(governorDetails, saveMethodAdditions.getMethodName(), null) != null) {
+			// The governor already declares this method
+			return null;
+		}
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		// No further layer found, so let's create a simple dummy implementation
+		if (saveMethodAdditions == null) {
+			bodyBuilder.appendFormalLine("throw new IllegalStateException(\"Implement me!\");");
+		} else {
+			bodyBuilder.appendFormalLine(saveMethodAdditions.getMethodSignature() + ";");
+		}
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, saveMethodAdditions.getMethodName(), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), bodyBuilder).build();
 	}
 
 	public static final String getMetadataIdentiferType() {

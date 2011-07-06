@@ -60,4 +60,12 @@ public class Pair<K, V> {
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(new Object[] {getKey(), getValue()});
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("key: ").append(key);
+		sb.append(", value: ").append(value);
+		return sb.toString();
+	}
 }

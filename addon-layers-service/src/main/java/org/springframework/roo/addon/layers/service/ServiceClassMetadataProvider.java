@@ -15,11 +15,14 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
+import org.springframework.roo.project.layers.LayerUtils;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
+import org.springframework.roo.support.util.Pair;
 
 /**
  * 
@@ -34,6 +37,7 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 	private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 	private static final Path SRC = Path.SRC_MAIN_JAVA;
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
+	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	
 	// Fields
 	@Reference private LayerService layerService;
@@ -76,6 +80,7 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, SRC), metadataIdentificationString);
 			Map<String, MemberTypeAdditions> methodAdditions = new HashMap<String, MemberTypeAdditions>();
 			methodAdditions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LAYER_POSITION));
+			methodAdditions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
 			allCrudAdditions.put(domainType, methodAdditions);
 			
 			String pluralId = PluralMetadata.createIdentifier(domainType, Path.SRC_MAIN_JAVA);

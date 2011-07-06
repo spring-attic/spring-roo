@@ -15,11 +15,14 @@ import java.lang.annotation.Target;
 public @interface RooService {
 	
 	public static final String FIND_ALL_METHOD = "findAll";
+	public static final String SAVE_METHOD = "save";
 	public static final String DOMAIN_TYPES = "domainTypes";
 	
 	Class<?>[] domainTypes();
 
 	String findAllMethod() default FIND_ALL_METHOD;
+	
+	String saveMethod() default SAVE_METHOD;
 	
 	boolean transactional() default true;
 }

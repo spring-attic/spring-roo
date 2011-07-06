@@ -51,13 +51,13 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private MethodMetadata findEntriesMethod;
 	private MethodMetadata flushMethod;
 	private MethodMetadata mergeMethod;
-	private MethodMetadata persistMethod;
+	private MemberTypeAdditions persistMethodAdditions;
 	private MethodMetadata removeMethod;
 	private String transactionManager;
 	private boolean hasEmbeddedIdentifier;
 	private boolean entityHasSuperclass;
 	
-	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MemberTypeAdditions findAllMethodAdditions, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MethodMetadata mergeMethod, MethodMetadata persistMethod, MethodMetadata removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass) {
+	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MemberTypeAdditions findAllMethodAdditions, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MethodMetadata mergeMethod, MemberTypeAdditions persistMethodAdditions, MethodMetadata removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(projectMetadata, "Project metadata required");
@@ -68,7 +68,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return;
 		}
 
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessorMethod == null) {
+		if (findEntriesMethod == null || persistMethodAdditions == null || flushMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			return;
 		}
 
@@ -82,7 +82,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		this.findEntriesMethod = findEntriesMethod;
 		this.flushMethod = flushMethod;
 		this.mergeMethod = mergeMethod;
-		this.persistMethod = persistMethod;
+		this.persistMethodAdditions = persistMethodAdditions;
 		this.removeMethod = removeMethod;
 		this.transactionManager = transactionManager;
 		this.hasEmbeddedIdentifier = hasEmbeddedIdentifier;
@@ -432,13 +432,13 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	public MethodMetadata getPersistMethodTest() {
-		if (!annotationValues.isPersist() || persistMethod == null || flushMethod == null) {
+		if (!annotationValues.isPersist() || persistMethodAdditions == null || flushMethod == null) {
 			// User does not want this method
 			return null;
 		}
 
 		// Prepare method signature
-		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethod.getMethodName().getSymbolName()));
+		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethodAdditions.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
@@ -455,7 +455,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 				bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName()  + "());");
 			}
 			
-			bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodSignature() + ";");
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName()  + "());");
 

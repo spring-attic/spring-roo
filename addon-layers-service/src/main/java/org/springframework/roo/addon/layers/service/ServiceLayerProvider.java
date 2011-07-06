@@ -73,8 +73,24 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		metadataDependencyRegistry.registerDependency(PluralMetadata.createIdentifier(targetEntity, SRC), metadataId);
 		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
 			return getFindAllMethod(metadataId, coitd, annotationValues, plural);
-		}
+		} 
+		// TODO: disabled due to loop
+//		else if (methodIdentifier.equals(PersistenceCustomDataKeys.PERSIST_METHOD.name())) {
+//			if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(targetEntity)) {
+//				return null;
+//			}
+//			return getSaveMethod(metadataId, coitd, annotationValues);
+//		}
 		return null;
+	}
+	
+	private MemberTypeAdditions getSaveMethod(String metadataId, ClassOrInterfaceTypeDetails coitd, ServiceAnnotationValues serviceAnnotationValues, Pair<JavaType, JavaSymbolName>... methodParameters) {
+		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
+		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
+		String fieldName = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
+		JavaSymbolName methodName = new JavaSymbolName(serviceAnnotationValues.getSaveMethod());
+		return new MemberTypeAdditions(classBuilder, fieldName + "." + methodName.getSymbolName() + "(" + methodParameters[0].getValue().getSymbolName() + ")", methodName);
 	}
 
 	private MemberTypeAdditions getFindAllMethod(String metadataId, ClassOrInterfaceTypeDetails coitd, ServiceAnnotationValues serviceAnnotationValues, String plural) {
@@ -82,7 +98,8 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
 		String fieldName = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
 		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
-		return new MemberTypeAdditions(classBuilder, fieldName + "." + serviceAnnotationValues.getFindAllMethod() + plural + "()");
+		JavaSymbolName methodName = new JavaSymbolName(serviceAnnotationValues.getFindAllMethod() + plural);
+		return new MemberTypeAdditions(classBuilder, fieldName + "." + methodName.getSymbolName() + "()", methodName);
 	}
 	
 	private String getPlural(JavaType entity) {

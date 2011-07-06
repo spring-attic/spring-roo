@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,12 +48,14 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -67,6 +70,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	
 	// Constants
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
+	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	
 	// Fields
@@ -406,7 +410,20 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	
 	public Map<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
-		final MemberTypeAdditions findAllAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition());
-		return Collections.singletonMap(FIND_ALL_METHOD, findAllAdditions);
+		
+		// Define the methods we need for Web scaffolding.
+		final Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
+		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
+		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, getEnityName(domainType))));
+		return Collections.unmodifiableMap(additions);
+	}
+
+	// TODO: move this to an appropriate utils class
+	private JavaSymbolName getEnityName(JavaType domainType) {
+		String entityNameString = Introspector.decapitalize(StringUtils.capitalize(domainType.getSimpleTypeName()));
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(entityNameString)) {
+			entityNameString = "_" + entityNameString;
+		}
+		return new JavaSymbolName(entityNameString);
 	}
 }

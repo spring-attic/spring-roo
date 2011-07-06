@@ -41,22 +41,34 @@ public class EntityLayerProvider extends CoreLayerProvider {
 		Assert.notNull(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
 		
+		EntityAnnotationValues rooEntityAnnotation = getRooEntityAnnotationValues(targetEntity);
+		if (rooEntityAnnotation == null) {
+			return null;
+		}
+		
 		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
-			return getFindAllMethod(metadataId, targetEntity);
+			return getFindAllMethod(metadataId, targetEntity, rooEntityAnnotation);
+		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.PERSIST_METHOD.name())) {
+			return getPersistMethod(metadataId, targetEntity, rooEntityAnnotation, methodParameters);
 		}
 		return null;
 	}
 
-	private MemberTypeAdditions getFindAllMethod(String metadataId, JavaType entityType) {
-		EntityAnnotationValues rooEntityAnnotation = getRooEntityAnnotationValues(entityType);
-		if (rooEntityAnnotation == null) {
-			return null;
-		}
+	private MemberTypeAdditions getFindAllMethod(String metadataId, JavaType entityType, EntityAnnotationValues rooEntityAnnotation) {
 		String plural = getPlural(entityType);
-		if (rooEntityAnnotation == null || !StringUtils.hasText(rooEntityAnnotation.getFindAllMethod()) || plural == null) {
+		if (!StringUtils.hasText(rooEntityAnnotation.getFindAllMethod()) || plural == null) {
 			return null;
 		}
-		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), entityType.getFullyQualifiedTypeName() + "." + rooEntityAnnotation.getFindAllMethod() + plural + "()");
+		JavaSymbolName methodName = new JavaSymbolName(rooEntityAnnotation.getFindAllMethod() + plural);
+		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), entityType.getFullyQualifiedTypeName() + "." + methodName.getSymbolName() + "()", methodName);
+	}
+	
+	private MemberTypeAdditions getPersistMethod(String metadataId, JavaType entityType, EntityAnnotationValues rooEntityAnnotation, Pair<JavaType, JavaSymbolName>... methodParameters) {
+		if (!StringUtils.hasText(rooEntityAnnotation.getPersistMethod()) || methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
+			return null;
+		}
+		JavaSymbolName methodName = new JavaSymbolName(rooEntityAnnotation.getPersistMethod());
+		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), methodParameters[0].getValue().getSymbolName() + "." + methodName.getSymbolName() + "()", methodName);
 	}
 	
 	private EntityAnnotationValues getRooEntityAnnotationValues(JavaType javaType) {

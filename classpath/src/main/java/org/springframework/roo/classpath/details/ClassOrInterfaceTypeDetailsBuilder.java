@@ -142,7 +142,15 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		
 		// Copy fields
 		for (FieldMetadataBuilder field : getDeclaredFields()) {
-			targetBuilder.addField(field.build());
+			boolean fieldExists = false;
+			for (FieldMetadataBuilder targetField : targetBuilder.getDeclaredFields()) {
+				if (targetField.getFieldType().equals(field.getFieldType()) && targetField.getFieldName().equals(field.getFieldName())) {
+					fieldExists = true;
+				}
+			}
+			if (!fieldExists) {
+				targetBuilder.addField(field.build());
+			}
 		}
 		
 		// Copy methods

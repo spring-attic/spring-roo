@@ -15,6 +15,7 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
 	@AutoPopulate private JavaType domainType = null;
 	@AutoPopulate private String findAllMethod = RooRepositoryJpa.FIND_ALL;
+	@AutoPopulate private String saveMethod = RooRepositoryJpa.SAVE;
 	
 	public RepositoryJpaAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooRepositoryJpa.class.getName()));
@@ -27,5 +28,9 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
 	public String getFindAllMethod() {
 		return findAllMethod;
+	}
+
+	public String getSaveMethod() {
+		return saveMethod;
 	}
 }

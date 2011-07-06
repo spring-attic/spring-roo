@@ -15,6 +15,7 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	@AutoPopulate private JavaType[] domainTypes = null;
 	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;
+	@AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
 	@AutoPopulate private boolean transactional = true;
 	
 	public ServiceAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
@@ -28,6 +29,10 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	public String getFindAllMethod() {
 		return findAllMethod;
+	}
+	
+	public String getSaveMethod() {
+		return saveMethod;
 	}
 	
 	public boolean isTransactional() {

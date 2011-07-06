@@ -15,10 +15,13 @@ import java.lang.annotation.Target;
 public @interface RooRepositoryJpa {
 	
 	public static final String FIND_ALL = "findAll";
+	public static final String SAVE = "save";
 	public static final String DOMAIN_TYPE = "domainType";
 	
 	Class<?> domainType();
 	
 	String getFindAllMethod() default FIND_ALL;
+	
+	String getSaveMethod() default SAVE;
 
 }
