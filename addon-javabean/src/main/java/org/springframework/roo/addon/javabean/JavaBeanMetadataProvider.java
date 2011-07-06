@@ -56,21 +56,26 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		removeMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
 	}
 
+	//We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
 	@Override
 	protected void notifyForGenericListener(String upstreamDependency) {
+		//If the upstream dependency is null or invalid do not continue
 		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
 			return;
 		}
+		//If the upstream dependency isn't ProjectMetadata do not continue
 		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
 			return;
 		}
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		//If ProjectMetadata isn't valid do not continue
 		if (projectMetadata == null || !projectMetadata.isValid()) {
 			return;
 		}
 		boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+		//We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
 		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-		if (projectMetadata.isGwtEnabled() && hasGaeStateChanged) {
+		if (hasGaeStateChanged) {
 			wasGaeEnabled = isGaeEnabled;
 			for (String producedMid : producedMids) {
 				metadataService.get(producedMid, true);
@@ -99,6 +104,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 			}
 		}
 
+		//In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
 		producedMids.add(metadataIdentificationString);
 		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, declaredFields);
 	}
