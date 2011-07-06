@@ -423,7 +423,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private void addFieldMutatorMethodsToBuilder() {
-
 		for (MethodMetadata fieldInitializerMethod : getFieldMutatorMethods()) {
 			builder.addMethod(fieldInitializerMethod);
 		}
@@ -443,7 +442,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Set<String> existingMutators = new HashSet<String>();
 
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
-
 			// Locate user-defined method
 			if (MemberFindingUtils.getMethod(governorTypeDetails, mutator.getMethodName(), paramTypes) != null) {
 				// Method found in governor so do not create method in ITD

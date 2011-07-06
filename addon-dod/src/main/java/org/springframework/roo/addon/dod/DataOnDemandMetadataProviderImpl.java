@@ -2,12 +2,12 @@ package org.springframework.roo.addon.dod;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collections;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -136,7 +136,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
 
 		List<MethodMetadata> mutatorMethods = MemberFindingUtils.getMethods(memberDetails);
-		//To avoid unnecessary rewriting of the DoD ITD we sort the mutators by method name to provide a consistent ordering
+		// To avoid unnecessary rewriting of the DoD ITD we sort the mutators by method name to provide a consistent ordering
 		Collections.sort(mutatorMethods, new NaturalOrderComparator<MethodMetadata>() {
 			@Override
 			protected String stringify(MethodMetadata object) {
