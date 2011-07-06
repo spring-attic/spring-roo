@@ -187,7 +187,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					}
 				}
 			}
-			bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "());");
+			if (field.getFieldType().equals(new JavaType("java.util.Calendar"))) {
+				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "().getTime());");
+			} else {
+				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "());");
+			}
 		}
 		bodyBuilder.appendFormalLine("// Add summary field to allow searching documents for objects of this type");
 		bodyBuilder.appendFormalLine("sid.addField(\"" + destination.getSimpleTypeName().toLowerCase() + "_solrsummary_t\", " + textField.toString() + ");");
