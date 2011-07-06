@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -28,6 +29,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.shell.NaturalOrderComparator;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.
@@ -133,8 +135,17 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
 
+		List<MethodMetadata> mutatorMethods = MemberFindingUtils.getMethods(memberDetails);
+		//To avoid unnecessary rewriting of the DoD ITD we sort the mutators by method name to provide a consistent ordering
+		Collections.sort(mutatorMethods, new NaturalOrderComparator<MethodMetadata>() {
+			@Override
+			protected String stringify(MethodMetadata object) {
+				return object.getMethodName().getSymbolName();
+			}
+		});
+
 		// Add the methods we care to the locatedMutators
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		for (MethodMetadata method : mutatorMethods) {
 			if (!BeanInfoUtils.isMutatorMethod(method)) {
 				continue;
 			}

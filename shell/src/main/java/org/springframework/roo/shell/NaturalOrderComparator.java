@@ -59,7 +59,11 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 		}
 	}
 
-	public int compare(Object o1, Object o2) {
+	protected String stringify(E object) {
+		return object.toString();
+	}
+
+	public int compare(E o1, E o2) {
 		if (o1 == null && o2 == null) {
 			return 1;
 		}
@@ -72,8 +76,8 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 			return -1;
 		}
 
-		String a = o1.toString();
-		String b = o2.toString();
+		String a = stringify(o1);
+		String b = stringify(o2);
 
 		int ia = 0, ib = 0;
 		int nza = 0, nzb = 0;
