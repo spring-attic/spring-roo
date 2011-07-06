@@ -108,7 +108,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.5.0.1/appengine-java-sdk-1.5.0.1</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.5.1/appengine-java-sdk-1.5.1</gae.home>
             </properties>
             <repositories>
                 <repository>
