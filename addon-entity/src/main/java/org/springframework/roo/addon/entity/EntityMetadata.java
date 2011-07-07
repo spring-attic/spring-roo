@@ -1107,7 +1107,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return (" + destination.getSimpleTypeName() + ") " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"SELECT o FROM " + entityName + " o WHERE o." + idFieldName + " = :" + idFieldName + "\").setParameter(\"" + idFieldName + "\", " + idFieldName + ").getSingleResult();");
 			bodyBuilder.indentRemove();
-			bodyBuilder.appendFormalLine("} catch (javax.persistence.NoResultException e) {");
+			// Catch the Spring exception thrown by JpaExceptionTranslatorAspect
+			bodyBuilder.appendFormalLine("} catch (org.springframework.dao.EmptyResultDataAccessException e) {");
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return null;");
 			bodyBuilder.indentRemove();
