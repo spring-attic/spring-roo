@@ -103,7 +103,7 @@ public class ControllerCommands implements CommandMarker {
 	}
 
 	@Deprecated
-	@CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller") 
+	@CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller - deprecated, use 'web mvc all' instead") 
 	public void generateAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") JavaPackage javaPackage) {
 		
@@ -112,7 +112,7 @@ public class ControllerCommands implements CommandMarker {
 	}
 
 	@Deprecated
-	@CliCommand(value = "controller scaffold", help = "Create a new scaffold Controller (ie where we maintain CRUD automatically)") 
+	@CliCommand(value = "controller scaffold", help = "Create a new scaffold Controller (ie where we maintain CRUD automatically) - deprecated, use 'web mvc scaffold' instead") 
 	public void newController(
 		@CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the controller object to be created") JavaType controller, 
 		@CliOption(key = "entity", mandatory = false, optionContext = "update,project", unspecifiedDefaultValue = "*", help = "The name of the entity object which the controller exposes to the web tier") JavaType entity, 
