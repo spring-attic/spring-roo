@@ -1112,6 +1112,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return null;");
 			bodyBuilder.indentRemove();
+			// ... and the original JPA exception in case the aspect doesn't trigger
+			bodyBuilder.appendFormalLine("} catch (javax.persistence.NoResultException e) {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine("return null;");
+			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		} else {
 			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + returnType.getSimpleTypeName() + ".class, " + idFieldName + ");");
