@@ -42,7 +42,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 		try {
 			return driver.connect(props.getProperty("database.url"), props);
 		} catch (SQLException e) {
-			throw new IllegalStateException("Unable to get connection from driver", e);
+			throw new IllegalStateException("Unable to get connection from driver: " + e.getMessage(), e);
 		}
 	}
 
