@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.test;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -19,11 +22,14 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
@@ -35,8 +41,12 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+	@Reference private ProjectOperations projectOperations;
+	private Set<String> producedMids = new LinkedHashSet<String>();
+	private Boolean wasGaeEnabled = null;
 
 	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		// Integration test classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
@@ -44,9 +54,37 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	}
 	
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
 		removeMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
+	}
+	
+	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
+	@Override
+	protected void notifyForGenericListener(String upstreamDependency) {
+		// If the upstream dependency is null or invalid do not continue
+		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
+			return;
+		}
+		// If the upstream dependency isn't ProjectMetadata do not continue
+		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+			return;
+		}
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		// If ProjectMetadata isn't valid do not continue
+		if (projectMetadata == null || !projectMetadata.isValid()) {
+			return;
+		}
+		boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+		// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
+		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+		if (hasGaeStateChanged) {
+			wasGaeEnabled = isGaeEnabled;
+			for (String producedMid : producedMids) {
+				metadataService.get(producedMid, true);
+			}
+		}
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -74,7 +112,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
 			return null;
 		}
-		
+
 		// Lookup the entity's metadata
 		MemberDetails memberDetails = getMemberDetails(annotationValues.getEntity());
 		
@@ -110,6 +148,9 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 				break;
 			}
 		}
+
+		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
+		producedMids.add(metadataIdentificationString);
 
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethod, flushMethod, mergeMethod, persistMethod, removeMethod, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
 	}
