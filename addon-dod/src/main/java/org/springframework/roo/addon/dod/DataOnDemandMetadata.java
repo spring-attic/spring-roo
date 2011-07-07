@@ -1058,7 +1058,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
 			imports.addImport(field.getFieldType());
 			initializer = field.getFieldType().getSimpleTypeName() + ".class.getEnumConstants()[0]";
-		} else if (collaboratingMetadata != null && collaboratingMetadata.getEntityType() != null) {
+		} else if (collaboratingMetadata != null) {
 			requiredDataOnDemandCollaborators.add(field.getFieldType());
 
 			String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
@@ -1113,10 +1113,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 		}
 		return new JavaSymbolName(embeddedIdField.getSymbolNameTurnedIntoMutatorMethodName());
-	}
-	
-	public JavaType getEntityType() {
-		return entityType;
 	}
 
 	public String toString() {

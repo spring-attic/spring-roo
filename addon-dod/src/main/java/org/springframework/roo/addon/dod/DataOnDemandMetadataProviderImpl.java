@@ -257,13 +257,9 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 			return null;
 		}
 		
-		DataOnDemandMetadata collaboratingMetadata = (DataOnDemandMetadata) metadataService.get(otherProvider);
-		if (collaboratingMetadata != null) {
-			metadataDependencyRegistry.registerDependency(collaboratingMetadata.getId(), metadataIdentificationString);
-		}
-		return collaboratingMetadata;
+		return (DataOnDemandMetadata) metadataService.get(otherProvider);
 	}
-
+		
 	public String getItdUniquenessFilenameSuffix() {
 		return "DataOnDemand";
 	}
