@@ -79,7 +79,7 @@
                 <executions>
                     <execution>
                         <id>gwtcompile</id>
-                        <phase>compile</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
@@ -131,7 +131,7 @@
                 <executions>
                     <execution>
                         <id>gwtcompile</id>
-                        <phase>compile</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
