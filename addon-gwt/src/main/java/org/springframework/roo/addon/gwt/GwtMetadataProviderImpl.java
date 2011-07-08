@@ -181,7 +181,6 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		gwtFileManager.write(gwtMetadata.buildRequest(), true);
 
 		if (dependsOnSomething) {
-			logger.warning("Type '" + persistenceMemberHoldingTypeDetails.getName().getFullyQualifiedTypeName() + "' can't be proxied as its depends on types which cannot be proxied");
 			return null;
 		}
 
