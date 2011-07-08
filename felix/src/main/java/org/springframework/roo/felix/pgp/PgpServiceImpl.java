@@ -83,10 +83,8 @@ public class PgpServiceImpl implements PgpService {
     }
     
     protected void trustDefaultKeysIfRequired() {
-    	// Setup default keys we trust automatically if the user doesn't have a PGP file already
-    	if (!ROO_PGP_FILE.exists()) {
-    		trustDefaultKeys();
-    	}
+    	// Setup default keys we trust automatically
+    	trustDefaultKeys();
     }
     
     private void trustDefaultKeys() {
