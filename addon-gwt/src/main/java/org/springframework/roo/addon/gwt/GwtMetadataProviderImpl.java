@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -39,6 +40,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -65,6 +67,9 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class GwtMetadataProviderImpl implements GwtMetadataProvider {
+
+	private static Logger logger = HandlerUtils.getLogger(GwtMetadataProviderImpl.class);
+
 	@Reference private FileManager fileManager;
 	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplateService gwtTemplateService;
@@ -74,6 +79,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProjectOperations projectOperations;
 	private Map<String, Set<String>> dependsOn = new HashMap<String, Set<String>>();
+	private Set<String> cannotMap = new HashSet<String>();
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -134,8 +140,10 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 		// We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
 		if (!isMappable(persistenceMemberHoldingTypeDetails.getName().getFullyQualifiedTypeName(), memberDetails, findEntriesMethod, findMethod, findAllMethod, countMethod)) {
+			cannotMap.add(persistenceMemberHoldingTypeDetails.getName().getFullyQualifiedTypeName());
 			return null;
 		}
+		cannotMap.remove(persistenceMemberHoldingTypeDetails.getName().getFullyQualifiedTypeName());
 
 		Map<JavaSymbolName, MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(governorTypeDetails);
 		List<MethodMetadata> convertedProxyMethods = new LinkedList<MethodMetadata>();
@@ -173,6 +181,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		gwtFileManager.write(gwtMetadata.buildRequest(), true);
 
 		if (dependsOnSomething) {
+			logger.warning("Type '" + persistenceMemberHoldingTypeDetails.getName().getFullyQualifiedTypeName() + "' can't be proxied as its depends on types which cannot be proxied");
 			return null;
 		}
 
@@ -298,40 +307,67 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 	private boolean isMappable(String typeName, MemberDetails memberDetails, MethodMetadata findEntriesMethod, MethodMetadata findMethod, MethodMetadata findAllMethod, MethodMetadata countMethod) {
 		if (findAllMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a find all method");
+			}
 			return false;
 		}
 		if (findEntriesMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a find entries method");
+			}
 			return false;
 		}
 		if (countMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a count method");
+			}
 			return false;
 		}
 		if (findMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a find method");
+			}
 			return false;
 		}
 
 		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
 		if (persistMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a persist method");
+			}
 			return false;
 		}
 		
 		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
 		if (removeMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + " can't be proxied as it doesn't have a remove method");
+			}
 			return false;
 		}
 		
 		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		if (identifierAccessorMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a identifier accessor method");
+			}
 			return false;
 		}
 		
 		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
 		if (versionAccessorMethod == null) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a version accessor method");
+			}
 			return false;
 		}
 		
 		List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_FIELD);
 		if (versionFields.isEmpty() || (!versionFields.isEmpty() && !versionFields.get(0).getFieldName().getSymbolName().equals("version"))) {
+			if (!cannotMap.contains(typeName)) {
+				logger.warning("Type '" + typeName + "' can't be proxied as it doesn't have a version field");
+			}
 			return false;
 		}
 		
