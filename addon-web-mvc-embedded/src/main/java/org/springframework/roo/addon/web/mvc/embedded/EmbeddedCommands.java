@@ -115,14 +115,15 @@ public class EmbeddedCommands implements CommandMarker {
 		operations.install(viewName, options); 
 	}
 	
-	@CliCommand(value="web mvc embed finances", help="Embed a stock ticker into your WEB MVC application")
-	public void embedFinance(@CliOption(key="stockSymbol", mandatory=true, help="The stock symbol") String stockSymbol, 
-			@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") String viewName) {
-		Map<String, String> options = new HashMap<String, String>();
-		options.put("provider", "FINANCES");
-		options.put("stockSymbol", stockSymbol);
-		operations.install(viewName, options); 
-	}
+	// TODO: disabled due to ROO-2562
+//	@CliCommand(value="web mvc embed finances", help="Embed a stock ticker into your WEB MVC application")
+//	public void embedFinance(@CliOption(key="stockSymbol", mandatory=true, help="The stock symbol") String stockSymbol, 
+//			@CliOption(key="viewName", mandatory=false, help="The name of the jspx view") String viewName) {
+//		Map<String, String> options = new HashMap<String, String>();
+//		options.put("provider", "FINANCES");
+//		options.put("stockSymbol", stockSymbol);
+//		operations.install(viewName, options); 
+//	}
 	
 	@CliCommand(value="web mvc embed twitter", help="Embed twitter messages into your WEB MVC application")
 	public void embedTwitter(@CliOption(key="searchTerm", mandatory=true, help="The search term to display results for") String searchTerm, 
