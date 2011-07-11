@@ -73,14 +73,12 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		metadataDependencyRegistry.registerDependency(PluralMetadata.createIdentifier(targetEntity, SRC), metadataId);
 		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
 			return getFindAllMethod(metadataId, coitd, annotationValues, plural);
-		} 
-		// TODO: disabled due to loop
-//		else if (methodIdentifier.equals(PersistenceCustomDataKeys.PERSIST_METHOD.name())) {
-//			if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(targetEntity)) {
-//				return null;
-//			}
-//			return getSaveMethod(metadataId, coitd, annotationValues);
-//		}
+		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.PERSIST_METHOD.name())) {
+			if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(targetEntity)) {
+				return null;
+			}
+			return getSaveMethod(metadataId, coitd, annotationValues, methodParameters);
+		}
 		return null;
 	}
 	

@@ -115,7 +115,8 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 	
 	private MethodMetadata getSaveMethod(JavaType domainType, MemberTypeAdditions saveMethodAdditions) {
-		if (saveMethodAdditions != null && MemberFindingUtils.getMethod(governorDetails, saveMethodAdditions.getMethodName(), null) != null) {
+		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSaveMethod());
+		if (saveMethodAdditions != null && MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
 			// The governor already declares this method
 			return null;
 		}
@@ -126,7 +127,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else {
 			bodyBuilder.appendFormalLine(saveMethodAdditions.getMethodSignature() + ";");
 		}
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, saveMethodAdditions.getMethodName(), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), bodyBuilder).build();
 	}
 
 	public static final String getMetadataIdentiferType() {
