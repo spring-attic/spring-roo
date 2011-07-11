@@ -86,6 +86,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private EmbeddedIdentifierHolder embeddedIdentifierHolder;
 	private FieldMetadata versionField;
 	private Set<ClassOrInterfaceTypeDetails> managedEntities;
+	private Database database;
 
 	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DbManagedAnnotationValues annotationValues, List<? extends FieldMetadata> entityFields, List<? extends MethodMetadata> entityMethods, FieldMetadata identifierField, EmbeddedIdentifierHolder embeddedIdentifierHolder, FieldMetadata versionField, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -103,23 +104,24 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		this.embeddedIdentifierHolder = embeddedIdentifierHolder;
 		this.versionField = versionField;
 		this.managedEntities = managedEntities;
+		this.database = database;
 
-		Table table = database.getTable(DbreTypeUtils.getTableName(governorTypeDetails));
+		Table table = this.database.getTable(DbreTypeUtils.getTableName(governorTypeDetails));
 		if (table == null) {
 			return;
 		}
 
 		// Add fields for many-valued associations with many-to-many multiplicity
-		addManyToManyFields(database, table);
+		addManyToManyFields(table);
 
 		// Add fields for single-valued associations to other entities that have one-to-one multiplicity
-		addOneToOneFields(database, table);
+		addOneToOneFields(table);
 
 		// Add fields for many-valued associations with one-to-many multiplicity
-		addOneToManyFields(database, table);
+		addOneToManyFields(table);
 
 		// Add fields for single-valued associations to other entities that have many-to-one multiplicity
-		addManyToOneFields(database, table);
+		addManyToOneFields(table);
 
 		// Add remaining fields from columns
 		addOtherFields(table);
@@ -128,7 +130,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		itdTypeDetails = builder.build();
 	}
 
-	private void addManyToManyFields(Database database, Table table) {
+	private void addManyToManyFields(Table table) {
 		Map<Table, Integer> owningSideTables = new LinkedHashMap<Table, Integer>();
 
 		for (Table joinTable : database.getTables()) {
@@ -167,7 +169,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-	private void addOneToOneFields(Database database, Table table) {
+	private void addOneToOneFields(Table table) {
 		// Add unique one-to-one fields
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
@@ -234,7 +236,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-	private void addOneToManyFields(Database database, Table table) {
+	private void addOneToManyFields(Table table) {
 		Assert.notNull(table, "Table required");
 		if (table.isJoinTable()) {
 			return;
@@ -275,7 +277,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-	private void addManyToOneFields(Database database, Table table) {
+	private void addManyToOneFields(Table table) {
 		// Add unique many-to-one fields
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 

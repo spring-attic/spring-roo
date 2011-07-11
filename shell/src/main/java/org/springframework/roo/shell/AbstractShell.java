@@ -8,12 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.JarFile;
@@ -49,7 +48,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     protected ExitShellRequest exitShellRequest;
 	
     // Abstract methods
-	protected abstract Collection<URI> findUris(String resourceName);
+	protected abstract Set<URL> findUrls(String resourceName);
 	protected abstract String getHomeAsString();
 	protected abstract ExecutionStrategy getExecutionStrategy();
 	protected abstract Parser getParser();
@@ -68,16 +67,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		
 		if (inputStream == null) {
 			// Try to find the resource via the classloader
-			final Collection<URI> uris = findUris(resource.getName());
+			Set<URL> urls = findUrls(resource.getName());
 			
 			// Handle search system failure
-			Assert.notNull(uris, "Unable to process classpath bundles to locate the script");
+			Assert.notNull(urls, "Unable to process classpath bundles to locate the script");
 			
 			// Handle the file simply not being present, but the search being OK
-			Assert.notEmpty(uris, "Resource '" + resource + "' not found on disk or in classpath");
-			Assert.isTrue(uris.size() == 1, "More than one '" + resource + "' was found in the classpath; unable to continue");
+			Assert.notEmpty(urls, "Resource '" + resource + "' not found on disk or in classpath");
+			Assert.isTrue(urls.size() == 1, "More than one '" + resource + "' was found in the classpath; unable to continue");
 			try {
-				inputStream = uris.iterator().next().toURL().openStream();
+				inputStream = urls.iterator().next().openStream();
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}

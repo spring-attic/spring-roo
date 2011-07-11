@@ -474,7 +474,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				}
 			} catch (IOException ignored) {}
 
-			if (!f.isFile()) {
+			if (f.isDirectory()) {
 				recursiveAntMatch(antPath, f, result);
 			}
 		}

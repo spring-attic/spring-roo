@@ -246,7 +246,10 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		} else {
 			folderName = preferredMapping.substring(1);
 		}
-		if (!preferredMapping.endsWith("/**")) {
+		if (preferredMapping.endsWith("/")) {
+			folderName = folderName.substring(0, folderName.length() - 1);
+			preferredMapping = preferredMapping + "**";
+		} else if (!preferredMapping.endsWith("/**")) {
 			preferredMapping = preferredMapping + "/**";
 		} else {
 			folderName = folderName.replace("/**", "");

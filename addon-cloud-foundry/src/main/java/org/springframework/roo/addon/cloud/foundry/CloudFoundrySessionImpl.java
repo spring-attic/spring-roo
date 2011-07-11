@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,8 +56,8 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	private static final String PASSWORD_KEY = "password";
 	private static final String URL_KEY = "url";
 	private static final String ROO_KEY = "Roo == Java + Productivity";
-	private static final String VCLOUD_KEY = "vCloud Prefs";
-	
+	private static final String CLOUD_FOUNDRY_KEY = "Cloud Foundry Prefs";
+
 	@Reference private UaaService uaaService;
 	private Preferences preferences = getPreferencesFor(CloudFoundrySessionImpl.class);
 	UaaClient.Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
@@ -77,14 +78,14 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 		try {
 			preferences.flush();
-		} catch (BackingStoreException ignored) {
+		} catch (BackingStoreException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
 	protected void activate(ComponentContext context) {
 		// TODO: Replace with call to VersionHelper.getProductFromDictionary(..) available in UAA 1.0.3
-		@SuppressWarnings("rawtypes")
-		Dictionary d = context.getBundleContext().getBundle().getHeaders();
+		@SuppressWarnings("rawtypes") Dictionary d = context.getBundleContext().getBundle().getHeaders();
 		Object bundleVersion = d.get("Bundle-Version");
 		Object gitCommitHash = d.get("Git-Commit-Hash");
 		product = VersionHelper.getProduct("Cloud Foundry Java API", bundleVersion == null ? "0.0.0.RELEASE" : bundleVersion.toString(), gitCommitHash == null ? null : gitCommitHash.toString());
@@ -109,25 +110,16 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		boolean storeCredentials = StringUtils.hasText(email) && StringUtils.hasText(password);
 
 		if (!StringUtils.hasText(cloudControllerUrl)) {
-			List<String> urlMatches = getStoredUrlsForEmail(email);
-			if (urlMatches.size() > 1) {
-				logger.warning("Multiple cloud controller URLs are stored for the email address '" + email + "'. Please specify a cloud controller.");
-				return;
-			} else if (urlMatches.size() == 1) {
-				cloudControllerUrl = urlMatches.get(0);
-			} else {
-				// We set the default URL only after no stored URL is found
-				cloudControllerUrl = UaaAwareAppCloudClient.VCLOUD_URL;
-			}
+			cloudControllerUrl = UaaAwareAppCloudClient.CLOUD_FOUNDRY_URL;
 		}
 
 		if (!StringUtils.hasText(email)) {
-			List<String> emailMatches = getStoredEmailsForUrl(cloudControllerUrl);
+			List<CloudCredentials> emailMatches = getStoredEmailsForUrl(cloudControllerUrl);
 			if (emailMatches.size() > 1) {
 				logger.warning("Multiple email addresses are stored for the cloud controller URL '" + cloudControllerUrl + "'. Please specify an email address.");
 				return;
 			} else if (emailMatches.size() == 1) {
-				email = emailMatches.get(0);
+				email = emailMatches.get(0).getEmail();
 			} else {
 				logger.warning("An email address is required.");
 				return;
@@ -135,60 +127,70 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 
 		if (StringUtils.hasText(email) && StringUtils.hasText(cloudControllerUrl) && !StringUtils.hasText(password)) {
-			List<Map<String, String>> list = getStoredLoginPrefs();
-			for (Map<String, String> map : list) {
-				if (email.equals(map.get(EMAIL_KEY)) && cloudControllerUrl.equals(map.get(URL_KEY))) {
-					if (!StringUtils.hasText(password)) {
-						password = map.get(PASSWORD_KEY);
-						break;
-					}
+			Set<CloudCredentials> cloudCredentialsSet = getStoredLoginPrefs();
+			for (CloudCredentials cloudCredentials : cloudCredentialsSet) {
+				if (email.equals(cloudCredentials.getEmail()) && cloudControllerUrl.equals(cloudCredentials.getUrl())) {
+					password = cloudCredentials.getPassword();
+					break;
 				}
 			}
+		}
+
+		CloudCredentials loginCredentials = new CloudCredentials(email, password, cloudControllerUrl);
+		if (!loginCredentials.isValid()) {
+			logger.info("Login failed");
+			return;
 		}
 
 		try {
 			if (client != null) {
 				client.deactivate();
 			}
-			URL vCloudUrl = new URL(UaaAwareAppCloudClient.VCLOUD_URL);
+			URL cloudFoundryUrl = new URL(UaaAwareAppCloudClient.CLOUD_FOUNDRY_URL);
 			SimpleClientHttpRequestFactory simpleFactory = new SimpleClientHttpRequestFactory();
-			simpleFactory.setProxy(new BasicProxyService().setupProxy(vCloudUrl));
-			client = new UaaAwareAppCloudClient(product, uaaService, email, password, null, vCloudUrl, simpleFactory);
+			simpleFactory.setProxy(new BasicProxyService().setupProxy(cloudFoundryUrl));
+			client = new UaaAwareAppCloudClient(product, uaaService, email, password, null, cloudFoundryUrl, simpleFactory);
 			client.loginIfNeeded();
 
 			if (storeCredentials) {
-				List<Map<String, String>> list = getStoredLoginPrefs();
+				Set<CloudCredentials> list = getStoredLoginPrefs();
 				Set<String> entries = new LinkedHashSet<String>();
-				for (Map<String, String> map : list) {
-					if (StringUtils.hasText(map.get(EMAIL_KEY)) && StringUtils.hasText(map.get(PASSWORD_KEY)) && StringUtils.hasText(map.get(URL_KEY))) {
-						entries.add(encodeLoginPrefEntry(map.get(EMAIL_KEY), map.get(PASSWORD_KEY), map.get(URL_KEY)));
+				for (CloudCredentials cloudCredentials : list) {
+					if (cloudCredentials.isValid()) {
+						entries.add(encodeLoginPrefEntry(cloudCredentials));
 					}
 				}
-				entries.add(encodeLoginPrefEntry(email, password, cloudControllerUrl));
+				CloudCredentials cloudCredentials = new CloudCredentials(email, password, cloudControllerUrl);
+				entries.add(encodeLoginPrefEntry(cloudCredentials));
 				try {
-					putPreference(VCLOUD_KEY, crypt(encodeLoginPrefEntries(new ArrayList<String>(entries)).getBytes(), Cipher.ENCRYPT_MODE));
+					putPreference(CLOUD_FOUNDRY_KEY, crypt(encodeLoginPrefEntries(new ArrayList<String>(entries)).getBytes("UTF-8"), Cipher.ENCRYPT_MODE));
 					logger.info("Credentials saved.");
-				} catch (Exception ignored) {
+				} catch (Exception e) {
+					throw new IllegalStateException(e);
 				}
 
 			}
 			logger.info("Logged in successfully with email address '" + email + "'");
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			throw new IllegalStateException(e);
 		}
 	}
 
-	public void putPreference(String prefKey, String prefValue) throws BackingStoreException, UnsupportedEncodingException {
-		preferences.putByteArray(prefKey, prefValue.getBytes("UTF-8"));
-		preferences.flush();
-	}
-
-	public String getPreference(String prefKey) {
+	public void putPreference(String prefKey, byte[] prefValue) {
 		try {
-			return new String(preferences.getByteArray(prefKey, EMPTY_STRING.getBytes("UTF-8")), "UTF-8");
-		} catch (UnsupportedEncodingException ignored) {
+			preferences.putByteArray(prefKey, prefValue);
+			preferences.flush();
+		} catch (BackingStoreException e) {
+			throw new IllegalStateException(e);
 		}
-		return "";
+	}
+
+	public byte[] getPreference(String prefKey) {
+		try {
+			return preferences.getByteArray(prefKey, EMPTY_STRING.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public AppCloudClient getClient() {
@@ -234,81 +236,65 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	}
 
 	public List<String> getStoredEmails() {
-		return getStoredData(EMAIL_KEY);
-	}
-
-	public List<String> getStoredUrls() {
-		return getStoredData(URL_KEY);
-	}
-
-	private List<String> getStoredData(String key) {
 		Set<String> storedData = new LinkedHashSet<String>();
-		List<Map<String, String>> list = getStoredLoginPrefs();
-		for (Map<String, String> map : list) {
-			storedData.add(map.get(key));
+		Set<CloudCredentials> set = getStoredLoginPrefs();
+		for (CloudCredentials cloudCredentials : set) {
+			storedData.add(cloudCredentials.getEmail());
 		}
 		return new ArrayList<String>(storedData);
 	}
 
-	private List<String> getStoredUrlsForEmail(String email) {
-		return getStoredMatches(email, EMAIL_KEY, URL_KEY);
-	}
-
-	private List<String> getStoredEmailsForUrl(String url) {
-		return getStoredMatches(url, URL_KEY, EMAIL_KEY);
-	}
-
-	private List<String> getStoredMatches(String value, String valueKey, String dataKey) {
-		List<Map<String, String>> list = getStoredLoginPrefs();
-		if (list != null && StringUtils.hasText(value)) {
-			List<String> matches = new ArrayList<String>();
-			for (Map<String, String> map : list) {
-				if (value.equals(map.get(valueKey)) && !matches.contains(map.get(dataKey))) {
-					matches.add(map.get(dataKey));
-				}
-			}
-			return matches;
+	public List<String> getStoredUrls() {
+		Set<String> storedData = new LinkedHashSet<String>();
+		Set<CloudCredentials> set = getStoredLoginPrefs();
+		for (CloudCredentials cloudCredentials : set) {
+			storedData.add(cloudCredentials.getUrl());
 		}
-		return new ArrayList<String>();
+		return new ArrayList<String>(storedData);
 	}
 
-	private List<Map<String, String>> getStoredLoginPrefs() {
-		String encodedPrefs = getPreference(VCLOUD_KEY);
-		if (StringUtils.hasText(encodedPrefs)) {
-			encodedPrefs = crypt(encodedPrefs.getBytes(), Cipher.DECRYPT_MODE);
+	public void clearStoredLoginDetails() {
+		try {
+			putPreference(CLOUD_FOUNDRY_KEY, EMPTY_STRING.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
 		}
-		return decodeLoginPrefEntries(encodedPrefs);
 	}
 
-	private String encodeLoginPrefEntry(String email, String password, String cloudControllerUrl) {
-		if (!StringUtils.hasText(email) && !StringUtils.hasText(password) && StringUtils.hasText(cloudControllerUrl)) {
-			return null;
-		}
-		StringBuilder sb = new StringBuilder();
-		String encodedEmail = Base64.encodeBytes(email.getBytes());
-		String encodedPassword = Base64.encodeBytes(password.getBytes());
-		String encodedUrl = Base64.encodeBytes(cloudControllerUrl.getBytes());
-		sb.append(EMAIL_KEY).append(":").append(encodedEmail).append(",");
-		sb.append(PASSWORD_KEY).append(":").append(encodedPassword).append(",");
-		sb.append(URL_KEY).append(":").append(encodedUrl);
-		return sb.toString();
-	}
-
-	private Map<String, String> decodeLoginPrefEntry(String encodedEntry) {
-		Map<String, String> map = new HashMap<String, String>();
-		if (!StringUtils.hasText(encodedEntry)) {
-			return map;
-		}
-		String[] encodedFields = encodedEntry.split(",");
-		for (String encodedField : encodedFields) {
-			String[] valuePair = encodedField.split(":");
-			if (valuePair.length == 2) {
-				try {
-					map.put(valuePair[0], new String(Base64.decode(valuePair[1].getBytes())));
-				} catch (IOException ignored) {}
+	private List<CloudCredentials> getStoredEmailsForUrl(String url) {
+		Set<CloudCredentials> cloudCredentialsList = getStoredLoginPrefs();
+		List<CloudCredentials> found = new ArrayList<CloudCredentials>();
+		for (CloudCredentials cloudCredentials : cloudCredentialsList) {
+			if (url != null && url.equals(cloudCredentials.getUrl())) {
+				found.add(cloudCredentials);
 			}
 		}
-		return map;
+		return found;
+	}
+
+	private Set<CloudCredentials> getStoredLoginPrefs() {
+		Set<CloudCredentials> decoded = new HashSet<CloudCredentials>();
+		byte[] encodedPrefs = getPreference(CLOUD_FOUNDRY_KEY);
+		if (encodedPrefs.length > 0) {
+			encodedPrefs = crypt(encodedPrefs, Cipher.DECRYPT_MODE);
+		} else {
+			return decoded;
+		}
+
+		try {
+			decoded = decodeLoginPrefEntries(new String(encodedPrefs, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e);
+		}
+		return decoded;
+	}
+
+	private String encodeLoginPrefEntry(CloudCredentials cloudCredentials) {
+		return cloudCredentials.encode();
+	}
+
+	private CloudCredentials decodeLoginPrefEntry(String encodedEntry) {
+		return CloudCredentials.decode(encodedEntry);
 	}
 
 	private String encodeLoginPrefEntries(List<String> entries) {
@@ -322,30 +308,30 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		return sb.toString();
 	}
 
-	private List<Map<String, String>> decodeLoginPrefEntries(String entries) {
+	private Set<CloudCredentials> decodeLoginPrefEntries(String entries) {
 		if (!StringUtils.hasText(entries)) {
-			return new ArrayList<Map<String, String>>();
+			return new HashSet<CloudCredentials>();
 		}
 		String[] encodedEntries = entries.split("\\|");
-		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+		Set<CloudCredentials> set = new HashSet<CloudCredentials>();
 		for (String encodedEntry : encodedEntries) {
-			list.add(decodeLoginPrefEntry(encodedEntry));
+			set.add(decodeLoginPrefEntry(encodedEntry));
 		}
-		return list;
+		return set;
 	}
 
-	private String crypt(byte[] input, int opmode) {
+	private byte[] crypt(byte[] input, int opmode) {
 		Cipher cipher = getCipher(opmode);
 		try {
-			return new String(cipher.doFinal(input));
-		} catch (Exception ignored) {
+			return cipher.doFinal(input);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
-		return "";
 	}
 
 	private Cipher getCipher(int opmode) {
 		try {
-			DESKeySpec keySpec = new DESKeySpec(ROO_KEY.getBytes());
+			DESKeySpec keySpec = new DESKeySpec(ROO_KEY.getBytes("UTF-8"));
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
 			SecretKey skey = keyFactory.generateSecret(keySpec);
 			Cipher cipher = Cipher.getInstance("DES");
@@ -358,6 +344,8 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalStateException(e);
 		} catch (InvalidKeyException e) {
+			throw new IllegalStateException(e);
+		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -409,6 +397,94 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 			return Preferences.userNodeForPackage(clazz);
 		} finally {
 			l.setLevel(original);
+		}
+	}
+
+	public static class CloudCredentials {
+		private String email;
+		private String password;
+		private String url;
+
+		public CloudCredentials(String email, String password, String url) {
+			this.email = email;
+			this.password = password;
+			this.url = url;
+		}
+
+		public CloudCredentials(Map<String, String> properties) {
+			email = properties.get(EMAIL_KEY);
+			password = properties.get(PASSWORD_KEY);
+			url = properties.get(URL_KEY);
+		}
+
+		public boolean isValid() {
+			return StringUtils.hasText(email) && StringUtils.hasText(password) && StringUtils.hasText(url);
+		}
+
+		public String getEmail() {
+			return email;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public String getUrl() {
+			return url;
+		}
+
+		public String encode() {
+			if (!isValid()) {
+				throw new IllegalStateException("Credentials invalid; cannot continue");
+			}
+			StringBuilder sb = new StringBuilder();
+			try {
+				sb.append(EMAIL_KEY).append(":").append(Base64.encodeBytes(getEmail().getBytes(), Base64.DO_BREAK_LINES)).append(",");
+				sb.append(PASSWORD_KEY).append(":").append(Base64.encodeBytes(getPassword().getBytes(), Base64.DO_BREAK_LINES)).append(",");
+				sb.append(URL_KEY).append(":").append(Base64.encodeBytes(getUrl().getBytes(), Base64.DO_BREAK_LINES));
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+			return sb.toString();
+		}
+
+		public static CloudCredentials decode(String encoded) {
+			if (!StringUtils.hasText(encoded)) {
+				throw new IllegalStateException("Stored login invalid; cannot continue");
+			}
+			Map<String, String> map = new HashMap<String, String>();
+			String[] encodedFields = encoded.split(",");
+			for (String encodedField : encodedFields) {
+				String[] valuePair = encodedField.split(":");
+				if (valuePair.length == 2) {
+					try {
+						map.put(valuePair[0], new String(Base64.decode(valuePair[1], Base64.DO_BREAK_LINES)));
+					} catch (IOException e) {
+						throw new IllegalStateException(e);
+					}
+				}
+			}
+			return new CloudCredentials(map);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			CloudCredentials clouldCredentials = (CloudCredentials) o;
+
+			if (email != null ? !email.equals(clouldCredentials.email) : clouldCredentials.email != null) return false;
+			if (url != null ? !url.equals(clouldCredentials.url) : clouldCredentials.url != null) return false;
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = email != null ? email.hashCode() : 0;
+			result = 31 * result + (url != null ? url.hashCode() : 0);
+			return result;
 		}
 	}
 }

@@ -78,18 +78,18 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, HashMap<String, String> pluralMap) {
 		List<FieldMetadata> fields = getFieldsInterestedIn(memberHoldingTypeDetailsList);
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		Set<JavaSymbolName> fieldNames = new HashSet<JavaSymbolName>();
+		Set<JavaSymbolName> methodNames = new HashSet<JavaSymbolName>();
 		JavaSymbolName userDefinedMethodName = getUserDefinedMethod(memberHoldingTypeDetailsList, pluralMap);
 		if (userDefinedMethodName == null) {
 			for (FieldMetadata fieldMetadata : fields) {
-				fieldNames.add(new JavaSymbolName(getPrefix() + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())));
+				methodNames.add(new JavaSymbolName(getPrefix() + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())));
 			}
 		} else {
-			fieldNames.add(new JavaSymbolName(userDefinedMethodName.getSymbolName() + additionalSuffix));
+			methodNames.add(new JavaSymbolName(userDefinedMethodName.getSymbolName() + additionalSuffix));
 		}
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
 			for (MethodMetadata methodMetadata : memberHoldingTypeDetails.getDeclaredMethods()) {
-				if (fieldNames.contains(methodMetadata.getMethodName())) {
+				if (methodNames.contains(methodMetadata.getMethodName())) {
 					methods.add(methodMetadata);
 				}
 			}
@@ -106,7 +106,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
 			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals(catalystAnnotationType.getFullyQualifiedTypeName())) {
 				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(userDefinedNameAttribute);
-				if (annotationAttributeValue != null) {
+				if (annotationAttributeValue != null && StringUtils.hasText(annotationAttributeValue.getValue().toString())) {
 					return new JavaSymbolName(annotationAttributeValue.getValue().toString() + suffix);
 				}
 				break;
@@ -128,20 +128,25 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	}
 
 	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, HashMap<String, String> pluralMap) {
+
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
 		if (singular) {
 			return classOrInterfaceTypeDetails.getName().getSimpleTypeName();
 		}
+		String plural = pluralMap.get(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
 			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals("org.springframework.roo.addon.plural.RooPlural")) {
 				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 				if (annotationAttributeValue != null) {
-					return annotationAttributeValue.getValue().toString();
+					plural  = annotationAttributeValue.getValue().toString();
 				}
 				break;
 			}
 		}
-		return pluralMap.get(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+		if (StringUtils.hasText(plural)) {
+			plural = StringUtils.capitalize(plural);
+		}
+		return plural;
 	}
 
 	private List<FieldMetadata> getFieldsInterestedIn(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {

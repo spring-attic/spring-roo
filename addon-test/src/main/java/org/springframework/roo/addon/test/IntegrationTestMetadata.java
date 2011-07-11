@@ -68,7 +68,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return;
 		}
 
-		if (findEntriesMethod == null || persistMethodAdditions == null || flushMethod == null || findMethod == null || identifierAccessorMethod == null) {
+		if (findEntriesMethod == null || persistMethodAdditions == null || flushMethod == null || findMethod == null) {
 			return;
 		}
 

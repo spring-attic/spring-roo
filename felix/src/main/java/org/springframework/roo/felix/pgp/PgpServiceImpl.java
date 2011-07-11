@@ -7,11 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.security.Security;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -85,34 +83,27 @@ public class PgpServiceImpl implements PgpService {
     }
     
     protected void trustDefaultKeysIfRequired() {
-    	// Setup default keys we trust automatically if the user doesn't have a PGP file already
-    	if (!ROO_PGP_FILE.exists()) {
-    		trustDefaultKeys();
-    	}
+    	// Setup default keys we trust automatically
+    	trustDefaultKeys();
     }
     
     private void trustDefaultKeys() {
-		final Collection<URI> uris = UrlFindingUtils.findMatchingClasspathResources(context, "/org/springframework/roo/felix/pgp/*.asc");
+		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context, "/org/springframework/roo/felix/pgp/*.asc");
 		
-		final Set<URI> sortedUris = new TreeSet<URI>(new Comparator<URI>() {
-			public int compare(URI o1, URI o2) {
-				try {
-					return o1.toURL().toExternalForm().compareTo(o2.toURL().toExternalForm());
-				} catch (MalformedURLException e) {
-					throw new IllegalStateException(e);
-				}
+		SortedSet<URL> sortedUrls = new TreeSet<URL>(new Comparator<URL>() {
+			public int compare(URL o1, URL o2) {
+				return o1.toExternalForm().compareTo(o2.toExternalForm());
 			}
 		});
-		sortedUris.addAll(uris);
+		sortedUrls.addAll(urls);
 		
-		for (final URI uri : sortedUris) {
+		for (URL url : sortedUrls) {
 			try {
-				PGPPublicKeyRing key = getPublicKey(uri.toURL().openStream());
+				PGPPublicKeyRing key = getPublicKey(url.openStream());
 				trust(key);
 			} catch (IOException ignore) {}
 		}
     }
-    
 	public String getKeyStorePhysicalLocation() {
 		try {
 			return ROO_PGP_FILE.getCanonicalPath();

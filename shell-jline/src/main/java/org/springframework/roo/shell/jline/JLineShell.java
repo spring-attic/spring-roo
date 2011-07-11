@@ -22,17 +22,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jline.ANSIBuffer;
-import jline.ANSIBuffer.ANSICodes;
 import jline.ConsoleReader;
 import jline.WindowsTerminal;
+import jline.ANSIBuffer.ANSICodes;
 
 import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.ShellStatus;
-import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
+import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
 import org.springframework.roo.support.util.OsUtils;
@@ -51,24 +51,21 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public abstract class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
-	
-	// Constants
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
 	private static final boolean APPLE_TERMINAL = Boolean.getBoolean("is.apple.terminal");
 	private static final char ESC = 27;
 	
-	// Fields
-	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private boolean developmentMode;
-	private boolean shutdownHookFired; // ROO-1599
     private ConsoleReader reader;
+    private boolean developmentMode = false;
     private FileWriter fileLog;
-    /** key: row number, value: eraseLineFromPosition */
-    private final Map<Integer,Integer> rowErasureMap = new HashMap<Integer,Integer>();
-	/** key: slot name, value: flashInfo instance */
-	private final Map<String, FlashInfo> flashInfoMap = new HashMap<String, FlashInfo>();
+	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected ShellStatusListener statusListener; // ROO-836
+	/** key: slot name, value: flashInfo instance */
+	private Map<String, FlashInfo> flashInfoMap = new HashMap<String, FlashInfo>();
+	/** key: row number, value: eraseLineFromPosition */
+	private Map<Integer,Integer> rowErasureMap = new HashMap<Integer,Integer>();
+	private boolean shutdownHookFired = false; // ROO-1599
 	
 	public void run() {
 		try {
@@ -163,7 +160,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		}
 
 		// the shellPrompt is now correct; let's ensure it now gets used
-		reader.setDefaultPrompt(shellPrompt);
+		reader.setDefaultPrompt(JLineShell.shellPrompt);
 	}
 
 	private ConsoleReader createAnsiWindowsReader() throws Exception {

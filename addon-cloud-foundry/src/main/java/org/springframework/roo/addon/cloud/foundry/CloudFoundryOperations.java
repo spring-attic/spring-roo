@@ -60,6 +60,8 @@ public interface CloudFoundryOperations {
 
 	void renameApp(String appName, String newAppName);
 
+	void clearStoredLoginDetails();
+
 	/**
 	 * Initial setup of Cloud Foundry in target project.
 	 */

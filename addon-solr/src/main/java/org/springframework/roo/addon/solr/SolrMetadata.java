@@ -173,7 +173,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			if (!textField.toString().endsWith("StringBuilder()")) {
 				textField.append(".append(\" \")");
 			}
-			textField.append(".append(").append(javaBeanFieldName).append(".").append(method.getMethodName()).append("()").append(")");
+			if (field.getFieldType().equals(new JavaType("java.util.Calendar"))) {
+				textField.append(".append(").append(javaBeanFieldName).append(".").append(method.getMethodName()).append("().getTime()").append(")");
+			} else {
+				textField.append(".append(").append(javaBeanFieldName).append(".").append(method.getMethodName()).append("()").append(")");
+			}
 			String fieldName = javaBeanFieldName + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType());
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
 				if (annotation.getAnnotationType().equals(new JavaType("org.apache.solr.client.solrj.beans.Field"))) {
@@ -183,7 +187,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					}
 				}
 			}
-			bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "());");
+			if (field.getFieldType().equals(new JavaType("java.util.Calendar"))) {
+				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "().getTime());");
+			} else {
+				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "());");
+			}
 		}
 		bodyBuilder.appendFormalLine("// Add summary field to allow searching documents for objects of this type");
 		bodyBuilder.appendFormalLine("sid.addField(\"" + destination.getSimpleTypeName().toLowerCase() + "_solrsummary_t\", " + textField.toString() + ");");

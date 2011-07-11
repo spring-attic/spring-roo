@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -438,12 +439,21 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		paramTypes.add(entityType);
 		paramTypes.add(JavaType.INT_PRIMITIVE);
 
+		Set<String> existingMutators = new HashSet<String>();
+
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
 			// Locate user-defined method
 			if (MemberFindingUtils.getMethod(governorTypeDetails, mutator.getMethodName(), paramTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
+
+			// Check to see if the mutator has already been added
+			String mutatorId = mutator.getMethodName() + " - " + mutator.getParameterTypes().size();
+			if (existingMutators.contains(mutatorId)) {
+				continue;
+			}
+			existingMutators.add(mutatorId);
 
 			// Method not on governor so need to create it
 			String initializer = fieldInitializers.get(mutator);
@@ -1048,7 +1058,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
 			imports.addImport(field.getFieldType());
 			initializer = field.getFieldType().getSimpleTypeName() + ".class.getEnumConstants()[0]";
-		} else if (collaboratingMetadata != null) {
+		} else if (collaboratingMetadata != null && collaboratingMetadata.getEntityType() != null) {
 			requiredDataOnDemandCollaborators.add(field.getFieldType());
 
 			String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
@@ -1103,6 +1113,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 		}
 		return new JavaSymbolName(embeddedIdField.getSymbolNameTurnedIntoMutatorMethodName());
+	}
+	
+	public JavaType getEntityType() {
+		return entityType;
 	}
 
 	public String toString() {

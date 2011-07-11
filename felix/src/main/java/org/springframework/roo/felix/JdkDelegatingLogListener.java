@@ -31,15 +31,12 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
-@Component(immediate=true)
-@Reference(name="shell", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=Shell.class, cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+@Component(immediate = true)
+@Reference(name = "shell", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Shell.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 public class JdkDelegatingLogListener extends AbstractFlashingObject implements LogListener {
-
 	@Reference private LogReaderService logReaderService;
 	private final static Logger logger = HandlerUtils.getLogger(JdkDelegatingLogListener.class);
-	
 	public static final String DO_NOT_LOG = "#DO_NOT_LOG";
 	
 	@SuppressWarnings("unchecked")
@@ -112,11 +109,13 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 	}
 	
 	private boolean containsDoNotLogTag(Throwable throwable) {
+		if (throwable == null) return false;
 		if (throwable.getMessage().contains(DO_NOT_LOG)) {
 			return true;
 		}
-		PrintWriter pw = new PrintWriter(new StringWriter());
-		return pw.toString().contains(DO_NOT_LOG);
+		StringWriter sw = new StringWriter();
+		throwable.printStackTrace(new PrintWriter(sw));
+		return sw.toString().contains(DO_NOT_LOG);
 	}
 	
 	private String buildMessage(LogEntry entry) {
@@ -124,5 +123,4 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 		sb.append("[").append(entry.getBundle()).append("] ").append(entry.getMessage());
 		return sb.toString();
 	}
-
 }

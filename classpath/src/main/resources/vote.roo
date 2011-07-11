@@ -23,6 +23,6 @@ logging setup --level WARN --package WEB
 
 security setup
 
-finder list --class com.springsource.vote.domain.Vote --depth 2 --filter reg,betw,IpEq
+finder list --class ~.domain.Vote --depth 2 --filter reg,betw,IpEq
 
 logging setup --level INFO

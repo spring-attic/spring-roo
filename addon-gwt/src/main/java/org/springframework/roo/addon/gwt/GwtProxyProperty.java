@@ -165,23 +165,7 @@ class GwtProxyProperty {
 		if (isCollectionOfProxy()) {
 			return getCollectionRenderer() + ".render";
 		} else if (isDate()) {
-			String formatter = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format";
-			if (annotations == null || annotations.isEmpty()) {
-				return formatter;
-			}
-			
-			String style = "";
-			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-			if (annotation != null) {
-				AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
-				if (attr != null) {
-					style = (String) attr.getValue();
-				}
-			}
-			if (StringUtils.hasText(style) && !style.equals("S-")) {
-				formatter = "DateTimeFormat.getFormat(\"" + style + "\").format";
-			}
-			return formatter;
+			return getDateTimeFormat() + ".format";
 		} else if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.FLOAT_OBJECT) || type.equals(JavaType.DOUBLE_OBJECT) || type.equals(new JavaType("java.math.BigInteger")) || type.equals(new JavaType("java.math.BigDecimal"))) {
 			String formatter = "String.valueOf";
 			if (annotations == null || annotations.isEmpty()) {
@@ -212,8 +196,40 @@ class GwtProxyProperty {
 		}
 	}
 
+	private String getDateTimeFormat() {
+		String format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)";
+		if (annotations == null || annotations.isEmpty()) {
+			return format;
+		}
+
+		String style = "";
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+		if (annotation != null) {
+			AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
+			if (attr != null) {
+				style = (String) attr.getValue();
+			}
+		}
+		if (StringUtils.hasText(style)) {
+			if (style.equals("S")) {
+				format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_SHORT)";
+			} else if (style.equals("M")) {
+				format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_MEDIUM)";
+			} else if (style.equals("F")) {
+				format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_TIME_FULL)";
+			} else if (style.equals("S-")) {
+				format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT)";
+			} else if (style.equals("M-")) {
+				format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_MEDIUM)";
+			} else if (style.equals("F-")) {
+				format = "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_FULL)";
+			}
+		}
+		return format;
+	}
+
 	public String getRenderer() {
-		return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() || isEmbeddable() || type.equals(new JavaType("java.lang.Object")) ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
+		return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(" + getDateTimeFormat() + ")" : isPrimitive() || isEnum() || isEmbeddable() || type.equals(new JavaType("java.lang.Object")) ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
 	}
 
 	String getProxyRendererType() {

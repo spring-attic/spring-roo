@@ -1,6 +1,9 @@
 package org.springframework.roo.addon.cloud.foundry.converter;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -44,16 +47,24 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 					}
 					((MavenOperationsImpl) projectOperations).executeMvnCommand("clean package");
 					String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
-					Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + "/**/*.war");
-					
+					Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + File.separator + "**" + File.separator + "*.war");
 					if (fileDetails.size() > 0) {
 						FileDetails fileToDeploy = fileDetails.iterator().next();
 						return new CloudDeployableFile(fileToDeploy);
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					throw new IllegalStateException(e);
 				}
 			}
+			return null;
+		}
+		String oppositeFileSeparator = getOppositeFileSeparator();
+		if (value.contains(oppositeFileSeparator)) {
+			value = value.replaceAll(escapeString(oppositeFileSeparator), escapeString(File.separator));
+		}
+		String path = projectOperations.getPathResolver().getRoot(Path.ROOT) + value;
+		if (!new File(path).exists())  {
+			logger.severe("The file at path '" + path + "' doesn't exist; cannot continue");
 			return null;
 		}
 		FileDetails fileToDeploy = fileManager.readFile(projectOperations.getPathResolver().getRoot(Path.ROOT) + value);
@@ -70,17 +81,101 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 			return false;
 		}
 		String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
-		Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + "/**/*.war");
-		
+		Set<FileDetails> fileDetails = fileManager.findMatchingAntPath(rootPath + File.separator + "**" + File.separator + "*.war");
+
 		if (fileDetails.isEmpty()) {
 			logger.warning("No deployable files found in the project directory. Please use the '" + CREATE_OPTION + "' option to build the war.");
 			completions.add(CREATE_OPTION);
 		}
-		
 		for (FileDetails fileDetail : fileDetails) {
-			completions.add(fileDetail.getCanonicalPath().replaceAll(rootPath, ""));
+			completions.add(fileDetail.getCanonicalPath().replaceAll(escapeString(rootPath), ""));
 		}
 
 		return false;
+	}
+
+	private String getOppositeFileSeparator() {
+		Character fileSeparator = File.separatorChar;
+		if (fileSeparator.equals('/')) {
+			return "\\";
+		} else if (fileSeparator.equals('\\')) {
+			return "/";
+		}
+		throw new IllegalStateException("Unexpected file separator character encountered; cannot continue");
+	}
+
+	public static String escapeString(String toEscape) {
+		final StringBuilder result = new StringBuilder();
+		final StringCharacterIterator iterator = new StringCharacterIterator(toEscape);
+		char character = iterator.current();
+		while (character != CharacterIterator.DONE) {
+			switch (character) {
+				case '.': {
+					result.append("\\.");
+					break;
+				}
+				case '\\': {
+					result.append("\\\\");
+					break;
+				}
+				case '?': {
+					result.append("\\?");
+					break;
+				}
+				case '*': {
+					result.append("\\*");
+					break;
+				}
+				case '+': {
+					result.append("\\+");
+					break;
+				}
+				case '&': {
+					result.append("\\&");
+					break;
+				}
+				case ':': {
+					result.append("\\:");
+					break;
+				}
+				case '{': {
+					result.append("\\{");
+					break;
+				}
+				case '}': {
+					result.append("\\}");
+					break;
+				}
+				case '[': {
+					result.append("\\[");
+					break;
+				}
+				case ']': {
+					result.append("\\]");
+					break;
+				}
+				case '(': {
+					result.append("\\(");
+					break;
+				}
+				case ')': {
+					result.append("\\)");
+					break;
+				}
+				case '^': {
+					result.append("\\^");
+					break;
+				}
+				case '$': {
+					result.append("\\$");
+					break;
+				}
+				default: {
+					result.append(character);
+				}
+			}
+			character = iterator.next();
+		}
+		return result.toString();
 	}
 }

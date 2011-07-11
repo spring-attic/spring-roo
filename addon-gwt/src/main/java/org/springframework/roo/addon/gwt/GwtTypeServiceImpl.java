@@ -207,15 +207,16 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return sourcePaths;
 	}
 
-	public List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
-		List<MethodMetadata> proxyMethods = new LinkedList<MethodMetadata>();
+	public Map<JavaSymbolName, MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
+		Map<JavaSymbolName, MethodMetadata> proxyMethods = new LinkedHashMap<JavaSymbolName, MethodMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetails.getDetails();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
 			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
 				if (isPublicAccessor(method)) {
 					if (isValidMethodReturnType(method, memberHoldingTypeDetail)) {
-						proxyMethods.add(method);
+						proxyMethods.remove(method.getMethodName());
+						proxyMethods.put(method.getMethodName(), method);
 					}
 				}
 			}

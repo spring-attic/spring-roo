@@ -1,11 +1,13 @@
 package org.springframework.roo.addon.gwt;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 
@@ -27,7 +29,7 @@ public interface GwtTypeService {
 
 	List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
 
-	List<MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
+	Map<JavaSymbolName, MethodMetadata> getProxyMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
 
 	boolean isDomainObject(JavaType type);
 

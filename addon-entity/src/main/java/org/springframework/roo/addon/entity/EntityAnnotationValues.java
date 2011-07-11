@@ -5,6 +5,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AbstractA
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a parsed {@link RooEntity} annotation.
@@ -13,21 +14,32 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1.3
  */
 public class EntityAnnotationValues extends AbstractAnnotationValues {
+	public static final String PERSIST_METHOD_DEFAULT = "persist";
+	public static final String VERSION_FIELD_DEFAULT = "version";
+	public static final String VERSION_COLUMN_DEFAULT = "version";
+	public static final String FLUSH_METHOD_DEFAULT = "flush";
+	public static final String CLEAR_METHOD_DEFAULT = "clear";
+	public static final String MERGE_METHOD_DEFAULT = "merge";
+	public static final String REMOVE_METHOD_DEFAULT = "remove";
+	public static final String COUNT_METHOD_DEFAULT = "count";
+	public static final String FIND_ALL_METHOD_DEFAULT = "findAll";
+	public static final String FIND_METHOD_DEFAULT = "find";
+
 	// From annotation
 	@AutoPopulate private JavaType identifierType;
 	@AutoPopulate private String identifierField = "";
 	@AutoPopulate private String identifierColumn = "";
 	@AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
-	@AutoPopulate private String versionField = "version";
-	@AutoPopulate private String versionColumn = "version";
-	@AutoPopulate private String persistMethod = "persist";
-	@AutoPopulate private String flushMethod = "flush";
-	@AutoPopulate private String clearMethod = "clear";
-	@AutoPopulate private String mergeMethod = "merge";
-	@AutoPopulate private String removeMethod = "remove";
-	@AutoPopulate private String countMethod = "count";
-	@AutoPopulate private String findAllMethod = "findAll";
-	@AutoPopulate private String findMethod = "find";
+	@AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
+	@AutoPopulate private String versionColumn = VERSION_COLUMN_DEFAULT;
+	@AutoPopulate private String persistMethod = PERSIST_METHOD_DEFAULT;
+	@AutoPopulate private String flushMethod = FLUSH_METHOD_DEFAULT;
+	@AutoPopulate private String clearMethod = CLEAR_METHOD_DEFAULT;
+	@AutoPopulate private String mergeMethod = MERGE_METHOD_DEFAULT;
+	@AutoPopulate private String removeMethod = REMOVE_METHOD_DEFAULT;
+	@AutoPopulate private String countMethod = COUNT_METHOD_DEFAULT;
+	@AutoPopulate private String findAllMethod = FIND_ALL_METHOD_DEFAULT;
+	@AutoPopulate private String findMethod = FIND_METHOD_DEFAULT;
 	@AutoPopulate private String findEntriesMethod = "find";
 	@AutoPopulate private String[] finders;
 	@AutoPopulate private String persistenceUnit = "";	
@@ -65,39 +77,39 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	}
 
 	public String getVersionColumn() {
-		return versionColumn;
+		return StringUtils.hasText(versionColumn) ? versionColumn : VERSION_COLUMN_DEFAULT;
 	}
 
 	public String getPersistMethod() {
-		return persistMethod;
+		return StringUtils.hasText(persistMethod) ? persistMethod : PERSIST_METHOD_DEFAULT;
 	}
 
 	public String getFlushMethod() {
-		return flushMethod;
+		return StringUtils.hasText(flushMethod) ? flushMethod : FLUSH_METHOD_DEFAULT;
 	}
 
 	public String getClearMethod() {
-		return clearMethod;
+		return StringUtils.hasText(clearMethod) ? clearMethod : CLEAR_METHOD_DEFAULT;
 	}
 
 	public String getMergeMethod() {
-		return mergeMethod;
+		return StringUtils.hasText(mergeMethod) ? mergeMethod : MERGE_METHOD_DEFAULT;
 	}
 
 	public String getRemoveMethod() {
-		return removeMethod;
+		return StringUtils.hasText(removeMethod) ? removeMethod : REMOVE_METHOD_DEFAULT;
 	}
 
 	public String getCountMethod() {
-		return countMethod;
+		return StringUtils.hasText(countMethod) ? countMethod : COUNT_METHOD_DEFAULT;
 	}
 
 	public String getFindAllMethod() {
-		return findAllMethod;
+		return StringUtils.hasText(findAllMethod) ? findAllMethod : FIND_ALL_METHOD_DEFAULT;
 	}
 
 	public String getFindMethod() {
-		return findMethod;
+		return StringUtils.hasText(findMethod) ? findMethod : FIND_METHOD_DEFAULT;
 	}
 
 	public String getFindEntriesMethod() {

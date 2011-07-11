@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dod;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.shell.NaturalOrderComparator;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.
@@ -114,7 +116,10 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-
+		if (persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
+			return null;
+		}
+		
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = getLocatedMutators(memberDetails, metadataIdentificationString);
 		
@@ -130,8 +135,17 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
 
+		List<MethodMetadata> mutatorMethods = MemberFindingUtils.getMethods(memberDetails);
+		// To avoid unnecessary rewriting of the DoD ITD we sort the mutators by method name to provide a consistent ordering
+		Collections.sort(mutatorMethods, new NaturalOrderComparator<MethodMetadata>() {
+			@Override
+			protected String stringify(MethodMetadata object) {
+				return object.getMethodName().getSymbolName();
+			}
+		});
+
 		// Add the methods we care to the locatedMutators
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		for (MethodMetadata method : mutatorMethods) {
 			if (!BeanInfoUtils.isMutatorMethod(method)) {
 				continue;
 			}
@@ -243,9 +257,13 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 			return null;
 		}
 		
-		return (DataOnDemandMetadata) metadataService.get(otherProvider);
+		DataOnDemandMetadata collaboratingMetadata = (DataOnDemandMetadata) metadataService.get(otherProvider);
+		if (collaboratingMetadata != null) {
+			metadataDependencyRegistry.registerDependency(collaboratingMetadata.getId(), metadataIdentificationString);
+		}
+		return collaboratingMetadata;
 	}
-		
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "DataOnDemand";
 	}

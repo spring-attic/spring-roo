@@ -15,6 +15,7 @@ import org.springframework.roo.project.listeners.RepositoryListener;
  * @author Ben Alex
  * @since 1.0
  */
+@SuppressWarnings("deprecation")
 public interface ProjectOperations {
 
 	/** 

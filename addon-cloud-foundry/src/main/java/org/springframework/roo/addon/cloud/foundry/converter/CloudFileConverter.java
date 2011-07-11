@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.cloud.foundry.converter;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class CloudFileConverter implements Converter<CloudFile> {
 		final String appName = ConverterUtils.getOptionValue("appName", target.remainingBuffer);
 		String path = ConverterUtils.getOptionValue("path", target.remainingBuffer);
 		if (path != null) {
-			int index = path.lastIndexOf("/");
+			int index = path.lastIndexOf(/*"/"*/File.separator);
 			if (index > 0) {
 				path = path.substring(0, index + 1);
 			} else {
@@ -54,7 +55,8 @@ public class CloudFileConverter implements Converter<CloudFile> {
 				}
 				completions.add(path + option);
 			}
-		} catch (Exception ignored) {}
+		} catch (Exception ignored) {
+		}
 
 		return false;
 	}
