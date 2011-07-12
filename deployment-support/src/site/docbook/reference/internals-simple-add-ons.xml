@@ -658,7 +658,8 @@
         <para><emphasis role="bold"><link
         linkend="command-index-osgi-scr-list">osgi scr list</link>
         </emphasis>- Lists all currently registered services and components.
-        This should list your add-on's command and operations types.</para>
+        This should list your add-on's command, metadata provider, and
+        operations types.</para>
       </listitem>
 
       <listitem>
