@@ -248,13 +248,13 @@
       at the top of your <code>.java</code> files to import those
       <code>@Roo</code> annotations. You can easily remove these unwanted
       members by clicking Search &gt; Search &gt; File Search, containing text
-      "<code>\n.*[@\.]Roo[^t_]+?.*$</code>" (without the quotes), file name pattern
-      "<code>*.java</code>" (without the quotes), ticking the "Regular
-      expression" check-box and clicking "Replace". When the following window
-      appears and asks you for a replacement pattern, leave it blank
-      and continue. All of the Roo statements will have now been removed. We
-      have noticed for an unknown reason that sometimes this operation needs
-      to be repeated twice in Eclipse.</para>
+      "<code>\n.*[@\.]Roo[^t_]+?.*$</code>" (without the quotes), file name
+      pattern "<code>*.java</code>" (without the quotes), ticking the "Regular
+      expression" and "Case sensitive" check-boxes and clicking "Replace". When
+      the following window appears and asks you for a replacement pattern, leave
+      it blank and continue. All of the Roo statements will have now been
+      removed. We have noticed for an unknown reason that sometimes this
+      operation needs to be repeated twice in Eclipse.</para>
     </section>
 
     <section xml:id="removing-step-by-step-3">
