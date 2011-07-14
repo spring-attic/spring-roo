@@ -58,6 +58,8 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
 	
 	/** Requires the governor to be a {@link PhysicalTypeCategory#CLASS} (as opposed to an interface etc) */
+	// TODO change the type of this field to PhysicalTypeCategory and allow
+	// subclasses to pass it via a new constructor
 	private boolean dependsOnGovernorBeingAClass = true;
 	
 	/** The annotations which, if present on a class or interface, will cause metadata to be created */
@@ -257,7 +259,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			produceMetadata = false;
 		}
 		
-		if (!produceMetadata && fileManager.exists(itdFilename)) {
+		if (!produceMetadata && isGovernor(cid) && fileManager.exists(itdFilename)) {
 			// We don't seem to want metadata anymore, yet the ITD physically exists, so get rid of it
 			// This might be because the trigger annotation has been removed, the governor is missing a class declaration etc
 			// TODO: Overload fileManager.delete(..) so we can give a message so the console output is more meaningful
@@ -321,6 +323,26 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		return null;
 	}
 	
+	/**
+	 * Indicates whether the given type is the governor for this provider. This
+	 * implementation simply checks whether the given type is either a class or
+	 * an interface, based on the value of {@link #dependsOnGovernorBeingAClass}.
+	 * A more sophisticated implementation could check for the presence of
+	 * particular annotations or the implementation of particular interfaces.
+	 * 
+	 * @param type can be <code>null</code>
+	 * @return <code>false</code> if the given type is <code>null</code>
+	 */
+	protected boolean isGovernor(final ClassOrInterfaceTypeDetails type) {
+		if (type == null) {
+			return false;
+		}
+		if (dependsOnGovernorBeingAClass) {
+			return type.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS;
+		}
+		return type.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
+	}
+
 	public final String getIdForPhysicalJavaType(String physicalJavaTypeIdentifier) {
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(physicalJavaTypeIdentifier).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected a valid physical Java type instance identifier (not '" + physicalJavaTypeIdentifier + "')");
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalJavaTypeIdentifier);
