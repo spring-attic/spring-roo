@@ -137,7 +137,9 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void processTypesWithTag(Object tag, LocatedTypeCallback callback) {
-		boolean cacheAllowed = !fileMonitorService.isDirty();
+//		TODO: Disabling caching here due to ROO-2588
+//		boolean cacheAllowed = !fileMonitorService.isDirty();
+		boolean cacheAllowed = false;
 		if (cacheAllowed && tagToMidMap.containsKey(tag)) {
 			for (String locatedMid : tagToMidMap.get(tag)) {
 				ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedMid);
@@ -160,7 +162,9 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
-		boolean cacheAllowed = !fileMonitorService.isDirty();
+//		TODO: Disabling caching here due to ROO-2588
+//		boolean cacheAllowed = !fileMonitorService.isDirty();
+		boolean cacheAllowed = false;
 		for (JavaType annotationType : annotationsToDetect) {
 			if (cacheAllowed && annotationToMidMap.containsKey(annotationType)) {
 				for (String locatedMid : annotationToMidMap.get(annotationType)) {
