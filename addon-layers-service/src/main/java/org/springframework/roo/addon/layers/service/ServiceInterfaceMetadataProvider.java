@@ -4,17 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.LayerCustomDataKeys;
+import org.springframework.roo.project.layers.LayerTypeMatcher;
 
 /**
  * 
@@ -25,15 +30,20 @@ import org.springframework.roo.project.Path;
 @Service
 public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
 	
+	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
+	
+	private static final JavaType ROO_SERVICE = new JavaType(RooService.class.getName());
+	
 	protected void activate(ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooService.class.getName()));
+		addMetadataTrigger(ROO_SERVICE);
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class.getName(), ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES)));
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooService.class.getName()));
+		removeMetadataTrigger(ROO_SERVICE);
 	}
 	
 	@Override
