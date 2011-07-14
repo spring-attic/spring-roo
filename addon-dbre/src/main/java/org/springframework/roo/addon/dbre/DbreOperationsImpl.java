@@ -118,7 +118,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 
 		excludeElement = document.createElement("exclude");
-		excludeElement.setTextContent("DBRE XML");
+		excludeElement.setTextContent("dbre.xml");
 		excludesElement.appendChild(excludeElement);
 		
 		Element directoryElement = document.createElement("directory");
@@ -132,6 +132,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		configurationElement.appendChild(webResourcesElement);
 		
 		warPluginElement.appendChild(configurationElement);
+		XmlUtils.removeTextNodes(warPluginElement);
 		
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}
