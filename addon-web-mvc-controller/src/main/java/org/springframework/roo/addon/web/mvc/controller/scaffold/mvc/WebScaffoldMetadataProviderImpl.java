@@ -124,8 +124,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		Map<String, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
 		
-		WebScaffoldMetadata md = new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
-		return md;
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
