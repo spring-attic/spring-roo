@@ -1,6 +1,9 @@
 package org.springframework.roo.addon.test;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -11,7 +14,9 @@ import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dod.DataOnDemandMetadata;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -23,11 +28,13 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.layers.LayerCustomDataKeys;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
@@ -47,7 +54,9 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private LayerService layerService;
+	@Reference private TypeLocationService typeLocationService;
 	private Set<String> producedMids = new LinkedHashSet<String>();
+	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 	private Boolean wasGaeEnabled = null;
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
@@ -73,22 +82,43 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
 			return;
 		}
+		
+		//TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing;
+		// We do need to be informed if a new layer is available to see if we should use that
+		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
+			ClassOrInterfaceTypeDetails coitd = typeLocationService.findClassOrInterface(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
+			if (coitd != null) {
+				MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
+				MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, LayerCustomDataKeys.LAYER_TYPE);
+				if (memberHoldingTypeDetails != null) {
+					List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+					if (domainTypes != null) {
+						for (JavaType type : domainTypes) {
+							String localMidType = managedEntityTypes.get(type);
+							if (localMidType != null) {
+								metadataService.get(localMidType);
+							}
+						}
+					}
+				}
+			}
+		}
+		
 		// If the upstream dependency isn't ProjectMetadata do not continue
-		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-			return;
-		}
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		// If ProjectMetadata isn't valid do not continue
-		if (projectMetadata == null || !projectMetadata.isValid()) {
-			return;
-		}
-		boolean isGaeEnabled = projectMetadata.isGaeEnabled();
-		// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
-		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-		if (hasGaeStateChanged) {
-			wasGaeEnabled = isGaeEnabled;
-			for (String producedMid : producedMids) {
-				metadataService.get(producedMid, true);
+		if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+			// If ProjectMetadata isn't valid do not continue
+			if (projectMetadata == null || !projectMetadata.isValid()) {
+				return;
+			}
+			boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
+			boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+			if (hasGaeStateChanged) {
+				wasGaeEnabled = isGaeEnabled;
+				for (String producedMid : producedMids) {
+					metadataService.get(producedMid, true);
+				}
 			}
 		}
 	}
@@ -158,6 +188,9 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 
 		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
 		producedMids.add(metadataIdentificationString);
+		
+		// maintain a list of entities that are being tested
+		managedEntityTypes.put(entity, metadataIdentificationString);
 
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethod, persistMethodAdditions, removeMethod, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
 	}
