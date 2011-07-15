@@ -71,6 +71,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	// Constants
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	
 	// Fields
@@ -415,6 +416,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		final Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
 		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
 		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, getEnityName(domainType))));
+		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, getEnityName(domainType))));
 		return Collections.unmodifiableMap(additions);
 	}
 

@@ -78,6 +78,11 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			if (saveAdditions != null) {
 				saveAdditions.copyAdditionsTo(builder);
 			}
+			final MemberTypeAdditions updateAdditions = crudAdditions.get(PersistenceCustomDataKeys.MERGE_METHOD.name());
+			builder.addMethod(getUpdateMethod(domainType, updateAdditions));
+			if (updateAdditions != null) {
+				updateAdditions.copyAdditionsTo(builder);
+			}
 		}
 		
 		// Introduce the @Service annotation via the ITD if it's not already on the service's Java class
@@ -115,7 +120,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 	
 	private MethodMetadata getSaveMethod(JavaType domainType, MemberTypeAdditions saveMethodAdditions) {
-		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSaveMethod());
+		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSaveMethod() + domainType.getSimpleTypeName());
 		if (saveMethodAdditions != null && MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
 			// The governor already declares this method
 			return null;
@@ -130,6 +135,22 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), bodyBuilder).build();
 	}
 
+	private MethodMetadata getUpdateMethod(JavaType domainType, MemberTypeAdditions updateMethodAdditions) {
+		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getUpdateMethod() + domainType.getSimpleTypeName());
+		if (updateMethodAdditions != null && MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
+			// The governor already declares this method
+			return null;
+		}
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		// No further layer found, so let's create a simple dummy implementation
+		if (updateMethodAdditions == null) {
+			bodyBuilder.appendFormalLine("throw new IllegalStateException(\"Implement me!\");");
+		} else {
+			bodyBuilder.appendFormalLine("return " + updateMethodAdditions.getMethodSignature() + ";");
+		}
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, domainType, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), bodyBuilder).build();
+	}
+	
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}

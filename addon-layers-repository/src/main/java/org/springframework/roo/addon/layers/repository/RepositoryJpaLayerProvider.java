@@ -56,6 +56,8 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 			return getFindAllMethod(metadataId, targetEntity, typeContainer);
 		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.PERSIST_METHOD.name())) {
 			return getPersistMethod(metadataId, targetEntity, typeContainer, methodParameters);
+		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.MERGE_METHOD.name())) {
+			return getMergeMethod(metadataId, targetEntity, typeContainer, methodParameters);
 		}
 		return null;
 	}
@@ -69,6 +71,18 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
 		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
 		JavaSymbolName methodName = new JavaSymbolName(typeContainer.getRepositoryJpaAnnotationValues().getSaveMethod());
+		return new MemberTypeAdditions(classBuilder, repoField + "." + methodName.getSymbolName() + "(" + methodParameters[0].getValue().getSymbolName() + ")", methodName);
+	}
+	
+	private MemberTypeAdditions getMergeMethod(final String metadataId, final JavaType entityType, final TypeContainer typeContainer, final Pair<JavaType, JavaSymbolName>... methodParameters) {
+		if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
+			return null;
+		}
+		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
+		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
+		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
+		JavaSymbolName methodName = new JavaSymbolName(typeContainer.getRepositoryJpaAnnotationValues().getUpdateMethod());
 		return new MemberTypeAdditions(classBuilder, repoField + "." + methodName.getSymbolName() + "(" + methodParameters[0].getValue().getSymbolName() + ")", methodName);
 	}
 

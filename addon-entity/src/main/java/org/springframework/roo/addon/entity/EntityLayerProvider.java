@@ -50,6 +50,8 @@ public class EntityLayerProvider extends CoreLayerProvider {
 			return getFindAllMethod(metadataId, targetEntity, rooEntityAnnotation);
 		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.PERSIST_METHOD.name())) {
 			return getPersistMethod(metadataId, targetEntity, rooEntityAnnotation, methodParameters);
+		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.MERGE_METHOD.name())) {
+			return getMergeMethod(metadataId, targetEntity, rooEntityAnnotation, methodParameters);
 		}
 		return null;
 	}
@@ -68,6 +70,14 @@ public class EntityLayerProvider extends CoreLayerProvider {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName(rooEntityAnnotation.getPersistMethod());
+		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), methodParameters[0].getValue().getSymbolName() + "." + methodName.getSymbolName() + "()", methodName);
+	}
+	
+	private MemberTypeAdditions getMergeMethod(String metadataId, JavaType entityType, EntityAnnotationValues rooEntityAnnotation, Pair<JavaType, JavaSymbolName>... methodParameters) {
+		if (!StringUtils.hasText(rooEntityAnnotation.getMergeMethod()) || methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
+			return null;
+		}
+		JavaSymbolName methodName = new JavaSymbolName(rooEntityAnnotation.getMergeMethod());
 		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), methodParameters[0].getValue().getSymbolName() + "." + methodName.getSymbolName() + "()", methodName);
 	}
 	

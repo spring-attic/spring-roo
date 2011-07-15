@@ -16,13 +16,16 @@ public @interface RooService {
 	
 	public static final String FIND_ALL_METHOD = "findAll";
 	public static final String SAVE_METHOD = "save";
-	public static final String DOMAIN_TYPES = "domainTypes";
+	public static final String UPDATE_METHOD = "update";
+	public static final String DOMAIN_TYPES_ATTRIBUTE = "domainTypes";
 	
 	Class<?>[] domainTypes();
 
 	String findAllMethod() default FIND_ALL_METHOD;
 	
 	String saveMethod() default SAVE_METHOD;
+	
+	String updateMethod() default UPDATE_METHOD;
 	
 	boolean transactional() default true;
 }

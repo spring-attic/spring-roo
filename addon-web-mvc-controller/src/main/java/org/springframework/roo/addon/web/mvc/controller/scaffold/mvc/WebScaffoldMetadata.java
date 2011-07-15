@@ -115,9 +115,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getListMethod(findAllMethod));
 			findAllMethod.copyAdditionsTo(builder);
 		}
-		
-		if (annotationValues.isUpdate()) {
-			builder.addMethod(getUpdateMethod());
+		MemberTypeAdditions updateMethod = crudAdditions.get(PersistenceCustomDataKeys.MERGE_METHOD.name());
+		if (annotationValues.isUpdate() && updateMethod != null) {
+			builder.addMethod(getUpdateMethod(updateMethod));
 			builder.addMethod(getUpdateFormMethod());
 		}
 		if (annotationValues.isDelete()) {
@@ -447,7 +447,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getUpdateMethod() {
+	private MethodMetadata getUpdateMethod(MemberTypeAdditions updateMethod) {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getMergeMethod() == null) {
 			return null;
@@ -491,7 +491,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
-		bodyBuilder.appendFormalLine(entityName + "." + javaTypePersistenceMetadataHolder.getMergeMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine(updateMethod.getMethodSignature() + ";");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." +  javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);

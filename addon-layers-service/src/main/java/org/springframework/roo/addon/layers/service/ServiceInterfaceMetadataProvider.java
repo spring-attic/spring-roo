@@ -38,7 +38,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_SERVICE);
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class.getName(), ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES)));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class.getName(), ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE)));
 	}
 
 	protected void deactivate(ComponentContext context) {

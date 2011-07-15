@@ -50,14 +50,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private MemberTypeAdditions findAllMethodAdditions;
 	private MethodMetadata findEntriesMethod;
 	private MethodMetadata flushMethod;
-	private MethodMetadata mergeMethod;
+	private MemberTypeAdditions mergeMethodAdditions;
 	private MemberTypeAdditions persistMethodAdditions;
 	private MethodMetadata removeMethod;
 	private String transactionManager;
 	private boolean hasEmbeddedIdentifier;
 	private boolean entityHasSuperclass;
 	
-	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MemberTypeAdditions findAllMethodAdditions, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MethodMetadata mergeMethod, MemberTypeAdditions persistMethodAdditions, MethodMetadata removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass) {
+	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MemberTypeAdditions findAllMethodAdditions, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MemberTypeAdditions mergeMethodAdditions, MemberTypeAdditions persistMethodAdditions, MethodMetadata removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(projectMetadata, "Project metadata required");
@@ -81,7 +81,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		this.findAllMethodAdditions = findAllMethodAdditions;
 		this.findEntriesMethod = findEntriesMethod;
 		this.flushMethod = flushMethod;
-		this.mergeMethod = mergeMethod;
+		this.mergeMethodAdditions = mergeMethodAdditions;
 		this.persistMethodAdditions = persistMethodAdditions;
 		this.removeMethod = removeMethod;
 		this.transactionManager = transactionManager;
@@ -386,13 +386,13 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the merge method, if available and requested (may return null)
 	 */
 	public MethodMetadata getMergeMethodTest() {
-		if (!annotationValues.isMerge() || mergeMethod == null || flushMethod == null || findMethod == null || versionAccessorMethod == null) {
+		if (!annotationValues.isMerge() || mergeMethodAdditions == null || flushMethod == null || findMethod == null || versionAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
 
 		// Prepare method signature
-		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethod.getMethodName().getSymbolName()));
+		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethodAdditions.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
@@ -410,7 +410,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 			
 			String castStr = entityHasSuperclass ? "(" + annotationValues.getEntity().getFullyQualifiedTypeName() + ")" : "";
-			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " merged = " + castStr + " obj." + mergeMethod.getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " merged = " + castStr + " " + mergeMethodAdditions.getMethodSignature() + ";");
 			
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." +  identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");

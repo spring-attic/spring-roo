@@ -38,6 +38,7 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 	private static final Path SRC = Path.SRC_MAIN_JAVA;
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
 	
 	// Fields
 	@Reference private LayerService layerService;
@@ -81,6 +82,8 @@ public class ServiceClassMetadataProvider extends AbstractItdMetadataProvider {
 			Map<String, MemberTypeAdditions> methodAdditions = new HashMap<String, MemberTypeAdditions>();
 			methodAdditions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LAYER_POSITION));
 			methodAdditions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
+			methodAdditions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
+
 			allCrudAdditions.put(domainType, methodAdditions);
 			
 			String pluralId = PluralMetadata.createIdentifier(domainType, Path.SRC_MAIN_JAVA);

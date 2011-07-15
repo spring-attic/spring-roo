@@ -78,6 +78,11 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 				return null;
 			}
 			return getSaveMethod(metadataId, coitd, annotationValues, methodParameters);
+		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.MERGE_METHOD.name())) {
+			if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(targetEntity)) {
+				return null;
+			}
+			return getUpdateMethod(metadataId, coitd, annotationValues, methodParameters);
 		}
 		return null;
 	}
@@ -87,7 +92,16 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
 		String fieldName = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
 		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
-		JavaSymbolName methodName = new JavaSymbolName(serviceAnnotationValues.getSaveMethod());
+		JavaSymbolName methodName = new JavaSymbolName(serviceAnnotationValues.getSaveMethod() + methodParameters[0].getKey().getSimpleTypeName());
+		return new MemberTypeAdditions(classBuilder, fieldName + "." + methodName.getSymbolName() + "(" + methodParameters[0].getValue().getSymbolName() + ")", methodName);
+	}
+	
+	private MemberTypeAdditions getUpdateMethod(String metadataId, ClassOrInterfaceTypeDetails coitd, ServiceAnnotationValues serviceAnnotationValues, Pair<JavaType, JavaSymbolName>... methodParameters) {
+		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
+		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
+		String fieldName = StringUtils.uncapitalize(coitd.getName().getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), coitd.getName()).build());
+		JavaSymbolName methodName = new JavaSymbolName(serviceAnnotationValues.getUpdateMethod() + methodParameters[0].getKey().getSimpleTypeName());
 		return new MemberTypeAdditions(classBuilder, fieldName + "." + methodName.getSymbolName() + "(" + methodParameters[0].getValue().getSymbolName() + ")", methodName);
 	}
 
@@ -121,7 +135,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		for (ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ANNOTATION_TYPE)) {
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), ANNOTATION_TYPE);
 			@SuppressWarnings("unchecked")
-			ArrayAttributeValue<AnnotationAttributeValue<JavaType>> domainTypes = (ArrayAttributeValue<AnnotationAttributeValue<JavaType>>) annotation.getAttribute(new JavaSymbolName(RooService.DOMAIN_TYPES));
+			ArrayAttributeValue<AnnotationAttributeValue<JavaType>> domainTypes = (ArrayAttributeValue<AnnotationAttributeValue<JavaType>>) annotation.getAttribute(new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE));
 			if (domainTypes == null) {
 				return null;
 			}

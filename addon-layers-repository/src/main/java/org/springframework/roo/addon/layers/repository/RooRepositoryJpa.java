@@ -14,14 +14,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooRepositoryJpa {
 	
-	public static final String FIND_ALL = "findAll";
-	public static final String SAVE = "save";
-	public static final String DOMAIN_TYPE = "domainType";
+	public static final String FIND_ALL_METHOD = "findAll";
+	public static final String SAVE_METHOD = "save";
+	public static final String UPDATE_METHOD = SAVE_METHOD;
+	public static final String DOMAIN_TYPE_ATTRIBUTE = "domainType";
 	
 	Class<?> domainType();
 	
-	String getFindAllMethod() default FIND_ALL;
+	String findAllMethod() default FIND_ALL_METHOD;
 	
-	String getSaveMethod() default SAVE;
+	String saveMethod() default SAVE_METHOD;
+	
+	String updateMethod() default UPDATE_METHOD;
 
 }

@@ -14,7 +14,6 @@ import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dod.DataOnDemandMetadata;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
@@ -28,7 +27,6 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -160,7 +158,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), entity, LAYER_POSITION);
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
-		MethodMetadata mergeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.MERGE_METHOD);
+		MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.MERGE_METHOD.name(), entity, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.PERSIST_METHOD.name(), entity, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
 		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
 		if (persistMethodAdditions == null || flushMethod == null || findMethod == null || identifierAccessorMethod == null) {
@@ -192,7 +190,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		// maintain a list of entities that are being tested
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
-		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethod, persistMethodAdditions, removeMethod, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
+		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethodAdditions, persistMethodAdditions, removeMethod, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
 	}
 	
 	private ClassOrInterfaceTypeDetails getEntitySuperclass(JavaType entity) {
