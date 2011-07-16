@@ -31,16 +31,16 @@ public class DbreCommands implements CommandMarker {
 
 	@CliCommand(value = "database introspect", help = "Displays database metadata")
 	public void displayDatabaseMetadata(
-		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Set<Schema> schema, 
+		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Set<Schema> schemas, 
 		@CliOption(key = "file", mandatory = false, help = "The file to save the metadata to") File file,
 		@CliOption(key = "enableViews", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display database views") boolean view) {
 
-		dbreOperations.displayDatabaseMetadata(schema, file, view);
+		dbreOperations.displayDatabaseMetadata(schemas, file, view);
 	}
 
 	@CliCommand(value = "database reverse engineer", help = "Create and update entities based on database metadata")
 	public void serializeDatabaseMetadata(
-		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Set<Schema> schema, 
+		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Set<Schema> schemas, 
 		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage destinationPackage,
 		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for entities") boolean testAutomatically, 
 		@CliOption(key = "enableViews", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Reverse engineer database views") boolean view,
@@ -48,6 +48,6 @@ public class DbreCommands implements CommandMarker {
 		@CliOption(key = "excludeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-tables", help = "The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> excludeTables,
 		@CliOption(key = "includeNonPortableAttributes", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Include non-portable JPA @Column attributes such as 'columnDefinition'") boolean includeNonPortableAttributes) {
 		
-		dbreOperations.reverseEngineerDatabase(schema, destinationPackage, testAutomatically, view, includeTables, excludeTables, includeNonPortableAttributes);
+		dbreOperations.reverseEngineerDatabase(schemas, destinationPackage, testAutomatically, view, includeTables, excludeTables, includeNonPortableAttributes);
 	}
 }

@@ -144,6 +144,25 @@ public abstract class DbreTypeUtils {
 		Assert.notNull(table, "Table required");
 		return getName(table.getName(), true);
 	}
+	
+	public static String suggestPackageName(String str) {
+		StringBuilder result = new StringBuilder();
+		char[] value = str.toCharArray();
+		for (int i = 0; i < value.length; i++) {
+			char c = value[i];
+			if (i == 0 && ('1' == c || '2' == c || '3' == c || '4' == c || '5' == c || '6' == c || '7' == c || '8' == c || '9' == c || '0' == c)) {
+				result.append("p");
+				result.append(c);
+			} else if ('.' == c || '/' == c || ' ' == c || '*' == c || '>' == c || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c ||
+				'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
+				'|' == c || '\\' == c || '\'' == c || '+' == c || '-' == c)  {
+				result.append("");
+			} else {
+				result.append(Character.toLowerCase(c));
+			}
+		}
+		return result.toString();
+	}
 
 	private static String getName(String str, boolean isField) {
 		StringBuilder result = new StringBuilder();

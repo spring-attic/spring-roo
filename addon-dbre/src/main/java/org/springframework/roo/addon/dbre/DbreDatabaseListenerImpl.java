@@ -141,11 +141,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
-				//String typeName = table.getName();
 				JavaPackage schemaPackage = destinationPackage;
 				if (database.hasMultipleSchemas()) {
-				//	typeName += StringUtils.capitalize(table.getSchema().getName());
-					schemaPackage = new JavaPackage(destinationPackage.getFullyQualifiedPackageName() + "." + StringUtils.toLowerCase(table.getSchema().getName()));
+					schemaPackage = new JavaPackage(destinationPackage.getFullyQualifiedPackageName() + "." + DbreTypeUtils.suggestPackageName(table.getSchema().getName()));
 				}
 				JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), schemaPackage);
 				if (typeLocationService.findClassOrInterface(javaType) == null) {
