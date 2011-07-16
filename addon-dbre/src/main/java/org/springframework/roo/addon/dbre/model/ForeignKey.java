@@ -26,6 +26,9 @@ public class ForeignKey {
 
 	/** The name of the foreign (target) table. */
 	private String foreignTableName;
+		
+	/** The schema name of the foreign table. */
+	private String foreignSchemaName;
 
 	/** The action to perform when the value of the referenced column changes. */
 	private CascadeAction onUpdate = CascadeAction.NONE;
@@ -60,12 +63,20 @@ public class ForeignKey {
 		return foreignTable;
 	}
 
-	public void setForeignTable(Table foreignTable) {
+	void setForeignTable(Table foreignTable) {
 		this.foreignTable = foreignTable;
 	}
 
-	public String getForeignTableName() {
+	String getForeignTableName() {
 		return foreignTableName;
+	}
+
+	String getForeignSchemaName() {
+		return foreignSchemaName;
+	}
+
+	void setForeignSchemaName(String foreignSchemaName) {
+		this.foreignSchemaName = foreignSchemaName;
 	}
 
 	public CascadeAction getOnUpdate() {
@@ -119,7 +130,8 @@ public class ForeignKey {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (exported ? 1231 : 1237);
-		result = prime * result + ((foreignTable == null) ? 0 : foreignTable.hashCode());
+		result = prime * result + ((foreignSchemaName == null) ? 0 : foreignSchemaName.hashCode());
+		result = prime * result + ((foreignTableName == null) ? 0 : foreignTableName.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
@@ -135,10 +147,15 @@ public class ForeignKey {
 		ForeignKey other = (ForeignKey) obj;
 		if (exported != other.exported)
 			return false;
-		if (foreignTable == null) {
-			if (other.foreignTable != null)
+		if (foreignSchemaName == null) {
+			if (other.foreignSchemaName != null)
 				return false;
-		} else if (!foreignTable.equals(other.foreignTable))
+		} else if (!foreignSchemaName.equals(other.foreignSchemaName))
+			return false;
+		if (foreignTableName == null) {
+			if (other.foreignTableName != null)
+				return false;
+		} else if (!foreignTableName.equals(other.foreignTableName))
 			return false;
 		if (name == null) {
 			if (other.name != null)
@@ -148,7 +165,8 @@ public class ForeignKey {
 		return true;
 	}
 
+	@Override
 	public String toString() {
-		return String.format("ForeignKey [name=%s, exported=%s, foreignTable=%s, onUpdate=%s, onDelete=%s, keySequence=%s, references=%s]", name, exported, foreignTableName, onUpdate, onDelete, keySequence, references);
+		return String.format("ForeignKey [name=%s, exported=%s, foreignTableName=%s, foreignSchemaName=%s, onUpdate=%s, onDelete=%s, keySequence=%s, references=%s]", name, exported, foreignTableName, foreignSchemaName, onUpdate, onDelete, keySequence, references);
 	}
 }

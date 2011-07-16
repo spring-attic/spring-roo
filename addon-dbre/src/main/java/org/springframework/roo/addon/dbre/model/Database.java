@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents the database model, ie. the tables in the database.
@@ -17,9 +19,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Database {
-
-	/** The name of the database model. Defaults to the catalog name if the schema name is not available. */
-	private String name;
 
 	/** All tables. */
 	private Set<Table> tables;
@@ -33,20 +32,12 @@ public class Database {
 	/** Whether or not to included non-portable JPA attribues in the @Column annotation */
 	private boolean includeNonPortableAttributes;
 	
-	Database(String name, Set<Table> tables) {
-		Assert.hasText(name, "Database name required");
+	private boolean multipleSchemas;
+	
+	Database(Set<Table> tables) {
 		Assert.notNull(tables, "Tables required");
-		this.name = name;
 		this.tables = tables;
 		initialize();
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Schema getSchema() {
-		return new Schema(name);
 	}
 
 	public Set<Table> getTables() {
@@ -57,10 +48,12 @@ public class Database {
 		return !tables.isEmpty();
 	}
 
-	public Table getTable(String name) {
+	public Table getTable(String name, String schemaName) {
 		for (Table table : tables) {
 			if (table.getName().equals(name)) {
-				return table;
+				if (!StringUtils.hasText(schemaName) || DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName) || table.getSchema().getName().equals(schemaName)) {
+					return table;
+				}
 			}
 		}
 		return null;
@@ -90,16 +83,23 @@ public class Database {
 		this.includeNonPortableAttributes = includeNonPortableAttributes;
 	}
 
+	public boolean hasMultipleSchemas() {
+		return multipleSchemas;
+	}
+
 	/**
 	 * Initialises the model by establishing the relationships between elements in this model eg. in foreign keys etc.
 	 */
 	private void initialize() {
+		Set<Schema> schemas = new HashSet<Schema>();
 		for (Table table : tables) {
+			schemas.add(table.getSchema());
 			initializeImportedKeys(table);
 			initializeExportedKeys(table);
 			initializeIndices(table);
 			initializeJoinTable(table);
 		}
+		multipleSchemas = schemas.size() > 1;
 	}
 
 	private void initializeImportedKeys(Table table) {
@@ -112,7 +112,8 @@ public class Database {
 				continue;
 			}
 			String foreignTableName = foreignKey.getForeignTableName();
-			Table targetTable = getTable(foreignTableName);
+			String foreignSchemaName = foreignKey.getForeignSchemaName();
+			Table targetTable = getTable(foreignTableName, foreignSchemaName);
 			if (targetTable != null) {
 				keySequence = keySequenceMap.get(foreignTableName);
 				if (keySequence == null) {
@@ -168,7 +169,8 @@ public class Database {
 				continue;
 			}
 			String foreignTableName = exportedKey.getForeignTableName();
-			Table targetTable = getTable(foreignTableName);
+			String foreignSchemaName = exportedKey.getForeignSchemaName();
+			Table targetTable = getTable(foreignTableName, foreignSchemaName);
 			if (targetTable != null) {
 				exportedKey.setForeignTable(targetTable);
 				keySequence = keySequenceMap.get(foreignTableName);
@@ -229,7 +231,30 @@ public class Database {
 		}
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((tables == null) ? 0 : tables.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Database other = (Database) obj;
+		if (tables == null) {
+			if (other.tables != null)
+				return false;
+		} else if (!tables.equals(other.tables))
+			return false;
+		return true;
+	}
+
 	public String toString() {
-		return String.format("Database [name=%s, tables=%s, destinationPackage=%s, testAutomatically=%s, includeNonPortableAttributes=%s]", name, tables, destinationPackage, testAutomatically, includeNonPortableAttributes);
+		return String.format("Database [tables=%s, destinationPackage=%s, testAutomatically=%s, includeNonPortableAttributes=%s]", tables, destinationPackage, testAutomatically, includeNonPortableAttributes);
 	}
 }

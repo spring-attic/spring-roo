@@ -31,7 +31,7 @@ public class DbreCommands implements CommandMarker {
 
 	@CliCommand(value = "database introspect", help = "Displays database metadata")
 	public void displayDatabaseMetadata(
-		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema, 
+		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Set<Schema> schema, 
 		@CliOption(key = "file", mandatory = false, help = "The file to save the metadata to") File file,
 		@CliOption(key = "enableViews", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display database views") boolean view) {
 
@@ -40,7 +40,7 @@ public class DbreCommands implements CommandMarker {
 
 	@CliCommand(value = "database reverse engineer", help = "Create and update entities based on database metadata")
 	public void serializeDatabaseMetadata(
-		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema, 
+		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Set<Schema> schema, 
 		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage destinationPackage,
 		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for entities") boolean testAutomatically, 
 		@CliOption(key = "enableViews", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Reverse engineer database views") boolean view,

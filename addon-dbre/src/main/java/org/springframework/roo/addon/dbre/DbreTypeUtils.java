@@ -2,7 +2,9 @@ package org.springframework.roo.addon.dbre;
 
 import java.util.Set;
 
+import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
+import org.springframework.roo.addon.dbre.model.TableBean;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -28,15 +30,15 @@ public abstract class DbreTypeUtils {
 	 * Locates the type associated with the presented table name.
 	 * 
 	 * @param managedEntities a set of database-managed entities to search.
-	 * @param tableNamePattern the table to locate (required).
+	 * @param tableName the table to locate (required).
 	 * @return the type (if known) or null (if not found).
 	 */
-	public static JavaType findTypeForTableName(Set<ClassOrInterfaceTypeDetails> managedEntities, String tableNamePattern) {
-		Assert.hasText(tableNamePattern, "Table name required");
+	public static JavaType findTypeForTableName(Set<ClassOrInterfaceTypeDetails> managedEntities, String tableName, String schemaName) {
+		Assert.hasText(tableName, "Table name required");
 
 		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
-			String tableName = getTableName(managedEntity);
-			if (tableNamePattern.equals(tableName)) {
+			TableBean tableBean = getTableName(managedEntity);
+			if (tableName.equals(tableBean.getName()) && (!DbreModelService.NO_SCHEMA_REQUIRED.equals(tableBean.getSchemaName()) || schemaName.equals(tableBean.getSchemaName()))) {
 				return managedEntity.getName();
 			}
 		}
@@ -53,29 +55,34 @@ public abstract class DbreTypeUtils {
 	 */
 	public static JavaType findTypeForTable(Set<ClassOrInterfaceTypeDetails> managedEntities, Table table) {
 		Assert.notNull(table, "Table required");
-		return findTypeForTableName(managedEntities, table.getName());
+		return findTypeForTableName(managedEntities, table.getName(), table.getSchema().getName());
 	}
 
 	/**
-	 * Locates the table name using the presented ClassOrInterfaceTypeDetails.
+	 * Locates the table using the presented ClassOrInterfaceTypeDetails.
 	 * 
 	 * <p>
 	 * The search for the table names starts on the @Table annotation and if not present, the
 	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
 	 * 
 	 * @param classOrInterfaceTypeDetails the type to search.
-	 * @return the table name (if known) or null (if not found).
+	 * @return the table (if known) or null (if not found).
 	 */
-	public static String getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	public static TableBean getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		// Try to locate a table name, which can be specified either via the "name" attribute on
 		// @Table, eg @Table(name = "foo") or via the "table" attribute on @RooEntity, eg @RooEntity(table = "foo")
 		String tableName = null;
+		String schemaName = null;
 
 		AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Table"));
 		if (annotation != null) {
 			AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName("name"));
 			if (nameAttribute != null) {
 				tableName = (String) nameAttribute.getValue();
+			}
+			AnnotationAttributeValue<?> schemaAttribute = annotation.getAttribute(new JavaSymbolName("schema"));
+			if (schemaAttribute != null) {
+				schemaName = (String) schemaAttribute.getValue();
 			}
 		}
 
@@ -87,10 +94,14 @@ public abstract class DbreTypeUtils {
 				if (tableAttribute != null) {
 					tableName = (String) tableAttribute.getValue();
 				}
+				AnnotationAttributeValue<?> schemaAttribute = annotation.getAttribute(new JavaSymbolName("schema"));
+				if (schemaAttribute != null) {
+					schemaName = (String) schemaAttribute.getValue();
+				}
 			}
 		}
 
-		return StringUtils.trimToNull(tableName);
+		return new TableBean(tableName, schemaName);
 	}
 
 	/**

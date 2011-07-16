@@ -11,6 +11,12 @@ import java.util.Set;
  */
 public interface DbreModelService {
 
+	/** The DBRE XML file name */
+	String DBRE_XML = "dbre.xml";
+	
+	/** The schema string for databases which do not support schemas, such as MySQL. */
+	String NO_SCHEMA_REQUIRED = "no-schema-required";
+
 	/**
 	 * Determines if the database uses schemas.
 	 * 
@@ -52,22 +58,15 @@ public interface DbreModelService {
 	 * @return a String representing the path of the DBRE XML file
 	 */
 	String getDbreXmlPath();
-	
-	/**
-	 * Returns the schema string for databases which do not support schemas, such as MySQL.
-	 * 
-	 * @return the string, "no-schema-required"
-	 */
-	String getNoSchemaString();
 
 	/**
 	 * Retrieves the database metadata from a JDBC connection.
 	 * 
-	 * @param schema the schema to query (required)
+	 * @param schemas the schema(s) to query (required)
 	 * @param view true if database views are to be retrieved, otherwise false
 	 * @param includeTables a set of table names to include
 	 * @param excludeTables a set of table names to exlude
 	 * @return the database metadata if available (null if cannot connect to the database or the schema is not found)
 	 */
-	Database refreshDatabase(Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables);
+	Database refreshDatabase(Set<Schema> schemas, boolean view, Set<String> includeTables, Set<String> excludeTables);
 }

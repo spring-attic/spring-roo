@@ -25,16 +25,16 @@ public interface DbreOperations {
 	 * Displays the metadata for the indicated schema on the screen, or writes it to
 	 * the given file if a filename is specified.
 	 * 
-	 * @param schema the schema to introspect (required)
+	 * @param schemas the schema(s) to introspect (required)
 	 * @param file to write to (can be null, in which case the output will appear on-screen)
 	 * @param view true if database views are displayed, otherwise false
 	 */
-	void displayDatabaseMetadata(Schema schema, File file, boolean view);
+	void displayDatabaseMetadata(Set<Schema> schemas, File file, boolean view);
 	
 	/**
 	 * Introspects the database schema and causes the related entities on disk to be created, updated and deleted.
 	 * 
-	 * @param schema the schema to reverse engineer (required)
+	 * @param schemas the schema(s) to reverse engineer (required)
 	 * @param destinationPackage the package in which all entities will be stored (if not
 	 * given, the project's top level package)
 	 * @param testAutomatically whether to create automatic integration tests for generated entities
@@ -43,5 +43,5 @@ public interface DbreOperations {
 	 * @param excludeTables the set of tables to exclude from reverse engineering
 	 * @param includeNonPortableAttributes whether or not to include non-portable JPA @Column attributes such as 'columnDefinition'
 	 */
-	void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes);
+	void reverseEngineerDatabase(Set<Schema> schemas, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes);
 }

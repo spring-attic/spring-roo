@@ -20,83 +20,44 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class DatabaseIntrospector extends AbstractIntrospector {
-	private String catalogName;
-	private Schema schema;
+	private Set<Schema> schemas;
 	private boolean view;
 	private Set<String> includeTables = null;
 	private Set<String> excludeTables = null;
-	private String tableName;
-	private String columnName;
 
-	public DatabaseIntrospector(Connection connection, Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
+	public DatabaseIntrospector(Connection connection, Set<Schema> schemas, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
 		super(connection);
-		this.schema = schema;
+		this.schemas = schemas;
 		this.view = view;
 		this.includeTables = includeTables;
 		this.excludeTables = excludeTables;
 	}
 
-	public String getCatalogName() {
-		return catalogName;
-	}
-
-	public Schema getSchema() {
-		return schema;
-	}
-
-	public String getSchemaName() {
-		return schema != null ? schema.getName() : null;
-	}
-
-	public String getTableName() {
-		return tableName;
-	}
-
-	public String getColumnName() {
-		return columnName;
-	}
-
-	public Set<Schema> getSchemas() throws SQLException {
-		Set<Schema> schemas = new LinkedHashSet<Schema>();
-
-		ResultSet rs = databaseMetaData.getSchemas();
-		try {
-			while (rs.next()) {
-				schemas.add(new Schema(rs.getString("TABLE_SCHEM")));
-			}
-		} finally {
-			rs.close();
-		}
-
-		return schemas;
-	}
-
 	public Database createDatabase() throws SQLException {
-		String name = schema != null && StringUtils.hasText(schema.getName()) ? schema.getName() : catalogName;
-		return new Database(name, getTables());
+		Set<Table> tables = new LinkedHashSet<Table>();
+		for (Schema schema : schemas) {
+			tables.addAll(getTables(schema));
+		}
+		return new Database(tables);
 	}
 
-	private Set<Table> getTables() throws SQLException {
+	private Set<Table> getTables(Schema schema) throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
 
 		String[] types = view ? new String[] { TableType.TABLE.name(), TableType.VIEW.name() } : new String[] { TableType.TABLE.name() };
-		ResultSet rs = databaseMetaData.getTables(getCatalog(), getSchemaPattern(), getTableNamePattern(), types);
+		ResultSet rs = databaseMetaData.getTables(null, getArtifact(schema.getName()), null, types);
 		try {
 			while (rs.next()) {
-				tableName = rs.getString("TABLE_NAME");
-				catalogName = rs.getString("TABLE_CAT");
-				schema = new Schema(rs.getString("TABLE_SCHEM"));
+				String tableName = rs.getString("TABLE_NAME");
 
 				// Check for certain tables such as Oracle recycle bin tables, and ignore
-				if (ignoreTables()) {
+				if (ignoreTables(tableName)) {
 					continue;
 				}
 
 				if (hasIncludedTable(tableName) && !hasExcludedTable(tableName)) {
-					Table table = new Table();
-					table.setName(tableName);
-					table.setCatalog(catalogName);
-					table.setSchema(schema);
+					Table table = new Table(tableName, new Schema(rs.getString("TABLE_SCHEM")));
+					table.setCatalog(rs.getString("TABLE_CAT"));
 					table.setDescription(rs.getString("REMARKS"));
 
 					readColumns(table);
@@ -104,7 +65,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 					readForeignKeys(table, true);
 					readIndices(table);
 
-					for (String columnName : readPrimaryKeyNames()) {
+					for (String columnName : readPrimaryKeyNames(table)) {
 						Column column = table.findColumn(columnName);
 						if (column != null) {
 							column.setPrimaryKey(true);
@@ -121,7 +82,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return tables;
 	}
 
-	private boolean ignoreTables() {
+	private boolean ignoreTables(String tableName) {
 		boolean ignore = false;
 		try {
 			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableName.startsWith("BIN$")) {
@@ -132,7 +93,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 	}
 
 	private void readColumns(Table table) throws SQLException {
-		ResultSet rs = databaseMetaData.getColumns(catalogName, getSchemaName(), tableName, getColumnNamePattern());
+		ResultSet rs = databaseMetaData.getColumns(table.getCatalog(), table.getSchema().getName(), table.getName(), null);
 		try {
 			while (rs.next()) {
 				Column column = new Column(rs.getString("COLUMN_NAME"), rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"), rs.getInt("COLUMN_SIZE"), rs.getInt("DECIMAL_DIGITS"));
@@ -152,9 +113,9 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 
 		ResultSet rs;
 		if (exported) {
-			rs = databaseMetaData.getExportedKeys(catalogName, getSchemaName(), tableName);
+			rs = databaseMetaData.getExportedKeys(table.getCatalog(), table.getSchema().getName(), table.getName());
 		} else {
-			rs = databaseMetaData.getImportedKeys(catalogName, getSchemaName(), tableName);
+			rs = databaseMetaData.getImportedKeys(table.getCatalog(), table.getSchema().getName(), table.getName());
 		}
 
 		try {
@@ -165,6 +126,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 
 				if (!hasExcludedTable(foreignTableName)) {
 					ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
+					foreignKey.setForeignSchemaName(StringUtils.defaultIfEmpty(rs.getString(exported ? "FKTABLE_SCHEM" : "PKTABLE_SCHEM"), DbreModelService.NO_SCHEMA_REQUIRED));
 					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 					foreignKey.setExported(exported);
@@ -249,7 +211,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		ResultSet rs;
 		try {
 			// Catching SQLException here due to Oracle throwing exception when attempting to retrieve indices for deleted tables that exist in Oracle's recycle bin
-			rs = databaseMetaData.getIndexInfo(catalogName, getSchemaName(), tableName, false, false);
+			rs = databaseMetaData.getIndexInfo(table.getCatalog(), table.getSchema().getName(), table.getName(), false, false);
 		} catch (SQLException e) {
 			return;
 		}
@@ -295,10 +257,10 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return null;
 	}
 
-	private Set<String> readPrimaryKeyNames() throws SQLException {
+	private Set<String> readPrimaryKeyNames(Table table) throws SQLException {
 		Set<String> columnNames = new LinkedHashSet<String>();
 
-		ResultSet rs = databaseMetaData.getPrimaryKeys(catalogName, getSchemaName(), tableName);
+		ResultSet rs = databaseMetaData.getPrimaryKeys(table.getCatalog(), table.getSchema().getName(), table.getName());
 		try {
 			while (rs.next()) {
 				columnNames.add(rs.getString("COLUMN_NAME"));
@@ -310,43 +272,13 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return columnNames;
 	}
 
-	private String getCatalog() throws SQLException {
+	private String getArtifact(String artifactName) throws SQLException {
 		if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			return StringUtils.toLowerCase(catalogName);
+			return StringUtils.toLowerCase(artifactName);
 		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			return StringUtils.toUpperCase(catalogName);
+			return StringUtils.toUpperCase(artifactName);
 		} else {
-			return catalogName;
-		}
-	}
-
-	private String getSchemaPattern() throws SQLException {
-		if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			return StringUtils.toLowerCase(getSchemaName());
-		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			return StringUtils.toUpperCase(getSchemaName());
-		} else {
-			return getSchemaName();
-		}
-	}
-
-	private String getTableNamePattern() throws SQLException {
-		if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			return StringUtils.toLowerCase(tableName);
-		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			return StringUtils.toUpperCase(tableName);
-		} else {
-			return tableName;
-		}
-	}
-
-	private String getColumnNamePattern() throws SQLException {
-		if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			return StringUtils.toLowerCase(columnName);
-		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			return StringUtils.toUpperCase(columnName);
-		} else {
-			return columnName;
+			return artifactName;
 		}
 	}
 
