@@ -46,6 +46,10 @@ public class Table {
 	public Schema getSchema() {
 		return schema;
 	}
+	
+	public String getFullyQualifiedTableName() {
+		return DbreModelService.NO_SCHEMA_REQUIRED.equals(schema.getName()) ? name : (schema.getName() + "." + name);
+	}
 
 	public String getDescription() {
 		return description;

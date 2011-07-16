@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.dbre.model.TableBean;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -31,14 +30,15 @@ public abstract class DbreTypeUtils {
 	 * 
 	 * @param managedEntities a set of database-managed entities to search.
 	 * @param tableName the table to locate (required).
+	 * @param schemaName the table's schema name
 	 * @return the type (if known) or null (if not found).
 	 */
 	public static JavaType findTypeForTableName(Set<ClassOrInterfaceTypeDetails> managedEntities, String tableName, String schemaName) {
 		Assert.hasText(tableName, "Table name required");
 
 		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
-			TableBean tableBean = getTableName(managedEntity);
-			if (tableName.equals(tableBean.getName()) && (!DbreModelService.NO_SCHEMA_REQUIRED.equals(tableBean.getSchemaName()) || schemaName.equals(tableBean.getSchemaName()))) {
+			String managedSchemaName = getSchemaName(managedEntity);
+			if (tableName.equals(getTableName(managedEntity)) && (!DbreModelService.NO_SCHEMA_REQUIRED.equals(managedSchemaName) || schemaName.equals(managedSchemaName))) {
 				return managedEntity.getName();
 			}
 		}
@@ -68,42 +68,53 @@ public abstract class DbreTypeUtils {
 	 * @param classOrInterfaceTypeDetails the type to search.
 	 * @return the table (if known) or null (if not found).
 	 */
-	public static TableBean getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	public static String getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		// Try to locate a table name, which can be specified either via the "name" attribute on
 		// @Table, eg @Table(name = "foo") or via the "table" attribute on @RooEntity, eg @RooEntity(table = "foo")
-		String tableName = null;
-		String schemaName = null;
-
-		AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Table"));
-		if (annotation != null) {
-			AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName("name"));
-			if (nameAttribute != null) {
-				tableName = (String) nameAttribute.getValue();
-			}
-			AnnotationAttributeValue<?> schemaAttribute = annotation.getAttribute(new JavaSymbolName("schema"));
-			if (schemaAttribute != null) {
-				schemaName = (String) schemaAttribute.getValue();
-			}
-		}
-
-		if (!StringUtils.hasText(tableName)) {
-			// The search continues...
-			annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-			if (annotation != null) {
-				AnnotationAttributeValue<?> tableAttribute = annotation.getAttribute(new JavaSymbolName("table"));
-				if (tableAttribute != null) {
-					tableName = (String) tableAttribute.getValue();
-				}
-				AnnotationAttributeValue<?> schemaAttribute = annotation.getAttribute(new JavaSymbolName("schema"));
-				if (schemaAttribute != null) {
-					schemaName = (String) schemaAttribute.getValue();
-				}
-			}
-		}
-
-		return new TableBean(tableName, schemaName);
+		return getTableOrSchemaName(classOrInterfaceTypeDetails, "name", "table");
 	}
 
+	/**
+	 * Locates the table's schema using the presented ClassOrInterfaceTypeDetails.
+	 * 
+	 * <p>
+	 * The search for the table names starts on the @Table annotation and if not present, the
+	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
+	 * 
+	 * @param classOrInterfaceTypeDetails the type to search.
+	 * @return the schema name (if known) or null (if not found).
+	 */
+	public static String getSchemaName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		// Try to locate a schema name, which can be specified either via the "schema" attribute on
+		// @Table, eg @Table(schema = "foo") or via the "table" attribute on @RooEntity, eg @RooEntity(schema = "foo")
+		return getTableOrSchemaName(classOrInterfaceTypeDetails, "schema", "schema");
+	}
+	
+	private static String getTableOrSchemaName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, String tableAttribute, String rooEntityAttraibute) {
+		String attributeValue = null;
+
+		AnnotationMetadata tableAnnotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Table"));
+		if (tableAnnotation != null) {
+			AnnotationAttributeValue<?> attribute = tableAnnotation.getAttribute(new JavaSymbolName(tableAttribute));
+			if (attribute != null) {
+				attributeValue = (String) attribute.getValue();
+			}
+		}
+
+		if (!StringUtils.hasText(attributeValue)) {
+			// The search continues...
+			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
+			if (rooEntityAnnotation != null) {
+				AnnotationAttributeValue<?> attribute = rooEntityAnnotation.getAttribute(new JavaSymbolName(rooEntityAttraibute));
+				if (attribute != null) {
+					attributeValue = (String) attribute.getValue();
+				}
+			}
+		}
+
+		return attributeValue;
+	}
+	
 	/**
 	 * Returns a JavaType given a table identity.
 	 * 
