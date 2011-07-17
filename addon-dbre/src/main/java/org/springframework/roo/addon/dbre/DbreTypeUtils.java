@@ -86,7 +86,7 @@ public abstract class DbreTypeUtils {
 	 */
 	public static String getSchemaName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		// Try to locate a schema name, which can be specified either via the "schema" attribute on
-		// @Table, eg @Table(schema = "foo") or via the "table" attribute on @RooEntity, eg @RooEntity(schema = "foo")
+		// @Table, eg @Table(schema = "foo") or via the "schema" attribute on @RooEntity, eg @RooEntity(schema = "foo")
 		return getTableOrSchemaName(classOrInterfaceTypeDetails, "schema", "schema");
 	}
 	
