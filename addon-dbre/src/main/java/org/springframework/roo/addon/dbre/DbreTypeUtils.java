@@ -28,12 +28,13 @@ public abstract class DbreTypeUtils {
 	/**
 	 * Locates the type associated with the presented table name.
 	 * 
-	 * @param managedEntities a set of database-managed entities to search.
-	 * @param tableName the table to locate (required).
+	 * @param managedEntities a set of database-managed entities to search (required)
+	 * @param tableName the table to locate (required)
 	 * @param schemaName the table's schema name
-	 * @return the type (if known) or null (if not found).
+	 * @return the type (if known) or null (if not found)
 	 */
 	public static JavaType findTypeForTableName(Set<ClassOrInterfaceTypeDetails> managedEntities, String tableName, String schemaName) {
+		Assert.notNull(managedEntities, "Set of managed entities required");
 		Assert.hasText(tableName, "Table name required");
 
 		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
@@ -49,11 +50,12 @@ public abstract class DbreTypeUtils {
 	/**
 	 * Locates the type associated with the presented table.
 	 * 
-	 * @param managedEntities a set of database-managed entities to search.
-	 * @param table the table to locate (required).
-	 * @return the type (if known) or null (if not found).
+	 * @param managedEntities a set of database-managed entities to search (required)
+	 * @param table the table to locate (required)
+	 * @return the type (if known) or null (if not found)
 	 */
 	public static JavaType findTypeForTable(Set<ClassOrInterfaceTypeDetails> managedEntities, Table table) {
+		Assert.notNull(managedEntities, "Set of managed entities required");
 		Assert.notNull(table, "Table required");
 		return findTypeForTableName(managedEntities, table.getName(), table.getSchema().getName());
 	}
@@ -65,10 +67,11 @@ public abstract class DbreTypeUtils {
 	 * The search for the table names starts on the @Table annotation and if not present, the
 	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
 	 * 
-	 * @param classOrInterfaceTypeDetails the type to search.
-	 * @return the table (if known) or null (if not found).
+	 * @param classOrInterfaceTypeDetails the type to search (required)
+	 * @return the table (if known) or null (if not found)
 	 */
 	public static String getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		Assert.notNull(classOrInterfaceTypeDetails, "ClassOrInterfaceTypeDetails type required");
 		// Try to locate a table name, which can be specified either via the "name" attribute on
 		// @Table, eg @Table(name = "foo") or via the "table" attribute on @RooEntity, eg @RooEntity(table = "foo")
 		return getTableOrSchemaName(classOrInterfaceTypeDetails, "name", "table");
@@ -81,10 +84,11 @@ public abstract class DbreTypeUtils {
 	 * The search for the table names starts on the @Table annotation and if not present, the
 	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
 	 * 
-	 * @param classOrInterfaceTypeDetails the type to search.
-	 * @return the schema name (if known) or null (if not found).
+	 * @param classOrInterfaceTypeDetails the type to search (required) 
+	 * @return the schema name (if known) or null (if not found)
 	 */
 	public static String getSchemaName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		Assert.notNull(classOrInterfaceTypeDetails, "ClassOrInterfaceTypeDetails type required");
 		// Try to locate a schema name, which can be specified either via the "schema" attribute on
 		// @Table, eg @Table(schema = "foo") or via the "schema" attribute on @RooEntity, eg @RooEntity(schema = "foo")
 		return getTableOrSchemaName(classOrInterfaceTypeDetails, "schema", "schema");
@@ -118,27 +122,27 @@ public abstract class DbreTypeUtils {
 	/**
 	 * Returns a JavaType given a table identity.
 	 * 
-	 * @param tableNamePattern the table name to convert
-	 * @param javaPackage the Java package to use for the type.
+	 * @param tableName the table name to convert (required)
+	 * @param javaPackage the Java package to use for the type
 	 * @return a new JavaType
 	 */
-	public static JavaType suggestTypeNameForNewTable(String tableNamePattern, JavaPackage javaPackage) {
-		Assert.hasText(tableNamePattern, "Table name required");
+	public static JavaType suggestTypeNameForNewTable(String tableName, JavaPackage javaPackage) {
+		Assert.hasText(tableName, "Table name required");
 
 		StringBuilder result = new StringBuilder();
 		if (javaPackage != null && StringUtils.hasText(javaPackage.getFullyQualifiedPackageName())) {
 			result.append(javaPackage.getFullyQualifiedPackageName());
 			result.append(".");
 		}
-		result.append(getName(tableNamePattern, false));
+		result.append(getName(tableName, false));
 		return new JavaType(result.toString());
 	}
 
 	/**
 	 * Returns a field name for a given database table or column name;
 	 * 
-	 * @param name the name of the table or column.
-	 * @return a String representing the table or column.
+	 * @param name the name of the table or column (required)
+	 * @return a String representing the table or column
 	 */
 	public static String suggestFieldName(String name) {
 		Assert.hasText(name, "Table or column name required");
@@ -148,7 +152,7 @@ public abstract class DbreTypeUtils {
 	/**
 	 * Returns a field name for a given database table;
 	 * 
-	 * @param table the the table.
+	 * @param table the the table (required)
 	 * @return a String representing the table or column.
 	 */
 	public static String suggestFieldName(Table table) {
