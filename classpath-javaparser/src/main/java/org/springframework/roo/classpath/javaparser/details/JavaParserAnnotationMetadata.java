@@ -20,9 +20,7 @@ import japa.parser.ast.expr.StringLiteralExpr;
 import japa.parser.ast.type.Type;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -30,6 +28,7 @@ import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.CharAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DoubleAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
@@ -41,38 +40,34 @@ import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
 /**
  * Java Parser implementation of {@link AnnotationMetadata}.
  * 
  * @author Ben Alex
+ * @author Andrew Swan
  * @since 1.0
  */
-public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
-	// Passed in
-	private AnnotationExpr annotationExpr;
-	private CompilationUnitServices compilationUnitServices;
+public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadata {
 
-	// Computed
-	private JavaType annotationType;
-	private List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-	private Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
-
-	public JavaParserAnnotationMetadata(AnnotationExpr annotationExpr, CompilationUnitServices compilationUnitServices) {
+	/**
+	 * Factory method
+	 * 
+	 * @param annotationExpr
+	 * @param compilationUnitServices
+	 * @return a non-<code>null</code> instance
+	 * @since 1.2
+	 */
+	public static JavaParserAnnotationMetadata getInstance(final AnnotationExpr annotationExpr, final CompilationUnitServices compilationUnitServices) {
 		Assert.notNull(annotationExpr, "Annotation expression required");
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 
-		// Store required source information for subsequent mutability support
-		this.annotationExpr = annotationExpr;
-		this.compilationUnitServices = compilationUnitServices;
-
 		// Obtain the annotation type name from the assorted types of annotations we might have received (ie marker annotations, single member annotations, normal annotations etc)
-		NameExpr nameToFind = JavaParserUtils.getNameExpr(annotationExpr);
+		final NameExpr nameToFind = JavaParserUtils.getNameExpr(annotationExpr);
 
 		// Compute the actual annotation type, having regard to the compilation unit package and imports
-		annotationType = JavaParserUtils.getJavaType(compilationUnitServices, nameToFind, null);
+		final JavaType annotationType = JavaParserUtils.getJavaType(compilationUnitServices, nameToFind, null);
 
 		// Generate some member-value pairs for subsequent parsing
 		List<MemberValuePair> annotationPairs = new ArrayList<MemberValuePair>();
@@ -93,22 +88,23 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 		}
 
 		// Iterate over the annotation attributes, creating our parsed attributes map
+		final List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		for (MemberValuePair p : annotationPairs) {
 			JavaSymbolName annotationName = new JavaSymbolName(p.getName());
-			AnnotationAttributeValue<?> value = convert(annotationName, p.getValue());
-			attributes.add(value);
-			attributeMap.put(value.getName(), value);
+			AnnotationAttributeValue<?> value = convert(annotationName, p.getValue(), compilationUnitServices);
+			attributeValues.add(value);
 		}
+		return new JavaParserAnnotationMetadata(annotationType, attributeValues, annotationExpr);
 	}
 
-	private AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, Expression expression) {
+	private static AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, Expression expression, final CompilationUnitServices compilationUnitServices) {
 		if (annotationName == null) {
 			annotationName = new JavaSymbolName("__ARRAY_ELEMENT__");
 		}
 
 		if (expression instanceof AnnotationExpr) {
 			AnnotationExpr annotationExpr = (AnnotationExpr) expression;
-			AnnotationMetadata value = new JavaParserAnnotationMetadata(annotationExpr, compilationUnitServices);
+			AnnotationMetadata value = getInstance(annotationExpr, compilationUnitServices);
 			return new NestedAnnotationAttributeValue(annotationName, value);
 		}
 
@@ -224,29 +220,12 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			ArrayInitializerExpr castExp = (ArrayInitializerExpr) expression;
 			List<AnnotationAttributeValue<?>> arrayElements = new ArrayList<AnnotationAttributeValue<?>>();
 			for (Expression e : castExp.getValues()) {
-				arrayElements.add(convert(null, e));
+				arrayElements.add(convert(null, e, compilationUnitServices));
 			}
 			return new ArrayAttributeValue<AnnotationAttributeValue<?>>(annotationName, arrayElements);
 		}
 
 		throw new UnsupportedOperationException("Unable to parse annotation attribute '" + annotationName + "' due to unsupported annotation expression '" + expression.getClass().getName() + "'");
-	}
-
-	public JavaType getAnnotationType() {
-		return annotationType;
-	}
-
-	public AnnotationAttributeValue<?> getAttribute(JavaSymbolName attributeName) {
-		Assert.notNull(attributeName, "Attribute name required");
-		return attributeMap.get(attributeName);
-	}
-
-	public List<JavaSymbolName> getAttributeNames() {
-		List<JavaSymbolName> result = new ArrayList<JavaSymbolName>();
-		for (AnnotationAttributeValue<?> value : attributes) {
-			result.add(value.getName());
-		}
-		return result;
 	}
 
 	/**
@@ -365,7 +344,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 	 * @param annotations to remove the annotation from (required)
 	 * @param annotation to remove (required)
 	 */
-	public static void removeAnnotationFromList(CompilationUnitServices compilationUnitServices, List<AnnotationExpr> annotations, JavaType annotation) {
+	public static void removeAnnotationFromList(final CompilationUnitServices compilationUnitServices, final List<AnnotationExpr> annotations, JavaType annotation) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(annotations, "Annotations required");
 		Assert.notNull(annotation, "Annotation metadata required");
@@ -473,11 +452,20 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 
 		throw new UnsupportedOperationException("Unsupported attribute value '" + value.getName() + "' of type '" + value.getClass().getName() + "'");
 	}
+	
+	// Fields
+	private final Expression annotationExpr;
 
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("annotationType", annotationType);
-		tsc.append("attributes", attributes);
-		return tsc.toString();
+	/**
+	 * Constructor
+	 *
+	 * @param annotationType the type of annotation for which these are the
+	 * metadata (required)
+	 * @param attributeValues the given annotation's values; can be <code>null</code>
+	 * @param annotationExpr
+	 */
+	public JavaParserAnnotationMetadata(final JavaType annotationType, final List<AnnotationAttributeValue<?>> attributeValues, final Expression annotationExpr) {
+		super(annotationType, attributeValues);
+		this.annotationExpr = annotationExpr;
 	}
 }

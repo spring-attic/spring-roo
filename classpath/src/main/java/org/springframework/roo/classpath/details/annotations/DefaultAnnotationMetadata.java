@@ -16,29 +16,44 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-public final class DefaultAnnotationMetadata implements AnnotationMetadata {
-	private JavaType annotationType;
-	private List<AnnotationAttributeValue<?>> attributes;
-	private Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
+public class DefaultAnnotationMetadata implements AnnotationMetadata {
 	
-	// Package protected to enforce use of AnnotationMetadataBuilder
-	DefaultAnnotationMetadata(JavaType annotationType, List<AnnotationAttributeValue<?>> attributes) {
+	// Fields
+	private final JavaType annotationType;
+	private final List<AnnotationAttributeValue<?>> attributes;
+	private final Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param annotationType the type of annotation for which these are the
+	 * metadata (required)
+	 * @param attributeValues the given annotation's values; can be <code>null</code>
+	 */
+	public DefaultAnnotationMetadata(final JavaType annotationType, final List<AnnotationAttributeValue<?>> attributeValues) {
 		Assert.notNull(annotationType, "Annotation type required");
-		Assert.notNull(attributes, "Attributes required");
 		this.annotationType = annotationType;
-		this.attributes = attributes;
-		for (AnnotationAttributeValue<?> v : attributes) {
-			this.attributeMap.put(v.getName(), v);
+		this.attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		this.attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
+		if (attributeValues!= null) {
+			this.attributes.addAll(attributeValues);
+			for (final AnnotationAttributeValue<?> value : attributeValues) {
+				this.attributeMap.put(value.getName(), value);
+			}
 		}
 	}
 	
-	public AnnotationAttributeValue<?> getAttribute(JavaSymbolName attributeName) {
+	public AnnotationAttributeValue<?> getAttribute(final JavaSymbolName attributeName) {
 		Assert.notNull(attributeName, "Attribute name required");
 		return attributeMap.get(attributeName);
 	}
 
+	public AnnotationAttributeValue<?> getAttribute(final String attributeName) {
+		return getAttribute(new JavaSymbolName(attributeName));
+	}
+	
 	public List<JavaSymbolName> getAttributeNames() {
-		List<JavaSymbolName> result = new ArrayList<JavaSymbolName>();
+		final List<JavaSymbolName> result = new ArrayList<JavaSymbolName>();
 		for (AnnotationAttributeValue<?> value : attributes) {
 			result.add(value.getName());
 		}
@@ -50,7 +65,7 @@ public final class DefaultAnnotationMetadata implements AnnotationMetadata {
 	}
 
 	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("annotationType", annotationType);
 		tsc.append("attributes", attributes);
 		return tsc.toString();

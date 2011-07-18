@@ -19,6 +19,13 @@ public final class PhysicalTypeIdentifier {
 		return PROVIDES_TYPE;
 	}
 	
+	/**
+	 * Creates an identifier from the given arguments
+	 * 
+	 * @param javaType (required)
+	 * @param path (required)
+	 * @return
+	 */
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}

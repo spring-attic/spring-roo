@@ -392,7 +392,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 
 		// Prepare method signature
-		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethodAdditions.getMethodName().getSymbolName()));
+		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethodAdditions.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
@@ -438,7 +438,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 
 		// Prepare method signature
-		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethodAdditions.getMethodName().getSymbolName()));
+		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethodAdditions.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);

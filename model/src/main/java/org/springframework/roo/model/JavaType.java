@@ -29,7 +29,8 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  */
-public final class JavaType implements Comparable<JavaType>, Cloneable {
+public class JavaType implements Comparable<JavaType>, Cloneable {
+	
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, DataType.TYPE, null, null);
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, DataType.TYPE, null, null);
 	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String", 0, DataType.TYPE, null, null);
@@ -352,19 +353,24 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return result;
 	}
 
-	public final boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType && this.array == ((JavaType) obj).array && ((JavaType) obj).parameters.containsAll(parameters);
+		return obj != null
+			&& obj instanceof JavaType 
+			&& this.fullyQualifiedTypeName.equals(((JavaType) obj).getFullyQualifiedTypeName()) 
+			&& this.dataType == ((JavaType) obj).getDataType() 
+			&& this.array == ((JavaType) obj).getArray() 
+			&& ((JavaType) obj).getParameters().containsAll(this.parameters);
 	}
 
-	public final int compareTo(JavaType o) {
+	public int compareTo(JavaType o) {
 		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly
 		if (o == null) return -1;
 		if (equals(o)) return 0;
 		return toString().compareTo(o.toString());
 	}
 
-	public final String toString() {
+	public String toString() {
 		return getNameIncludingTypeParameters();
 	}
 

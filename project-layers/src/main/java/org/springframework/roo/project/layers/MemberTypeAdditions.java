@@ -5,6 +5,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The required additions to a given type in order to invoke a given
@@ -18,27 +19,60 @@ import org.springframework.roo.support.util.Assert;
  */
 public class MemberTypeAdditions {
 	
+	/**
+	 * Builds the code snippet for a method call with the given properties
+	 * 
+	 * @param targetName the name of the object or class on which the method is
+	 * being invoked (if not blank, must be a valid Java name)
+	 * @param methodName the name of the method being invoked (must be a valid
+	 * Java name)
+	 * @param parameterNames the names of any parameters passed to the method
+	 * @return a non-blank Java snippet
+	 */
+	static String buildMethodCall(final String targetName, final String methodName, final JavaSymbolName... parameterNames) {
+		JavaSymbolName.assertJavaNameLegal(methodName);
+		final StringBuilder methodCall = new StringBuilder();
+		if (StringUtils.hasText(targetName)) {
+			JavaSymbolName.assertJavaNameLegal(targetName);
+			methodCall.append(targetName);
+			methodCall.append(".");
+		}
+		methodCall.append(methodName);
+		methodCall.append("(");
+		for (int i = 0; i < parameterNames.length; i++) {
+			if (i > 0) {
+				methodCall.append(", ");
+			}
+			methodCall.append(parameterNames[i].getSymbolName());
+		}
+		methodCall.append(")");
+		return methodCall.toString();
+	}
+	
 	// Fields
 	private final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceDetailsBuilder;
+	private final String methodName;
 	private final String methodSignature;
-	private final JavaSymbolName methodName;
 	
 	/**
 	 * Constructor
 	 *
-	 * @param classOrInterfaceTypeDetailsBuilder (required)
 	 * @param methodSignature the snippet of Java code that invokes the method
-	 * @param methodName the name of the method
-	 * in question, for example "<code>personService.findAll()</code>" (cannot
-	 * be blank)
+	 * in question, for example "<code>personService.findAll()</code>" (required)	 * 
+	 *
+	 * @param classOrInterfaceTypeDetailsBuilder (required)
+	 * @param targetName the name of the object or class on which the method is
+	 * being invoked (if not blank, must be a valid Java name)
+	 * @param methodName the name of the method being invoked (must be a valid
+	 * Java name)
+	 * @param parameterNames the names of any parameters passed to the method
 	 */
-	public MemberTypeAdditions(ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, String methodSignature, JavaSymbolName methodName) {
+	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, final String targetName, final String methodName, final JavaSymbolName... parameterNames) {
+		Assert.hasText(methodName, "Invalid method name '" + methodName + "'");
 		Assert.notNull(classOrInterfaceTypeDetailsBuilder, "Class or member details builder required");
-		Assert.hasText(methodSignature, "Invalid method signature '" + methodSignature + "'");
-		Assert.notNull(methodName, "Method name required");
 		this.classOrInterfaceDetailsBuilder = classOrInterfaceTypeDetailsBuilder;
-		this.methodSignature = methodSignature;
 		this.methodName = methodName;
+		this.methodSignature = buildMethodCall(targetName, methodName, parameterNames);
 	}
 
 	/**
@@ -52,11 +86,11 @@ public class MemberTypeAdditions {
 	}
 	
 	/**
-	 * Returns the method name;
+	 * Returns the bare name of the invoked method
 	 * 
-	 * @return the method name
+	 * @return a non-blank name
 	 */
-	public JavaSymbolName getMethodName() {
+	public String getMethodName() {
 		return methodName;
 	}
 	
@@ -71,7 +105,7 @@ public class MemberTypeAdditions {
 
 	@Override
 	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("memberHoldingTypeDetails", classOrInterfaceDetailsBuilder);
 		tsc.append("methodSignature", methodSignature);
 		return tsc.toString();

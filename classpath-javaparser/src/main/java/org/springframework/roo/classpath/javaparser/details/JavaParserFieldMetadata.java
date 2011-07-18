@@ -82,7 +82,7 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		List<AnnotationExpr> annotations = fieldDeclaration.getAnnotations();
 		if (annotations != null) {
 			for (AnnotationExpr annotation : annotations) {
-				this.annotations.add(new JavaParserAnnotationMetadata(annotation, compilationUnitServices));
+				this.annotations.add(JavaParserAnnotationMetadata.getInstance(annotation, compilationUnitServices));
 			}
 		}
 	}

@@ -22,13 +22,13 @@ public interface LayerProvider {
 	 * target entity and construct it accordingly. If it can not provide the requested functionality
 	 * it should simply return null;
 	 * 
-	 * @param metadataId Id of calling metadata provider
+	 * @param callerMID the caller's metadata ID
 	 * @param methodIdentifier specifies the method which is being requested
 	 * @param targetEntity specifies the target entity
 	 * @param methodParameters parameters which are passed in to the method
 	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, null otherwise
 	 */
-	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, Pair<JavaType, JavaSymbolName>... methodParameters);
+	MemberTypeAdditions getMemberTypeAdditions(String callerMID, String methodIdentifier, JavaType targetEntity, Pair<JavaType, JavaSymbolName>... methodParameters);
 	
 	/**
 	 * Returns the position of this layer relative to others. 

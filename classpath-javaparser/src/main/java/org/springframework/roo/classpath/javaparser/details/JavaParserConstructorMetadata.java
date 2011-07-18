@@ -97,7 +97,7 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 				if (annotationsList != null) {
 					for (AnnotationExpr candidate : annotationsList) {
-						JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, compilationUnitServices);
+						JavaParserAnnotationMetadata md = JavaParserAnnotationMetadata.getInstance(candidate, compilationUnitServices);
 						annotations.add(md);
 					}
 				}
@@ -109,7 +109,7 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 		
 		if (constructorDeclaration.getAnnotations() != null) {
 			for (AnnotationExpr annotation : constructorDeclaration.getAnnotations()) {
-				this.annotations.add(new JavaParserAnnotationMetadata(annotation, compilationUnitServices));
+				this.annotations.add(JavaParserAnnotationMetadata.getInstance(annotation, compilationUnitServices));
 			}
 		}
 		

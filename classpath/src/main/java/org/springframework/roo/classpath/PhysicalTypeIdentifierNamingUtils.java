@@ -6,7 +6,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Used to produce metadata identification strings that represent a {@link JavaType} 
+ * Produces metadata identification strings that represent a {@link JavaType} 
  * located in a particular {@link ClassloaderInclusivePath}.
  * 
  * <p>
@@ -16,11 +16,18 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class PhysicalTypeIdentifierNamingUtils {
 	
-	public static final String createIdentifier(String providesType, JavaType javaType, Path path) {
+	/**
+	 * Creates an identifier from the given arguments
+	 * 
+	 * @param providesType (required)
+	 * @param javaType (required)
+	 * @param path (required)
+	 * @return
+	 */
+	public static final String createIdentifier(final String providesType, final JavaType javaType, final Path path) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");
 		return MetadataIdentificationUtils.create(providesType, path.getName() + "?" + javaType.getFullyQualifiedTypeName());

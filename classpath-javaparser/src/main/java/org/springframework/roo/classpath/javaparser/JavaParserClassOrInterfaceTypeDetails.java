@@ -579,7 +579,7 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		List<AnnotationExpr> annotationsList = this.clazz == null ? this.enumClazz.getAnnotations() : typeDeclaration.getAnnotations();
 		if (annotationsList != null) {
 			for (AnnotationExpr candidate : annotationsList) {
-				JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, compilationUnitServices);
+				JavaParserAnnotationMetadata md = JavaParserAnnotationMetadata.getInstance(candidate, compilationUnitServices);
 				annotations.add(md);
 			}
 		}
