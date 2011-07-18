@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -48,7 +47,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -61,7 +59,6 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements IdentifierService, FileEventListener {
-	private static final Logger logger = HandlerUtils.getLogger(DbreDatabaseListenerImpl.class);
 	private static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");
 	private static final JavaType ROO_IDENTIFIER = new JavaType("org.springframework.roo.addon.entity.RooIdentifier");
 	private static final String IDENTIFIER_TYPE = "identifierType";
@@ -111,7 +108,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Lookup the relevant destination package if not explicitly given
 		JavaPackage destinationPackage = database.getDestinationPackage();
 		if (destinationPackage == null) {
-			if (!managedEntities.isEmpty()) {
+			if (!managedEntities.isEmpty() && !database.hasMultipleSchemas()) {
 				// Take the package of the first one
 				destinationPackage = managedEntities.iterator().next().getName().getPackage();
 			}
@@ -144,11 +141,12 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
-				JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
-				if (typeLocationService.findClassOrInterface(javaType) != null) {
-					// Type exists but is not annotated with @RooDbManaged
-					logger.warning("Type '" + javaType.getFullyQualifiedTypeName() + "' for table '" + table.getName() + "' is not database managed (not annotated with @RooDbManaged)");
-				} else {
+				JavaPackage schemaPackage = destinationPackage;
+				if (database.hasMultipleSchemas()) {
+					schemaPackage = new JavaPackage(destinationPackage.getFullyQualifiedPackageName() + "." + DbreTypeUtils.suggestPackageName(table.getSchema().getName()));
+				}
+				JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), schemaPackage);
+				if (typeLocationService.findClassOrInterface(javaType) == null) {
 					table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
 					newEntities.add(createNewManagedEntityFromTable(javaType, table));
 				}
@@ -205,15 +203,19 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		Assert.notNull(rooEntityAnnotation, "@RooEntity annotation not found on " + managedEntity.getName().getFullyQualifiedTypeName());
 		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(rooEntityAnnotation);
 
-		// Find table in database using 'table' attribute from @RooEntity
+		// Find table in database using 'table' and 'schema' attributes from @RooEntity
 		AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
 		String errMsg = "Unable to maintain database-managed entity " + managedEntity.getName().getFullyQualifiedTypeName() + " because its associated table could not be found";
 		Assert.notNull(tableAttribute, errMsg);
 		String tableName = (String) tableAttribute.getValue();
 		Assert.hasText(tableName, errMsg);
-		Table table = database.getTable(tableName);
-		if (table == null || !managedEntity.getName().getPackage().equals(database.getDestinationPackage())) {
-			// Table has been dropped or we have deliberately changed the package so delete managed type, and its identifier if applicable
+
+		AnnotationAttributeValue<?> schemaAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("schema"));
+		String schemaName = schemaAttribute != null ? (String) schemaAttribute.getValue() : null;
+
+		Table table = database.getTable(tableName, schemaName);
+		if (table == null) { 
+			// Table is missing and probably has been dropped so delete managed type and its identifier if applicable
 			deleteManagedType(managedEntity);
 			return null;
 		}
@@ -259,10 +261,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		if (!hasVersionField(table)) {
 			rooEntityBuilder.addStringAttribute(VERSION_FIELD, "");
 		}
-		if (StringUtils.hasText(table.getName())) {
-			rooEntityBuilder.addStringAttribute("table", table.getName());
-		}
-		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName()) && !table.getSchema().getName().equals(dbreModelService.getNoSchemaString())) {
+		
+		rooEntityBuilder.addStringAttribute("table", table.getName());
+		if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(table.getSchema().getName())) {
 			rooEntityBuilder.addStringAttribute("schema", table.getSchema().getName());
 		}
 

@@ -22,7 +22,6 @@ import org.xml.sax.helpers.DefaultHandler;
 public final class DatabaseContentHandler extends DefaultHandler {
 	private Stack<Object> stack = new Stack<Object>();
 	private Database database;
-	private String name;
 	private Set<Table> tables = new LinkedHashSet<Table>();
 	private JavaPackage destinationPackage;
 	private boolean testAutomatically;
@@ -40,7 +39,6 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (qName.equals("database")) {
 			stack.push(new Object()); 
-			name = attributes.getValue(DatabaseXmlUtils.NAME);
 			if (StringUtils.hasText(attributes.getValue("package"))) {
 				destinationPackage = new JavaPackage(attributes.getValue("package"));
 			}
@@ -69,8 +67,13 @@ public final class DatabaseContentHandler extends DefaultHandler {
 
 		if (qName.equals("option")) {
 			Option option = (Option) tmp;
-			if (stack.peek() instanceof ForeignKey && option.getKey().equals("exported")) {
-				((ForeignKey) stack.peek()).setExported(Boolean.parseBoolean(option.getValue()));
+			if (stack.peek() instanceof ForeignKey) {
+				if (option.getKey().equals("exported")) {
+					((ForeignKey) stack.peek()).setExported(Boolean.parseBoolean(option.getValue()));
+				}
+				if (option.getKey().equals("foreignSchemaName")) {
+					((ForeignKey) stack.peek()).setForeignSchemaName(option.getValue());
+				}
 			}
 			if (option.getKey().equals("testAutomatically")) {
 				testAutomatically = Boolean.parseBoolean(option.getValue());
@@ -97,7 +100,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		} else if (qName.equals("unique-column") || qName.equals("index-column")) {
 			((Index) stack.peek()).addColumn((IndexColumn) tmp);
 		} else if (qName.equals("database")) {
-			database = new Database(name, tables);
+			database = new Database(tables);
 			database.setDestinationPackage(destinationPackage);
 			database.setTestAutomatically(testAutomatically);
 			database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
@@ -107,9 +110,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	}
 
 	private Table getTable(Attributes attributes) {
-		Table table = new Table();
-		table.setName(attributes.getValue(DatabaseXmlUtils.NAME));
-		table.setSchema(new Schema(name));
+		Table table = new Table(attributes.getValue(DatabaseXmlUtils.NAME), new Schema(attributes.getValue("alias")));
 		if (StringUtils.hasText(attributes.getValue(DatabaseXmlUtils.DESCRIPTION))) {
 			table.setDescription(DatabaseXmlUtils.DESCRIPTION);
 		}

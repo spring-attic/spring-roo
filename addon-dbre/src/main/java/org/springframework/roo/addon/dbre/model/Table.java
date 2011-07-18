@@ -24,32 +24,31 @@ public class Table {
 	private Set<Index> indices = new LinkedHashSet<Index>();
 	private boolean includeNonPortableAttributes;
 
-	Table() {
+	Table(String name, Schema schema) {
+		Assert.isTrue(StringUtils.hasText(name), "Table name required");
+		Assert.notNull(schema, "Table schema required");
+		this.name = name;
+		this.schema = schema;
 	}
 
 	public String getCatalog() {
-		return catalog;
+		return StringUtils.trimToNull(catalog);
 	}
 
 	public void setCatalog(String catalog) {
 		this.catalog = catalog;
 	}
 
-	public Schema getSchema() {
-		return schema;
-	}
-
-	public void setSchema(Schema schema) {
-		this.schema = schema;
-	}
-
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		Assert.isTrue(StringUtils.hasText(name), "Table name required");
-		this.name = name;
+	public Schema getSchema() {
+		return schema;
+	}
+	
+	public String getFullyQualifiedTableName() {
+		return DbreModelService.NO_SCHEMA_REQUIRED.equals(schema.getName()) ? name : (schema.getName() + "." + name);
 	}
 
 	public String getDescription() {
@@ -187,8 +186,8 @@ public class Table {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+		result = prime * result + name.hashCode();
+		result = prime * result + schema.hashCode();
 		return result;
 	}
 
@@ -221,6 +220,6 @@ public class Table {
 	}
 
 	public String toString() {
-		return String.format("Table [name=%s, catalog=%s, schema=%s, description=%s, columns=%s, importedKeys=%s, exportedKeys=%s, indices=%s, includeNonPortableAttributes=%s]", name, catalog, (schema != null ? schema.getName() : ""), description, columns, importedKeys, exportedKeys, indices, includeNonPortableAttributes);
+		return String.format("Table [name=%s, schema=%s, catalog=%s, description=%s, columns=%s, importedKeys=%s, exportedKeys=%s, indices=%s, includeNonPortableAttributes=%s]", name, schema.getName(), catalog, description, columns, importedKeys, exportedKeys, indices, includeNonPortableAttributes);
 	}
 }

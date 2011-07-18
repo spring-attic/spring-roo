@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a schema in the database model.
@@ -11,17 +12,17 @@ public class Schema {
 	private String name;
 
 	public Schema(String name) {
-		this.name = name;
+		this.name = StringUtils.defaultIfEmpty(name, DbreModelService.NO_SCHEMA_REQUIRED);
 	}
 
 	public String getName() {
 		return name;
 	}
-
+	
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + name.hashCode();
 		return result;
 	}
 

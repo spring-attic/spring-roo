@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -43,8 +43,8 @@ public class DbreModelServiceImpl implements DbreModelService {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	private Schema lastSchema;
-	private Map<Schema, Database> cachedIntrospections = new HashMap<Schema, Database>();
+	private Database lastDatabase;
+	private Set<Database> cachedIntrospections = new HashSet<Database>();
 
 	public boolean supportsSchema(boolean displayAddOns) throws RuntimeException {
 		Connection connection = null;
@@ -74,12 +74,18 @@ public class DbreModelServiceImpl implements DbreModelService {
 	}
 
 	public Database getDatabase(boolean evictCache) {
-		if (!evictCache && cachedIntrospections.containsKey(lastSchema)) {
-			return cachedIntrospections.get(lastSchema);
+		if (!evictCache && cachedIntrospections.contains(lastDatabase)) {
+			for (Database database : cachedIntrospections) {
+				if (database.equals(lastDatabase)) {
+					return lastDatabase;
+
+				}
+			}
 		}
-		if (evictCache && cachedIntrospections.containsKey(lastSchema)) {
-			cachedIntrospections.remove(lastSchema);
+		if (evictCache && cachedIntrospections.contains(lastDatabase)) {
+			cachedIntrospections.remove(lastDatabase);
 		}
+		
 		String dbreXmlPath = getDbreXmlPath();
 		if (!StringUtils.hasText(dbreXmlPath) || !fileManager.exists(dbreXmlPath)) {
 			return null;
@@ -109,20 +115,16 @@ public class DbreModelServiceImpl implements DbreModelService {
 	}
 	
 	public String getDbreXmlPath() {
-		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml") : null;
-	}
-	
-	public String getNoSchemaString() {
-		return "no-schema-required";
+		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbreModelService.DBRE_XML) : null;
 	}
 
-	public Database refreshDatabase(Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables) {
-		Assert.notNull(schema, "Schema required");
+	public Database refreshDatabase(Set<Schema> schemas, boolean view, Set<String> includeTables, Set<String> excludeTables) {
+		Assert.notNull(schemas, "Schemas required");
 
 		Connection connection = null;
 		try {
 			connection = getConnection(true);
-			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, view, includeTables, excludeTables);
+			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schemas, view, includeTables, excludeTables);
 			Database database = introspector.createDatabase();
 			cacheDatabase(database);
 			return database;
@@ -135,8 +137,8 @@ public class DbreModelServiceImpl implements DbreModelService {
 	
 	private void cacheDatabase(Database database) {
 		if (database != null) {
-			lastSchema = database.getSchema();
-			cachedIntrospections.put(lastSchema, database);
+			lastDatabase = database;
+			cachedIntrospections.add(database);
 		}
 	}
 	

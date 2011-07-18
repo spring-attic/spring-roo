@@ -150,6 +150,9 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		
 		// Lookup the entity's metadata
 		MemberDetails memberDetails = getMemberDetails(entity);
+		if (memberDetails == null) {
+			return null;
+		}
 		
 		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		MethodMetadata versionAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);

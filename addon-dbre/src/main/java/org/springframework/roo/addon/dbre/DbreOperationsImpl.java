@@ -21,6 +21,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,21 +44,22 @@ public class DbreOperationsImpl implements DbreOperations {
 		return projectOperations.isProjectAvailable() && (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
 	}
 
-	public void displayDatabaseMetadata(Schema schema, File file, boolean view) {
-		Assert.notNull(schema, "Schema required");
+	public void displayDatabaseMetadata(Set<Schema> schemas, File file, boolean view) {
+		Assert.notNull(schemas, "Schemas required");
+
 		// Force it to refresh the database from the actual JDBC connection
-		Database database = dbreModelService.refreshDatabase(schema, view, Collections.<String> emptySet() , Collections.<String> emptySet());
+		Database database = dbreModelService.refreshDatabase(schemas, view, Collections.<String> emptySet() , Collections.<String> emptySet());
 		database.setIncludeNonPortableAttributes(true);
-		processDatabase(database, schema, file, true);
+		processDatabase(database, schemas, file, true);
 	}
 
-	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes) {
+	public void reverseEngineerDatabase(Set<Schema> schemas, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes) {
 		// Force it to refresh the database from the actual JDBC connection
-		Database database = dbreModelService.refreshDatabase(schema, view, includeTables, excludeTables);
+		Database database = dbreModelService.refreshDatabase(schemas, view, includeTables, excludeTables);
 		database.setDestinationPackage(destinationPackage);
 		database.setTestAutomatically(testAutomatically);
 		database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
-		processDatabase(database, schema, null, false);
+		processDatabase(database, schemas, null, false);
 		
 		// Update the pom.xml to add an exclusion for the DBRE XML file in the maven-war-plugin 
 		updatePom();
@@ -66,11 +68,11 @@ public class DbreOperationsImpl implements DbreOperations {
 		updatePersistenceXml();
 	}
 	
-	private void processDatabase(Database database, Schema schema, File file, boolean displayOnly) {
+	private void processDatabase(Database database, Set<Schema> schemas, File file, boolean displayOnly) {
 		if (database == null) {
-			logger.warning("Cannot obtain database information for schema '" + schema.getName() + "'");
+			logger.warning("Cannot obtain database information for schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "'");
 		} else if (!database.hasTables()) {
-			logger.warning("Schema '" + schema.getName() + "' does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
+			logger.warning("Schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "' do not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
 		} else {
 			try {
 				if (displayOnly) {
@@ -98,7 +100,7 @@ public class DbreOperationsImpl implements DbreOperations {
 			// Project may not be a web project, so just exit 
 			return;
 		}
-		Element excludeElement = XmlUtils.findFirstElement(warPluginXPath + "/configuration/webResources/resource/excludes/exclude[text() = 'dbre.xml']", root);
+		Element excludeElement = XmlUtils.findFirstElement(warPluginXPath + "/configuration/webResources/resource/excludes/exclude[text() = '" + DbreModelService.DBRE_XML + "']", root);
 		if (excludeElement != null) {
 			// <exclude> element is already there, so just exit 
 			return;
@@ -118,7 +120,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 
 		excludeElement = document.createElement("exclude");
-		excludeElement.setTextContent("DBRE XML");
+		excludeElement.setTextContent(DbreModelService.DBRE_XML);
 		excludesElement.appendChild(excludeElement);
 		
 		Element directoryElement = document.createElement("directory");
@@ -132,6 +134,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		configurationElement.appendChild(webResourcesElement);
 		
 		warPluginElement.appendChild(configurationElement);
+		XmlUtils.removeTextNodes(warPluginElement);
 		
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}

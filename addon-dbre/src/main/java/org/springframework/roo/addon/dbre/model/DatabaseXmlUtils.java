@@ -10,7 +10,6 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Comment;
@@ -35,26 +34,6 @@ public abstract class DatabaseXmlUtils {
 
 	public static enum IndexType {
 		INDEX, UNIQUE
-	}
-
-	static Schema readSchemaWithDom(InputStream inputStream) {
-		Assert.notNull("Input stream required");
-		Document document = XmlUtils.readXml(inputStream);
-		Element databaseElement = document.getDocumentElement();
-		return new Schema(databaseElement.getAttribute("schema"));
-	}
-
-	static Schema readSchema(InputStream inputStream) {
-		Assert.notNull("Input stream required");
-		try {
-			SAXParserFactory spf = SAXParserFactory.newInstance();
-			SAXParser parser = spf.newSAXParser();
-			SchemaContentHandler contentHandler = new SchemaContentHandler();
-			parser.parse(inputStream, contentHandler);
-			return contentHandler.getSchema();
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
 	}
 
 	static Database readDatabase(InputStream inputStream) {
@@ -82,8 +61,9 @@ public abstract class DatabaseXmlUtils {
 
 		List<Element> tableElements = XmlUtils.findElements("table", databaseElement);
 		for (Element tableElement : tableElements) {
-			Table table = new Table();
-			table.setName(tableElement.getAttribute(NAME));
+			String alias = tableElement.getAttribute("alias");
+			String schemaName = StringUtils.hasText(alias) ? alias : databaseElement.getAttribute(NAME);
+			Table table = new Table(tableElement.getAttribute(NAME), new Schema(schemaName));
 			if (StringUtils.hasText(tableElement.getAttribute(DESCRIPTION))) {
 				table.setDescription(tableElement.getAttribute(DESCRIPTION));
 			}
@@ -116,7 +96,9 @@ public abstract class DatabaseXmlUtils {
 				for (Element optionElement : optionElements) {
 					if (optionElement.getAttribute("key").equals("exported")) {
 						foreignKey.setExported(Boolean.parseBoolean(optionElement.getAttribute("value")));
-						break; // Don't process any more <option> elements
+					}
+					if (optionElement.getAttribute("key").equals("foreignSchemaName")) {
+						foreignKey.setForeignSchemaName(optionElement.getAttribute("value"));
 					}
 				}
 
@@ -139,7 +121,7 @@ public abstract class DatabaseXmlUtils {
 			destinationPackage = new JavaPackage(databaseElement.getAttribute("package"));
 		}
 
-		Database database = new Database(databaseElement.getAttribute(NAME), tables);
+		Database database = new Database(tables);
 		database.setDestinationPackage(destinationPackage);
 
 		List<Element> optionElements = XmlUtils.findElements("option", databaseElement);
@@ -161,7 +143,7 @@ public abstract class DatabaseXmlUtils {
 		document.appendChild(comment);
 
 		Element databaseElement = document.createElement("database");
-		databaseElement.setAttribute(NAME, database.getName());
+		databaseElement.setAttribute(NAME, "deprecated");
 
 		if (database.getDestinationPackage() != null) {
 			databaseElement.setAttribute("package", database.getDestinationPackage().getFullyQualifiedPackageName());
@@ -173,6 +155,10 @@ public abstract class DatabaseXmlUtils {
 		for (Table table : database.getTables()) {
 			Element tableElement = document.createElement("table");
 			tableElement.setAttribute(NAME, table.getName());
+			String schemaName = table.getSchema().getName();
+			if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName)) {
+				tableElement.setAttribute("alias", schemaName);
+			}
 			if (StringUtils.hasText(table.getDescription())) {
 				tableElement.setAttribute(DESCRIPTION, table.getDescription());
 			}
@@ -220,11 +206,16 @@ public abstract class DatabaseXmlUtils {
 	private static void addForeignKeyElements(Set<ForeignKey> foreignKeys, boolean exported, Element tableElement, Document document) {
 		for (ForeignKey foreignKey : foreignKeys) {
 			Element foreignKeyElement = document.createElement("foreign-key");
-			String foreignTableName = foreignKey.getForeignTableName();
 			foreignKeyElement.setAttribute(NAME, foreignKey.getName());
-			foreignKeyElement.setAttribute(FOREIGN_TABLE, foreignTableName);
+			foreignKeyElement.setAttribute(FOREIGN_TABLE, foreignKey.getForeignTableName());
 			foreignKeyElement.setAttribute(ON_DELETE, foreignKey.getOnDelete().getCode());
 			foreignKeyElement.setAttribute(ON_UPDATE, foreignKey.getOnUpdate().getCode());
+			
+			String foreignSchemaName = foreignKey.getForeignSchemaName();
+			if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(foreignSchemaName)) {
+				foreignKeyElement.appendChild(createOptionElement("foreignSchemaName", foreignSchemaName, document));
+			}
+			
 			foreignKeyElement.appendChild(createOptionElement("exported", String.valueOf(exported), document));
 
 			for (Reference reference : foreignKey.getReferences()) {
