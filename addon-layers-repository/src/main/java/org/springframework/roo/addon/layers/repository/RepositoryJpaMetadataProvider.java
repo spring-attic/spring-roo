@@ -1,16 +1,21 @@
 package org.springframework.roo.addon.layers.repository;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.LayerCustomDataKeys;
+import org.springframework.roo.project.layers.LayerTypeMatcher;
 
 /**
  * 
@@ -21,10 +26,15 @@ import org.springframework.roo.project.Path;
 @Service
 public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	
+	@Reference CustomDataKeyDecorator customDataKeyDecorator;
+	
+	private static final JavaType ROO_REPOSITORY_JPA = new JavaType(RooRepositoryJpa.class.getName());
+	
 	protected void activate(ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooRepositoryJpa.class.getName()));
+		customDataKeyDecorator.registerMatcher(getClass().getName(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, RepositoryJpaMetadata.class.getName(), ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
 	protected void deactivate(ComponentContext context) {
