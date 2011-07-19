@@ -18,6 +18,7 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;
 	@AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
 	@AutoPopulate private String updateMethod = RooService.UPDATE_METHOD;
+	@AutoPopulate private String deleteMethod = RooService.DELETE_METHOD;
 	@AutoPopulate private boolean transactional = true;
 	
 	/**
@@ -44,6 +45,10 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 	
 	public String getUpdateMethod() {
 		return updateMethod;
+	}
+	
+	public String getDeleteMethod() {
+		return deleteMethod;
 	}
 	
 	public boolean isTransactional() {

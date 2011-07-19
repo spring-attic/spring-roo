@@ -83,6 +83,12 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			if (updateAdditions != null) {
 				updateAdditions.copyAdditionsTo(builder);
 			}
+			
+			final MemberTypeAdditions deleteAdditions = crudAdditions.get(PersistenceCustomDataKeys.REMOVE_METHOD.name());
+			builder.addMethod(getDeleteMethod(domainType, deleteAdditions));
+			if (deleteAdditions != null) {
+				deleteAdditions.copyAdditionsTo(builder);
+			}
 		}
 		
 		// Introduce the @Service annotation via the ITD if it's not already on the service's Java class
@@ -149,6 +155,22 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.appendFormalLine("return " + updateMethodAdditions.getMethodSignature() + ";");
 		}
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, domainType, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), bodyBuilder).build();
+	}
+	
+	private MethodMetadata getDeleteMethod(JavaType domainType, MemberTypeAdditions deleteMethodAdditions) {
+		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteMethod() + domainType.getSimpleTypeName());
+		if (deleteMethodAdditions != null && MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
+			// The governor already declares this method
+			return null;
+		}
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		// No further layer found, so let's create a simple dummy implementation
+		if (deleteMethodAdditions == null) {
+			bodyBuilder.appendFormalLine("throw new IllegalStateException(\"Implement me!\");");
+		} else {
+			bodyBuilder.appendFormalLine(deleteMethodAdditions.getMethodSignature() + ";");
+		}
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), bodyBuilder).build();
 	}
 	
 	public static final String getMetadataIdentiferType() {

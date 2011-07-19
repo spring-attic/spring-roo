@@ -52,6 +52,8 @@ public class EntityLayerProvider extends CoreLayerProvider {
 			return getPersistMethod(metadataId, targetEntity, rooEntityAnnotation, methodParameters);
 		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.MERGE_METHOD.name())) {
 			return getMergeMethod(metadataId, targetEntity, rooEntityAnnotation, methodParameters);
+		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.REMOVE_METHOD.name())) {
+			return getRemoveMethod(metadataId, targetEntity, rooEntityAnnotation, methodParameters);
 		}
 		return null;
 	}
@@ -76,6 +78,13 @@ public class EntityLayerProvider extends CoreLayerProvider {
 			return null;
 		}
 		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), methodParameters[0].getValue().getSymbolName(), rooEntityAnnotation.getMergeMethod());
+	}
+	
+	private MemberTypeAdditions getRemoveMethod(String metadataId, JavaType entityType, EntityAnnotationValues rooEntityAnnotation, Pair<JavaType, JavaSymbolName>... methodParameters) {
+		if (!StringUtils.hasText(rooEntityAnnotation.getRemoveMethod()) || methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
+			return null;
+		}
+		return new MemberTypeAdditions(new ClassOrInterfaceTypeDetailsBuilder(metadataId), methodParameters[0].getValue().getSymbolName(), rooEntityAnnotation.getRemoveMethod());
 	}
 	
 	private EntityAnnotationValues getRooEntityAnnotationValues(JavaType javaType) {

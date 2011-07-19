@@ -52,12 +52,12 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private MethodMetadata flushMethod;
 	private MemberTypeAdditions mergeMethodAdditions;
 	private MemberTypeAdditions persistMethodAdditions;
-	private MethodMetadata removeMethod;
+	private MemberTypeAdditions removeMethodAdditions;
 	private String transactionManager;
 	private boolean hasEmbeddedIdentifier;
 	private boolean entityHasSuperclass;
 	
-	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MemberTypeAdditions findAllMethodAdditions, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MemberTypeAdditions mergeMethodAdditions, MemberTypeAdditions persistMethodAdditions, MethodMetadata removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass) {
+	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata countMethod, MethodMetadata findMethod, MemberTypeAdditions findAllMethodAdditions, MethodMetadata findEntriesMethod, MethodMetadata flushMethod, MemberTypeAdditions mergeMethodAdditions, MemberTypeAdditions persistMethodAdditions, MemberTypeAdditions removeMethodAdditions, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(projectMetadata, "Project metadata required");
@@ -83,7 +83,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		this.flushMethod = flushMethod;
 		this.mergeMethodAdditions = mergeMethodAdditions;
 		this.persistMethodAdditions = persistMethodAdditions;
-		this.removeMethod = removeMethod;
+		this.removeMethodAdditions = removeMethodAdditions;
 		this.transactionManager = transactionManager;
 		this.hasEmbeddedIdentifier = hasEmbeddedIdentifier;
 		this.entityHasSuperclass = entityHasSuperclass;
@@ -471,13 +471,13 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	public MethodMetadata getRemoveMethodTest() {
-		if (!annotationValues.isRemove() || findMethod == null || flushMethod == null || removeMethod == null) {
+		if (!annotationValues.isRemove() || findMethod == null || flushMethod == null || removeMethodAdditions == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
 		}
 
 		// Prepare method signature
-		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(removeMethod.getMethodName().getSymbolName()));
+		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(removeMethodAdditions.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
@@ -499,7 +499,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
 			bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getFullyQualifiedTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
-			bodyBuilder.appendFormalLine("obj." + removeMethod.getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine(removeMethodAdditions.getMethodSignature() + ";");
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + annotationValues.getEntity().getFullyQualifiedTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id));");
 

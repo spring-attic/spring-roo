@@ -72,6 +72,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
+	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	
 	// Fields
@@ -414,9 +415,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		
 		// Define the methods we need for Web scaffolding.
 		final Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
+		JavaSymbolName entityName = getEnityName(domainType);
 		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
-		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, getEnityName(domainType))));
-		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, getEnityName(domainType))));
+		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
+		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
+		additions.put(DELETE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
 		return Collections.unmodifiableMap(additions);
 	}
 

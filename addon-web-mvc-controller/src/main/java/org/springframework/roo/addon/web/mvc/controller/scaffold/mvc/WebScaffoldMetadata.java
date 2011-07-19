@@ -120,8 +120,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getUpdateMethod(updateMethod));
 			builder.addMethod(getUpdateFormMethod());
 		}
-		if (annotationValues.isDelete()) {
-			builder.addMethod(getDeleteMethod());
+		
+		MemberTypeAdditions deleteMethod = crudAdditions.get(PersistenceCustomDataKeys.REMOVE_METHOD.name());
+		if (annotationValues.isDelete() && deleteMethod != null) {
+			builder.addMethod(getDeleteMethod(deleteMethod));
 		}
 		if (specialDomainTypes.size() > 0) {
 			for (MethodMetadata method : getPopulateMethods()) {
@@ -173,7 +175,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return constructorBuilder.build();
 	}
 	
-	private MethodMetadata getDeleteMethod() {
+	private MethodMetadata getDeleteMethod(MemberTypeAdditions deleteMethodAdditions) {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindMethod() == null || javaTypePersistenceMetadataHolder.getRemoveMethod() == null) {
 			return null;
@@ -221,9 +223,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
+		
+		String formBackingTypeName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + javaTypePersistenceMetadataHolder.getFindMethod().getMethodName() + "(" + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + ")." + javaTypePersistenceMetadataHolder.getRemoveMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine(formBackingTypeName + " " + entityName + " = " + formBackingTypeName + "." + javaTypePersistenceMetadataHolder.getFindMethod().getMethodName() + "(" + javaTypePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName() + ");");
+		bodyBuilder.appendFormalLine(deleteMethodAdditions.getMethodSignature() + ";");
 		bodyBuilder.appendFormalLine("uiModel.asMap().clear();");
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"page\", (page == null) ? \"1\" : page.toString());");
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"size\", (size == null) ? \"10\" : size.toString());");

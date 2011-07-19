@@ -41,6 +41,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
 	static final String SAVE_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	static final String UPDATE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
+	static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
 	
 	// Fields
 	@Reference private MetadataService metadataService;
@@ -106,6 +107,8 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 			return getMethodAdditions(callerMID, serviceInterface, annotationValues.getSaveMethod(), targetEntity.getSimpleTypeName(), Arrays.asList(targetEntity), methodParameters);
 		} else if (UPDATE_METHOD.equals(methodIdentifier)) {
 			return getMethodAdditions(callerMID, serviceInterface, annotationValues.getUpdateMethod(), targetEntity.getSimpleTypeName(), Arrays.asList(targetEntity), methodParameters);
+		} else if (DELETE_METHOD.equals(methodIdentifier)) {
+			return getMethodAdditions(callerMID, serviceInterface, annotationValues.getDeleteMethod(), targetEntity.getSimpleTypeName(), Arrays.asList(targetEntity), methodParameters);
 		}
 		return null;
 	}

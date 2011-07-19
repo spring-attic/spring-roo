@@ -163,7 +163,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
 		MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.MERGE_METHOD.name(), entity, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.PERSIST_METHOD.name(), entity, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
-		MethodMetadata removeMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
+		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.REMOVE_METHOD.name(), entity, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
 		if (persistMethodAdditions == null || flushMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			return null;
 		}
@@ -193,7 +193,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		// maintain a list of entities that are being tested
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
-		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethodAdditions, persistMethodAdditions, removeMethod, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
+		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
 	}
 	
 	private ClassOrInterfaceTypeDetails getEntitySuperclass(JavaType entity) {

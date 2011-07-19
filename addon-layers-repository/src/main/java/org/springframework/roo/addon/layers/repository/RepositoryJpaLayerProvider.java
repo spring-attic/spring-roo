@@ -60,6 +60,8 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 			return getPersistMethod(metadataId, targetEntity, typeContainer, methodParameters);
 		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.MERGE_METHOD.name())) {
 			return getMergeMethod(metadataId, targetEntity, typeContainer, methodParameters);
+		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.REMOVE_METHOD.name())) {
+			return getDeleteMethod(metadataId, targetEntity, typeContainer, methodParameters);
 		}
 		return null;
 	}
@@ -95,6 +97,18 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
 		String methodName = typeContainer.getRepositoryJpaAnnotationValues().getFindAllMethod();
 		return new MemberTypeAdditions(classBuilder, repoField, methodName);
+	}
+	
+	private MemberTypeAdditions getDeleteMethod(final String metadataId, final JavaType entityType, final TypeContainer typeContainer, final Pair<JavaType, JavaSymbolName>... methodParameters) {
+		if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
+			return null;
+		}
+		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
+		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
+		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
+		String methodName = typeContainer.getRepositoryJpaAnnotationValues().getDeleteMethod();
+		return new MemberTypeAdditions(classBuilder, repoField, methodName, methodParameters[0].getValue());
 	}
 
 	private TypeContainer findInterfaceType(JavaType type) {

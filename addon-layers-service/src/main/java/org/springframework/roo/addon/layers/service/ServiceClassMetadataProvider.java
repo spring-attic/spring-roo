@@ -42,8 +42,9 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 	private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 	private static final Path SRC = Path.SRC_MAIN_JAVA;
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
-	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
-	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
+	private static final String SAVE_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final String UPDATE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
+	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
 	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 	
 	// Fields
@@ -115,9 +116,9 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, SRC), metadataIdentificationString);
 			Map<String, MemberTypeAdditions> methodAdditions = new HashMap<String, MemberTypeAdditions>();
 			methodAdditions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LAYER_POSITION));
-			methodAdditions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
-			methodAdditions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
-
+			methodAdditions.put(SAVE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, SAVE_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
+			methodAdditions.put(UPDATE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, UPDATE_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
+			methodAdditions.put(DELETE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, domainType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(domainType, LayerUtils.getTypeName(domainType))));
 			allCrudAdditions.put(domainType, methodAdditions);
 			
 			String pluralId = PluralMetadata.createIdentifier(domainType, Path.SRC_MAIN_JAVA);

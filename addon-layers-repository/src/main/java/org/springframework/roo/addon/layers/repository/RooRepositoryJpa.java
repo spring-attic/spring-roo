@@ -17,6 +17,7 @@ public @interface RooRepositoryJpa {
 	public static final String FIND_ALL_METHOD = "findAll";
 	public static final String SAVE_METHOD = "save";
 	public static final String UPDATE_METHOD = SAVE_METHOD;
+	public static final String DELETE_METHOD = "delete";
 	public static final String DOMAIN_TYPE_ATTRIBUTE = "domainType";
 	
 	Class<?> domainType();
@@ -27,4 +28,5 @@ public @interface RooRepositoryJpa {
 	
 	String updateMethod() default UPDATE_METHOD;
 
+	String deleteMethod() default DELETE_METHOD;
 }

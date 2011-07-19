@@ -61,6 +61,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 			builder.addMethod(getFindAllMethod(domainType, domainTypePlurals.get(domainType)));
 			builder.addMethod(getSaveMethod(domainType));
 			builder.addMethod(getUpdateMethod(domainType));
+			builder.addMethod(getDeleteMethod(domainType));
 		}
 		
 		// Create a representation of the desired output ITD
@@ -92,6 +93,15 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 			return null;
 		}
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, domainType, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), BODY).build();
+	}
+	
+	private MethodMetadata getDeleteMethod(final JavaType domainType) {
+		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteMethod() + domainType.getSimpleTypeName());
+		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null || annotationValues.getDeleteMethod().equals("")) {
+			// The governor already declares this method
+			return null;
+		}
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), BODY).build();
 	}
 
 	public ServiceAnnotationValues getServiceAnnotationValues() {

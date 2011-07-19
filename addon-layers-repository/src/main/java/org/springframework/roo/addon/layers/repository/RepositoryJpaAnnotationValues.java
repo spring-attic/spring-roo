@@ -17,6 +17,7 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String findAllMethod = RooRepositoryJpa.FIND_ALL_METHOD;
 	@AutoPopulate private String saveMethod = RooRepositoryJpa.SAVE_METHOD;
 	@AutoPopulate private String updateMethod = RooRepositoryJpa.UPDATE_METHOD;
+	@AutoPopulate private String deleteMethod = RooRepositoryJpa.DELETE_METHOD;
 	
 	public RepositoryJpaAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooRepositoryJpa.class.getName()));
@@ -37,5 +38,9 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 	
 	public String getUpdateMethod() {
 		return updateMethod;
+	}
+	
+	public String getDeleteMethod() {
+		return deleteMethod;
 	}
 }
