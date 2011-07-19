@@ -10,8 +10,6 @@ import org.jvnet.inflector.Noun;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -68,15 +66,15 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			// Add menu model field
 			builder.addField(getMenuModelField());
 
-			// Add constructor
-			builder.addConstructor(getConstructor());
+			// Add init() methid
+			builder.addMethod(getInitMethod());
 
 			// Add model field accessor method
 			builder.addMethod(getModelAccessorMethod());
+			
+			// Add application name accessor method
+			builder.addMethod(getApplicationAccessorMethod());
 		}
-
-		// Add application name accessor method
-		builder.addMethod(getApplicationAccessorMethod());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -110,9 +108,10 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return fieldBuilder.build();
 	}
 	
-	private ConstructorMetadata getConstructor() {
-		ConstructorMetadata constructor = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, new ArrayList<JavaType>());
-		if (constructor != null) return constructor;
+	private MethodMetadata getInitMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("init");
+		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
+		if (method != null) return method;
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType("javax.el.ELContext"));
@@ -123,7 +122,6 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		imports.addImport(new JavaType("org.primefaces.model.DefaultMenuModel"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("super();");
 		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
 		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
 		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
@@ -148,10 +146,10 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			String plural = getInflectorPlural(entity.getSimpleTypeName());
 
 			bodyBuilder.appendFormalLine("");
-			bodyBuilder.appendFormalLine("submenu = new Submenu();");
+			bodyBuilder.appendFormalLine("submenu = " + getComponentCreationStr("Submenu") + ";");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
 
-			bodyBuilder.appendFormalLine("item = new MenuItem();");
+			bodyBuilder.appendFormalLine("item = " + getComponentCreationStr("MenuItem") + ";");
 			bodyBuilder.appendFormalLine("item.setValue(\"List all " + plural + "\");");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".findAll" + plural + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
@@ -162,10 +160,9 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("menuModel.addSubmenu(submenu);");
 		}
 
-		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
-		constructorBuilder.setModifier(Modifier.PUBLIC);
-		constructorBuilder.setBodyBuilder(bodyBuilder);
-		return constructorBuilder.build();
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("javax.annotation.PostConstruct")));
+		return methodBuilder.build();
 	}
 
 	private MethodMetadata getModelAccessorMethod() {
@@ -197,6 +194,10 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<JavaType> paramTypes) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
+	}
+	
+	private String getComponentCreationStr(String componentName) {
+		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE)").toString();
 	}
 
 	private String getInflectorPlural(String term) {
