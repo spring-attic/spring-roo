@@ -202,8 +202,16 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return addField(new FieldMetadataBuilder(field));
 	}
 
-	public final boolean addMethod(MethodMetadata method) {
-		if (method == null) return false;
+	/**
+	 * Adds the given method to this builder
+	 * 
+	 * @param method the method to add; can be <code>null</code>
+	 * @return <code>true</code> if the state of this builder changed
+	 */
+	public final boolean addMethod(final MethodMetadata method) {
+		if (method == null) {
+			return false;
+		}
 		return addMethod(new MethodMetadataBuilder(method));
 	}
 

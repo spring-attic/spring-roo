@@ -16,6 +16,8 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @since 1.1
  */
 public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilder<MethodMetadata> {
+	
+	// Fields
 	private JavaSymbolName methodName;
 	private JavaType returnType;
 	
@@ -33,6 +35,17 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 		init(existing.getMethodName(), existing.getReturnType());
 	}
 
+	/**
+	 * Constructor for a method with parameters
+	 *
+	 * @param declaredbyMetadataId
+	 * @param modifier
+	 * @param methodName
+	 * @param returnType
+	 * @param parameterTypes
+	 * @param parameterNames
+	 * @param bodyBuilder
+	 */
 	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, InvocableMemberBodyBuilder bodyBuilder) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
@@ -42,6 +55,15 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 		setBodyBuilder(bodyBuilder);
 	}
 
+	/**
+	 * Constructor for a method with no parameters
+	 *
+	 * @param declaredbyMetadataId
+	 * @param modifier
+	 * @param methodName
+	 * @param returnType
+	 * @param bodyBuilder
+	 */
 	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, InvocableMemberBodyBuilder bodyBuilder) {
 		this(declaredbyMetadataId, modifier, methodName, returnType, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 	}
@@ -50,7 +72,7 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 		return new DefaultMethodMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getMethodName(), getReturnType(), getParameterTypes(), getParameterNames(), getThrowsTypes(), getBodyBuilder().getOutput());
 	}
 	
-	private void init(JavaSymbolName methodName, JavaType returnType) {
+	private void init(final JavaSymbolName methodName, final JavaType returnType) {
 		this.methodName = methodName;
 		this.returnType = returnType;
 	}

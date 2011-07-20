@@ -1,6 +1,7 @@
 package org.springframework.roo.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -75,6 +76,16 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 		commonCollectionTypes.add(ArrayList.class.getName());
 		commonCollectionTypes.add(Vector.class.getName());
 		commonCollectionTypes.add(HashSet.class.getName());
+	}
+	
+	/**
+	 * Returns a {@link JavaType} for a list of the given element type
+	 * 
+	 * @param elementType the type of element in the list (required)
+	 * @return a non-<code>null</code> type
+	 */
+	public static JavaType listOf(final JavaType elementType) {
+		return new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
 	}
 
 	/**

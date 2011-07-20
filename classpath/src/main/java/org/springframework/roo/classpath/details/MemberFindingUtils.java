@@ -42,11 +42,12 @@ public abstract class MemberFindingUtils {
 	 * Locates the specified method.
 	 * 
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search; can be <code>null</code>
-	 * @param methodName to locate; can be blank
+	 * @param methodName to locate; can be <code>null</code>
 	 * @param parameters to locate (can be null if there are no parameters)
-	 * @return the method, or <code>null</code> if not found
+	 * @return the method, or <code>null</code> if the given name was
+	 * <code>null</code> or it was simply not found
 	 */
-	public static MethodMetadata getDeclaredMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	public static MethodMetadata getDeclaredMethod(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName methodName, List<JavaType> parameters) {
 		if (memberHoldingTypeDetails == null) {
 			return null;
 		}
@@ -126,13 +127,14 @@ public abstract class MemberFindingUtils {
 	 * or none can be found.
 	 * 
 	 * @param memberDetails the {@link MemberDetails} to search (required)
-	 * @param methodName the method name to locate (required)
-	 * @param parameters the method parameter signature to locate (can be null if no parameters are required)
-	 * @return the first located method, or null if such a method cannot be found
+	 * @param methodName the method name to locate (can be <code>null</code>)
+	 * @param parameters the method parameter signature to locate (can be null
+	 * if no parameters are required)
+	 * @return the first located method, or <code>null</code> if the method name
+	 * is <code>null</code> or such a method cannot be found
 	 */
-	public static MethodMetadata getMethod(MemberDetails memberDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName, final List<JavaType> parameters) {
 		Assert.notNull(memberDetails, "Member details required");
-		Assert.notNull(methodName, "Method name required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			MethodMetadata md = getDeclaredMethod(memberHoldingTypeDetails, methodName, parameters);
 			if (md != null) {
