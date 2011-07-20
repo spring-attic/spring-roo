@@ -7,7 +7,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -20,6 +19,7 @@ import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Pair;
+import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
@@ -37,11 +37,6 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	
 	// Constants
 	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
-	// -- Method names; callers will usually use the PersistenceCustomDataKeys enum instead, to avoid a dependency upon this addon
-	static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
-	static final String SAVE_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
-	static final String UPDATE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
-	static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
 	
 	// Fields
 	@Reference private MetadataService metadataService;
@@ -97,53 +92,22 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	 * @param annotationValues the values of the {@link RooService} annotation
 	 * on the given service interface (required)
 	 * @param plural
-	 * @param methodParameters
+	 * @param callerParameters the types and names of the parameters being
+	 * passed by the caller to the method
 	 * @return <code>null</code> if that method is not supported by this layer
 	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType serviceInterface, final ServiceAnnotationValues annotationValues, final String plural, final Pair<JavaType, JavaSymbolName>... methodParameters) {
-		if (FIND_ALL_METHOD.equals(methodIdentifier)) {
-			return getMethodAdditions(callerMID, serviceInterface, annotationValues.getFindAllMethod(), plural, Arrays.<JavaType>asList(), methodParameters);
-		} else if (SAVE_METHOD.equals(methodIdentifier)) {
-			return getMethodAdditions(callerMID, serviceInterface, annotationValues.getSaveMethod(), targetEntity.getSimpleTypeName(), Arrays.asList(targetEntity), methodParameters);
-		} else if (UPDATE_METHOD.equals(methodIdentifier)) {
-			return getMethodAdditions(callerMID, serviceInterface, annotationValues.getUpdateMethod(), targetEntity.getSimpleTypeName(), Arrays.asList(targetEntity), methodParameters);
-		} else if (DELETE_METHOD.equals(methodIdentifier)) {
-			return getMethodAdditions(callerMID, serviceInterface, annotationValues.getDeleteMethod(), targetEntity.getSimpleTypeName(), Arrays.asList(targetEntity), methodParameters);
+	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType serviceInterface, final ServiceAnnotationValues annotationValues, final String plural, final Pair<JavaType, JavaSymbolName>... callerParameters) {
+		// Check whether this is a known service layer method
+		final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(callerParameters).getKeys();
+		final ServiceLayerMethod method = ServiceLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity);
+		if (method == null) {
+			return null;
 		}
-		return null;
-	}
 	
-	/**
-	 * Returns the additions that the caller needs to make in order to invoke
-	 * the given method
-	 * 
-	 * @param callerMID the caller's metadata ID (required)
-	 * @param serviceInterface the type of the service interface being queried (required)
-	 * @param methodName the name of the method to be invoked (as provided via
-	 * the {@link RooService} annotation); can be blank
-	 * @param methodSuffix any suffix to be appended to the method name; can be
-	 * blank for none
-	 * @param parameterTypes the types of parameters taken by services
-	 * implementing this method, if any (can be empty but not null)
-	 * @param callerParameters the types and names of the parameters provided by
-	 * the code calling the method
-	 * @return <code>null</code> if the given service doesn't implement a method
-	 * with this name and parameter types
-	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final JavaType serviceInterface, final String methodName, final String methodSuffix, final List<JavaType> parameterTypes, final Pair<JavaType, JavaSymbolName>... callerParameters) {
+		// Check whether this method is implemented by the given service
+		final String methodName = method.getName(annotationValues, targetEntity, plural);
 		if (!StringUtils.hasText(methodName)) {
-			// The service annotation doesn't provide a name for this method, so it's not implemented
 			return null;
-		}
-		if (parameterTypes.size() != callerParameters.length) {
-			// The caller has a different number of parameters to this method
-			return null;
-		}
-		for (int i = 0; i < callerParameters.length; i++) {
-			if (!parameterTypes.get(i).equals(callerParameters[i].getKey())) {
-				// The caller's parameter types don't match this method's parameter types
-				return null;
-			}
 		}
 		
 		// The method is supported by this service interface; make a builder
@@ -159,14 +123,14 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		for (int i = 0; i < callerParameters.length; i++) {
 			parameterNames[i] = callerParameters[i].getValue();
 		}
-		return new MemberTypeAdditions(classBuilder, fieldName, methodName + StringUtils.trimToEmpty(methodSuffix), parameterNames);		
+		return new MemberTypeAdditions(classBuilder, fieldName, methodName, parameterNames);		
 	}
 	
 	public int getLayerPosition() {
 		return LayerType.SERVICE.getPosition();
 	}
 	
-	// Setters for use by unit tests
+	// -------------------- Setters for use by unit tests ----------------------
 
 	void setMetadataDependencyRegistry(final MetadataDependencyRegistry metadataDependencyRegistry) {
 		this.metadataDependencyRegistry = metadataDependencyRegistry;

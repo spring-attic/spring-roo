@@ -6,9 +6,10 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.roo.addon.layers.service.ServiceLayerProvider.FIND_ALL_METHOD;
-import static org.springframework.roo.addon.layers.service.ServiceLayerProvider.SAVE_METHOD;
-import static org.springframework.roo.addon.layers.service.ServiceLayerProvider.UPDATE_METHOD;
+import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.FIND_ALL;
+import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.FIND_ENTRIES;
+import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.SAVE;
+import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.UPDATE;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,8 @@ import org.springframework.roo.support.util.Pair;
 public class ServiceLayerProviderTest {
 
 	// Constants
+	private static final Pair<JavaType, JavaSymbolName> SIZE_PARAMETER = new Pair<JavaType, JavaSymbolName>(JavaType.INT_PRIMITIVE, new JavaSymbolName("count"));
+	private static final Pair<JavaType, JavaSymbolName> START_PARAMETER = new Pair<JavaType, JavaSymbolName>(JavaType.INT_PRIMITIVE, new JavaSymbolName("start"));
 	private static final String BOGUS_METHOD = "bogus";
 	private static final String CALLER_MID = "MID:anything#com.example.web.PersonController";
 	private static final String SERVICE_MID = "MID:anything#com.example.serv.PersonService";
@@ -74,9 +77,10 @@ public class ServiceLayerProviderTest {
 	 * @param findAllMethod can be blank
 	 * @param saveMethod can be blank
 	 * @param updateMethod can be blank
+	 * @param findEntriesMethod can be blank
 	 * @return a non-<code>null</code> mock
 	 */
-	private ClassOrInterfaceTypeDetails getMockService(final String findAllMethod, final String saveMethod, final String updateMethod) {
+	private ClassOrInterfaceTypeDetails getMockService(final String findAllMethod, final String saveMethod, final String updateMethod, final String findEntriesMethod) {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
 		final JavaType mockServiceType = mock(JavaType.class);
 		final ServiceAnnotationValues mockServiceAnnotationValues = mock(ServiceAnnotationValues.class);
@@ -85,6 +89,7 @@ public class ServiceLayerProviderTest {
 		when(mockServiceInterface.getName()).thenReturn(mockServiceType);
 		when(mockServiceInterface.getDeclaredByMetadataId()).thenReturn(SERVICE_MID);
 		when(mockServiceAnnotationValues.getFindAllMethod()).thenReturn(findAllMethod);
+		when(mockServiceAnnotationValues.getFindEntriesMethod()).thenReturn(findEntriesMethod);
 		when(mockServiceAnnotationValues.getSaveMethod()).thenReturn(saveMethod);
 		when(mockServiceAnnotationValues.getUpdateMethod()).thenReturn(updateMethod);
 		when(mockServiceAnnotationValuesFactory.getInstance(mockServiceInterface)).thenReturn(mockServiceAnnotationValues);
@@ -147,7 +152,7 @@ public class ServiceLayerProviderTest {
 
 	@Test
 	public void testGetAdditionsForEntityWithNullPluralText() {
-		assertAdditions(null, Arrays.<ClassOrInterfaceTypeDetails>asList(), FIND_ALL_METHOD, null);
+		assertAdditions(null, Arrays.<ClassOrInterfaceTypeDetails>asList(), FIND_ALL.getKey(), null);
 	}
 	
 	@Test
@@ -168,46 +173,60 @@ public class ServiceLayerProviderTest {
 	}
 	
 	@Test
-	public void testGetAdditionsForFindAllMethodWhenServiceDoesNotProvideIt() {
-		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("", "x", "x");
-		assertAdditions("x", Arrays.asList(mockServiceInterface), FIND_ALL_METHOD, null);
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testGetAdditionsForSaveMethodWhenServiceDoesNotProvideIt() {
-		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", null, "x");
-		final Pair<JavaType, JavaSymbolName> methodParameter = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("anything"));
-		assertAdditions("x", Arrays.asList(mockServiceInterface), SAVE_METHOD, null, methodParameter);
-	}
-	
-	@Test
 	public void testGetAdditionsForFindAllMethodWhenServiceProvidesIt() {
-		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("findPerson", "", "x");
-		assertAdditions("s", Arrays.asList(mockServiceInterface), FIND_ALL_METHOD, "personService.findPersons()");		
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("findPerson", "", "x", "x");
+		assertAdditions("s", Arrays.asList(mockServiceInterface), FIND_ALL.getKey(), "personService.findPersons()");		
+	}
+	
+	@Test
+	public void testGetAdditionsForFindAllMethodWhenServiceDoesNotProvideIt() {
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("", "x", "x", "x");
+		assertAdditions("x", Arrays.asList(mockServiceInterface), FIND_ALL.getKey(), null);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForSaveMethodWhenServiceProvidesIt() {
-		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "save", "x");
-		final Pair<JavaType, JavaSymbolName> methodParameters = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("user"));
-		assertAdditions("x", Arrays.asList(mockServiceInterface), SAVE_METHOD, "personService.savePerson(user)", methodParameters);
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "save", "x", "x");
+		final Pair<JavaType, JavaSymbolName> methodParameter = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("user"));
+		assertAdditions("x", Arrays.asList(mockServiceInterface), SAVE.getKey(), "personService.savePerson(user)", methodParameter);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testGetAdditionsForUpdateMethodWhenServiceDoesNotProvideIt() {
-		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "");
-		final Pair<JavaType, JavaSymbolName> methodParameter = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("employee"));
-		assertAdditions("x", Arrays.asList(mockServiceInterface), UPDATE_METHOD, null, methodParameter);
+	public void testGetAdditionsForSaveMethodWhenServiceDoesNotProvideIt() {
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", null, "x", "x");
+		final Pair<JavaType, JavaSymbolName> methodParameter = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("anything"));
+		assertAdditions("x", Arrays.asList(mockServiceInterface), SAVE.getKey(), null, methodParameter);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForUpdateMethodWhenServiceProvidesIt() {
-		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "change");
-		final Pair<JavaType, JavaSymbolName> methodParameters = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("bob"));
-		assertAdditions("x", Arrays.asList(mockServiceInterface), UPDATE_METHOD, "personService.changePerson(bob)", methodParameters);
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "change", "x");
+		final Pair<JavaType, JavaSymbolName> methodParameter = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("bob"));
+		assertAdditions("x", Arrays.asList(mockServiceInterface), UPDATE.getKey(), "personService.changePerson(bob)", methodParameter);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetAdditionsForUpdateMethodWhenServiceDoesNotProvideIt() {
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "", "x");
+		final Pair<JavaType, JavaSymbolName> methodParameter = new Pair<JavaType, JavaSymbolName>(mockTargetType, new JavaSymbolName("employee"));
+		assertAdditions("x", Arrays.asList(mockServiceInterface), UPDATE.getKey(), null, methodParameter);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetAdditionsForFindEntriesMethodWhenServiceProvidesIt() {
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "x", "locate");
+		assertAdditions("z", Arrays.asList(mockServiceInterface), FIND_ENTRIES.getKey(), "personService.locatePersonEntries(start, count)", START_PARAMETER, SIZE_PARAMETER);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetAdditionsForFindEntriesMethodWhenServiceDoesNotProvideIt() {
+		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "x", "");
+		assertAdditions("x", Arrays.asList(mockServiceInterface), FIND_ENTRIES.getKey(), null, START_PARAMETER, SIZE_PARAMETER);
+	}	
 }

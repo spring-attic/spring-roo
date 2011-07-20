@@ -10,12 +10,14 @@ import org.springframework.roo.model.JavaType;
  * The values of a given {@link RooService} annotation.
  * 
  * @author Stefan Schmidt
+ * @author Andrew Swan
  * @since 1.2
  */
 public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	@AutoPopulate private JavaType[] domainTypes;
 	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;
+	@AutoPopulate private String findEntriesMethod = RooService.FIND_ENTRIES_METHOD;
 	@AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
 	@AutoPopulate private String updateMethod = RooService.UPDATE_METHOD;
 	@AutoPopulate private String deleteMethod = RooService.DELETE_METHOD;
@@ -37,6 +39,10 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	public String getFindAllMethod() {
 		return findAllMethod;
+	}
+	
+	public String getFindEntriesMethod() {
+		return findEntriesMethod;
 	}
 	
 	public String getSaveMethod() {

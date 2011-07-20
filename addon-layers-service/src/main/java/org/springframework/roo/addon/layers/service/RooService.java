@@ -27,6 +27,11 @@ public @interface RooService {
 	public static final String FIND_ALL_METHOD = "findAll";
 	
 	/**
+	 * The default name of the "find entries" method
+	 */
+	public static final String FIND_ENTRIES_METHOD = "find";
+	
+	/**
 	 * The default name of the "save" method
 	 */
 	public static final String SAVE_METHOD = "save";

@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -14,22 +13,23 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.layers.LayerUtils;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
 /**
+ * The metadata about a service interface within a user project
  * 
  * @author Stefan Schmidt
+ * @author Andrew Swan
  * @since 1.2
  */
 public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	
 	// Constants
+	private static final int PUBLIC_ABSTRACT = Modifier.PUBLIC | Modifier.ABSTRACT;
 	private static final String PROVIDES_TYPE_STRING = ServiceInterfaceMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final InvocableMemberBodyBuilder BODY = new InvocableMemberBodyBuilder();
@@ -57,51 +57,41 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
 		
-		for (JavaType domainType : annotationValues.getDomainTypes()) {
-			builder.addMethod(getFindAllMethod(domainType, domainTypePlurals.get(domainType)));
-			builder.addMethod(getSaveMethod(domainType));
-			builder.addMethod(getUpdateMethod(domainType));
-			builder.addMethod(getDeleteMethod(domainType));
+		for (final JavaType domainType : annotationValues.getDomainTypes()) {
+			final String plural = domainTypePlurals.get(domainType);
+			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
+				builder.addMethod(getMethod(method, domainType, plural));
+			}
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 	
-	private MethodMetadata getFindAllMethod(final JavaType domainType, final String plural) {
-		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getFindAllMethod() + plural);
-		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
-			// The governor already declares this method
+	/**
+	 * Returns the metadata for declaring the given method in the service interface
+	 * 
+	 * @param method the method to declare
+	 * @param domainType the domain type being managed
+	 * @param plural the domain type's plural
+	 * @return <code>null</code> if the method isn't required or is already
+	 * declared in the governor
+	 */
+	private MethodMetadata getMethod(final ServiceLayerMethod method, final JavaType domainType, final String plural) {
+		final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, plural);
+		if (methodName == null || MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
+			// We don't want this method, or the governor already declares it
 			return null;
 		}
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(domainType)), BODY).build();
-	}
-	
-	private MethodMetadata getSaveMethod(final JavaType domainType) {
-		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSaveMethod() + domainType.getSimpleTypeName());
-		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null || annotationValues.getSaveMethod().equals("")) {
-			// The governor already declares this method
-			return null;
-		}
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), BODY).build();
-	}
-	
-	private MethodMetadata getUpdateMethod(final JavaType domainType) {
-		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getUpdateMethod() + domainType.getSimpleTypeName());
-		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null || annotationValues.getUpdateMethod().equals("")) {
-			// The governor already declares this method
-			return null;
-		}
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, domainType, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), BODY).build();
-	}
-	
-	private MethodMetadata getDeleteMethod(final JavaType domainType) {
-		final JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteMethod() + domainType.getSimpleTypeName());
-		if (MemberFindingUtils.getMethod(governorDetails, methodName, null) != null || annotationValues.getDeleteMethod().equals("")) {
-			// The governor already declares this method
-			return null;
-		}
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.ABSTRACT, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(Arrays.asList(domainType)), Arrays.asList(LayerUtils.getTypeName(domainType)), BODY).build();
+		return new MethodMetadataBuilder(
+				getId(),
+				PUBLIC_ABSTRACT,
+				methodName,
+				method.getReturnType(domainType),
+				AnnotatedJavaType.convertFromJavaTypes(method.getParameterTypes(domainType)),
+				method.getParameterNames(domainType),
+				BODY)
+		.build();
 	}
 
 	public ServiceAnnotationValues getServiceAnnotationValues() {
