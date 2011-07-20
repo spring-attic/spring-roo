@@ -26,13 +26,11 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @aurhor Alan Stewart
  * @since 1.0
- *
  */
 public class ItdSourceFileComposer {
-	
 	private int indentLevel = 0;
-	
 	private JavaType introductionTo;
 	private StringBuilder pw = new StringBuilder();
 	private boolean content;
@@ -333,7 +331,6 @@ public class ItdSourceFileComposer {
 		
 		content = true;
 		for (FieldMetadata field : fields) {
-			
 			// Append annotations
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
 				this.appendIndent();
@@ -413,11 +410,18 @@ public class ItdSourceFileComposer {
 			}
 			this.append("{");
 			this.newLine(false);
+
 			// Write out fields
 			for (FieldMetadata field: innerType.getDeclaredFields()) {
 				this.indent();
 				this.newLine(false);
-				this.appendIndent();
+
+				// Append annotations
+				for (AnnotationMetadata annotation : field.getAnnotations()) {
+					this.appendIndent();
+					outputAnnotation(annotation);
+					this.newLine(false);
+				}
 				this.appendIndent();
 				if (field.getModifier() != 0) {
 					this.append(Modifier.toString(field.getModifier()));
@@ -432,13 +436,14 @@ public class ItdSourceFileComposer {
 					this.append(" = ");
 					this.append(field.getFieldInitializer());
 				}
-				
+
 				// Complete the field declaration
 				this.append(";");
 				this.newLine(false);
 				this.indentRemove();
 			}
-			
+			this.newLine(false);
+
 			// Write out methods
 			this.indent();
 			writeMethods(innerType.getDeclaredMethods(), false);
@@ -498,7 +503,7 @@ public class ItdSourceFileComposer {
 				}
 			}
 			
-			// add exceptions to be thrown
+			// Add exceptions to be thrown
 			List<JavaType> throwsTypes = method.getThrowsTypes();
 			if (throwsTypes.size() > 0) {
 				this.append(") throws ");
