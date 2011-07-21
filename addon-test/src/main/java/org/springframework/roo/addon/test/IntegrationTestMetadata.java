@@ -31,6 +31,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Metadata for {@link RooIntegrationTest}.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  */
 public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
@@ -42,17 +43,6 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private DataOnDemandMetadata dataOnDemandMetadata;
 	private JavaType dodGovernor;
 	private boolean isGaeSupported = false;
-	
-	private MethodMetadata identifierAccessorMethod;
-	private MethodMetadata versionAccessorMethod;
-	private MethodMetadata countMethod;
-	private MethodMetadata findMethod;
-	private MemberTypeAdditions findAllMethodAdditions;
-	private MethodMetadata findEntriesMethod;
-	private MethodMetadata flushMethod;
-	private MemberTypeAdditions mergeMethodAdditions;
-	private MemberTypeAdditions persistMethodAdditions;
-	private MemberTypeAdditions removeMethodAdditions;
 	private String transactionManager;
 	private boolean hasEmbeddedIdentifier;
 	private boolean entityHasSuperclass;
@@ -73,17 +63,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 
 		this.annotationValues = annotationValues;
-		this.identifierAccessorMethod = identifierAccessorMethod;
-		this.versionAccessorMethod = versionAccessorMethod;
 		this.dataOnDemandMetadata = dataOnDemandMetadata;
-		this.countMethod = countMethod;
-		this.findMethod = findMethod;
-		this.findAllMethodAdditions = findAllMethodAdditions;
-		this.findEntriesMethod = findEntriesMethod;
-		this.flushMethod = flushMethod;
-		this.mergeMethodAdditions = mergeMethodAdditions;
-		this.persistMethodAdditions = persistMethodAdditions;
-		this.removeMethodAdditions = removeMethodAdditions;
 		this.transactionManager = transactionManager;
 		this.hasEmbeddedIdentifier = hasEmbeddedIdentifier;
 		this.entityHasSuperclass = entityHasSuperclass;
@@ -98,19 +78,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			addOptionalIntegrationTestClassIntroductions();
 		}
 		
-		builder.addMethod(getCountMethodTest());
-		builder.addMethod(getFindMethodTest());
-		builder.addMethod(getFindAllMethodTest());
-		builder.addMethod(getFindEntriesMethodTest());
-		builder.addMethod(getFlushMethodTest());
-		builder.addMethod(getMergeMethodTest());
-		builder.addMethod(getPersistMethodTest());
-		builder.addMethod(getRemoveMethodTest());
-		
-		findAllMethodAdditions.copyAdditionsTo(builder);
-		mergeMethodAdditions.copyAdditionsTo(builder);
-		persistMethodAdditions.copyAdditionsTo(builder);
-		removeMethodAdditions.copyAdditionsTo(builder);
+		builder.addMethod(getCountMethodTest(countMethod));
+		builder.addMethod(getFindMethodTest(findMethod, identifierAccessorMethod));
+		builder.addMethod(getFindAllMethodTest(findAllMethodAdditions, countMethod));
+		builder.addMethod(getFindEntriesMethodTest(findEntriesMethod, countMethod));
+		builder.addMethod(getFlushMethodTest(flushMethod, findMethod, versionAccessorMethod, identifierAccessorMethod));
+		builder.addMethod(getMergeMethodTest(mergeMethodAdditions, flushMethod, findMethod, versionAccessorMethod, identifierAccessorMethod));
+		builder.addMethod(getPersistMethodTest(persistMethodAdditions, flushMethod, identifierAccessorMethod));
+		builder.addMethod(getRemoveMethodTest(findMethod, flushMethod, removeMethodAdditions, identifierAccessorMethod));
 		
 		itdTypeDetails = builder.build();
 	}
@@ -212,7 +187,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the count method, if available and requested (may return null)
 	 */
-	public MethodMetadata getCountMethodTest() {
+	public MethodMetadata getCountMethodTest(MethodMetadata countMethod) {
 		if (!annotationValues.isCount() || countMethod == null) {
 			// User does not want this method
 			return null;
@@ -243,7 +218,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the find (by ID) method, if available and requested (may return null)
 	 */
-	public MethodMetadata getFindMethodTest() {
+	public MethodMetadata getFindMethodTest(MethodMetadata findMethod, MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isFind() || findMethod == null) {
 			// User does not want this method
 			return null;
@@ -278,7 +253,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the find all  method, if available and requested (may return null)
 	 */
-	public MethodMetadata getFindAllMethodTest() {
+	public MethodMetadata getFindAllMethodTest(MemberTypeAdditions findAllMethodAdditions, MethodMetadata countMethod) {
 		if (!annotationValues.isFindAll() || findAllMethodAdditions == null || countMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -307,14 +282,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			methodBuilder.setAnnotations(annotations);
 			method = methodBuilder.build();
 		}
-
+		findAllMethodAdditions.copyAdditionsTo(builder);
 		return method;
 	}
 
 	/**
 	 * @return a test for the find entries method, if available and requested (may return null)
 	 */
-	public MethodMetadata getFindEntriesMethodTest() {
+	public MethodMetadata getFindEntriesMethodTest(MethodMetadata findEntriesMethod, MethodMetadata countMethod) {
 		if (!annotationValues.isFindEntries() || findEntriesMethod == null || countMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -341,15 +316,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			methodBuilder.setAnnotations(annotations);
 			method = methodBuilder.build();
 		}
-
 		return method;
 	}
 
 	/**
 	 * @return a test for the flush method, if available and requested (may return null)
 	 */
-	public MethodMetadata getFlushMethodTest() {
-		if (!annotationValues.isFlush() || flushMethod == null || findMethod == null || versionAccessorMethod == null) {
+	public MethodMetadata getFlushMethodTest(MethodMetadata flushMethod, MethodMetadata findMethod, MethodMetadata versionAccessorMethod, MethodMetadata identifierAccessorMethod) {
+		if (!annotationValues.isFlush() || flushMethod == null || findMethod == null || versionAccessorMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
@@ -390,8 +364,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the merge method, if available and requested (may return null)
 	 */
-	public MethodMetadata getMergeMethodTest() {
-		if (!annotationValues.isMerge() || mergeMethodAdditions == null || flushMethod == null || findMethod == null || versionAccessorMethod == null) {
+	public MethodMetadata getMergeMethodTest(MemberTypeAdditions mergeMethodAdditions, MethodMetadata flushMethod, MethodMetadata findMethod, MethodMetadata versionAccessorMethod, MethodMetadata identifierAccessorMethod) {
+		if (!annotationValues.isMerge() || mergeMethodAdditions == null || flushMethod == null || findMethod == null || versionAccessorMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
@@ -429,15 +403,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			methodBuilder.setAnnotations(annotations);
 			method = methodBuilder.build();
 		}
-
+		mergeMethodAdditions.copyAdditionsTo(builder);
 		return method;
 	}
 
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
-	public MethodMetadata getPersistMethodTest() {
-		if (!annotationValues.isPersist() || persistMethodAdditions == null || flushMethod == null) {
+	public MethodMetadata getPersistMethodTest(MemberTypeAdditions persistMethodAdditions, MethodMetadata flushMethod, MethodMetadata identifierAccessorMethod) {
+		if (!annotationValues.isPersist() || persistMethodAdditions == null || flushMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method
 			return null;
 		}
@@ -468,15 +442,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			methodBuilder.setAnnotations(annotations);
 			method = methodBuilder.build();
 		}
-
+		persistMethodAdditions.copyAdditionsTo(builder);
 		return method;
 	}
 	
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
-	public MethodMetadata getRemoveMethodTest() {
-		if (!annotationValues.isRemove() || findMethod == null || flushMethod == null || removeMethodAdditions == null) {
+	public MethodMetadata getRemoveMethodTest(MethodMetadata findMethod, MethodMetadata flushMethod, MemberTypeAdditions removeMethodAdditions, MethodMetadata identifierAccessorMethod) {
+		if (!annotationValues.isRemove() || findMethod == null || flushMethod == null || removeMethodAdditions == null || identifierAccessorMethod == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
 		}
@@ -512,7 +486,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			methodBuilder.setAnnotations(annotations);
 			method = methodBuilder.build();
 		}
-
+		removeMethodAdditions.copyAdditionsTo(builder);
 		return method;
 	}
 

@@ -50,6 +50,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	@Reference private LayerService layerService;
 	
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final String FIND_ENTRIES_METHOD = PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name();
 	private Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
 	private Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
 	
@@ -155,7 +156,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Get the list of embedded metadata holders - may be an empty list if no embedded identifier exists
 		List<EmbeddedHolder> embeddedHolders = getEmbeddedHolders(memberDetails, metadataIdentificationString);
 
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethodAdditions, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierHolder, embeddedHolders);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethodAdditions, flushMethod, locatedMutators, entity, embeddedIdentifierHolder, embeddedHolders);
 	}
 
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
