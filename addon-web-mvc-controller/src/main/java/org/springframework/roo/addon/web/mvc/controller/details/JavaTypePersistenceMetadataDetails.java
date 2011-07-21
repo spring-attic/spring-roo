@@ -12,23 +12,28 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.1.2
+ * @deprecated use LayerService instead
  */
+@Deprecated
 public class JavaTypePersistenceMetadataDetails {
-	private FieldMetadata identifierField;
-	private MethodMetadata identifierAccessorMethod;
-	private MethodMetadata versionAccessorMethod;
 	
-	private MethodMetadata persistMethod;
-	private MethodMetadata mergeMethod;
-	private MethodMetadata removeMethod;
-	private MethodMetadata findAllMethod;
-	private MethodMetadata findMethod;
-	private MethodMetadata countMethod;
-	private MethodMetadata findEntriesMethod;
+	// Fields
+	private final FieldMetadata identifierField;
 	
-	private List<String> finderNames;
-	private boolean isRooIdentifier;
-	private List<FieldMetadata> rooIdentifierFields;
+	private final MethodMetadata countMethod;
+	private final MethodMetadata findAllMethod;
+	private final MethodMetadata findEntriesMethod;
+	private final MethodMetadata findMethod;
+	private final MethodMetadata identifierAccessorMethod;
+	private final MethodMetadata mergeMethod;
+	private final MethodMetadata persistMethod;
+	private final MethodMetadata removeMethod;
+	private final MethodMetadata versionAccessorMethod;
+	
+	private final boolean isRooIdentifier;
+	
+	private final List<FieldMetadata> rooIdentifierFields;
+	private final List<String> finderNames;
 	
 	/**
 	 * Constructor for JavaTypePersistenceMetadataDetails
@@ -47,25 +52,25 @@ public class JavaTypePersistenceMetadataDetails {
 	 * @param isRooIdentifier
 	 * @param rooIdentifierFields (must not be null, but may be empty of no finders are defined)
 	 */
-	public JavaTypePersistenceMetadataDetails(FieldMetadata identifierField, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MethodMetadata persistMethod, MethodMetadata mergeMethod, MethodMetadata removeMethod, MethodMetadata findAllMethod, MethodMetadata findMethod, MethodMetadata countMethod, MethodMetadata findEntriesMethod, List<String> finderNames, boolean isRooIdentifier, List<FieldMetadata> rooIdentifierFields) {
+	public JavaTypePersistenceMetadataDetails(final FieldMetadata identifierField, final MethodMetadata identifierAccessorMethod, final MethodMetadata versionAccessorMethod, final MethodMetadata persistMethod, final MethodMetadata mergeMethod, final MethodMetadata removeMethod, final MethodMetadata findAllMethod, final MethodMetadata findMethod, final MethodMetadata countMethod, final MethodMetadata findEntriesMethod, final List<String> finderNames, final boolean isRooIdentifier, final List<FieldMetadata> rooIdentifierFields) {
 		Assert.notNull(identifierField, "Indentifier field required");
 		Assert.notNull(identifierAccessorMethod, "Indentifier accessor method required");
 		Assert.notNull(finderNames, "List of finder Names required");
 		Assert.notNull(rooIdentifierFields, "List of fields for Roo identifier required (may be empty)");
 		
-		this.identifierField = identifierField;
-		this.identifierAccessorMethod = identifierAccessorMethod;
-		this.versionAccessorMethod = versionAccessorMethod;
-		this.persistMethod = persistMethod;
-		this.mergeMethod = mergeMethod;
-		this.removeMethod = removeMethod;
-		this.findAllMethod = findAllMethod;
-		this.findMethod = findMethod;
-		this.finderNames = finderNames;
 		this.countMethod = countMethod;
+		this.findAllMethod = findAllMethod;
 		this.findEntriesMethod = findEntriesMethod;
+		this.finderNames = finderNames;
+		this.findMethod = findMethod;
+		this.identifierAccessorMethod = identifierAccessorMethod;
+		this.identifierField = identifierField;
 		this.isRooIdentifier = isRooIdentifier;
+		this.mergeMethod = mergeMethod;
+		this.persistMethod = persistMethod;
+		this.removeMethod = removeMethod;
 		this.rooIdentifierFields = rooIdentifierFields;
+		this.versionAccessorMethod = versionAccessorMethod;
 	}
 	
 	/**

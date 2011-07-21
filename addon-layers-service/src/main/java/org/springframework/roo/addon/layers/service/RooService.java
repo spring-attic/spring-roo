@@ -59,6 +59,13 @@ public @interface RooService {
 	 * @return a blank string if the annotated type doesn't support this method
 	 */
 	String findAllMethod() default FIND_ALL_METHOD;
+
+	/**
+	 * Returns the prefix of the "findFooEntries" method
+	 * 
+	 * @return a blank string if the annotated type doesn't support this method
+	 */
+	String findEntriesMethod() default FIND_ENTRIES_METHOD;
 	
 	/**
 	 * Returns the name of the "save" method

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.details;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -55,6 +56,7 @@ import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.Pair;
+import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -69,6 +71,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	
 	// Constants
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
+	private static final String FIND_ENTRIES_METHOD = PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name();
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
 	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
@@ -416,6 +419,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		final Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
 		JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(domainType);
 		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
+		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults")));
+		additions.put(FIND_ENTRIES_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, domainType, LayerType.HIGHEST.getPosition(), findEntriesParameters.toArray()));
 		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
 		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
 		additions.put(DELETE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
