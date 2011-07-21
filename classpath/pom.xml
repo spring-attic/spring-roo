@@ -62,5 +62,13 @@
             <groupId>org.springframework.roo.wrapping</groupId>
             <artifactId>org.springframework.roo.wrapping.inflector</artifactId>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <!-- Compile scope because this module provides test cases -->
+            <scope>compile</scope>
+            <!-- Optional because we don't want to make it transitive -->
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 </project>
