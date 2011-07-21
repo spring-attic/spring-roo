@@ -115,11 +115,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (annotationValues.isUpdate() && updateMethod != null) {
 			builder.addMethod(getUpdateMethod(updateMethod));
 			builder.addMethod(getUpdateFormMethod());
+			updateMethod.copyAdditionsTo(builder);
 		}
 		
 		MemberTypeAdditions deleteMethod = crudAdditions.get(PersistenceCustomDataKeys.REMOVE_METHOD.name());
 		if (annotationValues.isDelete() && deleteMethod != null) {
 			builder.addMethod(getDeleteMethod(deleteMethod));
+			deleteMethod.copyAdditionsTo(builder);
 		}
 		if (specialDomainTypes.size() > 0) {
 			for (MethodMetadata method : getPopulateMethods()) {
