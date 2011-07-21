@@ -7,6 +7,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.model.JavaType;
 
 /**
+ * The values of a {@link RooRepositoryJpa} annotation.
  * 
  * @author Stefan Schmidt
  * @since 1.2
