@@ -29,7 +29,12 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.LayerCustomDataKeys;
+import org.springframework.roo.project.layers.LayerService;
+import org.springframework.roo.project.layers.LayerType;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.shell.NaturalOrderComparator;
+import org.springframework.roo.support.util.Pair;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.
@@ -42,6 +47,9 @@ import org.springframework.roo.shell.NaturalOrderComparator;
 @Service
 public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DataOnDemandMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+	@Reference private LayerService layerService;
+	
+	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	private Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
 	private Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
 	
@@ -64,6 +72,23 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
+		
+		//TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
+		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), itdTypeDetails.getGovernor());
+		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, LayerCustomDataKeys.LAYER_TYPE);
+		if (memberHoldingTypeDetails != null) {
+			@SuppressWarnings("unchecked")
+			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+			if (domainTypes != null) {
+				for (JavaType type : domainTypes) {
+					String localMidType = entityToDodMidMap.get(type);
+					if (localMidType != null) {
+						return localMidType;
+					}
+				}
+			}
+		}
+		
 		String localMid = entityToDodMidMap.get(governor);
 		if (localMid == null) {
 			// No DOD is interested in this JavaType, so let's move on
@@ -98,7 +123,8 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		entityToDodMidMap.put(annotationValues.getEntity(), metadataIdentificationString);
 		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getEntity());
 		
-		MemberDetails memberDetails = getMemberDetails(annotationValues.getEntity());
+		JavaType entity = annotationValues.getEntity();
+		MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
 		}
@@ -110,13 +136,13 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-		
+		JavaSymbolName entityName = new JavaSymbolName("obj");
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
-		MethodMetadata persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
+		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(entity, entityName));
 		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		if (persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
+		if (persistMethodAdditions == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
 			return null;
 		}
 		
@@ -129,7 +155,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Get the list of embedded metadata holders - may be an empty list if no embedded identifier exists
 		List<EmbeddedHolder> embeddedHolders = getEmbeddedHolders(memberDetails, metadataIdentificationString);
 
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierHolder, embeddedHolders);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethodAdditions, flushMethod, locatedMutators, persistenceMemberHoldingTypeDetails.getName(), embeddedIdentifierHolder, embeddedHolders);
 	}
 
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {

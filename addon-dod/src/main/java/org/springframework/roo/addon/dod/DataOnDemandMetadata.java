@@ -33,6 +33,7 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -60,7 +61,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata identifierAccessor;
 	private MethodMetadata findMethod;
 	private MethodMetadata findEntriesMethod;
-	private MethodMetadata persistMethod;
+	private MemberTypeAdditions persistMethodAdditions;
 	private MethodMetadata flushMethod;
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators;
 	private JavaType entityType;
@@ -71,7 +72,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private Map<FieldMetadata, Map<FieldMetadata, String>> embeddedFieldInitializers = new LinkedHashMap<FieldMetadata, Map<FieldMetadata, String>>();
 	private List<JavaType> requiredDataOnDemandCollaborators = new LinkedList<JavaType>();
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MemberTypeAdditions persistMethodAdditions, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -84,7 +85,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
+		if (findEntriesMethod == null || persistMethodAdditions == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
 			return;
 		}
 
@@ -92,7 +93,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.identifierAccessor = identifierAccessor;
 		this.findMethod = findMethod;
 		this.findEntriesMethod = findEntriesMethod;
-		this.persistMethod = persistMethod;
+		this.persistMethodAdditions = persistMethodAdditions;
 		this.flushMethod = flushMethod;
 		this.locatedMutators = locatedMutators;
 		this.entityType = entityType;
@@ -124,6 +125,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.addMethod(getRandomPersistentEntityMethod());
 		builder.addMethod(getModifyMethod());
 		builder.addMethod(getInitMethod());
+		
+		persistMethodAdditions.copyAdditionsTo(builder);
 
 		itdTypeDetails = builder.build();
 	}
@@ -867,7 +870,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getSimpleTypeName() + " obj = " + getNewTransientEntityMethod().getMethodName() + "(i);");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodSignature() + ";");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (ConstraintViolationException e) {");
 		bodyBuilder.indent();

@@ -121,7 +121,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			builder.addAnnotation(runWithBuilder);
 		}
 		
-		// Add an @ContextConfiguration("classpath:/applicationContext.xml") annotation to the type, if the user did not define it on the governor directly
+		// Add an @ContextConfiguration("classpath:/applicationContext*.xml") annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.test.context.ContextConfiguration")) == null) {
 			AnnotationMetadataBuilder contextConfigurationBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.test.context.ContextConfiguration"));
 			contextConfigurationBuilder.addStringAttribute("locations", "classpath:/META-INF/spring/applicationContext*.xml");
@@ -391,8 +391,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return null;
 		}
 
-		// Prepare method signature
-		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethodAdditions.getMethodName()));
+		// Prepare method signature (adding update as method names for save and update are the same in Spring Data JPA
+		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethodAdditions.getMethodName()) + "Update");
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
