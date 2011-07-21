@@ -107,6 +107,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		builder.addMethod(getPersistMethodTest());
 		builder.addMethod(getRemoveMethodTest());
 		
+		findAllMethodAdditions.copyAdditionsTo(builder);
+		mergeMethodAdditions.copyAdditionsTo(builder);
+		persistMethodAdditions.copyAdditionsTo(builder);
+		removeMethodAdditions.copyAdditionsTo(builder);
+		
 		itdTypeDetails = builder.build();
 	}
 	
