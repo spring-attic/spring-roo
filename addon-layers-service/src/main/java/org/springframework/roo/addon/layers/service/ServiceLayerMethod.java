@@ -8,7 +8,6 @@ import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.LayerUtils;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.PairList;
@@ -34,7 +33,7 @@ public enum ServiceLayerMethod {
 
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
-			return Arrays.asList(LayerUtils.getTypeName(entityType));
+			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
 		}
 
 		@Override
@@ -109,7 +108,7 @@ public enum ServiceLayerMethod {
 		
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
-			return Arrays.asList(LayerUtils.getTypeName(entityType));
+			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
 		}
 
 		@Override
@@ -134,7 +133,7 @@ public enum ServiceLayerMethod {
 		
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
-			return Arrays.asList(LayerUtils.getTypeName(entityType));
+			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
 		}
 
 		@Override

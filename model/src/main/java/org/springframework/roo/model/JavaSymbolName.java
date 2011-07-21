@@ -1,5 +1,6 @@
 package org.springframework.roo.model;
 
+import java.beans.Introspector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,7 +86,22 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 			string.append(m.group()).append(" ");
 		}
 		return string.toString().trim();
-  }
+	}
+	
+	/**
+	 * Construct a Java symbol name which adheres to the strict JavaBean naming conventions and avoids
+	 * use of {@link ReservedWords} by prefixing '_'
+	 * 
+	 * @param javaType the {@link JavaType} for which the symbol name is created
+	 * @return a Java symbol name adhering to JavaBean conventions and avoids reserved words
+	 */
+	public static JavaSymbolName getReservedWordSaveName(JavaType javaType) {
+		String entityNameString = Introspector.decapitalize(StringUtils.capitalize(javaType.getSimpleTypeName()));
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(entityNameString)) {
+			entityNameString = "_" + entityNameString;
+		}
+		return new JavaSymbolName(entityNameString);
+	}
 	
 	public final int hashCode() {
 		return this.symbolName.hashCode();

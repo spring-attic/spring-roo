@@ -39,7 +39,6 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -81,12 +80,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 	
 		this.annotationValues = annotationValues;
-		this.entityName = uncapitalize(annotationValues.getFormBackingObject().getSimpleTypeName());
-		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
-			this.entityName = "_" + entityName;
-		}
 		this.controllerPath = annotationValues.getPath();
 		this.formBackingType = annotationValues.getFormBackingObject();
+		this.entityName = JavaSymbolName.getReservedWordSaveName(formBackingType).getSymbolName();
 		this.specialDomainTypes = specialDomainTypes;
 		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);

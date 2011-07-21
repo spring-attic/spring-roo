@@ -22,7 +22,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -52,10 +51,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (!isValid()) {
 			return;
 		}
-		this.javaBeanFieldName = destination.getSimpleTypeName().toLowerCase();
-		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(javaBeanFieldName)) {
-			this.javaBeanFieldName = "_" + javaBeanFieldName;
-		}
+		this.javaBeanFieldName = JavaSymbolName.getReservedWordSaveName(destination).getSymbolName();
 		this.annotationValues = annotationValues;
 		this.beanPlural = javaTypePlural;
 		

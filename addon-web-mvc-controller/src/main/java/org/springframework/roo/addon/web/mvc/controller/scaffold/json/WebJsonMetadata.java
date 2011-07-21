@@ -36,7 +36,6 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -72,10 +71,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		}
 		
 		this.annotationValues = annotationValues;
-		this.entityName = StringUtils.uncapitalize(annotationValues.getFormBackingObject().getSimpleTypeName());
-		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
-			this.entityName = "_" + entityName;
-		}
+		this.entityName = JavaSymbolName.getReservedWordSaveName(annotationValues.getFormBackingObject()).getSymbolName();
 		this.formBackingType = annotationValues.getFormBackingObject();
 		this.memberDetails = memberDetails;
 		

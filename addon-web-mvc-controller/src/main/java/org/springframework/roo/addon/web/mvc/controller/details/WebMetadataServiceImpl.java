@@ -48,7 +48,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.LayerService;
 import org.springframework.roo.project.layers.LayerType;
@@ -415,7 +414,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		
 		// Define the methods we need for Web scaffolding.
 		final Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
-		JavaSymbolName entityName = getEnityName(domainType);
+		JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(domainType);
 		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
 		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
 		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
@@ -423,12 +422,5 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		return Collections.unmodifiableMap(additions);
 	}
 
-	// TODO: move this to an appropriate utils class
-	private JavaSymbolName getEnityName(JavaType domainType) {
-		String entityNameString = Introspector.decapitalize(StringUtils.capitalize(domainType.getSimpleTypeName()));
-		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(entityNameString)) {
-			entityNameString = "_" + entityNameString;
-		}
-		return new JavaSymbolName(entityNameString);
-	}
+
 }
