@@ -62,15 +62,6 @@ public interface TypeLocationService {
 	Set<JavaType> findTypesWithAnnotation(JavaType... annotationsToDetect);
 	
 	/**
-	 * Returns an optionally filtered set of {@link ClassOrInterfaceTypeDetails}s that possess the specified annotations (specified as a vararg).
-	 * 
-	 * @param filter the filter to apply; can be <code>null</code> for no filtering
-	 * @param annotationsToDetect the annotations (as a vararg) to detect on a type.
-	 * @return a set of ClassOrInterfaceTypeDetails that have the specified annotations.
-	 */
-	Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(ClassOrInterfaceTypeDetailsFilter filter, JavaType... annotationsToDetect);
-	
-	/**
 	 * Returns a set of {@link ClassOrInterfaceTypeDetails}s that possess the specified annotations (specified as a vararg).
 	 * 
 	 * @param annotationsToDetect the annotations (as a vararg) to detect on a type.

@@ -54,8 +54,8 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	@Reference private ProjectOperations projectOperations;
 	
+	@Reference private ProjectOperations projectOperations;
 	private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
 	private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
 
@@ -207,7 +207,15 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect) {
-		return findClassesOrInterfaceDetailsWithAnnotation(null, annotationsToDetect);
+		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
+		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
+			public void process(ClassOrInterfaceTypeDetails located) {
+				if (located != null) {
+					types.add(located);
+				}
+			}
+		});
+		return Collections.unmodifiableSet(types);
 	}
 
 	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(Object tag) {
@@ -262,17 +270,5 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 			}
 		}
 		return projectTypes;
-	}
-
-	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(final ClassOrInterfaceTypeDetailsFilter filter, final JavaType... annotationsToDetect) {
-		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
-		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
-			public void process(ClassOrInterfaceTypeDetails located) {
-				if (located != null && (filter == null || filter.include(located))) {
-					types.add(located);
-				}
-			}
-		});
-		return Collections.unmodifiableSet(types);
 	}
 }
