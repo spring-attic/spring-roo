@@ -1,5 +1,7 @@
 package org.springframework.roo.project.layers;
 
+import java.util.List;
+
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.model.JavaSymbolName;
@@ -55,10 +57,19 @@ public class MemberTypeAdditions {
 	private final String methodSignature;
 	
 	/**
-	 * Constructor
+	 * Constructor that takes a list of parameter names
 	 *
-	 * @param methodSignature the snippet of Java code that invokes the method
-	 * in question, for example "<code>personService.findAll()</code>" (required)	 * 
+	 * @param classOrInterfaceTypeDetailsBuilder
+	 * @param targetName
+	 * @param methodName
+	 * @param parameterNames (required)
+	 */
+	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, final String targetName, final String methodName, final List<JavaSymbolName> parameterNames) {
+		this(classOrInterfaceTypeDetailsBuilder, targetName, methodName, parameterNames.toArray(new JavaSymbolName[parameterNames.size()]));
+	}
+	
+	/**
+	 * Constructor that takes an array of parameter names
 	 *
 	 * @param classOrInterfaceTypeDetailsBuilder (required)
 	 * @param targetName the name of the object or class on which the method is
@@ -66,7 +77,9 @@ public class MemberTypeAdditions {
 	 * @param methodName the name of the method being invoked (must be a valid
 	 * Java name)
 	 * @param parameterNames the names of any parameters passed to the method
+	 * @deprecated use the list version instead
 	 */
+	@Deprecated
 	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, final String targetName, final String methodName, final JavaSymbolName... parameterNames) {
 		Assert.hasText(methodName, "Invalid method name '" + methodName + "'");
 		Assert.notNull(classOrInterfaceTypeDetailsBuilder, "Class or member details builder required");

@@ -10,38 +10,30 @@ import org.springframework.roo.model.JavaType;
  * The values of a {@link RooRepositoryJpa} annotation.
  * 
  * @author Stefan Schmidt
+ * @author Andrew Swan
  * @since 1.2
  */
 public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
-	@AutoPopulate private JavaType domainType = null;
-	@AutoPopulate private String findAllMethod = RooRepositoryJpa.FIND_ALL_METHOD;
-	@AutoPopulate private String saveMethod = RooRepositoryJpa.SAVE_METHOD;
-	@AutoPopulate private String updateMethod = RooRepositoryJpa.UPDATE_METHOD;
-	@AutoPopulate private String deleteMethod = RooRepositoryJpa.DELETE_METHOD;
+	// Fields
+	@AutoPopulate private JavaType domainType;
 	
+	/**
+	 * Constructor
+	 *
+	 * @param governorPhysicalTypeMetadata the metadata to parse (required)
+	 */
 	public RepositoryJpaAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooRepositoryJpa.class.getName()));
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 
+	/**
+	 * Returns the domain type managed by the annotated repository
+	 * 
+	 * @return a non-<code>null</code> type
+	 */
 	public JavaType getDomainType() {
 		return domainType;
-	}
-
-	public String getFindAllMethod() {
-		return findAllMethod;
-	}
-
-	public String getSaveMethod() {
-		return saveMethod;
-	}
-	
-	public String getUpdateMethod() {
-		return updateMethod;
-	}
-	
-	public String getDeleteMethod() {
-		return deleteMethod;
 	}
 }

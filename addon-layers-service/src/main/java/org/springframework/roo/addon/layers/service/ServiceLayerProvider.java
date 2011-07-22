@@ -50,21 +50,32 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		Assert.notNull(targetEntity, "Target entity type required");
 		Assert.notNull(methodParameters, "Method param names and types required (may be empty)");
 		
+		// Check whether this is even a known service layer method
+		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(methodParameters);
+		final List<JavaType> parameterTypes = parameterList.getKeys();
+		final ServiceLayerMethod method = ServiceLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity);
+		if (method == null) {
+			return null;
+		}
+		
 		// Check the entity has a plural form
 		final String pluralId = PluralMetadata.createIdentifier(targetEntity);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 		if (pluralMetadata == null || pluralMetadata.getPlural() == null) {
 			return null;
 		}
-		
+	
 		// Loop through the service interfaces that claim to support the given target entity
 		for (final ClassOrInterfaceTypeDetails serviceInterface : serviceInterfaceLocator.getServiceInterfaces(targetEntity)) {
 			// Get the values of the @RooService annotation for this service interface
 			final ServiceAnnotationValues annotationValues = serviceAnnotationValuesFactory.getInstance(serviceInterface);
 			if (annotationValues != null) {
-				final MemberTypeAdditions methodAdditions = getMethodAdditions(callerMID, methodIdentifier, targetEntity, serviceInterface.getName(), annotationValues, pluralMetadata.getPlural(), methodParameters);
-				
-				if (methodAdditions != null) {
+				// Check whether this method is implemented by the given service
+				final String methodName = method.getName(annotationValues, targetEntity, pluralMetadata.getPlural());
+				if (StringUtils.hasText(methodName)) {
+					// The service implements the method; get the additions to be made by the caller
+					final MemberTypeAdditions methodAdditions = getMethodAdditions(callerMID, methodName, serviceInterface.getName(), parameterList.getValues());
+					
 					// Register the caller for updates of this service
 					metadataDependencyRegistry.registerDependency(serviceInterface.getDeclaredByMetadataId(), callerMID);
 					
@@ -86,29 +97,13 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	 * method for the given domain entity.
 	 * 
 	 * @param callerMID the caller's metadata ID (required)
-	 * @param methodIdentifier the internal ID of the method being invoked
-	 * @param targetEntity the type of entity being operated upon (required)
+	 * @param methodName the name of the method being invoked (required)
 	 * @param serviceInterface the domain service type (required)
-	 * @param annotationValues the values of the {@link RooService} annotation
-	 * on the given service interface (required)
-	 * @param plural
-	 * @param callerParameters the types and names of the parameters being
-	 * passed by the caller to the method
-	 * @return <code>null</code> if that method is not supported by this layer
+	 * @param parameterNames the names of the parameters being passed by the
+	 * caller to the method
+	 * @return a non-<code>null</code> set of additions
 	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType serviceInterface, final ServiceAnnotationValues annotationValues, final String plural, final Pair<JavaType, JavaSymbolName>... callerParameters) {
-		// Check whether this is a known service layer method
-		final List<JavaType> parameterTypes = new PairList<JavaType, JavaSymbolName>(callerParameters).getKeys();
-		final ServiceLayerMethod method = ServiceLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity);
-		if (method == null) {
-			return null;
-		}
-	
-		// Check whether this method is implemented by the given service
-		final String methodName = method.getName(annotationValues, targetEntity, plural);
-		if (!StringUtils.hasText(methodName)) {
-			return null;
-		}
+	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType serviceInterface, final List<JavaSymbolName> parameterNames) {
 		
 		// The method is supported by this service interface; make a builder
 		final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
@@ -119,10 +114,6 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), serviceInterface).build());
 		
 		// Generate an additions object that includes a call to the method
-		final JavaSymbolName[] parameterNames = new JavaSymbolName[callerParameters.length];
-		for (int i = 0; i < callerParameters.length; i++) {
-			parameterNames[i] = callerParameters[i].getValue();
-		}
 		return new MemberTypeAdditions(classBuilder, fieldName, methodName, parameterNames);		
 	}
 	

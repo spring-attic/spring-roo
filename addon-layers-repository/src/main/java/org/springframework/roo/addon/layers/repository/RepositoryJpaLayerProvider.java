@@ -1,26 +1,25 @@
 package org.springframework.roo.addon.layers.repository;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.layers.CoreLayerProvider;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.Pair;
+import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
@@ -36,119 +35,72 @@ import org.springframework.uaa.client.util.Assert;
 public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
 	// Constants
-	private static final JavaType ANNOTATION_TYPE = new JavaType(RooRepositoryJpa.class.getName());
 	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 	
 	// Fields
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private MetadataService metadataService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private RepositoryJpaLocator repositoryLocator;
 	
-	public MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, Pair<JavaType, JavaSymbolName>... methodParameters) {
-		Assert.isTrue(StringUtils.hasText(metadataId), "Metadata identifier required");
-		Assert.notNull(methodIdentifier, "Method identifier required");
+	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final Pair<JavaType, JavaSymbolName>... callerParameters) {
+		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata ID required");
+		Assert.isTrue(StringUtils.hasText(methodIdentifier), "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
-		Assert.notNull(methodParameters, "Method param names and types required (may be empty)");
 		
-		TypeContainer typeContainer = findInterfaceType(targetEntity);
-		if (typeContainer == null) {
+		// Look for a repository layer method with this ID and parameter types
+		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(callerParameters);
+		final List<JavaType> parameterTypes = parameterList.getKeys();
+		final RepositoryLayerMethod method = RepositoryLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity);
+		if (method == null) {
 			return null;
 		}
 		
-		if (methodIdentifier.equals(PersistenceCustomDataKeys.FIND_ALL_METHOD.name())) {
-			return getFindAllMethod(metadataId, typeContainer);
-		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.PERSIST_METHOD.name())) {
-			return getPersistMethod(metadataId, targetEntity, typeContainer, methodParameters);
-		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.MERGE_METHOD.name())) {
-			return getMergeMethod(metadataId, targetEntity, typeContainer, methodParameters);
-		} else if (methodIdentifier.equals(PersistenceCustomDataKeys.REMOVE_METHOD.name())) {
-			return getDeleteMethod(metadataId, targetEntity, typeContainer, methodParameters);
-		}
-		return null;
-	}
-	
-	private MemberTypeAdditions getPersistMethod(final String metadataId, final JavaType entityType, final TypeContainer typeContainer, final Pair<JavaType, JavaSymbolName>... methodParameters) {
-		if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
+		// Look for repositories that support this domain type
+		final Collection<ClassOrInterfaceTypeDetails> repositories = repositoryLocator.getRepositories(targetEntity);
+		if (CollectionUtils.isEmpty(repositories)) {
 			return null;
 		}
-		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
-		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
-		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
-		String methodName = typeContainer.getRepositoryJpaAnnotationValues().getSaveMethod();
-		return new MemberTypeAdditions(classBuilder, repoField, methodName, methodParameters[0].getValue());
+		// Use the first such repository (could refine this later)
+		final ClassOrInterfaceTypeDetails repository = repositories.iterator().next();
+		
+		// Ensure the caller is notified of updates to the repository
+		metadataDependencyRegistry.registerDependency(repository.getDeclaredByMetadataId(), callerMID);
+		
+		// Return the additions the caller needs to make
+		return getMethodAdditions(callerMID, method.getName(), repository.getName(), parameterList.getValues());
 	}
 	
-	private MemberTypeAdditions getMergeMethod(final String metadataId, final JavaType entityType, final TypeContainer typeContainer, final Pair<JavaType, JavaSymbolName>... methodParameters) {
-		if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
-			return null;
-		}
-		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
-		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
-		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
-		String methodName = typeContainer.getRepositoryJpaAnnotationValues().getUpdateMethod();
-		return new MemberTypeAdditions(classBuilder, repoField, methodName, methodParameters[0].getValue());
-	}
-
-	private MemberTypeAdditions getFindAllMethod(final String metadataId, final TypeContainer typeContainer) {
-		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
-		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
-		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
-		String methodName = typeContainer.getRepositoryJpaAnnotationValues().getFindAllMethod();
-		return new MemberTypeAdditions(classBuilder, repoField, methodName);
-	}
-	
-	private MemberTypeAdditions getDeleteMethod(final String metadataId, final JavaType entityType, final TypeContainer typeContainer, final Pair<JavaType, JavaSymbolName>... methodParameters) {
-		if (methodParameters == null || methodParameters.length != 1 || !methodParameters[0].getKey().equals(entityType)) {
-			return null;
-		}
-		ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(metadataId);
-		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(AUTOWIRED);
-		String repoField = StringUtils.uncapitalize(typeContainer.getClassOrInterfaceTypeDetails().getName().getSimpleTypeName());
-		classBuilder.addField(new FieldMetadataBuilder(metadataId, 0, Arrays.asList(annotation), new JavaSymbolName(repoField), typeContainer.getClassOrInterfaceTypeDetails().getName()).build());
-		String methodName = typeContainer.getRepositoryJpaAnnotationValues().getDeleteMethod();
-		return new MemberTypeAdditions(classBuilder, repoField, methodName, methodParameters[0].getValue());
-	}
-
-	private TypeContainer findInterfaceType(JavaType type) {
-		for (ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ANNOTATION_TYPE)) {
-			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(coitd.getName(), Path.SRC_MAIN_JAVA));
-			if (physicalTypeMetadata == null) {
-				continue;
-			}
-			RepositoryJpaAnnotationValues repositoryJpaAnnotationValues = new RepositoryJpaAnnotationValues(physicalTypeMetadata);
-			if (!repositoryJpaAnnotationValues.getDomainType().equals(type)) {
-				continue;
-			}
-			return new TypeContainer(coitd, repositoryJpaAnnotationValues);
-		}
-		return null;
+	/**
+	 * Returns the additions that the caller needs to make in order to invoke
+	 * the given method
+	 * 
+	 * @param callerMID the caller's metadata ID (required)
+	 * @param methodName the name of the method being called (required)
+	 * @param repositoryType the type of repository being called
+	 * @param parameterNames the parameter names used by the caller
+	 * @return a non-<code>null</code> set of additions
+	 */
+	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType repositoryType, final List<JavaSymbolName> parameterNames) {
+		// Create a builder to hold the repository field to be copied into the caller
+		final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
+		final AnnotationMetadataBuilder autowiredAnnotation = new AnnotationMetadataBuilder(AUTOWIRED);
+		final String repositoryFieldName = StringUtils.uncapitalize(repositoryType.getSimpleTypeName());
+		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(autowiredAnnotation), new JavaSymbolName(repositoryFieldName), repositoryType).build());
+		
+		// Create the additions to invoke the given method on this field
+		return new MemberTypeAdditions(classBuilder, repositoryFieldName, methodName, parameterNames);		
 	}
 
 	public int getLayerPosition() {
 		return LayerType.REPOSITORY.getPosition();
 	}
 	
-	/**
-	 * Container to hold {@link ClassOrInterfaceTypeDetails} and {@link RepositoryJpaAnnotationValues} 
-	 * for a given domain type;
-	 * 
-	 * @author Stefan Schmidt
-	 * @since 1.2
-	 */
-	private class TypeContainer {
-		private ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails;
-		private RepositoryJpaAnnotationValues repositoryJpaAnnotationValues;
-		public TypeContainer(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, RepositoryJpaAnnotationValues repositoryJpaAnnotationValues) {
-			this.classOrInterfaceTypeDetails = classOrInterfaceTypeDetails;
-			this.repositoryJpaAnnotationValues = repositoryJpaAnnotationValues;
-		}
-		public ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails() {
-			return classOrInterfaceTypeDetails;
-		}
-		public RepositoryJpaAnnotationValues getRepositoryJpaAnnotationValues() {
-			return repositoryJpaAnnotationValues;
-		}
+	// -------------------- Setters for use by unit tests ----------------------
+	
+	void setMetadataDependencyRegistry(final MetadataDependencyRegistry metadataDependencyRegistry) {
+		this.metadataDependencyRegistry = metadataDependencyRegistry;
+	}
+	
+	void setRepositoryLocator(final RepositoryJpaLocator repositoryLocator) {
+		this.repositoryLocator = repositoryLocator;
 	}
 }

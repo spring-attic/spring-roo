@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.layers.service;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.ClassOrInterfaceTypeDetailsFilter;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -45,22 +45,23 @@ public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
 	 */
 	public Collection<ClassOrInterfaceTypeDetails> getServiceInterfaces(final JavaType entityType) {
 		Assert.notNull(entityType, "Entity type is required");
-		final Collection<ClassOrInterfaceTypeDetails> interfaces = new ArrayList<ClassOrInterfaceTypeDetails>();
-		// Loop through all interfaces annotated with @RooService
-		for (final ClassOrInterfaceTypeDetails serviceInterface : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_SERVICE)) {
-			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(serviceInterface.getAnnotations(), ROO_SERVICE);
-			// Find the domain type(s) supported by this service interface
-			@SuppressWarnings("unchecked")
-			final ArrayAttributeValue<AnnotationAttributeValue<JavaType>> domainTypes = (ArrayAttributeValue<AnnotationAttributeValue<JavaType>>) annotation.getAttribute(RooService.DOMAIN_TYPES_ATTRIBUTE);
-			if (domainTypes != null) {
-				// Look through those domain types for the given one
-				for (final AnnotationAttributeValue<JavaType> javaTypeValue : domainTypes.getValue()) {
-					if (entityType.equals(javaTypeValue.getValue())) {
-						interfaces.add(serviceInterface);
+		final ClassOrInterfaceTypeDetailsFilter entityServicefilter = new ClassOrInterfaceTypeDetailsFilter() {
+			public boolean include(final ClassOrInterfaceTypeDetails serviceInterface) {
+				final AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(serviceInterface.getAnnotations(), ROO_SERVICE);
+				// Find the domain type(s) supported by this service interface
+				@SuppressWarnings("unchecked")
+				final ArrayAttributeValue<AnnotationAttributeValue<JavaType>> domainTypes = (ArrayAttributeValue<AnnotationAttributeValue<JavaType>>) annotation.getAttribute(RooService.DOMAIN_TYPES_ATTRIBUTE);
+				if (domainTypes != null) {
+					// Look through those domain types for the given one
+					for (final AnnotationAttributeValue<JavaType> javaTypeValue : domainTypes.getValue()) {
+						if (entityType.equals(javaTypeValue.getValue())) {
+							return true;
+						}
 					}
 				}
+				return false;
 			}
-		}
-		return interfaces;
-	}		
+		};
+		return typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(entityServicefilter , ROO_SERVICE);
+	}
 }
