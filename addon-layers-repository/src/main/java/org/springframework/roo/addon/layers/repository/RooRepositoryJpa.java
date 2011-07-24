@@ -6,27 +6,30 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Marks the annotated type as a Spring Data JPA repository interface.
+ * 
+ * For the time being, we don't allow users to customise the names of repository
+ * methods like we do for service interfaces, because Spring Data JPA provides
+ * a complete pre-named set of CRUD methods out of the box.
  * 
  * @author Stefan Schmidt
+ * @author Andrew Swan
  * @since 1.2
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooRepositoryJpa {
 	
-	public static final String FIND_ALL_METHOD = "findAll";
-	public static final String SAVE_METHOD = "save";
-	public static final String UPDATE_METHOD = SAVE_METHOD;
-	public static final String DELETE_METHOD = "delete";
+	/**
+	 * The name of this annotation's attribute that specifies the managed domain
+	 * type.
+	 */
 	public static final String DOMAIN_TYPE_ATTRIBUTE = "domainType";
 	
-	Class<?> domainType();
-	
-	String findAllMethod() default FIND_ALL_METHOD;
-	
-	String saveMethod() default SAVE_METHOD;
-	
-	String updateMethod() default UPDATE_METHOD;
-
-	String deleteMethod() default DELETE_METHOD;
+	/**
+	 * The domain type managed by the annotated repository
+	 * 
+	 * @return a non-<code>null</code> entity type
+	 */
+	Class<?> domainType();	// no default => mandatory
 }
