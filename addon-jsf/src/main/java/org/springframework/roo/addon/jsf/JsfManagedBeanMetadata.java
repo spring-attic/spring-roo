@@ -387,7 +387,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.indentRemove();
 		
 		MethodMetadataBuilder getAsObjectMethod = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("getAsObject"), new JavaType("java.lang.Object"), AnnotatedJavaType.convertFromJavaTypes(getAsObjectParameterTypes), parameterNames, bodyBuilder);
-
+		
 		// Create getAsString method
 		List<JavaType> getAsStringParameterTypes = new ArrayList<JavaType>(paramTypes);
 		getAsStringParameterTypes.add(new JavaType("java.lang.Object"));

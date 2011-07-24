@@ -66,7 +66,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			// Add menu model field
 			builder.addField(getMenuModelField());
 
-			// Add init() methid
+			// Add init() method
 			builder.addMethod(getInitMethod());
 
 			// Add model field accessor method
@@ -146,10 +146,10 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			String plural = getInflectorPlural(entity.getSimpleTypeName());
 
 			bodyBuilder.appendFormalLine("");
-			bodyBuilder.appendFormalLine("submenu = " + getComponentCreationStr("Submenu") + ";");
+			bodyBuilder.appendFormalLine("submenu = " + getComponentCreationStr("Submenu"));
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
 
-			bodyBuilder.appendFormalLine("item = " + getComponentCreationStr("MenuItem") + ";");
+			bodyBuilder.appendFormalLine("item = " + getComponentCreationStr("MenuItem"));
 			bodyBuilder.appendFormalLine("item.setValue(\"List all " + plural + "\");");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".findAll" + plural + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
@@ -197,7 +197,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private String getComponentCreationStr(String componentName) {
-		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE)").toString();
+		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
 	}
 
 	private String getInflectorPlural(String term) {
