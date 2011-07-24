@@ -7,7 +7,7 @@
 			<url>http://maven.springframework.org/snapshot</url>
 		</repository>
 		<dependencies>
-			<dependency org="org.springframework.data" name="spring-data-jpa" rev="1.0.0.RC1" />
+			<dependency org="org.springframework.data" name="spring-data-jpa" rev="1.0.0.RELEASE" />
 		</dependencies>
 	</repository>
 </configuration>
