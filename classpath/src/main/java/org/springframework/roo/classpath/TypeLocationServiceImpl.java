@@ -153,7 +153,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 				}
 			}
 			// Only cache tag if there are MIDs associated with it
-			if (cacheAllowed && locatedMids.size() > 0) {
+			if (cacheAllowed && !locatedMids.isEmpty()) {
 				tagToMidMap.put(tag, locatedMids);
 			}
 		}
@@ -176,7 +176,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 					}
 				}
 				// Only cache annotation if there are MIDs associated with it
-				if (cacheAllowed && locatedMids.size() > 0) {
+				if (cacheAllowed && !locatedMids.isEmpty()) {
 					annotationToMidMap.put(annotationType, locatedMids);
 				}
 			}
