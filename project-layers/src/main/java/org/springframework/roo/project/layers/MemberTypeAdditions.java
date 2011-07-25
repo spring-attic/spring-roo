@@ -1,5 +1,7 @@
 package org.springframework.roo.project.layers;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
@@ -20,6 +22,40 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.2
  */
 public class MemberTypeAdditions {
+
+	/**
+	 * Factory method that builds the method call for you from the given target,
+	 * method, and array of parameter names.
+	 *
+	 * @param builder stores any changes the caller should make in order to make
+	 * the given method call, e.g. the field that is the method target (required)
+	 * @param targetName the name of the object or class on which the method is
+	 * being invoked (if not blank, must be a valid Java name)
+	 * @param methodName the name of the method being invoked (must be a valid
+	 * Java name)
+	 * @param parameterNames the names of any parameters passed to the method
+	 * (required)
+	 */
+	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, JavaSymbolName... parameterNames) {
+		return getInstance(builder, targetName, methodName, Arrays.asList(parameterNames));
+	}
+	
+	/**
+	 * Factory method that builds the method call for you from the given target,
+	 * method, and list of parameter names.
+	 *
+	 * @param builder stores any changes the caller should make in order to make
+	 * the given method call, e.g. the field that is the method target (required)
+	 * @param targetName the name of the object or class on which the method is
+	 * being invoked (if not blank, must be a valid Java name)
+	 * @param methodName the name of the method being invoked (must be a valid
+	 * Java name)
+	 * @param parameterNames the names of any parameters passed to the method
+	 * (required)
+	 */
+	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, final List<JavaSymbolName> parameterNames) {
+		return new MemberTypeAdditions(builder, methodName, buildMethodCall(targetName, methodName, parameterNames.iterator()));
+	}
 	
 	/**
 	 * Builds the code snippet for a method call with the given properties
@@ -31,7 +67,7 @@ public class MemberTypeAdditions {
 	 * @param parameterNames the names of any parameters passed to the method
 	 * @return a non-blank Java snippet
 	 */
-	static String buildMethodCall(final String targetName, final String methodName, final JavaSymbolName... parameterNames) {
+	static String buildMethodCall(final String targetName, final String methodName, final Iterator<JavaSymbolName> parameterNames) {
 		JavaSymbolName.assertJavaNameLegal(methodName);
 		final StringBuilder methodCall = new StringBuilder();
 		if (StringUtils.hasText(targetName)) {
@@ -41,11 +77,11 @@ public class MemberTypeAdditions {
 		}
 		methodCall.append(methodName);
 		methodCall.append("(");
-		for (int i = 0; i < parameterNames.length; i++) {
-			if (i > 0) {
+		while (parameterNames.hasNext()) {
+			methodCall.append(parameterNames.next().getSymbolName());
+			if (parameterNames.hasNext()) {
 				methodCall.append(", ");
 			}
-			methodCall.append(parameterNames[i].getSymbolName());
 		}
 		methodCall.append(")");
 		return methodCall.toString();
@@ -54,48 +90,34 @@ public class MemberTypeAdditions {
 	// Fields
 	private final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceDetailsBuilder;
 	private final String methodName;
-	private final String methodSignature;
+	private final String methodCall;
 	
 	/**
-	 * Constructor that takes a list of parameter names
+	 * Constructor that accepts a pre-built method call
 	 *
-	 * @param classOrInterfaceTypeDetailsBuilder
-	 * @param targetName
-	 * @param methodName
-	 * @param parameterNames (required)
+	 * @param builder stores any changes the caller should make in order to make
+	 * the given method call, e.g. the field that is the method target (required)
+	 * @param methodName the bare name of the method being invoked (required)
+	 * @param methodCall a valid Java snippet that calls the method,
+	 * including any required target and parameters, for example "foo.bar(baz)"
+	 * (required)
 	 */
-	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, final String targetName, final String methodName, final List<JavaSymbolName> parameterNames) {
-		this(classOrInterfaceTypeDetailsBuilder, targetName, methodName, parameterNames.toArray(new JavaSymbolName[parameterNames.size()]));
-	}
-	
-	/**
-	 * Constructor that takes an array of parameter names
-	 *
-	 * @param classOrInterfaceTypeDetailsBuilder (required)
-	 * @param targetName the name of the object or class on which the method is
-	 * being invoked (if not blank, must be a valid Java name)
-	 * @param methodName the name of the method being invoked (must be a valid
-	 * Java name)
-	 * @param parameterNames the names of any parameters passed to the method
-	 * @deprecated use the list version instead
-	 */
-	@Deprecated
-	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder, final String targetName, final String methodName, final JavaSymbolName... parameterNames) {
+	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder builder, final String methodName, final String methodCall) {
+		Assert.notNull(builder, "Builder required");
 		Assert.hasText(methodName, "Invalid method name '" + methodName + "'");
-		Assert.notNull(classOrInterfaceTypeDetailsBuilder, "Class or member details builder required");
-		this.classOrInterfaceDetailsBuilder = classOrInterfaceTypeDetailsBuilder;
+		Assert.hasText(methodCall, "Invalid method signature '" + methodCall + "'");
+		this.classOrInterfaceDetailsBuilder = builder;
 		this.methodName = methodName;
-		this.methodSignature = buildMethodCall(targetName, methodName, parameterNames);
+		this.methodCall = methodCall;
 	}
-
+	
 	/**
-	 * Returns the snippet of Java code that invokes the method in question,
-	 * for example "<code>personService.findAll()</code>".
+	 * Copies this instance's additions into the given builder
 	 * 
-	 * @return a non-blank String
+	 * @param targetBuilder the ITD builder to receive the additions (required)
 	 */
-	public String getMethodSignature() {
-		return methodSignature;
+	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder) {
+		this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder);
 	}
 	
 	/**
@@ -108,19 +130,20 @@ public class MemberTypeAdditions {
 	}
 	
 	/**
-	 * Copies this instance's additions into the given builder
+	 * Returns the snippet of Java code that calls the method in question, for
+	 * example "<code>personService.findAll()</code>".
 	 * 
-	 * @param targetBuilder the ITD builder to receive the additions (required)
+	 * @return a non-blank String
 	 */
-	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder) {
-		this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder);
+	public String getMethodCall() {
+		return methodCall;
 	}
 
 	@Override
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("memberHoldingTypeDetails", classOrInterfaceDetailsBuilder);
-		tsc.append("methodSignature", methodSignature);
+		tsc.append("methodCall", methodCall);
 		return tsc.toString();
 	}
 }

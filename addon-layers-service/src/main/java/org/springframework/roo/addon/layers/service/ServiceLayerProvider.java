@@ -114,7 +114,7 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(annotation), new JavaSymbolName(fieldName), serviceInterface).build());
 		
 		// Generate an additions object that includes a call to the method
-		return new MemberTypeAdditions(classBuilder, fieldName, methodName, parameterNames);		
+		return MemberTypeAdditions.getInstance(classBuilder, fieldName, methodName, parameterNames);		
 	}
 	
 	public int getLayerPosition() {

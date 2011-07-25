@@ -195,7 +195,7 @@ public enum ServiceLayerMethod {
 		if (!isVoid()) {
 			line = "return ";
 		}
-		line += lowerLayerAdditions.getMethodSignature() + ";";
+		line += lowerLayerAdditions.getMethodCall() + ";";
 		return line;
 	}
 	

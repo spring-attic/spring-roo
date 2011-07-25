@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.repository;
 
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
@@ -11,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.support.util.Assert;
@@ -45,6 +48,11 @@ public enum RepositoryLayerMethod {
 	DELETE ("delete", REMOVE_METHOD) {
 		
 		@Override
+		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+			return "delete(" + parameterNames.get(0).getSymbolName() + ")";
+		}
+		
+		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
 			return Arrays.asList(targetEntity);
 		}
@@ -56,12 +64,43 @@ public enum RepositoryLayerMethod {
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
 			return Collections.emptyList();
 		}
+
+		@Override
+		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+			return "findAll()";
+		}
+	},
+
+	/**
+	 * Finds entities starting from a given zero-based index, up to a given
+	 * maximum number of results. This method isn't directly implemented by
+	 * Spring Data JPA, so we use its findAll(Pageable) API.
+	 */
+	FIND_ENTRIES ("findEntries", FIND_ENTRIES_METHOD) {
+
+		@Override
+		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+			final JavaSymbolName firstResultParameter = parameterNames.get(0);
+			final JavaSymbolName maxResultsParameter = parameterNames.get(1);
+			final String pageNumberExpression = firstResultParameter + " / " + maxResultsParameter;
+			return "findAll(new org.springframework.data.domain.PageRequest(" + pageNumberExpression + ", " + maxResultsParameter + ")).getContent()";
+		}
+
+		@Override
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
+		}
 	},
 	
 	/**
 	 * Spring Data JPA makes no distinction between create/persist/save/update/merge
 	 */
 	SAVE ("save", MERGE_METHOD, PERSIST_METHOD) {
+		
+		@Override
+		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+			return "save(" + parameterNames.get(0).getSymbolName() + ")";
+		}
 		
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
@@ -106,6 +145,16 @@ public enum RepositoryLayerMethod {
 		}
 		this.name = name;
 	}
+	
+	/**
+	 * Returns a Java snippet that invokes this method
+	 * 
+	 * @param parameterNames the parameter names used by the caller; can be
+	 * <code>null</code>
+	 * @param classBuilder the builder that will be used to modify the caller
+	 * @return a non-blank Java snippet
+	 */
+	public abstract String getCall(List<JavaSymbolName> parameterNames, ClassOrInterfaceTypeDetailsBuilder classBuilder);
 	
 	/**
 	 * Returns the name of this method

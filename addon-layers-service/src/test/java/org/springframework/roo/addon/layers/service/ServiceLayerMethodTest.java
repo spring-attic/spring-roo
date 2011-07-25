@@ -82,7 +82,7 @@ public class ServiceLayerMethodTest {
 	@Test
 	public void testGetBodyWhenLowerLayerImplementsMethod() {
 		final MemberTypeAdditions mockLowerLayerAdditions = mock(MemberTypeAdditions.class);
-		when(mockLowerLayerAdditions.getMethodSignature()).thenReturn("foo()");
+		when(mockLowerLayerAdditions.getMethodCall()).thenReturn("foo()");
 		for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 			if (method.isVoid()) {
 				assertEquals("foo();", method.getBody(mockLowerLayerAdditions));
