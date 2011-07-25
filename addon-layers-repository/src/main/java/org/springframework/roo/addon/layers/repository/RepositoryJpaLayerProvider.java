@@ -87,7 +87,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(autowiredAnnotation), new JavaSymbolName(repositoryFieldName), repositoryType).build());
 		
 		// Create the additions to invoke the given method on this field
-		final String methodCall = repositoryFieldName + "." + method.getCall(parameterNames, classBuilder);
+		final String methodCall = repositoryFieldName + "." + method.getCall(parameterNames);
 		return new MemberTypeAdditions(classBuilder, method.getName(), methodCall);		
 	}
 

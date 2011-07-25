@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.layers.repository;
 
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
@@ -12,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.LayerType;
@@ -45,10 +45,23 @@ public enum RepositoryLayerMethod {
 			T           saveAndFlush(T)
 	 */
 	
+	COUNT ("count", COUNT_ALL_METHOD) {
+
+		@Override
+		public String getCall(final List<JavaSymbolName> parameterNames) {
+			return "count()";
+		}
+
+		@Override
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+			return Collections.emptyList();
+		}
+	},
+	
 	DELETE ("delete", REMOVE_METHOD) {
 		
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "delete(" + parameterNames.get(0).getSymbolName() + ")";
 		}
 		
@@ -66,7 +79,7 @@ public enum RepositoryLayerMethod {
 		}
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "findAll()";
 		}
 	},
@@ -79,7 +92,7 @@ public enum RepositoryLayerMethod {
 	FIND_ENTRIES ("findEntries", FIND_ENTRIES_METHOD) {
 
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+		public String getCall(final List<JavaSymbolName> parameterNames) {
 			final JavaSymbolName firstResultParameter = parameterNames.get(0);
 			final JavaSymbolName maxResultsParameter = parameterNames.get(1);
 			final String pageNumberExpression = firstResultParameter + " / " + maxResultsParameter;
@@ -98,7 +111,7 @@ public enum RepositoryLayerMethod {
 	SAVE ("save", MERGE_METHOD, PERSIST_METHOD) {
 		
 		@Override
-		public String getCall(final List<JavaSymbolName> parameterNames, final ClassOrInterfaceTypeDetailsBuilder classBuilder) {
+		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "save(" + parameterNames.get(0).getSymbolName() + ")";
 		}
 		
@@ -151,10 +164,9 @@ public enum RepositoryLayerMethod {
 	 * 
 	 * @param parameterNames the parameter names used by the caller; can be
 	 * <code>null</code>
-	 * @param classBuilder the builder that will be used to modify the caller
 	 * @return a non-blank Java snippet
 	 */
-	public abstract String getCall(List<JavaSymbolName> parameterNames, ClassOrInterfaceTypeDetailsBuilder classBuilder);
+	public abstract String getCall(List<JavaSymbolName> parameterNames);
 	
 	/**
 	 * Returns the name of this method
