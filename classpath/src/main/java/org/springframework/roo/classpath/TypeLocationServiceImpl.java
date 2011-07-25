@@ -157,8 +157,8 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 					callback.process(cid);
 				}
 			}
-
-			if (cacheAllowed) {
+			// Only cache tag if there are MIDs associated with it
+			if (cacheAllowed && locatedMids.size() > 0) {
 				tagToMidMap.put(tag, locatedMids);
 			}
 		}
@@ -182,8 +182,8 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 						callback.process(cid);
 					}
 				}
-
-				if (cacheAllowed) {
+				// Only cache annotation if there are MIDs associated with it
+				if (cacheAllowed && locatedMids.size() > 0) {
 					annotationToMidMap.put(annotationType, locatedMids);
 				}
 			}
