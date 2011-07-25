@@ -16,6 +16,7 @@ import org.springframework.roo.model.JavaType;
 public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	@AutoPopulate private JavaType[] domainTypes;
+	@AutoPopulate private String countAllMethod = RooService.COUNT_ALL_METHOD;
 	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;
 	@AutoPopulate private String findEntriesMethod = RooService.FIND_ENTRIES_METHOD;
 	@AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
@@ -37,6 +38,10 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 		return domainTypes;
 	}
 
+	public String getCountAllMethod() {
+		return countAllMethod;
+	}
+	
 	public String getFindAllMethod() {
 		return findAllMethod;
 	}

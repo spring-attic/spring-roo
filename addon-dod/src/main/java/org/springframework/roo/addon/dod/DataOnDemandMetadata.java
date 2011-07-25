@@ -863,7 +863,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getSimpleTypeName() + " obj = " + getNewTransientEntityMethod().getMethodName() + "(i);");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodSignature() + ";");
+		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodCall() + ";");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (ConstraintViolationException e) {");
 		bodyBuilder.indent();

@@ -74,6 +74,6 @@ public class RepositoryJpaLayerProviderTest {
 		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity);
 		
 		// Check
-		assertEquals("clinicRepo.findAll()", additions.getMethodSignature());	
+		assertEquals("clinicRepo.findAll()", additions.getMethodCall());	
 	}
 }

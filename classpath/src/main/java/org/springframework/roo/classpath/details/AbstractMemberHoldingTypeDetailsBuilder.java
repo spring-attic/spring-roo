@@ -13,6 +13,7 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
+ * @param <T> the type of {@link MemberHoldingTypeDetails} being built
  */
 public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
 	

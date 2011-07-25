@@ -66,7 +66,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		metadataDependencyRegistry.registerDependency(repository.getDeclaredByMetadataId(), callerMID);
 		
 		// Return the additions the caller needs to make
-		return getMethodAdditions(callerMID, method.getName(), repository.getName(), parameterList.getValues());
+		return getMethodAdditions(callerMID, method, repository.getName(), parameterList.getValues());
 	}
 	
 	/**
@@ -74,12 +74,12 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	 * the given method
 	 * 
 	 * @param callerMID the caller's metadata ID (required)
-	 * @param methodName the name of the method being called (required)
+	 * @param method the method being called (required)
 	 * @param repositoryType the type of repository being called
 	 * @param parameterNames the parameter names used by the caller
 	 * @return a non-<code>null</code> set of additions
 	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final String methodName, final JavaType repositoryType, final List<JavaSymbolName> parameterNames) {
+	private MemberTypeAdditions getMethodAdditions(final String callerMID, final RepositoryLayerMethod method, final JavaType repositoryType, final List<JavaSymbolName> parameterNames) {
 		// Create a builder to hold the repository field to be copied into the caller
 		final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
 		final AnnotationMetadataBuilder autowiredAnnotation = new AnnotationMetadataBuilder(AUTOWIRED);
@@ -87,7 +87,8 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(autowiredAnnotation), new JavaSymbolName(repositoryFieldName), repositoryType).build());
 		
 		// Create the additions to invoke the given method on this field
-		return new MemberTypeAdditions(classBuilder, repositoryFieldName, methodName, parameterNames);		
+		final String methodCall = repositoryFieldName + "." + method.getCall(parameterNames);
+		return new MemberTypeAdditions(classBuilder, method.getName(), methodCall);		
 	}
 
 	public int getLayerPosition() {

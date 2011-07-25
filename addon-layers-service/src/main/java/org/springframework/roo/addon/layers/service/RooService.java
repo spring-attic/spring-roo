@@ -22,12 +22,17 @@ public @interface RooService {
 	public static final String DOMAIN_TYPES_ATTRIBUTE = "domainTypes";
 
 	/**
-	 * The default name of the "find all" method
+	 * The default prefix of the "count all" method
+	 */
+	public static final String COUNT_ALL_METHOD = "countAll";
+	
+	/**
+	 * The default prefix of the "find all" method
 	 */
 	public static final String FIND_ALL_METHOD = "findAll";
 	
 	/**
-	 * The default name of the "find entries" method
+	 * The default prefix of the "find entries" method
 	 */
 	public static final String FIND_ENTRIES_METHOD = "find";
 	
@@ -53,6 +58,13 @@ public @interface RooService {
 	 */
 	Class<?>[] domainTypes();
 
+	/**
+	 * Returns the prefix of the "count all" method
+	 * 
+	 * @return a blank string if the annotated type doesn't support this method
+	 */
+	String countAllMethod() default COUNT_ALL_METHOD;
+	
 	/**
 	 * Returns the name of the "find all" method
 	 * 

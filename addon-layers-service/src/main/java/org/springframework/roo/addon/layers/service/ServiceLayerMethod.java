@@ -19,7 +19,36 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Andrew Swan
  * @since 1.2
  */
-public enum ServiceLayerMethod {
+enum ServiceLayerMethod {
+	
+	// The names of these enum constants are arbitrary; calling code refers to
+	// each of these methods by their String key.
+	
+	COUNT (PersistenceCustomDataKeys.COUNT_ALL_METHOD) {
+
+		@Override
+		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
+			if (StringUtils.hasText(annotationValues.getCountAllMethod())) {
+				return annotationValues.getCountAllMethod() + plural;
+			}
+			return null;
+		}
+
+		@Override
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public List<JavaType> getParameterTypes(final JavaType entityType) {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public JavaType getReturnType(final JavaType entityType) {
+			return JavaType.LONG_PRIMITIVE;
+		}
+	},
 	
 	DELETE (PersistenceCustomDataKeys.REMOVE_METHOD) {
 
@@ -195,7 +224,7 @@ public enum ServiceLayerMethod {
 		if (!isVoid()) {
 			line = "return ";
 		}
-		line += lowerLayerAdditions.getMethodSignature() + ";";
+		line += lowerLayerAdditions.getMethodCall() + ";";
 		return line;
 	}
 	

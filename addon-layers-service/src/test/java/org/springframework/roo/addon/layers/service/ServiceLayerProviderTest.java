@@ -132,7 +132,7 @@ public class ServiceLayerProviderTest {
 			assertNull("Expected no additions but found: " + additions, additions);
 		} else {
 			assertNotNull("Expected some additions but was null", additions);
-			assertEquals(expectedMethodSignature, additions.getMethodSignature());
+			assertEquals(expectedMethodSignature, additions.getMethodCall());
 			verify(mockMetadataDependencyRegistry).registerDependency(SERVICE_MID, CALLER_MID);
 			verify(mockMetadataDependencyRegistry).registerDependency(this.pluralId, CALLER_MID);
 		}
