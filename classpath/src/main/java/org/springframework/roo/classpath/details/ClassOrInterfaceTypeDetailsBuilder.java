@@ -1,13 +1,13 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -23,8 +23,8 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
 	private ClassOrInterfaceTypeDetailsBuilder superclass;
-	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
-	private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
+	private final List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
+	private final Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
 
 	/**
 	 * Constructor
@@ -75,10 +75,11 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		this.name = existing.getName();
 		this.physicalTypeCategory = existing.getPhysicalTypeCategory();
 		if (existing.getSuperclass() != null) {
-			superclass = new ClassOrInterfaceTypeDetailsBuilder(existing.getSuperclass());
+			this.superclass = new ClassOrInterfaceTypeDetailsBuilder(existing.getSuperclass());
 		}
-		enumConstants.addAll(existing.getEnumConstants());
-		registeredImports = existing.getRegisteredImports();
+		this.enumConstants.addAll(existing.getEnumConstants());
+		this.registeredImports.clear();
+		this.registeredImports.addAll(existing.getRegisteredImports());
 	}
 
 	public JavaType getName() {
@@ -109,8 +110,17 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		return enumConstants;
 	}
 
-	public void setEnumConstants(List<JavaSymbolName> enumConstants) {
-		this.enumConstants = enumConstants;
+	/**
+	 * Sets this builder's enum constants to the given collection
+	 * 
+	 * @param enumConstants can be <code>null</code> for none, otherwise is
+	 * defensively copied
+	 */
+	public void setEnumConstants(final Collection<? extends JavaSymbolName> enumConstants) {
+		this.enumConstants.clear();
+		if (enumConstants != null) {
+			this.enumConstants.addAll(enumConstants);
+		}
 	}
 
 	public boolean addEnumConstant(JavaSymbolName javaSymbolName) {
@@ -125,12 +135,52 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		return new DefaultClassOrInterfaceTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getName(), getPhysicalTypeCategory(), buildConstructors(), buildFields(), buildMethods(), buildInnerTypes(), buildInitializers(), superclass, getExtendsTypes(), getImplementsTypes(), getEnumConstants(), getRegisteredImports());
 	}
 
+	/**
+	 * Returns this builder's imports
+	 * 
+	 * @return a non-<code>null</code> copy
+	 */
 	public Set<ImportMetadata> getRegisteredImports() {
-		return registeredImports;
+		return new HashSet<ImportMetadata>(registeredImports);
 	}
 
-	public void setRegisteredImports(Set<ImportMetadata> registeredImports) {
-		this.registeredImports = registeredImports;
+	/**
+	 * Sets this builder's imports
+	 * 
+	 * @param registeredImports can be <code>null</code> for none; defensively copied
+	 */
+	public void setRegisteredImports(final Collection<ImportMetadata> registeredImports) {
+		this.registeredImports.clear();
+		if (registeredImports != null) {
+			this.registeredImports.addAll(registeredImports);
+		}
+	}
+	
+	/**
+	 * Adds the given import to this builder
+	 * 
+	 * @param importMetadata the import to add; can be <code>null</code> not to
+	 * add anything
+	 * @return <code>true</code> if the state of this builder changed
+	 */
+	public boolean add(final ImportMetadata importMetadata) {
+		if (importMetadata == null) {
+			return false;
+		}
+		return this.registeredImports.add(importMetadata);
+	}
+	
+	/**
+	 * Adds the given imports to this builder, if not already present
+	 * 
+	 * @param imports the imports to add; can be <code>null</code> for none
+	 * @return <code>true</code> if the state of this builder changed
+	 */
+	public boolean add(final Collection<ImportMetadata> imports) {
+		if (imports == null) {
+			return false;
+		}
+		return this.registeredImports.addAll(imports);
 	}
 	
 	/**
@@ -165,9 +215,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		
 		// Copy custom data
 		if (getCustomData() != null) {
-			CustomDataBuilder customDataBuilder = new CustomDataBuilder(getCustomData().build());
-			customDataBuilder.append(targetBuilder.getCustomData().build());
-			targetBuilder.setCustomData(customDataBuilder);
+			targetBuilder.append(getCustomData().build());
 		}
 		
 		// Copy constructors

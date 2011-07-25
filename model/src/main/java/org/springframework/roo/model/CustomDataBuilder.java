@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.roo.support.util.Assert;
-
 /**
  * Builder for {@link CustomData}.
  * 
@@ -17,11 +15,21 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public final class CustomDataBuilder implements Builder<CustomData> {
+
+	// Fields
 	private Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
 	
+	/**
+	 * Constructor for an empty builder
+	 */
 	public CustomDataBuilder() {}
 	
-	public CustomDataBuilder(CustomData existing) {
+	/**
+	 * Constructor for a builder initialised with the given contents
+	 *
+	 * @param existing can be <code>null</code>
+	 */
+	public CustomDataBuilder(final CustomData existing) {
 		append(existing);
 	}
 	
@@ -33,10 +41,17 @@ public final class CustomDataBuilder implements Builder<CustomData> {
 		customData.clear();
 	}
 
-	public void append(CustomData existing) {
-		Assert.notNull(existing, "Existing custom data required");
-		for (Object key : existing.keySet()) {
-			customData.put(key, existing.get(key));
+	/**
+	 * Appends the given custom data to this builder
+	 * 
+	 * @param customData the custom data to append; can be <code>null</code> to
+	 * make no changes
+	 */
+	public void append(final CustomData customData) {
+		if (customData != null) {
+			for (final Object key : customData.keySet()) {
+				this.customData.put(key, customData.get(key));
+			}
 		}
 	}
 	
