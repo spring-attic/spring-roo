@@ -96,14 +96,15 @@ public class MemberTypeAdditions {
 	 * Constructor that accepts a pre-built method call
 	 *
 	 * @param builder stores any changes the caller should make in order to make
-	 * the given method call, e.g. the field that is the method target (required)
+	 * the given method call, e.g. the field that is the method target; can be
+	 * <code>null</code> if the caller requires no changes other than the given
+	 * method call
 	 * @param methodName the bare name of the method being invoked (required)
 	 * @param methodCall a valid Java snippet that calls the method,
 	 * including any required target and parameters, for example "foo.bar(baz)"
 	 * (required)
 	 */
 	public MemberTypeAdditions(final ClassOrInterfaceTypeDetailsBuilder builder, final String methodName, final String methodCall) {
-		Assert.notNull(builder, "Builder required");
 		Assert.hasText(methodName, "Invalid method name '" + methodName + "'");
 		Assert.hasText(methodCall, "Invalid method signature '" + methodCall + "'");
 		this.classOrInterfaceDetailsBuilder = builder;
@@ -112,12 +113,14 @@ public class MemberTypeAdditions {
 	}
 	
 	/**
-	 * Copies this instance's additions into the given builder
+	 * Copies this instance's additions (if any) into the given builder
 	 * 
 	 * @param targetBuilder the ITD builder to receive the additions (required)
 	 */
 	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder) {
-		this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder);
+		if (this.classOrInterfaceDetailsBuilder != null) {
+			this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder);
+		}
 	}
 	
 	/**

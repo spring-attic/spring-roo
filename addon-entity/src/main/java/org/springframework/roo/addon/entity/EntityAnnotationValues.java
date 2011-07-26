@@ -1,9 +1,9 @@
 package org.springframework.roo.addon.entity;
 
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
+import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -14,6 +14,11 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1.3
  */
 public class EntityAnnotationValues extends AbstractAnnotationValues {
+	
+	public static final JavaType ANNOTATION_TYPE = new JavaType(RooEntity.class);
+	
+	// Constants for the default values of these fields and methods
+	// TODO seems to duplicate the corresponding literals in RooEntity
 	public static final String PERSIST_METHOD_DEFAULT = "persist";
 	public static final String VERSION_FIELD_DEFAULT = "version";
 	public static final String VERSION_COLUMN_DEFAULT = "version";
@@ -51,8 +56,13 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String inheritanceType = "";
 	@AutoPopulate private String entityName = "";
 
-	public EntityAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooEntity.class.getName()));
+	/**
+	 * Constructor
+	 *
+	 * @param governorMetadata the governor's details (required)
+	 */
+	public EntityAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> governorMetadata) {
+		super(governorMetadata, ANNOTATION_TYPE);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 
@@ -112,6 +122,12 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 		return StringUtils.hasText(findMethod) ? findMethod : FIND_METHOD_DEFAULT;
 	}
 
+	/**
+	 * Returns the prefix for the "find entries" method, e.g. the "find" part
+	 * of "findFooEntries"
+	 * 
+	 * @return
+	 */
 	public String getFindEntriesMethod() {
 		return findEntriesMethod;
 	}

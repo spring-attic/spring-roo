@@ -20,14 +20,17 @@ import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.customdata.taggers.TypeMatcher;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link EntityMetadataProvider}.
@@ -38,12 +41,14 @@ import org.springframework.roo.project.ProjectMetadata;
 @Component(immediate = true)
 @Service
 public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements EntityMetadataProvider {
+	
+	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	private boolean noArgConstructor = true;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
@@ -51,7 +56,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		registerMatchers();
 	}
 	
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
@@ -191,5 +196,15 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 	 */
 	public void setNoArgConstructor(boolean noArgConstructor) {
 		this.noArgConstructor = noArgConstructor;
+	}
+
+	public EntityAnnotationValues getAnnotationValues(final JavaType javaType) {
+		Assert.notNull(javaType, "JavaType required");
+		final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType));
+		if (MemberFindingUtils.getAnnotationOfType(governor, EntityAnnotationValues.ANNOTATION_TYPE) == null) {
+			// The type can't be found or it's not annotated with @RooEntity
+			return null;
+		}
+		return new EntityAnnotationValues(governor);
 	}
 }
