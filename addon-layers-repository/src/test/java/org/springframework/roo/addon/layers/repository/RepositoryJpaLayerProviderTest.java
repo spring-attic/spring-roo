@@ -13,7 +13,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
 
@@ -32,14 +31,12 @@ public class RepositoryJpaLayerProviderTest {
 	// Fixture
 	private RepositoryJpaLayerProvider layerProvider;
 	@Mock private JavaType mockTargetEntity;
-	@Mock private MetadataDependencyRegistry mockMetadataDependencyRegistry;
 	@Mock private RepositoryJpaLocator mockRepositoryLocator;
 	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		this.layerProvider = new RepositoryJpaLayerProvider();
-		this.layerProvider.setMetadataDependencyRegistry(mockMetadataDependencyRegistry);
 		this.layerProvider.setRepositoryLocator(mockRepositoryLocator);
 	}
 	

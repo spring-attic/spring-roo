@@ -11,7 +11,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -40,7 +39,6 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	
 	// Fields
 	@Reference private MetadataService metadataService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
 	@Reference private ServiceInterfaceLocator serviceInterfaceLocator;
 	
@@ -77,10 +75,10 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 					final MemberTypeAdditions methodAdditions = getMethodAdditions(callerMID, methodName, serviceInterface.getName(), parameterList.getValues());
 					
 					// Register the caller for updates of this service
-					metadataDependencyRegistry.registerDependency(serviceInterface.getDeclaredByMetadataId(), callerMID);
+//					metadataDependencyRegistry.registerDependency(serviceInterface.getDeclaredByMetadataId(), callerMID);
 					
 					// Register the caller for updates of the pluralisation of the entity
-					metadataDependencyRegistry.registerDependency(pluralId, callerMID);
+//					metadataDependencyRegistry.registerDependency(pluralId, callerMID);
 					
 					// Return these additions
 					return methodAdditions;
@@ -122,10 +120,6 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	}
 	
 	// -------------------- Setters for use by unit tests ----------------------
-
-	void setMetadataDependencyRegistry(final MetadataDependencyRegistry metadataDependencyRegistry) {
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-	}
 	
 	void setMetadataService(final MetadataService metadataService) {
 		this.metadataService = metadataService;

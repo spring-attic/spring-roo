@@ -11,7 +11,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.CoreLayerProvider;
@@ -38,7 +37,6 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 	
 	// Fields
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private RepositoryJpaLocator repositoryLocator;
 	
 	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final Pair<JavaType, JavaSymbolName>... callerParameters) {
@@ -59,11 +57,9 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		if (CollectionUtils.isEmpty(repositories)) {
 			return null;
 		}
+		
 		// Use the first such repository (could refine this later)
 		final ClassOrInterfaceTypeDetails repository = repositories.iterator().next();
-		
-		// Ensure the caller is notified of updates to the repository
-		metadataDependencyRegistry.registerDependency(repository.getDeclaredByMetadataId(), callerMID);
 		
 		// Return the additions the caller needs to make
 		return getMethodAdditions(callerMID, method, repository.getName(), parameterList.getValues());
@@ -96,10 +92,6 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	}
 	
 	// -------------------- Setters for use by unit tests ----------------------
-	
-	void setMetadataDependencyRegistry(final MetadataDependencyRegistry metadataDependencyRegistry) {
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-	}
 	
 	void setRepositoryLocator(final RepositoryJpaLocator repositoryLocator) {
 		this.repositoryLocator = repositoryLocator;

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.FIND_ALL;
 import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.FIND_ENTRIES;
@@ -20,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -46,7 +44,6 @@ public class ServiceLayerProviderTest {
 	
 	// -- Mocks
 	@Mock private JavaType mockTargetType;
-	@Mock private MetadataDependencyRegistry mockMetadataDependencyRegistry;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private ServiceAnnotationValuesFactory mockServiceAnnotationValuesFactory;
 	@Mock private ServiceInterfaceLocator mockServiceInterfaceLocator;
@@ -59,7 +56,6 @@ public class ServiceLayerProviderTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		this.provider = new ServiceLayerProvider();
-		this.provider.setMetadataDependencyRegistry(mockMetadataDependencyRegistry);
 		this.provider.setMetadataService(mockMetadataService);
 		this.provider.setServiceAnnotationValuesFactory(mockServiceAnnotationValuesFactory);
 		this.provider.setServiceInterfaceLocator(mockServiceInterfaceLocator);
@@ -133,8 +129,6 @@ public class ServiceLayerProviderTest {
 		} else {
 			assertNotNull("Expected some additions but was null", additions);
 			assertEquals(expectedMethodSignature, additions.getMethodCall());
-			verify(mockMetadataDependencyRegistry).registerDependency(SERVICE_MID, CALLER_MID);
-			verify(mockMetadataDependencyRegistry).registerDependency(this.pluralId, CALLER_MID);
 		}
 	}
 	
