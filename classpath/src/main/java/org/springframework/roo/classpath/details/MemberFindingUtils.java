@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
@@ -145,21 +146,40 @@ public abstract class MemberFindingUtils {
 	}
 
 	/**
-	 * Locates an annotation with the specified type from a list of annotations.
+	 * Locates the metadata for an annotation of the specified type from within
+	 * the given list.
 	 * 
-	 * @param annotations to search (required)
-	 * @param type to locate (required)
-	 * @return the annotation, or null if not found
+	 * @param annotations the set of annotations to search (may be <code>null</code>)
+	 * @param annotationType the annotation to locate (may be <code>null</code>)
+	 * @return the annotation, or <code>null</code> if not found
 	 */
-	public static AnnotationMetadata getAnnotationOfType(List<? extends AnnotationMetadata> annotations, JavaType type) {
-		Assert.notNull(annotations, "Annotations to search required");
-		Assert.notNull(type, "Annotation type to locate required");
-		for (AnnotationMetadata md : annotations) {
-			if (md.getAnnotationType().equals(type)) {
+	public static AnnotationMetadata getAnnotationOfType(final List<? extends AnnotationMetadata> annotations, final JavaType annotationType) {
+		if (annotations == null) {
+			return null;
+		}
+		for (final AnnotationMetadata md : annotations) {
+			if (md.getAnnotationType().equals(annotationType)) {
 				return md;
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the metadata for the annotation of the given type from within the
+	 * given metadata
+	 * 
+	 * @param metadata the metadata to search; can be <code>null</code>
+	 * @param annotationType the type of annotation for which to return the metadata; can
+	 * be <code>null</code>
+	 * @return <code>null</code> if not found
+	 * @since 1.2
+	 */
+	public static AnnotationMetadata getAnnotationOfType(final MemberHoldingTypeDetailsMetadataItem<?> metadata, final JavaType annotationType) {
+		if (metadata == null || metadata.getMemberHoldingTypeDetails() == null) {
+			return null;
+		}
+		return getAnnotationOfType(metadata.getMemberHoldingTypeDetails().getAnnotations(), annotationType);
 	}
 
 	/**

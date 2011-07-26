@@ -25,7 +25,7 @@ public abstract class PhysicalTypeIdentifierNamingUtils {
 	 * @param providesType (required)
 	 * @param javaType (required)
 	 * @param path (required)
-	 * @return
+	 * @return a non-blank ID
 	 */
 	public static final String createIdentifier(final String providesType, final JavaType javaType, final Path path) {
 		Assert.notNull(javaType, "Java type required");

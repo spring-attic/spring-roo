@@ -17,7 +17,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Greg Turnquist
  * @since 1.0
  */
-public final class JavaSymbolName implements Comparable<JavaSymbolName> {
+public class JavaSymbolName implements Comparable<JavaSymbolName> {
 
 	/** Constant for keyword "true" */
 	public static final JavaSymbolName TRUE = new JavaSymbolName("true");
@@ -25,6 +25,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	/** Constant for keyword "false" */
 	public static final JavaSymbolName FALSE = new JavaSymbolName("false");
 	
+	// Fields
 	private final String symbolName;
 
 	/**
@@ -103,11 +104,11 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 		return new JavaSymbolName(entityNameString);
 	}
 	
-	public final int hashCode() {
+	public int hashCode() {
 		return this.symbolName.hashCode();
 	}
 
-	public final boolean equals(Object obj) {
+	public boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
 		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName) obj).symbolName);
 	}

@@ -1,10 +1,10 @@
 package org.springframework.roo.classpath.details.annotations.populator;
 
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
@@ -26,7 +26,7 @@ public abstract class AbstractAnnotationValues {
 	protected ClassOrInterfaceTypeDetails governorTypeDetails = null;
 	
 	/**
-	 * Parses the {@link PhysicalTypeMetadata} for the requested annotation {@link JavaType}. If found, makes
+	 * Parses the governor's metadata for the requested annotation {@link JavaType}. If found, makes
 	 * the annotation available via the {@link #annotationMetadata} field. Subclasses will then generally use
 	 * {@link AutoPopulationUtils#populate(Object, AnnotationMetadata)} to complete the configuration of the
 	 * subclass (we don't invoke {@link AutoPopulationUtils} from this constructor because the subclass is
@@ -37,20 +37,20 @@ public abstract class AbstractAnnotationValues {
 	 * If the {@link PhysicalTypeMetadata} cannot be parsed or does not internally contain a
 	 * {@link ClassOrInterfaceTypeDetails}, no attempt will be made to populate the values. 
 	 *  
-	 * @param governorPhysicalTypeMetadata to parse (required)
+	 * @param governorMetadata to parse (required)
 	 * @param annotationType to locate and parse (required)
 	 */
-	public AbstractAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType annotationType) {
-		Assert.notNull(governorPhysicalTypeMetadata, "Governor physical type metadata required");
+	protected AbstractAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> governorMetadata, final JavaType annotationType) {
+		Assert.notNull(governorMetadata, "Governor physical type metadata required");
 		Assert.notNull(annotationType, "Annotation to locate is required");
 
-		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		final Object governorDetails = governorMetadata.getMemberHoldingTypeDetails();
 		
-		if (physicalTypeDetails != null && physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+		if (governorDetails != null && governorDetails instanceof ClassOrInterfaceTypeDetails) {
 			classParsed = true;
 			
 			// We have reliable physical type details
-			this.governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+			this.governorTypeDetails = (ClassOrInterfaceTypeDetails) governorDetails;
 			
 			// Process values from the annotation, if present
 			this.annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);

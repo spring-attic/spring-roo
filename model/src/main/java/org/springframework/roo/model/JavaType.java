@@ -17,7 +17,8 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Immutable representation of a Java type.
+ * The declaration of a Java type (i.e. contains no details of its members).
+ * Instances are immutable.
  * 
  * <p>
  * Note that a Java type can be contained within a package, but a package is not a type.
@@ -32,16 +33,16 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JavaType implements Comparable<JavaType>, Cloneable {
 	
-	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, DataType.TYPE, null, null);
-	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, DataType.TYPE, null, null);
-	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String", 0, DataType.TYPE, null, null);
-	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", 0, DataType.TYPE, null, null);
-	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short", 0, DataType.TYPE, null, null);
-	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer", 0, DataType.TYPE, null, null);
-	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long", 0, DataType.TYPE, null, null);
-	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float", 0, DataType.TYPE, null, null);
-	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double", 0, DataType.TYPE, null, null);
-	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void", 0, DataType.TYPE, null, null);
+	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");
+	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character");
+	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String");
+	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte");
+	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
+	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer");
+	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long");
+	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float");
+	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double");
+	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void");
 	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", 0, DataType.PRIMITIVE, null, null);
@@ -57,25 +58,19 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
 	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_"); // List<?>
 
-	private List<JavaType> parameters = new LinkedList<JavaType>();
-	private JavaSymbolName argName = null;
-	private int array = 0;
-	private boolean defaultPackage;
-	private DataType dataType;
-	private String fullyQualifiedTypeName;
-	private String simpleTypeName;
-	private static final Set<String> commonCollectionTypes = new HashSet<String>();
-
+	// The fully-qualified names of common collection types
+	private static final Set<String> COMMON_COLLECTION_TYPES = new HashSet<String>();
+	
 	static {
-		commonCollectionTypes.add(Collection.class.getName());
-		commonCollectionTypes.add(List.class.getName());
-		commonCollectionTypes.add(Set.class.getName());
-		commonCollectionTypes.add(Map.class.getName());
-		commonCollectionTypes.add(HashMap.class.getName());
-		commonCollectionTypes.add(TreeMap.class.getName());
-		commonCollectionTypes.add(ArrayList.class.getName());
-		commonCollectionTypes.add(Vector.class.getName());
-		commonCollectionTypes.add(HashSet.class.getName());
+		COMMON_COLLECTION_TYPES.add(ArrayList.class.getName());
+		COMMON_COLLECTION_TYPES.add(Collection.class.getName());
+		COMMON_COLLECTION_TYPES.add(HashMap.class.getName());
+		COMMON_COLLECTION_TYPES.add(HashSet.class.getName());
+		COMMON_COLLECTION_TYPES.add(List.class.getName());
+		COMMON_COLLECTION_TYPES.add(Map.class.getName());
+		COMMON_COLLECTION_TYPES.add(Set.class.getName());
+		COMMON_COLLECTION_TYPES.add(TreeMap.class.getName());
+		COMMON_COLLECTION_TYPES.add(Vector.class.getName());
 	}
 	
 	/**
@@ -87,6 +82,25 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	public static JavaType listOf(final JavaType elementType) {
 		return new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
 	}
+	
+	// Fields
+	private final boolean defaultPackage;
+	private final int arrayDimensions;
+	private final DataType dataType;
+	private final JavaSymbolName argName;
+	private final List<JavaType> parameters;
+	private final String fullyQualifiedTypeName;
+	private final String simpleTypeName;
+	
+	/**
+	 * Constructor that accepts a {@link Class} object.
+	 *
+	 * @param type the class this type represents (required)
+	 * @since 1.2
+	 */
+	public JavaType(final Class<?> type) {
+		this(type.getName());
+	}
 
 	/**
 	 * Construct a JavaType.
@@ -94,7 +108,7 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	 * The fully qualified type name will be enforced as follows:
 	 * <ul>
 	 * <li>The rules listed in {@link JavaSymbolName#assertJavaNameLegal(String)}
-	 * <li>First letter of simple type name must be uppercase</li>
+	 * <li>First letter of simple type name must be upper-case</li>
 	 * </ul>
 	 * <p>
 	 * A fully qualified type name may include or exclude a package designator.
@@ -110,37 +124,31 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	 * setting these non-default values.
 	 * 
 	 * @param fullyQualifiedTypeName the name (as per the rules above)
-	 * @param array number of array indicies (0 = not an array, 1 = single dimensional array etc)
-	 * @param dataType the {@link DataType}
+	 * @param arrayDimensions the number of array dimensions (0 = not an array, 1 = one-dimensional array, etc.)
+	 * @param dataType the {@link DataType} (required)
 	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
-	public JavaType(String fullyQualifiedTypeName, int array, DataType dataType, JavaSymbolName argName, List<JavaType> parameters) {
+	public JavaType(final String fullyQualifiedTypeName, final int arrayDimensions, final DataType dataType, final JavaSymbolName argName, final List<JavaType> parameters) {
 		Assert.hasText(fullyQualifiedTypeName, "Fully qualified type name required");
 		Assert.notNull(dataType, "Data type required");
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
+		this.argName = argName;
+		this.arrayDimensions = arrayDimensions;
+		this.dataType = dataType;
 		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
 		this.defaultPackage = !fullyQualifiedTypeName.contains(".");
 		if (defaultPackage) {
-			simpleTypeName = fullyQualifiedTypeName;
+			this.simpleTypeName = fullyQualifiedTypeName;
 		} else {
-			int offset = fullyQualifiedTypeName.lastIndexOf(".");
-			simpleTypeName = fullyQualifiedTypeName.substring(offset + 1);
+			final int offset = fullyQualifiedTypeName.lastIndexOf(".");
+			this.simpleTypeName = fullyQualifiedTypeName.substring(offset + 1);
 		}
-		// Disabled as per ROO-1734
-		// if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
-		//     // Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
-		//     if (simpleTypeName.length() < 2 || !Character.isUpperCase(simpleTypeName.charAt(1)) || '_' != simpleTypeName.charAt(0)) {
-		//         throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
-		//     }
-		// }
 
-		this.array = array;
-		this.dataType = dataType;
+		this.parameters = new LinkedList<JavaType>();
 		if (parameters != null) {
-			this.parameters = parameters;
+			this.parameters.addAll(parameters);
 		}
-		this.argName = argName;
 	}
 
 	/**
@@ -312,7 +320,7 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 		}
 
 		if (Character.isUpperCase(enclosedWithinTypeName.charAt(0))) {
-			// First letter is uppercase, so treat it as a type name for now
+			// First letter is upper-case, so treat it as a type name for now
 			String preTypeNamePortion = enclosedWithinPackage == null ? "" : (enclosedWithinPackage + ".");
 			return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
 		}
@@ -329,7 +337,7 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 
 	public boolean isCommonCollectionType() {
-		return commonCollectionTypes.contains(this.fullyQualifiedTypeName);
+		return COMMON_COLLECTION_TYPES.contains(this.fullyQualifiedTypeName);
 	}
 
 	public List<JavaType> getParameters() {
@@ -337,19 +345,19 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 
 	public boolean isArray() {
-		return array > 0;
+		return arrayDimensions > 0;
 	}
 
 	public int getArray() {
-		return array;
+		return arrayDimensions;
 	}
 
 	private String getArraySuffix() {
-		if (array == 0) {
+		if (arrayDimensions == 0) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < array; i++) {
+		for (int i = 0; i < arrayDimensions; i++) {
 			sb.append("[]");
 		}
 		return sb.toString();
@@ -370,7 +378,7 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 			&& obj instanceof JavaType 
 			&& this.fullyQualifiedTypeName.equals(((JavaType) obj).getFullyQualifiedTypeName()) 
 			&& this.dataType == ((JavaType) obj).getDataType() 
-			&& this.array == ((JavaType) obj).getArray() 
+			&& this.arrayDimensions == ((JavaType) obj).getArray() 
 			&& ((JavaType) obj).getParameters().containsAll(this.parameters);
 	}
 
