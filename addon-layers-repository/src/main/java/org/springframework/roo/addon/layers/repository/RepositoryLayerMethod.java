@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.repository;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
@@ -27,22 +28,23 @@ import org.springframework.roo.support.util.Assert;
 public enum RepositoryLayerMethod {
 	
 	/* 
-	    A Spring Data JPA repository provides the following methods out of the box:
+	    A Spring Data JPA repository provides the following methods out of the
+	    box, of which those marked * are not implemented below:
 			long        count()
-			void        delete(ID)
-			void        delete(Iterable<? extends T>)
+			*void        delete(ID)
+			*void        delete(Iterable<? extends T>)
 			void        delete(T)
-			void        deleteAll()
-			void        deleteInBatch(Iterable<T>)
-			boolean     exists(ID)
+			*void        deleteAll()
+			*void        deleteInBatch(Iterable<T>)
+			*boolean     exists(ID)
 			List<T>     findAll()
-			org.springframework.data.domain.Page<T> findAll(org.springframework.data.domain.Pageable)
-			List<T>     findAll(org.springframework.data.domain.Sort)
-			T           findOne(ID)
+			*org.springframework.data.domain.Page<T> findAll(org.springframework.data.domain.Pageable)
+			*List<T>     findAll(org.springframework.data.domain.Sort)
+			*T           findOne(ID) TODO
 			void        flush()
-	        List<T>     save(Iterable<? extends T>)
+	        *List<T>     save(Iterable<? extends T>)
 			T           save(T)
-			T           saveAndFlush(T)
+			*T           saveAndFlush(T)
 	 */
 	
 	COUNT ("count", COUNT_ALL_METHOD) {
@@ -58,6 +60,9 @@ public enum RepositoryLayerMethod {
 		}
 	},
 	
+	/**
+	 * Deletes the passed-in entity (does not delete by ID).
+	 */
 	DELETE ("delete", REMOVE_METHOD) {
 		
 		@Override
@@ -102,6 +107,19 @@ public enum RepositoryLayerMethod {
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
 			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
+		}
+	},
+	
+	FLUSH ("flush", FLUSH_METHOD) {
+
+		@Override
+		public String getCall(final List<JavaSymbolName> parameterNames) {
+			return "flush()";
+		}
+
+		@Override
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+			return Collections.emptyList();
 		}
 	},
 	
@@ -160,7 +178,7 @@ public enum RepositoryLayerMethod {
 	}
 	
 	/**
-	 * Returns a Java snippet that invokes this method
+	 * Returns a Java snippet that invokes this method (minus the target)
 	 * 
 	 * @param parameterNames the parameter names used by the caller; can be
 	 * <code>null</code>
