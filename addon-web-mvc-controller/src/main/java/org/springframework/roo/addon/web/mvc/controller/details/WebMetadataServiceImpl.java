@@ -421,7 +421,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		final Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
 		JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(domainType);
 		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(domainType, entityName);
-		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults")));
+		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("sizeNo")));
 		additions.put(COUNT_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
 		additions.put(DELETE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, domainType, LayerType.HIGHEST.getPosition(), entityParameter));
 		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
@@ -430,6 +430,4 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), entityParameter));
 		return Collections.unmodifiableMap(additions);
 	}
-
-
 }
