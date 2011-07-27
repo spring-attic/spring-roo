@@ -127,10 +127,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		// "list" method
 		MemberTypeAdditions countAllMethod = crudAdditions.get(PersistenceCustomDataKeys.COUNT_ALL_METHOD.name());
 		MemberTypeAdditions findAllMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
-		if (findAllMethod != null && countAllMethod != null) {
-			builder.addMethod(getListMethod(findAllMethod, countAllMethod));
+		MemberTypeAdditions findEntriesMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name());
+		if (countAllMethod != null && findAllMethod != null && findEntriesMethod != null) {
+			builder.addMethod(getListMethod(findAllMethod, countAllMethod, findEntriesMethod));
 			countAllMethod.copyAdditionsTo(builder);
 			findAllMethod.copyAdditionsTo(builder);
+			findEntriesMethod.copyAdditionsTo(builder);
 		}
 		
 		// "update" method
@@ -198,7 +200,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getDeleteMethod(MemberTypeAdditions deleteMethodAdditions) {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
-		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindMethod() == null || javaTypePersistenceMetadataHolder.getRemoveMethod() == null) {
+		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindMethod() == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("delete");
@@ -260,12 +262,16 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getListMethod(final MemberTypeAdditions findAllAdditions, final MemberTypeAdditions countAllAdditions) {
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
-		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindEntriesMethod() == null) {
-			return null;
-		}
-
+	/**
+	 * Returns the metadata for the "list" method that this ITD introduces into
+	 * the controller.
+	 * 
+	 * @param findAllAdditions
+	 * @param countAllAdditions
+	 * @param findEntriesAdditions
+	 * @return <code>null</code> if no such method is to be introduced
+	 */
+	private MethodMetadata getListMethod(final MemberTypeAdditions findAllAdditions, final MemberTypeAdditions countAllAdditions, final MemberTypeAdditions findEntriesAdditions) {
 		JavaSymbolName methodName = new JavaSymbolName("list");
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
@@ -301,11 +307,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		String plural = javaTypeMetadataHolder.getPlural().toLowerCase();
 
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (page != null || size != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");
-		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural + "\", " + formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + javaTypePersistenceMetadataHolder.getFindEntriesMethod().getMethodName() + "(page == null ? 0 : (page.intValue() - 1) * sizeNo, sizeNo));");
+		bodyBuilder.appendFormalLine("final int firstResult = page == null ? 0 : (page.intValue() - 1) * sizeNo;");
+		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural + "\", " + findEntriesAdditions.getMethodCall() + ");");
 		bodyBuilder.appendFormalLine("float nrOfPages = (float) " + countAllAdditions.getMethodCall() + " / sizeNo;");
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
 		bodyBuilder.indentRemove();
