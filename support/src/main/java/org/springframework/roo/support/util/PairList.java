@@ -74,7 +74,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 	/**
 	 * Returns the values of each {@link Pair} in this list
 	 * 
-	 * @return a non-<code>null</code> list
+	 * @return a non-<code>null</code> modifiable copy of this list
 	 */
 	public List<V> getValues() {
 		final List<V> values = new ArrayList<V>();
