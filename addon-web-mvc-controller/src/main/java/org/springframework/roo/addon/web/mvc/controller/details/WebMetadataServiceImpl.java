@@ -70,11 +70,13 @@ import org.springframework.roo.support.util.StringUtils;
 public class WebMetadataServiceImpl implements WebMetadataService {
 	
 	// Constants
+	private static final String COUNT_ALL_METHOD = PersistenceCustomDataKeys.COUNT_ALL_METHOD.name();
+	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
 	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
 	private static final String FIND_ENTRIES_METHOD = PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name();
-	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
-	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
+	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	
 	// Fields
@@ -418,12 +420,14 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		// Define the methods we need for Web scaffolding.
 		final Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
 		JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(domainType);
-		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
+		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(domainType, entityName);
 		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults")));
+		additions.put(COUNT_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
+		additions.put(DELETE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, domainType, LayerType.HIGHEST.getPosition(), entityParameter));
+		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, domainType, LayerType.HIGHEST.getPosition()));
 		additions.put(FIND_ENTRIES_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, domainType, LayerType.HIGHEST.getPosition(), findEntriesParameters.toArray()));
-		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
-		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
-		additions.put(DELETE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, domainType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(domainType, entityName)));
+		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, domainType, LayerType.HIGHEST.getPosition(), entityParameter));
+		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, domainType, LayerType.HIGHEST.getPosition(), entityParameter));
 		return Collections.unmodifiableMap(additions);
 	}
 

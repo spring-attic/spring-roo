@@ -49,24 +49,41 @@ import org.springframework.roo.support.util.StringUtils;
  * Metadata for {@link RooWebScaffold}.
  * 
  * @author Stefan Schmidt
+ * @author Andrew Swan
  * @since 1.0
  */
 public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = WebScaffoldMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	private WebScaffoldAnnotationValues annotationValues;
+	// Fields
+	private boolean compositePk;
+	private JavaType formBackingType;
+	private JavaTypeMetadataDetails javaTypeMetadataHolder;
+	private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
+	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
+	private List<ConstructorMetadata> constructors;
+	private List<FieldMetadata> fields;
+	private List<MethodMetadata> methods;
 	private String controllerPath;
 	private String entityName;
-	private Map<JavaSymbolName, DateTimeFormatDetails> dateTypes;
-	private JavaType formBackingType;
-	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
-	private JavaTypeMetadataDetails javaTypeMetadataHolder;
-	private boolean compositePk = false;
-	private List<MethodMetadata> methods;
-	private List<FieldMetadata> fields;
-	private List<ConstructorMetadata> constructors;
+	private WebScaffoldAnnotationValues annotationValues;
 
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 * @param annotationValues
+	 * @param memberDetails
+	 * @param specialDomainTypes
+	 * @param dependentTypes
+	 * @param dateTypes
+	 * @param crudAdditions
+	 */
 	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, MemberDetails memberDetails, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, Map<String, MemberTypeAdditions> crudAdditions) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -106,11 +123,17 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			persistMethod.copyAdditionsTo(builder);
 		}
 		builder.addMethod(getShowMethod());
+		
+		// "list" method
+		MemberTypeAdditions countAllMethod = crudAdditions.get(PersistenceCustomDataKeys.COUNT_ALL_METHOD.name());
 		MemberTypeAdditions findAllMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
-		if (findAllMethod != null) {
-			builder.addMethod(getListMethod(findAllMethod));
+		if (findAllMethod != null && countAllMethod != null) {
+			builder.addMethod(getListMethod(findAllMethod, countAllMethod));
+			countAllMethod.copyAdditionsTo(builder);
 			findAllMethod.copyAdditionsTo(builder);
 		}
+		
+		// "update" method
 		MemberTypeAdditions updateMethod = crudAdditions.get(PersistenceCustomDataKeys.MERGE_METHOD.name());
 		if (annotationValues.isUpdate() && updateMethod != null) {
 			builder.addMethod(getUpdateMethod(updateMethod));
@@ -237,9 +260,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getListMethod(MemberTypeAdditions findAllAdditions) {
+	private MethodMetadata getListMethod(final MemberTypeAdditions findAllAdditions, final MemberTypeAdditions countAllAdditions) {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
-		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindEntriesMethod() == null || javaTypePersistenceMetadataHolder.getCountMethod() == null || javaTypePersistenceMetadataHolder.getFindAllMethod() == null) {
+		if (javaTypePersistenceMetadataHolder == null || javaTypePersistenceMetadataHolder.getFindEntriesMethod() == null) {
 			return null;
 		}
 
@@ -283,7 +306,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + plural + "\", " + formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + javaTypePersistenceMetadataHolder.getFindEntriesMethod().getMethodName() + "(page == null ? 0 : (page.intValue() - 1) * sizeNo, sizeNo));");
-		bodyBuilder.appendFormalLine("float nrOfPages = (float) " + formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + javaTypePersistenceMetadataHolder.getCountMethod().getMethodName() + "() / sizeNo;");
+		bodyBuilder.appendFormalLine("float nrOfPages = (float) " + countAllAdditions.getMethodCall() + " / sizeNo;");
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
