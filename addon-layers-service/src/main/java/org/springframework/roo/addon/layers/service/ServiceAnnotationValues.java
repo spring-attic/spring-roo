@@ -15,6 +15,7 @@ import org.springframework.roo.model.JavaType;
  */
 public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
+	// Fields
 	@AutoPopulate private JavaType[] domainTypes;
 	@AutoPopulate private String countAllMethod = RooService.COUNT_ALL_METHOD;
 	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;

@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.StringUtils;
 enum ServiceLayerMethod {
 	
 	// The names of these enum constants are arbitrary; calling code refers to
-	// each of these methods by their String key.
+	// these methods by their String key.
 	
 	COUNT (PersistenceCustomDataKeys.COUNT_ALL_METHOD) {
 

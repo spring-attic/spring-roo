@@ -27,6 +27,11 @@ public @interface RooService {
 	public static final String COUNT_ALL_METHOD = "countAll";
 	
 	/**
+	 * The default name of the "delete" method
+	 */
+	public static final String DELETE_METHOD = "delete";
+	
+	/**
 	 * The default prefix of the "find all" method
 	 */
 	public static final String FIND_ALL_METHOD = "findAll";
@@ -47,11 +52,6 @@ public @interface RooService {
 	public static final String UPDATE_METHOD = "update";
 	
 	/**
-	 * The default name of the "delete" method
-	 */
-	public static final String DELETE_METHOD = "delete";
-	
-	/**
 	 * Returns the domain type(s) managed by this service
 	 * 
 	 * @return a non-<code>null</code> array
@@ -64,6 +64,13 @@ public @interface RooService {
 	 * @return a blank string if the annotated type doesn't support this method
 	 */
 	String countAllMethod() default COUNT_ALL_METHOD;
+	
+	/**
+	 * Returns the name of the "delete" method
+	 * 
+	 * @return a blank string if the annotated type doesn't support this method
+	 */
+	String deleteMethod() default DELETE_METHOD;
 	
 	/**
 	 * Returns the name of the "find all" method
@@ -92,13 +99,6 @@ public @interface RooService {
 	 * @return a blank string if the annotated type doesn't support this method
 	 */
 	String updateMethod() default UPDATE_METHOD;
-	
-	/**
-	 * Returns the name of the "delete" method
-	 * 
-	 * @return a blank string if the annotated type doesn't support this method
-	 */
-	String deleteMethod() default DELETE_METHOD;
 	
 	/**
 	 * Indicates whether the annotated service should be transactional

@@ -24,11 +24,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
@@ -43,19 +39,6 @@ public class EntityLayerProviderTest {
 	
 	// Constants
 	private static final String CALLER_MID = "MID:caller#com.example.MyService";
-	private static final String ENTITY_PARAMETER = "person";
-	
-	private static final MethodMetadataCustomDataKey[] ENTITY_METHODS = {
-		CLEAR_METHOD,
-		COUNT_ALL_METHOD,
-		FIND_ALL_METHOD,
-		FIND_ENTRIES_METHOD,
-		FIND_METHOD,
-		FLUSH_METHOD,
-		MERGE_METHOD,
-		PERSIST_METHOD,
-		REMOVE_METHOD,
-	};
 	
 	// Maps the supported entity methods to their test parameter names
 	private static final Map<MethodMetadataCustomDataKey, List<String>> METHODS = new HashMap<MethodMetadataCustomDataKey, List<String>>();
@@ -74,15 +57,11 @@ public class EntityLayerProviderTest {
 
 	// Fixture
 	private EntityLayerProvider layerProvider;
-	private String entityID;
 	private String pluralId;
 
-	@Mock private AnnotationMetadata mockEntityAnnotationMetadata;
 	@Mock private EntityAnnotationValues mockAnnotationValues;
 	@Mock private EntityMetadataProvider mockEntityMetadataProvider;
 	@Mock private JavaType mockTargetEntity;
-	@Mock private MemberHoldingTypeDetails mockGovernorDetails;
-	@Mock private MemberHoldingTypeDetailsMetadataItem<MemberHoldingTypeDetails> mockGovernorMetadata;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private PluralMetadata mockPluralMetadata;
 	
@@ -90,7 +69,6 @@ public class EntityLayerProviderTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn("com.example.Pizza");
-		this.entityID = PhysicalTypeIdentifier.createIdentifier(mockTargetEntity);
 		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity);
 		
 		this.layerProvider = new EntityLayerProvider();
