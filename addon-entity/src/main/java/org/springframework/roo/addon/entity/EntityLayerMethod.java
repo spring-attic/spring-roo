@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
@@ -21,12 +22,7 @@ enum EntityLayerMethod {
 	
 	// The names of these enum constants are arbitrary
 
-	CLEAR (PersistenceCustomDataKeys.CLEAR_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			return targetEntity.getFullyQualifiedTypeName() + "." + getName(annotationValues, targetEntity, plural) + "()";	// Static call
-		}
+	CLEAR (PersistenceCustomDataKeys.CLEAR_METHOD, true) {
 		
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -42,12 +38,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	COUNT_ALL (PersistenceCustomDataKeys.COUNT_ALL_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			return targetEntity.getFullyQualifiedTypeName() + "." + getName(annotationValues, targetEntity, plural) + "()";	// Static call
-		}
+	COUNT_ALL (PersistenceCustomDataKeys.COUNT_ALL_METHOD, true) {
 		
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -63,12 +54,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FIND_ALL (PersistenceCustomDataKeys.FIND_ALL_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			return targetEntity.getFullyQualifiedTypeName() + "." + getName(annotationValues, targetEntity, plural) + "()";	// Static call
-		}
+	FIND_ALL (PersistenceCustomDataKeys.FIND_ALL_METHOD, true) {
 		
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -84,14 +70,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FIND_ENTRIES (PersistenceCustomDataKeys.FIND_ENTRIES_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			final String firstIndex = parameterNames.get(0).getSymbolName();
-			final String maxResults = parameterNames.get(1).getSymbolName();
-			return targetEntity.getFullyQualifiedTypeName() + "." + getName(annotationValues, targetEntity, plural) + "(" + firstIndex + ", " + maxResults + ")";	// static
-		}
+	FIND_ENTRIES (PersistenceCustomDataKeys.FIND_ENTRIES_METHOD, true) {
 		
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -107,12 +86,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FLUSH (PersistenceCustomDataKeys.FLUSH_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			return targetEntity.getFullyQualifiedTypeName() + "." + getName(annotationValues, targetEntity, plural) + "()";	// static
-		}
+	FLUSH (PersistenceCustomDataKeys.FLUSH_METHOD, true) {
 
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -128,12 +102,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	MERGE (PersistenceCustomDataKeys.MERGE_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			return parameterNames.get(0).getSymbolName() + "." + getName(annotationValues, targetEntity, plural) + "()";	// Instance call
-		}
+	MERGE (PersistenceCustomDataKeys.MERGE_METHOD, false) {
 		
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -145,16 +114,11 @@ enum EntityLayerMethod {
 		
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
-			return Collections.emptyList();
+			return Arrays.asList(targetEntity);
 		}
 	},
 	
-	PERSIST (PersistenceCustomDataKeys.PERSIST_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			return parameterNames.get(0).getSymbolName() + "." + getName(annotationValues, targetEntity, plural) + "()";	// Instance call
-		}
+	PERSIST (PersistenceCustomDataKeys.PERSIST_METHOD, false) {
 		
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -166,16 +130,11 @@ enum EntityLayerMethod {
 		
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
-			return Collections.emptyList();
+			return Arrays.asList(targetEntity);
 		}
 	},
 	
-	REMOVE (PersistenceCustomDataKeys.REMOVE_METHOD) {
-		
-		@Override
-		public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
-			return parameterNames.get(0).getSymbolName() + "." + getName(annotationValues, targetEntity, plural) + "()";	// Instance call
-		}
+	REMOVE (PersistenceCustomDataKeys.REMOVE_METHOD, false) {
 		
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -187,7 +146,7 @@ enum EntityLayerMethod {
 		
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
-			return Collections.emptyList();
+			return Arrays.asList(targetEntity);
 		}
 	};
 
@@ -219,16 +178,19 @@ enum EntityLayerMethod {
 	protected abstract List<JavaType> getParameterTypes(JavaType targetEntity);
 
 	// Fields
+	private final boolean isStatic;
 	private final String id;
 
 	/**
 	 * Constructor
 	 *
 	 * @param id a unique id for this method (required)
+	 * @param isStatic whether this method is static
 	 */
-	private EntityLayerMethod(MethodMetadataCustomDataKey key) {
+	private EntityLayerMethod(final MethodMetadataCustomDataKey key, final boolean isStatic) {
 		Assert.notNull(key, "Key is required");
 		this.id = key.name();
+		this.isStatic = isStatic;
 	}
 
 	/**
@@ -252,9 +214,43 @@ enum EntityLayerMethod {
 	 * @param targetEntity the type of entity being managed (required)
 	 * @param plural the plural form of the entity (required)
 	 * @param parameterNames the caller's names for the method's parameters
-	 * (required)
+	 * (required, must be modifiable)
 	 * 
 	 * @return a non-blank Java snippet
 	 */
-	public abstract String getCall(EntityAnnotationValues annotationValues, JavaType targetEntity, String plural, List<JavaSymbolName> parameterNames);
+	public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, String plural, final List<JavaSymbolName> parameterNames) {
+		final String target;
+		if (this.isStatic) {
+			target = targetEntity.getSimpleTypeName();
+		}
+		else {
+			target = parameterNames.get(0).getSymbolName();
+			parameterNames.remove(0);
+		}
+		return getCall(target, getName(annotationValues, targetEntity, plural), parameterNames.iterator());
+	}
+	
+	/**
+	 * Generates a method call from the given inputs
+	 * 
+	 * @param targetName the name of the target on which the method is being invoked (required)
+	 * @param methodName the name of the method being invoked (required)
+	 * @param parameterNames the names of the parameters (from the caller's POV)
+	 * @return a non-blank Java snippet ending in ")"
+	 */
+	private String getCall(final String targetName, final String methodName, final Iterator<JavaSymbolName> parameterNames) {
+		final StringBuilder methodCall = new StringBuilder();
+		methodCall.append(targetName);
+		methodCall.append(".");
+		methodCall.append(methodName);
+		methodCall.append("(");
+		while (parameterNames.hasNext()) {
+			methodCall.append(parameterNames.next().getSymbolName());
+			if (parameterNames.hasNext()) {
+				methodCall.append(", ");
+			}
+		}
+		methodCall.append(")");
+		return methodCall.toString();
+	}
 }
