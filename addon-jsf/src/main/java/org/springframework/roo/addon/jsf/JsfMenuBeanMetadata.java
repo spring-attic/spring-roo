@@ -146,10 +146,10 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			String plural = getInflectorPlural(entity.getSimpleTypeName());
 
 			bodyBuilder.appendFormalLine("");
-			bodyBuilder.appendFormalLine("submenu = " + getComponentCreationStr("Submenu"));
+			bodyBuilder.appendFormalLine("submenu = new Submenu();");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
 
-			bodyBuilder.appendFormalLine("item = " + getComponentCreationStr("MenuItem"));
+			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setValue(\"List all " + plural + "\");");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".findAll" + plural + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
@@ -196,10 +196,6 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
 	}
 	
-	private String getComponentCreationStr(String componentName) {
-		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
-	}
-
 	private String getInflectorPlural(String term) {
 		try {
 			return Noun.pluralOf(term, Locale.ENGLISH);

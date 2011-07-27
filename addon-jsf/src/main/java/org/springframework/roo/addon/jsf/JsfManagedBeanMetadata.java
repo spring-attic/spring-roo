@@ -421,6 +421,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
 	}
 	
+	private String getComponentCreationStr(String componentName) {
+		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
+	}
+
 	private String getBuilderString(List<MethodMetadata> accessors) {
 		StringBuilder sb = new StringBuilder("new StringBuilder()");
 		for (int i = 0; i < accessors.size(); i++) {
