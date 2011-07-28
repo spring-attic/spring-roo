@@ -80,7 +80,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addAnnotation(getManagedBeanAnnotation());
 
 		// Add @SessionScoped annotation if required
-		builder.addAnnotation(getSessionScopedAnnotation());
+		builder.addAnnotation(getScopeAnnotation());
 
 		// Add fields
 		builder.addField(getEntityField());
@@ -106,19 +106,28 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private AnnotationMetadata getManagedBeanAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.faces.bean.ManagedBean"));
+		JavaType managedBeanAnnotation = new JavaType("javax.faces.bean.ManagedBean");
+		if (getTypeAnnotation(managedBeanAnnotation) != null) {
+			return null;
+		}
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(managedBeanAnnotation);
+		return annotationBuilder.build();
 	}
 
-	private AnnotationMetadata getSessionScopedAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped"));
+	private AnnotationMetadata getScopeAnnotation() {
+		if (hasScopeAnnotation()) { 
+			return null;
+		}
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.ViewScoped"));
+		return annotationBuilder.build();
+	}
+	
+	private boolean hasScopeAnnotation() {
+		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.RequestScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.ViewScoped")) != null;
 	}
 	
 	private AnnotationMetadata getTypeAnnotation(JavaType annotationType) {
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType) != null) {
-			return null;
-		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(annotationType);
-		return annotationBuilder.build();
+		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
 	}
 
 	private FieldMetadata getEntityField() {
