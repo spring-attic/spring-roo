@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.repository;
 
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
@@ -25,7 +26,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Andrew Swan
  * @since 1.2
  */
-public enum RepositoryLayerMethod {
+public enum RepositoryJpaLayerMethod {
 	
 	/* 
 	    A Spring Data JPA repository provides the following methods out of the
@@ -73,6 +74,19 @@ public enum RepositoryLayerMethod {
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
 			return Arrays.asList(targetEntity);
+		}
+	},
+
+	FIND ("find", FIND_METHOD) {
+		
+		@Override
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+			return Arrays.asList(targetEntity);
+		}
+
+		@Override
+		public String getCall(final List<JavaSymbolName> parameterNames) {
+			return "findOne(" + parameterNames.get(0).getSymbolName() + ")";
 		}
 	},
 	
@@ -142,7 +156,7 @@ public enum RepositoryLayerMethod {
 	};
 	
 	/**
-	 * Returns the {@link RepositoryLayerMethod} with the given ID and parameter
+	 * Returns the {@link RepositoryJpaLayerMethod} with the given ID and parameter
 	 * types.
 	 * 
 	 * @param methodId the ID to match upon
@@ -150,8 +164,8 @@ public enum RepositoryLayerMethod {
 	 * @param targetEntity the entity type being managed by the repository
 	 * @return <code>null</code> if no such method exists
 	 */
-	public static RepositoryLayerMethod valueOf(final String methodId, final List<JavaType> parameterTypes, final JavaType targetEntity) {
-		for (final RepositoryLayerMethod method : values()) {
+	public static RepositoryJpaLayerMethod valueOf(final String methodId, final List<JavaType> parameterTypes, final JavaType targetEntity) {
+		for (final RepositoryJpaLayerMethod method : values()) {
 			if (method.ids.contains(methodId) && method.getParameterTypes(targetEntity).equals(parameterTypes)) {
 				return method;
 			}
@@ -169,7 +183,7 @@ public enum RepositoryLayerMethod {
 	 * @param key the unique key for this method (required)
 	 * @param name the Java name of this method (required)
 	 */
-	private RepositoryLayerMethod(final String name, final MethodMetadataCustomDataKey... keys) {
+	private RepositoryJpaLayerMethod(final String name, final MethodMetadataCustomDataKey... keys) {
 		Assert.hasText(name, "Name is required");
 		Assert.isTrue(keys.length > 0, "One or more ids are required");
 		this.ids = new ArrayList<String>();
