@@ -79,13 +79,13 @@ public enum RepositoryLayerMethod {
 	FIND_ALL ("findAll", FIND_ALL_METHOD) {
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
-			return Collections.emptyList();
-		}
-
-		@Override
 		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "findAll()";
+		}
+		
+		@Override
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+			return Collections.emptyList();
 		}
 	},
 
@@ -119,7 +119,9 @@ public enum RepositoryLayerMethod {
 
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
-			return Collections.emptyList();
+			// Even though Spring Data JPA's flush() method doesn't take a
+			// parameter, the caller provides one, so we list it here.
+			return Arrays.asList(targetEntity);
 		}
 	},
 	

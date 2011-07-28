@@ -86,7 +86,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FLUSH (PersistenceCustomDataKeys.FLUSH_METHOD, true) {
+	FLUSH (PersistenceCustomDataKeys.FLUSH_METHOD, false) {
 
 		@Override
 		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -98,7 +98,7 @@ enum EntityLayerMethod {
 		
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
-			return Collections.emptyList();
+			return Arrays.asList(targetEntity);
 		}
 	},
 	
@@ -252,5 +252,15 @@ enum EntityLayerMethod {
 		}
 		methodCall.append(")");
 		return methodCall.toString();
+	}
+	
+	/**
+	 * Indicates whether this method is static; only for use of unit tests, as
+	 * it breaks encapsulation
+	 * 
+	 * @return
+	 */
+	boolean isStatic() {
+		return isStatic;
 	}
 }

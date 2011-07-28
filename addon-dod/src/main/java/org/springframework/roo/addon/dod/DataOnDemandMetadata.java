@@ -45,18 +45,23 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @author Greg Turnquist
+ * @author Andrew Swan
  * @since 1.0
  */
 public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	
+	// Constants
+	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
+	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 	private static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
 	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
-	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
-	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
+	
+	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
+	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
+	// Fields
 	private DataOnDemandAnnotationValues annotationValues;
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators;
 	private JavaType entityType;
@@ -68,7 +73,24 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata findMethod;
 	private MethodMetadata identifierAccessor;
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MemberTypeAdditions persistMethodAdditions, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 * @param annotationValues
+	 * @param identifierAccessor
+	 * @param findMethod
+	 * @param findEntriesMethod
+	 * @param persistMethodAdditions
+	 * @param flushMethod
+	 * @param locatedMutators
+	 * @param entityType
+	 * @param embeddedIdentifierHolder
+	 * @param embeddedHolders
+	 */
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MemberTypeAdditions persistMethodAdditions, MemberTypeAdditions flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -824,7 +846,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	/**
 	 * @return the "init():void" method (never returns null)
 	 */
-	public MethodMetadata getInitMethod(MethodMetadata findEntriesMethod, MemberTypeAdditions persistMethodAdditions, MethodMetadata flushMethod) {
+	private MethodMetadata getInitMethod(MethodMetadata findEntriesMethod, MemberTypeAdditions persistMethodAdditions, final MemberTypeAdditions flushAdditions) {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("init");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -877,7 +899,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("throw new RuntimeException(msg.toString(), e);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(flushAdditions.getMethodCall() + ";");
+		flushAdditions.copyAdditionsTo(builder);
 		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");

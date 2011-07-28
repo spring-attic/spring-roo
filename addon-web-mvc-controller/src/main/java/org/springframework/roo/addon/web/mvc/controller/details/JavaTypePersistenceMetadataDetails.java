@@ -22,7 +22,6 @@ public class JavaTypePersistenceMetadataDetails {
 	
 	private final MethodMetadata countMethod;
 	private final MethodMetadata findAllMethod;
-	private final MethodMetadata findEntriesMethod;
 	private final MethodMetadata findMethod;
 	private final MethodMetadata identifierAccessorMethod;
 	private final MethodMetadata mergeMethod;
@@ -47,20 +46,18 @@ public class JavaTypePersistenceMetadataDetails {
 	 * @param findAllMethod (may be null if no findAll method is present)
 	 * @param findMethod (may be null if no find method is present)
 	 * @param countMethod (may be null if no count method is present)
-	 * @param findEntriesMethod (may be null if no findEntries method is present)
 	 * @param finderNames (must not be null, but may be empty of no finders are defined)
 	 * @param isRooIdentifier
 	 * @param rooIdentifierFields (must not be null, but may be empty of no finders are defined)
 	 */
-	public JavaTypePersistenceMetadataDetails(final FieldMetadata identifierField, final MethodMetadata identifierAccessorMethod, final MethodMetadata versionAccessorMethod, final MethodMetadata persistMethod, final MethodMetadata mergeMethod, final MethodMetadata removeMethod, final MethodMetadata findAllMethod, final MethodMetadata findMethod, final MethodMetadata countMethod, final MethodMetadata findEntriesMethod, final List<String> finderNames, final boolean isRooIdentifier, final List<FieldMetadata> rooIdentifierFields) {
-		Assert.notNull(identifierField, "Indentifier field required");
-		Assert.notNull(identifierAccessorMethod, "Indentifier accessor method required");
+	public JavaTypePersistenceMetadataDetails(final FieldMetadata identifierField, final MethodMetadata identifierAccessorMethod, final MethodMetadata versionAccessorMethod, final MethodMetadata persistMethod, final MethodMetadata mergeMethod, final MethodMetadata removeMethod, final MethodMetadata findAllMethod, final MethodMetadata findMethod, final MethodMetadata countMethod, final List<String> finderNames, final boolean isRooIdentifier, final List<FieldMetadata> rooIdentifierFields) {
+		Assert.notNull(identifierField, "Identifier field required");
+		Assert.notNull(identifierAccessorMethod, "Identifier accessor method required");
 		Assert.notNull(finderNames, "List of finder Names required");
 		Assert.notNull(rooIdentifierFields, "List of fields for Roo identifier required (may be empty)");
 		
 		this.countMethod = countMethod;
 		this.findAllMethod = findAllMethod;
-		this.findEntriesMethod = findEntriesMethod;
 		this.finderNames = finderNames;
 		this.findMethod = findMethod;
 		this.identifierAccessorMethod = identifierAccessorMethod;
@@ -152,15 +149,6 @@ public class JavaTypePersistenceMetadataDetails {
 	 */
 	public MethodMetadata getCountMethod() {
 		return countMethod;
-	}
-	
-	/**
-	 * Accessor for persistence findEntries method
-	 * 
-	 * @return the {@link MethodMetadata} for the findEntries method presented by the persistence MD (null if not defined)
-	 */
-	public MethodMetadata getFindEntriesMethod() {
-		return findEntriesMethod;
 	}
 	
 	/**

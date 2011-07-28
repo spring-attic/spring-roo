@@ -589,12 +589,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			} else if (javaTypeMd.isEnumType()) {
 				JavaType arrays = new JavaType("java.util.Arrays");
 				bodyBuilder.appendFormalLine("return " + arrays.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
-			} else if (javaTypePersistenceMd != null && javaTypePersistenceMd.isRooIdentifier()) {
-				continue;
 			} else {
-				
 				continue;
-//				throw new IllegalStateException("Unable to scaffold controller for type " + formBackingType.getFullyQualifiedTypeName() + ". The referenced type " + type.getFullyQualifiedTypeName() + " cannot be handled");
 			}
 
 			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + javaTypeMd.getPlural());

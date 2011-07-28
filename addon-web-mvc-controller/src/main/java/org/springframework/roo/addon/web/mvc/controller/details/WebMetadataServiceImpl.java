@@ -206,7 +206,6 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		MethodMetadata findAllMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ALL_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
 		MethodMetadata countMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.COUNT_ALL_METHOD);
-		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
 
 		List<String> dynamicFinderNames = new ArrayList<String>();
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
@@ -220,7 +219,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		if (identifierAccessor != null) {
 			registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
 			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
-					findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), compositePkFields);
+					findMethod, countMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), compositePkFields);
 		}
 			
 		return javaTypePersistenceMetadataDetails;

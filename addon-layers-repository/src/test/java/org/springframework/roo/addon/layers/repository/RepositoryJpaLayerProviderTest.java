@@ -98,8 +98,10 @@ public class RepositoryJpaLayerProviderTest {
 		assertMethodCall("clinicRepo.findAll()", FIND_ALL_METHOD);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetFlushAdditions() {
-		assertMethodCall("clinicRepo.flush()", FLUSH_METHOD);
+		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(mockTargetEntity, new JavaSymbolName("anything"));
+		assertMethodCall("clinicRepo.flush()", FLUSH_METHOD, entityParameter);
 	}
 }

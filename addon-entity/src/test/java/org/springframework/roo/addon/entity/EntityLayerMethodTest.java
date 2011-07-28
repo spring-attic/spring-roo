@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -103,10 +104,10 @@ public class EntityLayerMethodTest {
 	public void testCallFlushMethod() {
 		// Set up
 		when(mockAnnotationValues.getFlushMethod()).thenReturn("bloosh");
-		final List<JavaSymbolName> parameterNames = getMockParameterNames();
+		final List<JavaSymbolName> parameterNames = getMockParameterNames("person");
 		
 		// Invoke and check
-		assertEquals("Person.bloosh()", EntityLayerMethod.FLUSH.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
+		assertEquals("person.bloosh()", EntityLayerMethod.FLUSH.getCall(mockAnnotationValues, mockTargetEntity, PLURAL, parameterNames));
 	}
 	
 	@Test
@@ -145,9 +146,15 @@ public class EntityLayerMethodTest {
 	}
 	
 	@Test
-	public void testParameterTypesAreNotNull() {
+	public void testParameterTypes() {
 		for (final EntityLayerMethod method : EntityLayerMethod.values()) {
-			assertNotNull(method + " method has null parameter types", method.getParameterTypes(mockTargetEntity));
+			final List<JavaType> parameterTypes = method.getParameterTypes(mockTargetEntity);
+			if (method.isStatic()) {
+				// All we can check is that it's not null
+				assertNotNull(method + " method has null parameter types", parameterTypes);
+			} else {
+				assertEquals(Arrays.asList(mockTargetEntity), parameterTypes);
+			}
 		}
 	}
 }

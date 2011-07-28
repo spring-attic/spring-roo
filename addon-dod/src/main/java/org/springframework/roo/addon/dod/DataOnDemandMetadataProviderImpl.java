@@ -41,20 +41,25 @@ import org.springframework.roo.support.util.Pair;
  * 
  * @author Ben Alex
  * @author Greg Turnquist
+ * @author Andrew Swan
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
 public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DataOnDemandMetadataProvider {
+	
+	// Constants
+	private static final String FLUSH_METHOD = PersistenceCustomDataKeys.FLUSH_METHOD.name();
+	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	
+	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
 	
-	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
-	private static final String FIND_ENTRIES_METHOD = PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name();
-	private Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
-	private Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
+	private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
+	private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
 	
-	protected void activate(ComponentContext context) {
+	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		
@@ -63,7 +68,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
 	}
 	
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
@@ -137,13 +142,16 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-		JavaSymbolName entityName = new JavaSymbolName("obj");
+
+		// Get the additions to make for each required method
+		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
-		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(entity, entityName));
-		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
 		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
+		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, LayerType.HIGHEST.getPosition(), entityParameter);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		if (persistMethodAdditions == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
+		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, LayerType.HIGHEST.getPosition(), entityParameter);
+		
+		if (findEntriesMethod == null || findMethod == null || flushMethod == null || identifierAccessor == null || persistMethodAdditions == null) {
 			return null;
 		}
 		
