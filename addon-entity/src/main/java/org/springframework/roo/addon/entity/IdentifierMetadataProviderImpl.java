@@ -24,18 +24,20 @@ import org.springframework.roo.project.ProjectMetadata;
 @Component(immediate = true)
 @Service
 public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements IdentifierMetadataProvider {
+	
+	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 	private boolean noArgConstructor = true;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		serializableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		serializableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));

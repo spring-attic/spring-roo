@@ -15,8 +15,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class EntityAnnotationValues extends AbstractAnnotationValues {
 	
-	public static final JavaType ANNOTATION_TYPE = new JavaType(RooEntity.class);
-	
 	// Constants for the default values of these fields and methods
 	// TODO seems to duplicate the corresponding literals in RooEntity
 	public static final String PERSIST_METHOD_DEFAULT = "persist";
@@ -62,7 +60,7 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	 * @param governorMetadata the governor's details (required)
 	 */
 	public EntityAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> governorMetadata) {
-		super(governorMetadata, ANNOTATION_TYPE);
+		super(governorMetadata, EntityMetadataProvider.ENTITY_ANNOTATION);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 
