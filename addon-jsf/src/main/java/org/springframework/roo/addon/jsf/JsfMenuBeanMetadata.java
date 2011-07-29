@@ -60,7 +60,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		builder.addAnnotation(getManagedBeanAnnotation());
 
 		// Add @SessionScoped annotation if required
-		builder.addAnnotation(getSessionScopedAnnotation());
+		builder.addAnnotation(getScopeAnnotation());
 
 		if (!managedBeans.isEmpty()) {
 			// Add menu model field
@@ -81,19 +81,28 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private AnnotationMetadata getManagedBeanAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.faces.bean.ManagedBean"));
+		JavaType managedBeanAnnotation = new JavaType("javax.faces.bean.ManagedBean");
+		if (getTypeAnnotation(managedBeanAnnotation) != null) {
+			return null;
+		}
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(managedBeanAnnotation);
+		return annotationBuilder.build();
 	}
 
-	private AnnotationMetadata getSessionScopedAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped"));
+	private AnnotationMetadata getScopeAnnotation() {
+		if (hasScopeAnnotation()) { 
+			return null;
+		}
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.RequestScoped"));
+		return annotationBuilder.build();
+	}
+	
+	private boolean hasScopeAnnotation() {
+		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.RequestScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.ViewScoped")) != null;
 	}
 	
 	private AnnotationMetadata getTypeAnnotation(JavaType annotationType) {
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType) != null) {
-			return null;
-		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(annotationType);
-		return annotationBuilder.build();
+		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
 	}
 	
 	private FieldMetadata getMenuModelField() {
@@ -146,10 +155,10 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			String plural = getInflectorPlural(entity.getSimpleTypeName());
 
 			bodyBuilder.appendFormalLine("");
-			bodyBuilder.appendFormalLine("submenu = " + getComponentCreationStr("Submenu"));
+			bodyBuilder.appendFormalLine("submenu = new Submenu();");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
 
-			bodyBuilder.appendFormalLine("item = " + getComponentCreationStr("MenuItem"));
+			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setValue(\"List all " + plural + "\");");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".findAll" + plural + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
@@ -196,10 +205,6 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
 	}
 	
-	private String getComponentCreationStr(String componentName) {
-		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
-	}
-
 	private String getInflectorPlural(String term) {
 		try {
 			return Noun.pluralOf(term, Locale.ENGLISH);
