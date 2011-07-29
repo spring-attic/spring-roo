@@ -234,7 +234,6 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		ClassOrInterfaceTypeDetails cid = null;
 		if (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() != null && governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		
 			// Only create metadata if the type is annotated with one of the metadata triggers
 			for (JavaType trigger : metadataTriggers) {
 				if (MemberFindingUtils.getDeclaredTypeAnnotation(cid, trigger) != null) {

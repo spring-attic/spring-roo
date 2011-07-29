@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -29,8 +30,9 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
-	private HashMap<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
-	private HashMap<String, String> pluralMap = new HashMap<String, String>();
+	
+	private final Map<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
+	private final Map<String, String> pluralMap = new HashMap<String, String>();
 
 	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
 		MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(memberDetails);
@@ -90,7 +92,14 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 	public void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher) {
 		Assert.notNull(addingClass, "The calling class must be specified");
 		Assert.notNull(matcher, "The matcher must be specified");
-		taggerMap.put(addingClass + matcher.getCustomDataKey().toString(), matcher);
+		taggerMap.put(addingClass + matcher.getCustomDataKey(), matcher);
+	}
+	
+	public void registerMatchers(final Class<?> addingClass, final Matcher<? extends CustomDataAccessor>... matchers) {
+		for (final Matcher<? extends CustomDataAccessor> matcher : matchers) {
+			// We don't keep a reference to the class, as OSGi might unload it later
+			registerMatcher(addingClass.getName(), matcher);
+		}
 	}
 
 	public void unregisterMatchers(String addingClass) {
@@ -103,6 +112,10 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		for (String taggerKey : toRemove) {
 			taggerMap.remove(taggerKey);
 		}
+	}
+	
+	public void unregisterMatchers(final Class<?> addingClass) {
+		unregisterMatchers(addingClass.getName());
 	}
 
 	public List<MethodMatcher> getMethodTaggers() {
