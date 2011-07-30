@@ -17,7 +17,6 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 @Component
 public class HintConverter implements Converter<String> {
-	
 	@Reference private HintOperations hintOperations;
 
 	public String convertFromText(String value, Class<?> requiredType, String optionContext) {
