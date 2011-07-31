@@ -136,7 +136,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			for (Identifier identifier : identifierServiceResult) {
 				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 				annotations.add(getColumnBuilder(identifier));
-				setDateAnnotations(identifier, annotations);
+				if (identifier.getFieldType().equals(new JavaType("java.util.Date"))) {
+					setDateAnnotations(identifier.getColumnDefinition(), annotations);
+				}
 				
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType());
 				FieldMetadata idField = fieldBuilder.build();
@@ -144,7 +146,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				// Only add field to ITD if not declared on governor
 				if (!hasField(declaredFields, idField)) {
 					fields.add(idField);
-				}	
+				}
 			}
 		}
 		
@@ -205,18 +207,19 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		return columnBuilder;
 	}
 	
-	private void setDateAnnotations(Identifier identifier, List<AnnotationMetadataBuilder> annotations) {
+	private void setDateAnnotations(String columnDefinition, List<AnnotationMetadataBuilder> annotations) {
 		// Add JSR 220 @Temporal annotation to date fields
-		if (identifier.getFieldType().equals(new JavaType("java.util.Date"))) {
-			String temporalType = StringUtils.defaultIfEmpty(StringUtils.toUpperCase(identifier.getColumnDefinition()), "DATE");
-			AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"));
-			temporalBuilder.addEnumAttribute("value", new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(temporalType)));
-			annotations.add(temporalBuilder);
-
-			AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-			dateTimeFormatBuilder.addStringAttribute("style", "M-");
-			annotations.add(dateTimeFormatBuilder);
+		String temporalType = StringUtils.defaultIfEmpty(StringUtils.toUpperCase(columnDefinition), "DATE");
+		if ("DATETIME".equals(temporalType)) {
+			temporalType = "TIMESTAMP"; // ROO-2606
 		}
+		AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"));
+		temporalBuilder.addEnumAttribute("value", new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(temporalType)));
+		annotations.add(temporalBuilder);
+
+		AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+		dateTimeFormatBuilder.addStringAttribute("style", "M-");
+		annotations.add(dateTimeFormatBuilder);
 	}
 
 	private boolean hasField(List<? extends FieldMetadata> declaredFields, FieldMetadata idField) {

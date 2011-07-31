@@ -9,7 +9,7 @@
     </parent>
     <artifactId>org.springframework.roo.annotations</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Annotations (ASLv2/GPLv3 Dual Licensed)</name>
+    <name>Spring Roo - Annotations (ASLv2 Licensed)</name>
     <build>
         <plugins>
             <plugin> <!-- should move antrun to a pluginManagement section in root POM; similarly do this for all other plugins -->

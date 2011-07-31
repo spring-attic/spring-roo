@@ -27,8 +27,12 @@
         <personname>Alan Stewart</personname>
       </author>
 
-		<author>
+      <author>
         <personname>James Tyrrell</personname>
+      </author>
+
+      <author>
+        <personname>Andrew Swan</personname>
       </author>
     </authorgroup>
 
@@ -94,9 +98,9 @@
     <xi:include href="base-dbre.xml" />
 
     <xi:include href="base-web.xml" />
-    
+
     <xi:include href="base-cloud-foundry.xml" />
-    
+
     <xi:include href="base-gwt.xml" />
 
     <xi:include href="base-json.xml" />
