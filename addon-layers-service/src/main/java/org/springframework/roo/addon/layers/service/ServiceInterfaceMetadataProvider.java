@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -12,8 +13,10 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -31,6 +34,7 @@ import org.springframework.roo.project.layers.LayerTypeMatcher;
 public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
 	
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
+	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
 	
 	private static final JavaType ROO_SERVICE = new JavaType(RooService.class.getName());
 	
@@ -59,7 +63,14 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 			return null;
 		}
 		Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
+		Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
 		for (JavaType type : domainTypes) {
+			List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(type);
+			if (idFields.isEmpty()) {
+				continue;
+			}
+			// We simply take the first disregarding any further fields which may be identifiers
+			domainTypeToIdTypeMap.put(type, idFields.get(0).getFieldType());
 			String pluralId = PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA);
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {
@@ -68,7 +79,8 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 			metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
 			domainTypePlurals.put(type, pluralMetadata.getPlural());
 		}
-		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues, domainTypePlurals);
+		
+		return new ServiceInterfaceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, domainTypeToIdTypeMap, annotationValues, domainTypePlurals);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

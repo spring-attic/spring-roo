@@ -45,22 +45,24 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 * @param aspectName (required)
 	 * @param governorPhysicalTypeMetadata (required)
 	 * @param governorDetails (required)
+	 * @param domainTypeToIdTypeMap (required)
 	 * @param annotationValues (required)
 	 * @param domainTypePlurals 
 	 */
-	public ServiceInterfaceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, String> domainTypePlurals) {
+	public ServiceInterfaceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, Map<JavaType, JavaType> domainTypeToIdTypeMap, ServiceAnnotationValues annotationValues, Map<JavaType, String> domainTypePlurals) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
+		Assert.notNull(domainTypeToIdTypeMap, "Domain type to ID type map required required");
 		Assert.notNull(domainTypePlurals, "Domain type plural values required");
 		
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
 		
-		for (final JavaType domainType : annotationValues.getDomainTypes()) {
+		for (final JavaType domainType : domainTypeToIdTypeMap.keySet()) {
 			final String plural = domainTypePlurals.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-				builder.addMethod(getMethod(method, domainType, plural));
+				builder.addMethod(getMethod(method, domainType, domainTypeToIdTypeMap.get(domainType), plural));
 			}
 		}
 		
@@ -77,7 +79,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 * @return <code>null</code> if the method isn't required or is already
 	 * declared in the governor
 	 */
-	private MethodMetadata getMethod(final ServiceLayerMethod method, final JavaType domainType, final String plural) {
+	private MethodMetadata getMethod(final ServiceLayerMethod method, final JavaType domainType, final JavaType idType, final String plural) {
 		final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, plural);
 		if (methodName == null || MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
 			// We don't want this method, or the governor already declares it
@@ -88,8 +90,8 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 				PUBLIC_ABSTRACT,
 				methodName,
 				method.getReturnType(domainType),
-				AnnotatedJavaType.convertFromJavaTypes(method.getParameterTypes(domainType)),
-				method.getParameterNames(domainType),
+				AnnotatedJavaType.convertFromJavaTypes(method.getParameterTypes(domainType, idType)),
+				method.getParameterNames(domainType, idType),
 				BODY)
 		.build();
 	}

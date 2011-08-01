@@ -32,6 +32,11 @@ public @interface RooService {
 	public static final String DELETE_METHOD = "delete";
 	
 	/**
+	 * The default prefix of the "find" method
+	 */
+	public static final String FIND_METHOD = "find";
+	
+	/**
 	 * The default prefix of the "find all" method
 	 */
 	public static final String FIND_ALL_METHOD = "findAll";
@@ -71,6 +76,13 @@ public @interface RooService {
 	 * @return a blank string if the annotated type doesn't support this method
 	 */
 	String deleteMethod() default DELETE_METHOD;
+	
+	/**
+	 * Returns the name of the "find" method
+	 * 
+	 * @return a blank string if the annotated type doesn't support this method
+	 */
+	String findMethod() default FIND_METHOD;
 	
 	/**
 	 * Returns the name of the "find all" method

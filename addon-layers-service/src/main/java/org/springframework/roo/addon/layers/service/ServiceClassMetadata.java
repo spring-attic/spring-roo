@@ -43,22 +43,24 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
 	 * @param governorDetails (required)
 	 * @param annotationValues (required)
+	 * @param domainTypeToIdTypeMap (required)
 	 * @param allCrudAdditions any additions to be made to the service class in
 	 * order to invoke lower-layer methods (required)
 	 * @param domainTypePlurals the plurals of each domain type managed by the service
 	 */
-	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions, Map<JavaType, String> domainTypePlurals) {
+	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, JavaType> domainTypeToIdTypeMap, Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions, Map<JavaType, String> domainTypePlurals) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(allCrudAdditions, "CRUD additions required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor details required");
 		Assert.notNull(domainTypePlurals, "Domain type plurals required");
 		
-		for (final JavaType domainType : annotationValues.getDomainTypes()) {
+		for (final JavaType domainType : domainTypeToIdTypeMap.keySet()) {
+			JavaType idType = domainTypeToIdTypeMap.get(domainType);
 			final Map<ServiceLayerMethod, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 				final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, domainTypePlurals.get(domainType));
-				if (methodName != null && MemberFindingUtils.getMethod(governorDetails, methodName, method.getParameterTypes(domainType)) == null) {
+				if (methodName != null && MemberFindingUtils.getMethod(governorDetails, methodName, method.getParameterTypes(domainType, idType)) == null) {
 					// The method is desired and the service class' Java file doesn't contain it, so generate it
 					final MemberTypeAdditions lowerLayerCallAdditions = crudAdditions.get(method);
 					if (lowerLayerCallAdditions != null) {
@@ -74,8 +76,8 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 							Modifier.PUBLIC,
 							methodName,
 							method.getReturnType(domainType),
-							AnnotatedJavaType.convertFromJavaTypes(method.getParameterTypes(domainType)),
-							method.getParameterNames(domainType),
+							AnnotatedJavaType.convertFromJavaTypes(method.getParameterTypes(domainType, idType)),
+							method.getParameterNames(domainType, idType),
 							bodyBuilder
 						)
 					);

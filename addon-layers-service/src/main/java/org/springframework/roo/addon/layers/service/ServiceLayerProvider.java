@@ -42,16 +42,16 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 	@Reference private ServiceAnnotationValuesFactory serviceAnnotationValuesFactory;
 	@Reference private ServiceInterfaceLocator serviceInterfaceLocator;
 	
-	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final Pair<JavaType, JavaSymbolName>... methodParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final Pair<JavaType, JavaSymbolName>... methodParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata identifier required");
 		Assert.notNull(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target entity type required");
 		Assert.notNull(methodParameters, "Method param names and types required (may be empty)");
-		
+
 		// Check whether this is even a known service layer method
 		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(methodParameters);
 		final List<JavaType> parameterTypes = parameterList.getKeys();
-		final ServiceLayerMethod method = ServiceLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity);
+		final ServiceLayerMethod method = ServiceLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idType);
 		if (method == null) {
 			return null;
 		}
@@ -85,7 +85,6 @@ public class ServiceLayerProvider extends CoreLayerProvider {
 				}
 			}
 		}
-		
 		// None of the services for this entity were able to provide the method
 		return null;
 	}

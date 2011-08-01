@@ -17,6 +17,7 @@ import org.springframework.roo.support.util.StringUtils;
  * A method provided by a user project's service layer
  *
  * @author Andrew Swan
+ * @author Stefan Schmidt
  * @since 1.2
  */
 enum ServiceLayerMethod {
@@ -35,12 +36,12 @@ enum ServiceLayerMethod {
 		}
 
 		@Override
-		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Collections.emptyList();
 		}
 
 		@Override
-		public List<JavaType> getParameterTypes(final JavaType entityType) {
+		public List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Collections.emptyList();
 		}
 
@@ -61,18 +62,44 @@ enum ServiceLayerMethod {
 		}
 
 		@Override
-		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
 		}
 
 		@Override
-		public List<JavaType> getParameterTypes(final JavaType entityType) {
+		public List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(entityType);
 		}
 
 		@Override
 		public JavaType getReturnType(final JavaType entityType) {
 			return JavaType.VOID_PRIMITIVE;
+		}
+	},
+	
+	FIND (PersistenceCustomDataKeys.FIND_METHOD) {
+		
+		@Override
+		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
+			if (StringUtils.hasText(annotationValues.getFindMethod())) {
+				return annotationValues.getFindMethod() + entityType.getSimpleTypeName();
+			}
+			return null;
+		}
+
+		@Override
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
+			return Arrays.asList(new JavaSymbolName("id"));
+		}
+
+		@Override
+		public List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
+			return Arrays.asList(idType);
+		}
+
+		@Override
+		public JavaType getReturnType(final JavaType entityType) {
+			return entityType;
 		}
 	},
 
@@ -86,12 +113,12 @@ enum ServiceLayerMethod {
 		}
 		
 		@Override
-		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Collections.emptyList();
 		}
 
 		@Override
-		public List<JavaType> getParameterTypes(final JavaType entityType) {
+		public List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Collections.emptyList();
 		}
 
@@ -111,12 +138,12 @@ enum ServiceLayerMethod {
 		}
 		
 		@Override
-		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
 		}
 
 		@Override
-		public List<JavaType> getParameterTypes(final JavaType entityType) {
+		public List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
 		}
 
@@ -136,12 +163,12 @@ enum ServiceLayerMethod {
 		}
 		
 		@Override
-		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
 		}
 
 		@Override
-		public List<JavaType> getParameterTypes(final JavaType entityType) {
+		public List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(entityType);
 		}
 
@@ -161,12 +188,12 @@ enum ServiceLayerMethod {
 		}
 		
 		@Override
-		public List<JavaSymbolName> getParameterNames(final JavaType entityType) {
+		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
 		}
 
 		@Override
-		public List<JavaType> getParameterTypes(final JavaType entityType) {
+		public List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(entityType);
 		}
 
@@ -180,15 +207,15 @@ enum ServiceLayerMethod {
 	 * Returns the {@link ServiceLayerMethod} with the given properties, if any
 	 * 
 	 * @param methodIdentifier the internal ID of the method (can be blank)
-	 * @param callerParameters the types of parameter to be passed to the method
-	 * (required)
+	 * @param callerParameters the types of parameter to be passed to the method (required)
 	 * @param targetEntity the type of entity being managed (required)
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return <code>null</code> if a blank or unknown ID is given
 	 */
-	public static ServiceLayerMethod valueOf(final String methodIdentifier, final List<JavaType> callerParameters, final JavaType targetEntity) {
+	public static ServiceLayerMethod valueOf(final String methodIdentifier, final List<JavaType> callerParameters, final JavaType targetEntity, final JavaType idType) {
 		// Look for matching method name and parameter types
 		for (final ServiceLayerMethod method : values()) {
-			if (method.getKey().equals(methodIdentifier) && method.getParameterTypes(targetEntity).equals(callerParameters)) {
+			if (method.getKey().equals(methodIdentifier) && method.getParameterTypes(targetEntity, idType).equals(callerParameters)) {
 				return method;
 			}
 		}
@@ -251,31 +278,32 @@ enum ServiceLayerMethod {
 	/**
 	 * Returns the names of this method's declared parameters
 	 * 
-	 * @param entityType the type of domain entity managed by the service
-	 * (required)
+	 * @param entityType the type of domain entity managed by the service (required)
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list (might be empty)
 	 */
-	public abstract List<JavaSymbolName> getParameterNames(final JavaType entityType);
+	public abstract List<JavaSymbolName> getParameterNames(JavaType entityType, JavaType idType);
 
 	/**
 	 * Returns the types and names of the parameters declared by this method for
 	 * the given domain type
 	 * 
 	 * @param domainType the domain type to which the method applies (required)
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list
 	 */
-	public PairList<JavaType, JavaSymbolName> getParameters(final JavaType domainType) {
-		return new PairList<JavaType, JavaSymbolName>(getParameterTypes(domainType), getParameterNames(domainType));
+	public PairList<JavaType, JavaSymbolName> getParameters(final JavaType domainType, final JavaType idType) {
+		return new PairList<JavaType, JavaSymbolName>(getParameterTypes(domainType, idType), getParameterNames(domainType, idType));
 	}
 	
 	/**
 	 * Returns the types of parameters taken by this method
 	 * 
-	 * @param entityType the type of entity to which this method applies
-	 * (required)
+	 * @param entityType the type of entity to which this method applies (required)
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> copy of list (might be empty)
 	 */
-	public abstract List<JavaType> getParameterTypes(JavaType entityType);
+	public abstract List<JavaType> getParameterTypes(JavaType entityType, JavaType idType);
 
 	/**
 	 * Returns this method's return type

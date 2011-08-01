@@ -44,6 +44,7 @@ public class ServiceLayerProviderTest {
 	
 	// -- Mocks
 	@Mock private JavaType mockTargetType;
+	@Mock private JavaType mockIdType;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private ServiceAnnotationValuesFactory mockServiceAnnotationValuesFactory;
 	@Mock private ServiceInterfaceLocator mockServiceInterfaceLocator;
@@ -61,6 +62,7 @@ public class ServiceLayerProviderTest {
 		this.provider.setServiceInterfaceLocator(mockServiceInterfaceLocator);
 		
 		when(mockTargetType.getFullyQualifiedTypeName()).thenReturn("com.example.domain.Person");
+		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 		when(mockTargetType.getSimpleTypeName()).thenReturn("Person");
 		this.pluralId = PluralMetadata.createIdentifier(mockTargetType);
 	}
@@ -121,7 +123,7 @@ public class ServiceLayerProviderTest {
 		when(mockServiceInterfaceLocator.getServiceInterfaces(mockTargetType)).thenReturn(mockServiceInterfaces);
 		
 		// Invoke
-		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, methodId, mockTargetType, methodParameters);
+		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, methodId, mockTargetType, mockIdType, methodParameters);
 		
 		// Check
 		if (expectedMethodSignature == null) {
@@ -138,7 +140,7 @@ public class ServiceLayerProviderTest {
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
 		
 		// Invoke
-		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, BOGUS_METHOD, mockTargetType);
+		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, BOGUS_METHOD, mockTargetType, mockIdType);
 		
 		// Check
 		assertNull(additions);		

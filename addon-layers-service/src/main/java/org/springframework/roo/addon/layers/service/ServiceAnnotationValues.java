@@ -18,6 +18,7 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 	// Fields
 	@AutoPopulate private JavaType[] domainTypes;
 	@AutoPopulate private String countAllMethod = RooService.COUNT_ALL_METHOD;
+	@AutoPopulate private String findMethod = RooService.FIND_METHOD;
 	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;
 	@AutoPopulate private String findEntriesMethod = RooService.FIND_ENTRIES_METHOD;
 	@AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
@@ -41,6 +42,10 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 
 	public String getCountAllMethod() {
 		return countAllMethod;
+	}
+	
+	public String getFindMethod() {
+		return findMethod;
 	}
 	
 	public String getFindAllMethod() {

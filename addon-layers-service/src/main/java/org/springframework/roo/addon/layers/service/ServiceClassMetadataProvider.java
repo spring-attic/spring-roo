@@ -13,11 +13,13 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -47,14 +49,15 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 	
 	// Fields
 	@Reference private LayerService layerService;
+	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
 	
-	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		setIgnoreTriggerAnnotations(true);
 	}
 
-	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
@@ -121,9 +124,17 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		 * order of code generation.
 		 */
 		final Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
+		final Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
 		// Collect the additions for each method for each supported domain type
 		final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions = new LinkedHashMap<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>>();
 		for (final JavaType domainType : domainTypes) {
+			
+			List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(domainType);
+			if (idFields.isEmpty()) {
+				continue;
+			}
+			JavaType idType = idFields.get(0).getFieldType();
+			domainTypeToIdTypeMap.put(domainType, idType);
 			// Collect the plural for this domain type
 			final String pluralId = PluralMetadata.createIdentifier(domainType, Path.SRC_MAIN_JAVA);
 			final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
@@ -138,8 +149,8 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 			// Collect the additions the service class needs in order to invoke each service layer method
 			final Map<ServiceLayerMethod, MemberTypeAdditions> methodAdditions = new LinkedHashMap<ServiceLayerMethod, MemberTypeAdditions>();
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-				final Pair<JavaType, JavaSymbolName>[] methodParameters = method.getParameters(domainType).toArray();
-				final MemberTypeAdditions memberTypeAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, method.getKey(), domainType, LAYER_POSITION, methodParameters);
+				final Pair<JavaType, JavaSymbolName>[] methodParameters = method.getParameters(domainType, idType).toArray();
+				final MemberTypeAdditions memberTypeAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, method.getKey(), domainType, idType, LAYER_POSITION, methodParameters);
 				if (memberTypeAdditions != null) {
 					// A lower layer implements this method
 					methodAdditions.put(method, memberTypeAdditions);
@@ -152,7 +163,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 			metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
 		}
 		final MemberDetails serviceClassDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), serviceClass);
-		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, serviceClassDetails, serviceAnnotationValues, allCrudAdditions, domainTypePlurals);
+		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, serviceClassDetails, serviceAnnotationValues, domainTypeToIdTypeMap, allCrudAdditions, domainTypePlurals);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
