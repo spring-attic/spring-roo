@@ -127,7 +127,7 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 		// maintain a list of entities that are being tested
 		managedEntityTypes.put(domainEntity, metadataIdentificationString);
 		
-		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, persistenceAdditions, javaTypePersistenceMetadataDetails.getIdentifierField(), javaTypePersistenceMetadataDetails.getFindMethod(), plural.getPlural(), finderDetails, jsonMetadata);
+		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, persistenceAdditions, javaTypePersistenceMetadataDetails.getIdentifierField(), plural.getPlural(), finderDetails, jsonMetadata);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

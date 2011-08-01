@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -20,14 +21,15 @@ public class JavaTypePersistenceMetadataDetails {
 	// Fields
 	private final FieldMetadata identifierField;
 	
-	private final MethodMetadata countMethod;
-	private final MethodMetadata findAllMethod;
-	private final MethodMetadata findMethod;
-	private final MethodMetadata identifierAccessorMethod;
-	private final MethodMetadata mergeMethod;
-	private final MethodMetadata persistMethod;
-	private final MethodMetadata removeMethod;
+	private final MemberTypeAdditions countMethod;
+	private final MemberTypeAdditions findAllMethod;
+	private final MemberTypeAdditions findEntriesMethod;
+	private final MemberTypeAdditions findMethod;
+	private final MemberTypeAdditions mergeMethod;
+	private final MemberTypeAdditions persistMethod;
+	private final MemberTypeAdditions removeMethod;
 	private final MethodMetadata versionAccessorMethod;
+	private final MethodMetadata identifierAccessorMethod;
 	
 	private final boolean isRooIdentifier;
 	
@@ -50,9 +52,9 @@ public class JavaTypePersistenceMetadataDetails {
 	 * @param isRooIdentifier
 	 * @param rooIdentifierFields (must not be null, but may be empty of no finders are defined)
 	 */
-	public JavaTypePersistenceMetadataDetails(final FieldMetadata identifierField, final MethodMetadata identifierAccessorMethod, final MethodMetadata versionAccessorMethod, final MethodMetadata persistMethod, final MethodMetadata mergeMethod, final MethodMetadata removeMethod, final MethodMetadata findAllMethod, final MethodMetadata findMethod, final MethodMetadata countMethod, final List<String> finderNames, final boolean isRooIdentifier, final List<FieldMetadata> rooIdentifierFields) {
-		Assert.notNull(identifierField, "Identifier field required");
-		Assert.notNull(identifierAccessorMethod, "Identifier accessor method required");
+	public JavaTypePersistenceMetadataDetails(final FieldMetadata identifierField, final MethodMetadata identifierAccessorMethod, final MethodMetadata versionAccessorMethod, final MemberTypeAdditions persistMethod, final MemberTypeAdditions mergeMethod, final MemberTypeAdditions removeMethod, final MemberTypeAdditions findAllMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions countMethod, final MemberTypeAdditions findEntriesMethod, final List<String> finderNames, final boolean isRooIdentifier, final List<FieldMetadata> rooIdentifierFields) {
+		Assert.notNull(identifierField, "Indentifier field required");
+		Assert.notNull(identifierAccessorMethod, "Indentifier accessor method required");
 		Assert.notNull(finderNames, "List of finder Names required");
 		Assert.notNull(rooIdentifierFields, "List of fields for Roo identifier required (may be empty)");
 		
@@ -68,8 +70,9 @@ public class JavaTypePersistenceMetadataDetails {
 		this.removeMethod = removeMethod;
 		this.rooIdentifierFields = rooIdentifierFields;
 		this.versionAccessorMethod = versionAccessorMethod;
+		this.findEntriesMethod = findEntriesMethod;
 	}
-	
+
 	/**
 	 * Field metadata for identifier
 	 * 
@@ -100,55 +103,64 @@ public class JavaTypePersistenceMetadataDetails {
 	/**
 	 * Accessor for persistence persist method
 	 * 
-	 * @return the {@link MethodMetadata} for the persist method presented by the persistence MD (null if not defined)
+	 * @return the {@link MemberTypeAdditions} for the persist method presented by the persistence MD (null if not defined)
 	 */
-	public MethodMetadata getPersistMethod() {
+	public MemberTypeAdditions getPersistMethod() {
 		return persistMethod;
 	}
 
 	/**
 	 * Accessor for persistence merge method
 	 * 
-	 * @return the {@link MethodMetadata} for the merge method presented by the persistence MD (null if not defined)
+	 * @return the {@link MemberTypeAdditions} for the merge method presented by the persistence MD (null if not defined)
 	 */
-	public MethodMetadata getMergeMethod() {
+	public MemberTypeAdditions getMergeMethod() {
 		return mergeMethod;
 	}
 
 	/**
 	 * Accessor for persistence remove method
 	 * 
-	 * @return the {@link MethodMetadata} for the remove method presented by the persistence MD (null if not defined)
+	 * @return the {@link MemberTypeAdditions} for the remove method presented by the persistence MD (null if not defined)
 	 */
-	public MethodMetadata getRemoveMethod() {
+	public MemberTypeAdditions getRemoveMethod() {
 		return removeMethod;
 	}
 
 	/**
 	 * Accessor for persistence findAll method
 	 * 
-	 * @return the {@link MethodMetadata} for the findAll method presented by the persistence MD (null if not defined)
+	 * @return the {@link MemberTypeAdditions} for the findAll method presented by the persistence MD (null if not defined)
 	 */
-	public MethodMetadata getFindAllMethod() {
+	public MemberTypeAdditions getFindAllMethod() {
 		return findAllMethod;
 	}
 
 	/**
 	 * Accessor for persistence find method
 	 * 
-	 * @return the {@link MethodMetadata} for the find method presented by the persistence MD (null if not defined)
+	 * @return the {@link MemberTypeAdditions} for the find method presented by the persistence MD (null if not defined)
 	 */
-	public MethodMetadata getFindMethod() {
+	public MemberTypeAdditions getFindMethod() {
 		return findMethod;
 	}
 	
 	/**
 	 * Accessor for persistence count method
 	 * 
-	 * @return the {@link MethodMetadata} for the count method presented by the persistence MD (null if not defined)
+	 * @return the {@link MemberTypeAdditions} for the count method presented by the persistence MD (null if not defined)
 	 */
-	public MethodMetadata getCountMethod() {
+	public MemberTypeAdditions getCountMethod() {
 		return countMethod;
+	}
+	
+	/**
+	 * Accessor for persistence findEntries method
+	 * 
+	 * @return the {@link MemberTypeAdditions} for the findEntries method presented by the persistence MD (null if not defined)
+	 */
+	public MemberTypeAdditions getFindEntriesMethod() {
+		return findEntriesMethod;
 	}
 	
 	/**

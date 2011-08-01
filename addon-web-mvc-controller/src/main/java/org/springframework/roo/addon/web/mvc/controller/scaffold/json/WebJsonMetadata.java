@@ -57,7 +57,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	private MemberDetails memberDetails;
 	private JavaType formBackingType;
 
-	public WebJsonMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebScaffoldAnnotationValues annotationValues, final MemberDetails memberDetails, final Map<String, MemberTypeAdditions> persistenceAdditions, final FieldMetadata identifierField, final MethodMetadata findMethod, final String plural, final Set<FinderMetadataDetails> finderDetails, JsonMetadata jsonMetadata) {
+	public WebJsonMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebScaffoldAnnotationValues annotationValues, final MemberDetails memberDetails, final Map<String, MemberTypeAdditions> persistenceAdditions, final FieldMetadata identifierField, final String plural, final Set<FinderMetadataDetails> finderDetails, JsonMetadata jsonMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -75,6 +75,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		this.jsonMetadata = jsonMetadata;
 		
+		MemberTypeAdditions findMethod = persistenceAdditions.get(PersistenceCustomDataKeys.FIND_METHOD.name());
 		if (identifierField != null && findMethod != null) {
 			builder.addMethod(getJsonShowMethod(identifierField, findMethod));
 		}
@@ -109,7 +110,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		return annotationValues;
 	}
 
-	private MethodMetadata getJsonShowMethod(final FieldMetadata identifierField, final MethodMetadata findMethod) {
+	private MethodMetadata getJsonShowMethod(final FieldMetadata identifierField, final MemberTypeAdditions findMethod) {
 		JavaSymbolName toJsonMethodName = jsonMetadata.getToJsonMethodName();
 		
 		JavaSymbolName methodName = new JavaSymbolName("showJson");
@@ -141,7 +142,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		String beanShortName = getShortName(formBackingType);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + beanShortName + "." + findMethod.getMethodName() + "(" + identifierField.getFieldName().getSymbolName() + ");");
+		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + findMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
 		String responseEntityShortName = getShortName(new JavaType("org.springframework.http.ResponseEntity"));
 		String httpStatusShortName = getShortName(new JavaType("org.springframework.http.HttpStatus"));
@@ -385,7 +386,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getJsonDeleteMethod(MemberTypeAdditions removeMethod, FieldMetadata identifierField, MethodMetadata findMethod) {
+	private MethodMetadata getJsonDeleteMethod(MemberTypeAdditions removeMethod, FieldMetadata identifierField, MemberTypeAdditions findMethod) {
 		JavaSymbolName methodName = new JavaSymbolName("deleteFromJson");
 
 		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
@@ -414,7 +415,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		String beanShortName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + beanShortName + "." + findMethod.getMethodName() + "(" + identifierField.getFieldName().getSymbolName() + ");");
+		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + findMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(new JavaType("org.springframework.http.HttpHeaders"));
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
