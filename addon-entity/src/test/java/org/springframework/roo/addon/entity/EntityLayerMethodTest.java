@@ -33,6 +33,7 @@ public class EntityLayerMethodTest {
 	
 	// Fixture
 	@Mock private JavaType mockTargetEntity;
+	@Mock private JavaType mockIdType;
 	@Mock private EntityAnnotationValues mockAnnotationValues;
 	@Mock private JavaSymbolName mockParameterName;
 	
@@ -42,6 +43,7 @@ public class EntityLayerMethodTest {
 		when(mockParameterName.getSymbolName()).thenReturn("person");
 		when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn("com.example.Person");
 		when(mockTargetEntity.getSimpleTypeName()).thenReturn("Person");
+		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 	}
 	
 	/**
@@ -142,13 +144,13 @@ public class EntityLayerMethodTest {
 	
 	@Test
 	public void testValueOfBogusMethodId() {
-		assertNull(EntityLayerMethod.valueOf("foo", NO_TYPES, mockTargetEntity));
+		assertNull(EntityLayerMethod.valueOf("foo", NO_TYPES, mockTargetEntity, mockIdType));
 	}
 	
 	@Test
 	public void testParameterTypes() {
 		for (final EntityLayerMethod method : EntityLayerMethod.values()) {
-			final List<JavaType> parameterTypes = method.getParameterTypes(mockTargetEntity);
+			final List<JavaType> parameterTypes = method.getParameterTypes(mockTargetEntity, mockIdType);
 			if (method.isStatic()) {
 				// All we can check is that it's not null
 				assertNotNull(method + " method has null parameter types", parameterTypes);

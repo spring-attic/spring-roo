@@ -16,6 +16,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Methods implemented by a user project entity.
  *
  * @author Andrew Swan
+ * @author Stefan Schmidt
  * @since 1.2
  */
 enum EntityLayerMethod {
@@ -33,7 +34,7 @@ enum EntityLayerMethod {
 		}
 
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
 		}
 	},
@@ -49,8 +50,24 @@ enum EntityLayerMethod {
 		}
 
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
+		}
+	},
+	
+	FIND (PersistenceCustomDataKeys.FIND_METHOD, true) {
+		
+		@Override
+		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+			if (StringUtils.hasText(annotationValues.getFindMethod())) {
+				return annotationValues.getFindMethod() + targetEntity.getSimpleTypeName();
+			}
+			return null;
+		}
+		
+		@Override
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
+			return Arrays.asList(idType);
 		}
 	},
 	
@@ -65,7 +82,7 @@ enum EntityLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
 		}
 	},
@@ -81,7 +98,7 @@ enum EntityLayerMethod {
 		}
 
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
 		}
 	},
@@ -97,7 +114,7 @@ enum EntityLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	},
@@ -113,7 +130,7 @@ enum EntityLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	},
@@ -129,7 +146,7 @@ enum EntityLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	},
@@ -145,7 +162,7 @@ enum EntityLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	};
@@ -157,12 +174,13 @@ enum EntityLayerMethod {
 	 * @param methodIdentifier the ID to seek; will not match if blank
 	 * @param callerParameters will not match if <code>null</code>
 	 * @param targetEntity
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return
 	 */
-	public static EntityLayerMethod valueOf(final String methodIdentifier, final List<JavaType> callerParameters, final JavaType targetEntity) {
+	public static EntityLayerMethod valueOf(final String methodIdentifier, final List<JavaType> callerParameters, final JavaType targetEntity, final JavaType idType) {
 		// Look for matching method name and parameter types
 		for (final EntityLayerMethod method : values()) {
-			if (method.id.equals(methodIdentifier) && method.getParameterTypes(targetEntity).equals(callerParameters)) {
+			if (method.id.equals(methodIdentifier) && method.getParameterTypes(targetEntity, idType).equals(callerParameters)) {
 				return method;
 			}
 		}
@@ -173,9 +191,10 @@ enum EntityLayerMethod {
 	 * Returns the type of parameters taken by this method
 	 * 
 	 * @param targetEntity the type of entity being managed
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list
 	 */
-	protected abstract List<JavaType> getParameterTypes(JavaType targetEntity);
+	protected abstract List<JavaType> getParameterTypes(JavaType targetEntity, JavaType idType);
 
 	// Fields
 	private final boolean isStatic;

@@ -33,7 +33,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private MetadataService metadataService;
 
-	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final Pair<JavaType, JavaSymbolName>... methodParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final Pair<JavaType, JavaSymbolName>... methodParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Metadata identifier required");
 		Assert.hasText(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
@@ -53,7 +53,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 		// Look for an entity layer method with this ID and parameter types
 		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(methodParameters);
 		final List<JavaType> parameterTypes = parameterList.getKeys();
-		final EntityLayerMethod method = EntityLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity);
+		final EntityLayerMethod method = EntityLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idType);
 		if (method == null) {
 			return null;
 		}

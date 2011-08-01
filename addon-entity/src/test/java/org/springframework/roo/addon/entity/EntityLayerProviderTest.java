@@ -62,6 +62,7 @@ public class EntityLayerProviderTest {
 	@Mock private EntityAnnotationValues mockAnnotationValues;
 	@Mock private EntityMetadataProvider mockEntityMetadataProvider;
 	@Mock private JavaType mockTargetEntity;
+	@Mock private JavaType mockIdType;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private PluralMetadata mockPluralMetadata;
 	
@@ -69,6 +70,7 @@ public class EntityLayerProviderTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn("com.example.Pizza");
+		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity);
 		
 		this.layerProvider = new EntityLayerProvider();
@@ -91,7 +93,7 @@ public class EntityLayerProviderTest {
 		when(mockEntityMetadataProvider.getAnnotationValues(mockTargetEntity)).thenReturn(null);
 		
 		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity);
+		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
 		assertNull(additions);
@@ -103,7 +105,7 @@ public class EntityLayerProviderTest {
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
 		
 		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity);
+		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
 		assertNull(additions);
@@ -116,7 +118,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("");
 		
 		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity);
+		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
 		assertNull(additions);
@@ -129,7 +131,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("anything");
 		
 		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity);
+		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
 		
 		// Check
 		assertNull(additions);
@@ -143,7 +145,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("anything");
 		
 		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity);
+		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
 		assertNull(additions);
@@ -157,7 +159,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("Pizzas");
 		
 		// Invoke
-		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity);
+		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
 		assertEquals("getAllPizzas", additions.getMethodName());
