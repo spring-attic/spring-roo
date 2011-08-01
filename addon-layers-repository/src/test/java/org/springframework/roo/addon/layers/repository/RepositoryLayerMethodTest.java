@@ -26,6 +26,7 @@ public class RepositoryLayerMethodTest {
 
 	// Fixture
 	@Mock private JavaType mockTargetEntity;
+	@Mock private JavaType mockIdType;
 	
 	@Before
 	public void setUp() {
@@ -35,25 +36,25 @@ public class RepositoryLayerMethodTest {
 	@Test
 	public void testNamesAreUniqueAndNotBlank() {
 		final Set<String> names = new HashSet<String>();
-		for (final RepositoryLayerMethod method : RepositoryLayerMethod.values()) {
+		for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod.values()) {
 			final String name = method.getName();
 			names.add(name);
 			assertTrue(StringUtils.hasText(name));
 		}
-		assertEquals(RepositoryLayerMethod.values().length, names.size());
+		assertEquals(RepositoryJpaLayerMethod.values().length, names.size());
 	}
 	
 	@Test
 	public void testParameterTypesAreNotNull() {
-		for (final RepositoryLayerMethod method : RepositoryLayerMethod.values()) {
-			assertNotNull(method.getParameterTypes(mockTargetEntity));
+		for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod.values()) {
+			assertNotNull(method.getParameterTypes(mockTargetEntity, mockIdType));
 		}
 	}
 	
 	@Test
 	public void testCallFlushMethod() {
 		// Invoke
-		final String methodCall = RepositoryLayerMethod.FLUSH.getCall(Collections.<JavaSymbolName>emptyList());
+		final String methodCall = RepositoryJpaLayerMethod.FLUSH.getCall(Collections.<JavaSymbolName>emptyList());
 		
 		// Check
 		assertEquals("flush()", methodCall);

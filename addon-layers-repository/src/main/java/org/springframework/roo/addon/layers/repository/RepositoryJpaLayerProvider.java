@@ -9,8 +9,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.CoreLayerProvider;
@@ -38,8 +40,9 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
 	// Fields
 	@Reference private RepositoryJpaLocator repositoryLocator;
+	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
 	
-	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final Pair<JavaType, JavaSymbolName>... callerParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final Pair<JavaType, JavaSymbolName>... callerParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata ID required");
 		Assert.isTrue(StringUtils.hasText(methodIdentifier), "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
@@ -47,7 +50,11 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		// Look for a repository layer method with this ID and parameter types
 		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(callerParameters);
 		final List<JavaType> parameterTypes = parameterList.getKeys();
-		final RepositoryLayerMethod method = RepositoryLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity);
+		final List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(targetEntity);
+		if (idFields.isEmpty()) {
+			return null;
+		}
+		final RepositoryJpaLayerMethod method = RepositoryJpaLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idFields.get(0).getFieldType());
 		if (method == null) {
 			return null;
 		}
@@ -75,7 +82,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	 * @param parameterNames the parameter names used by the caller
 	 * @return a non-<code>null</code> set of additions
 	 */
-	private MemberTypeAdditions getMethodAdditions(final String callerMID, final RepositoryLayerMethod method, final JavaType repositoryType, final List<JavaSymbolName> parameterNames) {
+	private MemberTypeAdditions getMethodAdditions(final String callerMID, final RepositoryJpaLayerMethod method, final JavaType repositoryType, final List<JavaSymbolName> parameterNames) {
 		// Create a builder to hold the repository field to be copied into the caller
 		final ClassOrInterfaceTypeDetailsBuilder classBuilder = new ClassOrInterfaceTypeDetailsBuilder(callerMID);
 		final AnnotationMetadataBuilder autowiredAnnotation = new AnnotationMetadataBuilder(AUTOWIRED);
@@ -95,5 +102,9 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
 	void setRepositoryLocator(final RepositoryJpaLocator repositoryLocator) {
 		this.repositoryLocator = repositoryLocator;
+	}
+	
+	void setPersistenceIdentifierLocator(final PersistenceIdentifierLocator persistenceIdentifierLocator) {
+		this.persistenceIdentifierLocator = persistenceIdentifierLocator;
 	}
 }

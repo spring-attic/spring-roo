@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
@@ -25,6 +27,7 @@ import org.springframework.roo.support.util.Pair;
  * Unit test of {@link RepositoryJpaLayerProvider}
  *
  * @author Andrew Swan
+ * @author Stefan Schmidt
  * @since 1.2
  */
 public class RepositoryJpaLayerProviderTest {
@@ -35,31 +38,38 @@ public class RepositoryJpaLayerProviderTest {
 	// Fixture
 	private RepositoryJpaLayerProvider layerProvider;
 	@Mock private JavaType mockTargetEntity;
+	@Mock private JavaType mockIdType;
 	@Mock private RepositoryJpaLocator mockRepositoryLocator;
+	@Mock private PersistenceIdentifierLocator persistenceIdentifierLocator;
 	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		this.layerProvider = new RepositoryJpaLayerProvider();
 		this.layerProvider.setRepositoryLocator(mockRepositoryLocator);
+		this.layerProvider.setPersistenceIdentifierLocator(persistenceIdentifierLocator);
 	}
 	
 	/**
-	 * Sets up the mock {@link RepositoryJpaLocator} to return a mock repository
+	 * Sets up the mock {@link RepositoryJpaLocator} and {@link PersistenceIdentifierLocator} to return a mock repository
 	 * for our test entity.
 	 */
 	private void setUpMockRepository() {
 		final ClassOrInterfaceTypeDetails mockRepositoryDetails = mock(ClassOrInterfaceTypeDetails.class);
+		final FieldMetadata mockFieldMetadata = mock(FieldMetadata.class);
 		final JavaType mockRepositoryType = mock(JavaType.class);
 		when(mockRepositoryType.getSimpleTypeName()).thenReturn("ClinicRepo");
+		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 		when(mockRepositoryDetails.getName()).thenReturn(mockRepositoryType);
+		when(mockFieldMetadata.getFieldType()).thenReturn(mockIdType);
 		when(mockRepositoryLocator.getRepositories(mockTargetEntity)).thenReturn(Arrays.asList(mockRepositoryDetails));
+		when(persistenceIdentifierLocator.getIdentifierFields(mockTargetEntity)).thenReturn(Arrays.asList(mockFieldMetadata));
 	}
 	
 	@Test
 	public void testGetAdditionsForNonRepositoryLayerMethod() {
 		// Invoke
-		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity);
+		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
 		
 		// Check
 		assertNull(additions);
@@ -68,7 +78,7 @@ public class RepositoryJpaLayerProviderTest {
 	@Test
 	public void testGetAdditionsWhenNoRepositoriesExist() {
 		// Invoke
-		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity);
+		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
 		assertNull(additions);
@@ -87,7 +97,7 @@ public class RepositoryJpaLayerProviderTest {
 		setUpMockRepository();
 		
 		// Invoke
-		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, methodKey.name(), mockTargetEntity, callerParameters);
+		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, methodKey.name(), mockTargetEntity, mockIdType, callerParameters);
 		
 		// Check
 		assertEquals(expectedMethodCall, additions.getMethodCall());

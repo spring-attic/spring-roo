@@ -56,7 +56,7 @@ public enum RepositoryJpaLayerMethod {
 		}
 
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
 		}
 	},
@@ -72,7 +72,7 @@ public enum RepositoryJpaLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	},
@@ -80,8 +80,8 @@ public enum RepositoryJpaLayerMethod {
 	FIND ("find", FIND_METHOD) {
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
-			return Arrays.asList(targetEntity);
+		protected List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
+			return Arrays.asList(idType);
 		}
 
 		@Override
@@ -98,7 +98,7 @@ public enum RepositoryJpaLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
 		}
 	},
@@ -119,7 +119,7 @@ public enum RepositoryJpaLayerMethod {
 		}
 
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
 		}
 	},
@@ -132,7 +132,7 @@ public enum RepositoryJpaLayerMethod {
 		}
 
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			// Even though Spring Data JPA's flush() method doesn't take a
 			// parameter, the caller provides one, so we list it here.
 			return Arrays.asList(targetEntity);
@@ -150,7 +150,7 @@ public enum RepositoryJpaLayerMethod {
 		}
 		
 		@Override
-		protected List<JavaType> getParameterTypes(final JavaType targetEntity) {
+		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	};
@@ -162,14 +162,16 @@ public enum RepositoryJpaLayerMethod {
 	 * @param methodId the ID to match upon
 	 * @param parameterTypes the parameter types to match upon
 	 * @param targetEntity the entity type being managed by the repository
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return <code>null</code> if no such method exists
 	 */
-	public static RepositoryJpaLayerMethod valueOf(final String methodId, final List<JavaType> parameterTypes, final JavaType targetEntity) {
+	public static RepositoryJpaLayerMethod valueOf(final String methodId, final List<JavaType> parameterTypes, final JavaType targetEntity, final JavaType idType) {
 		for (final RepositoryJpaLayerMethod method : values()) {
-			if (method.ids.contains(methodId) && method.getParameterTypes(targetEntity).equals(parameterTypes)) {
+			if (method.ids.contains(methodId) && method.getParameterTypes(targetEntity, idType).equals(parameterTypes)) {
 				return method;
 			}
 		}
+		System.out.println("no repo method for " + methodId);
 		return null;
 	}
 	
@@ -215,7 +217,8 @@ public enum RepositoryJpaLayerMethod {
 	 * Instances must return the types of parameters they take
 	 * 
 	 * @param targetEntity the type of entity being managed (required)
+	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list
 	 */
-	protected abstract List<JavaType> getParameterTypes(JavaType targetEntity);
+	protected abstract List<JavaType> getParameterTypes(JavaType targetEntity, JavaType idType);
 }
