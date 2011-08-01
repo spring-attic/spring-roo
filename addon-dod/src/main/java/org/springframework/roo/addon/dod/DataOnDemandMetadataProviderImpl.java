@@ -41,9 +41,11 @@ import org.springframework.roo.shell.NaturalOrderComparator;
 @Component(immediate = true)
 @Service
 public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DataOnDemandMetadataProvider {
+	
+	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	private Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
-	private Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
+	private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
+	private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -234,6 +236,16 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		return embeddedHolders;
 	}
 
+	/**
+	 * Returns the data-on-demand metadata for the entity that's the target of
+	 * the given reference field. Registers a metadata dependency on that entity
+	 * type if appropriate.
+	 * 
+	 * @param metadataIdentificationString
+	 * @param field
+	 * @return <code>null</code> if it's not an n:1 or 1:1 field, or the DoD
+	 * metadata is simply not available
+	 */
 	private DataOnDemandMetadata locateCollaboratingMetadata(String metadataIdentificationString, FieldMetadata field) {
 		// Check field type to ensure it is a persistent type and is not abstract
 		MemberDetails memberDetails = getMemberDetails(field.getFieldType());
@@ -254,14 +266,13 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Look up the metadata we are relying on
 		String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
 		if (otherProvider.equals(metadataIdentificationString)) {
-			return null;
+			return null;	// ignore self-references
 		}
 		
-		DataOnDemandMetadata collaboratingMetadata = (DataOnDemandMetadata) metadataService.get(otherProvider);
-		if (collaboratingMetadata != null) {
-			metadataDependencyRegistry.registerDependency(collaboratingMetadata.getId(), metadataIdentificationString);
-		}
-		return collaboratingMetadata;
+		// The field points to a single instance of another domain entity - register for changes to it
+		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+		
+		return (DataOnDemandMetadata) metadataService.get(otherProvider);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
