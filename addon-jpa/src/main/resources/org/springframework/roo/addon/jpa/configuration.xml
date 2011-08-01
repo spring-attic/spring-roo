@@ -173,39 +173,14 @@
                 </plugin>
             </plugins>
         </database>
-        <database id="VMFORCE">
-            <repositories>
-                <repository>
-                    <id>com.force.maven.release</id>
-                    <name>Force.com Maven Repo</name>
-                    <url>http://repo.t.salesforce.com/archiva/repository/releases</url>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
+        <database id="DATABASE.COM">
             <dependencies>
                 <dependency>
                     <groupId>com.force.sdk</groupId>
                     <artifactId>force-jpa</artifactId>
-                    <version>20.0.0</version>
+                    <version>22.0.4-BETA</version>
                 </dependency>
             </dependencies>
-            <filters>
-                <filter>${basedir}/src/main/resources/config.properties</filter>
-            </filters>
-            <resources>
-                <resource>
-                    <directory>src/main/resources</directory>
-                    <filtering>true</filtering>
-                    <includes>
-                        <include>**/persistence.xml</include>
-                    </includes>
-                </resource>
-                <resource>
-                    <directory>src/main/resources</directory>
-                </resource>
-            </resources>
         </database>
     </databases>
     <ormProviders>

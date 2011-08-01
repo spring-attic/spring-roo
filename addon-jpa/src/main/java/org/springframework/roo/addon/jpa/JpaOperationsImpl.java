@@ -101,7 +101,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateApplicationContext(ormProvider, jdbcDatabase, jndi, transactionManager, persistenceUnit);
 		updatePersistenceXml(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, persistenceUnit);
 		manageGaeXml(ormProvider, jdbcDatabase, applicationId);
-		updateVMforceConfigProperties(ormProvider, jdbcDatabase, userName, password);
+		updateDbdcConfigProperties(ormProvider, jdbcDatabase, hostName, userName, password, StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME);
 
 		if (!StringUtils.hasText(jndi)) {
 			updateDatabaseProperties(ormProvider, jdbcDatabase, hostName, databaseName, userName, password);
@@ -299,7 +299,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			persistenceUnitElement.removeAttribute("transaction-type");
 			provider.setTextContent(ormProvider.getAlternateAdapter());
 			break;
-		case VMFORCE:
+		case DATABASE_DOT_COM:
 			persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
 			persistenceUnitElement.removeAttribute("transaction-type");
 			provider.setTextContent(ormProvider.getAlternateAdapter());
@@ -351,12 +351,10 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
 				break;
-			case VMFORCE:
-				userName = "${sfdc.userName}";
-				password = "${sfdc.password}";
+			case DATABASE_DOT_COM:
+				properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "force", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.Optimistic", "false", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.datastoreTransactionDelayOperations", "true", persistence));
-				properties.appendChild(createPropertyElement("sfdcConnectionName", "DefaultSFDCConnection", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
 				break;
 			default:
@@ -370,9 +368,13 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "rdbms", persistence));
 			}
 
-			properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", connectionString, persistence));
-			properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", userName, persistence));
-			properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
+			if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) { 
+				// These are specified in the connection properties file
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", connectionString, persistence));
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", userName, persistence));
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
+			}
+			
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateTables", "true", persistence));
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateColumns", "false", persistence));
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateConstraints", "false", persistence));
@@ -531,38 +533,38 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateVMforceConfigProperties(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String userName, String password) {
-		String configPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "config.properties");
+	private void updateDbdcConfigProperties(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String userName, String password, String persistenceUnit) {
+		String configPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, persistenceUnit + ".properties");
 		boolean configExists = fileManager.exists(configPath);
 
-		if (jdbcDatabase != JdbcDatabase.VMFORCE) {
+		if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) {
 			if (configExists) {
 				fileManager.delete(configPath);
 			}
 			return;
 		}
 
+		String connectionString = getConnectionString(jdbcDatabase, hostName, null /*databaseName*/).replace("USER_NAME", StringUtils.defaultIfEmpty(userName, "${userName}")).replace("PASSWORD", StringUtils.defaultIfEmpty(password, "${password}"));
+		
 		Properties props = new Properties();
 		try {
 			if (configExists) {
 				props.load(fileManager.getInputStream(configPath));
 			} else {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "config-template.properties");
-				Assert.notNull(templateInputStream, "Could not acquire config properties template");
+				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-dot-com-template.properties");
+				Assert.notNull(templateInputStream, "Could not acquire Database.com properties template");
 				props.load(templateInputStream);
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 
-		boolean hasChanged = !props.get("sfdc.userName").equals(StringUtils.trimToEmpty(userName));
-		hasChanged |= !props.get("sfdc.password").equals(StringUtils.trimToEmpty(password));
+		boolean hasChanged = !props.get("url").equals(StringUtils.trimToEmpty(connectionString));
 		if (!hasChanged) {
 			return;
 		}
 
-		props.put("sfdc.userName", StringUtils.trimToEmpty(userName));
-		props.put("sfdc.password", StringUtils.trimToEmpty(password));
+		props.put("url", StringUtils.trimToEmpty(connectionString));
 
 		OutputStream outputStream = null;
 		try {
@@ -580,7 +582,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 
-		logger.warning("Please update your database details in src/main/resources/config.properties.");
+		logger.warning("Please update your database details in src/main/resources/" + persistenceUnit + ".properties.");
 	}
 
 	private void updateLog4j(OrmProvider ormProvider) {

@@ -23,7 +23,7 @@ public enum JdbcDatabase {
 	DERBY("DERBY", "org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:TO_BE_CHANGED_BY_ADDON;create=true"),
 	FIREBIRD("FIREBIRD", "org.firebirdsql.jdbc.FBDriver", "jdbc:firebirdsql://HOST_NAME:3050/"),
 	GOOGLE_APP_ENGINE("GAE", "", "appengine"),
-	VMFORCE("VMFORCE", "", "sfdc:${sfdc.endPoint}/services/Soap/u/${sfdc.apiVersion}");
+	DATABASE_DOT_COM("DATABASE.COM", "", "force://HOST_NAME;user=USER_NAME;password=PASSWORD");
 
 	private String key;
 	private String connectionString;
