@@ -25,10 +25,11 @@ public interface LayerProvider {
 	 * @param callerMID the caller's metadata ID
 	 * @param methodIdentifier specifies the method which is being requested
 	 * @param targetEntity specifies the target entity
+	 * @param idType specifies the ID type used by the target entity
 	 * @param methodParameters parameters which are passed in to the method
 	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, null otherwise
 	 */
-	MemberTypeAdditions getMemberTypeAdditions(String callerMID, String methodIdentifier, JavaType targetEntity, Pair<JavaType, JavaSymbolName>... methodParameters);
+	MemberTypeAdditions getMemberTypeAdditions(String callerMID, String methodIdentifier, JavaType targetEntity, JavaType idType, Pair<JavaType, JavaSymbolName>... methodParameters);
 	
 	/**
 	 * Returns the position of this layer relative to others. 

@@ -32,7 +32,7 @@ public class LayerServiceImpl implements LayerService {
 
 	private final Set<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
 	
-	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final int layerPosition,	final Pair<JavaType, JavaSymbolName>... methodParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition,	final Pair<JavaType, JavaSymbolName>... methodParameters) {
 		Assert.hasText(metadataId, "metadataId is required");
 		Assert.hasText(methodIdentifier, "methodIdentifier is required");
 		Assert.notNull(targetEntity, "targetEntity is required");
@@ -40,7 +40,7 @@ public class LayerServiceImpl implements LayerService {
 			if (provider.getLayerPosition() >= layerPosition) {
 				continue;
 			}
-			MemberTypeAdditions additions = provider.getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, methodParameters);
+			MemberTypeAdditions additions = provider.getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, idType, methodParameters);
 			if (additions != null) {
 				return additions;
 			}
