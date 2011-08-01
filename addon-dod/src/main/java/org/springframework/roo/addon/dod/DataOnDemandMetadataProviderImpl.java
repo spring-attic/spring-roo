@@ -25,6 +25,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -55,6 +56,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
+	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
 	
 	private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
@@ -130,6 +132,12 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getEntity());
 		
 		JavaType entity = annotationValues.getEntity();
+		
+		List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(entity);
+		if (idFields.isEmpty()) {
+			return null;
+		}
+		
 		MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
@@ -144,14 +152,15 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		// Get the additions to make for each required method
+		JavaType idType = idFields.get(0).getFieldType();
 		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
-		MethodMetadata findMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
-		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, LayerType.HIGHEST.getPosition(), entityParameter);
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
+		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, LayerType.HIGHEST.getPosition(), entityParameter);
+		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		
-		if (findEntriesMethod == null || findMethod == null || flushMethod == null || identifierAccessor == null || persistMethodAdditions == null) {
+		if (findEntriesMethod == null || findMethodAdditions == null || flushMethod == null || identifierAccessor == null || persistMethodAdditions == null) {
 			return null;
 		}
 		
@@ -164,7 +173,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Get the list of embedded metadata holders - may be an empty list if no embedded identifier exists
 		List<EmbeddedHolder> embeddedHolders = getEmbeddedHolders(memberDetails, metadataIdentificationString);
 
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethodAdditions, flushMethod, locatedMutators, entity, embeddedIdentifierHolder, embeddedHolders);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethodAdditions, findEntriesMethod, persistMethodAdditions, flushMethod, locatedMutators, entity, idType, embeddedIdentifierHolder, embeddedHolders);
 	}
 
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
