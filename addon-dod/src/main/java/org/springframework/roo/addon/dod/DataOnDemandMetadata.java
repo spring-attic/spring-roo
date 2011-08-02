@@ -1043,8 +1043,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(new JavaType("java.lang.Character", 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ 'Y', 'N' }");
 		} else if (fieldType.equals(BIG_DECIMAL)) {
+			imports.addImport(new JavaType("java.math.BigDecimal"));
 			initializer = BIG_DECIMAL.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(BIG_INTEGER)) {
+			imports.addImport(new JavaType("java.math.BigInteger"));
 			initializer = BIG_INTEGER.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(JavaType.BYTE_OBJECT)) {
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ")";
