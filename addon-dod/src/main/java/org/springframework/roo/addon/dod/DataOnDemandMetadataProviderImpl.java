@@ -308,7 +308,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Look up the metadata we are relying on
 		String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
 		if (otherProvider.equals(metadataIdentificationString)) {
-			return null;	// ignore self-references
+			return null; // Ignore self-references
 		}
 		
 		// The field points to a single instance of another domain entity - register for changes to it
