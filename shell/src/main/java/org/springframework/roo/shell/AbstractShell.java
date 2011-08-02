@@ -44,8 +44,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	
 	// Instance fields
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
-    protected boolean inBlockComment;
-    protected ExitShellRequest exitShellRequest;
+    protected boolean inBlockComment = false;
+    protected ExitShellRequest exitShellRequest = null;
 	
     // Abstract methods
 	protected abstract Set<URL> findUrls(String resourceName);
