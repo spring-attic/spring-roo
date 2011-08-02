@@ -40,7 +40,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -85,7 +85,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private LayerService layerService;
-	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
@@ -182,7 +182,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details service required");
 		
-		List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(javaType);
+		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(javaType);
 		if (idFields.isEmpty()) {
 			return null;
 		}
@@ -217,7 +217,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		if (identifierAccessor != null) {
 			registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
 			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
-					findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), persistenceIdentifierLocator.getEmbeddedIdentifierFields(javaType));
+					findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
 		}
 			
 		return javaTypePersistenceMetadataDetails;

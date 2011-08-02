@@ -12,13 +12,14 @@ import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 
 /**
- * This implementation of {@link PersistenceIdentifierLocator} scans for the presence of 
+ * This implementation of {@link PersistenceMemberLocator} scans for the presence of 
  * persistence ID tags for {@link MemberDetails} for a given domain type.
  * 
  * @author Stefan Schmidt
@@ -27,7 +28,7 @@ import org.springframework.roo.model.JavaType;
  */
 @Component(immediate=true)
 @Service
-public class PersistenceIdentifierLocatorImpl implements PersistenceIdentifierLocator {
+public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
@@ -74,5 +75,47 @@ public class PersistenceIdentifierLocatorImpl implements PersistenceIdentifierLo
 			return null;
 		}
 		return memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
+	}
+
+	public MethodMetadata getIdentifierAccessor(final JavaType domainType) {
+		if (domainType == null) {
+			return null;
+		}
+		return getIdentifierAccessor((PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(domainType)));
+	}
+
+	public MethodMetadata getIdentifierAccessor(final PhysicalTypeMetadata physicalTypeMetadata) {
+		if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
+			return null;
+		}
+		final ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (coitd == null) {
+			return null;
+		}
+		return getIdentifierAccessor(memberDetailsScanner.getMemberDetails(getClass().getName(), coitd));
+	}
+
+	public MethodMetadata getIdentifierAccessor(final MemberDetails domainType) {
+		return MemberFindingUtils.getMostConcreteMethodWithTag(domainType, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+	}
+
+	public MethodMetadata getVersionAccessor(final MemberDetails domainType) {
+		return MemberFindingUtils.getMostConcreteMethodWithTag(domainType, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
+	}
+
+	public List<FieldMetadata> getVersionFields(final MemberDetails domainType) {
+		return MemberFindingUtils.getFieldsWithTag(domainType, PersistenceCustomDataKeys.VERSION_FIELD);
+	}
+
+	public FieldMetadata getVersionField(final MemberDetails domainType) {
+		final List<FieldMetadata> versionFields = getVersionFields(domainType);
+		switch (versionFields.size()) {
+			case 0:
+				return null;
+			case 1:
+				return versionFields.get(0);
+			default:
+				throw new IllegalStateException("Expected at most one version field, but found:\n" + versionFields);
+		}
 	}
 }

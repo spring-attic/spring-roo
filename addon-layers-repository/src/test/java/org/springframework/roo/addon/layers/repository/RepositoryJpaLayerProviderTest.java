@@ -16,7 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.MemberTypeAdditions;
@@ -40,14 +40,14 @@ public class RepositoryJpaLayerProviderTest {
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
 	@Mock private RepositoryJpaLocator mockRepositoryLocator;
-	@Mock private PersistenceIdentifierLocator persistenceIdentifierLocator;
+	@Mock private PersistenceMemberLocator persistenceMemberLocator;
 	
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		this.layerProvider = new RepositoryJpaLayerProvider();
 		this.layerProvider.setRepositoryLocator(mockRepositoryLocator);
-		this.layerProvider.setPersistenceIdentifierLocator(persistenceIdentifierLocator);
+		this.layerProvider.setPersistenceMemberLocator(persistenceMemberLocator);
 	}
 	
 	/**
@@ -63,7 +63,7 @@ public class RepositoryJpaLayerProviderTest {
 		when(mockRepositoryDetails.getName()).thenReturn(mockRepositoryType);
 		when(mockFieldMetadata.getFieldType()).thenReturn(mockIdType);
 		when(mockRepositoryLocator.getRepositories(mockTargetEntity)).thenReturn(Arrays.asList(mockRepositoryDetails));
-		when(persistenceIdentifierLocator.getIdentifierFields(mockTargetEntity)).thenReturn(Arrays.asList(mockFieldMetadata));
+		when(persistenceMemberLocator.getIdentifierFields(mockTargetEntity)).thenReturn(Arrays.asList(mockFieldMetadata));
 	}
 	
 	@Test

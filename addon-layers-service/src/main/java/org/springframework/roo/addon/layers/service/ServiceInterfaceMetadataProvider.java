@@ -16,7 +16,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -34,7 +34,7 @@ import org.springframework.roo.project.layers.LayerTypeMatcher;
 public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
 	
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	private static final JavaType ROO_SERVICE = new JavaType(RooService.class.getName());
 	
@@ -65,7 +65,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 		Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
 		Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
 		for (JavaType type : domainTypes) {
-			List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(type);
+			List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(type);
 			if (idFields.isEmpty()) {
 				continue;
 			}

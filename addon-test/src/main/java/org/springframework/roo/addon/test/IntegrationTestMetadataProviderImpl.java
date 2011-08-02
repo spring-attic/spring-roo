@@ -25,7 +25,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
@@ -53,7 +53,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private LayerService layerService;
-	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	private Set<String> producedMids = new LinkedHashSet<String>();
 	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 	private Boolean wasGaeEnabled = null;
@@ -149,7 +149,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 			return null;
 		}
 		
-		List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(entity);
+		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return null;
 		}

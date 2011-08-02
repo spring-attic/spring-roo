@@ -19,7 +19,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -49,7 +49,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 	
 	// Fields
 	@Reference private LayerService layerService;
-	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -129,7 +129,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions = new LinkedHashMap<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>>();
 		for (final JavaType domainType : domainTypes) {
 			
-			List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(domainType);
+			List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(domainType);
 			if (idFields.isEmpty()) {
 				continue;
 			}

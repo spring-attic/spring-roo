@@ -25,7 +25,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -56,7 +56,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
-	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
@@ -133,7 +133,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		
 		JavaType entity = annotationValues.getEntity();
 		
-		List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(entity);
+		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return null;
 		}

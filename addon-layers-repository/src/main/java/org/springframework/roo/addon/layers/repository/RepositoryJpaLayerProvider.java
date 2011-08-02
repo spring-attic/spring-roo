@@ -12,7 +12,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.persistence.PersistenceIdentifierLocator;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.layers.CoreLayerProvider;
@@ -40,7 +40,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
 	// Fields
 	@Reference private RepositoryJpaLocator repositoryLocator;
-	@Reference private PersistenceIdentifierLocator persistenceIdentifierLocator;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final Pair<JavaType, JavaSymbolName>... callerParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata ID required");
@@ -50,7 +50,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		// Look for a repository layer method with this ID and parameter types
 		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(callerParameters);
 		final List<JavaType> parameterTypes = parameterList.getKeys();
-		final List<FieldMetadata> idFields = persistenceIdentifierLocator.getIdentifierFields(targetEntity);
+		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(targetEntity);
 		if (idFields.isEmpty()) {
 			return null;
 		}
@@ -104,7 +104,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 		this.repositoryLocator = repositoryLocator;
 	}
 	
-	void setPersistenceIdentifierLocator(final PersistenceIdentifierLocator persistenceIdentifierLocator) {
-		this.persistenceIdentifierLocator = persistenceIdentifierLocator;
+	void setPersistenceMemberLocator(final PersistenceMemberLocator persistenceMemberLocator) {
+		this.persistenceMemberLocator = persistenceMemberLocator;
 	}
 }
