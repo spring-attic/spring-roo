@@ -264,7 +264,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	
 	public boolean isApplicationType(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
-		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null;
+		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType)) != null;
 	}
 	
 	public Map<JavaSymbolName, DateTimeFormatDetails> getDatePatterns(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {

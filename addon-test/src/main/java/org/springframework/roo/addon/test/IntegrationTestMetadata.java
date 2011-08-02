@@ -245,8 +245,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 			methodBuilder.setAnnotations(annotations);
 			method = methodBuilder.build();
+			findMethod.copyAdditionsTo(builder);
 		}
-		findMethod.copyAdditionsTo(builder);
 		return method;
 	}
 

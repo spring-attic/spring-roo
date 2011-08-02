@@ -171,7 +171,6 @@ public enum RepositoryJpaLayerMethod {
 				return method;
 			}
 		}
-		System.out.println("no repo method for " + methodId);
 		return null;
 	}
 	
