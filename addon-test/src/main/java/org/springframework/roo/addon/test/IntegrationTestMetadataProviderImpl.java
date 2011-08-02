@@ -166,11 +166,12 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
 		MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
-		MethodMetadata flushMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FLUSH_METHOD);
-		MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.MERGE_METHOD.name(), entity, idType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
-		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
-		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj")));
-		if (persistMethodAdditions == null || flushMethod == null || findMethodAdditions == null || identifierAccessorMethod == null) {
+		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
+		MemberTypeAdditions flushMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FLUSH_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.MERGE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		if (persistMethodAdditions == null || flushMethodAdditions == null || findMethodAdditions == null || identifierAccessorMethod == null) {
 			return null;
 		}
 	
@@ -199,7 +200,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		// maintain a list of entities that are being tested
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
-		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethod, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
+		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethodAdditions, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
 	}
 	
 	private ClassOrInterfaceTypeDetails getEntitySuperclass(JavaType entity) {
