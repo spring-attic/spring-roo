@@ -94,7 +94,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		
 		SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
 		JavaTypeMetadataDetails javaTypeMetadataDetails = getJavaTypeMetadataDetails(javaType, memberDetails, metadataIdentificationString);
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = javaTypeMetadataDetails.getPersistenceDetails();
+
+		MethodMetadata idMethod = persistenceMemberLocator.getIdentifierAccessor(memberDetails);
+		MethodMetadata versionMethod = persistenceMemberLocator.getVersionAccessor(memberDetails);
 		specialTypes.put(javaType, javaTypeMetadataDetails);
 		
 		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
@@ -103,7 +105,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			// Not interested in persistence identifiers and version fields
-			if (isPersistenceIdentifierOrVersionMethod(method, javaTypePersistenceMetadataDetails)) {
+			if (isPersistenceIdentifierOrVersionMethod(method, idMethod, versionMethod)) {
 				continue;
 			}
 			// Not interested in fields that are JPA transient fields or immutable fields
@@ -154,14 +156,14 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(memberDetails, "Member details required");
 		
 		Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString);
+		
 		List<MethodMetadata> methods = MemberFindingUtils.getMethods(memberDetails);
 		for (MethodMetadata method : methods) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			if (isPersistenceIdentifierOrVersionMethod(method, javaTypePersistenceMetadataDetails)) {
+			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(memberDetails), persistenceMemberLocator.getVersionAccessor(memberDetails))) {
 				continue;
 			}
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
@@ -181,6 +183,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details service required");
+		Assert.hasText(metadataIdentificationString, "Metadata id required");
 		
 		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(javaType);
 		if (idFields.isEmpty()) {
@@ -279,7 +282,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator and accessor and in identifiers and version fields
-			if (isPersistenceIdentifierOrVersionMethod(method, javaTypePersistenceMetadataDetails)) {
+			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(memberDetails), persistenceMemberLocator.getVersionAccessor(memberDetails))) {
 				continue;
 			}
 			JavaType type = method.getReturnType();
@@ -353,12 +356,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		return Collections.unmodifiableSortedSet(finderMetadataDetails);
 	}
 	
-	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails) {
+	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, MethodMetadata idMethod, MethodMetadata versionMethod) {
 		Assert.notNull(method, "Method metadata required");
 		
-		return javaTypePersistenceMetadataDetails != null
-					&& (method.getMethodName().equals(javaTypePersistenceMetadataDetails.getIdentifierAccessorMethod().getMethodName()) 
-					|| (javaTypePersistenceMetadataDetails.getVersionAccessorMethod() != null && method.getMethodName().equals(javaTypePersistenceMetadataDetails.getVersionAccessorMethod().getMethodName())));
+		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName()))
+					|| (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
 	}
 	
 	public JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
@@ -415,8 +417,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(domainType, getMemberDetails(domainType), metadataIdentificationString);
-		
 		Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
+		if (javaTypePersistenceMetadataDetails == null) {
+			return additions;
+		}
 		additions.put(COUNT_ALL_METHOD, javaTypePersistenceMetadataDetails.getCountMethod());
 		additions.put(DELETE_METHOD, javaTypePersistenceMetadataDetails.getRemoveMethod());
 		additions.put(FIND_METHOD, javaTypePersistenceMetadataDetails.getFindMethod());
