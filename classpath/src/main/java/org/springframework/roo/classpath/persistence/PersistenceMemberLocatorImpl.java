@@ -32,11 +32,10 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
-
-	public List<FieldMetadata> getIdentifierFields(JavaType domainType) {
-		MemberDetails memberDetails = getMemberDetails(domainType);
+	
+	public List<FieldMetadata> getIdentifierFields(MemberDetails memberDetails) {
 		if (memberDetails == null) {
-			return new ArrayList<FieldMetadata>();
+			return null;
 		}
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
 		if (idFields.isEmpty()) {
@@ -44,9 +43,16 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 		}
 		return idFields;
 	}
-	
-	public List<FieldMetadata> getEmbeddedIdentifierFields(JavaType domainType) {
+
+	public List<FieldMetadata> getIdentifierFields(JavaType domainType) {
 		MemberDetails memberDetails = getMemberDetails(domainType);
+		if (memberDetails == null) {
+			return new ArrayList<FieldMetadata>();
+		}
+		return getIdentifierFields(memberDetails);
+	}
+	
+	public List<FieldMetadata> getEmbeddedIdentifierFields(MemberDetails memberDetails) {
 		List<FieldMetadata> compositePkFields = new ArrayList<FieldMetadata>();
 		if (memberDetails == null) {
 			return compositePkFields;
@@ -63,6 +69,14 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 			}
 		}
 		return compositePkFields;
+	}
+	
+	public List<FieldMetadata> getEmbeddedIdentifierFields(JavaType domainType) {
+		MemberDetails memberDetails = getMemberDetails(domainType);
+		if (memberDetails == null) {
+			return new ArrayList<FieldMetadata>();
+		}
+		return getEmbeddedIdentifierFields(memberDetails);
 	}
 	
 	private MemberDetails getMemberDetails(JavaType javaType) {
@@ -103,6 +117,14 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 		return MemberFindingUtils.getMostConcreteMethodWithTag(domainType, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
 	}
 
+	public MethodMetadata getVersionAccessor(JavaType domainType) {
+		MemberDetails memberDetails = getMemberDetails(domainType);
+		if (memberDetails == null) {
+			return null;
+		}
+		return getVersionAccessor(memberDetails);
+	}
+
 	public List<FieldMetadata> getVersionFields(final MemberDetails domainType) {
 		return MemberFindingUtils.getFieldsWithTag(domainType, PersistenceCustomDataKeys.VERSION_FIELD);
 	}
@@ -118,4 +140,5 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 				throw new IllegalStateException("Expected at most one version field, but found:\n" + versionFields);
 		}
 	}
+
 }

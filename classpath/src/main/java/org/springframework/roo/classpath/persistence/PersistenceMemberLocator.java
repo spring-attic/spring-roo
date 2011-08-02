@@ -56,12 +56,32 @@ public interface PersistenceMemberLocator {
 	List<FieldMetadata> getIdentifierFields(JavaType domainType);
 	
 	/**
+	 * Locates identifier types for a given domain type. Less expensive
+	 * than calling the other {@link #getIdentifierFields} methods if you already
+	 * have the {@link MemberDetails}.
+	 * 
+	 * @param memberDetails The domain type details (needs to be part of the project)
+	 * @return a list of identifier fields (not null, may be empty)
+	 */
+	List<FieldMetadata> getIdentifierFields(MemberDetails memberDetails);
+	
+	/**
 	 * Locates embedded identifier types for a given domain type.
 	 * 
 	 * @param domainType The domain type (needs to be part of the project)
 	 * @return a list of identifier fields (not null, may be empty)
 	 */
 	List<FieldMetadata> getEmbeddedIdentifierFields(JavaType domainType);
+	
+	/**
+	 * Locates embedded identifier types for a given domain type. Less expensive
+	 * than calling the other {@link #getEmbeddedIdentifierFields} methods if you already
+	 * have the {@link MemberDetails}.
+	 * 
+	 * @param memberDetails The domain type details (needs to be part of the project)
+	 * @return a list of identifier fields (not null, may be empty)
+	 */
+	List<FieldMetadata> getEmbeddedIdentifierFields(MemberDetails memberDetails);
 
 	/**
 	 * Returns the version accessor for the given domain type. Less expensive
@@ -73,6 +93,15 @@ public interface PersistenceMemberLocator {
 	 * not have a version accessor
 	 */
 	MethodMetadata getVersionAccessor(MemberDetails domainType);
+	
+	/**
+	 * Returns the version accessor for the given domain type. 
+	 * 
+	 * @param domainType the domain type (can be <code>null</code>)
+	 * @return <code>null</code> if the given type is <code>null</code> or does
+	 * not have a version accessor
+	 */
+	MethodMetadata getVersionAccessor(JavaType domainType);
 	
 	/**
 	 * Returns the version field for the given domain type, if it has one.
