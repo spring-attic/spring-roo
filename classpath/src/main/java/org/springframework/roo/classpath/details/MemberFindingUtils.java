@@ -397,12 +397,15 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
 	 * 
-	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for (required)
-	 * @return the most concrete tagged method or null if not found
+	 * @return the most concrete tagged method or <code>null</code> if not found
 	 */
-	public static MethodMetadata getMostConcreteMethodWithTag(MemberDetails memberDetails, Object tagKey) {
-		List<MethodMetadata> taggedMethods = getMethodsWithTag(memberDetails, tagKey);
+	public static MethodMetadata getMostConcreteMethodWithTag(final MemberDetails memberDetails, final Object tagKey) {
+		if (memberDetails == null) {
+			return null;
+		}
+		final List<MethodMetadata> taggedMethods = getMethodsWithTag(memberDetails, tagKey);
 		if (taggedMethods.isEmpty()) {
 			return null;
 		} 
@@ -410,25 +413,26 @@ public abstract class MemberFindingUtils {
 	}
 	
 	/**
-	 * Searches all {@link MemberDetails} and returns all fields which contain a given
-	 * {@link CustomData} tag.
+	 * Returns all fields within the given {@link MemberDetails} that contain
+	 * the given {@link CustomData} tag.
 	 * 
-	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for
-	 * @return zero or more fields (never null)
+	 * @return zero or more fields (never <code>null</code>)
 	 */
-	public static List<FieldMetadata> getFieldsWithTag(MemberDetails memberDetails, Object tagKey) {
-		Assert.notNull(memberDetails, "Member details required");
+	public static List<FieldMetadata> getFieldsWithTag(final MemberDetails memberDetails, final Object tagKey) {
 		Assert.notNull(tagKey, "Custom data key required");
-		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
-		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
-			for (FieldMetadata field: mhtd.getDeclaredFields()) {
-				if (field.getCustomData().keySet().contains(tagKey)) {
-					result.add(field);
+		final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
+		if (memberDetails != null) {
+			for (final MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
+				for (final FieldMetadata field: mhtd.getDeclaredFields()) {
+					if (field.getCustomData().keySet().contains(tagKey)) {
+						fields.add(field);
+					}
 				}
 			}
 		}
-		return result;
+		return fields;
 	}
 	
 	/**

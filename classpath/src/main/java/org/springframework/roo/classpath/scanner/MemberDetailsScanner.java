@@ -57,9 +57,8 @@ public interface MemberDetailsScanner {
 	 * of its comparatively heavier weight and is primarily used to represent user project-specific types (not internal types).
 	 * 
 	 * @param requestingClass the fully-qualified class name requesting the member details (required; may be used for result customization)
-	 * @param cid the class or interface to build member information for (required)
-	 * @return the discovered member details (never null)
+	 * @param cid the class or interface for which to build member information (can be <code>null</code>)
+	 * @return the discovered member details, or <code>null</code> if <code>null</code> {@link ClassOrInterfaceTypeDetails} were given
 	 */
-	public MemberDetails getMemberDetails(String requestingClass, ClassOrInterfaceTypeDetails cid);
-
+	MemberDetails getMemberDetails(String requestingClass, ClassOrInterfaceTypeDetails cid);
 }

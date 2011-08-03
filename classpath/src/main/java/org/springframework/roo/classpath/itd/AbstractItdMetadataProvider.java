@@ -180,6 +180,42 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	protected abstract ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename);
 	
 	/**
+	 * Looks up the given type's inheritance hierarchy for metadata of the given
+	 * type, starting with the given type's parent and going upwards until the
+	 * first such instance is found (i.e. lower level metadata takes priority
+	 * over higher level metadata)
+	 * 
+	 * @param <T> the type of metadata to look for
+	 * @param child the child type whose parents to search (required)
+	 * @return <code>null</code> if there is no such metadata
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends MetadataItem> T getParentMetadata(final ClassOrInterfaceTypeDetails child) {
+		T parentMetadata = null;
+		ClassOrInterfaceTypeDetails superCid = child.getSuperclass();
+		while (parentMetadata == null && superCid != null) {
+			final String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
+			final Path path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
+			final String superCidLocalIdentifier = createLocalIdentifier(superCid.getName(), path);
+			parentMetadata = (T) metadataService.get(superCidLocalIdentifier);
+			superCid = superCid.getSuperclass();
+		}
+		return parentMetadata;	// could be null
+	}
+	
+	/**
+	 * Registers the given {@link JavaType}s as triggering metadata registration.
+	 * 
+	 * @param triggerTypes the type-level annotations to detect that will cause metadata creation
+	 * @since 1.2
+	 */
+	public void addMetadataTriggers(final JavaType... triggerTypes) {
+		for (final JavaType triggerType : triggerTypes) {
+			addMetadataTrigger(triggerType);
+		}
+	}
+	
+	/**
 	 * Registers an additional {@link JavaType} that will trigger metadata registration.
 	 * 
 	 * @param javaType the type-level annotation to detect that will cause metadata creation (required)
@@ -187,6 +223,18 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	public void addMetadataTrigger(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required for metadata trigger registration");
 		this.metadataTriggers.add(javaType);
+	}
+	
+	/**
+	 * Removes the given {@link JavaType}s as triggering metadata registration.
+	 * 
+	 * @param triggerTypes the type-level annotations to remove as triggers
+	 * @since 1.2
+	 */
+	public void removeMetadataTriggers(final JavaType... triggerTypes) {
+		for (final JavaType triggerType : triggerTypes) {
+			removeMetadataTrigger(triggerType);
+		}
 	}
 	
 	/**
