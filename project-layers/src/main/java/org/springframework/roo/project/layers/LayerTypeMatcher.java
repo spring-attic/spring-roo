@@ -23,13 +23,22 @@ import org.springframework.roo.model.JavaType;
  */
 public class LayerTypeMatcher extends TypeMatcher {
 	
-	private JavaType annotationType;
-	private JavaSymbolName annotationAttributeValue;
+	// Fields
+	private final JavaSymbolName annotationAttributeValue;
+	private final JavaType annotationType;
 	
-	public LayerTypeMatcher(CustomDataKey<MemberHoldingTypeDetails> customDataKey, String declaredBy, JavaType annotationType, JavaSymbolName annotationAttributeName) {
+	/**
+	 * Constructor
+	 *
+	 * @param customDataKey
+	 * @param declaredBy the declaring class (required)
+	 * @param annotationType
+	 * @param annotationAttributeName
+	 */
+	public LayerTypeMatcher(CustomDataKey<MemberHoldingTypeDetails> customDataKey, Class<?> declaredBy, JavaType annotationType, JavaSymbolName annotationAttributeName) {
 		super(customDataKey, declaredBy);
-		this.annotationType = annotationType;
 		this.annotationAttributeValue = annotationAttributeName;
+		this.annotationType = annotationType;
 	}
 	
 	@Override

@@ -18,6 +18,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -25,6 +26,7 @@ import org.springframework.roo.project.layers.LayerCustomDataKeys;
 import org.springframework.roo.project.layers.LayerTypeMatcher;
 
 /**
+ * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
  * 
  * @author Stefan Schmidt
  * @since 1.2
@@ -32,20 +34,22 @@ import org.springframework.roo.project.layers.LayerTypeMatcher;
 @Component(immediate=true)
 @Service
 public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
+
+	// Constants
+	private static final JavaType ROO_SERVICE = new JavaType(RooService.class.getName());
 	
+	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
-	private static final JavaType ROO_SERVICE = new JavaType(RooService.class.getName());
-	
-	protected void activate(ComponentContext context) {
+	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_SERVICE);
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class.getName(), ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE)));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE)));
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_SERVICE);
 	}

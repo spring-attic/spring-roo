@@ -18,6 +18,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -25,6 +26,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
@@ -45,12 +47,17 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class FinderOperationsImpl implements FinderOperations {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(FinderOperationsImpl.class);
 	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
+
+	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
 	@Reference private FileManager fileManager;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	
@@ -86,14 +93,18 @@ public class FinderOperationsImpl implements FinderOperations {
 		if (cid == null) {
 			throw new IllegalStateException("Could not determine class or interface type details for type " + javaType);
 		}
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
+		final MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
+		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(memberDetails);
+		final List<FieldMetadata> versionFields = persistenceMemberLocator.getVersionFields(memberDetails);
 		
-		// Compute the finders
+		// Compute the finders (excluding the ID, version, and EM fields)
 		Set<JavaSymbolName> exclusions = new HashSet<JavaSymbolName>();
-		exclusions.add(entityMetadata.getIdentifierField().getFieldName());
 		exclusions.add(entityMetadata.getEntityManagerField().getFieldName());
-		if (entityMetadata.getVersionField() != null) {
-			exclusions.add(entityMetadata.getVersionField().getFieldName());
+		for (final FieldMetadata idField : idFields) {
+			exclusions.add(idField.getFieldName());
+		}
+		for (final FieldMetadata versionField : versionFields) {
+			exclusions.add(versionField.getFieldName());
 		}
 
 		SortedSet<String> result = new TreeSet<String>();

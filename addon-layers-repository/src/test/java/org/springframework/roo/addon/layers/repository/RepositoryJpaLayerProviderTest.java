@@ -39,8 +39,8 @@ public class RepositoryJpaLayerProviderTest {
 	private RepositoryJpaLayerProvider layerProvider;
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
-	@Mock private RepositoryJpaLocator mockRepositoryLocator;
 	@Mock private PersistenceMemberLocator persistenceMemberLocator;
+	@Mock private RepositoryJpaLocator mockRepositoryLocator;
 	
 	@Before
 	public void setUp() {
@@ -51,7 +51,7 @@ public class RepositoryJpaLayerProviderTest {
 	}
 	
 	/**
-	 * Sets up the mock {@link RepositoryJpaLocator} and {@link PersistenceIdentifierLocator} to return a mock repository
+	 * Sets up the mock {@link RepositoryJpaLocator} and {@link PersistenceMemberLocator} to return a mock repository
 	 * for our test entity.
 	 */
 	private void setUpMockRepository() {

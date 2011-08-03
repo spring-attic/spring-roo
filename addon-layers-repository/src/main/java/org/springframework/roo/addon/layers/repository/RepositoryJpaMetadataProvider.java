@@ -26,22 +26,26 @@ import org.springframework.roo.project.layers.LayerTypeMatcher;
 @Service
 public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	
+	// Constants
+	private static final JavaType ROO_REPOSITORY_JPA = new JavaType(RooRepositoryJpa.class.getName());
+
+	// Fields
 	@Reference CustomDataKeyDecorator customDataKeyDecorator;
 	
-	private static final JavaType ROO_REPOSITORY_JPA = new JavaType(RooRepositoryJpa.class.getName());
-	
-	protected void activate(ComponentContext context) {
+	@SuppressWarnings("unchecked")
+	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooRepositoryJpa.class.getName()));
-		customDataKeyDecorator.registerMatcher(getClass().getName(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, RepositoryJpaMetadata.class.getName(), ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, RepositoryJpaMetadata.class, ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooRepositoryJpa.class.getName()));
+		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
-	
+
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(governorPhysicalTypeMetadata);

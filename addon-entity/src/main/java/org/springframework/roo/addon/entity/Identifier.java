@@ -5,29 +5,41 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Represents an entity identifier.
+ * Represents an entity identifier. Instances are immutable.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
 public class Identifier {
-	private JavaSymbolName fieldName;
-	private JavaType fieldType;
-	private String columnName;
-	private int columnSize;
-	private int scale;
-	private String columnDefinition;
 	
+	// Fields
+	private final int columnSize;
+	private final int scale;
+	private final JavaSymbolName fieldName;
+	private final JavaType fieldType;
+	private final String columnDefinition;
+	private final String columnName;
+
+	/**
+	 * Constructor
+	 *
+	 * @param fieldName required
+	 * @param fieldType required
+	 * @param columnName required
+	 * @param columnSize
+	 * @param scale
+	 * @param columnDefinition
+	 */
 	public Identifier(JavaSymbolName fieldName, JavaType fieldType, String columnName, int columnSize, int scale, String columnDefinition) {
 		Assert.notNull(fieldName, "Field name required");
 		Assert.notNull(fieldType, "Field type required");
 		Assert.hasText(columnName, "Column name required");
-		this.fieldName = fieldName;
-		this.fieldType = fieldType;
+		this.columnDefinition = columnDefinition;
 		this.columnName = columnName;
 		this.columnSize = columnSize;
+		this.fieldName = fieldName;
+		this.fieldType = fieldType;
 		this.scale = scale;
-		this.columnDefinition = columnDefinition;
 	}
 
 	public JavaSymbolName getFieldName() {

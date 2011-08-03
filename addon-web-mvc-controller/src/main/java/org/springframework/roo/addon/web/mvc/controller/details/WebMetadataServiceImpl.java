@@ -80,12 +80,12 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	
 	// Fields
+	@Reference private LayerService layerService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private TypeLocationService typeLocationService;
 	
 	public SortedMap<JavaType, JavaTypeMetadataDetails> getRelatedApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
