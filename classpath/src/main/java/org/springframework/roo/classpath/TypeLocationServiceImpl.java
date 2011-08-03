@@ -163,7 +163,9 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
-		boolean cacheAllowed = !fileMonitorService.isDirty();
+		// TODO research why file monitor service is marked as not dirty when it actully is dirty
+//		boolean cacheAllowed = !fileMonitorService.isDirty();
+		boolean cacheAllowed = false;
 		for (JavaType annotationType : annotationsToDetect) {
 			if (cacheAllowed && annotationToMidMap.containsKey(annotationType)) {
 				for (String locatedMid : annotationToMidMap.get(annotationType)) {
