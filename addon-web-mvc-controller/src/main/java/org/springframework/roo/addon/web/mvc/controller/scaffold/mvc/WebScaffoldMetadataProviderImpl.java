@@ -22,14 +22,14 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
-import org.springframework.roo.project.layers.LayerCustomDataKeys;
 
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
 
 /**

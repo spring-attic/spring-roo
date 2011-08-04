@@ -15,9 +15,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
+import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.LayerType;
 import org.springframework.roo.support.util.Assert;
 
 /**

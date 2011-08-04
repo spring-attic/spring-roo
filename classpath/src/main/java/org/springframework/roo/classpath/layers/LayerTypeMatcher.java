@@ -1,4 +1,4 @@
-package org.springframework.roo.project.layers;
+package org.springframework.roo.classpath.layers;
 
 import java.util.ArrayList;
 import java.util.List;

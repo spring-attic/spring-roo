@@ -6,10 +6,10 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 
 /**
  * Service to retrieve various metadata information for use by Web scaffolding add-ons.

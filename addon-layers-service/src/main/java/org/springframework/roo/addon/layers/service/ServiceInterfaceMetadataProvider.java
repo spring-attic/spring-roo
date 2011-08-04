@@ -16,14 +16,14 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
+import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.layers.LayerCustomDataKeys;
-import org.springframework.roo.project.layers.LayerTypeMatcher;
 
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}

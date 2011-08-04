@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
 
 /**

@@ -25,9 +25,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 
 /**
  * Unit test of {@link EntityLayerProvider}

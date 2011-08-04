@@ -11,19 +11,19 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.layers.CoreLayerProvider;
+import org.springframework.roo.classpath.layers.LayerType;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.CoreLayerProvider;
-import org.springframework.roo.project.layers.LayerType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
 /**
- * The {@link org.springframework.roo.project.layers.LayerProvider} that
+ * The {@link org.springframework.roo.classpath.layers.LayerProvider} that
  * provides an application's service layer.
  * 
  * @author Stefan Schmidt

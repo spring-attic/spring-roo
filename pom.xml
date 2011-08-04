@@ -69,7 +69,6 @@
         <module>addon-git</module>
         <module>addon-cloud-foundry</module>
         <module>annotations</module>
-        <module>project-layers</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository</module>
     </modules>
@@ -774,11 +773,6 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.url.stream.jdk</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.project.layers</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

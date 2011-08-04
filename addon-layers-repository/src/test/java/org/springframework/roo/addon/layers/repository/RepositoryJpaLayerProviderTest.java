@@ -16,10 +16,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Pair;
 
 

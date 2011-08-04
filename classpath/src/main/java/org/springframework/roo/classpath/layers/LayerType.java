@@ -1,4 +1,4 @@
-package org.springframework.roo.project.layers;
+package org.springframework.roo.classpath.layers;
 
 /**
  * Typical layers within a user application. Roo is not limited to these layers

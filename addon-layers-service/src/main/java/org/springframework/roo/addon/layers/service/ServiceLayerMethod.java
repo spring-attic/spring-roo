@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;

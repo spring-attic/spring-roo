@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.PairList;
 
 /**

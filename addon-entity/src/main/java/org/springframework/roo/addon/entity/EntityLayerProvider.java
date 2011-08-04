@@ -6,19 +6,19 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.layers.CoreLayerProvider;
+import org.springframework.roo.classpath.layers.LayerType;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.layers.CoreLayerProvider;
-import org.springframework.roo.project.layers.LayerType;
-import org.springframework.roo.project.layers.MemberTypeAdditions;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * The {@link org.springframework.roo.project.layers.LayerProvider} for the
+ * The {@link org.springframework.roo.classpath.layers.LayerProvider} for the
  * {@link LayerType#ACTIVE_RECORD} layer.
  * 
  * @author Stefan Schmidt

@@ -1,4 +1,4 @@
-package org.springframework.roo.project.layers;
+package org.springframework.roo.classpath.layers;
 
 /**
  * A built-in {@link LayerAdapter}, in other words one that ships with Spring Roo.

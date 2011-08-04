@@ -1,4 +1,4 @@
-package org.springframework.roo.project.layers;
+package org.springframework.roo.classpath.layers;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MemberHoldingTypeDetailsCustomDataKey;
 import org.springframework.roo.model.CustomData;

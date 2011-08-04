@@ -1,4 +1,4 @@
-package org.springframework.roo.project.layers;
+package org.springframework.roo.classpath.layers;
 
 /**
  * Convenience class for addon developers wishing to implement their own {@link LayerProvider}.

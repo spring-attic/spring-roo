@@ -1,4 +1,4 @@
-package org.springframework.roo.project.layers;
+package org.springframework.roo.classpath.layers;
 
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
