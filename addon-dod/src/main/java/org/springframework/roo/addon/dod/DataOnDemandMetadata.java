@@ -27,6 +27,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
@@ -44,34 +45,53 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @author Greg Turnquist
+ * @author Andrew Swan
  * @since 1.0
  */
 public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	
+	// Constants
+	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
+	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 	private static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
 	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
-	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
-	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
+	
+	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
+	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
+	// Fields
 	private DataOnDemandAnnotationValues annotationValues;
-	private MethodMetadata identifierAccessor;
-	private MethodMetadata findMethod;
-	private MethodMetadata findEntriesMethod;
-	private MethodMetadata persistMethod;
-	private MethodMetadata flushMethod;
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators;
 	private JavaType entityType;
 	private EmbeddedIdentifierHolder embeddedIdentifierHolder;
 	private List<EmbeddedHolder> embeddedHolders;
-
 	private Map<MethodMetadata, String> fieldInitializers = new LinkedHashMap<MethodMetadata, String>();
 	private Map<FieldMetadata, Map<FieldMetadata, String>> embeddedFieldInitializers = new LinkedHashMap<FieldMetadata, Map<FieldMetadata, String>>();
 	private List<JavaType> requiredDataOnDemandCollaborators = new LinkedList<JavaType>();
+	private MemberTypeAdditions findMethod;
+	private MethodMetadata identifierAccessor;
+	private JavaType idType;
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 * @param annotationValues
+	 * @param identifierAccessor
+	 * @param findMethodAdditions
+	 * @param findEntriesMethod
+	 * @param persistMethodAdditions
+	 * @param flushMethod
+	 * @param locatedMutators
+	 * @param entityType
+	 * @param embeddedIdentifierHolder
+	 * @param embeddedHolders
+	 */
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MemberTypeAdditions findMethodAdditions, MethodMetadata findEntriesMethod, MemberTypeAdditions persistMethodAdditions, MemberTypeAdditions flushMethod, Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators, JavaType entityType, JavaType idType, EmbeddedIdentifierHolder embeddedIdentifierHolder, List<EmbeddedHolder> embeddedHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -84,21 +104,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null || identifierAccessor == null) {
+		if (findEntriesMethod == null || persistMethodAdditions == null || flushMethod == null || findMethodAdditions == null) {
 			return;
 		}
 
 		this.annotationValues = annotationValues;
-		this.identifierAccessor = identifierAccessor;
-		this.findMethod = findMethod;
-		this.findEntriesMethod = findEntriesMethod;
-		this.persistMethod = persistMethod;
-		this.flushMethod = flushMethod;
 		this.locatedMutators = locatedMutators;
 		this.entityType = entityType;
 		this.embeddedIdentifierHolder = embeddedIdentifierHolder;
 		this.embeddedHolders = embeddedHolders;
-
+		this.identifierAccessor = identifierAccessor;
+		this.findMethod = findMethodAdditions;
+		this.idType = idType;
+		
 		// Calculate and store field initializers
 		storeFieldInitializers();
 		storeEmbeddedFieldInitializers();
@@ -123,8 +141,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		builder.addMethod(getSpecificPersistentEntityMethod());
 		builder.addMethod(getRandomPersistentEntityMethod());
 		builder.addMethod(getModifyMethod());
-		builder.addMethod(getInitMethod());
-
+		builder.addMethod(getInitMethod(findEntriesMethod, persistMethodAdditions, flushMethod));
+		
 		itdTypeDetails = builder.build();
 	}
 
@@ -191,7 +209,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	/**
 	 * @return the "data" field to use, which is either provided by the user or produced on demand (never returns null)
 	 */
-	public FieldMetadata getDataField() {
+	private FieldMetadata getDataField() {
 		int index = -1;
 		while (true) {
 			// Compute the required field name
@@ -791,8 +809,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
 		bodyBuilder.appendFormalLine(entityType.getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() + ".get(" + getRndField().getFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
-		bodyBuilder.appendFormalLine("return " + entityType.getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessor.getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine(idType.getFullyQualifiedTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
+		findMethod.copyAdditionsTo(builder);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -821,8 +841,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("if (index < 0) index = 0;");
 		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size() - 1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
 		bodyBuilder.appendFormalLine(entityType.getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() + ".get(index);");
-		bodyBuilder.appendFormalLine("return " + entityType.getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessor.getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine(idType.getFullyQualifiedTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
+		findMethod.copyAdditionsTo(builder);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -830,7 +852,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	/**
 	 * @return the "init():void" method (never returns null)
 	 */
-	public MethodMetadata getInitMethod() {
+	private MethodMetadata getInitMethod(MethodMetadata findEntriesMethod, MemberTypeAdditions persistMethodAdditions, final MemberTypeAdditions flushAdditions) {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("init");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -853,6 +875,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String dataField = getDataField().getFieldName().getSymbolName();
+		bodyBuilder.appendFormalLine("int from = 0;");
+		bodyBuilder.appendFormalLine("int to = 10;");
 		bodyBuilder.appendFormalLine(dataField + " = " + entityType.getSimpleTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, " + annotationValues.getQuantity() + ");");
 		bodyBuilder.appendFormalLine("if (data == null) throw new IllegalStateException(\"Find entries implementation for '" + entityType.getSimpleTypeName() + "' illegally returned null\");");
 		bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
@@ -867,7 +891,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(entityType.getSimpleTypeName() + " obj = " + getNewTransientEntityMethod().getMethodName() + "(i);");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(persistMethodAdditions.getMethodCall() + ";");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (ConstraintViolationException e) {");
 		bodyBuilder.indent();
@@ -881,11 +905,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("throw new RuntimeException(msg.toString(), e);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(flushAdditions.getMethodCall() + ";");
+		flushAdditions.copyAdditionsTo(builder);
 		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-
+		
+		persistMethodAdditions.copyAdditionsTo(builder);
 		// Create the method
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();

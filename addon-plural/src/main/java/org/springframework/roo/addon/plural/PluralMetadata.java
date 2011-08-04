@@ -137,6 +137,17 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return PROVIDES_TYPE;
 	}
 
+	/**
+	 * Creates a plural identifier for the given type, assumed to be located in
+	 * {@link Path#SRC_MAIN_JAVA}
+	 * 
+	 * @param javaType (required)
+	 * @return a non-<code>null</code> ID
+	 */
+	public static final String createIdentifier(final JavaType javaType) {
+		return createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+	}
+	
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}

@@ -49,6 +49,8 @@ import org.springframework.roo.support.util.Assert;
 	}
 )
 public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
+	
+	// Fields
 	@Reference protected MetadataService metadataService;
 
 	// Mutex
@@ -98,7 +100,10 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 		synchronized (lock) {}
 	}
 
-	public final MemberDetails getMemberDetails(String requestingClass, ClassOrInterfaceTypeDetails cid) {
+	public final MemberDetails getMemberDetails(final String requestingClass, ClassOrInterfaceTypeDetails cid) {
+		if (cid == null) {
+			return null;
+		}
 		synchronized (lock) {
 			// Create a list of discovered members
 			List<MemberHoldingTypeDetails> memberHoldingTypeDetails = new LinkedList<MemberHoldingTypeDetails>();

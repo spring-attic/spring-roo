@@ -10,9 +10,18 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, IdentifiableAnnotatedJavaStructure {
+	
+	/**
+	 * Indicates whether this type extends the given type. Equivalent to
+	 * calling {@link #getExtendsTypes()} and checking whether the given type
+	 * is in the returned list.
+	 * 
+	 * @param type the supertype being checked for (required)
+	 * @return see above
+	 */
+	boolean extendsType(JavaType type);
 	
 	List<? extends MethodMetadata> getDeclaredMethods();
 	

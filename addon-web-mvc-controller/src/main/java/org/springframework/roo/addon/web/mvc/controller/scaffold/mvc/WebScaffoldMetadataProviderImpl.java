@@ -22,10 +22,14 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
+
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -37,10 +41,13 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true) 
 @Service 
 public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements WebScaffoldMetadataProvider {
+	
+	// Constants
 	private static final JavaType ROO_WEB_SCAFFOLD = new JavaType(RooWebScaffold.class.getName());
+
 	@Reference private WebMetadataService webMetadataService;
-	private Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
-	private Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
+	private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
+	private final Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -58,7 +65,25 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
 		String localMid = entityToWebScaffoldMidMap.get(governor);
-		return localMid == null ? null : localMid;
+		if (localMid != null) {
+			return localMid;
+		}
+		
+		//TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
+		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), itdTypeDetails.getGovernor());
+		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, LayerCustomDataKeys.LAYER_TYPE);
+		if (memberHoldingTypeDetails != null) {
+			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+			if (domainTypes != null) {
+				for (JavaType type : domainTypes) {
+					String localMidType = entityToWebScaffoldMidMap.get(type);
+					if (localMidType != null) {
+						return localMidType;
+					}
+				}
+			}
+		}
+		return null;
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -74,7 +99,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formBackingType.getFullyQualifiedTypeName());
 		MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingObjectPhysicalTypeMetadata);
-		
+		if (formBackingObjectMemberDetails == null) {
+			return null;
+		}
 		MemberHoldingTypeDetails formBackingMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
 		if (formBackingMemberHoldingTypeDetails == null) {
 			return null;
@@ -97,8 +124,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns);
+		Map<String, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
+		
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

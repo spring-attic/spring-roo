@@ -58,6 +58,8 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
 	
 	/** Requires the governor to be a {@link PhysicalTypeCategory#CLASS} (as opposed to an interface etc) */
+	// TODO change the type of this field to PhysicalTypeCategory and allow
+	// subclasses to pass it via a new constructor
 	private boolean dependsOnGovernorBeingAClass = true;
 	
 	/** The annotations which, if present on a class or interface, will cause metadata to be created */
@@ -178,6 +180,42 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	protected abstract ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename);
 	
 	/**
+	 * Looks up the given type's inheritance hierarchy for metadata of the given
+	 * type, starting with the given type's parent and going upwards until the
+	 * first such instance is found (i.e. lower level metadata takes priority
+	 * over higher level metadata)
+	 * 
+	 * @param <T> the type of metadata to look for
+	 * @param child the child type whose parents to search (required)
+	 * @return <code>null</code> if there is no such metadata
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends MetadataItem> T getParentMetadata(final ClassOrInterfaceTypeDetails child) {
+		T parentMetadata = null;
+		ClassOrInterfaceTypeDetails superCid = child.getSuperclass();
+		while (parentMetadata == null && superCid != null) {
+			final String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
+			final Path path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
+			final String superCidLocalIdentifier = createLocalIdentifier(superCid.getName(), path);
+			parentMetadata = (T) metadataService.get(superCidLocalIdentifier);
+			superCid = superCid.getSuperclass();
+		}
+		return parentMetadata;	// could be null
+	}
+	
+	/**
+	 * Registers the given {@link JavaType}s as triggering metadata registration.
+	 * 
+	 * @param triggerTypes the type-level annotations to detect that will cause metadata creation
+	 * @since 1.2
+	 */
+	public void addMetadataTriggers(final JavaType... triggerTypes) {
+		for (final JavaType triggerType : triggerTypes) {
+			addMetadataTrigger(triggerType);
+		}
+	}
+	
+	/**
 	 * Registers an additional {@link JavaType} that will trigger metadata registration.
 	 * 
 	 * @param javaType the type-level annotation to detect that will cause metadata creation (required)
@@ -185,6 +223,18 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	public void addMetadataTrigger(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required for metadata trigger registration");
 		this.metadataTriggers.add(javaType);
+	}
+	
+	/**
+	 * Removes the given {@link JavaType}s as triggering metadata registration.
+	 * 
+	 * @param triggerTypes the type-level annotations to remove as triggers
+	 * @since 1.2
+	 */
+	public void removeMetadataTriggers(final JavaType... triggerTypes) {
+		for (final JavaType triggerType : triggerTypes) {
+			removeMetadataTrigger(triggerType);
+		}
 	}
 	
 	/**
@@ -232,7 +282,6 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		ClassOrInterfaceTypeDetails cid = null;
 		if (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() != null && governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		
 			// Only create metadata if the type is annotated with one of the metadata triggers
 			for (JavaType trigger : metadataTriggers) {
 				if (MemberFindingUtils.getDeclaredTypeAnnotation(cid, trigger) != null) {
@@ -257,7 +306,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			produceMetadata = false;
 		}
 		
-		if (!produceMetadata && fileManager.exists(itdFilename)) {
+		if (!produceMetadata && isGovernor(cid) && fileManager.exists(itdFilename)) {
 			// We don't seem to want metadata anymore, yet the ITD physically exists, so get rid of it
 			// This might be because the trigger annotation has been removed, the governor is missing a class declaration etc
 			// TODO: Overload fileManager.delete(..) so we can give a message so the console output is more meaningful
@@ -321,6 +370,26 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		return null;
 	}
 	
+	/**
+	 * Indicates whether the given type is the governor for this provider. This
+	 * implementation simply checks whether the given type is either a class or
+	 * an interface, based on the value of {@link #dependsOnGovernorBeingAClass}.
+	 * A more sophisticated implementation could check for the presence of
+	 * particular annotations or the implementation of particular interfaces.
+	 * 
+	 * @param type can be <code>null</code>
+	 * @return <code>false</code> if the given type is <code>null</code>
+	 */
+	protected boolean isGovernor(final ClassOrInterfaceTypeDetails type) {
+		if (type == null) {
+			return false;
+		}
+		if (dependsOnGovernorBeingAClass) {
+			return type.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS;
+		}
+		return type.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
+	}
+
 	public final String getIdForPhysicalJavaType(String physicalJavaTypeIdentifier) {
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(physicalJavaTypeIdentifier).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected a valid physical Java type instance identifier (not '" + physicalJavaTypeIdentifier + "')");
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalJavaTypeIdentifier);

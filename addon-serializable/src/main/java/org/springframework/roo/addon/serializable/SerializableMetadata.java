@@ -103,12 +103,12 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		FieldMetadata result = MemberFindingUtils.getDeclaredField(governorTypeDetails, fieldName);
 		if (result != null) {
 			FieldMetadataBuilder field = new FieldMetadataBuilder(result);
-			field.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD, null);
+			field.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);
 			return field.build();
 		}
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, fieldName, JavaType.LONG_PRIMITIVE, "1L");
-		fieldBuilder.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD, null);
+		fieldBuilder.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);
 		return fieldBuilder.build();
 	}
 

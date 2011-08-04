@@ -13,6 +13,7 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
+ * @param <T> the type of {@link MemberHoldingTypeDetails} being built
  */
 public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
 	
@@ -202,8 +203,16 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return addField(new FieldMetadataBuilder(field));
 	}
 
-	public final boolean addMethod(MethodMetadata method) {
-		if (method == null) return false;
+	/**
+	 * Adds the given method to this builder
+	 * 
+	 * @param method the method to add; can be <code>null</code>
+	 * @return <code>true</code> if the state of this builder changed
+	 */
+	public final boolean addMethod(final MethodMetadata method) {
+		if (method == null) {
+			return false;
+		}
 		return addMethod(new MethodMetadataBuilder(method));
 	}
 

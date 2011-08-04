@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.mvc.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
@@ -26,6 +25,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.operations.DateTime;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
@@ -61,6 +61,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMetadataService webMetadataService;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	public boolean isProjectAvailable() {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
@@ -122,14 +123,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formBackingClassOrInterfaceDetails);
 
 		// Add composite PK identifier fields if needed
-		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(formBackingType, memberDetails, null);
-		if (javaTypePersistenceMetadataDetails != null && !javaTypePersistenceMetadataDetails.getRooIdentifierFields().isEmpty()) {
-			for (FieldMetadata field : javaTypePersistenceMetadataDetails.getRooIdentifierFields()) {
-				if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
-					FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-					fieldBuilder.setFieldName(new JavaSymbolName(javaTypePersistenceMetadataDetails.getIdentifierField().getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));
-					tbody.appendChild(typeCommand(document, fieldBuilder.build()));
-				}
+		for (FieldMetadata field : persistenceMemberLocator.getEmbeddedIdentifierFields(memberDetails)) {
+			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
+				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+				fieldBuilder.setFieldName(new JavaSymbolName(field.getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));
+				tbody.appendChild(typeCommand(document, fieldBuilder.build()));
 			}
 		}
 

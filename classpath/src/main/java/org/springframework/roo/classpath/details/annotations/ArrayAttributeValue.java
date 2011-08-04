@@ -13,17 +13,28 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  *
- * @param <Y> the contents of the array
+ * @param <Y> the type of each array element
  */
 public class ArrayAttributeValue<Y extends AnnotationAttributeValue<? extends Object>> extends AbstractAnnotationAttributeValue<List<Y>> {
-	private List<Y> value;
 	
-	public ArrayAttributeValue(JavaSymbolName name, List<Y> value) {
+	// Fields
+	private final List<Y> value;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param name the attribute name (required)
+	 * @param value the attribute values (required)
+	 */
+	public ArrayAttributeValue(final JavaSymbolName name, final List<Y> value) {
 		super(name);
 		Assert.notNull(value, "Value required");
 		this.value = value;
 	}
 
+	/**
+	 * Returns an unmodifiable copy of the array values
+	 */
 	public List<Y> getValue() {
 		return Collections.unmodifiableList(value);
 	}

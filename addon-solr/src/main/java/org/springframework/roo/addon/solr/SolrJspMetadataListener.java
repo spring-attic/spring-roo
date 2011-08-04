@@ -20,6 +20,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -58,6 +59,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	@Reference private TilesOperations tilesOperations;
 	@Reference private MenuOperations menuOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
 	
 	private WebScaffoldMetadata webScaffoldMetadata;
@@ -127,13 +129,14 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 								.build();
 		pageSearch.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
 		
+		final FieldMetadata idField = persistenceMemberLocator.getIdentifierFields(formbackingObject).get(0);
 		Element resultTable = new XmlElementBuilder("fields:table", document)
 									.addAttribute("id", XmlUtils.convertId("rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
 									.addAttribute("data", "${searchResults}")
 									.addAttribute("delete", "false")
 									.addAttribute("update", "false")
 									.addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath())
-									.addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(entityMetadata.getIdentifierField().getFieldType()))
+									.addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + idField.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(idField.getFieldType()))
 								.build();
 		resultTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(resultTable));
 					
@@ -144,6 +147,8 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formbackingObject.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(memberDetails);
+		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(memberDetails);
 		
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			// Only interested in accessors
@@ -151,8 +156,8 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 				continue;
 			}
 			if(++fieldCounter < 7) {
-				if (method.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName()) ||
-						method.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName())) {
+				if (method.getMethodName().equals(identifierAccessor.getMethodName()) ||
+						method.getMethodName().equals(versionAccessor.getMethodName())) {
 					continue;
 				}
 				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));

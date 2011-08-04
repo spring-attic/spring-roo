@@ -103,7 +103,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 				if (annotationsList != null) {
 					for (AnnotationExpr candidate : annotationsList) {
-						JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, compilationUnitServices);
+						JavaParserAnnotationMetadata md = JavaParserAnnotationMetadata.getInstance(candidate, compilationUnitServices);
 						annotations.add(md);
 					}
 				}
@@ -123,7 +123,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		
 		if (methodDeclaration.getAnnotations() != null) {
 			for (AnnotationExpr annotation : methodDeclaration.getAnnotations()) {
-				this.annotations.add(new JavaParserAnnotationMetadata(annotation, compilationUnitServices));
+				this.annotations.add(JavaParserAnnotationMetadata.getInstance(annotation, compilationUnitServices));
 			}
 		}
 	}

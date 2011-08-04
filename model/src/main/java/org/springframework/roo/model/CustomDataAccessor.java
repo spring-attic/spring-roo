@@ -5,7 +5,6 @@ package org.springframework.roo.model;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface CustomDataAccessor {
 

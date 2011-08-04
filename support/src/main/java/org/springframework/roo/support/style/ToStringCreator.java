@@ -148,7 +148,7 @@ public class ToStringCreator {
 	/**
 	 * Append a field value.
 	 * @param fieldName the name of the field, usually the member variable name
-	 * @param value the field value
+	 * @param value the field value; can be <code>null</code>
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, Object value) {

@@ -1,14 +1,15 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Service to retrieve various metadata information for use by Web scaffolding add-ons.
@@ -37,4 +38,6 @@ public interface WebMetadataService {
 	JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString);
 
 	MemberDetails getMemberDetails(JavaType javaType);
+	
+	Map<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString);
 }

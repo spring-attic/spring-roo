@@ -1,13 +1,16 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import org.springframework.roo.model.CustomDataKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * {@link ConstructorMetadata}-specific implementation of {@link Matcher}. Currently
@@ -17,12 +20,42 @@ import java.util.List;
  * @since 1.1.3
  */
 public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
-	private CustomDataKey<ConstructorMetadata> customDataKey;
-	private List<JavaType> parameterTypes = new ArrayList<JavaType>();
+	
+	/**
+	 * A {@link ConstructorMatcher} that matches on no-arg constructors.
+	 * 
+	 * @since 1.2
+	 */
+	public static final ConstructorMatcher NO_ARG = new ConstructorMatcher(PersistenceCustomDataKeys.NO_ARG_CONSTRUCTOR);
+	
+	// Fields
+	private final CustomDataKey<ConstructorMetadata> customDataKey;
+	private final List<JavaType> parameterTypes;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param <T> {@link JavaType} or any subclass
+	 * @param customDataKey
+	 * @param parameterTypes
+	 * @since 1.2
+	 */
+	public <T extends JavaType> ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final T... parameterTypes) {
+		this(customDataKey, Arrays.asList(parameterTypes));
+	}
 
-	public ConstructorMatcher(CustomDataKey<ConstructorMetadata> customDataKey, List<JavaType> parameterTypes) {
+	/**
+	 * Constructor
+	 *
+	 * @param customDataKey
+	 * @param parameterTypes can be <code>null</code> for none
+	 */
+	public ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final Collection<? extends JavaType> parameterTypes) {
 		this.customDataKey = customDataKey;
-		this.parameterTypes = parameterTypes;
+		this.parameterTypes = new ArrayList<JavaType>();
+		if (parameterTypes != null) {
+			this.parameterTypes.addAll(parameterTypes);
+		}
 	}
 
 	public List<ConstructorMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {

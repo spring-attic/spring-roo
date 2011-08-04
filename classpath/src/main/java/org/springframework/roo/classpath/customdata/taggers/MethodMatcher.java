@@ -1,9 +1,9 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -29,35 +29,74 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1.3
  */
 public class MethodMatcher implements Matcher<MethodMetadata> {
-	private List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
-	private boolean isAccessor = false;
-	private CustomDataKey<MethodMetadata> customDataKey;
+	
+	// Fields
+	private final CustomDataKey<MethodMetadata> customDataKey;
+
+	private boolean isAccessor;
+	private boolean suffixPlural;
+	private boolean suffixSingular;
 	private JavaType catalystAnnotationType;
 	private JavaSymbolName userDefinedNameAttribute;
-	private String defaultName;
-	private boolean suffixPlural = false;
-	private boolean suffixSingular = false;
+	private List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
 	private String additionalSuffix = "";
+	private String defaultName;
 
+	/**
+	 * Constructor
+	 *
+	 * @param fieldTaggers
+	 * @param customDataKey
+	 * @param isAccessor
+	 */
 	public MethodMatcher(List<FieldMatcher> fieldTaggers, CustomDataKey<MethodMetadata> customDataKey, boolean isAccessor) {
-		this.fieldTaggers = fieldTaggers;
 		this.customDataKey = customDataKey;
+		this.fieldTaggers = fieldTaggers;
 		this.isAccessor = isAccessor;
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param customDataKey
+	 * @param catalystAnnotationType
+	 * @param userDefinedNameAttribute
+	 * @param defaultName
+	 */
 	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName) {
-		this.customDataKey = customDataKey;
 		this.catalystAnnotationType = catalystAnnotationType;
-		this.userDefinedNameAttribute = userDefinedNameAttribute;
+		this.customDataKey = customDataKey;
 		this.defaultName = defaultName;
+		this.userDefinedNameAttribute = userDefinedNameAttribute;
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param customDataKey
+	 * @param catalystAnnotationType
+	 * @param userDefinedNameAttribute
+	 * @param defaultName
+	 * @param suffixPlural
+	 * @param suffixSingular
+	 */
 	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular) {
 		this(customDataKey, catalystAnnotationType, userDefinedNameAttribute, defaultName);
 		this.suffixPlural = suffixPlural;
 		this.suffixSingular = suffixSingular;
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param customDataKey
+	 * @param catalystAnnotationType
+	 * @param userDefinedNameAttribute
+	 * @param defaultName
+	 * @param suffixPlural
+	 * @param suffixSingular
+	 * @param additionalSuffix
+	 */
 	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName, boolean suffixPlural, boolean suffixSingular, String additionalSuffix) {
 		this(customDataKey, catalystAnnotationType, userDefinedNameAttribute, defaultName, suffixPlural, suffixSingular);
 		this.additionalSuffix = additionalSuffix;
@@ -75,7 +114,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		return null;
 	}
 
-	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, HashMap<String, String> pluralMap) {
+	public List<MethodMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, Map<String, String> pluralMap) {
 		List<FieldMetadata> fields = getFieldsInterestedIn(memberHoldingTypeDetailsList);
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		Set<JavaSymbolName> methodNames = new HashSet<JavaSymbolName>();
@@ -97,7 +136,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		return methods;
 	}
 
-	private JavaSymbolName getUserDefinedMethod(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, HashMap<String, String> pluralMap) {
+	private JavaSymbolName getUserDefinedMethod(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, Map<String, String> pluralMap) {
 		if (catalystAnnotationType == null || userDefinedNameAttribute == null) {
 			return null;
 		}
@@ -127,7 +166,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		return classOrInterfaceTypeDetails;
 	}
 
-	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, HashMap<String, String> pluralMap) {
+	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, Map<String, String> pluralMap) {
 
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
 		if (singular) {

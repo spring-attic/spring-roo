@@ -46,21 +46,24 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true) 
 @Service 
 public class TypeLocationServiceImpl implements TypeLocationService, MetadataNotificationListener {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private FileMonitorService fileMonitorService;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	
 	@Reference private ProjectOperations projectOperations;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
-	private Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
-	private Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
+	private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
+	private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
 
-	protected void activate(ComponentContext context) {
+	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
 		dependencyRegistry.addNotificationListener(this);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
 		dependencyRegistry.removeNotificationListener(this);
 	}
 
@@ -160,7 +163,9 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
-		boolean cacheAllowed = !fileMonitorService.isDirty();
+		// TODO research why file monitor service is marked as not dirty when it actully is dirty
+//		boolean cacheAllowed = !fileMonitorService.isDirty();
+		boolean cacheAllowed = false;
 		for (JavaType annotationType : annotationsToDetect) {
 			if (cacheAllowed && annotationToMidMap.containsKey(annotationType)) {
 				for (String locatedMid : annotationToMidMap.get(annotationType)) {

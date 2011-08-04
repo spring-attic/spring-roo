@@ -16,6 +16,7 @@ package org.springframework.roo.support.util;
  * limitations under the License.
  */
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -30,6 +31,7 @@ import java.util.Properties;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Andrew Swan
  * @since 1.1.3
  */
 public abstract class CollectionUtils {
@@ -268,5 +270,26 @@ public abstract class CollectionUtils {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Filters (removes elements from) the given {@link Iterable} using the
+	 * given filter.
+	 * 
+	 * @param <T> the type of object being filtered
+	 * @param unfiltered the iterable to filter; can be <code>null</code>
+	 * @param filter the filter to apply; can be <code>null</code> for none
+	 * @return a non-<code>null</code> list
+	 */
+	public static <T> List<T> filter(final Iterable<? extends T> unfiltered, final Filter<T> filter) {
+		final List<T> filtered = new ArrayList<T>();
+		if (unfiltered != null) {
+			for (final T element : unfiltered) {
+				if (filter == null || filter.include(element)) {
+					filtered.add(element);
+				}
+			}
+		}
+		return filtered;
 	}
 }

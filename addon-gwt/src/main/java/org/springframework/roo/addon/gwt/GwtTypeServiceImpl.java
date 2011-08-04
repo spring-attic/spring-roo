@@ -300,7 +300,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		builder.setName(abstractType);
 		builder.setModifier(Modifier.ABSTRACT | Modifier.PUBLIC);
 		builder.getExtendsTypes().addAll(concreteClass.getExtendsTypes());
-		builder.getRegisteredImports().addAll(concreteClass.getRegisteredImports());
+		builder.add(concreteClass.getRegisteredImports());
 
 		for (MemberHoldingTypeDetails extendsTypeDetails : extendsTypesDetails) {
 			for (ConstructorMetadata constructorMetadata : extendsTypeDetails.getDeclaredConstructors()) {

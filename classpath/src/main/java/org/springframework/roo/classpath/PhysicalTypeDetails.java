@@ -22,10 +22,12 @@ public interface PhysicalTypeDetails extends CustomDataAccessor {
 	PhysicalTypeCategory getPhysicalTypeCategory();
 	
 	/**
-	 * If possible, indicates any type parameters.
+	 * Returns the {@link JavaType} provided by this physical type. If possible,
+	 * indicates any type parameters.
 	 * 
-	 * @return the full name of the type that members will eventually be available from when compiled, including any 
-	 * available type parameters (may be null if unable to parse)
+	 * @return the full name of the type that members will eventually be
+	 * available from when compiled, including any available type parameters
+	 * (may be null if unable to parse)
 	 */
 	JavaType getName();
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
@@ -42,11 +43,12 @@ public abstract class MemberFindingUtils {
 	 * Locates the specified method.
 	 * 
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search; can be <code>null</code>
-	 * @param methodName to locate; can be blank
+	 * @param methodName to locate; can be <code>null</code>
 	 * @param parameters to locate (can be null if there are no parameters)
-	 * @return the method, or <code>null</code> if not found
+	 * @return the method, or <code>null</code> if the given name was
+	 * <code>null</code> or it was simply not found
 	 */
-	public static MethodMetadata getDeclaredMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	public static MethodMetadata getDeclaredMethod(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName methodName, List<JavaType> parameters) {
 		if (memberHoldingTypeDetails == null) {
 			return null;
 		}
@@ -126,13 +128,14 @@ public abstract class MemberFindingUtils {
 	 * or none can be found.
 	 * 
 	 * @param memberDetails the {@link MemberDetails} to search (required)
-	 * @param methodName the method name to locate (required)
-	 * @param parameters the method parameter signature to locate (can be null if no parameters are required)
-	 * @return the first located method, or null if such a method cannot be found
+	 * @param methodName the method name to locate (can be <code>null</code>)
+	 * @param parameters the method parameter signature to locate (can be null
+	 * if no parameters are required)
+	 * @return the first located method, or <code>null</code> if the method name
+	 * is <code>null</code> or such a method cannot be found
 	 */
-	public static MethodMetadata getMethod(MemberDetails memberDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName, final List<JavaType> parameters) {
 		Assert.notNull(memberDetails, "Member details required");
-		Assert.notNull(methodName, "Method name required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			MethodMetadata md = getDeclaredMethod(memberHoldingTypeDetails, methodName, parameters);
 			if (md != null) {
@@ -143,21 +146,40 @@ public abstract class MemberFindingUtils {
 	}
 
 	/**
-	 * Locates an annotation with the specified type from a list of annotations.
+	 * Locates the metadata for an annotation of the specified type from within
+	 * the given list.
 	 * 
-	 * @param annotations to search (required)
-	 * @param type to locate (required)
-	 * @return the annotation, or null if not found
+	 * @param annotations the set of annotations to search (may be <code>null</code>)
+	 * @param annotationType the annotation to locate (may be <code>null</code>)
+	 * @return the annotation, or <code>null</code> if not found
 	 */
-	public static AnnotationMetadata getAnnotationOfType(List<? extends AnnotationMetadata> annotations, JavaType type) {
-		Assert.notNull(annotations, "Annotations to search required");
-		Assert.notNull(type, "Annotation type to locate required");
-		for (AnnotationMetadata md : annotations) {
-			if (md.getAnnotationType().equals(type)) {
+	public static AnnotationMetadata getAnnotationOfType(final List<? extends AnnotationMetadata> annotations, final JavaType annotationType) {
+		if (annotations == null) {
+			return null;
+		}
+		for (final AnnotationMetadata md : annotations) {
+			if (md.getAnnotationType().equals(annotationType)) {
 				return md;
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the metadata for the annotation of the given type from within the
+	 * given metadata
+	 * 
+	 * @param metadata the metadata to search; can be <code>null</code>
+	 * @param annotationType the type of annotation for which to return the metadata; can
+	 * be <code>null</code>
+	 * @return <code>null</code> if not found
+	 * @since 1.2
+	 */
+	public static AnnotationMetadata getAnnotationOfType(final MemberHoldingTypeDetailsMetadataItem<?> metadata, final JavaType annotationType) {
+		if (metadata == null || metadata.getMemberHoldingTypeDetails() == null) {
+			return null;
+		}
+		return getAnnotationOfType(metadata.getMemberHoldingTypeDetails().getAnnotations(), annotationType);
 	}
 
 	/**
@@ -375,12 +397,15 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
 	 * 
-	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for (required)
-	 * @return the most concrete tagged method or null if not found
+	 * @return the most concrete tagged method or <code>null</code> if not found
 	 */
-	public static MethodMetadata getMostConcreteMethodWithTag(MemberDetails memberDetails, Object tagKey) {
-		List<MethodMetadata> taggedMethods = getMethodsWithTag(memberDetails, tagKey);
+	public static MethodMetadata getMostConcreteMethodWithTag(final MemberDetails memberDetails, final Object tagKey) {
+		if (memberDetails == null) {
+			return null;
+		}
+		final List<MethodMetadata> taggedMethods = getMethodsWithTag(memberDetails, tagKey);
 		if (taggedMethods.isEmpty()) {
 			return null;
 		} 
@@ -388,25 +413,26 @@ public abstract class MemberFindingUtils {
 	}
 	
 	/**
-	 * Searches all {@link MemberDetails} and returns all fields which contain a given
-	 * {@link CustomData} tag.
+	 * Returns all fields within the given {@link MemberDetails} that contain
+	 * the given {@link CustomData} tag.
 	 * 
-	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for
-	 * @return zero or more fields (never null)
+	 * @return zero or more fields (never <code>null</code>)
 	 */
-	public static List<FieldMetadata> getFieldsWithTag(MemberDetails memberDetails, Object tagKey) {
-		Assert.notNull(memberDetails, "Member details required");
+	public static List<FieldMetadata> getFieldsWithTag(final MemberDetails memberDetails, final Object tagKey) {
 		Assert.notNull(tagKey, "Custom data key required");
-		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
-		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
-			for (FieldMetadata field: mhtd.getDeclaredFields()) {
-				if (field.getCustomData().keySet().contains(tagKey)) {
-					result.add(field);
+		final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
+		if (memberDetails != null) {
+			for (final MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
+				for (final FieldMetadata field: mhtd.getDeclaredFields()) {
+					if (field.getCustomData().keySet().contains(tagKey)) {
+						fields.add(field);
+					}
 				}
 			}
 		}
-		return result;
+		return fields;
 	}
 	
 	/**

@@ -69,6 +69,8 @@
         <module>addon-git</module>
         <module>addon-cloud-foundry</module>
         <module>annotations</module>
+        <module>addon-layers-service</module>
+        <module>addon-layers-repository</module>
     </modules>
     <organization>
         <name>VMware, Inc</name>
@@ -771,6 +773,16 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.url.stream.jdk</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.layers.service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.layers.repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

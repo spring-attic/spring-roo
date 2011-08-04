@@ -1,5 +1,6 @@
 package org.springframework.roo.model;
 
+import java.beans.Introspector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +17,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Greg Turnquist
  * @since 1.0
  */
-public final class JavaSymbolName implements Comparable<JavaSymbolName> {
+public class JavaSymbolName implements Comparable<JavaSymbolName> {
 
 	/** Constant for keyword "true" */
 	public static final JavaSymbolName TRUE = new JavaSymbolName("true");
@@ -24,6 +25,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	/** Constant for keyword "false" */
 	public static final JavaSymbolName FALSE = new JavaSymbolName("false");
 	
+	// Fields
 	private final String symbolName;
 
 	/**
@@ -85,13 +87,28 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 			string.append(m.group()).append(" ");
 		}
 		return string.toString().trim();
-  }
+	}
 	
-	public final int hashCode() {
+	/**
+	 * Construct a Java symbol name which adheres to the strict JavaBean naming conventions and avoids
+	 * use of {@link ReservedWords} by prefixing '_'
+	 * 
+	 * @param javaType the {@link JavaType} for which the symbol name is created
+	 * @return a Java symbol name adhering to JavaBean conventions and avoids reserved words
+	 */
+	public static JavaSymbolName getReservedWordSaveName(JavaType javaType) {
+		String entityNameString = Introspector.decapitalize(StringUtils.capitalize(javaType.getSimpleTypeName()));
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(entityNameString)) {
+			entityNameString = "_" + entityNameString;
+		}
+		return new JavaSymbolName(entityNameString);
+	}
+	
+	public int hashCode() {
 		return this.symbolName.hashCode();
 	}
 
-	public final boolean equals(Object obj) {
+	public boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
 		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName) obj).symbolName);
 	}

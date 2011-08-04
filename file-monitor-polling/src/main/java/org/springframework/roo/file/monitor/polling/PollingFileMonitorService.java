@@ -91,7 +91,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public boolean isDirty() {
 		synchronized (lock) {
-			return notifyChanged.size() > 0 || notifyCreated.size() > 0 || notifyDeleted.size() > 0;
+			return !notifyChanged.isEmpty() || !notifyCreated.isEmpty() || !notifyDeleted.isEmpty();
 		}
 	}
 	

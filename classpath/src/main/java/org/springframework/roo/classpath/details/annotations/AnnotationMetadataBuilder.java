@@ -13,13 +13,40 @@ import org.springframework.roo.support.util.Assert;
  * Builder for {@link AnnotationMetadata}.
  * 
  * <p>
- * The "add" method will replace any existing annotation attribute with the same name, taking
- * care to preserve its location. 
+ * The "add" method will replace any existing annotation attribute with the same
+ * name, taking care to preserve its location. 
  * 
  * @author Ben Alex
+ * @author Andrew Swan
  * @since 1.1
  */
 public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
+	
+	// Constants for valueless JPA annotations (using literal class names so as not to make Roo depend on JPA)
+	public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance("javax.persistence.Column");
+	public static final AnnotationMetadata JPA_EMBEDDED_ANNOTATION = getInstance("javax.persistence.Embedded");
+	public static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION = getInstance("javax.persistence.EmbeddedId");
+	public static final AnnotationMetadata JPA_ENUMERATED_ANNOTATION = getInstance("javax.persistence.Enumerated");
+	public static final AnnotationMetadata JPA_ID_ANNOTATION = getInstance("javax.persistence.Id");
+	public static final AnnotationMetadata JPA_LOB_ANNOTATION = getInstance("javax.persistence.Lob");
+	public static final AnnotationMetadata JPA_MANY_TO_MANY_ANNOTATION = getInstance("javax.persistence.ManyToMany");
+	public static final AnnotationMetadata JPA_MANY_TO_ONE_ANNOTATION = getInstance("javax.persistence.ManyToOne");
+	public static final AnnotationMetadata JPA_ONE_TO_MANY_ANNOTATION = getInstance("javax.persistence.OneToMany");
+	public static final AnnotationMetadata JPA_ONE_TO_ONE_ANNOTATION = getInstance("javax.persistence.OneToOne");
+	public static final AnnotationMetadata JPA_TRANSIENT_ANNOTATION = getInstance("javax.persistence.Transient");
+	public static final AnnotationMetadata JPA_VERSION_ANNOTATION = getInstance("javax.persistence.Version");
+	
+	/**
+	 * Returns the {@link AnnotationMetadata} for the given annotation type
+	 * 
+	 * @param type the annotation's fully-qualified type name (required)
+	 * @return an instance with no values
+	 */
+	public static AnnotationMetadata getInstance(final String type) {
+		return new AnnotationMetadataBuilder(new JavaType(type)).build();
+	}
+	
+	// Fields
 	private JavaType annotationType;
 	private List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 	

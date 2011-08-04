@@ -12,6 +12,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public final class PhysicalTypeIdentifier {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = PhysicalTypeIdentifier.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	
@@ -19,7 +21,25 @@ public final class PhysicalTypeIdentifier {
 		return PROVIDES_TYPE;
 	}
 	
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	/**
+	 * Creates an identifier from the given arguments
+	 * 
+	 * @param javaType, assumed to be in {@link Path#SRC_MAIN_JAVA} (required)
+	 * @return a non-blank ID
+	 * @since 1.2
+	 */
+	public static final String createIdentifier(final JavaType javaType) {
+		return createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+	}
+	
+	/**
+	 * Creates an identifier from the given arguments
+	 * 
+	 * @param javaType (required)
+	 * @param path (required)
+	 * @return a non-blank ID
+	 */
+	public static final String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
@@ -39,4 +59,9 @@ public final class PhysicalTypeIdentifier {
 		Assert.isTrue(isValid(metadataIdentificationString), "Invalid metadata identification string '" + metadataIdentificationString + "' provided");
 		return getPath(metadataIdentificationString) + "/" + getJavaType(metadataIdentificationString);
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private PhysicalTypeIdentifier() {}
 }

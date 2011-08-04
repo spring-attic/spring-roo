@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
@@ -35,7 +36,9 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service
 public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
+	
 	@Reference private EntityMetadataProvider entityMetadataProvider;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -70,6 +73,7 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 			return null;
 		}
 		
+		// Otherwise go off and create the Solr metadata
 		String beanPlural = javaType.getSimpleTypeName() + "s";
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
 		if (pluralMetadata != null && pluralMetadata.isValid()) {
@@ -88,8 +92,9 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 				metadataDependencyRegistry.registerDependency(methodMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
 		}
-		// Otherwise go off and create the to Solr metadata
-		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata.getIdentifierAccessor(), entityMetadata.getVersionField(), accessorDetails, beanPlural);
+		final MethodMetadata idAccessor = persistenceMemberLocator.getIdentifierAccessor(memberDetails);
+		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(memberDetails);
+		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, idAccessor, versionField, accessorDetails, beanPlural);
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {

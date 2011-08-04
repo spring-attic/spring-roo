@@ -1,7 +1,12 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -31,7 +36,27 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
     private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
 	
-	// Package protected to mandate the use of ClassOrInterfaceTypeDetailsBuilder
+	/**
+	 * Constructor is package protected to mandate the use of
+	 * {@link ClassOrInterfaceTypeDetailsBuilder}
+	 *
+	 * @param customData
+	 * @param declaredByMetadataId
+	 * @param modifier
+	 * @param annotations
+	 * @param name
+	 * @param physicalTypeCategory
+	 * @param declaredConstructors
+	 * @param declaredFields
+	 * @param declaredMethods
+	 * @param declaredInnerTypes
+	 * @param declaredInitializers
+	 * @param superclass
+	 * @param extendsTypes
+	 * @param implementsTypes
+	 * @param enumConstants
+	 * @param registeredImports
+	 */
     DefaultClassOrInterfaceTypeDetails(CustomData customData,
 			String declaredByMetadataId,
 			int modifier,
@@ -47,7 +72,8 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 			List<JavaType> extendsTypes,
 			List<JavaType> implementsTypes,
 			List<JavaSymbolName> enumConstants,
-            Set<ImportMetadata> registeredImports) {
+            Collection<ImportMetadata> registeredImports)
+    {
 		super(customData, declaredByMetadataId, modifier, annotations);
 		Assert.notNull(name, "Name required");
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
@@ -88,8 +114,9 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 			this.enumConstants = enumConstants;
 		}
 
+		this.registeredImports = new HashSet<ImportMetadata>();
         if (registeredImports != null) {
-            this.registeredImports = registeredImports;
+            this.registeredImports.addAll(registeredImports);
         }
 	}
 
@@ -140,6 +167,10 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
     public Set<ImportMetadata> getRegisteredImports() {
         return Collections.unmodifiableSet(registeredImports);
     }
+
+	public boolean extendsType(final JavaType type) {
+		return this.extendsTypes.contains(type);
+	}
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
