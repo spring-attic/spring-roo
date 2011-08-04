@@ -41,7 +41,6 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 	private IntegrationTestAnnotationValues annotationValues;
 	private DataOnDemandMetadata dataOnDemandMetadata;
-	private JavaType dodGovernor;
 	private boolean isGaeSupported = false;
 	private String transactionManager;
 	private boolean hasEmbeddedIdentifier;
@@ -58,19 +57,13 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			return;
 		}
 
-		if (findEntriesMethod == null || persistMethod == null || flushMethod == null || findMethod == null) {
-			return;
-		}
-
 		this.annotationValues = annotationValues;
 		this.dataOnDemandMetadata = dataOnDemandMetadata;
 		this.transactionManager = transactionManager;
 		this.hasEmbeddedIdentifier = hasEmbeddedIdentifier;
 		this.entityHasSuperclass = entityHasSuperclass;
 		
-		dodGovernor = DataOnDemandMetadata.getJavaType(dataOnDemandMetadata.getId());
-		
-		addRequiredIntegrationTestClassIntroductions();
+		addRequiredIntegrationTestClassIntroductions(DataOnDemandMetadata.getJavaType(dataOnDemandMetadata.getId()));
 
 		// Add GAE LocalServiceTestHelper instance and @BeforeClass/@AfterClass methods if GAE is enabled
 		if (projectMetadata.isGaeEnabled()) {
@@ -93,7 +86,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * Adds the JUnit and Spring type level annotations if needed
 	 */
-	private void addRequiredIntegrationTestClassIntroductions() {
+	private void addRequiredIntegrationTestClassIntroductions(JavaType dodGovernor) {
 		// Add an @RunWith(SpringJunit4ClassRunner) annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.junit.runner.RunWith")) == null) {
 			AnnotationMetadataBuilder runWithBuilder = new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"));
@@ -251,6 +244,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
+		findMethod.copyAdditionsTo(builder);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -338,7 +332,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the flush method, if available and requested (may return null)
 	 */
 	private MethodMetadata getFlushMethodTest(MethodMetadata versionAccessorMethod, MethodMetadata identifierAccessorMethod, MemberTypeAdditions flushMethod, MemberTypeAdditions findMethod) {
-		if (!annotationValues.isFlush() || versionAccessorMethod == null) {
+		if (!annotationValues.isFlush() || versionAccessorMethod == null || identifierAccessorMethod == null || flushMethod == null || findMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
@@ -386,7 +380,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the merge method, if available and requested (may return null)
 	 */
 	private MethodMetadata getMergeMethodTest(MemberTypeAdditions mergeMethod, MemberTypeAdditions findMethod, MemberTypeAdditions flushMethod, MethodMetadata versionAccessorMethod, MethodMetadata identifierAccessorMethod) {
-		if (!annotationValues.isMerge() || mergeMethod == null || versionAccessorMethod == null) {
+		if (!annotationValues.isMerge() || mergeMethod == null || versionAccessorMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
@@ -439,7 +433,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	private MethodMetadata getPersistMethodTest(MemberTypeAdditions persistMethod, MemberTypeAdditions flushMethod, MethodMetadata identifierAccessorMethod) {
-		if (!annotationValues.isPersist()) {
+		if (!annotationValues.isPersist() || persistMethod == null || flushMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method
 			return null;
 		}
@@ -479,7 +473,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	private MethodMetadata getRemoveMethodTest(MemberTypeAdditions removeMethod, MemberTypeAdditions findMethod, MemberTypeAdditions flushMethod, MethodMetadata identifierAccessorMethod) {
-		if (!annotationValues.isRemove() || removeMethod == null) {
+		if (!annotationValues.isRemove() || removeMethod == null || findMethod == null || flushMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
 		}
