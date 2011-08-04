@@ -315,8 +315,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
 		bodyBuilder.appendFormalLine("long count = " + countMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("if (count > 20) count = 20;");
-		bodyBuilder.append("int firstResult = 0;");
-		bodyBuilder.append("int maxResults = (int) count;");
+		bodyBuilder.appendFormalLine("int firstResult = 0;");
+		bodyBuilder.appendFormalLine("int maxResults = (int) count;");
 		bodyBuilder.appendFormalLine("List<" + annotationValues.getEntity().getSimpleTypeName() + "> result = " + findEntriesMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned an incorrect number of entries\", count, result.size());");
