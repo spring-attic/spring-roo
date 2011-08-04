@@ -217,28 +217,28 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<JavaType> parameters = new ArrayList<JavaType>();
 
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
-			bodyBuilder.appendFormalLine("long count = " + annotationValues.getEntity().getSimpleTypeName() + "." + countMethod.getMethodName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Counter for '" + annotationValues.getEntity().getSimpleTypeName() + "' incorrectly reported there were no entries\", count > 0);");
-
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+		if (method != null) {
+			return method;
 		}
+		
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
 
-		return method;
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("long count = " + annotationValues.getEntity().getSimpleTypeName() + "." + countMethod.getMethodName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Counter for '" + annotationValues.getEntity().getSimpleTypeName() + "' incorrectly reported there were no entries\", count > 0);");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 	
 	/**
 	 * @return a test for the find (by ID) method, if available and requested (may return null)
 	 */
 	public MethodMetadata getFindMethodTest() {
-		if (!annotationValues.isFind() || findMethod == null) {
+		if (!annotationValues.isFind()) {
 			// User does not want this method
 			return null;
 		}
@@ -246,27 +246,26 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
-			bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
-			bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
-
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+		if (method != null) {
+			return method;
 		}
 
-		return method;
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
 	/**
@@ -281,33 +280,32 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findAllMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
-			bodyBuilder.appendFormalLine("long count = " + annotationValues.getEntity().getSimpleTypeName() + "." + countMethod.getMethodName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Too expensive to perform a find all test for '" + annotationValues.getEntity().getSimpleTypeName() + "', as there are \" + count + \" entries; set the findAllMaximum to exceed this value or set findAll=false on the integration test annotation to disable the test\", count < " + annotationValues.getFindAllMaximum() +");");
-			bodyBuilder.appendFormalLine("java.util.List<" + annotationValues.getEntity().getSimpleTypeName() + "> result = " + annotationValues.getEntity().getSimpleTypeName() + "." + findAllMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to return any data\", result.size() > 0);");
-
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+		if (method != null) {
+			return method;
 		}
 
-		return method;
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("long count = " + annotationValues.getEntity().getSimpleTypeName() + "." + countMethod.getMethodName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Too expensive to perform a find all test for '" + annotationValues.getEntity().getSimpleTypeName() + "', as there are \" + count + \" entries; set the findAllMaximum to exceed this value or set findAll=false on the integration test annotation to disable the test\", count < " + annotationValues.getFindAllMaximum() + ");");
+		bodyBuilder.appendFormalLine("java.util.List<" + annotationValues.getEntity().getSimpleTypeName() + "> result = " + annotationValues.getEntity().getSimpleTypeName() + "." + findAllMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to return any data\", result.size() > 0);");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
 	/**
 	 * @return a test for the find entries method, if available and requested (may return null)
 	 */
 	public MethodMetadata getFindEntriesMethodTest() {
-		if (!annotationValues.isFindEntries() || findEntriesMethod == null || countMethod == null) {
+		if (!annotationValues.isFindEntries() || countMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
@@ -315,33 +313,32 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findEntriesMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
-			bodyBuilder.appendFormalLine("long count = " + annotationValues.getEntity().getSimpleTypeName() + "." + countMethod.getMethodName() + "();");
-			bodyBuilder.appendFormalLine("if (count > 20) count = 20;");
-			bodyBuilder.appendFormalLine("java.util.List<" + annotationValues.getEntity().getSimpleTypeName() + "> result = " + annotationValues.getEntity().getSimpleTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, (int) count);");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned an incorrect number of entries\", count, result.size());");
-
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+		if (method != null) {
+			return method;
 		}
+		
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
 
-		return method;
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("long count = " + annotationValues.getEntity().getSimpleTypeName() + "." + countMethod.getMethodName() + "();");
+		bodyBuilder.appendFormalLine("if (count > 20) count = 20;");
+		bodyBuilder.appendFormalLine("java.util.List<" + annotationValues.getEntity().getSimpleTypeName() + "> result = " + annotationValues.getEntity().getSimpleTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, (int) count);");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned an incorrect number of entries\", count, result.size());");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
 	/**
 	 * @return a test for the flush method, if available and requested (may return null)
 	 */
 	public MethodMetadata getFlushMethodTest() {
-		if (!annotationValues.isFlush() || flushMethod == null || findMethod == null || versionAccessorMethod == null) {
+		if (!annotationValues.isFlush() || versionAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
@@ -349,42 +346,42 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(flushMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
+		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		if (method != null) {
+			return method;
+		}
+		
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
+		bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
 		
 		String versionTypeName = versionAccessorMethod.getReturnType().getFullyQualifiedTypeName();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
-			bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
-			bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
-			bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
-			bodyBuilder.appendFormalLine(versionTypeName + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
-			if (versionTypeName.equals("java.util.Date") || versionTypeName.equals("java.util.Calendar") || versionTypeName.equals("java.util.GregorianCalendar")) {
-				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
-			} else {
-				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
-			}
-			
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+		bodyBuilder.appendFormalLine(versionTypeName + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
+		if (versionTypeName.equals("java.util.Date") || versionTypeName.equals("java.util.Calendar") || versionTypeName.equals("java.util.GregorianCalendar")) {
+			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
+		} else {
+			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 		}
 
-		return method;
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
 	/**
 	 * @return a test for the merge method, if available and requested (may return null)
 	 */
 	public MethodMetadata getMergeMethodTest() {
-		if (!annotationValues.isMerge() || mergeMethod == null || flushMethod == null || findMethod == null || versionAccessorMethod == null) {
+		if (!annotationValues.isMerge() || mergeMethod == null || versionAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
 		}
@@ -392,46 +389,46 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		
-		String versionTypeName = versionAccessorMethod.getReturnType().getFullyQualifiedTypeName();
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-	
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
-			bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
-			bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
-			bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
-			bodyBuilder.appendFormalLine(versionTypeName + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
-			
-			String castStr = entityHasSuperclass ? "(" + annotationValues.getEntity().getSimpleTypeName() + ")" : "";
-			bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " merged = " + castStr + " obj." + mergeMethod.getMethodName().getSymbolName() + "();");
-			
-			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." +  identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");
-			if (versionTypeName.equals("java.util.Date") || versionTypeName.equals("java.util.Calendar") || versionTypeName.equals("java.util.GregorianCalendar")) {
-				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
-			} else {
-				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
-			}
+		if (method != null) {
+			return method;
+		}
+		
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
+		bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
+
+		String versionTypeName = versionAccessorMethod.getReturnType().getFullyQualifiedTypeName();
+		bodyBuilder.appendFormalLine(versionTypeName + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
+
+		String castStr = entityHasSuperclass ? "(" + annotationValues.getEntity().getSimpleTypeName() + ")" : "";
+		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " merged = " + castStr + " obj." + mergeMethod.getMethodName().getSymbolName() + "();");
+
+		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." + identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");
+		if (versionTypeName.equals("java.util.Date") || versionTypeName.equals("java.util.Calendar") || versionTypeName.equals("java.util.GregorianCalendar")) {
+			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
+		} else {
+			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 		}
 
-		return method;
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	public MethodMetadata getPersistMethodTest() {
-		if (!annotationValues.isPersist() || persistMethod == null || flushMethod == null) {
+		if (!annotationValues.isPersist()) {
 			// User does not want this method
 			return null;
 		}
@@ -439,38 +436,37 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-			
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
-			bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getNewTransientEntityMethod().getMethodName().getSymbolName() + "(Integer.MAX_VALUE);");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide a new transient entity\", obj);");
-			
-			if (!hasEmbeddedIdentifier) {
-				bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName()  + "());");
-			}
-			
-			bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName()  + "());");
-
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+		if (method != null) {
+			return method;
 		}
 
-		return method;
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getNewTransientEntityMethod().getMethodName().getSymbolName() + "(Integer.MAX_VALUE);");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide a new transient entity\", obj);");
+
+		if (!hasEmbeddedIdentifier) {
+			bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+		}
+
+		bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 	
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	public MethodMetadata getRemoveMethodTest() {
-		if (!annotationValues.isRemove() || findMethod == null || flushMethod == null || removeMethod == null) {
+		if (!annotationValues.isRemove() || removeMethod == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
 		}
@@ -478,36 +474,35 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(removeMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
-		if (method == null) {
-			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(TEST));
-			if (isGaeSupported) {
-				AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
-				if (StringUtils.hasText(transactionManager) && !"transactionManager".equals(transactionManager)) {
-					transactionalBuilder.addStringAttribute("value", transactionManager);
-				}
-				transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("SUPPORTS")));
-				annotations.add(transactionalBuilder);
+		if (method != null) {
+			return method;
+		}
+		
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(TEST));
+		if (isGaeSupported) {
+			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
+			if (StringUtils.hasText(transactionManager) && !"transactionManager".equals(transactionManager)) {
+				transactionalBuilder.addStringAttribute("value", transactionManager);
 			}
-			
-			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
-			bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
-			bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
-			bodyBuilder.appendFormalLine("obj." + removeMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id));");
-
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
-			methodBuilder.setAnnotations(annotations);
-			method = methodBuilder.build();
+			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("SUPPORTS")));
+			annotations.add(transactionalBuilder);
 		}
 
-		return method;
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
+		bodyBuilder.appendFormalLine("obj." + removeMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id));");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
 	/**
