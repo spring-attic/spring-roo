@@ -350,6 +350,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(flushMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
+		String versionTypeName = versionAccessorMethod.getReturnType().getFullyQualifiedTypeName();
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -363,9 +364,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
 			bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
-			bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine(versionTypeName + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
-			if (versionAccessorMethod.getReturnType().getFullyQualifiedTypeName().equals("java.util.Date")) {
+			if (versionTypeName.equals("java.util.Date") || versionTypeName.equals("java.util.Calendar") || versionTypeName.equals("java.util.GregorianCalendar")) {
 				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
 			} else {
 				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
@@ -392,6 +393,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethod.getMethodName().getSymbolName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		
+		String versionTypeName = versionAccessorMethod.getReturnType().getFullyQualifiedTypeName();
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -404,14 +406,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
 			bodyBuilder.appendFormalLine("obj = " + annotationValues.getEntity().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
 			bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
-			bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine(versionTypeName + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 			
 			String castStr = entityHasSuperclass ? "(" + annotationValues.getEntity().getSimpleTypeName() + ")" : "";
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " merged = " + castStr + " obj." + mergeMethod.getMethodName().getSymbolName() + "();");
 			
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." +  identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");
-			if (versionAccessorMethod.getReturnType().getFullyQualifiedTypeName().equals("java.util.Date")) {
+			if (versionTypeName.equals("java.util.Date") || versionTypeName.equals("java.util.Calendar") || versionTypeName.equals("java.util.GregorianCalendar")) {
 				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
 			} else {
 				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
