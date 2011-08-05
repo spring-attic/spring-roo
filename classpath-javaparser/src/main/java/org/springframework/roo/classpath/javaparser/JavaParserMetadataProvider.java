@@ -4,33 +4,24 @@ import japa.parser.ParseException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecoratorImpl;
-import org.springframework.roo.classpath.customdata.taggers.TypeMatcher;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
-import org.springframework.roo.classpath.layers.LayerTypeMatcher;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.classpath.scanner.MemberDetailsBuilder;
-import org.springframework.roo.classpath.scanner.MemberDetailsDecorator;
-import org.springframework.roo.classpath.scanner.MemberDetailsImpl;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataItem;
-import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -54,38 +45,12 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true) 
 @Service
-@References(
-	value = {
-		@Reference(name = "memberHoldingDecorator", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MemberDetailsDecorator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
-	}
-)
 public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataProvider, FileEventListener {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProjectOperations projectOperations;
 	private Map<JavaType, String> cache = new HashMap<JavaType, String>();
-
-	// Mutex
-	private final Object lock = new Object();
-
-	private SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(new Comparator<MemberDetailsDecorator>() {
-		public int compare(MemberDetailsDecorator o1, MemberDetailsDecorator o2) {
-			return o1.getClass().getName().compareTo(o2.getClass().getName());
-		}
-	});
-
-	protected void bindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
-		synchronized (lock) {
-			decorators.add(decorator);
-		}
-	}
-
-	protected void unbindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
-		synchronized (lock) {
-			decorators.remove(decorator);
-		}
-	}
 
 	public String getProvidesType() {
 		return PhysicalTypeIdentifier.getMetadataIdentiferType();
@@ -204,11 +169,6 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 					}
 				}
 			}
-			MemberDetails memberDetails = new MemberDetailsBuilder(Collections.<MemberHoldingTypeDetails>singletonList(details)).build();
-			for (MemberDetailsDecorator memberDetailsDecorator : decorators) {
-				memberDetails = memberDetailsDecorator.decorate(JavaParserMetadataProvider.class.getName(), memberDetails);
-			}
-			return new DefaultPhysicalTypeMetadata(metadataIdentificationString,  fileIdentifier, memberDetails.getDetails().get(0));
 		}
 		
 		return result;
