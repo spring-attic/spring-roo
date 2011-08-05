@@ -37,6 +37,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * A {@link Matcher} for {@link FieldMetadata}-that matches on the presence of
@@ -61,7 +62,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 	public static final FieldMatcher JPA_ONE_TO_ONE = new FieldMatcher(ONE_TO_ONE_FIELD, JPA_ONE_TO_ONE_ANNOTATION);
 	public static final FieldMatcher JPA_TRANSIENT = new FieldMatcher(TRANSIENT_FIELD, JPA_TRANSIENT_ANNOTATION);
 	public static final FieldMatcher JPA_VERSION = new FieldMatcher(VERSION_FIELD, JPA_VERSION_ANNOTATION);
-	
+
 	// Fields
 	private final CustomDataKey<FieldMetadata> customDataKey;
 	private final List<AnnotationMetadata> annotations;
@@ -69,7 +70,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 	/**
 	 * Constructor for matching on any of the given annotations
 	 *
-	 * @param customDataKey
+	 * @param customDataKey the custom data key indicating the type of field (required)
 	 * @param annotations the annotations to match upon
 	 * @since 1.2
 	 */
@@ -80,15 +81,16 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 	/**
 	 * Constructor for matching on any of the given annotations
 	 *
-	 * @param customDataKey
+	 * @param customDataKey the custom data key indicating the type of field (required)
 	 * @param annotations the annotations to match upon (can be null)
 	 */
 	public FieldMatcher(final CustomDataKey<FieldMetadata> customDataKey, final Collection<AnnotationMetadata> annotations) {
+		Assert.notNull(customDataKey, "Custom data key is required");
 		this.annotations = new ArrayList<AnnotationMetadata>();
+		this.customDataKey = customDataKey;
 		if (annotations != null) {
 			this.annotations.addAll(annotations);
 		}
-		this.customDataKey = customDataKey;
 	}
 
 	public List<FieldMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {

@@ -91,19 +91,9 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	private final List<JavaType> parameters;
 	private final String fullyQualifiedTypeName;
 	private final String simpleTypeName;
-	
-	/**
-	 * Constructor that accepts a {@link Class} object.
-	 *
-	 * @param type the class this type represents (required)
-	 * @since 1.2
-	 */
-	public JavaType(final Class<?> type) {
-		this(type.getName());
-	}
 
 	/**
-	 * Construct a JavaType.
+	 * Constructs a {@link JavaType}.
 	 * <p>
 	 * The fully qualified type name will be enforced as follows:
 	 * <ul>
@@ -119,6 +109,17 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 		this(fullyQualifiedTypeName, 0, DataType.TYPE, null, null);
 	}
 
+	/**
+	 * Constructor equivalent to {@link #JavaType(String)}, but takes a Class
+	 * for convenience and type safety.
+	 *
+	 * @param type the class for which to create an instance (required)
+	 * @since 1.2
+	 */
+	public JavaType(final Class<?> type) {
+		this(type.getName());
+	}
+	
 	/**
 	 * Construct a {@link JavaType} with full details. Recall that {@link JavaType} is immutable and therefore this is the only way of
 	 * setting these non-default values.

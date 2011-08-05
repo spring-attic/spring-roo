@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,27 +33,29 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	
 	// Fields
 	private final CustomDataKey<MethodMetadata> customDataKey;
+	private final List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
 
 	private boolean isAccessor;
 	private boolean suffixPlural;
 	private boolean suffixSingular;
-	private JavaType catalystAnnotationType;
 	private JavaSymbolName userDefinedNameAttribute;
-	private List<FieldMatcher> fieldTaggers = new ArrayList<FieldMatcher>();
+	private JavaType catalystAnnotationType;
 	private String additionalSuffix = "";
 	private String defaultName;
 
 	/**
 	 * Constructor
 	 *
-	 * @param fieldTaggers
+	 * @param fieldTaggers can be <code>null</code> for none
 	 * @param customDataKey
 	 * @param isAccessor
 	 */
-	public MethodMatcher(List<FieldMatcher> fieldTaggers, CustomDataKey<MethodMetadata> customDataKey, boolean isAccessor) {
+	public MethodMatcher(final Collection<? extends FieldMatcher> fieldTaggers, final CustomDataKey<MethodMetadata> customDataKey, final boolean isAccessor) {
 		this.customDataKey = customDataKey;
-		this.fieldTaggers = fieldTaggers;
 		this.isAccessor = isAccessor;
+		if (fieldTaggers != null) {
+			this.fieldTaggers.addAll(fieldTaggers);
+		}
 	}
 
 	/**

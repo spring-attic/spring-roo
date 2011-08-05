@@ -31,6 +31,7 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 	
+	// Fields
 	private final Map<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
 	private final Map<String, String> pluralMap = new HashMap<String, String>();
 
@@ -94,11 +95,13 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		Assert.notNull(matcher, "The matcher must be specified");
 		taggerMap.put(addingClass + matcher.getCustomDataKey(), matcher);
 	}
-	
+
 	public void registerMatchers(final Class<?> addingClass, final Matcher<? extends CustomDataAccessor>... matchers) {
-		for (final Matcher<? extends CustomDataAccessor> matcher : matchers) {
-			// We don't keep a reference to the class, as OSGi might unload it later
-			registerMatcher(addingClass.getName(), matcher);
+		if (addingClass != null) {
+			for (final Matcher<? extends CustomDataAccessor> matcher : matchers) {
+				// We don't keep a reference to the class, as OSGi might unload it later
+				registerMatcher(addingClass.getName(), matcher);
+			}
 		}
 	}
 

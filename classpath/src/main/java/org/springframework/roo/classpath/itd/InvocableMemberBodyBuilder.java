@@ -13,10 +13,15 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class InvocableMemberBodyBuilder {
-	private boolean reset = false;
-	private int indentLevel = 0;
-	private StringBuilder stringBuilder = new StringBuilder();
+	
+	// Fields
+	private boolean reset;
+	private int indentLevel;
+	private final StringBuilder stringBuilder = new StringBuilder();
 
+	/**
+	 * Constructor for an empty body
+	 */
 	public InvocableMemberBodyBuilder() {
 		indentLevel++;
 		indentLevel++;

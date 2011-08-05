@@ -168,7 +168,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return getTypeAnnotation(new JavaType("javax.persistence.MappedSuperclass"));
 	}
 
-	private AnnotationMetadata getTypeAnnotation(JavaType annotationType) {
+	protected AnnotationMetadata getTypeAnnotation(JavaType annotationType) {
 		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType) != null) {
 			return null;
 		}

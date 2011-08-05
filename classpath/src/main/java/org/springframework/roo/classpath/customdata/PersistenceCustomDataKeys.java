@@ -19,6 +19,12 @@ public class PersistenceCustomDataKeys {
 	public static final MemberHoldingTypeDetailsCustomDataKey IDENTIFIER_TYPE = new MemberHoldingTypeDetailsCustomDataKey("IDENTIFIER_TYPE");
 	public static final MemberHoldingTypeDetailsCustomDataKey PERSISTENT_TYPE = new MemberHoldingTypeDetailsCustomDataKey("PERSISTENT_TYPE");
 
+	/**
+	 * Tags a type as having a no-arg constructor.
+	 * 
+	 * @deprecated not applied by core Roo addons.
+	 */
+	@Deprecated
 	public static final ConstructorMetadataCustomDataKey NO_ARG_CONSTRUCTOR = new ConstructorMetadataCustomDataKey("NO_ARG_CONSTRUCTOR");
 
 	public static final FieldMetadataCustomDataKey IDENTIFIER_FIELD = new FieldMetadataCustomDataKey("IDENTIFIER_FIELD");

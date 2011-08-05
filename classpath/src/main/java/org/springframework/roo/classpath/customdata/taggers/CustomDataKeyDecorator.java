@@ -18,28 +18,31 @@ import org.springframework.roo.model.CustomDataAccessor;
  * @since 1.1.3
  */
 public interface CustomDataKeyDecorator extends MemberDetailsDecorator {
-
+	
 	/**
-	 * Registers the given matcher
+	 * Registers the given matcher on behalf of the class with the given fully-
+	 * qualified name.
 	 * 
-	 * @param addingClass the class adding the matcher (required)
-	 * @param matchers the matchers being registered
+	 * @param addingClass the name of the class registering the matcher (required)
+	 * @param matcher the matcher to register (required)
+	 */
+	void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher);
+	
+	/**
+	 * Registers the given matchers on behalf of the given class
+	 * 
+	 * @param addingClass the class registering the matchers (can be null not to
+	 * register any matchers)
+	 * @param matchers the matchers to register (can be none)
 	 * @since 1.2
 	 */
 	void registerMatchers(Class<?> addingClass, Matcher<? extends CustomDataAccessor>... matchers);
-	
-	/**
-	 * Registers the given matcher
-	 * 
-	 * @param addingClass the name of the class adding the matcher (required)
-	 * @param matcher the matcher being registered (required)
-	 */
-	void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher);
 
 	/**
 	 * Unregisters any matchers registered by the given class
 	 * 
-	 * @param addingClass the class whose matchers are to be unregistered (required)
+	 * @param addingClass the class whose matchers are to be unregistered
+	 * (required)
 	 * @since 1.2
 	 */
 	void unregisterMatchers(Class<?> addingClass);
@@ -47,7 +50,8 @@ public interface CustomDataKeyDecorator extends MemberDetailsDecorator {
 	/**
 	 * Unregisters any matchers registered by the given class
 	 * 
-	 * @param addingClass the class whose matchers are to be unregistered (required)
+	 * @param addingClass the fully-qualified name of the class whose matchers
+	 * are to be unregistered (required)
 	 */
 	void unregisterMatchers(String addingClass);
 }

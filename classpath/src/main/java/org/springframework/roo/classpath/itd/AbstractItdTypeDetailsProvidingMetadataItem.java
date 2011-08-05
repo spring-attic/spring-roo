@@ -5,6 +5,9 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -66,6 +69,20 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	
 	public final ItdTypeDetails getMemberHoldingTypeDetails() {
 		return itdTypeDetails;
+	}
+	
+	/**
+	 * Returns the metadata for an annotation of the given type if the governor
+	 * does not already have one.
+	 * 
+	 * @param annotationType the type of annotation to generate (required)
+	 * @return <code>null</code> if the governor already has that annotation
+	 */
+	protected AnnotationMetadata getTypeAnnotation(final JavaType annotationType) {
+		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType) != null) {
+			return null;
+		}
+		return new AnnotationMetadataBuilder(annotationType).build();
 	}
 
 	@Override

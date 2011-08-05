@@ -19,11 +19,11 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractAnnotationValues {
 	
 	/** Indicates whether the class was able to be parsed at all (ie the metadata was properly formed) */
-	protected boolean classParsed = false;
+	protected boolean classParsed;
 	
-	protected AnnotationMetadata annotationMetadata = null;
+	protected AnnotationMetadata annotationMetadata;
 	
-	protected ClassOrInterfaceTypeDetails governorTypeDetails = null;
+	protected ClassOrInterfaceTypeDetails governorTypeDetails;
 	
 	/**
 	 * Parses the governor's metadata for the requested annotation {@link JavaType}. If found, makes
@@ -37,23 +37,24 @@ public abstract class AbstractAnnotationValues {
 	 * If the {@link PhysicalTypeMetadata} cannot be parsed or does not internally contain a
 	 * {@link ClassOrInterfaceTypeDetails}, no attempt will be made to populate the values. 
 	 *  
-	 * @param governorMetadata to parse (required)
-	 * @param annotationType to locate and parse (required)
+	 * @param governorMetadata to parse (can be <code>null</code>)
+	 * @param annotationType to locate and parse (can be <code>null</code>)
 	 */
 	protected AbstractAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> governorMetadata, final JavaType annotationType) {
-		Assert.notNull(governorMetadata, "Governor physical type metadata required");
 		Assert.notNull(annotationType, "Annotation to locate is required");
 
-		final Object governorDetails = governorMetadata.getMemberHoldingTypeDetails();
-		
-		if (governorDetails != null && governorDetails instanceof ClassOrInterfaceTypeDetails) {
-			classParsed = true;
+		if (governorMetadata != null) {
+			final Object governorDetails = governorMetadata.getMemberHoldingTypeDetails();
 			
-			// We have reliable physical type details
-			this.governorTypeDetails = (ClassOrInterfaceTypeDetails) governorDetails;
-			
-			// Process values from the annotation, if present
-			this.annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
+			if (governorDetails instanceof ClassOrInterfaceTypeDetails) {
+				this.classParsed = true;
+				
+				// We have reliable physical type details
+				this.governorTypeDetails = (ClassOrInterfaceTypeDetails) governorDetails;
+				
+				// Process values from the annotation, if present
+				this.annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
+			}
 		}
 	}
 	

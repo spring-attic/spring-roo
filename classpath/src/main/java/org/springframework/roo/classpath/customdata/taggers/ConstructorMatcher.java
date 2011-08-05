@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * {@link ConstructorMetadata}-specific implementation of {@link Matcher}. Currently
@@ -36,21 +37,22 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 	 * Constructor
 	 *
 	 * @param <T> {@link JavaType} or any subclass
-	 * @param customDataKey
+	 * @param customDataKey (required)
 	 * @param parameterTypes
 	 * @since 1.2
 	 */
 	public <T extends JavaType> ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final T... parameterTypes) {
 		this(customDataKey, Arrays.asList(parameterTypes));
 	}
-
+	
 	/**
 	 * Constructor
 	 *
-	 * @param customDataKey
+	 * @param customDataKey (required)
 	 * @param parameterTypes can be <code>null</code> for none
 	 */
 	public ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final Collection<? extends JavaType> parameterTypes) {
+		Assert.notNull(customDataKey, "Custom data key is required, e.g. a ConstructorMetadataCustomDataKey");
 		this.customDataKey = customDataKey;
 		this.parameterTypes = new ArrayList<JavaType>();
 		if (parameterTypes != null) {
