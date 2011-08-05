@@ -24,8 +24,8 @@ import org.springframework.roo.model.JavaType;
 public class LayerTypeMatcher extends TypeMatcher {
 	
 	// Fields
-	private final JavaSymbolName annotationAttributeValue;
-	private final JavaType annotationType;
+	public final JavaSymbolName annotationAttributeValue;
+	public final JavaType annotationType;
 	
 	/**
 	 * Constructor
@@ -40,10 +40,22 @@ public class LayerTypeMatcher extends TypeMatcher {
 		this.annotationAttributeValue = annotationAttributeName;
 		this.annotationType = annotationType;
 	}
-	
+
+	@Override
+	public List<MemberHoldingTypeDetails> matches(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+		final List<MemberHoldingTypeDetails> types = new ArrayList<MemberHoldingTypeDetails>();
+		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), annotationType);
+			if (annotation != null ) {
+				types.add(memberHoldingTypeDetails);
+			}
+		}
+		return types;
+	}
+
 	@Override
 	public Object getTagValue(MemberHoldingTypeDetails key) {
-		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(((ItdTypeDetails) key).getGovernor().getAnnotations(), annotationType);
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(key.getAnnotations(), annotationType);
 		if (annotation == null || annotation.getAttribute(annotationAttributeValue) == null) {
 			return null;
 		}

@@ -70,10 +70,8 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		if (localMid != null) {
 			return localMid;
 		}
-		
-		//TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
-		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), itdTypeDetails.getGovernor());
-		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, LayerCustomDataKeys.LAYER_TYPE);
+
+		MemberHoldingTypeDetails memberHoldingTypeDetails = itdTypeDetails.getGovernor();
 		if (memberHoldingTypeDetails != null) {
 			@SuppressWarnings("unchecked")
 			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);

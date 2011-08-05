@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.scanner;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.roo.model.CustomDataKey;
@@ -37,6 +38,14 @@ public class MemberDetailsBuilder {
 	private boolean changed = false;
 
 	public MemberDetailsBuilder(MemberDetails memberDetails) {
+		this.originalMemberDetails = memberDetails;
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			memberHoldingTypeDetailsMap.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), memberHoldingTypeDetails);
+		}
+	}
+
+	public MemberDetailsBuilder(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+		MemberDetails memberDetails = new MemberDetailsImpl(memberHoldingTypeDetailsList);
 		this.originalMemberDetails = memberDetails;
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			memberHoldingTypeDetailsMap.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), memberHoldingTypeDetails);
