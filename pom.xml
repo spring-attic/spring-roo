@@ -195,7 +195,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.bundlerepository</artifactId>
-                <version>1.6.4</version>
+                <version>1.6.6</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.easymock</groupId>
@@ -206,7 +206,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>3.0.7</version>
+                <version>3.2.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -221,7 +221,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.ipojo</artifactId>
-                <version>1.6.8</version>
+                <version>1.8.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.osgi</groupId>
@@ -244,7 +244,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.log</artifactId>
-                <version>1.0.0</version>
+                <version>1.0.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.felix</groupId>
@@ -278,7 +278,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>1.4.0</version>
+                <version>1.6.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
