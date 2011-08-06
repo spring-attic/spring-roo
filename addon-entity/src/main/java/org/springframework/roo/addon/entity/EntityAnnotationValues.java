@@ -19,7 +19,6 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	// TODO seems to duplicate the corresponding literals in RooEntity
 	public static final String PERSIST_METHOD_DEFAULT = "persist";
 	public static final String VERSION_FIELD_DEFAULT = "version";
-	public static final String VERSION_COLUMN_DEFAULT = "version";
 	public static final String FLUSH_METHOD_DEFAULT = "flush";
 	public static final String CLEAR_METHOD_DEFAULT = "clear";
 	public static final String MERGE_METHOD_DEFAULT = "merge";
@@ -34,7 +33,7 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String identifierColumn = "";
 	@AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
 	@AutoPopulate private String versionField = VERSION_FIELD_DEFAULT;
-	@AutoPopulate private String versionColumn = VERSION_COLUMN_DEFAULT;
+	@AutoPopulate private String versionColumn = "";
 	@AutoPopulate private String persistMethod = PERSIST_METHOD_DEFAULT;
 	@AutoPopulate private String flushMethod = FLUSH_METHOD_DEFAULT;
 	@AutoPopulate private String clearMethod = CLEAR_METHOD_DEFAULT;
@@ -85,7 +84,7 @@ public class EntityAnnotationValues extends AbstractAnnotationValues {
 	}
 
 	public String getVersionColumn() {
-		return StringUtils.hasText(versionColumn) ? versionColumn : VERSION_COLUMN_DEFAULT;
+		return versionColumn;
 	}
 
 	public String getPersistMethod() {

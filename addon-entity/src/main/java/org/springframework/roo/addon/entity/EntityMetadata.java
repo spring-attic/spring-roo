@@ -367,13 +367,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Try to locate an existing field with @javax.persistence.Id
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
-		if (idFields.size() > 0) {
+		if (!idFields.isEmpty()) {
 			return getIdentifierField(idFields, ID);
 		}
 		
 		// Try to locate an existing field with @javax.persistence.EmbeddedId
 		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
-		if (embeddedIdFields.size() > 0) {
+		if (!embeddedIdFields.isEmpty()) {
 			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
@@ -389,7 +389,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			for (int i = 0; i < index; i++) {
 				fieldName = fieldName + "_";
 			}
-			fieldName = fieldName + identifierField;
+			fieldName = identifierField + fieldName;
 			
 			idField = new JavaSymbolName(fieldName);
 			if (MemberFindingUtils.getField(governorTypeDetails, idField) == null) {
@@ -629,15 +629,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(versionField)) {
 			return null;
 		}
-		
-		JavaType versionType = annotationValues.getVersionType();
-		String versionColumn = annotationValues.getVersionColumn();
-		if (isVMforceEnabled) {
-			versionField = "lastModifiedDate";
-			versionType = new JavaType("java.util.Calendar");
-			versionColumn = "lastModifiedDate";
-		}
-		
+
 		// Ensure there isn't already a field called "version"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
 		JavaSymbolName verField;
@@ -648,7 +640,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			for (int i = 0; i < index; i++) {
 				fieldName = fieldName + "_";
 			}
-			fieldName = fieldName + versionField;
+			fieldName = versionField + fieldName;
 			
 			verField = new JavaSymbolName(fieldName);
 			if (MemberFindingUtils.getField(governorTypeDetails, verField) == null) {
@@ -658,6 +650,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// We're creating one
+		JavaType versionType = annotationValues.getVersionType();
+		String versionColumn = StringUtils.hasText(annotationValues.getVersionColumn()) ? annotationValues.getVersionColumn() : verField.getSymbolName();
+		if (isVMforceEnabled) {
+			versionField = "lastModifiedDate";
+			versionType = new JavaType("java.util.Calendar");
+			versionColumn = "lastModifiedDate";
+		}
+
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Version")));
 		
