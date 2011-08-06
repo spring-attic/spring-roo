@@ -417,11 +417,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Determines whether the VMforce Maven dependency exists in the pom.
+	 * Determines whether the Database.com Maven dependency exists in the pom.
 	 * 
 	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
 	 */
-	public boolean isVMforceEnabled() {
+	public boolean isDatabaseDotComEnabled() {
 		for (Dependency dependency : dependencies) {
 			if ("com.force.sdk".equals(dependency.getGroupId())) {
 				return true;

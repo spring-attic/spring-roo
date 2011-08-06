@@ -64,7 +64,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private Identifier identifier;
 	private boolean isGaeEnabled;
 	private boolean isDataNucleusEnabled;
-	private boolean isVMforceEnabled;
+	private boolean isDatabaseDotComEnabled;
 	
 	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, ProjectMetadata projectMetadata, EntityAnnotationValues annotationValues, boolean noArgConstructor, String plural, MemberDetails memberDetails, List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -89,7 +89,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		isGaeEnabled = projectMetadata.isGaeEnabled();
 		isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
-		isVMforceEnabled = projectMetadata.isVMforceEnabled();
+		isDatabaseDotComEnabled = projectMetadata.isDatabaseDotComEnabled();
 		
 		// Add @Entity or @MappedSuperclass annotation
 		builder.addAnnotation(annotationValues.isMappedSuperclass() ? getMappedSuperclassAnnotation() : getEntityAnnotation());
@@ -401,7 +401,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We need to create one
 		
 		JavaType identifierType = getIdentifierType();
-		if (isVMforceEnabled) {
+		if (isDatabaseDotComEnabled) {
 			identifierType = JavaType.STRING_OBJECT;
 		}
 		
@@ -412,7 +412,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Compute the column name, as required
 		if (!hasIdClass) {
-			String generationType = isGaeEnabled || isVMforceEnabled ? "IDENTITY" : "AUTO";
+			String generationType = isGaeEnabled || isDatabaseDotComEnabled ? "IDENTITY" : "AUTO";
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 			if ("AUTO".equals(generationType)) {
@@ -652,7 +652,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We're creating one
 		JavaType versionType = annotationValues.getVersionType();
 		String versionColumn = StringUtils.hasText(annotationValues.getVersionColumn()) ? annotationValues.getVersionColumn() : verField.getSymbolName();
-		if (isVMforceEnabled) {
+		if (isDatabaseDotComEnabled) {
 			versionField = "lastModifiedDate";
 			versionType = new JavaType("java.util.Calendar");
 			versionColumn = "lastModifiedDate";
