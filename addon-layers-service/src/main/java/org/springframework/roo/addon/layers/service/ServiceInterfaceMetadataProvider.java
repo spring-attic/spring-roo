@@ -42,14 +42,15 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
-	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
+	@SuppressWarnings("unchecked")
+	protected void activate(ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_SERVICE);
 		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE)));
 	}
 
-	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_SERVICE);
 	}

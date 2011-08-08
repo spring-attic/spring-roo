@@ -92,8 +92,8 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 				metadataDependencyRegistry.registerDependency(methodMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
 		}
-		final MethodMetadata idAccessor = persistenceMemberLocator.getIdentifierAccessor(memberDetails);
-		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(memberDetails);
+		final MethodMetadata idAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
+		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
 		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, idAccessor, versionField, accessorDetails, beanPlural);
 	}
 	

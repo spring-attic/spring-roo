@@ -123,7 +123,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formBackingClassOrInterfaceDetails);
 
 		// Add composite PK identifier fields if needed
-		for (FieldMetadata field : persistenceMemberLocator.getEmbeddedIdentifierFields(memberDetails)) {
+		for (FieldMetadata field : persistenceMemberLocator.getEmbeddedIdentifierFields(formBackingType)) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
 				fieldBuilder.setFieldName(new JavaSymbolName(field.getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));

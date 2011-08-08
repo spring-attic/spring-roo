@@ -95,8 +95,8 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
 		JavaTypeMetadataDetails javaTypeMetadataDetails = getJavaTypeMetadataDetails(javaType, memberDetails, metadataIdentificationString);
 
-		MethodMetadata idMethod = persistenceMemberLocator.getIdentifierAccessor(memberDetails);
-		MethodMetadata versionMethod = persistenceMemberLocator.getVersionAccessor(memberDetails);
+		MethodMetadata idMethod = persistenceMemberLocator.getIdentifierAccessor(javaType);
+		MethodMetadata versionMethod = persistenceMemberLocator.getVersionAccessor(javaType);
 		specialTypes.put(javaType, javaTypeMetadataDetails);
 		
 		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
@@ -163,7 +163,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(memberDetails), persistenceMemberLocator.getVersionAccessor(memberDetails))) {
+			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(javaType), persistenceMemberLocator.getVersionAccessor(javaType))) {
 				continue;
 			}
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
@@ -282,7 +282,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator and accessor and in identifiers and version fields
-			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(memberDetails), persistenceMemberLocator.getVersionAccessor(memberDetails))) {
+			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(javaType), persistenceMemberLocator.getVersionAccessor(javaType))) {
 				continue;
 			}
 			JavaType type = method.getReturnType();

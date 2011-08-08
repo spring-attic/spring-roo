@@ -71,7 +71,7 @@ public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		if (identifierFields.isEmpty()) {
 			return null;
 		}
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(governorPhysicalTypeMetadata);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
 		if (identifierAccessor == null) {
 			return null;
 		}

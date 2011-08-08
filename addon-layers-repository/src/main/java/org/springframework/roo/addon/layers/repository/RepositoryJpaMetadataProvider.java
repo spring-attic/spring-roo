@@ -33,14 +33,14 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	@Reference CustomDataKeyDecorator customDataKeyDecorator;
 	
 	@SuppressWarnings("unchecked")
-	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void activate(ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooRepositoryJpa.class.getName()));
 		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, RepositoryJpaMetadata.class, ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
-	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooRepositoryJpa.class.getName()));
 		customDataKeyDecorator.unregisterMatchers(getClass());

@@ -94,8 +94,8 @@ public class FinderOperationsImpl implements FinderOperations {
 			throw new IllegalStateException("Could not determine class or interface type details for type " + javaType);
 		}
 		final MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
-		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(memberDetails);
-		final List<FieldMetadata> versionFields = persistenceMemberLocator.getVersionFields(memberDetails);
+		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(javaType);
+		FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
 		
 		// Compute the finders (excluding the ID, version, and EM fields)
 		Set<JavaSymbolName> exclusions = new HashSet<JavaSymbolName>();
@@ -103,7 +103,8 @@ public class FinderOperationsImpl implements FinderOperations {
 		for (final FieldMetadata idField : idFields) {
 			exclusions.add(idField.getFieldName());
 		}
-		for (final FieldMetadata versionField : versionFields) {
+		
+		if (versionField != null) {
 			exclusions.add(versionField.getFieldName());
 		}
 

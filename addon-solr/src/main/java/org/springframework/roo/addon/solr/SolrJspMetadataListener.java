@@ -147,8 +147,8 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formbackingObject.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(memberDetails);
-		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(memberDetails);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(formbackingObject);
+		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(formbackingObject);
 		
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			// Only interested in accessors

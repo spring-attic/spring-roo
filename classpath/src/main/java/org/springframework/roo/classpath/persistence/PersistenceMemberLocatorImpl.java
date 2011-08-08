@@ -1,20 +1,26 @@
 package org.springframework.roo.classpath.persistence;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 
@@ -28,121 +34,119 @@ import org.springframework.roo.model.JavaType;
  */
 @Component(immediate=true)
 @Service
-public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
+public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, MetadataNotificationListener {
+	
+	private static final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
+	private static final Map<JavaType, List<FieldMetadata>> domainTypeEmbeddedIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
+	private static final Map<JavaType, FieldMetadata> domainTypeVersionFieldCache = new HashMap<JavaType, FieldMetadata>();
+	private static final Map<JavaType, MethodMetadata> domainTypeIdAccessorCache = new HashMap<JavaType, MethodMetadata>();
+	private static final Map<JavaType, MethodMetadata> domainTypeVersionAccessorCache = new HashMap<JavaType, MethodMetadata>();
 	
 	// Fields
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
-
-	public List<FieldMetadata> getEmbeddedIdentifierFields(final JavaType domainType) {
-		return getEmbeddedIdentifierFields(getMemberDetails(domainType));
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.addNotificationListener(this);
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
-	public List<FieldMetadata> getEmbeddedIdentifierFields(final MemberDetails memberDetails) {
-		final List<FieldMetadata> compositePkFields = new ArrayList<FieldMetadata>();
-		if (memberDetails == null) {
-			return compositePkFields;
+	public List<FieldMetadata> getEmbeddedIdentifierFields(final JavaType domainType) {
+		if (domainTypeEmbeddedIdFieldsCache.containsKey(domainType)) {
+			return domainTypeEmbeddedIdFieldsCache.get(domainType);
 		}
-		
-		final List<FieldMetadata> embeddedFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
-		if (embeddedFields.isEmpty()) {
-			return embeddedFields;
-		}
-		final List<FieldMetadata> fields = MemberFindingUtils.getFields(getMemberDetails(embeddedFields.get(0).getFieldType()));
-		for (final FieldMetadata field : fields) {
-			if (!field.getCustomData().keySet().contains("SERIAL_VERSION_UUID_FIELD")) {
-				compositePkFields.add(field);
-			}
-		}
-		return compositePkFields;
+		return new ArrayList<FieldMetadata>();
 	}
 	
 	public MethodMetadata getIdentifierAccessor(final JavaType domainType) {
-		return getIdentifierAccessor(getPhysicalTypeMetadata(domainType));
+		return domainTypeIdAccessorCache.get(domainType);
 	}
 	
-	public MethodMetadata getIdentifierAccessor(final PhysicalTypeMetadata physicalTypeMetadata) {
-		if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
-			return null;
-		}
-		return getIdentifierAccessor(getMemberDetails(physicalTypeMetadata));
-	}
-	
-	public MethodMetadata getIdentifierAccessor(final MemberDetails domainType) {
-		return MemberFindingUtils.getMostConcreteMethodWithTag(domainType, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-	}
-
 	public List<FieldMetadata> getIdentifierFields(final JavaType domainType) {
-		return getIdentifierFields(getMemberDetails(domainType));
-	}
-
-	public List<FieldMetadata> getIdentifierFields(final MemberDetails memberDetails) {
-		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
-		if (idFields.isEmpty()) {
-			// Return the embedded ID fields, if any
-			return MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
+		if (domainTypeIdFieldsCache.containsKey(domainType)) {
+			return domainTypeIdFieldsCache.get(domainType);
+		} else if (domainTypeEmbeddedIdFieldsCache.containsKey(domainType)) {
+			return domainTypeEmbeddedIdFieldsCache.get(domainType);
 		}
-		return idFields;
-	}
-
-	/**
-	 * Returns the {@link MemberDetails} for the given {@link JavaType}
-	 * 
-	 * @param javaType (can be <code>null</code>)
-	 * @return <code>null</code> if they can't be found
-	 */
-	private MemberDetails getMemberDetails(final JavaType javaType) {
-		return getMemberDetails(getPhysicalTypeMetadata(javaType));
+		return new ArrayList<FieldMetadata>();
 	}
 	
-	/**
-	 * Returns the {@link MemberDetails} for the given {@link PhysicalTypeMetadata}
-	 * 
-	 * @param physicalTypeMetadata can be <code>null</code>
-	 * @return <code>null</code> if the details can't be found
-	 */
-	private MemberDetails getMemberDetails(final PhysicalTypeMetadata physicalTypeMetadata) {
-		if (physicalTypeMetadata == null || !physicalTypeMetadata.isValid()) {
-			return null;
-		}
-		final ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
-		return memberDetailsScanner.getMemberDetails(getClass().getName(), coitd);
-	}
-
-	/**
-	 * Returns the {@link PhysicalTypeMetadata} for the given {@link JavaType}
-	 * 
-	 * @param javaType can be <code>null</code>
-	 * @return <code>null</code> if the given {@link JavaType} is <code>null</code>
-	 */
-	private PhysicalTypeMetadata getPhysicalTypeMetadata(final JavaType javaType) {
-		if (javaType == null) {
-			return null;
-		}
-		return (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType));
-	}
-
 	public MethodMetadata getVersionAccessor(final JavaType domainType) {
-		return getVersionAccessor(getMemberDetails(domainType));
+		return domainTypeVersionAccessorCache.get(domainType);
 	}
 
-	public MethodMetadata getVersionAccessor(final MemberDetails domainType) {
-		return MemberFindingUtils.getMostConcreteMethodWithTag(domainType, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
+	public FieldMetadata getVersionField(JavaType domainType) {
+		return domainTypeVersionFieldCache.get(domainType);
 	}
 
-	public FieldMetadata getVersionField(final MemberDetails domainType) {
-		final List<FieldMetadata> versionFields = getVersionFields(domainType);
-		switch (versionFields.size()) {
-			case 0:
-				return null;
-			case 1:
-				return versionFields.get(0);
-			default:
-				throw new IllegalStateException("Expected at most one version field, but found:\n" + versionFields);
+	public void notify(String upstreamDependency, String downstreamDependency) {
+		if (!PhysicalTypeIdentifier.isValid(upstreamDependency)) {
+			return;
+		}
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(upstreamDependency);
+		if (physicalTypeMetadata == null) {
+			return;
+		}
+		MemberHoldingTypeDetails memberHoldingTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (memberHoldingTypeDetails == null || !(memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails)) {
+			return;
+		}
+		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails);
+		
+		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, PersistenceCustomDataKeys.PERSISTENT_TYPE) == null) {
+			return;
+		}
+		
+		// Get normal persistence ID fields
+		JavaType type = memberHoldingTypeDetails.getName();
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
+		if (!idFields.isEmpty()) {
+			domainTypeIdFieldsCache.put(type, idFields);
+		} else if (domainTypeIdFieldsCache.containsKey(type)) {
+			domainTypeIdFieldsCache.remove(type);
+		}
+		
+		// Get embedded ID fields 
+		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
+		if (!embeddedIdFields.isEmpty()) {
+			domainTypeEmbeddedIdFieldsCache.remove(type);
+			domainTypeEmbeddedIdFieldsCache.put(type, new ArrayList<FieldMetadata>());
+			final List<FieldMetadata> fields = MemberFindingUtils.getFields(getMemberDetails(embeddedIdFields.get(0).getFieldType()));
+			for (final FieldMetadata field : fields) {
+				if (!field.getCustomData().keySet().contains("SERIAL_VERSION_UUID_FIELD")) {
+					domainTypeEmbeddedIdFieldsCache.get(type).add(field);
+				}
+			}
+		} else if (domainTypeEmbeddedIdFieldsCache.containsKey(type)) {
+			domainTypeEmbeddedIdFieldsCache.remove(type);
+		}
+		
+		// Get ID accessor
+		MethodMetadata idAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		if (idAccessor != null) {
+			domainTypeIdAccessorCache.put(type, idAccessor);
+		} else if (domainTypeIdAccessorCache.containsKey(type)) {
+			domainTypeIdAccessorCache.remove(type);
+		}
+		
+		// Get version accessor
+		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
+		if (versionAccessor != null) {
+			domainTypeVersionAccessorCache.put(type, versionAccessor);
+		} else if (domainTypeVersionAccessorCache.containsKey(type)) {
+			domainTypeVersionAccessorCache.remove(type);
 		}
 	}
 
-	public List<FieldMetadata> getVersionFields(final MemberDetails domainType) {
-		return MemberFindingUtils.getFieldsWithTag(domainType, PersistenceCustomDataKeys.VERSION_FIELD);
+	private MemberDetails getMemberDetails(final JavaType type) {
+		final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type));
+		if (physicalTypeMetadata == null || !(physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+			return null;
+		}
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails());
 	}
 }
