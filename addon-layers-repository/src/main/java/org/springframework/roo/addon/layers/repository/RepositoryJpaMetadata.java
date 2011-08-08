@@ -26,6 +26,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	private static final String PROVIDES_TYPE_STRING = RepositoryJpaMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String SPRING_JPA_REPOSITORY = "org.springframework.data.jpa.repository.JpaRepository";
+	private final RepositoryJpaAnnotationValues annotationValues;
 	
 	/**
 	 * Constructor
@@ -41,6 +42,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
 		
+		this.annotationValues = annotationValues;
+		
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
 		final JavaType springJpaRepository = new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), JavaType.LONG_OBJECT));
 		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(springJpaRepository)) {
@@ -49,6 +52,10 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 		
 		// Build the ITD
 		itdTypeDetails = builder.build();
+	}
+	
+	public RepositoryJpaAnnotationValues getAnnotationValues() {
+		return annotationValues;
 	}
 
 	public static final String getMetadataIdentiferType() {

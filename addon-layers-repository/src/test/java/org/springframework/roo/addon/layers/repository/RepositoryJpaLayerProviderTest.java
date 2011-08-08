@@ -78,6 +78,7 @@ public class RepositoryJpaLayerProviderTest {
 	@Test
 	public void testGetAdditionsWhenNoRepositoriesExist() {
 		// Invoke
+		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
