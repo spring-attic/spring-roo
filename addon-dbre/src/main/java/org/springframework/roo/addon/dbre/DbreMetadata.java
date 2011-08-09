@@ -633,6 +633,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getField(JavaSymbolName fieldName, Column column, String tableName, boolean includeNonPortable) {
 		JavaType fieldType = column.getJavaType();
 		Assert.notNull(fieldType, "Field type for column '" + column.getName() + "' in table '"+ tableName +"' is null");
+		
+		// Check if field is a Boolean object and is required, and change to boolean primitive
+		if (fieldType.equals(JavaType.BOOLEAN_OBJECT) && column.isRequired()) {
+			fieldType = JavaType.BOOLEAN_PRIMITIVE;
+		}
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -697,11 +702,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Check for an existing accessor in the governor or in the entity metadata
 		if (!hasAccessor(field)) {
 			builder.addMethod(getAccessor(field));
-		}
-
-		// Add boolean accessor for Boolean object fields
-		if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) && !hasBooleanPrimitiveAccessor(field)) {
-			builder.addMethod(getBooleanPrimitiveAccessor(field));
 		}
 
 		// Check for an existing mutator in the governor or in the entity metadata
