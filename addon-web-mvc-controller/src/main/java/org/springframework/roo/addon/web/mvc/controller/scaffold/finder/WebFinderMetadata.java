@@ -121,7 +121,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				javaTypePersistenceMetadataHolder = typeMd.getPersistenceDetails();
 			}
 			if (typeMd != null && javaTypePersistenceMetadataHolder != null && javaTypePersistenceMetadataHolder.getFindAllMethod() != null) {
-				bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + typeMd.getPlural().toLowerCase() + "\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + javaTypePersistenceMetadataHolder.getFindAllMethod().getMethodName() + "());");
+				bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + typeMd.getPlural().toLowerCase() + "\", " + javaTypePersistenceMetadataHolder.getFindAllMethod().getMethodCall() + ");");
+//				javaTypePersistenceMetadataHolder.getFindAllMethod().copyAdditionsTo(builder);
 			}
 			needmodel = true;
 		}
