@@ -69,7 +69,6 @@ public class RepositoryJpaLayerProviderTest {
 	@Test
 	public void testGetAdditionsForNonRepositoryLayerMethod() {
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
 		
 		// Check
@@ -79,7 +78,6 @@ public class RepositoryJpaLayerProviderTest {
 	@Test
 	public void testGetAdditionsWhenNoRepositoriesExist() {
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -105,7 +103,6 @@ public class RepositoryJpaLayerProviderTest {
 		assertEquals(expectedMethodCall, additions.getMethodCall());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetFindAllAdditions() {
 		assertMethodCall("clinicRepo.findAll()", FIND_ALL_METHOD);

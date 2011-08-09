@@ -9,7 +9,7 @@
 	</parent>
 	<artifactId>org.springframework.roo.addon.layers.service</artifactId>
 	<packaging>bundle</packaging>
-	<name>Spring Roo - Application Layering Support for Services</name>
+	<name>Spring Roo - Addon - Application Layering Support for Services</name>
 	<description>Support for common layering options in Java Enterprise Applications</description>
 	<dependencies>
         <!-- OSGi -->

@@ -140,47 +140,40 @@ public class ServiceLayerProviderTest {
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, BOGUS_METHOD, mockTargetType, mockIdType);
 		
 		// Check
 		assertNull(additions);		
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForEntityWithNullPluralText() {
 		assertAdditions(null, Arrays.<ClassOrInterfaceTypeDetails>asList(), FIND_ALL.getKey(), null);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForEntityWithNoServices() {
 		assertAdditions("x", Arrays.<ClassOrInterfaceTypeDetails>asList(), BOGUS_METHOD, null);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsWhenServiceAnnotationValuesUnavailable() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
 		assertAdditions("anything", Arrays.asList(mockServiceInterface), BOGUS_METHOD, null);
 	}	
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForBogusMethod() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);		
 		assertAdditions("x", Arrays.asList(mockServiceInterface), BOGUS_METHOD, null);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForFindAllMethodWhenServiceProvidesIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("findPerson", "", "x", "x");
 		assertAdditions("s", Arrays.asList(mockServiceInterface), FIND_ALL.getKey(), "personService.findPersons()");		
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForFindAllMethodWhenServiceDoesNotProvideIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("", "x", "x", "x");
