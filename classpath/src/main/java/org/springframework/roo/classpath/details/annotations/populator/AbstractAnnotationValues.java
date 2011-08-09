@@ -14,7 +14,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class AbstractAnnotationValues {
 	
@@ -24,6 +23,16 @@ public abstract class AbstractAnnotationValues {
 	protected AnnotationMetadata annotationMetadata;
 	
 	protected ClassOrInterfaceTypeDetails governorTypeDetails;
+	
+	/**
+	 * Convenience constructor that takes a {@link Class} for the annotation type
+	 *
+	 * @param governorMetadata to parse (can be <code>null</code>)
+	 * @param annotationType the annotation class (required)
+	 */
+	protected AbstractAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> governorMetadata, final Class<?> annotationType) {
+		this(governorMetadata, new JavaType(annotationType));
+	}
 	
 	/**
 	 * Parses the governor's metadata for the requested annotation {@link JavaType}. If found, makes
@@ -72,5 +81,4 @@ public abstract class AbstractAnnotationValues {
 	public boolean isAnnotationFound() {
 		return annotationMetadata != null;
 	}
-	
 }

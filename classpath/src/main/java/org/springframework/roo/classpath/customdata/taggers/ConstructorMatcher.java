@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -21,13 +20,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.3
  */
 public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
-	
-	/**
-	 * A {@link ConstructorMatcher} that matches on no-arg constructors.
-	 * 
-	 * @since 1.2
-	 */
-	public static final ConstructorMatcher NO_ARG = new ConstructorMatcher(PersistenceCustomDataKeys.NO_ARG_CONSTRUCTOR);
 	
 	// Fields
 	private final CustomDataKey<ConstructorMetadata> customDataKey;
