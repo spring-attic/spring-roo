@@ -13,9 +13,7 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.1.2
- * @deprecated use LayerService instead
  */
-@Deprecated
 public class JavaTypePersistenceMetadataDetails {
 	
 	// Fields
