@@ -72,6 +72,13 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 		} else if (domainTypeEmbeddedIdFieldsCache.containsKey(domainType)) {
 			return domainTypeEmbeddedIdFieldsCache.get(domainType);
 		}
+		// It is possible that the notify method has not been called yet for this type, let's try now.
+		notify(PhysicalTypeIdentifier.createIdentifier(domainType), null);
+		if (domainTypeIdFieldsCache.containsKey(domainType)) {
+			return domainTypeIdFieldsCache.get(domainType);
+		} else if (domainTypeEmbeddedIdFieldsCache.containsKey(domainType)) {
+			return domainTypeEmbeddedIdFieldsCache.get(domainType);
+		}
 		return new ArrayList<FieldMetadata>();
 	}
 	
@@ -100,17 +107,39 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, PersistenceCustomDataKeys.PERSISTENT_TYPE) == null) {
 			return;
 		}
-		
-		// Get normal persistence ID fields
 		JavaType type = memberHoldingTypeDetails.getName();
-		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
-		if (!idFields.isEmpty()) {
-			domainTypeIdFieldsCache.put(type, idFields);
-		} else if (domainTypeIdFieldsCache.containsKey(type)) {
-			domainTypeIdFieldsCache.remove(type);
-		}
+		// Get normal persistence ID fields
+		populateIdFields(details, type);
 		
 		// Get embedded ID fields 
+		populateEmbeddedIdFields(details, type);
+		
+		// Get ID accessor
+		populateIdAccessors(details, type);
+		
+		// Get version accessor
+		populateVersionAccessor(details, type);
+	}
+
+	private void populateVersionAccessor(MemberDetails details, JavaType type) {
+		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
+		if (versionAccessor != null) {
+			domainTypeVersionAccessorCache.put(type, versionAccessor);
+		} else if (domainTypeVersionAccessorCache.containsKey(type)) {
+			domainTypeVersionAccessorCache.remove(type);
+		}
+	}
+
+	private void populateIdAccessors(MemberDetails details, JavaType type) {
+		MethodMetadata idAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		if (idAccessor != null) {
+			domainTypeIdAccessorCache.put(type, idAccessor);
+		} else if (domainTypeIdAccessorCache.containsKey(type)) {
+			domainTypeIdAccessorCache.remove(type);
+		}
+	}
+
+	private void populateEmbeddedIdFields(MemberDetails details, JavaType type) {
 		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 		if (!embeddedIdFields.isEmpty()) {
 			domainTypeEmbeddedIdFieldsCache.remove(type);
@@ -124,21 +153,14 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 		} else if (domainTypeEmbeddedIdFieldsCache.containsKey(type)) {
 			domainTypeEmbeddedIdFieldsCache.remove(type);
 		}
-		
-		// Get ID accessor
-		MethodMetadata idAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		if (idAccessor != null) {
-			domainTypeIdAccessorCache.put(type, idAccessor);
-		} else if (domainTypeIdAccessorCache.containsKey(type)) {
-			domainTypeIdAccessorCache.remove(type);
-		}
-		
-		// Get version accessor
-		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
-		if (versionAccessor != null) {
-			domainTypeVersionAccessorCache.put(type, versionAccessor);
-		} else if (domainTypeVersionAccessorCache.containsKey(type)) {
-			domainTypeVersionAccessorCache.remove(type);
+	}
+
+	private void populateIdFields(MemberDetails details, JavaType type) {
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
+		if (!idFields.isEmpty()) {
+			domainTypeIdFieldsCache.put(type, idFields);
+		} else if (domainTypeIdFieldsCache.containsKey(type)) {
+			domainTypeIdFieldsCache.remove(type);
 		}
 	}
 

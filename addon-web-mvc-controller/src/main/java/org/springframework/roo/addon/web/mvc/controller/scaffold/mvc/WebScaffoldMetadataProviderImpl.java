@@ -95,7 +95,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		}
 		
 		// Lookup the form backing object's metadata
-		JavaType formBackingType = annotationValues.getFormBackingObject();
+		final JavaType formBackingType = annotationValues.getFormBackingObject();
 		
 		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + formBackingType.getFullyQualifiedTypeName());
@@ -126,7 +126,6 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		Map<String, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
-		
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
 	}
 	

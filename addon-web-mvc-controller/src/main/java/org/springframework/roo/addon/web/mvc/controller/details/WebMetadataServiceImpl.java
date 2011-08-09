@@ -76,6 +76,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private static final String FIND_ENTRIES_METHOD = PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name();
 	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 	
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	
@@ -180,7 +181,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	}
 	
 	@SuppressWarnings("unchecked") 
-	public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
+	public JavaTypePersistenceMetadataDetails getJavaTypePersistenceMetadataDetails(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details service required");
 		Assert.hasText(metadataIdentificationString, "Metadata id required");
@@ -200,14 +201,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
-		MemberTypeAdditions persistMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, javaType, idType, LayerType.HIGHEST.getPosition(), entityParameter);
-		MemberTypeAdditions removeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, javaType, idType, LayerType.HIGHEST.getPosition(), entityParameter);
-		MemberTypeAdditions mergeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, javaType, idType, LayerType.HIGHEST.getPosition(), entityParameter);
-		MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, javaType, idType, LayerType.HIGHEST.getPosition());
-		MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD, javaType, idType, LayerType.HIGHEST.getPosition(), idParameter);
-		MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, javaType, idType, LayerType.HIGHEST.getPosition());
-		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, javaType, idType, LayerType.HIGHEST.getPosition(), findEntriesParameters.toArray());
-
+		MemberTypeAdditions persistMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions removeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions mergeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, javaType, idType, LAYER_POSITION);
+		MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD, javaType, idType, LAYER_POSITION, idParameter);
+		MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, javaType, idType, LAYER_POSITION);
+		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, javaType, idType, LAYER_POSITION, findEntriesParameters.toArray());
 		List<String> dynamicFinderNames = new ArrayList<String>();
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
 			if (mhtd.getCustomData().keySet().contains(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES)) {
@@ -406,14 +406,14 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		}
 	}
 	
-	public MemberDetails getMemberDetails(JavaType javaType) {
+	public MemberDetails getMemberDetails(final JavaType javaType) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails classOrInterfaceDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceDetails);
 	}
 	
-	public Map<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString) {
+	public Map<String, MemberTypeAdditions> getCrudAdditions(final JavaType domainType, String metadataIdentificationString) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(domainType, getMemberDetails(domainType), metadataIdentificationString);
@@ -421,6 +421,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		if (javaTypePersistenceMetadataDetails == null) {
 			return additions;
 		}
+		
 		additions.put(COUNT_ALL_METHOD, javaTypePersistenceMetadataDetails.getCountMethod());
 		additions.put(DELETE_METHOD, javaTypePersistenceMetadataDetails.getRemoveMethod());
 		additions.put(FIND_METHOD, javaTypePersistenceMetadataDetails.getFindMethod());
