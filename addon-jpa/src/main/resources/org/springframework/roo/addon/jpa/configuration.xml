@@ -6,7 +6,7 @@
                 <dependency>
                     <groupId>com.h2database</groupId>
                     <artifactId>h2</artifactId>
-                    <version>1.3.155</version>
+                    <version>1.3.158</version>
                 </dependency>
             </dependencies>
         </database>
@@ -33,7 +33,7 @@
                 <dependency>
                     <groupId>mysql</groupId>
                     <artifactId>mysql-connector-java</artifactId>
-                    <version>5.1.13</version>
+                    <version>5.1.17</version>
                 </dependency>
             </dependencies>
         </database>
@@ -82,11 +82,20 @@
                 </dependency>
             </dependencies>
         </database>
-        <database id="DERBY">
+        <database id="DERBY_EMBEDDED">
             <dependencies>
                 <dependency>
                     <groupId>org.apache.derby</groupId>
                     <artifactId>derby</artifactId>
+                    <version>10.8.1.2</version>
+                </dependency>
+            </dependencies>
+        </database>
+        <database id="DERBY_CLIENT">
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.derby</groupId>
+                    <artifactId>derbyclient</artifactId>
                     <version>10.8.1.2</version>
                 </dependency>
             </dependencies>
@@ -108,7 +117,7 @@
         </database>
         <database id="GAE">
             <properties>
-                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.5.1/appengine-java-sdk-1.5.1</gae.home>
+                <gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/1.5.2/appengine-java-sdk-1.5.2</gae.home>
             </properties>
             <repositories>
                 <repository>
@@ -133,24 +142,24 @@
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-1.0-sdk</artifactId>
-                    <version>1.5.1</version>
+                    <version>1.5.2</version>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-testing</artifactId>
-                    <version>1.5.1</version>
+                    <version>1.5.2</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-stubs</artifactId>
-                    <version>1.5.1</version>
+                    <version>1.5.2</version>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.google.appengine</groupId>
                     <artifactId>appengine-api-labs</artifactId>
-                    <version>1.5.1</version>
+                    <version>1.5.2</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -158,9 +167,9 @@
                 <plugin>
                     <groupId>net.kindleit</groupId>
                     <artifactId>maven-gae-plugin</artifactId>
-                    <version>0.8.4</version>
+                    <version>0.9.0</version>
                     <configuration>
-                        <unpackVersion>1.5.1</unpackVersion>
+                        <unpackVersion>1.5.2</unpackVersion>
                     </configuration>
                     <executions>
                         <execution>
@@ -189,12 +198,12 @@
                 <dependency>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-core</artifactId>
-                    <version>3.6.4.Final</version>
+                    <version>3.6.6.Final</version>
                 </dependency>
                 <dependency>
                     <groupId>org.hibernate</groupId>
                     <artifactId>hibernate-entitymanager</artifactId>
-                    <version>3.6.4.Final</version>
+                    <version>3.6.6.Final</version>
                     <exclusions>
                         <exclusion>
                             <groupId>cglib</groupId>
@@ -209,7 +218,7 @@
                 <dependency>
                     <groupId>org.hibernate.javax.persistence</groupId>
                     <artifactId>hibernate-jpa-2.0-api</artifactId>
-                    <version>1.0.0.Final</version>
+                    <version>1.0.1.Final</version>
                 </dependency>
             </dependencies>
         </provider>
@@ -218,7 +227,7 @@
                 <dependency>
                     <groupId>org.apache.openjpa</groupId>
                     <artifactId>openjpa</artifactId>
-                    <version>2.1.0</version>
+                    <version>2.1.1</version>
                     <exclusions>
                         <exclusion>
                             <groupId>commons-logging</groupId>

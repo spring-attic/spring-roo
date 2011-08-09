@@ -20,7 +20,8 @@ public enum JdbcDatabase {
 	MSSQL("MSSQL", "net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sqlserver://HOST_NAME:1433/TO_BE_CHANGED_BY_ADDON"), 
 	DB2_EXPRESS_C("DB2_EXPRESS_C", "com.ibm.db2.jcc.DB2Driver", "jdbc:db2://HOST_NAME:50000"), 
 	DB2_400("DB2_400", "com.ibm.as400.access.AS400JDBCDriver", "jdbc:as400://HOST_NAME"), 
-	DERBY("DERBY", "org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:TO_BE_CHANGED_BY_ADDON;create=true"),
+	DERBY_EMBEDDED("DERBY_EMBEDDED", "org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:TO_BE_CHANGED_BY_ADDON;create=true"),
+	DERBY_CLIENT("DERBY_CLIENT", "org.apache.derby.jdbc.ClientDriver", "jdbc:derby://HOST_NAME:1527/TO_BE_CHANGED_BY_ADDON;create=true"),
 	FIREBIRD("FIREBIRD", "org.firebirdsql.jdbc.FBDriver", "jdbc:firebirdsql://HOST_NAME:3050/"),
 	GOOGLE_APP_ENGINE("GAE", "", "appengine"),
 	DATABASE_DOT_COM("DATABASE.COM", "", "force://HOST_NAME;user=USER_NAME;password=PASSWORD");

@@ -524,7 +524,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			logger.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
 			break;
 		case POSTGRES:
-		case DERBY:
+		case DERBY_EMBEDDED:
 		case MSSQL:
 		case SYBASE:
 		case MYSQL:
