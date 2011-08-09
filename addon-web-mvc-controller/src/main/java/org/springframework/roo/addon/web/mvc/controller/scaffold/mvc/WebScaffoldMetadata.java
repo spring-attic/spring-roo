@@ -690,10 +690,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		return null;
 	}
-	
-	private String getShortName(JavaType type) {
-		return type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-	}
 
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

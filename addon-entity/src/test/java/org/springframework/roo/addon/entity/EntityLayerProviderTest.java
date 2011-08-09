@@ -93,6 +93,7 @@ public class EntityLayerProviderTest {
 		when(mockEntityMetadataProvider.getAnnotationValues(mockTargetEntity)).thenReturn(null);
 		
 		// Invoke
+		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -105,6 +106,7 @@ public class EntityLayerProviderTest {
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
 		
 		// Invoke
+		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -118,6 +120,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("");
 		
 		// Invoke
+		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -131,6 +134,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("anything");
 		
 		// Invoke
+		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
 		
 		// Check
@@ -145,6 +149,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("anything");
 		
 		// Invoke
+		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -159,6 +164,7 @@ public class EntityLayerProviderTest {
 		setUpPlural("Pizzas");
 		
 		// Invoke
+		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check

@@ -59,11 +59,11 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
 	private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
 
-	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void activate(ComponentContext context) {
 		dependencyRegistry.addNotificationListener(this);
 	}
 
-	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void deactivate(ComponentContext context) {
 		dependencyRegistry.removeNotificationListener(this);
 	}
 

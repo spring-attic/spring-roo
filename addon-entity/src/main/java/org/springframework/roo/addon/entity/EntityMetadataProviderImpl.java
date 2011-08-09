@@ -75,7 +75,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	private boolean noArgConstructor = true;
 
-	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void activate(ComponentContext context) {
 		configurableMetadataProvider.addMetadataTrigger(ENTITY_ANNOTATION);
 		// Now that active record is optional, the ID field is managed by the IdentifierMetadataProvider, not this one
 		// identifierMetadataProvider.addMetadataTrigger(ENTITY_ANNOTATION);
@@ -85,7 +85,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		registerMatchers();
 	}
 	
-	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(ENTITY_ANNOTATION);
 		// identifierMetadataProvider.removeMetadataTrigger(ENTITY_ANNOTATION);

@@ -61,7 +61,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();
 	
-	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		
@@ -70,7 +70,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
 	}
 	
-	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
@@ -155,9 +155,12 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		JavaType idType = idFields.get(0).getFieldType();
 		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
+		@SuppressWarnings("unchecked")
 		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
+		@SuppressWarnings("unchecked")
 		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		@SuppressWarnings("unchecked")
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		
 		if (findEntriesMethod == null || findMethodAdditions == null || flushMethod == null || identifierAccessor == null || persistMethodAdditions == null) {

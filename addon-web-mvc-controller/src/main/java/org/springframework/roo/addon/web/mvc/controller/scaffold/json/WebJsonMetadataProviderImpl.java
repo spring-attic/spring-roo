@@ -73,6 +73,7 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 			if (memberDetails != null) {
 				MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, LayerCustomDataKeys.LAYER_TYPE);
 				if (memberHoldingTypeDetails != null) {
+					@SuppressWarnings("unchecked")
 					List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
 					if (domainTypes != null) {
 						for (JavaType type : domainTypes) {
