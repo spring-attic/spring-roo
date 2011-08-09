@@ -126,10 +126,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.RequestScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.ViewScoped")) != null;
 	}
 	
-	private AnnotationMetadata getTypeAnnotation(JavaType annotationType) {
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
-	}
-
 	private FieldMetadata getEntityField() {
 		JavaSymbolName fieldName = new JavaSymbolName(getEntityName());
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);

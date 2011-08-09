@@ -100,11 +100,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private boolean hasScopeAnnotation() {
 		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.RequestScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.ViewScoped")) != null;
 	}
-	
-	private AnnotationMetadata getTypeAnnotation(JavaType annotationType) {
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
-	}
-	
+
 	private FieldMetadata getMenuModelField() {
 		JavaSymbolName fieldName = new JavaSymbolName("menuModel");
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
