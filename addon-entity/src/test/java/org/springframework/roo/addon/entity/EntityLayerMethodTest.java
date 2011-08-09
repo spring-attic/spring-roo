@@ -34,8 +34,8 @@ public class EntityLayerMethodTest {
 	// Fixture
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
-	@Mock private EntityAnnotationValues mockAnnotationValues;
 	@Mock private JavaSymbolName mockParameterName;
+	@Mock private JpaCrudAnnotationValues mockAnnotationValues;
 	
 	@Before
 	public void setUp() {

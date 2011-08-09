@@ -83,7 +83,7 @@ public class EntityCommands implements CommandMarker {
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
 
-		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.entity.RooEntity"));
+		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(EntityMetadataProvider.ENTITY_ANNOTATION);
 		if (identifierField != null) {
 			rooEntityBuilder.addStringAttribute("identifierField", identifierField);
 		}

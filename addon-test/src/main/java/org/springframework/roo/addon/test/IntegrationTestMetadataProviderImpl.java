@@ -52,6 +52,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
+	private static final JavaType ROO_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooEntity");
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private LayerService layerService;
@@ -182,9 +183,9 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		}
 	
 		String transactionManager = null;
-		AnnotationMetadata rooEntity = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-		if (rooEntity != null) {
-			StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntity.getAttribute(new JavaSymbolName("transactionManager"));
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ROO_ENTITY_ANNOTATION);
+		if (rooEntityAnnotation != null) {
+			StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(new JavaSymbolName("transactionManager"));
 			if (transactionManagerAttr != null) {
 				transactionManager = transactionManagerAttr.getValue();
 			}

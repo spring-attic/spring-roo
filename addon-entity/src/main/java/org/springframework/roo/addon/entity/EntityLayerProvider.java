@@ -38,8 +38,8 @@ public class EntityLayerProvider extends CoreLayerProvider {
 		Assert.hasText(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
 		
-		// Get the values of this entity's @RooEntity annotation
-		final EntityAnnotationValues annotationValues = entityMetadataProvider.getAnnotationValues(targetEntity);
+		// Get the CRUD-related values of this entity's @RooEntity annotation
+		final JpaCrudAnnotationValues annotationValues = entityMetadataProvider.getAnnotationValues(targetEntity);
 		if (annotationValues == null) {
 			return null;
 		}

@@ -59,10 +59,10 @@ public class EntityLayerProviderTest {
 	private EntityLayerProvider layerProvider;
 	private String pluralId;
 
-	@Mock private EntityAnnotationValues mockAnnotationValues;
 	@Mock private EntityMetadataProvider mockEntityMetadataProvider;
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
+	@Mock private JpaCrudAnnotationValues mockAnnotationValues;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private PluralMetadata mockPluralMetadata;
 	
@@ -93,7 +93,6 @@ public class EntityLayerProviderTest {
 		when(mockEntityMetadataProvider.getAnnotationValues(mockTargetEntity)).thenReturn(null);
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -106,7 +105,6 @@ public class EntityLayerProviderTest {
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -120,7 +118,6 @@ public class EntityLayerProviderTest {
 		setUpPlural("");
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -134,7 +131,6 @@ public class EntityLayerProviderTest {
 		setUpPlural("anything");
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
 		
 		// Check
@@ -149,7 +145,6 @@ public class EntityLayerProviderTest {
 		setUpPlural("anything");
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check
@@ -164,7 +159,6 @@ public class EntityLayerProviderTest {
 		setUpPlural("Pizzas");
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
 		
 		// Check

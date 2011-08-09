@@ -6,7 +6,6 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Provides a list of identifier fields that a given {@link JavaType} may require.
- * Used by {@link IdentifierMetadataProviderImpl}.
  * 
  * @author Ben Alex
  * @since 1.1

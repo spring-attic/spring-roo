@@ -12,7 +12,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.entity.EntityMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -50,7 +50,7 @@ public class FinderOperationsImpl implements FinderOperations {
 	
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(FinderOperationsImpl.class);
-	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
+	private static final JavaType ROO_ENTITY = EntityMetadataProvider.ENTITY_ANNOTATION;
 
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;

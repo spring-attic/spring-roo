@@ -41,6 +41,7 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
@@ -78,6 +79,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	@Reference private GwtTemplateService gwtTemplateService;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
 
 	private Set<String> warnings = new LinkedHashSet<String>();
@@ -489,17 +491,8 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return type.isPrimitive() || (isCollectionType(type) && type.getParameters().size() == 1 && isPrimitive(type.getParameters().get(0)));
 	}
 
-	private boolean isEntity(PhysicalTypeMetadata ptmd) {
-		if (ptmd == null) {
-			return false;
-		}
-
-		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-		return annotationMetadata != null;
-	}
-
-	private boolean isEntity(JavaType type) {
-		return isEntity((PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA)));
+	private boolean isEntity(final JavaType type) {
+		return persistenceMemberLocator.getIdentifierFields(type).size() == 1;
 	}
 
 	private boolean isCollectionType(JavaType returnType) {
@@ -531,7 +524,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	private boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
-		return !isEnum(ptmd) && isEntity(ptmd) && !(isRequestFactoryCompatible(returnType)) && !isEmbeddable(ptmd);
+		return !isEnum(ptmd) && isEntity(returnType) && !(isRequestFactoryCompatible(returnType)) && !isEmbeddable(ptmd);
 	}
 
 	private Map<JavaSymbolName, JavaType> resolveTypes(JavaType generic, JavaType typed) {

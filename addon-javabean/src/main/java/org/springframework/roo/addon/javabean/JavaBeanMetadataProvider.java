@@ -2,6 +2,7 @@ package org.springframework.roo.addon.javabean;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,17 +13,13 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
@@ -38,22 +35,26 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
-	private static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");
+	
+	// Constants
+	private static final JavaType ROO_JAVA_BEAN_ANNOTATION = new JavaType(RooJavaBean.class);
+	
+	// Fields
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
-	private Set<String> producedMids = new LinkedHashSet<String>();
-	private Boolean wasGaeEnabled = null;
+	private final Set<String> producedMids = new LinkedHashSet<String>();
+	private Boolean wasGaeEnabled;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
+		addMetadataTrigger(ROO_JAVA_BEAN_ANNOTATION);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
+		removeMetadataTrigger(ROO_JAVA_BEAN_ANNOTATION);
 	}
 
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
@@ -95,9 +96,9 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 			return null;
 		}
 
-		Map<FieldMetadata, FieldMetadata> declaredFields = new LinkedHashMap<FieldMetadata, FieldMetadata>();
+		final Map<FieldMetadata, FieldMetadata> declaredFields = new LinkedHashMap<FieldMetadata, FieldMetadata>();
 		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (physicalTypeDetails != null && physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+		if (physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 			for (FieldMetadata field : governorTypeDetails.getDeclaredFields()) {
 				declaredFields.put(field, isGaeInterested(field));
@@ -110,7 +111,10 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, declaredFields);
 	}
 
-	private FieldMetadata isGaeInterested(FieldMetadata field) {
+	private FieldMetadata isGaeInterested(final FieldMetadata field) {
+		if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
+			return null;
+		}
 		// We are not interested if the field is annotated with @javax.persistence.Transient
 		for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
 			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Transient")) {
@@ -126,17 +130,12 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 			fieldType = fieldType.getParameters().get(0);
 		}
 
-		try {
-			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(fieldType);
-			FieldMetadata identifierField = null;
-			if (projectOperations.getProjectMetadata().isGaeEnabled() && MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, ROO_ENTITY) != null) {
-				identifierField = getIdentifierField(classOrInterfaceTypeDetails);
-			}
-			return identifierField;
-		} catch (Exception e) {
-			// Don't need to know what happened so just return false;
-			return null;
+		final List<FieldMetadata> identifierFields = persistenceMemberLocator.getIdentifierFields(fieldType);
+		if (identifierFields.size() == 1) {
+			// The field is another Entity (or collection thereof); return its ID field
+			return identifierFields.get(0);
 		}
+		return null;
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
@@ -155,31 +154,5 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 
 	public String getProvidesType() {
 		return JavaBeanMetadata.getMetadataIdentiferType();
-	}
-
-	private FieldMetadata getIdentifierField(ClassOrInterfaceTypeDetails governorTypeDetails) {
-		for (AnnotationMetadata annotation : governorTypeDetails.getAnnotations()) {
-			if (!annotation.getAnnotationType().getFullyQualifiedTypeName().equals(ROO_ENTITY.getFullyQualifiedTypeName())) {
-				continue;
-			}
-			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("identifierField"));
-			if (value != null) {
-				FieldMetadata possibleIdentifierField = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName(String.valueOf(value.getValue())));
-				for (AnnotationMetadata fieldAnnotation : possibleIdentifierField.getAnnotations()) {
-					if (fieldAnnotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Id")) {
-						return possibleIdentifierField;
-					}
-				}
-			} else {
-				for (MemberHoldingTypeDetails member : getMemberDetails(governorTypeDetails.getName()).getDetails()) {
-					for (FieldMetadata field : member.getDeclaredFields()) {
-						if (field.getFieldName().getSymbolName().equals("id")) {
-							return field;
-						}
-					}
-				}
-			}
-		}
-		return null;
 	}
 }

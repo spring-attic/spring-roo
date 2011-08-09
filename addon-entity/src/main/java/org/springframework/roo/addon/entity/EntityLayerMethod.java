@@ -26,7 +26,7 @@ enum EntityLayerMethod {
 	CLEAR (PersistenceCustomDataKeys.CLEAR_METHOD, true) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getClearMethod())) {
 				return annotationValues.getClearMethod();
 			}
@@ -42,7 +42,7 @@ enum EntityLayerMethod {
 	COUNT_ALL (PersistenceCustomDataKeys.COUNT_ALL_METHOD, true) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getCountMethod())) {
 				return annotationValues.getCountMethod() + plural;
 			}
@@ -58,7 +58,7 @@ enum EntityLayerMethod {
 	FIND (PersistenceCustomDataKeys.FIND_METHOD, true) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindMethod())) {
 				return annotationValues.getFindMethod() + targetEntity.getSimpleTypeName();
 			}
@@ -74,7 +74,7 @@ enum EntityLayerMethod {
 	FIND_ALL (PersistenceCustomDataKeys.FIND_ALL_METHOD, true) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindAllMethod())) {
 				return annotationValues.getFindAllMethod() + plural;
 			}
@@ -90,7 +90,7 @@ enum EntityLayerMethod {
 	FIND_ENTRIES (PersistenceCustomDataKeys.FIND_ENTRIES_METHOD, true) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindEntriesMethod())) {
 				return annotationValues.getFindEntriesMethod() + targetEntity.getSimpleTypeName() + "Entries";
 			}
@@ -106,7 +106,7 @@ enum EntityLayerMethod {
 	FLUSH (PersistenceCustomDataKeys.FLUSH_METHOD, false) {
 
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFlushMethod())) {
 				return annotationValues.getFlushMethod();
 			}
@@ -122,7 +122,7 @@ enum EntityLayerMethod {
 	MERGE (PersistenceCustomDataKeys.MERGE_METHOD, false) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getMergeMethod())) {
 				return annotationValues.getMergeMethod();
 			}
@@ -138,7 +138,7 @@ enum EntityLayerMethod {
 	PERSIST (PersistenceCustomDataKeys.PERSIST_METHOD, false) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getPersistMethod())) {
 				return annotationValues.getPersistMethod();
 			}
@@ -154,7 +154,7 @@ enum EntityLayerMethod {
 	REMOVE (PersistenceCustomDataKeys.REMOVE_METHOD, false) {
 		
 		@Override
-		public String getName(final EntityAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
+		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getRemoveMethod())) {
 				return annotationValues.getRemoveMethod();
 			}
@@ -222,22 +222,22 @@ enum EntityLayerMethod {
 	 * @param plural the plural form of the entity (required)
 	 * @return <code>null</code> if the method isn't desired for that entity
 	 */
-	public abstract String getName(EntityAnnotationValues annotationValues, JavaType targetEntity, String plural);
+	public abstract String getName(JpaCrudAnnotationValues annotationValues, JavaType targetEntity, String plural);
 
 	/**
 	 * Returns the Java snippet that invokes this method, including the target
 	 * if any
 	 * 
-	 * @param annotationValues the values of the {@link RooEntity} annotation
+	 * @param annotationValues the CRUD-related values of the {@link RooEntity}
+	 * annotation
 	 * on the entity type
 	 * @param targetEntity the type of entity being managed (required)
 	 * @param plural the plural form of the entity (required)
 	 * @param parameterNames the caller's names for the method's parameters
 	 * (required, must be modifiable)
-	 * 
 	 * @return a non-blank Java snippet
 	 */
-	public String getCall(final EntityAnnotationValues annotationValues, final JavaType targetEntity, String plural, final List<JavaSymbolName> parameterNames) {
+	public String getCall(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, String plural, final List<JavaSymbolName> parameterNames) {
 		final String target;
 		if (this.isStatic) {
 			target = targetEntity.getSimpleTypeName();

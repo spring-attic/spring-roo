@@ -38,13 +38,16 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = IdentifierMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType EMBEDDABLE = new JavaType("javax.persistence.Embeddable");
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
+	// Fields
 	private boolean noArgConstructor;
-	private boolean publicNoArgConstructor = false;
+	private boolean publicNoArgConstructor;
 	private List<FieldMetadata> fields;
 
 	// From annotation

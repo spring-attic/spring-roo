@@ -9,7 +9,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.entity.EntityMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -34,18 +34,22 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements FinderMetadataProvider {
+	
+	// Constants
+	private static final JavaType TRIGGER_ANNOTATION = EntityMetadataProvider.ENTITY_ANNOTATION;
+	
 	@Reference private DynamicFinderServices dynamicFinderServices;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -61,14 +65,14 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 		if (projectMetadata == null || !projectMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid() || entityMetadata.getEntityManagerMethod() == null) {
 			return null;
-		}
-
+		}		
+				
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.notNull(classOrInterfaceTypeDetails, "Governor failed to provide class type details, in violation of superclass contract");
 		
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		
-		// Using SortedMap to ensure that if they have > 1 finder the ITD source emits in the same predictable order each finder
+		// Using SortedMap to ensure that the ITD emits finders in the same order each time
 		SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
 		for (String methodName : entityMetadata.getDynamicFinders()) {
 			JavaSymbolName finderName = new JavaSymbolName(methodName);

@@ -1,12 +1,15 @@
 package org.springframework.roo.addon.dbre;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaPackage;
@@ -59,64 +62,94 @@ public abstract class DbreTypeUtils {
 		Assert.notNull(table, "Table required");
 		return findTypeForTableName(managedEntities, table.getName(), table.getSchema().getName());
 	}
-
-	/**
-	 * Locates the table using the presented ClassOrInterfaceTypeDetails.
-	 * 
-	 * <p>
-	 * The search for the table names starts on the @Table annotation and if not present, the
-	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
-	 * 
-	 * @param classOrInterfaceTypeDetails the type to search (required)
-	 * @return the table (if known) or null (if not found)
-	 */
-	public static String getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		Assert.notNull(classOrInterfaceTypeDetails, "ClassOrInterfaceTypeDetails type required");
-		// Try to locate a table name, which can be specified either via the "name" attribute on
-		// @Table, eg @Table(name = "foo") or via the "table" attribute on @RooEntity, eg @RooEntity(table = "foo")
-		return getTableOrSchemaName(classOrInterfaceTypeDetails, "name", "table");
-	}
-
-	/**
-	 * Locates the table's schema using the presented ClassOrInterfaceTypeDetails.
-	 * 
-	 * <p>
-	 * The search for the table names starts on the @Table annotation and if not present, the
-	 * {@link RooEntity @RooEntity} "table" attribute is checked. If not present on either, the method returns null.
-	 * 
-	 * @param classOrInterfaceTypeDetails the type to search (required) 
-	 * @return the schema name (if known) or null (if not found)
-	 */
-	public static String getSchemaName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		Assert.notNull(classOrInterfaceTypeDetails, "ClassOrInterfaceTypeDetails type required");
-		// Try to locate a schema name, which can be specified either via the "schema" attribute on
-		// @Table, eg @Table(schema = "foo") or via the "schema" attribute on @RooEntity, eg @RooEntity(schema = "foo")
-		return getTableOrSchemaName(classOrInterfaceTypeDetails, "schema", "schema");
+	
+	private static final JavaType JPA_TABLE_ANNOTATION = new JavaType("javax.persistence.Table");
+	private static final JavaType ROO_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooEntity");
+	private static final JavaType ROO_JPA_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooJpaEntity");
+	
+	private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName("name");
+	private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName("schema");
+	private static final JavaSymbolName TABLE_ATTRIBUTE = new JavaSymbolName("table");
+	
+	// The annotation attributes from which to read the db schema name
+	// Linked to preserve the iteration order below
+	private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
+	static {
+		SCHEMA_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
 	}
 	
-	private static String getTableOrSchemaName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, String tableAttribute, String rooEntityAttraibute) {
-		String attributeValue = null;
-
-		AnnotationMetadata tableAnnotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Table"));
-		if (tableAnnotation != null) {
-			AnnotationAttributeValue<?> attribute = tableAnnotation.getAttribute(new JavaSymbolName(tableAttribute));
-			if (attribute != null) {
-				attributeValue = (String) attribute.getValue();
+	/**
+	 * Returns the database schema for the given entity.
+	 * 
+	 * @param entityDetails the type to search (required) 
+	 * @return the schema name (if known) or null (if not found)
+	 */
+	public static String getSchemaName(final MemberHoldingTypeDetails entityDetails) {
+		Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
+		return getFirstNonBlankAttributeValue(entityDetails, SCHEMA_ATTRIBUTES);
+	}
+	
+	// The annotation attributes from which to read the db table name
+	// Linked to preserve the iteration order below
+	private static final Map<JavaType, JavaSymbolName> TABLE_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
+	static {
+		TABLE_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, NAME_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
+	}
+	
+	/**
+	 * Returns the database table for the given entity.
+	 * 
+	 * @param entityDetails the type to search (required)
+	 * @return the table (if known) or null (if not found)
+	 */
+	public static String getTableName(final MemberHoldingTypeDetails entityDetails) {
+		Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
+		return getFirstNonBlankAttributeValue(entityDetails, TABLE_ATTRIBUTES);
+	}
+	
+	/**
+	 * Reads the given attributes of the given annotations on the given type,
+	 * returning the first non-blank one found.
+	 * 
+	 * @param annotatedType the type for which to read the annotations (required)
+	 * @param annotationAttributes the annotation/attribute pairs to read for that type
+	 * @return <code>null</code> if none of those annotations provide a non-blank schema name
+	 */
+	private static String getFirstNonBlankAttributeValue(final MemberHoldingTypeDetails annotatedType, final Map<JavaType, JavaSymbolName> annotationAttributes) {
+		for (final Entry<JavaType, JavaSymbolName> entry : annotationAttributes.entrySet()) {
+			final String attributeValue = getAnnotationAttribute(annotatedType, entry.getKey(), entry.getValue());
+			if (StringUtils.hasText(attributeValue)) {
+				return attributeValue;
 			}
 		}
-
-		if (!StringUtils.hasText(attributeValue)) {
-			// The search continues...
-			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-			if (rooEntityAnnotation != null) {
-				AnnotationAttributeValue<?> attribute = rooEntityAnnotation.getAttribute(new JavaSymbolName(rooEntityAttraibute));
-				if (attribute != null) {
-					attributeValue = (String) attribute.getValue();
-				}
-			}
+		return null;
+	}
+	
+	/**
+	 * Returns the value of the given attribute of the given annotation on the
+	 * given type
+	 * 
+	 * @param <T> the expected annotation value type
+	 * @param type the type whose annotations to read (required)
+	 * @param annotationType the annotation to read (required)
+	 * @param attributeName the annotation attribute to read (required)
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T> T getAnnotationAttribute(final MemberHoldingTypeDetails type, final JavaType annotationType, final JavaSymbolName attributeName) {
+		final AnnotationMetadata typeAnnotation = MemberFindingUtils.getTypeAnnotation(type, annotationType);
+		if (typeAnnotation == null) {
+			return null;
 		}
-
-		return attributeValue;
+		final AnnotationAttributeValue<?> attributeValue = typeAnnotation.getAttribute(attributeName);
+		if (attributeValue == null) {
+			return null;
+		}
+		return (T) attributeValue.getValue();
 	}
 	
 	/**

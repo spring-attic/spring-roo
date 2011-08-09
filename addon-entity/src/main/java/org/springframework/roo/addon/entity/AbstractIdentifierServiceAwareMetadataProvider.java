@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -22,7 +23,9 @@ import org.springframework.roo.model.JavaType;
 @Component(componentAbstract = true)
 @Reference(name = "identifierService", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = IdentifierService.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public abstract class AbstractIdentifierServiceAwareMetadataProvider extends AbstractItdMetadataProvider {
-	private Set<IdentifierService> identifierServices = new HashSet<IdentifierService>();
+	
+	// Fields
+	private final Set<IdentifierService> identifierServices = new HashSet<IdentifierService>();
 
 	protected void bindIdentifierService(IdentifierService identifierService) {
 		synchronized (identifierServices) {
@@ -45,8 +48,10 @@ public abstract class AbstractIdentifierServiceAwareMetadataProvider extends Abs
 	 * 
 	 * @param javaType the entity or PK identifier class for which column information is desired (required)
 	 * @return the applicable identifiers, or null if no registered {@link IdentifierService} was authoritative for this type
+	 * 
+	 * TODO made obsolete by {@link PersistenceMemberLocator}?
 	 */
-	protected List<Identifier> getIdentifiersForType(JavaType javaType) {
+	protected List<Identifier> getIdentifiersForType(final JavaType javaType) {
 		List<Identifier> identifierServiceResult = null;
 		synchronized (identifierServices) {
 			for (IdentifierService service : identifierServices) {
