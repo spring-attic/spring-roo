@@ -799,26 +799,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private boolean hasBooleanPrimitiveAccessor(FieldMetadata field) {
-		// Check governor for boolean accessor method for Boolean object fields
-		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(getBooleanPrimitiveAccessorName(field)), new ArrayList<JavaType>()) != null) {
-			return true;
-		}
-
-		return false;
-	}
-
 	private MethodMetadata getAccessor(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 		String methodBody = "return this." + field.getFieldName().getSymbolName() + ";";
 		return getAccessor(field.getFieldType(), getRequiredAccessorName(field), methodBody);
-	}
-
-	private MethodMetadata getBooleanPrimitiveAccessor(FieldMetadata field) {
-		Assert.notNull(field, "Field required");
-		String fieldName = field.getFieldName().getSymbolName();
-		String methodBody = "return this." + fieldName + " != null && this." + fieldName + ";";
-		return getAccessor(JavaType.BOOLEAN_PRIMITIVE, getBooleanPrimitiveAccessorName(field), methodBody);
 	}
 
 	private MethodMetadata getAccessor(JavaType fieldType, String requiredAccessorName, String methodBody) {
