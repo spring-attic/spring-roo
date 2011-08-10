@@ -395,12 +395,15 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private String getConnectionString(JdbcDatabase jdbcDatabase, String hostName, String databaseName) {
 		String connectionString = jdbcDatabase.getConnectionString();
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-		if (StringUtils.hasText(databaseName)) {
-			// Oracle uses a different connection URL - see ROO-1203
-			String dbDelimiter = jdbcDatabase == JdbcDatabase.ORACLE ? ":" : "/";
-			connectionString += databaseName.startsWith(dbDelimiter) ? databaseName : dbDelimiter + databaseName;
+		if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", (StringUtils.hasText(databaseName) ? databaseName : projectMetadata.getProjectName()));
+		} else {
+			if (StringUtils.hasText(databaseName)) {
+				// Oracle uses a different connection URL - see ROO-1203
+				String dbDelimiter = jdbcDatabase == JdbcDatabase.ORACLE ? ":" : "/";
+				connectionString += dbDelimiter + databaseName;
+			}
 		}
 		if (!StringUtils.hasText(hostName)) {
 			hostName = "localhost";
@@ -525,6 +528,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			break;
 		case POSTGRES:
 		case DERBY_EMBEDDED:
+		case DERBY_CLIENT:
 		case MSSQL:
 		case SYBASE:
 		case MYSQL:
