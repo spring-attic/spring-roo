@@ -10,9 +10,16 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public abstract class AbstractAnnotationAttributeValue<T extends Object> implements AnnotationAttributeValue<T> {
-	private JavaSymbolName name;
+	
+	// Fields
+	private final JavaSymbolName name;
 
-	public AbstractAnnotationAttributeValue(JavaSymbolName name) {
+	/**
+	 * Constructor
+	 *
+	 * @param name the attribute name (required)
+	 */
+	protected AbstractAnnotationAttributeValue(JavaSymbolName name) {
 		Assert.notNull(name, "Annotation attribute name required");
 		this.name = name;
 	}

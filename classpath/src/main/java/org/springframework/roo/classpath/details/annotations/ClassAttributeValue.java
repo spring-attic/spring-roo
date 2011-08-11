@@ -15,9 +15,17 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class ClassAttributeValue extends AbstractAnnotationAttributeValue<JavaType> {
-	private JavaType value;
 	
-	public ClassAttributeValue(JavaSymbolName name, JavaType value) {
+	// Fields
+	private final JavaType value;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param name the attribute name (required)
+	 * @param value the value (required)
+	 */
+	public ClassAttributeValue(final JavaSymbolName name, final JavaType value) {
 		super(name);
 		Assert.notNull(value, "Value required");
 		this.value = value;
@@ -26,6 +34,7 @@ public class ClassAttributeValue extends AbstractAnnotationAttributeValue<JavaTy
 	public JavaType getValue() {
 		return value;
 	}
+	
 	public String toString() {
 		return getName() + " -> " + value.getNameIncludingTypeParameters();
 	}

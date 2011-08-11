@@ -139,6 +139,12 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 		addAttribute(new ClassAttributeValue(new JavaSymbolName(key), new JavaType(fullyQualifiedTypeName)));
 	}
 
+	/**
+	 * Adds an attribute with the given {@link JavaType} as its value
+	 * 
+	 * @param key the attribute name (required)
+	 * @param javaType the value (required)
+	 */
 	public void addClassAttribute(String key, JavaType javaType) {
 		addAttribute(new ClassAttributeValue(new JavaSymbolName(key), javaType));
 	}
