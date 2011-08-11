@@ -109,7 +109,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		}
 	}
 
-	public void writeDatabase(Database database) {
+	public void writeDatabase(final Database database) {
 		Document document = DatabaseXmlUtils.getDatabaseDocument(database);
 		fileManager.createOrUpdateTextFileIfRequired(getDbreXmlPath(), XmlUtils.nodeToString(document), true);
 	}

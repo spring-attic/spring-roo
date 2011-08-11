@@ -7,6 +7,7 @@ import java.util.Stack;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils.IndexType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -19,14 +20,20 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Alan Stewart
  * @since 1.1
  */
-public final class DatabaseContentHandler extends DefaultHandler {
-	private Stack<Object> stack = new Stack<Object>();
+public class DatabaseContentHandler extends DefaultHandler {
+	
+	// Fields
+	private final Set<Table> tables = new LinkedHashSet<Table>();
+	private final Stack<Object> stack = new Stack<Object>();
 	private Database database;
-	private Set<Table> tables = new LinkedHashSet<Table>();
 	private JavaPackage destinationPackage;
-	private boolean testAutomatically;
+	private boolean activeRecord;
 	private boolean includeNonPortableAttributes;
+	private boolean testAutomatically;
 
+	/**
+	 * Constructor
+	 */
 	public DatabaseContentHandler() {
 		super();
 	}
@@ -75,11 +82,14 @@ public final class DatabaseContentHandler extends DefaultHandler {
 					((ForeignKey) stack.peek()).setForeignSchemaName(option.getValue());
 				}
 			}
-			if (option.getKey().equals("testAutomatically")) {
-				testAutomatically = Boolean.parseBoolean(option.getValue());
+			if (option.getKey().equals("activeRecord")) {
+				activeRecord = Boolean.parseBoolean(option.getValue());
 			}
 			if (option.getKey().equals("includeNonPortableAttributes")) {
 				includeNonPortableAttributes = Boolean.parseBoolean(option.getValue());
+			}
+			if (option.getKey().equals("testAutomatically")) {
+				testAutomatically = Boolean.parseBoolean(option.getValue());
 			}
 		} else if (qName.equals("table")) {
 			tables.add((Table) tmp);
@@ -101,9 +111,10 @@ public final class DatabaseContentHandler extends DefaultHandler {
 			((Index) stack.peek()).addColumn((IndexColumn) tmp);
 		} else if (qName.equals("database")) {
 			database = new Database(tables);
+			database.setActiveRecord(activeRecord);
 			database.setDestinationPackage(destinationPackage);
-			database.setTestAutomatically(testAutomatically);
 			database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
+			database.setTestAutomatically(testAutomatically);
 		} else {
 			stack.push(tmp);
 		}
@@ -172,21 +183,16 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		return new IndexColumn(attributes.getValue(DatabaseXmlUtils.NAME));
 	}
 
-	private static class Option {
-		private String key;
-		private String value;
+	private static class Option extends Pair<String, String> {
 
-		public Option(String key, String value) {
-			this.key = key;
-			this.value = value;
-		}
-
-		public String getKey() {
-			return key;
-		}
-
-		public String getValue() {
-			return value;
+		/**
+		 * Constructor
+		 *
+		 * @param key
+		 * @param value
+		 */
+		public Option(final String key, final String value) {
+			super(key, value);
 		}
 	}
 }

@@ -29,12 +29,20 @@ public class Database {
 	/** Whether to create integration tests */
 	private boolean testAutomatically;
 	
-	/** Whether or not to included non-portable JPA attribues in the @Column annotation */
+	/** Whether or not to included non-portable JPA attributes in the @Column annotation */
 	private boolean includeNonPortableAttributes;
 	
 	private boolean multipleSchemas;
+
+	// Whether to generate active record CRUD methods for each entity
+	private boolean activeRecord;
 	
-	Database(Set<Table> tables) {
+	/**
+	 * Constructor
+	 *
+	 * @param tables (required)
+	 */
+	Database(final Set<Table> tables) {
 		Assert.notNull(tables, "Tables required");
 		this.tables = tables;
 		initialize();
@@ -58,7 +66,27 @@ public class Database {
 		}
 		return null;
 	}
+	
+	/**
+	 * Indicates whether active record CRUD methods should be generated for each entity
+	 * 
+	 * @return see above
+	 * @since 1.2
+	 */
+	public boolean isActiveRecord() {
+		return activeRecord;
+	}
 
+	/**
+	 * Sets whether active record CRUD methods should be generated for each entity
+	 * 
+	 * @param activeRecord
+	 * @since 1.2
+	 */
+	public void setActiveRecord(final boolean activeRecord) {
+		this.activeRecord = activeRecord;
+	}
+	
 	public JavaPackage getDestinationPackage() {
 		return destinationPackage;
 	}

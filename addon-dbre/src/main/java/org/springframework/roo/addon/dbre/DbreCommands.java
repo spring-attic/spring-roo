@@ -22,6 +22,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class DbreCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private DbreOperations dbreOperations;
 
 	@CliAvailabilityIndicator({ "database introspect", "database reverse engineer" })
@@ -46,8 +48,9 @@ public class DbreCommands implements CommandMarker {
 		@CliOption(key = "enableViews", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Reverse engineer database views") boolean view,
 		@CliOption(key = "includeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "include-tables", help = "The tables to include in reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> includeTables,
 		@CliOption(key = "excludeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-tables", help = "The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> excludeTables,
-		@CliOption(key = "includeNonPortableAttributes", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Include non-portable JPA @Column attributes such as 'columnDefinition'") boolean includeNonPortableAttributes) {
-		
-		dbreOperations.reverseEngineerDatabase(schemas, destinationPackage, testAutomatically, view, includeTables, excludeTables, includeNonPortableAttributes);
+		@CliOption(key = "includeNonPortableAttributes", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Include non-portable JPA @Column attributes such as 'columnDefinition'") boolean includeNonPortableAttributes,
+		@CliOption(key = "activeRecord", specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for each entity") boolean activeRecord)
+	{
+		dbreOperations.reverseEngineerDatabase(schemas, destinationPackage, testAutomatically, view, includeTables, excludeTables, includeNonPortableAttributes, activeRecord);
 	}
 }

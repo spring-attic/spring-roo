@@ -2,8 +2,8 @@ package org.springframework.roo.addon.dbre;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -48,6 +48,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -61,8 +62,13 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements IdentifierService, FileEventListener {
 	
 	// Constants
+	private static final JavaType ROO_DB_MANAGED = new JavaType(RooDbManaged.class);
 	private static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");
 	private static final JavaType ROO_IDENTIFIER = new JavaType("org.springframework.roo.addon.entity.RooIdentifier");
+	private static final JavaType ROO_JAVA_BEAN = new JavaType("org.springframework.roo.addon.javabean.RooJavaBean");
+	private static final JavaType ROO_JPA_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooJpaEntity");
+	private static final JavaType ROO_TO_STRING = new JavaType("org.springframework.roo.addon.tostring.RooToString");
+	
 	private static final String IDENTIFIER_TYPE = "identifierType";
 	private static final String VERSION_FIELD = "versionField";
 	private static final String VERSION = "version";
@@ -78,7 +84,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private Shell shell;
 	private Map<JavaType, List<Identifier>> identifierResults;
 
-	public void onFileEvent(FileEvent fileEvent) {
+	public void onFileEvent(final FileEvent fileEvent) {
 		if (fileEvent.getFileDetails().getCanonicalPath().equals(dbreModelService.getDbreXmlPath())) {
 			if (fileEvent.getOperation() == FileOperation.UPDATED || fileEvent.getOperation() == FileOperation.CREATED) {
 				deserializeDatabase();
@@ -86,7 +92,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 	}
 
-	public List<Identifier> getIdentifiers(JavaType pkType) {
+	public List<Identifier> getIdentifiers(final JavaType pkType) {
 		if (identifierResults == null) {
 			// Need to populate the identifier results before returning from this method
 			deserializeDatabase();
@@ -99,17 +105,93 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private void deserializeDatabase() {
-		Database database = dbreModelService.getDatabase(true);
+		final Database database = dbreModelService.getDatabase(true);
 		if (database != null) {
 			identifierResults = new LinkedHashMap<JavaType, List<Identifier>>();
 			reverseEngineer(database);
 		}
 	}
 
-	private void reverseEngineer(Database database) {
-		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
+	private void reverseEngineer(final Database database) {
+		final Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
+		
+		// Determine whether to create "active record" CRUD methods
+		database.setActiveRecord(isActiveRecord(database, managedEntities));
 
 		// Lookup the relevant destination package if not explicitly given
+		final JavaPackage destinationPackage = getDestinationPackage(database, managedEntities);
+
+		// Set the destination package in the database
+		database.setDestinationPackage(destinationPackage);
+
+		// Get tables from database
+		final Set<Table> tables = new LinkedHashSet<Table>(database.getTables());
+
+		// Manage existing entities with @RooDbManaged annotation
+		for (final ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
+			// Remove table from set as each managed entity is processed.
+			// The tables that remain in the set will be used for creation of new entities later
+			final Table table = updateOrDeleteManagedEntity(managedEntity, database);
+			if (table != null) {
+				tables.remove(table);
+			}
+		}
+
+		// Create new entities from tables
+		final List<ClassOrInterfaceTypeDetails> newEntities = new ArrayList<ClassOrInterfaceTypeDetails>();
+		for (final Table table : tables) {
+			// Don't create types from join tables in many-to-many associations
+			if (!table.isJoinTable()) {
+				JavaPackage schemaPackage = destinationPackage;
+				if (database.hasMultipleSchemas()) {
+					schemaPackage = new JavaPackage(destinationPackage.getFullyQualifiedPackageName() + "." + DbreTypeUtils.suggestPackageName(table.getSchema().getName()));
+				}
+				final JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), schemaPackage);
+				if (typeLocationService.findClassOrInterface(javaType) == null) {
+					table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
+					newEntities.add(createNewManagedEntityFromTable(javaType, table, database.isActiveRecord()));
+				}
+			}
+		}
+
+		// Create integration tests if required
+		if (database.isTestAutomatically()) {
+			for (final ClassOrInterfaceTypeDetails entity : newEntities) {
+				integrationTestOperations.newIntegrationTest(entity.getName());
+			}
+		}
+
+		// Notify
+		final List<ClassOrInterfaceTypeDetails> allEntities = new LinkedList<ClassOrInterfaceTypeDetails>();
+		allEntities.addAll(newEntities);
+		allEntities.addAll(managedEntities);
+		notify(allEntities);
+	}
+
+	/**
+	 * Indicates whether active record CRUD methods should be generated for the
+	 * given entities (this being an all or nothing decision)
+	 * 
+	 * @param database the database being reverse-engineered (required)
+	 * @param managedEntities any existing DB-managed entities in the user
+	 * project (can be <code>null</code> or empty)
+	 * @return see above
+	 */
+	private boolean isActiveRecord(final Database database, final Collection<ClassOrInterfaceTypeDetails> managedEntities) {
+		if (CollectionUtils.isEmpty(managedEntities)) {
+			// There are no existing entities; use the given setting
+			return database.isActiveRecord();
+		}
+		/*
+		 * There are one or more existing entities; preserve the existing
+		 * decision, based on the first such entity. This saves the user from
+		 * having to enter the same value for the "activeRecord" option each
+		 * time they run the DBRE command.
+		 */
+		return MemberFindingUtils.getDeclaredTypeAnnotation(managedEntities.iterator().next(), ROO_ENTITY) != null;
+	}
+
+	private JavaPackage getDestinationPackage(final Database database, final Set<ClassOrInterfaceTypeDetails> managedEntities) {
 		JavaPackage destinationPackage = database.getDestinationPackage();
 		if (destinationPackage == null) {
 			if (!managedEntities.isEmpty() && !database.hasMultipleSchemas()) {
@@ -120,67 +202,22 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Fall back to project's top level package
 		if (destinationPackage == null) {
-			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+			final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 			destinationPackage = projectMetadata.getTopLevelPackage();
 		}
-
-		// Set the destination package in the database
-		database.setDestinationPackage(destinationPackage);
-
-		// Get tables from database
-		Set<Table> tables = new LinkedHashSet<Table>(database.getTables());
-
-		// Manage existing entities with @RooDbManaged annotation
-		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
-			// Remove table from set as each managed entity is processed.
-			// The tables that remain in the set will be used for creation of new entities later
-			Table table = updateOrDeleteManagedEntity(managedEntity, database);
-			if (table != null) {
-				tables.remove(table);
-			}
-		}
-
-		// Create new entities from tables
-		List<ClassOrInterfaceTypeDetails> newEntities = new ArrayList<ClassOrInterfaceTypeDetails>();
-		for (Table table : tables) {
-			// Don't create types from join tables in many-to-many associations
-			if (!table.isJoinTable()) {
-				JavaPackage schemaPackage = destinationPackage;
-				if (database.hasMultipleSchemas()) {
-					schemaPackage = new JavaPackage(destinationPackage.getFullyQualifiedPackageName() + "." + DbreTypeUtils.suggestPackageName(table.getSchema().getName()));
-				}
-				JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), schemaPackage);
-				if (typeLocationService.findClassOrInterface(javaType) == null) {
-					table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
-					newEntities.add(createNewManagedEntityFromTable(javaType, table));
-				}
-			}
-		}
-
-		// Create integration tests if required
-		if (database.isTestAutomatically()) {
-			for (ClassOrInterfaceTypeDetails entity : newEntities) {
-				integrationTestOperations.newIntegrationTest(entity.getName());
-			}
-		}
-
-		// Notify
-		List<ClassOrInterfaceTypeDetails> allEntities = new LinkedList<ClassOrInterfaceTypeDetails>();
-		allEntities.addAll(newEntities);
-		allEntities.addAll(managedEntities);
-		notify(allEntities);
+		return destinationPackage;
 	}
 
-	private void notify(List<ClassOrInterfaceTypeDetails> entities) {
-		for (ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
-			MetadataItem metadataItem = metadataService.get(managedIdentifierType.getDeclaredByMetadataId(), true);
+	private void notify(final List<ClassOrInterfaceTypeDetails> entities) {
+		for (final ClassOrInterfaceTypeDetails managedIdentifierType : getManagedIdentifiers()) {
+			final MetadataItem metadataItem = metadataService.get(managedIdentifierType.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
 			}
 		}
 
-		for (ClassOrInterfaceTypeDetails entity : entities) {
-			MetadataItem metadataItem = metadataService.get(entity.getDeclaredByMetadataId(), true);
+		for (final ClassOrInterfaceTypeDetails entity : entities) {
+			final MetadataItem metadataItem = metadataService.get(entity.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
 			}
@@ -188,12 +225,12 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private Set<ClassOrInterfaceTypeDetails> getManagedIdentifiers() {
-		Set<ClassOrInterfaceTypeDetails> managedIdentifierTypes = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
+		final Set<ClassOrInterfaceTypeDetails> managedIdentifierTypes = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 
-		Set<ClassOrInterfaceTypeDetails> identifierTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_IDENTIFIER);
-		for (ClassOrInterfaceTypeDetails managedIdentifierType : identifierTypes) {
-			AnnotationMetadata identifierAnnotation = MemberFindingUtils.getTypeAnnotation(managedIdentifierType, ROO_IDENTIFIER);
-			AnnotationAttributeValue<?> attrValue = identifierAnnotation.getAttribute(new JavaSymbolName("dbManaged"));
+		final Set<ClassOrInterfaceTypeDetails> identifierTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_IDENTIFIER);
+		for (final ClassOrInterfaceTypeDetails managedIdentifierType : identifierTypes) {
+			final AnnotationMetadata identifierAnnotation = MemberFindingUtils.getTypeAnnotation(managedIdentifierType, ROO_IDENTIFIER);
+			final AnnotationAttributeValue<?> attrValue = identifierAnnotation.getAttribute(new JavaSymbolName("dbManaged"));
 			if (attrValue != null && (Boolean) attrValue.getValue()) {
 				managedIdentifierTypes.add(managedIdentifierType);
 			}
@@ -201,23 +238,22 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return managedIdentifierTypes;
 	}
 
-	private Table updateOrDeleteManagedEntity(ClassOrInterfaceTypeDetails managedEntity, Database database) {
-		// Update changes to @RooEntity attributes
-		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, ROO_ENTITY);
-		Assert.notNull(rooEntityAnnotation, "@RooEntity annotation not found on " + managedEntity.getName().getFullyQualifiedTypeName());
-		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(rooEntityAnnotation);
-
-		// Find table in database using 'table' and 'schema' attributes from @RooEntity
-		AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
-		String errMsg = "Unable to maintain database-managed entity " + managedEntity.getName().getFullyQualifiedTypeName() + " because its associated table could not be found";
+	private Table updateOrDeleteManagedEntity(final ClassOrInterfaceTypeDetails managedEntity, final Database database) {
+		// Update the attributes of the existing JPA-related annotation
+		final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
+		Assert.state(jpaAnnotation != null, "Neither " + ROO_ENTITY + " nor " + ROO_JPA_ENTITY + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
+		
+		// Find table in database using 'table' and 'schema' attributes from the JPA annotation
+		final AnnotationAttributeValue<?> tableAttribute = jpaAnnotation.getAttribute(new JavaSymbolName("table"));
+		final String errMsg = "Unable to maintain database-managed entity " + managedEntity.getName().getFullyQualifiedTypeName() + " because its associated table could not be found";
 		Assert.notNull(tableAttribute, errMsg);
-		String tableName = (String) tableAttribute.getValue();
+		final String tableName = (String) tableAttribute.getValue();
 		Assert.hasText(tableName, errMsg);
 
-		AnnotationAttributeValue<?> schemaAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("schema"));
-		String schemaName = schemaAttribute != null ? (String) schemaAttribute.getValue() : null;
+		final AnnotationAttributeValue<?> schemaAttribute = jpaAnnotation.getAttribute(new JavaSymbolName("schema"));
+		final String schemaName = schemaAttribute != null ? (String) schemaAttribute.getValue() : null;
 
-		Table table = database.getTable(tableName, schemaName);
+		final Table table = database.getTable(tableName, schemaName);
 		if (table == null) { 
 			// Table is missing and probably has been dropped so delete managed type and its identifier if applicable
 			deleteManagedType(managedEntity);
@@ -226,67 +262,97 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		table.setIncludeNonPortableAttributes(database.isIncludeNonPortableAttributes());
 
-		// Get new @RooEntity attributes
-		Set<JavaSymbolName> attributesToDeleteIfPresent = new LinkedHashSet<JavaSymbolName>();
-		manageIdentifier(managedEntity.getName(), rooEntityBuilder, attributesToDeleteIfPresent, table);
+		// Update the @RooEntity/@RooJpaEntity attributes
+		final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(jpaAnnotation);
+		final Set<JavaSymbolName> attributesToDeleteIfPresent = new LinkedHashSet<JavaSymbolName>();
+		manageIdentifier(managedEntity.getName(), jpaAnnotationBuilder, attributesToDeleteIfPresent, table);
 
 		// Manage versionField attribute
-		AnnotationAttributeValue<?> versionFieldAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName(VERSION_FIELD));
-		if (versionFieldAttribute != null) {
-			String versionFieldValue = (String) versionFieldAttribute.getValue();
-			if (hasVersionField(table) && (!StringUtils.hasText(versionFieldValue) || VERSION.equals(versionFieldValue))) {
-				attributesToDeleteIfPresent.add(new JavaSymbolName(VERSION_FIELD));
-			}
-		} else {
+		final AnnotationAttributeValue<?> versionFieldAttribute = jpaAnnotation.getAttribute(new JavaSymbolName(VERSION_FIELD));
+		if (versionFieldAttribute == null) {
 			if (hasVersionField(table)) {
 				attributesToDeleteIfPresent.add(new JavaSymbolName(VERSION_FIELD));
 			} else {
-				rooEntityBuilder.addStringAttribute(VERSION_FIELD, "");
+				jpaAnnotationBuilder.addStringAttribute(VERSION_FIELD, "");
+			}
+		} else {
+			final String versionFieldValue = (String) versionFieldAttribute.getValue();
+			if (hasVersionField(table) && (!StringUtils.hasText(versionFieldValue) || VERSION.equals(versionFieldValue))) {
+				attributesToDeleteIfPresent.add(new JavaSymbolName(VERSION_FIELD));
 			}
 		}
 
 		// Update the annotation on disk
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) managedEntity;
-		mutableTypeDetails.updateTypeAnnotation(rooEntityBuilder.build(), attributesToDeleteIfPresent);
+		final MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) managedEntity;
+		mutableTypeDetails.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
 
 		return table;
 	}
+	
+	/**
+	 * Returns the JPA-related annotation on the given managed entity
+	 * 
+	 * @param managedEntity an existing DBRE-managed entity (required)
+	 * @return <code>null</code> if there isn't one
+	 */
+	private AnnotationMetadata getJpaAnnotation(final ClassOrInterfaceTypeDetails managedEntity) {
+		// The @RooJpaEntity annotation takes precedence if present
+		final AnnotationMetadata rooJpaEntity = MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, ROO_JPA_ENTITY);
+		if (rooJpaEntity != null) {
+			return rooJpaEntity;
+		}
+		return MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, ROO_ENTITY);
+	}
 
-	private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(JavaType javaType, Table table) {
+	/**
+	 * Creates a new DBRE-managed entity from the given table
+	 * 
+	 * @param javaType the name of the entity to be created (required)
+	 * @param table the table from which to create the entity (required)
+	 * @param activeRecord whether to create "active record" CRUD methods in the
+	 * new entity
+	 * @return the newly created entity
+	 */
+	private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(final JavaType javaType, final Table table, final boolean activeRecord) {
 		// Create type annotations for new entity
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
+		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
 
 		// Find primary key from db metadata and add identifier attributes to @RooEntity
-		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(ROO_ENTITY);
-		manageIdentifier(javaType, rooEntityBuilder, new HashSet<JavaSymbolName>(), table);
+		final AnnotationMetadataBuilder jpaAnnotationBuilder;
+		if (activeRecord) {
+			jpaAnnotationBuilder = new AnnotationMetadataBuilder(ROO_ENTITY);
+		} else {
+			jpaAnnotationBuilder = new AnnotationMetadataBuilder(ROO_JPA_ENTITY);
+		}
+		manageIdentifier(javaType, jpaAnnotationBuilder, new HashSet<JavaSymbolName>(), table);
 
 		if (!hasVersionField(table)) {
-			rooEntityBuilder.addStringAttribute(VERSION_FIELD, "");
+			jpaAnnotationBuilder.addStringAttribute(VERSION_FIELD, "");
 		}
 		
-		rooEntityBuilder.addStringAttribute("table", table.getName());
+		jpaAnnotationBuilder.addStringAttribute("table", table.getName());
 		if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(table.getSchema().getName())) {
-			rooEntityBuilder.addStringAttribute("schema", table.getSchema().getName());
+			jpaAnnotationBuilder.addStringAttribute("schema", table.getSchema().getName());
 		}
 
-		annotations.add(rooEntityBuilder);
+		annotations.add(jpaAnnotationBuilder);
 
 		// Add @RooDbManaged
 		annotations.add(getRooDbManagedAnnotation());
 
-		JavaType superclass = new JavaType("java.lang.Object");
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
+		final JavaType superclass = new JavaType("java.lang.Object");
+		final List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 
 		// Create entity class
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 		typeDetailsBuilder.setAnnotations(annotations);
 
-		ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
+		final ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
 		typeManagementService.generateClassFile(entityType);
 
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
@@ -296,13 +362,13 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 
 	private AnnotationMetadataBuilder getRooDbManagedAnnotation() {
-		AnnotationMetadataBuilder rooDbManagedBuilder = new AnnotationMetadataBuilder(new JavaType(RooDbManaged.class.getName()));
+		final AnnotationMetadataBuilder rooDbManagedBuilder = new AnnotationMetadataBuilder(ROO_DB_MANAGED);
 		rooDbManagedBuilder.addBooleanAttribute("automaticallyDelete", true);
 		return rooDbManagedBuilder;
 	}
 
-	private boolean hasVersionField(Table table) {
-		for (Column column : table.getColumns()) {
+	private boolean hasVersionField(final Table table) {
+		for (final Column column : table.getColumns()) {
 			if (VERSION.equalsIgnoreCase(column.getName())) {
 				return true;
 			}
@@ -310,12 +376,12 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return false;
 	}
 
-	private void manageIdentifier(JavaType javaType, AnnotationMetadataBuilder rooEntityBuilder, Set<JavaSymbolName> attributesToDeleteIfPresent, Table table) {
-		JavaType identifierType = getIdentifierType(javaType);
-		PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
+	private void manageIdentifier(final JavaType javaType, final AnnotationMetadataBuilder jpaAnnotationBuilder, final Set<JavaSymbolName> attributesToDeleteIfPresent, final Table table) {
+		final JavaType identifierType = getIdentifierType(javaType);
+		final PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
 
 		// Process primary keys and add 'identifierType' attribute
-		int pkCount = table.getPrimaryKeyCount();
+		final int pkCount = table.getPrimaryKeyCount();
 		if (pkCount == 1) {
 			// Table has one primary key
 			// Check for redundant, managed identifier class and delete if found
@@ -326,7 +392,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			attributesToDeleteIfPresent.add(new JavaSymbolName(IDENTIFIER_TYPE));
 
 			// We don't need a PK class, so we just tell the EntityMetadataProvider via IdentifierService the column name, field type and field name to use
-			List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
+			final List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table);
 			identifierResults.put(javaType, identifiers);
 		} else if (pkCount == 0 || pkCount > 1) {
 			// Table has either no primary keys or more than one primary key so create a composite key
@@ -336,25 +402,25 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				createIdentifierClass(identifierType);
 			}
 
-			rooEntityBuilder.addClassAttribute(IDENTIFIER_TYPE, identifierType);
+			jpaAnnotationBuilder.addClassAttribute(IDENTIFIER_TYPE, identifierType);
 
 			// We need a PK class, so we tell the IdentifierMetadataProvider via IdentifierService the various column names, field types and field names to use
 			// For tables with no primary keys, create a composite key using all the table's columns
-			List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table) : getIdentifiersFromPrimaryKeys(table);
+			final List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table) : getIdentifiersFromPrimaryKeys(table);
 			identifierResults.put(identifierType, identifiers);
 		}
 	}
 
-	private void createIdentifierClass(JavaType identifierType) {
-		List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+	private void createIdentifierClass(final JavaType identifierType) {
+		final List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
-		AnnotationMetadataBuilder identifierBuilder = new AnnotationMetadataBuilder(ROO_IDENTIFIER);
+		final AnnotationMetadataBuilder identifierBuilder = new AnnotationMetadataBuilder(ROO_IDENTIFIER);
 		identifierBuilder.addBooleanAttribute("dbManaged", true);
 		identifierAnnotations.add(identifierBuilder);
 
 		// Produce identifier itself
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-		ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+		final ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		idTypeDetailsBuilder.setAnnotations(identifierAnnotations);
 		typeManagementService.generateClassFile(idTypeDetailsBuilder.build());
 
@@ -362,43 +428,43 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 	}
 
-	private List<Identifier> getIdentifiersFromPrimaryKeys(Table table) {
+	private List<Identifier> getIdentifiersFromPrimaryKeys(final Table table) {
 		return getIdentifiers(table, true);
 	}
 
-	private List<Identifier> getIdentifiersFromColumns(Table table) {
+	private List<Identifier> getIdentifiersFromColumns(final Table table) {
 		return getIdentifiers(table, false);
 	}
 
-	private List<Identifier> getIdentifiers(Table table, boolean usePrimaryKeys) {
-		List<Identifier> result = new ArrayList<Identifier>();
+	private List<Identifier> getIdentifiers(final Table table, final boolean usePrimaryKeys) {
+		final List<Identifier> result = new ArrayList<Identifier>();
 
 		// Add fields to the identifier class
-		Set<Column> columns = usePrimaryKeys ? table.getPrimaryKeys() : table.getColumns();
-		for (Column column : columns) {
-			String columnName = column.getName();
+		final Set<Column> columns = usePrimaryKeys ? table.getPrimaryKeys() : table.getColumns();
+		for (final Column column : columns) {
+			final String columnName = column.getName();
 			JavaSymbolName fieldName;
 			try {
 				fieldName = new JavaSymbolName(DbreTypeUtils.suggestFieldName(columnName));
-			} catch (RuntimeException e) {
+			} catch (final RuntimeException e) {
 				throw new IllegalArgumentException("Failed to create field name for column '" + columnName + "' in table '" + table.getName() + "': " + e.getMessage());
 			}
-			JavaType fieldType = column.getJavaType();
-			String columnDefinition = table.isIncludeNonPortableAttributes() ? column.getTypeName() : "";
+			final JavaType fieldType = column.getJavaType();
+			final String columnDefinition = table.isIncludeNonPortableAttributes() ? column.getTypeName() : "";
 			result.add(new Identifier(fieldName, fieldType, columnName, column.getColumnSize(), column.getScale(), columnDefinition));
 		}
 
 		return result;
 	}
 
-	private void deleteManagedType(ClassOrInterfaceTypeDetails managedEntity) {
+	private void deleteManagedType(final ClassOrInterfaceTypeDetails managedEntity) {
 		if (!isEntityDeletable(managedEntity)) {
 			return;
 		}
 		deleteJavaType(managedEntity.getName());
 
-		JavaType identifierType = getIdentifierType(managedEntity.getName());
-		for (ClassOrInterfaceTypeDetails managedIdentifier : getManagedIdentifiers()) {
+		final JavaType identifierType = getIdentifierType(managedEntity.getName());
+		for (final ClassOrInterfaceTypeDetails managedIdentifier : getManagedIdentifiers()) {
 			if (managedIdentifier.getName().equals(identifierType)) {
 				deleteJavaType(identifierType);
 				break;
@@ -406,46 +472,62 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 	}
 
-	private boolean isEntityDeletable(ClassOrInterfaceTypeDetails managedEntity) {
-		String declaredByMetadataId = DbreMetadata.createIdentifier(managedEntity.getName(), Path.SRC_MAIN_JAVA);
-		DbreMetadata dbreMetadata = (DbreMetadata) metadataService.get(declaredByMetadataId);
+	private boolean isEntityDeletable(final ClassOrInterfaceTypeDetails managedEntity) {
+		final String declaredByMetadataId = DbreMetadata.createIdentifier(managedEntity.getName(), Path.SRC_MAIN_JAVA);
+		final DbreMetadata dbreMetadata = (DbreMetadata) metadataService.get(declaredByMetadataId);
 		if (dbreMetadata == null || !dbreMetadata.isAutomaticallyDelete()) {
 			return false;
 		}
 
-		// Check type annotations
-		List<? extends AnnotationMetadata> typeAnnotations = managedEntity.getAnnotations();
-
-		boolean hasRequiredAnnotations = true;
-		Iterator<? extends AnnotationMetadata> typeAnnotationIterator = typeAnnotations.iterator();
-		while (hasRequiredAnnotations && typeAnnotationIterator.hasNext()) {
-			JavaType annotationType = typeAnnotationIterator.next().getAnnotationType();
-			hasRequiredAnnotations &= (annotationType.getFullyQualifiedTypeName().equals(RooDbManaged.class.getName()) || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.javabean.RooJavaBean") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.tostring.RooToString") || annotationType.equals(ROO_ENTITY));
-		}
-
-		if (!hasRequiredAnnotations || typeAnnotations.size() != 4) {
+		// Check whether the type's annotations have been customised
+		if (!hasStandardEntityAnnotations(managedEntity)) {
 			return false;
 		}
 
 		// Finally, check for added constructors, fields and methods
 		return managedEntity.getDeclaredConstructors().isEmpty() && managedEntity.getDeclaredFields().isEmpty() && managedEntity.getDeclaredMethods().isEmpty();
 	}
+	
+	/**
+	 * Indicates whether the given entity has the standard annotations applied
+	 * by Roo, and no others.
+	 * 
+	 * @param entity the entity to check (required)
+	 * @return <code>false</code> if any of the standard ones are missing or any
+	 * extra ones have been added
+	 */
+	private boolean hasStandardEntityAnnotations(final ClassOrInterfaceTypeDetails entity) {
+		final List<? extends AnnotationMetadata> typeAnnotations = entity.getAnnotations();
+		// We expect four: RooDbManaged, RooJavaBean, RooToString, and either RooEntity or RooJpaEntity
+		if (typeAnnotations.size() != 4) {
+			return false;
+		}
+		// There are exactly four - check for any non-standard ones
+		for (final AnnotationMetadata annotation : typeAnnotations) {
+			final JavaType annotationType = annotation.getAnnotationType();
+			final boolean entityAnnotation = ROO_ENTITY.equals(annotationType) || ROO_JPA_ENTITY.equals(annotationType);
+			if (!entityAnnotation && !ROO_DB_MANAGED.equals(annotationType) && !ROO_JAVA_BEAN.equals(annotationType) && !ROO_TO_STRING.equals(annotationType)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-	private boolean isIdentifierDeletable(JavaType identifierType) {
-		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
+	private boolean isIdentifierDeletable(final JavaType identifierType) {
+		final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
 		if (governorPhysicalTypeMetadata == null) {
 			return false;
 		}
 
 		// Check for added constructors, fields and methods
-		ClassOrInterfaceTypeDetails managedIdentifier = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		final ClassOrInterfaceTypeDetails managedIdentifier = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		return managedIdentifier.getDeclaredConstructors().isEmpty() && managedIdentifier.getDeclaredFields().isEmpty() && managedIdentifier.getDeclaredMethods().isEmpty();
 	}
 
-	private void deleteJavaType(JavaType javaType) {
-		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
+	private void deleteJavaType(final JavaType javaType) {
+		final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
-			String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
+			final String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
 			if (fileManager.exists(filePath)) {
 				fileManager.delete(filePath);
 				shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
@@ -455,16 +537,22 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 	}
 
-	private JavaType getIdentifierType(JavaType javaType) {
-		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
+	/**
+	 * Returns the type of ID that DBRE should use for the given entity
+	 * 
+	 * @param entity the entity for which to get the ID type (required)
+	 * @return a non-<code>null</code> ID type
+	 */
+	private JavaType getIdentifierType(final JavaType entity) {
+		final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(entity);
 		if (governorPhysicalTypeMetadata != null) {
-			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_ENTITY);
-			if (rooEntityAnnotation != null) {
-				AnnotationAttributeValue<?> identifierTypeAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
+			final ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+			final AnnotationMetadata jpaAnnotation = getJpaAnnotation(governorTypeDetails);
+			if (jpaAnnotation != null) {
+				final AnnotationAttributeValue<?> identifierTypeAttribute = jpaAnnotation.getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
 				if (identifierTypeAttribute != null) {
-					// Attribute identifierType exists so get the value
-					JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
+					// The identifierType attribute exists, so get its value
+					final JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
 					if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
 						return identifierType;
 					}
@@ -472,12 +560,12 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			}
 		}
 
-		// @RooEntity identifierType attribute does not exist or is not a simple type, so return a default
-		return new JavaType(javaType.getFullyQualifiedTypeName() + PRIMARY_KEY_SUFFIX);
+		// The JPA annotation's "identifierType" attribute does not exist or is not a simple type, so return a default
+		return new JavaType(entity.getFullyQualifiedTypeName() + PRIMARY_KEY_SUFFIX);
 	}
 
-	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+	private PhysicalTypeMetadata getPhysicalTypeMetadata(final JavaType javaType) {
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 	}
 }

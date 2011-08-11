@@ -35,7 +35,11 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class DbreOperationsImpl implements DbreOperations {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(DbreOperationsImpl.class);
+	
+	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -50,16 +54,17 @@ public class DbreOperationsImpl implements DbreOperations {
 		// Force it to refresh the database from the actual JDBC connection
 		Database database = dbreModelService.refreshDatabase(schemas, view, Collections.<String> emptySet() , Collections.<String> emptySet());
 		database.setIncludeNonPortableAttributes(true);
-		processDatabase(database, schemas, file, true);
+		outputSchemaXml(database, schemas, file, true);
 	}
 
-	public void reverseEngineerDatabase(Set<Schema> schemas, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes) {
+	public void reverseEngineerDatabase(final Set<Schema> schemas, final JavaPackage destinationPackage, final boolean testAutomatically, final boolean view, final Set<String> includeTables, final Set<String> excludeTables, final boolean includeNonPortableAttributes, final boolean activeRecord) {
 		// Force it to refresh the database from the actual JDBC connection
-		Database database = dbreModelService.refreshDatabase(schemas, view, includeTables, excludeTables);
+		final Database database = dbreModelService.refreshDatabase(schemas, view, includeTables, excludeTables);
+		database.setActiveRecord(activeRecord);
 		database.setDestinationPackage(destinationPackage);
-		database.setTestAutomatically(testAutomatically);
 		database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
-		processDatabase(database, schemas, null, false);
+		database.setTestAutomatically(testAutomatically);
+		outputSchemaXml(database, schemas, null, false);
 		
 		// Update the pom.xml to add an exclusion for the DBRE XML file in the maven-war-plugin 
 		updatePom();
@@ -68,7 +73,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		updatePersistenceXml();
 	}
 	
-	private void processDatabase(Database database, Set<Schema> schemas, File file, boolean displayOnly) {
+	private void outputSchemaXml(Database database, Set<Schema> schemas, File file, boolean displayOnly) {
 		if (database == null) {
 			logger.warning("Cannot obtain database information for schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "'");
 		} else if (!database.hasTables()) {

@@ -42,6 +42,7 @@ public interface DbreOperations {
 	 * @param includeTables the set of tables to include in reverse engineering.
 	 * @param excludeTables the set of tables to exclude from reverse engineering
 	 * @param includeNonPortableAttributes whether or not to include non-portable JPA @Column attributes such as 'columnDefinition'
+	 * @param activeRecord whether to generate CRUD active record methods for each entity
 	 */
-	void reverseEngineerDatabase(Set<Schema> schemas, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes);
+	void reverseEngineerDatabase(Set<Schema> schemas, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables, boolean includeNonPortableAttributes, boolean activeRecord);
 }
