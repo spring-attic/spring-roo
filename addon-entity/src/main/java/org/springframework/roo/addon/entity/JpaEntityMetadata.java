@@ -325,10 +325,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	}
 	
 	private String getIdentifierFieldName() {
-		if (StringUtils.hasText(annotationValues.getIdentifierField())) {
-			return annotationValues.getIdentifierField();
-		} else if (identifier != null && identifier.getFieldName() != null) {
+		if (identifier != null && identifier.getFieldName() != null) {
 			return identifier.getFieldName().getSymbolName();
+		} else if (StringUtils.hasText(annotationValues.getIdentifierField())) {
+			return annotationValues.getIdentifierField();
 		}
 		// Use the default
 		return RooJpaEntity.ID_FIELD_DEFAULT;
