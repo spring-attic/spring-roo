@@ -3003,10 +3003,10 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section xml:id="command-index-persistence-setup">
-            <title>persistence setup</title>
+        <section xml:id="command-index-jpa-setup">
+            <title>jpa setup</title>
             <para>Install or updates a JPA persistence provider in your project</para>
-            <programlisting><![CDATA[persistence setup --provider --database]]></programlisting>
+            <programlisting><![CDATA[jpa setup --provider --database]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--provider</term>

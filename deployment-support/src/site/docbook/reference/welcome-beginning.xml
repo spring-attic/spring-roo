@@ -243,7 +243,7 @@ com.springsource.roo.pizzashop roo&gt;
     persistent domain objects (entities) and their underlying database tables.
     To install or change the persistence configuration in your project you can
     use the <emphasis role="bold"><link
-    linkend="command-index-persistence-setup">persistence
+    linkend="command-index-jpa-setup">persistence
     setup</link></emphasis> command (note: try using the <emphasis
     role="bold">&lt;TAB&gt;</emphasis> as often as you can to auto-complete
     your commands, options and even obtain contextual help):</para>
@@ -252,7 +252,7 @@ com.springsource.roo.pizzashop roo&gt;
           role="bold">hint</emphasis>
 Roo requires the installation of a JPA provider and associated database.
 
-Type 'persistence setup' and then hit TAB three times.
+Type 'jpa setup' and then hit TAB three times.
 We suggest you type 'H' then TAB to complete "HIBERNATE".
 After the --provider, press TAB twice for database choices.
 For testing purposes, type (or TAB) HYPERSONIC_IN_MEMORY.
@@ -261,7 +261,7 @@ As such, you're ready to press ENTER to execute the command.
 
 Once JPA is installed, type 'hint' and ENTER for the next suggestion.
 com.springsource.roo.pizzashop roo&gt;
-com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis> 
+com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis> 
 Created SRC_MAIN_RESOURCES/META-INF/persistence.xml
 Created SRC_MAIN_RESOURCES/META-INF/spring/database.properties
 Managed SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
@@ -278,7 +278,7 @@ com.springsource.roo.pizzashop roo&gt;
 
     <para>When you are ready to test or install your application in a
     production setting, the <emphasis role="bold"><link
-    linkend="command-index-persistence-setup">persistence
+    linkend="command-index-jpa-setup">persistence
     setup</link></emphasis> command can be repeated. This allows you to
     nominate a different database, or even ORM. Roo offers TAB completion for
     production databases including Postgres, MySQL, Microsoft SQL Server,

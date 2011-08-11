@@ -570,7 +570,7 @@ Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
 roo&gt; <emphasis role="bold">hint</emphasis>
 Roo requires the installation of a JPA provider and associated database.
 
-Type 'persistence setup' and then hit TAB three times.
+Type 'jpa setup' and then hit TAB three times.
 We suggest you type 'H' then TAB to complete "HIBERNATE".
 After the --provider, press TAB twice for database choices.
 For testing purposes, type (or TAB) HYPERSONIC_IN_MEMORY.
@@ -585,7 +585,7 @@ Once JPA is installed, type 'hint' and ENTER for the next suggestion.</programli
     the TAB key when using the shell, as it will save you from having to type
     most of these commands:</para>
 
-    <programlisting>roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis>
+    <programlisting>roo&gt; <emphasis role="bold">jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis>
 roo&gt; <emphasis role="bold">hint</emphasis>
 roo&gt; <emphasis role="bold">entity --class ~.Timer --testAutomatically</emphasis>
 roo&gt; <emphasis role="bold">hint</emphasis>

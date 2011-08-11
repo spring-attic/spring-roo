@@ -310,7 +310,7 @@
         command completion options for the Spring Roo Shell. An example of
         static command completion options are for example the database selection
         options as part of the <link
-        linkend="command-index-persistence-setup">persistence setup</link>
+        linkend="command-index-jpa-setup">jpa setup</link>
         command.</para>
       </listitem>
 

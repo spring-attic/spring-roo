@@ -17,9 +17,9 @@
   offered by the Spring Roo persistence add-on:</para>
 
   <section>
-    <title>Persistence setup command</title>
+    <title>JPA setup command</title>
 
-    <para>The <link linkend="command-index-persistence-setup">persistence
+    <para>The <link linkend="command-index-jpa-setup">jpa
     setup</link> command provides the following options and attributes:</para>
 
     <para>Database Options:</para>
@@ -136,7 +136,7 @@
     we recommend you use Hibernate, OpenJPA or EclipseLink.</para>
 
     <para>In addition, the <link
-    linkend="command-index-persistence-setup">persistence setup</link> command
+    linkend="command-index-jpa-setup">jpa setup</link> command
     accepts optional <emphasis>databaseName</emphasis>,
     <emphasis>userName</emphasis> and <emphasis>password</emphasis> attributes
     for your convenience. However, it's not necessary to use this command. You
@@ -144,14 +144,14 @@
     at any time. Finally, you can also specify a pre-configured JNDI
     datasource via the <emphasis>jndiDataSource</emphasis> attribute.</para>
 
-    <para>The persistence setup command can be re-run at any time. This means
+    <para>The jpa setup command can be re-run at any time. This means
     you can change your ORM provider or database when you plan to move your
     application between your development setup (e.g. Hibernate with HSQLDB) to
     your production setup (e.g. EclipseLink with DB2). Of course this is a
     convenience only. You'll naturally experience fewer deployment issues if
     you use the same platform for both development and production.</para>
 
-    <para>Running the persistence setup command in the Roo shell takes care of
+    <para>Running the jpa setup command in the Roo shell takes care of
     configuring several aspects in your project:</para>
 
     <orderedlist>
@@ -214,7 +214,7 @@ database.driverClassName=org.hsqldb.jdbcDriver
         or by using the <emphasis>databaseName</emphasis>,
         <emphasis>userName</emphasis> and <emphasis>password</emphasis>
         attributes of the <link
-        linkend="command-index-persistence-setup">persistence setup</link>
+        linkend="command-index-jpa-setup">jpa setup</link>
         command. You can edit the properties file or use any of these commands
         at any time.</para>
       </listitem>

@@ -42,12 +42,12 @@ public class JpaCommands implements CommandMarker {
 		staticFieldConverter.remove(OrmProvider.class);
 	}
 
-	@CliAvailabilityIndicator("persistence setup")
+	@CliAvailabilityIndicator({ "jpa setup", "persistence setup" })
 	public boolean isInstallJpaAvailable() {
 		return jpaOperations.isJpaInstallationPossible() || jpaOperations.isJpaInstalled();
 	}
 	
-	@CliCommand(value = "persistence setup", help = "Install or updates a JPA persistence provider in your project")
+	@CliCommand(value = "jpa setup", help = "Install or updates a JPA persistence provider in your project")
 	public void installJpa(
 		@CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
 		@CliOption(key = "database", mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
@@ -76,6 +76,23 @@ public class JpaCommands implements CommandMarker {
 		}
 
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, transactionManager, persistenceUnit);
+	}
+	
+	@Deprecated
+	@CliCommand(value = "persistence setup", help = "Install or updates a JPA persistence provider in your project - deprecated, use 'jpa setup' instead")
+	public void installPersistence(
+		@CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
+		@CliOption(key = "database", mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
+		@CliOption(key = "applicationId", mandatory = false, unspecifiedDefaultValue = "the project's name", help = "The Google App Engine application identifier to use") String applicationId, 
+		@CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") String jndi, 
+		@CliOption(key = "hostName", mandatory = false, help = "The host name to use") String hostName, 
+		@CliOption(key = "databaseName", mandatory = false, help = "The database name to use") String databaseName, 
+		@CliOption(key = "userName", mandatory = false, help = "The username to use") String userName, 
+		@CliOption(key = "password", mandatory = false, help = "The password to use") String password,
+		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") String transactionManager,
+		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit) {
+		
+		installJpa(ormProvider, jdbcDatabase, applicationId, jndi, hostName, databaseName, userName, password, transactionManager, persistenceUnit);
 	}
 
 	@CliCommand(value = "database properties list", help = "Shows database configuration details")

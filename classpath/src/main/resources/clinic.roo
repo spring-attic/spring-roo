@@ -1,6 +1,6 @@
 project --topLevelPackage com.springsource.petclinic
 
-persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
 enum type --class ~.reference.PetType
 enum constant --name Dog

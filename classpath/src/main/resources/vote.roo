@@ -1,6 +1,6 @@
 project --topLevelPackage com.springsource.vote
 
-persistence setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+jpa setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 
 entity --class ~.domain.Choice --testAutomatically
 field string namingChoice --notNull --sizeMin 1 --sizeMax 30

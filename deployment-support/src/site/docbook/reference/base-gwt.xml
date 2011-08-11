@@ -108,7 +108,7 @@
 
     <programlisting>project --topLevelPackage com.springsource.roo.zoo
 
-persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
 enum type --class ~.shared.domain.Species
 enum constant --name Fish

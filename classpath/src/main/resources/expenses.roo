@@ -1,6 +1,6 @@
 project --topLevelPackage org.springsource.roo.extrack
 
-persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
+jpa setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
 enum type --class ~.shared.domain.Gender
 enum constant --name MALE

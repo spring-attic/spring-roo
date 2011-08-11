@@ -259,8 +259,8 @@
 
     <programlisting>// Spring Roo ENGINEERING BUILD [rev 553:554M] log opened at 2009-12-31 08:10:58
 project --topLevelPackage roo.shell.is.neat
-// [failed] persistence setup --database DELIBERATE_ERROR --provider HIBERNATE 
-persistence setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE 
+// [failed] jpa setup --database DELIBERATE_ERROR --provider HIBERNATE 
+jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE 
 quit
 // Spring Roo ENGINEERING BUILD [rev 553:554M] log closed at 2009-12-31 08:11:37</programlisting>
 

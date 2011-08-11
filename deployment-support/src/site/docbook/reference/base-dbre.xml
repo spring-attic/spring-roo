@@ -206,7 +206,7 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
     <title xml:id="dbre_commands">DBRE Add-On commands</title>
 
     <para>After you have configured your persistence layer with the <link
-    linkend="command-index-persistence-setup">persistence setup</link> command
+    linkend="command-index-jpa-setup">jpa setup</link> command
     and installed all the JDBC drivers, you can introspect and reverse
     engineer the database configured for your project. DBRE contains two
     commands:</para>

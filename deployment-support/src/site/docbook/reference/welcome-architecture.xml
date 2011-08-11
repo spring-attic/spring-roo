@@ -122,7 +122,7 @@
       following commands and note the console output:</para>
 
       <programlisting>roo&gt; <emphasis role="bold">project --topLevelPackage com.aspectj.rocks</emphasis>
-roo&gt; <emphasis role="bold">persistence setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE</emphasis>
+roo&gt; <emphasis role="bold">jpa setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE</emphasis>
 roo&gt; <emphasis role="bold">entity --class ~.Hello</emphasis>
 Created SRC_MAIN_JAVA/com/aspectj/rocks
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello.java
@@ -601,7 +601,7 @@ public class Choice {
           methods, the ability to plug in an alternate implementation is
           already fully supported despite there being no formal DAO layer. You
           can see this yourself by issuing the <link
-          linkend="command-index-persistence-setup">persistence setup
+          linkend="command-index-jpa-setup">jpa setup
           </link>command and specifying alternate implementations.</para>
         </listitem>
 

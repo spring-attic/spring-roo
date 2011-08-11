@@ -66,7 +66,7 @@
         combination with Hibernate. We have found OpenJPA works reliably in
         all cases, so you might want to consider switching to OpenJPA if you
         are seriously impacted by this issue (the "<link
-        linkend="command-index-persistence-setup">persistence setup</link>"
+        linkend="command-index-jpa-setup">jpa setup</link>"
         command can be used multiple times, which is useful for experimentally
         switching between different JPA providers).</para>
       </listitem>
