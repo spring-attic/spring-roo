@@ -68,9 +68,9 @@
         <module>addon-op4j</module>
         <module>addon-git</module>
         <module>addon-cloud-foundry</module>
-        <module>annotations</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository</module>
+        <module>annotations</module>
     </modules>
     <organization>
         <name>VMware, Inc</name>
