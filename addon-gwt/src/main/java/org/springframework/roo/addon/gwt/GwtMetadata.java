@@ -199,8 +199,17 @@ public class GwtMetadata extends AbstractMetadataItem {
 			is.setCharacterStream(new FileReader(destFile));
 			Document existingDocument = builder.parse(is);
 
-			Element existingHoldingElement = XmlUtils.findFirstElement("//*[@id='" + "boundElementHolder" + "']", existingDocument.getDocumentElement());
-			Element templateHoldingElement = XmlUtils.findFirstElement("//*[@id='" + "boundElementHolder" + "']", templateDocument.getDocumentElement());
+			//Look for the element holder denoted by the 'debugId' attribute first
+			Element existingHoldingElement = XmlUtils.findFirstElement("//*[@debugId='" + "boundElementHolder" + "']", existingDocument.getDocumentElement());
+			Element templateHoldingElement = XmlUtils.findFirstElement("//*[@debugId='" + "boundElementHolder" + "']", templateDocument.getDocumentElement());
+
+			//If holding element isn't found then the holding element is either not widget based or using the old convention of 'id' so look for the element holder with an 'id' attribute
+			if (existingHoldingElement == null) {
+				existingHoldingElement = XmlUtils.findFirstElement("//*[@id='" + "boundElementHolder" + "']", existingDocument.getDocumentElement());
+			}
+			if (templateHoldingElement == null) {
+				templateHoldingElement = XmlUtils.findFirstElement("//*[@id='" + "boundElementHolder" + "']", templateDocument.getDocumentElement());
+			}
 
 			if (existingHoldingElement != null) {
 				HashMap<String, Element> templateElementMap = new LinkedHashMap<String, Element>();
