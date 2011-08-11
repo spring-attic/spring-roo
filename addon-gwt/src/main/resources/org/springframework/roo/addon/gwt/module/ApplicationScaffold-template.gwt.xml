@@ -28,6 +28,9 @@
 	<set-property name="gwt.logging.systemHandler" value="ENABLED"/>
 	<set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED"/>
 
+	<!--UiBinder Configuration -->
+	<set-configuration-property name="UiBinder.useSafeHtmlTemplates" value="true"/>
+
 	<!-- Uncomment if you are enabling server side deobfuscation of StackTraces
 		<set-property name="compiler.emulatedStack" value="true" />
 		<set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
