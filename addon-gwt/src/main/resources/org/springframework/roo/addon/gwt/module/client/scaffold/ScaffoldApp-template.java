@@ -3,7 +3,7 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.gae.*;
-import com.google.gwt.requestfactory.shared.EntityProxy;
+import com.google.web.bindery.requestfactory.shared.EntityProxy;
 
 import java.util.HashSet;
 import java.util.Set;

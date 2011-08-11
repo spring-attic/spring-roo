@@ -10,7 +10,7 @@ import com.google.gwt.editor.client.adapters.ListEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.requestfactory.client.RequestFactoryEditorDriver;
+import com.google.web.bindery.requestfactory.gwt.client.RequestFactoryEditorDriver;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -113,7 +113,7 @@ public class {{=className}} extends Composite implements ValueAwareEditor<List<{
   ValueListBox<{{=proxy}}> picker
       = new ValueListBox<{{=proxy}}>(
       {{=proxyRenderer}}.instance(),
-      new com.google.gwt.requestfactory.ui.client.EntityProxyKeyProvider<{{=proxy}}>());
+      new com.google.web.bindery.requestfactory.gwt.ui.client.EntityProxyKeyProvider<{{=proxy}}>());
 
   ;
 

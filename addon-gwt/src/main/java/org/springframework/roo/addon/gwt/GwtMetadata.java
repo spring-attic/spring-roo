@@ -104,7 +104,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<AnnotationMetadataBuilder> typeAnnotations = createAnnotations();
 
 		// Add @ProxyForName("com.foo.bar.Foo") annotation
-		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.ProxyForName")));
+		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.web.bindery.requestfactory.shared.ProxyForName")));
 
 		// Only add annotations that don't already exist on the target
 		for (AnnotationMetadataBuilder annotationBuilder : typeAnnotations) {
@@ -122,8 +122,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		// Only inherit from EntityProxy if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"))) {
-			typeDetailsBuilder.addExtendsTypes(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"));
+		if (!typeDetailsBuilder.getExtendsTypes().contains(new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy"))) {
+			typeDetailsBuilder.addExtendsTypes(new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy"));
 		}
 
 		List<MethodMetadataBuilder> methods = new LinkedList<MethodMetadataBuilder>();
@@ -155,14 +155,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		List<AnnotationMetadataBuilder> typeAnnotations = createAnnotations();
 		// @Service(Employee.class)
-		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.ServiceName")));
+		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.web.bindery.requestfactory.shared.ServiceName")));
 
 		List<MethodMetadataBuilder> methods = new LinkedList<MethodMetadataBuilder>();
 		for (MethodMetadata method : requestMethods) {
 			methods.add(getRequestMethod(destinationMetadataId, method));
 		}
 
-		List<JavaType> extendsTypes = Collections.singletonList(new JavaType("com.google.gwt.requestfactory.shared.RequestContext"));
+		List<JavaType> extendsTypes = Collections.singletonList(new JavaType("com.google.web.bindery.requestfactory.shared.RequestContext"));
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(destinationMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
 		typeDetailsBuilder.setAnnotations(typeAnnotations);
@@ -289,13 +289,13 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private MethodMetadataBuilder getRequestMethod(String destinationMetadataId, MethodMetadata methodMetaData) {
 		if (methodMetaData.getMethodName().equals(countMethod.getMethodName()) || methodMetaData.getMethodName().equals(findMethod.getMethodName()) || methodMetaData.getMethodName().equals(findAllMethod.getMethodName()) || methodMetaData.getMethodName().equals(findEntriesMethod.getMethodName())) {
 			List<JavaType> methodReturnTypeArgs = Collections.singletonList(methodMetaData.getReturnType());
-			JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, methodReturnTypeArgs);
+			JavaType methodReturnType = new JavaType("com.google.web.bindery.requestfactory.shared.Request", 0, DataType.TYPE, null, methodReturnTypeArgs);
 			return getRequestMethod(destinationMetadataId, methodMetaData, methodReturnType);
 		}
 		
 		JavaType proxy = PhysicalTypeIdentifier.getJavaType(getDestinationMetadataId(GwtType.PROXY));
 		List<JavaType> methodReturnTypeArgs = Arrays.asList(proxy, JavaType.VOID_OBJECT);
-		JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.InstanceRequest", 0, DataType.TYPE, null, methodReturnTypeArgs);
+		JavaType methodReturnType = new JavaType("com.google.web.bindery.requestfactory.shared.InstanceRequest", 0, DataType.TYPE, null, methodReturnTypeArgs);
 		return getRequestMethod(destinationMetadataId, methodMetaData, methodReturnType);
 	}
 

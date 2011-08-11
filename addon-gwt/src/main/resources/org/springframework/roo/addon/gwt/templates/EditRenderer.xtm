@@ -1,6 +1,6 @@
 package {{=packageName}};
 
-import com.google.gwt.requestfactory.ui.client.ProxyRenderer;
+import com.google.web.bindery.requestfactory.gwt.ui.client.ProxyRenderer;
 
 {{#imports}}import {{=import}};
 {{/imports}}

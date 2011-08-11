@@ -6,8 +6,8 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
-import com.google.gwt.requestfactory.client.DefaultRequestTransport;
-import com.google.gwt.requestfactory.shared.ServerFailure;
+import com.google.web.bindery.requestfactory.gwt.client.DefaultRequestTransport;
+import com.google.web.bindery.requestfactory.shared.ServerFailure;
 import com.google.gwt.user.client.Window;
 
 /**
@@ -41,7 +41,7 @@ public class GaeAuthRequestTransport extends DefaultRequestTransport {
 					if (loginUrl != null) {
 						/*
 						 * Hand the receiver a non-fatal callback, so that
-						 * com.google.gwt.requestfactory.shared.Receiver will not post a
+						 * com.google.web.bindery.requestfactory.shared.Receiver will not post a
 						 * runtime exception.
 						 */
 						receiver.onTransportFailure(new ServerFailure("Unauthenticated user", null, null, false /* not fatal */));
@@ -53,7 +53,7 @@ public class GaeAuthRequestTransport extends DefaultRequestTransport {
 					/*
 					 * A response with no status follows the SC_UNAUTHORIZED.
 					 * Report it as non-fatal, so that
-					 * com.google.gwt.requestfactory.shared.Receiver will not post a
+					 * com.google.web.bindery.requestfactory.shared.Receiver will not post a
 					 * runtime exception
 					 */
 					receiver.onTransportFailure(new ServerFailure("Status zero response, probably after auth failure", null, null, false /* not fatal */));

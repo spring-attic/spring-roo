@@ -1,6 +1,6 @@
 package {{=packageName}};
 
-import com.google.gwt.requestfactory.shared.EntityProxy;
+import com.google.web.bindery.requestfactory.shared.EntityProxy;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -75,9 +75,9 @@ public abstract class {{=className}}<T> {
 	 * {@link #getClass()} method of a proxy object, due to limitations of GWT's
 	 * metadata. It will only work with against class objects in the set returned
 	 * by {@link #getAll()}, or returned by
-	 * {@link com.google.gwt.requestfactory.shared.RequestFactory#getClass(Proxy)}
+	 * {@link com.google.web.bindery.requestfactory.shared.RequestFactory#getClass(Proxy)}
 	 * or
-	 * {@link com.google.gwt.requestfactory.shared.RequestFactory#getClass(String)}.
+	 * {@link com.google.web.bindery.requestfactory.shared.RequestFactory#getClass(String)}.
  	 * 
 	 * @param clazz the proxy type to resolve
 	 * @return the value provided via {@link #setResult}, or the default value

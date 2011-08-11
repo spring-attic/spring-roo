@@ -246,7 +246,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		Document webXml = XmlUtils.readXml(fileManager.getInputStream(webXmlpath));
 		Element root = webXml.getDocumentElement();
 
-		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXml, null);
+		WebXmlUtils.addServlet("requestFactory", "com.google.web.bindery.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXml, null);
 		if (projectOperations.getProjectMetadata().isGaeEnabled()) {
 			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectOperations.getProjectMetadata()) + ".GaeAuthFilter", "/gwtRequest/*", webXml, "This filter makes GAE authentication services visible to a RequestFactory client.");
 			String displayName = "Redirect to the login page if needed before showing any html pages";

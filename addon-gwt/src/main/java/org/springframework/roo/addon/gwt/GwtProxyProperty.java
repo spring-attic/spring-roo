@@ -261,7 +261,7 @@ class GwtProxyProperty {
 		}
 
 		if (isProxy()) {
-			initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), new com.google.gwt.requestfactory.ui.client.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getProxyRendererType());
+			initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), new com.google.web.bindery.requestfactory.gwt.ui.client.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getProxyRendererType());
 		}
 
 		return String.format("@UiField %s %s %s", getEditor(), getName(), initializer);

@@ -6,7 +6,7 @@
 	<inherits name='com.google.gwt.place.Place'/>
 	<inherits name="com.google.gwt.user.User"/>
 	<inherits name="com.google.gwt.user.theme.standard.Standard"/>
-	<inherits name='com.google.gwt.requestfactory.RequestFactory'/>
+	<inherits name='com.google.web.bindery.requestfactory.RequestFactory'/>
 	<inherits name="com.google.gwt.user.cellview.CellView"/>
 	<inherits name='com.google.gwt.logging.Logging'/>
 	<inherits name="com.google.gwt.inject.Inject"/>

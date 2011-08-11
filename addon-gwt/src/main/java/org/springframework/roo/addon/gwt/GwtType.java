@@ -133,7 +133,7 @@ public enum GwtType {
 				watchedMethods.put(new JavaSymbolName("start"), params);
 				break;
 			case DETAIL_ACTIVITY:
-				params = Arrays.asList(new JavaType("com.google.gwt.requestfactory.shared.Receiver", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"))));
+				params = Arrays.asList(new JavaType("com.google.web.bindery.requestfactory.shared.Receiver", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy"))));
 				watchedMethods.put(new JavaSymbolName("find"), params);
 				break;
 			case MOBILE_LIST_VIEW:

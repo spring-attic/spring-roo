@@ -3,7 +3,7 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.gwt.requestfactory.shared.ServiceLocator;
+import com.google.web.bindery.requestfactory.shared.ServiceLocator;
 
 /**
  * Gives a RequestFactory system access to the Google AppEngine UserService.
