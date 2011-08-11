@@ -25,7 +25,7 @@ public class SchemaConverter implements Converter<Set<Schema>> {
 	@Reference private DbreModelService dbreModelService;
 
 	public boolean supports(Class<?> requiredType, String optionContext) {
-		return Set.class.isAssignableFrom(requiredType);
+		return Set.class.isAssignableFrom(requiredType) && optionContext.contains("schema");
 	}
 
 	public Set<Schema> convertFromText(String value, Class<?> requiredType, String optionContext) {
