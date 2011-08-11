@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.entity;
 
-import static org.springframework.roo.addon.entity.RooJpaEntity.ID_FIELD_DEFAULT;
 import static org.springframework.roo.addon.entity.RooJpaEntity.VERSION_FIELD_DEFAULT;
 
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
@@ -27,7 +26,7 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String catalog = "";
 	@AutoPopulate private String entityName = "";
 	@AutoPopulate private String identifierColumn = "";
-	@AutoPopulate private String identifierField = ID_FIELD_DEFAULT;
+	@AutoPopulate private String identifierField = "";
 	@AutoPopulate private String inheritanceType = "";
 	@AutoPopulate private String schema = "";
 	@AutoPopulate private String table = "";
