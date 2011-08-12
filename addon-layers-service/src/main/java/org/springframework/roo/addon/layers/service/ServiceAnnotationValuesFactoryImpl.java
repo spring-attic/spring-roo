@@ -13,7 +13,7 @@ import org.springframework.roo.project.Path;
  * Factory for {@link ServiceAnnotationValues} instances.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 @Component
 @Service

@@ -6,7 +6,7 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
  * Unit test of {@link ServiceAnnotationValues}
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class ServiceAnnotationValuesTest extends AnnotationValuesTestCase<RooService, ServiceAnnotationValues> {
 

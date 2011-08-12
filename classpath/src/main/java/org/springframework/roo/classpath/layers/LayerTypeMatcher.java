@@ -19,7 +19,7 @@ import org.springframework.roo.model.JavaType;
  * Layer type specific matcher which populates a tag value based on the layer provider specific trigger annotation.
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 public class LayerTypeMatcher extends TypeMatcher {
 	

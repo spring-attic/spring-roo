@@ -9,7 +9,7 @@ import java.util.List;
  * duplicate and/or <code>null</code> keys.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  * @param <K> the type of key
  * @param <V> the type of value
  */

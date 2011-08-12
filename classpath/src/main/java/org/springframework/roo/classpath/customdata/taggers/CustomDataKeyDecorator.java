@@ -34,7 +34,7 @@ public interface CustomDataKeyDecorator extends MemberDetailsDecorator {
 	 * @param addingClass the class registering the matchers (can be null not to
 	 * register any matchers)
 	 * @param matchers the matchers to register (can be none)
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	void registerMatchers(Class<?> addingClass, Matcher<? extends CustomDataAccessor>... matchers);
 
@@ -43,7 +43,7 @@ public interface CustomDataKeyDecorator extends MemberDetailsDecorator {
 	 * 
 	 * @param addingClass the class whose matchers are to be unregistered
 	 * (required)
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	void unregisterMatchers(Class<?> addingClass);
 	

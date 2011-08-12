@@ -33,7 +33,7 @@ import org.springframework.roo.support.util.StringUtils;
  * The metadata for a JPA entity's *_Roo_Jpa_Entity.aj ITD.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 

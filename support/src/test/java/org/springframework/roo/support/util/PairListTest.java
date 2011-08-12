@@ -10,7 +10,7 @@ import org.junit.Test;
  * Unit test of {@link PairList}
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class PairListTest {
 

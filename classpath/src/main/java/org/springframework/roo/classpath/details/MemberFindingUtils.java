@@ -173,7 +173,7 @@ public abstract class MemberFindingUtils {
 	 * @param annotationType the type of annotation for which to return the metadata; can
 	 * be <code>null</code>
 	 * @return <code>null</code> if not found
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public static AnnotationMetadata getAnnotationOfType(final MemberHoldingTypeDetailsMetadataItem<?> metadata, final JavaType annotationType) {
 		if (metadata == null || metadata.getMemberHoldingTypeDetails() == null) {

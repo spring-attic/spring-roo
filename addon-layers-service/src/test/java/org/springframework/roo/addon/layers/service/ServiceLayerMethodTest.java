@@ -26,7 +26,7 @@ import org.springframework.roo.support.util.PairList;
  * Unit test of the {@link ServiceLayerMethod} enum
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class ServiceLayerMethodTest {
 

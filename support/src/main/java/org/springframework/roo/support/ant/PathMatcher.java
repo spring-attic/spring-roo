@@ -25,7 +25,7 @@ import java.util.Map;
  * Ant-style pattern syntax.
  *
  * @author Juergen Hoeller
- * @since 1.2
+ * @since 1.2.0
  * @see AntPathMatcher
  */
 public interface PathMatcher {

@@ -7,7 +7,7 @@ package org.springframework.roo.classpath.layers;
  * to the core position values shown below.
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 public enum LayerType {
 	

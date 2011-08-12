@@ -8,7 +8,7 @@ import org.springframework.roo.support.util.Pair;
  * Provides persistence-related methods at a given layer of the application.
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 public interface LayerProvider {
 	

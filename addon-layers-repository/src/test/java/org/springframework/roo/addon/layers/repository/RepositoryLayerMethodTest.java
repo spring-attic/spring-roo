@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Unit test of the {@link RepositoryLayerMethod} enum.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class RepositoryLayerMethodTest {
 

@@ -31,7 +31,7 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 	 * @param <T> {@link JavaType} or any subclass
 	 * @param customDataKey (required)
 	 * @param parameterTypes
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public <T extends JavaType> ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final T... parameterTypes) {
 		this(customDataKey, Arrays.asList(parameterTypes));

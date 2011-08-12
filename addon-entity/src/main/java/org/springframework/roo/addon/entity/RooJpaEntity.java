@@ -7,7 +7,7 @@ import java.io.Serializable;
  * concerns managed by {@link RooEntity}.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public @interface RooJpaEntity {
 

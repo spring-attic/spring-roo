@@ -13,7 +13,7 @@ import org.springframework.roo.model.JavaType;
  * {@link RooEntity} annotation.
  * 
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 	
@@ -39,7 +39,7 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 	 * @param annotatedType the type from which to read the values (required)
 	 * @param triggerAnnotation the type of annotation from which to read the
 	 * values (required)
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public JpaEntityAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> annotatedType, final JavaType annotationType) {
 		super(annotatedType, annotationType);

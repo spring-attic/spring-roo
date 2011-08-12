@@ -33,7 +33,7 @@ import org.springframework.roo.model.JavaType;
  * Unit test of {@link EntityLayerProvider}
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class EntityLayerProviderTest {
 	

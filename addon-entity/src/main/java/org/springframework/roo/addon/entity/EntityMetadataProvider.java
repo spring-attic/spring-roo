@@ -24,7 +24,7 @@ public interface EntityMetadataProvider extends ItdTriggerBasedMetadataProvider 
 	 * 
 	 * @param javaType can be <code>null</code>
 	 * @return <code>null</code> if no values can be found
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	JpaCrudAnnotationValues getAnnotationValues(JavaType javaType);
 }

@@ -12,7 +12,7 @@ import org.springframework.roo.model.JavaType;
  * methods such as merge(), persist(), finders, etc.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public interface JpaEntityMetadataProvider extends ItdTriggerBasedMetadataProvider {
 	

@@ -22,7 +22,7 @@ import org.springframework.roo.model.JavaType;
  * Unit test of the {@link EntityLayerMethod} enum
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class EntityLayerMethodTest {
 

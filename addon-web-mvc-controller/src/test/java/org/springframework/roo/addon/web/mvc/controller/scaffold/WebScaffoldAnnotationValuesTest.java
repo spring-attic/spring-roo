@@ -7,7 +7,7 @@ import org.springframework.roo.classpath.details.annotations.populator.Annotatio
  * Unit test of {@link WebScaffoldAnnotationValues}
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class WebScaffoldAnnotationValuesTest extends AnnotationValuesTestCase<RooWebScaffold, WebScaffoldAnnotationValues> {
 

@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * 
  * @author Stefan Schmidt
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)

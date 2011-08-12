@@ -71,7 +71,7 @@ public class Database {
 	 * Indicates whether active record CRUD methods should be generated for each entity
 	 * 
 	 * @return see above
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public boolean isActiveRecord() {
 		return activeRecord;
@@ -81,7 +81,7 @@ public class Database {
 	 * Sets whether active record CRUD methods should be generated for each entity
 	 * 
 	 * @param activeRecord
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public void setActiveRecord(final boolean activeRecord) {
 		this.activeRecord = activeRecord;

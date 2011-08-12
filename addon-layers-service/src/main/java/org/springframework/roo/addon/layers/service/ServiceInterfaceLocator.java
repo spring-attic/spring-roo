@@ -9,7 +9,7 @@ import org.springframework.roo.model.JavaType;
  * Locates service interfaces within the user's project.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public interface ServiceInterfaceLocator {
 

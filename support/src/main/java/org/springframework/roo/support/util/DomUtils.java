@@ -35,7 +35,7 @@ import org.w3c.dom.NodeList;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Costin Leau
- * @since 1.2
+ * @since 1.2.0
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
  */

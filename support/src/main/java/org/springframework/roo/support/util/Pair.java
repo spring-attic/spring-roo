@@ -5,7 +5,7 @@ package org.springframework.roo.support.util;
  * immutable.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  * @param <K> the key type
  * @param <V> the value type
  */

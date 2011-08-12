@@ -28,7 +28,7 @@ import org.springframework.roo.support.util.Pair;
  *
  * @author Andrew Swan
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 public class RepositoryJpaLayerProviderTest {
 

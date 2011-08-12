@@ -12,7 +12,7 @@ import org.springframework.roo.shell.CommandMarker;
 /**
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 @Component
 @Service

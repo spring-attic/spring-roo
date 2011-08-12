@@ -207,7 +207,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 * Registers the given {@link JavaType}s as triggering metadata registration.
 	 * 
 	 * @param triggerTypes the type-level annotations to detect that will cause metadata creation
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public void addMetadataTriggers(final JavaType... triggerTypes) {
 		for (final JavaType triggerType : triggerTypes) {
@@ -229,7 +229,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 * Removes the given {@link JavaType}s as triggering metadata registration.
 	 * 
 	 * @param triggerTypes the type-level annotations to remove as triggers
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public void removeMetadataTriggers(final JavaType... triggerTypes) {
 		for (final JavaType triggerType : triggerTypes) {

@@ -24,7 +24,7 @@ import org.springframework.uaa.client.util.Assert;
  * 
  * @author Stefan Schmidt
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	

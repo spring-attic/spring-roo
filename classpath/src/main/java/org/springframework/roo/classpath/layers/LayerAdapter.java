@@ -5,7 +5,7 @@ package org.springframework.roo.classpath.layers;
  * 
  * @author Stefan Schmidt
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public abstract class LayerAdapter implements LayerProvider {
 

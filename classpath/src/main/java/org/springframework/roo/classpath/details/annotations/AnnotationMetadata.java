@@ -37,7 +37,7 @@ public interface AnnotationMetadata {
 	 * 
 	 * @param attributeName
 	 * @return the requested attribute (or null if not found)
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	AnnotationAttributeValue<?> getAttribute(String attributeName);
 }

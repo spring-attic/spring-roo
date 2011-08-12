@@ -43,7 +43,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	 * 
 	 * @param annotationType the fully-qualified name of the annotation type (required)
 	 * @return a non-<code>null</code> instance
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public static AnnotationMetadata getInstance(final String annotationType) {
 		return new AnnotationMetadataBuilder(annotationType).build();
@@ -55,7 +55,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	 * 
 	 * @param annotationType the annotation type (required)
 	 * @return a non-<code>null</code> instance
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public static AnnotationMetadata getInstance(final Class<?> annotationType) {
 		return new AnnotationMetadataBuilder(annotationType).build();
@@ -90,7 +90,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	 * Constructor for no initial attribute values
 	 *
 	 * @param annotationType the annotation class (required)
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public AnnotationMetadataBuilder(final Class<?> annotationType) {
 		this(new JavaType(annotationType));

@@ -57,7 +57,7 @@ public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadat
 	 * @param annotationExpr
 	 * @param compilationUnitServices
 	 * @return a non-<code>null</code> instance
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public static JavaParserAnnotationMetadata getInstance(final AnnotationExpr annotationExpr, final CompilationUnitServices compilationUnitServices) {
 		Assert.notNull(annotationExpr, "Annotation expression required");

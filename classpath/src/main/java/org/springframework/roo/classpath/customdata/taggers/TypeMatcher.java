@@ -25,7 +25,7 @@ public class TypeMatcher implements Matcher<MemberHoldingTypeDetails> {
 	 *
 	 * @param customDataKey
 	 * @param declaredBy the declaring class (required)
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public TypeMatcher(final CustomDataKey<MemberHoldingTypeDetails> customDataKey, final Class<?> declaredBy) {
 		this(customDataKey, declaredBy.getName());

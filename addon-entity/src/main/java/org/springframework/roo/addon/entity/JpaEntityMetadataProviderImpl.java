@@ -48,7 +48,7 @@ import org.springframework.roo.support.util.Assert;
  * The {@link JpaEntityMetadataProvider} implementation.
  * 
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 @Component(immediate = true)
 @Service

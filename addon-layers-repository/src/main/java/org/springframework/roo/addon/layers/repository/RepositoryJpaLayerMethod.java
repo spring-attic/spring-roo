@@ -24,7 +24,7 @@ import org.springframework.roo.support.util.Assert;
  * A method provided by the {@link LayerType#REPOSITORY} layer.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public enum RepositoryJpaLayerMethod {
 	

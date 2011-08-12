@@ -21,7 +21,7 @@ import org.springframework.roo.support.util.Pair;
  * The {@link LayerService} implementation.
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 @Component(immediate=true)
 @Service
@@ -67,7 +67,7 @@ public class LayerServiceImpl implements LayerService {
 	 *
 	 * @author Andrew Swan
 	 * @author Stefan Schmidt
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	class DescendingLayerComparator implements Comparator<LayerProvider>, Serializable {
 		

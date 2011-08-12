@@ -13,7 +13,7 @@ import org.springframework.roo.model.JavaSymbolName;
  * Unit test of {@link MemberTypeAdditions}
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class MemberTypeAdditionsTest {
 

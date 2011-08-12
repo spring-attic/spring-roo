@@ -34,7 +34,7 @@ import org.w3c.dom.Element;
 /**
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 @Component
 @Service

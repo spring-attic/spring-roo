@@ -13,7 +13,7 @@ import org.springframework.roo.support.util.ObjectUtils;
  * Unit test of the {@link RooEntity} annotation.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public class RooEntityTest {
 

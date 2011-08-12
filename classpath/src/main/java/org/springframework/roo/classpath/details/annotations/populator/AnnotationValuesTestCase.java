@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.ReflectionUtils;
  * Convenience superclass for unit-testing subclasses of {@link AbstractAnnotationValues}
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  * @param <A> the annotation type
  * @param <V> the annotation values class
  */

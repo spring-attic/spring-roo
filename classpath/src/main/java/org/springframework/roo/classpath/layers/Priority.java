@@ -3,7 +3,7 @@ package org.springframework.roo.classpath.layers;
 /**
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 public enum Priority {
 

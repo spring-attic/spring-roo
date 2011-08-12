@@ -4,7 +4,7 @@ package org.springframework.roo.support.util;
  * Allows filtering of objects of type T.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  * @param <T> the type of object to be filtered
  */
 public interface Filter<T> {

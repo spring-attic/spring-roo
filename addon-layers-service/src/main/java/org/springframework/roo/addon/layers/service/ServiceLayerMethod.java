@@ -18,7 +18,7 @@ import org.springframework.roo.support.util.StringUtils;
  *
  * @author Andrew Swan
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 enum ServiceLayerMethod {
 	

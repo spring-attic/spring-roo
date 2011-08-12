@@ -29,7 +29,7 @@ import org.springframework.roo.model.JavaType;
  * persistence ID tags for {@link MemberDetails} for a given domain type.
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  *
  */
 @Component(immediate=true)

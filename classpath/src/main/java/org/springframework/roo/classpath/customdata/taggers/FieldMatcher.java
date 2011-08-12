@@ -72,7 +72,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 	 *
 	 * @param customDataKey the custom data key indicating the type of field (required)
 	 * @param annotations the annotations to match upon
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public FieldMatcher(final CustomDataKey<FieldMetadata> customDataKey, final AnnotationMetadata... annotations) {
 		this(customDataKey, Arrays.asList(annotations));

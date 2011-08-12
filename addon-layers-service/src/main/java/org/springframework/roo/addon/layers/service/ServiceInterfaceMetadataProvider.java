@@ -29,7 +29,7 @@ import org.springframework.roo.project.Path;
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
  * 
  * @author Stefan Schmidt
- * @since 1.2
+ * @since 1.2.0
  */
 @Component(immediate=true)
 @Service

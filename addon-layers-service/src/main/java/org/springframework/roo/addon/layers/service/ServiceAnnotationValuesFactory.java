@@ -7,7 +7,7 @@ import org.springframework.roo.project.Path;
  * A factory for {@link ServiceAnnotationValues} instances.
  *
  * @author Andrew Swan
- * @since 1.2
+ * @since 1.2.0
  */
 public interface ServiceAnnotationValuesFactory {
 

@@ -26,7 +26,7 @@ public final class PhysicalTypeIdentifier {
 	 * 
 	 * @param javaType, assumed to be in {@link Path#SRC_MAIN_JAVA} (required)
 	 * @return a non-blank ID
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public static final String createIdentifier(final JavaType javaType) {
 		return createIdentifier(javaType, Path.SRC_MAIN_JAVA);

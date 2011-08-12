@@ -114,7 +114,7 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	 * for convenience and type safety.
 	 *
 	 * @param type the class for which to create an instance (required)
-	 * @since 1.2
+	 * @since 1.2.0
 	 */
 	public JavaType(final Class<?> type) {
 		this(type.getName());
