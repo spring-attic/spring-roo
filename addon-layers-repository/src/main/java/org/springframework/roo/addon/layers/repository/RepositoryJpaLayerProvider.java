@@ -9,13 +9,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.layers.CoreLayerProvider;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.CollectionUtils;
@@ -40,21 +38,17 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
 	// Fields
 	@Reference private RepositoryJpaLocator repositoryLocator;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final Pair<JavaType, JavaSymbolName>... callerParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata ID required");
 		Assert.isTrue(StringUtils.hasText(methodIdentifier), "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
+		Assert.notNull(idType, "Enitity Id type required");
 		
 		// Look for a repository layer method with this ID and parameter types
 		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(callerParameters);
 		final List<JavaType> parameterTypes = parameterList.getKeys();
-		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(targetEntity);
-		if (idFields.isEmpty()) {
-			return null;
-		}
-		final RepositoryJpaLayerMethod method = RepositoryJpaLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idFields.get(0).getFieldType());
+		final RepositoryJpaLayerMethod method = RepositoryJpaLayerMethod.valueOf(methodIdentifier, parameterTypes, targetEntity, idType);
 		if (method == null) {
 			return null;
 		}
@@ -102,9 +96,5 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	
 	void setRepositoryLocator(final RepositoryJpaLocator repositoryLocator) {
 		this.repositoryLocator = repositoryLocator;
-	}
-	
-	void setPersistenceMemberLocator(final PersistenceMemberLocator persistenceMemberLocator) {
-		this.persistenceMemberLocator = persistenceMemberLocator;
 	}
 }

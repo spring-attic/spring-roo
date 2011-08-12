@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.property.editor;
 
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -9,7 +7,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -67,16 +64,17 @@ public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
-		final List<FieldMetadata> identifierFields = persistenceMemberLocator.getIdentifierFields(javaType);
-		if (identifierFields.isEmpty()) {
+		final JavaType idType = persistenceMemberLocator.getIdentifierType(javaType);
+		if (idType == null) {
 			return null;
 		}
+		
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
 		if (identifierAccessor == null) {
 			return null;
 		}
 
-		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierFields.get(0), identifierAccessor, entityMetadata.getFindMethod());
+		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, idType, identifierAccessor, entityMetadata.getFindMethod());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

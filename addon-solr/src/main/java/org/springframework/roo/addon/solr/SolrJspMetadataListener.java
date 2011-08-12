@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.solr;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -129,15 +130,18 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 								.build();
 		pageSearch.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
 		
-		final FieldMetadata idField = persistenceMemberLocator.getIdentifierFields(formbackingObject).get(0);
+		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(formbackingObject);
+		if (!idFields.isEmpty()) {
+			return null;
+		}
 		Element resultTable = new XmlElementBuilder("fields:table", document)
-									.addAttribute("id", XmlUtils.convertId("rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
-									.addAttribute("data", "${searchResults}")
-									.addAttribute("delete", "false")
-									.addAttribute("update", "false")
-									.addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath())
-									.addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + idField.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(idField.getFieldType()))
-								.build();
+		.addAttribute("id", XmlUtils.convertId("rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
+		.addAttribute("data", "${searchResults}")
+		.addAttribute("delete", "false")
+		.addAttribute("update", "false")
+		.addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath())
+		.addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + idFields.get(0).getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(idFields.get(0).getFieldType()))
+		.build();
 		resultTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(resultTable));
 					
 		StringBuilder facetFields = new StringBuilder();

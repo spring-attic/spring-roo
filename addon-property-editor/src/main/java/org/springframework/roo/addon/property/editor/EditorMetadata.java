@@ -33,11 +33,11 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String PROVIDES_TYPE_STRING = EditorMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	public EditorMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType javaType, FieldMetadata identifierField, MethodMetadata identifierAccessorMethod, MethodMetadata findMethod) {
+	public EditorMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType javaType, JavaType idType, MethodMetadata identifierAccessorMethod, MethodMetadata findMethod) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(javaType, "Java type required");
-		Assert.notNull(identifierField, "Identifier field metadata required");
+		Assert.notNull(idType, "Identifier field metadata required");
 		Assert.notNull(identifierAccessorMethod, "Identifier accessor metadata required");
 
 		if (!isValid() || findMethod == null) {
@@ -58,7 +58,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		builder.addField(getField());
 		builder.addMethod(getGetAsTextMethod(javaType, identifierAccessorMethod));
-		builder.addMethod(getSetAsTextMethod(javaType, identifierField, findMethod));
+		builder.addMethod(getSetAsTextMethod(javaType, idType, findMethod));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -105,7 +105,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getSetAsTextMethod(JavaType javaType, FieldMetadata identifierField, MethodMetadata findMethod) {
+	private MethodMetadata getSetAsTextMethod(JavaType javaType, JavaType idType, MethodMetadata findMethod) {
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, null));
 
@@ -122,7 +122,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return userMethod;
 		}
 
-		String identifierTypeName = identifierField.getFieldType().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String identifierTypeName = idType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (text == null || 0 == text.length()) {");

@@ -18,7 +18,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -153,18 +152,17 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 			return null;
 		}
 		
-		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
-		if (idFields.isEmpty()) {
-			return null;
-		}
-		
 		// Lookup the entity's metadata
 		MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
 		}
 
-		final JavaType idType = idFields.get(0).getFieldType();
+		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
+		if (idType == null) {
+			return null;
+		}
+		
 		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults")));
 
 		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);

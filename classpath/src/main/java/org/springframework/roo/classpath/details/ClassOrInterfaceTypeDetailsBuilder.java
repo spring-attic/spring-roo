@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.uaa.client.util.Assert;
 
 /**
  * Builder for {@link ClassOrInterfaceTypeDetails}.
@@ -187,29 +189,45 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	 * Copies this builder's modifications into the given ITD builder
 	 * 
 	 * @param targetBuilder the ITD builder to receive the additions (required)
+	 * @param governorDetails the {@link ClassOrInterfaceTypeDetails} of the governor (required)
 	 */
-	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder) {
-		
+	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, ClassOrInterfaceTypeDetails governorDetails) {
+		Assert.notNull(targetBuilder, "Target builder required");
+		Assert.notNull(governorDetails, "Governor member holding types required");
 		// Copy fields
-		for (FieldMetadataBuilder field : getDeclaredFields()) {
-			boolean fieldExists = false;
+		fieldAdditions: for (FieldMetadataBuilder field : getDeclaredFields()) {
 			for (FieldMetadataBuilder targetField : targetBuilder.getDeclaredFields()) {
 				if (targetField.getFieldType().equals(field.getFieldType()) && targetField.getFieldName().equals(field.getFieldName())) {
-					fieldExists = true;
+					// The field already exists, so move on
+					continue fieldAdditions;
 				}
 			}
-			if (!fieldExists) {
-				targetBuilder.addField(field.build());
+			for(FieldMetadata targetField : governorDetails.getDeclaredFields()) {
+				if (targetField.getFieldType().equals(field.getFieldType()) && targetField.getFieldName().equals(field.getFieldName())) {
+					// The field already exists, so move on
+					continue fieldAdditions;
+				}
 			}
+			targetBuilder.addField(field.build());
 		}
 		
 		// Copy methods
-		for (MethodMetadataBuilder method : getDeclaredMethods()) {
+		methodAdditions: for (MethodMetadataBuilder method : getDeclaredMethods()) {
+			for(MethodMetadata targetMethod : governorDetails.getDeclaredMethods()) {
+				if (targetMethod.getMethodName().equals(method.getMethodName()) && targetMethod.getParameterTypes().equals(method.getParameterTypes())) {
+					continue methodAdditions;
+				}
+			}
 			targetBuilder.addMethod(method);
 		}
 		
 		// Copy annotations
-		for (AnnotationMetadataBuilder annotation : getAnnotations()) {
+		annotationAdditions: for (AnnotationMetadataBuilder annotation : getAnnotations()) {
+			for(AnnotationMetadata targetAnnotation : governorDetails.getAnnotations()) {
+				if (targetAnnotation.getAnnotationType().equals(annotation.getAnnotationType())) {
+					continue annotationAdditions;
+				}
+			}
 			targetBuilder.addAnnotation(annotation);
 		}
 		
@@ -219,7 +237,12 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		}
 		
 		// Copy constructors
-		for (ConstructorMetadataBuilder constructor : getDeclaredConstructors()) {
+		constructorAdditions: for (ConstructorMetadataBuilder constructor : getDeclaredConstructors()) {
+			for(ConstructorMetadata targetConstructor : governorDetails.getDeclaredConstructors()) {
+				if (targetConstructor.getParameterTypes().equals(constructor.getParameterTypes())) {
+					continue constructorAdditions;
+				}
+			}
 			targetBuilder.addConstructor(constructor);
 		}
 		
@@ -229,18 +252,27 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		}
 		
 		// Copy inner types
-		for (ClassOrInterfaceTypeDetailsBuilder innerType : getDeclaredInnerTypes()) {
+		innerTypeAdditions: for (ClassOrInterfaceTypeDetailsBuilder innerType : getDeclaredInnerTypes()) {
+			for(ClassOrInterfaceTypeDetails targetInnerType : governorDetails.getDeclaredInnerTypes()) {
+				if (targetInnerType.getName().equals(innerType.getName())) {
+					continue innerTypeAdditions;
+				}
+			}
 			targetBuilder.addInnerType(innerType);
 		}
 		
 		// Copy extends types
 		for (JavaType type : getExtendsTypes()) {
-			targetBuilder.addExtendsTypes(type);
+			if (!governorDetails.getExtendsTypes().contains(type)) {
+				targetBuilder.addExtendsTypes(type);
+			}
 		}
 		
 		// Copy implements types
 		for (JavaType type : getImplementsTypes()) {
-			targetBuilder.addImplementsType(type);
+			if (!governorDetails.getImplementsTypes().contains(type)) {
+				targetBuilder.addImplementsType(type);
+			}
 		}
 	}
 }

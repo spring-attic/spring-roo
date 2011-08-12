@@ -39,7 +39,6 @@ public class RepositoryJpaLayerProviderTest {
 	private RepositoryJpaLayerProvider layerProvider;
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
-	@Mock private PersistenceMemberLocator persistenceMemberLocator;
 	@Mock private RepositoryJpaLocator mockRepositoryLocator;
 	
 	@Before
@@ -47,7 +46,6 @@ public class RepositoryJpaLayerProviderTest {
 		MockitoAnnotations.initMocks(this);
 		this.layerProvider = new RepositoryJpaLayerProvider();
 		this.layerProvider.setRepositoryLocator(mockRepositoryLocator);
-		this.layerProvider.setPersistenceMemberLocator(persistenceMemberLocator);
 	}
 	
 	/**
@@ -63,7 +61,6 @@ public class RepositoryJpaLayerProviderTest {
 		when(mockRepositoryDetails.getName()).thenReturn(mockRepositoryType);
 		when(mockFieldMetadata.getFieldType()).thenReturn(mockIdType);
 		when(mockRepositoryLocator.getRepositories(mockTargetEntity)).thenReturn(Arrays.asList(mockRepositoryDetails));
-		when(persistenceMemberLocator.getIdentifierFields(mockTargetEntity)).thenReturn(Arrays.asList(mockFieldMetadata));
 	}
 	
 	@Test

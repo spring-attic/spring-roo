@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -116,10 +117,11 @@ public class MemberTypeAdditions {
 	 * Copies this instance's additions (if any) into the given builder
 	 * 
 	 * @param targetBuilder the ITD builder to receive the additions (required)
+	 * @param governorClassOrInterfaceTypeDetails the {@link ClassOrInterfaceTypeDetails} of the governor (required)
 	 */
-	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder) {
+	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, ClassOrInterfaceTypeDetails governorClassOrInterfaceTypeDetails) {
 		if (this.classOrInterfaceDetailsBuilder != null) {
-			this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder);
+			this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder, governorClassOrInterfaceTypeDetails);
 		}
 	}
 	

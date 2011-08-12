@@ -24,6 +24,14 @@ public interface PersistenceMemberLocator {
 	List<FieldMetadata> getIdentifierFields(JavaType domainType);
 	
 	/**
+	 * Returns the identifier type of the given domain type.
+	 * 
+	 * @param domainType The domain type (can be <code>null</code>)
+	 * @return the identifier type (may be null)
+	 */
+	JavaType getIdentifierType(JavaType domainType);
+	
+	/**
 	 * Locates embedded identifier types for a given domain type.
 	 * 
 	 * @param domainType The domain type (needs to be part of the project)

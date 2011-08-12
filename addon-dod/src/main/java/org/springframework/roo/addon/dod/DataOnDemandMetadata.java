@@ -812,7 +812,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(idType.getFullyQualifiedTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
-		findMethod.copyAdditionsTo(builder);
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -844,7 +844,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(idType.getFullyQualifiedTypeName() + " id = " + "obj." + identifierAccessor.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
-		findMethod.copyAdditionsTo(builder);
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -906,12 +906,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(flushAdditions.getMethodCall() + ";");
-		flushAdditions.copyAdditionsTo(builder);
+		flushAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		
-		persistMethodAdditions.copyAdditionsTo(builder);
+		persistMethodAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		// Create the method
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();

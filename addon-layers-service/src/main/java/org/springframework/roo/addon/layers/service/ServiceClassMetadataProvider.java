@@ -13,7 +13,6 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -129,11 +128,10 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions = new LinkedHashMap<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>>();
 		for (final JavaType domainType : domainTypes) {
 			
-			List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(domainType);
-			if (idFields.isEmpty()) {
-				continue;
+			final JavaType idType = persistenceMemberLocator.getIdentifierType(domainType);
+			if (idType == null) {
+				return null;
 			}
-			JavaType idType = idFields.get(0).getFieldType();
 			domainTypeToIdTypeMap.put(domainType, idType);
 			// Collect the plural for this domain type
 			final String pluralId = PluralMetadata.createIdentifier(domainType, Path.SRC_MAIN_JAVA);

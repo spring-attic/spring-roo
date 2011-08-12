@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -30,7 +31,8 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	private static final JavaType ROO_REPOSITORY_JPA = new JavaType(RooRepositoryJpa.class.getName());
 
 	// Fields
-	@Reference CustomDataKeyDecorator customDataKeyDecorator;
+	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	@SuppressWarnings("unchecked")
 	protected void activate(ComponentContext context) {
@@ -57,9 +59,13 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 		if (domainType == null) {
 			return null;
 		}
+		final JavaType idType = persistenceMemberLocator.getIdentifierType(domainType);
+		if (idType == null) {
+			return null;
+		}
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(RepositoryJpaMetadataProvider.class.getName(), coitd);
-		return new RepositoryJpaMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, annotationValues);
+		return new RepositoryJpaMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberDetails, idType, annotationValues);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

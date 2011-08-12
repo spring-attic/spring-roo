@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,12 +29,17 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.layers.LayerService;
+import org.springframework.roo.classpath.layers.LayerType;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.Pair;
 
 /**
  * Metadata provider for {@link ConversionServiceMetadata}. Monitors
@@ -50,6 +56,8 @@ import org.springframework.roo.support.util.Assert;
 public final class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMetadataService webMetadataService;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private LayerService layerService;
 	
 	// Stores the MID (as accepted by this ConversionServiceMetadataProvider) for the one (and only one) application-wide conversion service
 	private String applicationConversionServiceFactoryBeanMid;
@@ -87,8 +95,19 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(new JavaType(RooWebScaffold.class.getName()));
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
-
-		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, relevantDomainTypes, compositePrimaryKeyTypes);
+		Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
+		Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
+		for (JavaType type : relevantDomainTypes.keySet()) {
+			JavaType idType = persistenceMemberLocator.getIdentifierType(type);
+			if (idType == null) {
+				continue;
+			}
+			idTypes.put(type, idType);
+			@SuppressWarnings("unchecked")
+			MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), type, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
+			findMethods.put(type, findMethod);
+		}
+		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
 	
 	private Map<JavaType, List<MethodMetadata>> findDomainTypesRequiringAConverter(String metadataIdentificationString, Set<JavaType> controllers) {

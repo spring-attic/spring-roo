@@ -197,7 +197,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 
-//		persistMethod.copyAdditionsTo(builder);
+//		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -244,7 +244,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
-//		persistMethod.copyAdditionsTo(builder);
+//		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		
 		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
@@ -279,7 +279,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine(list.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " result = " + findAllMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + entityName + "." + toJsonArrayMethodName.getSymbolName() + "(result), headers, " +  httpStatusShortName + ".OK);");
 		
-//		findAllMethod.copyAdditionsTo(builder);
+//		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		
 		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, bodyBuilder);
@@ -326,7 +326,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
-//		mergeMethod.copyAdditionsTo(builder);
+//		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
@@ -378,7 +378,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
-//		mergeMethod.copyAdditionsTo(builder);
+//		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		
 		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));	
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
@@ -429,7 +429,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
 		
-//		removeMethod.copyAdditionsTo(builder);
+//		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);

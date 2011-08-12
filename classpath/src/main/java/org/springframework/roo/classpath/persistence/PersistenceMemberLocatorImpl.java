@@ -37,6 +37,7 @@ import org.springframework.roo.model.JavaType;
 public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, MetadataNotificationListener {
 	
 	private static final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
+	private static final Map<JavaType, JavaType> domainTypeIdCache = new HashMap<JavaType, JavaType>();
 	private static final Map<JavaType, List<FieldMetadata>> domainTypeEmbeddedIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
 	private static final Map<JavaType, FieldMetadata> domainTypeVersionFieldCache = new HashMap<JavaType, FieldMetadata>();
 	private static final Map<JavaType, MethodMetadata> domainTypeIdAccessorCache = new HashMap<JavaType, MethodMetadata>();
@@ -60,6 +61,17 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 			return domainTypeEmbeddedIdFieldsCache.get(domainType);
 		}
 		return new ArrayList<FieldMetadata>();
+	}
+	
+	public JavaType getIdentifierType(JavaType domainType) {
+		if (domainTypeIdCache.containsKey(domainType)) {
+			return domainTypeIdCache.get(domainType);
+		}
+		notify(PhysicalTypeIdentifier.createIdentifier(domainType), null);
+		if (domainTypeIdCache.containsKey(domainType)) {
+			return domainTypeIdCache.get(domainType);
+		}
+		return null;
 	}
 	
 	public MethodMetadata getIdentifierAccessor(final JavaType domainType) {
@@ -108,6 +120,10 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 			return;
 		}
 		JavaType type = memberHoldingTypeDetails.getName();
+		
+		// Get normal persistence ID fields
+		populateIdTypes(details, type);
+				
 		// Get normal persistence ID fields
 		populateIdFields(details, type);
 		
@@ -155,10 +171,25 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 		}
 	}
 
+	private void populateIdTypes(MemberDetails details, JavaType type) {
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
+		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
+		if (!idFields.isEmpty()) {
+			domainTypeIdCache.put(type, idFields.get(0).getFieldType());
+		} else if (!embeddedIdFields.isEmpty()) {
+			domainTypeIdCache.put(type, embeddedIdFields.get(0).getFieldType());
+		} else if (domainTypeIdCache.containsKey(type)) {
+			domainTypeIdCache.remove(type);
+		}
+	}
+	
 	private void populateIdFields(MemberDetails details, JavaType type) {
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
+		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 		if (!idFields.isEmpty()) {
 			domainTypeIdFieldsCache.put(type, idFields);
+		} else if (!embeddedIdFields.isEmpty()) {
+			domainTypeIdFieldsCache.put(type, embeddedIdFields);
 		} else if (domainTypeIdFieldsCache.containsKey(type)) {
 			domainTypeIdFieldsCache.remove(type);
 		}

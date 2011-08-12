@@ -35,17 +35,19 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
 	 * @param governorDetails (required)
+	 * @param javaType 
 	 * @param annotationValues (required)
 	 */
-	public RepositoryJpaMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, RepositoryJpaAnnotationValues annotationValues) {
+	public RepositoryJpaMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, JavaType idType, RepositoryJpaAnnotationValues annotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
+		Assert.notNull(idType, "Id type required");
 		
 		this.annotationValues = annotationValues;
 		
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
-		final JavaType springJpaRepository = new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), JavaType.LONG_OBJECT));
+		final JavaType springJpaRepository = new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType));
 		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(springJpaRepository)) {
 			builder.addExtendsTypes(springJpaRepository);
 		}

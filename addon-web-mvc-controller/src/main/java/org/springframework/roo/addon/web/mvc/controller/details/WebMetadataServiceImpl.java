@@ -191,7 +191,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			return null;
 		}
 		FieldMetadata identifierField = idFields.get(0);
-		JavaType idType = identifierField.getFieldType();
+		JavaType idType = persistenceMemberLocator.getIdentifierType(javaType);
+		if (idType == null) {
+			return null;
+		}
 		registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(javaType);
@@ -219,7 +222,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = null;
 		if (identifierAccessor != null) {
 			registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
-			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
+			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(idType, identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
 					findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
 		}
 			

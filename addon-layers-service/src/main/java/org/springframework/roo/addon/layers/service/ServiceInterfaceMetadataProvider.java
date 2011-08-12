@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.layers.service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -13,7 +12,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
@@ -70,12 +68,12 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 		Map<JavaType, String> domainTypePlurals = new HashMap<JavaType, String>();
 		Map<JavaType, JavaType> domainTypeToIdTypeMap = new HashMap<JavaType, JavaType>();
 		for (JavaType type : domainTypes) {
-			List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(type);
-			if (idFields.isEmpty()) {
+			final JavaType idType = persistenceMemberLocator.getIdentifierType(type);
+			if (idType == null) {
 				continue;
 			}
 			// We simply take the first disregarding any further fields which may be identifiers
-			domainTypeToIdTypeMap.put(type, idFields.get(0).getFieldType());
+			domainTypeToIdTypeMap.put(type, idType);
 			String pluralId = PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA);
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {

@@ -65,7 +65,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					final MemberTypeAdditions lowerLayerCallAdditions = crudAdditions.get(method);
 					if (lowerLayerCallAdditions != null) {
 						// A lower layer implements it
-						lowerLayerCallAdditions.copyAdditionsTo(builder);
+						lowerLayerCallAdditions.copyAdditionsTo(builder, governorTypeDetails);
 					}
 					final String body = method.getBody(lowerLayerCallAdditions);
 					final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

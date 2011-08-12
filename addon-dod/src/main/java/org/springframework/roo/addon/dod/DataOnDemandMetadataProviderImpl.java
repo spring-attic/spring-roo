@@ -133,11 +133,6 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		
 		JavaType entity = annotationValues.getEntity();
 		
-		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
-		if (idFields.isEmpty()) {
-			return null;
-		}
-		
 		MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
@@ -148,11 +143,15 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 			return null;
 		}
 
+		JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
+		if (idType == null) {
+			return null;
+		}
+
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-
+		
 		// Get the additions to make for each required method
-		JavaType idType = idFields.get(0).getFieldType();
 		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
 		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
 		@SuppressWarnings("unchecked")

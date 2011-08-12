@@ -206,7 +206,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("long count = " + countMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Counter for '" + annotationValues.getEntity().getSimpleTypeName() + "' incorrectly reported there were no entries\", count > 0);");
 
-		countMethod.copyAdditionsTo(builder);
+		countMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -244,7 +244,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
-		findMethod.copyAdditionsTo(builder);
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -281,8 +281,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
 		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to return any data\", result.size() > 0);");
 
-		findAllMethod.copyAdditionsTo(builder);
-		countMethod.copyAdditionsTo(builder);
+		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
+		countMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -321,8 +321,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned an incorrect number of entries\", count, result.size());");
 
-		findEntriesMethod.copyAdditionsTo(builder);
-		countMethod.copyAdditionsTo(builder);
+		findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
+		countMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -369,8 +369,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		} else {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 		}
-		flushMethod.copyAdditionsTo(builder);
-		findMethod.copyAdditionsTo(builder);
+		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -421,9 +421,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		} else {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 		}
-		mergeMethod.copyAdditionsTo(builder);
-		findMethod.copyAdditionsTo(builder);
-		flushMethod.copyAdditionsTo(builder);
+		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
+		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -462,8 +462,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
-		persistMethod.copyAdditionsTo(builder);
-		flushMethod.copyAdditionsTo(builder);
+		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
+		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -510,9 +510,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine( flushMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + findMethod.getMethodCall() + ");");
 
-		removeMethod.copyAdditionsTo(builder);
-		findMethod.copyAdditionsTo(builder);
-		flushMethod.copyAdditionsTo(builder);
+		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
+		findMethod.copyAdditionsTo(builder, governorTypeDetails);
+		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
