@@ -238,10 +238,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 
 				ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
 				String suffix = "\\";
-				if (APPLE_TERMINAL) {
-					suffix = "";
-				}
-				buff.append(ESC + "]0;").append(message).append(ESC + suffix);
+				buff.append(ESC + "[0;").append(message).append(ESC + suffix);
 				String stg = buff.toString();
 				try {
 					reader.printString(stg);
