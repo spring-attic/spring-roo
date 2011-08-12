@@ -120,10 +120,8 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	// ------------- Optional AbstractItdMetadataProvider methods --------------
 
 	protected void activate(final ComponentContext context) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		for (final JavaType triggerAnnotation : TRIGGER_ANNOTATIONS) {
-			addMetadataTrigger(triggerAnnotation);
-		}
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
+		addMetadataTriggers(TRIGGER_ANNOTATIONS);
 		registerMatchers();
 	}
 	
@@ -156,10 +154,8 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	}
 	
 	protected void deactivate(final ComponentContext context) {
-		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		for (final JavaType triggerAnnotation : TRIGGER_ANNOTATIONS) {
-			removeMetadataTrigger(triggerAnnotation);
-		}
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
+		removeMetadataTriggers(TRIGGER_ANNOTATIONS);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 	

@@ -194,12 +194,16 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	protected void onAddMethod(MethodMetadataBuilder method) {}
 
 	public final boolean addConstructor(ConstructorMetadata constructor) {
-		if (constructor == null) return false;
+		if (constructor == null) {
+			return false;
+		}
 		return addConstructor(new ConstructorMetadataBuilder(constructor));
 	}
 
 	public final boolean addField(FieldMetadata field) {
-		if (field == null) return false;
+		if (field == null) {
+			return false;
+		}
 		return addField(new FieldMetadataBuilder(field));
 	}
 
