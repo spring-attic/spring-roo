@@ -397,7 +397,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 						params.append(type.toString()).append(" ").append(name);
 					}
 					final int newModifier = method.getModifier() - Modifier.ABSTRACT;
-					bodyBuilder.appendFormalLine(Modifier.toString(newModifier) + " " + method.getReturnType().getNameIncludingTypeParameters() + " " + method.getMethodName().getSymbolName() + "(" + params.toString() + ") { throw new UnsupportedOperationException(); }");
+					bodyBuilder.appendFormalLine(Modifier.toString(newModifier) + " " + method.getReturnType().getNameIncludingTypeParameters() + " " + method.getMethodName().getSymbolName() + "(" + params.toString() + ") {");
+					bodyBuilder.indent();
+					bodyBuilder.appendFormalLine("throw new UnsupportedOperationException();");
+					bodyBuilder.indentRemove();
+					bodyBuilder.appendFormalLine("}");
 				}
 			}
 			bodyBuilder.indentRemove();
