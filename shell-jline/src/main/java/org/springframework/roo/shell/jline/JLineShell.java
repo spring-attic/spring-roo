@@ -53,6 +53,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
 	private static final boolean APPLE_TERMINAL = Boolean.getBoolean("is.apple.terminal");
 	private static final char ESC = 27;
+	private static final String BEL = "\007";
 
 	private ConsoleReader reader;
 	private boolean developmentMode = false;
@@ -229,6 +230,8 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Assert.notNull(message, "Message is required for a flash message");
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
 
+		//System.out.println("flash: " + message);
+
 		if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
 			if (reader != null && reader.getTerminal().isANSISupported()) {
 				// We can probably update the window title, as requested
@@ -237,8 +240,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 				}
 
 				ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
-				String suffix = "\\";
-				buff.append(ESC + "[0;").append(message).append(ESC + suffix);
+				buff.append(ESC + "]0;").append(message).append(BEL);
 				String stg = buff.toString();
 				try {
 					reader.printString(stg);
