@@ -27,6 +27,14 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class EntityCommands implements CommandMarker {
+	
+	// Constants
+	private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"));
+	private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString"));
+	private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"));
+	private static final JavaType GAE_DATASTORE_KEY = new JavaType("com.google.appengine.api.datastore.Key");
+	
+	// Fields
 	@Reference private EntityOperations entityOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
 	
@@ -37,26 +45,27 @@ public class EntityCommands implements CommandMarker {
 
 	@CliCommand(value = "entity", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
 	public void newPersistenceClassJpa(
-		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") JavaType name, 
-		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") JavaType superclass, 
-		@CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") boolean createAbstract, 
-		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") boolean testAutomatically, 
-		@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") String table, 
-		@CliOption(key = "schema", mandatory = false, help = "The JPA table schema name to use for this entity") String schema, 
-		@CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") String catalog, 
-		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") String identifierField, 
-		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") String identifierColumn, 
-		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType, 
-		@CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") String versionField, 
-		@CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") String versionColumn, 
-		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") InheritanceType inheritanceType, 
-		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
-		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
-		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit,
-		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") String transactionManager,
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
-		@CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") String entityName) {
-
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType name, 
+		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") final JavaType superclass, 
+		@CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") final boolean createAbstract, 
+		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") final boolean testAutomatically, 
+		@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") final String table, 
+		@CliOption(key = "schema", mandatory = false, help = "The JPA table schema name to use for this entity") final String schema, 
+		@CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") final String catalog, 
+		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") final String identifierField, 
+		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") final String identifierColumn, 
+		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType, 
+		@CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") final String versionField, 
+		@CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") final String versionColumn, 
+		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") final InheritanceType inheritanceType, 
+		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass, 
+		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable, 
+		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
+		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
+		@CliOption(key = "entityName", mandatory = false, help = "The name used to refer to the entity in queries") final String entityName,
+		@CliOption(key = "activeRecord", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Generate CRUD active record methods for this entity") final boolean activeRecord)
+	{
 		Assert.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 
 		if (!permitReservedWords) {
@@ -79,61 +88,19 @@ public class EntityCommands implements CommandMarker {
 		}
 
 		// Create entity's annotations
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
-
-		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(EntityMetadataProvider.ENTITY_ANNOTATION);
-		if (identifierField != null) {
-			rooEntityBuilder.addStringAttribute("identifierField", identifierField);
-		}
-		if (identifierColumn != null) {
-			rooEntityBuilder.addStringAttribute("identifierColumn", identifierColumn);
-		}
-		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
-			rooEntityBuilder.addClassAttribute("identifierType", identifierType);
-		} 
-		if (versionField != null && !"version".equals(versionField)) {
-			rooEntityBuilder.addStringAttribute("versionField", versionField);
-		}
-		if (versionColumn != null && !"version".equals(versionColumn)) {
-			rooEntityBuilder.addStringAttribute("versionColumn", versionColumn);
-		}
-		if (persistenceUnit != null) {
-			rooEntityBuilder.addStringAttribute("persistenceUnit", persistenceUnit);
-		}
-		if (transactionManager != null) {
-			rooEntityBuilder.addStringAttribute("transactionManager", transactionManager);
-		}
-		if (mappedSuperclass) {
-			rooEntityBuilder.addBooleanAttribute("mappedSuperclass", mappedSuperclass);
-		}
-		if (table != null) {
-			rooEntityBuilder.addStringAttribute("table", table);
-		}
-		if (schema != null) {
-			rooEntityBuilder.addStringAttribute("schema", schema);
-		}
-		if (catalog != null) {
-			rooEntityBuilder.addStringAttribute("catalog", catalog);
-		}
-		if (inheritanceType != null) {
-			rooEntityBuilder.addStringAttribute("inheritanceType", inheritanceType.name());
-		}
-		if (entityName != null) {
-			rooEntityBuilder.addStringAttribute("entityName", entityName);
-		}
-		annotations.add(rooEntityBuilder);
-
+		final List<AnnotationMetadataBuilder> annotationBuilders = new ArrayList<AnnotationMetadataBuilder>();
+		annotationBuilders.add(ROO_JAVA_BEAN_BUILDER);
+		annotationBuilders.add(ROO_TO_STRING_BUILDER);
+		annotationBuilders.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
 		if (serializable) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable")));
+			annotationBuilders.add(ROO_SERIALIZABLE_BUILDER);
 		}
 
-		// Produce entity itself
-		entityOperations.newEntity(name, createAbstract, superclass, annotations);
+		// Produce the entity itself
+		entityOperations.newEntity(name, createAbstract, superclass, annotationBuilders);
 		
 		// Create entity identifier class if required
-		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")))) {
+		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(GAE_DATASTORE_KEY))) {
 			entityOperations.newIdentifier(identifierType, identifierField, identifierColumn);
 		}
 
@@ -142,11 +109,96 @@ public class EntityCommands implements CommandMarker {
 		}
 	}
 
+	/**
+	 * Returns a builder for the entity-related annotation to be added to a
+	 * newly created JPA entity
+	 * 
+	 * @param table
+	 * @param schema
+	 * @param catalog
+	 * @param identifierField
+	 * @param identifierColumn
+	 * @param identifierType
+	 * @param versionField
+	 * @param versionColumn
+	 * @param inheritanceType
+	 * @param mappedSuperclass
+	 * @param persistenceUnit
+	 * @param transactionManager
+	 * @param entityName
+	 * @param activeRecord whether to generate active record CRUD methods for the entity
+	 * @return a non-<code>null</code> builder
+	 */
+	private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table, final String schema, final String catalog, final String identifierField, final String identifierColumn, final JavaType identifierType, final String versionField, final String versionColumn, final InheritanceType inheritanceType, final boolean mappedSuperclass, final String persistenceUnit, final String transactionManager, final String entityName, final boolean activeRecord) {
+		final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(getEntityAnnotationType(activeRecord));
+		
+		// Attributes that apply to all JPA entities (active record or not)
+		if (catalog != null) {
+			entityAnnotationBuilder.addStringAttribute("catalog", catalog);
+		}
+		if (entityName != null) {
+			entityAnnotationBuilder.addStringAttribute("entityName", entityName);
+		}
+		if (identifierColumn != null) {
+			entityAnnotationBuilder.addStringAttribute("identifierColumn", identifierColumn);
+		}
+		if (identifierField != null) {
+			entityAnnotationBuilder.addStringAttribute("identifierField", identifierField);
+		}
+		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
+			entityAnnotationBuilder.addClassAttribute("identifierType", identifierType);
+		} 
+		if (inheritanceType != null) {
+			entityAnnotationBuilder.addStringAttribute("inheritanceType", inheritanceType.name());
+		}
+		if (mappedSuperclass) {
+			entityAnnotationBuilder.addBooleanAttribute("mappedSuperclass", mappedSuperclass);
+		}
+		if (schema != null) {
+			entityAnnotationBuilder.addStringAttribute("schema", schema);
+		}
+		if (table != null) {
+			entityAnnotationBuilder.addStringAttribute("table", table);
+		}
+		if (versionColumn != null && !RooJpaEntity.VERSION_COLUMN_DEFAULT.equals(versionColumn)) {
+			entityAnnotationBuilder.addStringAttribute("versionColumn", versionColumn);
+		}
+		if (versionField != null && !RooJpaEntity.VERSION_FIELD_DEFAULT.equals(versionField)) {
+			entityAnnotationBuilder.addStringAttribute("versionField", versionField);
+		}
+		
+		// Attributes that only apply to entities with CRUD active record methods
+		if (activeRecord) {
+			if (persistenceUnit != null) {
+				entityAnnotationBuilder.addStringAttribute("persistenceUnit", persistenceUnit);
+			}
+			if (transactionManager != null) {
+				entityAnnotationBuilder.addStringAttribute("transactionManager", transactionManager);
+			}
+		}
+		
+		return entityAnnotationBuilder;
+	}
+
+	/**
+	 * Returns the type of annotation to put on the entity
+	 * 
+	 * @param activeRecord whether the entity is to have CRUD active record
+	 * methods generated
+	 * @return a non-<code>null</code> type
+	 */
+	private JavaType getEntityAnnotationType(final boolean activeRecord) {
+		if (activeRecord) {
+			return EntityMetadataProvider.ENTITY_ANNOTATION;
+		}
+		return JpaEntityMetadataProvider.JPA_ENTITY_ANNOTATION;
+	}
+
 	@CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
 	public void createEmbeddableClass(
-		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") JavaType name,
-		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") final JavaType name,
+		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);

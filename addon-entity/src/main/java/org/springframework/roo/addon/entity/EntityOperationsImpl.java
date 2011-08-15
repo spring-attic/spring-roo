@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -38,29 +39,26 @@ public class EntityOperationsImpl implements EntityOperations {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 
-	public void newEntity(JavaType name, boolean createAbstract, JavaType superclass, List<AnnotationMetadataBuilder> annotations) {
+	public void newEntity(final JavaType name, final boolean createAbstract, final JavaType superclass, final List<AnnotationMetadataBuilder> annotations) {
 		Assert.notNull(name, "Entity name required");
 		
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
 		
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
 			modifier |= Modifier.ABSTRACT;
 		}
 		
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
+		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
 		if (!superclass.equals(new JavaType("java.lang.Object"))) {
-			ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(superclass);
+			final ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(superclass);
 			if (superclassClassOrInterfaceTypeDetails != null) {
 				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
 			}
 		}
 		
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		extendsTypes.add(superclass);
-		typeDetailsBuilder.setExtendsTypes(extendsTypes);
-		
+		typeDetailsBuilder.setExtendsTypes(Arrays.asList(superclass));
 		typeDetailsBuilder.setAnnotations(annotations);
 
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
