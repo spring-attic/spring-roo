@@ -81,7 +81,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
 		
-		//TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
+		// TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
 		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), itdTypeDetails.getGovernor());
 		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, LayerCustomDataKeys.LAYER_TYPE);
 		if (memberHoldingTypeDetails != null) {
@@ -152,10 +152,13 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
 		// Get the additions to make for each required method
-		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
-		MethodMetadata findEntriesMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
+		final Pair<JavaType, JavaSymbolName> fromParameter = new Pair<JavaType, JavaSymbolName>(JavaType.INT_PRIMITIVE, new JavaSymbolName("from"));
+		final Pair<JavaType, JavaSymbolName> toParameter = new Pair<JavaType, JavaSymbolName>(JavaType.INT_PRIMITIVE, new JavaSymbolName("to"));
+		@SuppressWarnings("unchecked")
+		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), fromParameter, toParameter);
 		@SuppressWarnings("unchecked")
 		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
+		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
 		@SuppressWarnings("unchecked")
 		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
