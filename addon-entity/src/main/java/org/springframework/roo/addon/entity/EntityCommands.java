@@ -54,9 +54,10 @@ public class EntityCommands implements CommandMarker {
 		@CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") final String catalog, 
 		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") final String identifierField, 
 		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") final String identifierColumn, 
-		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType, 
+		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType,
 		@CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") final String versionField, 
 		@CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") final String versionColumn, 
+		@CliOption(key = "versionType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Integer", help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
 		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") final InheritanceType inheritanceType, 
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass, 
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable, 
@@ -91,7 +92,7 @@ public class EntityCommands implements CommandMarker {
 		final List<AnnotationMetadataBuilder> annotationBuilders = new ArrayList<AnnotationMetadataBuilder>();
 		annotationBuilders.add(ROO_JAVA_BEAN_BUILDER);
 		annotationBuilders.add(ROO_TO_STRING_BUILDER);
-		annotationBuilders.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
+		annotationBuilders.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, versionType, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
 		if (serializable) {
 			annotationBuilders.add(ROO_SERIALIZABLE_BUILDER);
 		}
@@ -121,6 +122,7 @@ public class EntityCommands implements CommandMarker {
 	 * @param identifierType
 	 * @param versionField
 	 * @param versionColumn
+	 * @param versionType
 	 * @param inheritanceType
 	 * @param mappedSuperclass
 	 * @param persistenceUnit
@@ -129,7 +131,7 @@ public class EntityCommands implements CommandMarker {
 	 * @param activeRecord whether to generate active record CRUD methods for the entity
 	 * @return a non-<code>null</code> builder
 	 */
-	private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table, final String schema, final String catalog, final String identifierField, final String identifierColumn, final JavaType identifierType, final String versionField, final String versionColumn, final InheritanceType inheritanceType, final boolean mappedSuperclass, final String persistenceUnit, final String transactionManager, final String entityName, final boolean activeRecord) {
+	private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table, final String schema, final String catalog, final String identifierField, final String identifierColumn, final JavaType identifierType, final String versionField, final String versionColumn, final JavaType versionType, final InheritanceType inheritanceType, final boolean mappedSuperclass, final String persistenceUnit, final String transactionManager, final String entityName, final boolean activeRecord) {
 		final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(getEntityAnnotationType(activeRecord));
 		
 		// Attributes that apply to all JPA entities (active record or not)
@@ -165,6 +167,9 @@ public class EntityCommands implements CommandMarker {
 		}
 		if (versionField != null && !RooJpaEntity.VERSION_FIELD_DEFAULT.equals(versionField)) {
 			entityAnnotationBuilder.addStringAttribute("versionField", versionField);
+		}
+		if (!JavaType.INT_OBJECT.equals(versionType)) {
+			entityAnnotationBuilder.addClassAttribute("versionType", versionType);
 		}
 		
 		// Attributes that only apply to entities with CRUD active record methods
