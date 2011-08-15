@@ -55,6 +55,12 @@ public interface NotifiableFileMonitorService extends FileMonitorService {
 	 */
 	void notifyChanged(String fileCanonicalPath);
 	
+	/**
+	 * Notifies this service that the given file system resource is about to be
+	 * deleted
+	 * 
+	 * @param fileCanonicalPath
+	 */
 	void notifyDeleted(String fileCanonicalPath);
 	
 	void notifyCreated(String fileCanonicalPath);

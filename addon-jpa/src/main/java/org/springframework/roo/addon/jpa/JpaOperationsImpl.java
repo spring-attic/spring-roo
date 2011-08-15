@@ -420,10 +420,10 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
 			if (appenginePathExists) {
-				fileManager.delete(appenginePath);
+				fileManager.delete(appenginePath, "database is " + jdbcDatabase.name());
 			}
 			if (loggingPropertiesPathExists) {
-				fileManager.delete(loggingPropertiesPath);
+				fileManager.delete(loggingPropertiesPath, "database is " + jdbcDatabase.name());
 			}
 			return;
 		}
@@ -466,7 +466,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
 			if (databaseExists) {
-				fileManager.delete(databasePath);
+				fileManager.delete(databasePath, "ORM provider is " + ormProvider.name());
 			}
 			return;
 		}
@@ -543,7 +543,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) {
 			if (configExists) {
-				fileManager.delete(configPath);
+				fileManager.delete(configPath, "database is " + jdbcDatabase.name());
 			}
 			return;
 		}

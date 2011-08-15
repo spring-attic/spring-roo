@@ -309,8 +309,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		if (!produceMetadata && isGovernor(cid) && fileManager.exists(itdFilename)) {
 			// We don't seem to want metadata anymore, yet the ITD physically exists, so get rid of it
 			// This might be because the trigger annotation has been removed, the governor is missing a class declaration etc
-			// TODO: Overload fileManager.delete(..) so we can give a message so the console output is more meaningful
-			fileManager.delete(itdFilename);
+			fileManager.delete(itdFilename, "not required for governor " + cid.getName());
 		}
 		
 		if (produceMetadata) {

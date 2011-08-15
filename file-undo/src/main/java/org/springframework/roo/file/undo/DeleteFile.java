@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * {@link UndoableOperation} to delete a file.
@@ -18,62 +19,81 @@ import org.springframework.roo.support.util.FileCopyUtils;
 public class DeleteFile implements UndoableOperation {
 	
 	// Constants
-	private static final Logger logger = HandlerUtils.getLogger(DeleteFile.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(DeleteFile.class);
 
 	// Fields
-	private final FilenameResolver filenameResolver;
 	private final File actual;
 	private final File backup;
-	
+	private final FilenameResolver filenameResolver;
+
 	/**
-	 * Constructor
+	 * Constructor that doesn't allow a reason to be given
 	 * 
 	 * @param undoManager cannot be <code>null</code>
 	 * @param filenameResolver cannot be <code>null</code>
 	 * @param actual the file to delete; must be an existing file (not a directory)
+	 * @deprecated use the constructor that allows a reason to be given
 	 */
+	@Deprecated
 	public DeleteFile(final UndoManager undoManager, final FilenameResolver filenameResolver, final File actual) {
+		this(undoManager, filenameResolver, actual, null);
+	}
+	
+	/**
+	 * Constructor that allows a reason to be given
+	 * 
+	 * @param undoManager cannot be <code>null</code>
+	 * @param filenameResolver cannot be <code>null</code>
+	 * @param actual the file to delete; must be an existing file (not a directory)
+	 * @param reason the reason for the file's deletion (can be blank)
+	 * @since 1.2.0
+	 */
+	public DeleteFile(final UndoManager undoManager, final FilenameResolver filenameResolver, final File actual, final String reason) {
 		Assert.notNull(undoManager, "Undo manager required");
 		Assert.notNull(actual, "File required");
 		Assert.notNull(filenameResolver, "Filename resolver required");
 		Assert.isTrue(actual.exists(), "File '" + actual + "' must exist");
 		Assert.isTrue(actual.isFile(), "Path '" + actual + "' must be a file (not a directory)");
-		this.filenameResolver = filenameResolver;
 		
 		try {
-			backup = File.createTempFile("DeleteFile", "tmp");
+			this.backup = File.createTempFile("DeleteFile", "tmp");
 			FileCopyUtils.copy(actual, backup);
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			throw new IllegalStateException("Unable to make a backup of file '" + actual + "'", ioe);
 		}
 		this.actual = actual;
 		this.actual.delete();
+		this.filenameResolver = filenameResolver;
 		undoManager.add(this);
-		logger.fine("Deleted " + filenameResolver.getMeaningfulName(actual));
+		String deletionMessage = "Deleted " + filenameResolver.getMeaningfulName(actual);
+		if (StringUtils.hasText(reason)) {
+			deletionMessage += ": " + reason.trim();
+		}
+		LOGGER.fine(deletionMessage);
 	}
-	
+
 	public void reset() {
 		// fix for ROO-1555
 		try {
 			if (backup.delete()) {
-				logger.finest("Reset manage " + filenameResolver.getMeaningfulName(backup));
+				LOGGER.finest("Reset manage " + filenameResolver.getMeaningfulName(backup));
 			} else {
 				backup.deleteOnExit();
-				logger.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
+				LOGGER.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
 			}
-		} catch (Throwable e) {
+		} catch (final Throwable e) {
 			backup.deleteOnExit();
-			logger.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
+			LOGGER.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
 		}
 	}
 
 	public boolean undo() {
 		try {
 			FileCopyUtils.copy(backup, actual);
-			logger.fine("Undo delete " + filenameResolver.getMeaningfulName(actual));
+			LOGGER.fine("Undo delete " + filenameResolver.getMeaningfulName(actual));
 			return true;
-		} catch (IOException ioe) {
-			logger.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
+		} catch (final IOException ioe) {
+			LOGGER.fine("Undo failed " + filenameResolver.getMeaningfulName(actual));
 			return false;
 		}
 	}

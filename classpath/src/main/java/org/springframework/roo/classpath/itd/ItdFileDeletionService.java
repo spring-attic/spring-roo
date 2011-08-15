@@ -41,7 +41,7 @@ public class ItdFileDeletionService implements FileEventListener {
 		}
 	}
 
-	public void onFileEvent(FileEvent fileEvent) {
+	public void onFileEvent(final FileEvent fileEvent) {
 		Assert.notNull(fileEvent, "File event required");
 		if (fileEvent.getFileDetails().matchesAntPath(ANT_PATH_ALL_ITD_SOURCE)) {
 			// It's a ROO ITD, but check it really exists
@@ -54,7 +54,7 @@ public class ItdFileDeletionService implements FileEventListener {
 			String governorName = path.substring(0, lastIndex) + ".java";
 			if (!fileManager.exists(governorName)) {
 				// We just checked the disk, and the governor does not exist, so blow away the ITD
-				fileManager.delete(fileEvent.getFileDetails().getCanonicalPath());
+				fileManager.delete(fileEvent.getFileDetails().getCanonicalPath(), fileEvent.getFileDetails().getFile().getName() + " not found");
 			}
 		} else if (fileEvent.getFileDetails().matchesAntPath(ANT_PATH_ALL_JAVA_SOURCE)) {
 			// It's a Java file, but we only cleanup on deletion in this case
@@ -66,7 +66,7 @@ public class ItdFileDeletionService implements FileEventListener {
 				for (FileDetails itd : fileManager.findMatchingAntPath(itdAntPath)) {
 					String itdCanonicalPath = itd.getCanonicalPath();
 					if (fileManager.exists(itdCanonicalPath)) {
-						fileManager.delete(itdCanonicalPath);
+						fileManager.delete(itdCanonicalPath, fileEvent.getFileDetails().getFile().getName() + " not found");
 					}
 				}
 			}

@@ -256,7 +256,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		final Table table = database.getTable(tableName, schemaName);
 		if (table == null) { 
 			// Table is missing and probably has been dropped so delete managed type and its identifier if applicable
-			deleteManagedType(managedEntity);
+			deleteManagedType(managedEntity, "no database table called '" + tableName + "'");
 			return null;
 		}
 
@@ -386,7 +386,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			// Table has one primary key
 			// Check for redundant, managed identifier class and delete if found
 			if (isIdentifierDeletable(identifierType)) {
-				deleteJavaType(identifierType);
+				deleteJavaType(identifierType, "the " + table.getName() + " table has only one primary key");
 			}
 
 			attributesToDeleteIfPresent.add(new JavaSymbolName(IDENTIFIER_TYPE));
@@ -457,16 +457,16 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return result;
 	}
 
-	private void deleteManagedType(final ClassOrInterfaceTypeDetails managedEntity) {
+	private void deleteManagedType(final ClassOrInterfaceTypeDetails managedEntity, final String reason) {
 		if (!isEntityDeletable(managedEntity)) {
 			return;
 		}
-		deleteJavaType(managedEntity.getName());
+		deleteJavaType(managedEntity.getName(), reason);
 
 		final JavaType identifierType = getIdentifierType(managedEntity.getName());
 		for (final ClassOrInterfaceTypeDetails managedIdentifier : getManagedIdentifiers()) {
 			if (managedIdentifier.getName().equals(identifierType)) {
-				deleteJavaType(identifierType);
+				deleteJavaType(identifierType, "managed identifier of deleted type " + managedEntity.getName());
 				break;
 			}
 		}
@@ -524,12 +524,18 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return managedIdentifier.getDeclaredConstructors().isEmpty() && managedIdentifier.getDeclaredFields().isEmpty() && managedIdentifier.getDeclaredMethods().isEmpty();
 	}
 
-	private void deleteJavaType(final JavaType javaType) {
+	/**
+	 * Deletes the given {@link JavaType} for the given reason
+	 * 
+	 * @param javaType the type to be deleted (required)
+	 * @param reason the reason for deletion (can be blank)
+	 */
+	private void deleteJavaType(final JavaType javaType, final String reason) {
 		final PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
 			final String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
 			if (fileManager.exists(filePath)) {
-				fileManager.delete(filePath);
+				fileManager.delete(filePath, reason);
 				shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 			}
 

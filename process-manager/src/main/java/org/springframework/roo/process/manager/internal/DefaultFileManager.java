@@ -41,16 +41,18 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class DefaultFileManager implements FileManager, UndoListener {
+	
+	// Fields
 	@Reference private FilenameResolver filenameResolver;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
 	@Reference private ProcessManager processManager;
 	@Reference private UndoManager undoManager;
 
 	/** key: file identifier, value: new textual content */
-	private Map<String, String> deferredFileWrites = new LinkedHashMap<String, String>();
+	private final Map<String, String> deferredFileWrites = new LinkedHashMap<String, String>();
 
 	/** key: file identifier, value: new description of change */
-	private Map<String, String> deferredDescriptionOfChanges = new LinkedHashMap<String, String>();
+	private final Map<String, String> deferredDescriptionOfChanges = new LinkedHashMap<String, String>();
 
 	protected void activate(ComponentContext context) {
 		undoManager.addUndoListener(this);
@@ -117,20 +119,28 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		return new DefaultMutableFile(actual, null, renderer);
 	}
 
-	public void delete(String fileIdentifier) {
-		Assert.notNull(fileIdentifier, "File identifier required");
-		File actual = new File(fileIdentifier);
+	public void delete(final String fileIdentifier) {
+		delete(fileIdentifier, null);
+	}
+
+	public void delete(final String fileIdentifier, final String reasonForDeletion) {
+		if (!StringUtils.hasText(fileIdentifier)) {
+			return;
+		}
+		
+		// TODO Auto-generated method stub
+		final File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
 		try {
 			this.fileMonitorService.notifyDeleted(actual.getCanonicalPath());
 		} catch (IOException ignored) {}
 		if (actual.isDirectory()) {
-			new DeleteDirectory(undoManager, filenameResolver, actual);
+			new DeleteDirectory(undoManager, filenameResolver, actual, reasonForDeletion);
 		} else {
-			new DeleteFile(undoManager, filenameResolver, actual);
+			new DeleteFile(undoManager, filenameResolver, actual, reasonForDeletion);
 		}
 	}
-
+	
 	public MutableFile updateFile(String fileIdentifier) {
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
@@ -169,7 +179,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 				String newContents = deferredFileWrites.get(fileIdentifier);
 				if (!StringUtils.hasText(newContents)) {
 					if (exists(fileIdentifier)) {
-						delete(fileIdentifier);
+						delete(fileIdentifier, "no new contents");
 					}
 				} else {
 					createOrUpdateTextFileIfRequired(fileIdentifier, newContents, StringUtils.trimToEmpty(deferredDescriptionOfChanges.get(fileIdentifier)));

@@ -87,7 +87,19 @@ public interface FileManager {
 	 * Attempts to delete a file or directory on the disk. The path should be in canonical file name format.
 	 * 
 	 * <p>
-	 * An exception will be thrown if the path does not exist.
+	 * If the path refers to a directory, contents of the directory will be recursively deleted.
+	 * 
+	 * <p>
+	 * If a delete fails, an exception will be thrown.
+	 * 
+	 * @param pathname the file to delete; can be blank to do nothing, otherwise
+	 * should be a valid pathname as per {@link java.io.File#File(String)}
+	 * @throws IllegalArgumentException if a file is specified but does not exist
+	 */
+	void delete(String pathname);
+
+	/**
+	 * Attempts to delete a file or directory on the disk. The path should be in canonical file name format.
 	 * 
 	 * <p>
 	 * If the path refers to a directory, contents of the directory will be recursively deleted.
@@ -95,10 +107,15 @@ public interface FileManager {
 	 * <p>
 	 * If a delete fails, an exception will be thrown.
 	 * 
-	 * @param fileIdentifier the file to delete (required)
+	 * @param pathname the file to delete; can be blank to do nothing, otherwise
+	 * should be a valid pathname as per {@link java.io.File#File(String)}
+	 * @param reasonForDeletion the reason why the file is being deleted (can be
+	 * blank)
+	 * @since 1.2.0
+	 * @throws IllegalArgumentException if a file is specified but does not exist
 	 */
-	void delete(String fileIdentifier);
-
+	void delete(String pathname, String reasonForDeletion);
+	
 	/**
 	 * Provides an updatable representation of a file on the disk.
 	 * 
