@@ -102,7 +102,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		if (physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 			for (FieldMetadata field : governorTypeDetails.getDeclaredFields()) {
-				declaredFields.put(field, getIdentifierAccessorMethodName(field));
+				declaredFields.put(field, getIdentifierAccessorMethodName(field, metadataIdentificationString));
 			}
 		}
 
@@ -112,7 +112,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, declaredFields);
 	}
 
-	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field) {
+	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field, String metadataIdentificationString) {
 		if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
 			return null;
 		}
@@ -132,7 +132,12 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		}
 
 		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(fieldType);
-		return identifierAccessor != null ? identifierAccessor.getMethodName() : null;
+		if (identifierAccessor != null) {
+			metadataDependencyRegistry.registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
+			return identifierAccessor.getMethodName();
+		}
+		
+		return null;
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

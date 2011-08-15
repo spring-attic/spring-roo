@@ -231,6 +231,54 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return fieldMetadataBuilder.build();
 	}
 
+	private JavaSymbolName getIdentifierMethodName(FieldMetadata fieldMetadata) {
+		JavaSymbolName identifierAccessorMethodName = declaredFields.get(fieldMetadata);
+		return identifierAccessorMethodName != null ? identifierAccessorMethodName : new JavaSymbolName("getId");
+	}
+
+	private InvocableMemberBodyBuilder getEntityCollectionAccessorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
+		String entityCollectionName = field.getFieldName().getSymbolName();
+		String entityIdsName = entityIdsFieldName.getSymbolName();
+		String localEnitiesName = "local" + StringUtils.capitalize(entityCollectionName);
+
+		JavaType collectionElementType = field.getFieldType().getParameters().get(0);
+		String simpleCollectionElementTypeName = collectionElementType.getSimpleTypeName();
+
+		JavaType collectionType = field.getFieldType();
+		builder.getImportRegistrationResolver().addImport(collectionType);
+
+		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
+		String instantiableCollection = collectionName;
+
+		// GAE only supports java.util.List and java.util.Set collections and we need a concrete implementation of either.
+		if (collectionType.getFullyQualifiedTypeName().equals("java.util.List")) {
+			collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+		} else if (collectionType.getFullyQualifiedTypeName().equals("java.util.Set")) {
+			collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+		}
+
+		builder.getImportRegistrationResolver().addImport(collectionType);
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
+		bodyBuilder.appendFormalLine("for (Key key : " + entityIdsName + ") {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine(simpleCollectionElementTypeName + " entity = " + simpleCollectionElementTypeName + ".find" + simpleCollectionElementTypeName + "(key.getId());");
+		bodyBuilder.appendFormalLine("if (entity != null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
+		bodyBuilder.appendFormalLine("return " + localEnitiesName + ";");
+
+		return bodyBuilder;
+	}
+
 	private InvocableMemberBodyBuilder getEntityCollectionMutatorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
 		String entityCollectionName = field.getFieldName().getSymbolName();
 		String entityIdsName = entityIdsFieldName.getSymbolName();
@@ -284,63 +332,17 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return bodyBuilder;
 	}
 
-	private JavaSymbolName getIdentifierMethodName(FieldMetadata fieldMetadata) {
-		JavaSymbolName identifierAccessorMethodName = declaredFields.get(fieldMetadata);
-		return identifierAccessorMethodName != null ? identifierAccessorMethodName : new JavaSymbolName("getId");
-	}
-
-	private InvocableMemberBodyBuilder getEntityCollectionAccessorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
-		String entityCollectionName = field.getFieldName().getSymbolName();
-		String entityIdsName = entityIdsFieldName.getSymbolName();
-		String localEnitiesName = "local" + StringUtils.capitalize(entityCollectionName);
-
-		JavaType collectionElementType = field.getFieldType().getParameters().get(0);
-		String simpleCollectionElementTypeName = collectionElementType.getSimpleTypeName();
-
-		JavaType collectionType = field.getFieldType();
-		builder.getImportRegistrationResolver().addImport(collectionType);
-
-		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
-		String instantiableCollection = collectionName;
-
-		// GAE only supports java.util.List and java.util.Set collections and we need a concrete implementation of either.
-		if (collectionType.getFullyQualifiedTypeName().equals("java.util.List")) {
-			collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
-			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-		} else if (collectionType.getFullyQualifiedTypeName().equals("java.util.Set")) {
-			collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
-			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-		}
-
-		builder.getImportRegistrationResolver().addImport(collectionType);
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
-		bodyBuilder.appendFormalLine("for (Key key : " + entityIdsName + ") {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(simpleCollectionElementTypeName + " entity = " + simpleCollectionElementTypeName + ".find" + simpleCollectionElementTypeName + "(key.getId());");
-		bodyBuilder.appendFormalLine("if (entity != null) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
-		bodyBuilder.appendFormalLine("return " + localEnitiesName + ";");
-
-		return bodyBuilder;
-	}
-
 	private InvocableMemberBodyBuilder getSingularEntityAccessor(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
 		String entityName = field.getFieldName().getSymbolName();
 		String entityIdName = hiddenIdFieldName.getSymbolName();
 		String simpleFieldTypeName = field.getFieldType().getSimpleTypeName();
 
+		String identifierMethodName = getIdentifierMethodName(field).getSymbolName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (this." + entityIdName + " != null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (this." + entityName + " == null || this." + entityName + ".getId() != this." + entityIdName + ") {");
+		bodyBuilder.appendFormalLine("if (this." + entityName + " == null || this." + entityName + "." + identifierMethodName + "() != this." + entityIdName + ") {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("this." + entityName + " = " + simpleFieldTypeName + ".find" + simpleFieldTypeName + "(this." + entityIdName + ");");
 		bodyBuilder.indentRemove();
