@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -157,7 +158,11 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	}
 
 	private Map<JavaType, List<MethodMetadata>> findRelevantTypes(JavaType type, String metadataIdentificationString) {
-		MemberDetails memberDetails = getMemberDetails(type);
+		final MemberDetails memberDetails = getMemberDetails(type);
+		if (memberDetails == null) {
+			return Collections.emptyMap();
+		}
+		
 		Map<JavaType, List<MethodMetadata>> types = new LinkedHashMap<JavaType, List<MethodMetadata>>();
 		List<MethodMetadata> locatedAccessors = new LinkedList<MethodMetadata>();
 		

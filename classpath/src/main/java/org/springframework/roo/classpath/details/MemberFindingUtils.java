@@ -439,17 +439,18 @@ public abstract class MemberFindingUtils {
 	 * Searches all {@link MemberDetails} and returns all {@link MemberHoldingTypeDetails} which contains a given
 	 * {@link CustomData} tag.
 	 * 
-	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for (required)
 	 * @return zero or more {@link MemberHoldingTypeDetails} (never null)
 	 */
-	public static List<MemberHoldingTypeDetails> getMemberHoldingTypeDetailsWithTag(MemberDetails memberDetails, Object tagKey) {
-		Assert.notNull(memberDetails, "MemberDetails required");
+	public static List<MemberHoldingTypeDetails> getMemberHoldingTypeDetailsWithTag(final MemberDetails memberDetails, final Object tagKey) {
 		Assert.notNull(tagKey, "Custom data tag required");
-		List<MemberHoldingTypeDetails> result = new ArrayList<MemberHoldingTypeDetails>();
-		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
-			if (mhtd.getCustomData().keySet().contains(tagKey)) {
-				result.add(mhtd);
+		final List<MemberHoldingTypeDetails> result = new ArrayList<MemberHoldingTypeDetails>();
+		if (memberDetails != null) {
+			for (final MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
+				if (mhtd.getCustomData().keySet().contains(tagKey)) {
+					result.add(mhtd);
+				}
 			}
 		}
 		return result;
@@ -458,14 +459,13 @@ public abstract class MemberFindingUtils {
 	/**
 	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
 	 * 
-	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tag the {@link CustomData} key to search for (required)
 	 * @return the most concrete tagged type or null if not found
 	 */
-	public static MemberHoldingTypeDetails getMostConcreteMemberHoldingTypeDetailsWithTag(MemberDetails memberDetails, Object tag) {
-		Assert.notNull(memberDetails, "MemberDetails required");
+	public static MemberHoldingTypeDetails getMostConcreteMemberHoldingTypeDetailsWithTag(final MemberDetails memberDetails, final Object tag) {
 		Assert.notNull(tag, "Custom data tag required");
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = getMemberHoldingTypeDetailsWithTag(memberDetails, tag);
+		final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList = getMemberHoldingTypeDetailsWithTag(memberDetails, tag);
 		if (memberHoldingTypeDetailsList.isEmpty()) {
 			return null;
 		}
