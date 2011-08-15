@@ -39,9 +39,9 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	private static final String PROVIDES_TYPE_STRING = JavaBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private JavaBeanAnnotationValues annotationValues;
-	private Map<FieldMetadata, FieldMetadata> declaredFields;
+	private Map<FieldMetadata, JavaSymbolName> declaredFields;
 
-	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaBeanAnnotationValues annotationValues, Map<FieldMetadata, FieldMetadata> declaredFields) {
+	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaBeanAnnotationValues annotationValues, Map<FieldMetadata, JavaSymbolName> declaredFields) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -254,7 +254,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.List"));
 		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.ArrayList"));
 
-		String identifierMethodName = getIdentifierMethodName(field);
+		String identifierMethodName = getIdentifierMethodName(field).getSymbolName();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
@@ -284,20 +284,9 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return bodyBuilder;
 	}
 
-	private String getIdentifierMethodName(FieldMetadata fieldMetadata) {
-		MethodMetadata identifierMethod = getIdentifierMethod(fieldMetadata);
-		if (identifierMethod != null) {
-			return identifierMethod.getMethodName().getSymbolName();
-		}
-		return "getId";
-	}
-
-	private MethodMetadata getIdentifierMethod(FieldMetadata fieldMetadata) {
-		FieldMetadata identifierField = declaredFields.get(fieldMetadata);
-		if (identifierField != null) {
-			return getDeclaredGetter(identifierField);
-		}
-		return null;
+	private JavaSymbolName getIdentifierMethodName(FieldMetadata fieldMetadata) {
+		JavaSymbolName identifierAccessorMethodName = declaredFields.get(fieldMetadata);
+		return identifierAccessorMethodName != null ? identifierAccessorMethodName : new JavaSymbolName("getId");
 	}
 
 	private InvocableMemberBodyBuilder getEntityCollectionAccessorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
@@ -370,7 +359,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	private InvocableMemberBodyBuilder getSingularEntityMutator(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
 		String entityName = field.getFieldName().getSymbolName();
 		String entityIdName = hiddenIdFieldName.getSymbolName();
-		String identifierMethodName = getIdentifierMethodName(field);
+		String identifierMethodName = getIdentifierMethodName(field).getSymbolName();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + entityName + " != null) {");

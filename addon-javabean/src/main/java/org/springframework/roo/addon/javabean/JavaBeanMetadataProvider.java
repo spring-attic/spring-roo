@@ -2,7 +2,6 @@ package org.springframework.roo.addon.javabean;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,11 +14,13 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
@@ -96,12 +97,12 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 			return null;
 		}
 
-		final Map<FieldMetadata, FieldMetadata> declaredFields = new LinkedHashMap<FieldMetadata, FieldMetadata>();
+		final Map<FieldMetadata, JavaSymbolName> declaredFields = new LinkedHashMap<FieldMetadata, JavaSymbolName>();
 		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 			for (FieldMetadata field : governorTypeDetails.getDeclaredFields()) {
-				declaredFields.put(field, isGaeInterested(field));
+				declaredFields.put(field, getIdentifierAccessorMethodName(field));
 			}
 		}
 
@@ -111,7 +112,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, declaredFields);
 	}
 
-	private FieldMetadata isGaeInterested(final FieldMetadata field) {
+	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field) {
 		if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
 			return null;
 		}
@@ -130,12 +131,8 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 			fieldType = fieldType.getParameters().get(0);
 		}
 
-		final List<FieldMetadata> identifierFields = persistenceMemberLocator.getIdentifierFields(fieldType);
-		if (identifierFields.size() == 1) {
-			// The field is another Entity (or collection thereof); return its ID field
-			return identifierFields.get(0);
-		}
-		return null;
+		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(fieldType);
+		return identifierAccessor != null ? identifierAccessor.getMethodName() : null;
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
