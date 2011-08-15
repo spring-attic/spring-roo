@@ -69,7 +69,7 @@ public class DeleteDirectory implements UndoableOperation {
 		undoManager.add(this);
 		String deletionMessage = "Deleted " + filenameResolver.getMeaningfulName(directory);
 		if (StringUtils.hasText(reason)) {
-			deletionMessage += ": " + reason.trim();
+			deletionMessage += " - " + reason.trim();
 		}
 		LOGGER.fine(deletionMessage);
 	}

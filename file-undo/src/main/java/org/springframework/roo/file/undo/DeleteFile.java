@@ -67,7 +67,7 @@ public class DeleteFile implements UndoableOperation {
 		undoManager.add(this);
 		String deletionMessage = "Deleted " + filenameResolver.getMeaningfulName(actual);
 		if (StringUtils.hasText(reason)) {
-			deletionMessage += ": " + reason.trim();
+			deletionMessage += " - " + reason.trim();
 		}
 		LOGGER.fine(deletionMessage);
 	}
