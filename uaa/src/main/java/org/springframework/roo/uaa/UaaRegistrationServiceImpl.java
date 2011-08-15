@@ -18,20 +18,18 @@ import org.springframework.uaa.client.TransmissionAwareUaaService;
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
-import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse.Builder;
+import org.springframework.uaa.client.protobuf.UaaClient.Product;
 
 /**
  * Default implementation of {@link UaaRegistrationService}.
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 @Service
 @Component
 public class UaaRegistrationServiceImpl implements UaaRegistrationService, TransmissionEventListener {
-
 	@Reference private UaaService uaaService;
 	@Reference private PublicFeatureResolver publicFeatureResolver;
 	/** key: bundleSymbolicName, value: customJson */
@@ -50,7 +48,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService, Trans
 		String bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(context.getBundleContext(), UaaRegistrationServiceImpl.class.getName());
 		registerBundleSymbolicNameUse(bundleSymbolicName, null);
 		if (uaaService instanceof TransmissionAwareUaaService) {
-			((TransmissionAwareUaaService)uaaService).addTransmissionEventListener(this);
+			((TransmissionAwareUaaService) uaaService).addTransmissionEventListener(this);
 		}
 	}
 	
@@ -58,7 +56,7 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService, Trans
 		// Last effort to store the data given we're shutting down
 		flushIfPossible();
 		if (uaaService instanceof TransmissionAwareUaaService) {
-			((TransmissionAwareUaaService)uaaService).removeTransmissionEventListener(this);
+			((TransmissionAwareUaaService) uaaService).removeTransmissionEventListener(this);
 		}
 	}
 	
@@ -240,5 +238,4 @@ public class UaaRegistrationServiceImpl implements UaaRegistrationService, Trans
 			featureUseBuilder.setSourceControlIdentifier(commitHash);
 		}
 	}
-
 }

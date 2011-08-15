@@ -1,6 +1,5 @@
 package org.springframework.roo.metadata;
 
-
 /**
  * Indicates a service which is aware of all {@link MetadataProvider}s in the system and
  * can provide access to their respective capabilities.

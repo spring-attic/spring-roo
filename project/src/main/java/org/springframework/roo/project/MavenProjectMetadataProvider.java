@@ -152,7 +152,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 			Dependency dependency = new Dependency(productInfo.getGroupId(), productInfo.getArtifactId(), "version_is_ignored_for_searching");
 			Set<Dependency> dependenciesExcludingVersion = result.getDependenciesExcludingVersion(dependency);
-			if (dependenciesExcludingVersion.size() > 0) {
+			if (!dependenciesExcludingVersion.isEmpty()) {
 				// This dependency was detected
 				Dependency first = dependenciesExcludingVersion.iterator().next();
 				// Convert the detected dependency into a Product as best we can
@@ -162,7 +162,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 					// Strip the ${ } from the version sequence
 					String propertyName = versionSequence.replace("${", "").replace("}", "");
 					Set<Property> prop = result.getPropertiesExcludingValue(new Property(propertyName));
-					if (prop.size() > 0) {
+					if (!prop.isEmpty()) {
 						// Take the first one's value and treat that as the version sequence
 						versionSequence = prop.iterator().next().getValue();
 					}
@@ -176,7 +176,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				uaaRegistrationService.registerProject(product, topLevelPackage.getFullyQualifiedPackageName());
 			}
 		}
-
+		
 		return result;
 	}
 
@@ -206,7 +206,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (dependencies.isEmpty()) {
 			return;
 		}
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency addition is unavailable");
 		if (projectMetadata.isAllDependenciesRegistered(dependencies)) {
 			return;
@@ -237,7 +237,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void addDependency(Dependency dependency) {
 		Assert.notNull(dependency, "Dependency to add required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency addition is unavailable");
 		if (projectMetadata.isDependencyRegistered(dependency)) {
 			return;
@@ -259,7 +259,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (dependencies.isEmpty()) {
 			return;
 		}
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency removal is unavailable");
 		if (!projectMetadata.isAnyDependenciesRegistered(dependencies)) {
 			return;
@@ -303,7 +303,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (plugins.isEmpty()) {
 			return;
 		}
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so plugin addition is unavailable");
 		if (projectMetadata.isAllPluginsRegistered(plugins)) {
 			return;
@@ -334,7 +334,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void addBuildPlugin(Plugin plugin) {
 		Assert.notNull(plugin, "Plugin to add required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so build plugin addition is unavailable");
 		if (projectMetadata.isBuildPluginRegistered(plugin)) {
 			return;
@@ -356,7 +356,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (plugins.isEmpty()) {
 			return;
 		}
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so plugin removal is unavailable");
 		if (!projectMetadata.isAnyPluginsRegistered(plugins)) {
 			return;
@@ -421,7 +421,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void updateProjectType(ProjectType projectType) {
 		Assert.notNull(projectType, "Project type required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency addition is unavailable");
 
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
@@ -446,7 +446,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (repositories.isEmpty()) {
 			return;
 		}
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so repository addition is unavailable");
 		if (path.equals("pluginRepository")) {
 			if (projectMetadata.isAllPluginRepositoriesRegistered(repositories)) {
@@ -566,7 +566,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	private void addRepository(Repository repository, String containingPath, String path) {
 		Assert.notNull(repository, "Repository required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so repository addition is unavailable");
 		if (path.equals("pluginRepository")) {
 			if (projectMetadata.isPluginRepositoryRegistered(repository)) {
@@ -593,7 +593,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	private void removeRepository(Repository repository, String path) {
 		Assert.notNull(repository, "Repository required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so plugin repository removal is unavailable");
 		if (path.equals("pluginRepository")) {
 			if (!projectMetadata.isPluginRepositoryRegistered(repository)) {
@@ -688,7 +688,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void addProperty(Property property) {
 		Assert.notNull(property, "Property to add required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so property addition is unavailable");
 		if (projectMetadata.isPropertyRegistered(property)) {
 			return;
@@ -716,7 +716,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void removeProperty(Property property) {
 		Assert.notNull(property, "Property to remove required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so property removal is unavailable");
 		if (!projectMetadata.isPropertyRegistered(property)) {
 			return;
@@ -742,7 +742,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void addFilter(Filter filter) {
 		Assert.notNull(filter, "Filter to add required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so filter addition is unavailable");
 		if (projectMetadata.isFilterRegistered(filter)) {
 			return;
@@ -775,7 +775,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void removeFilter(Filter filter) {
 		Assert.notNull(filter, "Filter required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so filter removal is unavailable");
 		if (!projectMetadata.isFilterRegistered(filter)) {
 			return;
@@ -810,7 +810,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void addResource(Resource resource) {
 		Assert.notNull(resource, "Resource to add required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so resource addition is unavailable");
 		if (projectMetadata.isResourceRegistered(resource)) {
 			return;
@@ -857,7 +857,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	public void removeResource(Resource resource) {
 		Assert.notNull(resource, "Resource required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so resource removal is unavailable");
 		if (!projectMetadata.isResourceRegistered(resource)) {
 			return;
@@ -892,7 +892,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	// Remove an element identified by dependency, whenever it occurs at path
 	private void removeDependency(Dependency dependency, String containingPath, String path) {
 		Assert.notNull(dependency, "Dependency to remove required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency removal is unavailable");
 		if (!projectMetadata.isDependencyRegistered(dependency)) {
 			return;
@@ -919,7 +919,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	// Remove an element identified by plugin, whenever it occurs at path
 	private void removeBuildPlugin(Plugin plugin, String containingPath, String path) {
 		Assert.notNull(plugin, "Plugin to remove required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency addition is unavailable");
 		if (!projectMetadata.isBuildPluginRegistered(plugin)) {
 			return;

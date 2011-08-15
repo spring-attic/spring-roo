@@ -44,7 +44,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	private Map<String, MetadataProvider> providerMap = new HashMap<String, MetadataProvider>();
 
 	// Mutex
-	private Boolean lock = new Boolean(true);
+	private Object lock = new Object();
 
 	// Request control
 	private List<String> activeRequests = new ArrayList<String>(); // List to assist output "stacks" which show the order of requests
@@ -172,6 +172,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				if (metadataLogger.getTraceLevel() > 0) {
 					metadataLogger.log("Returning " + metadataIdentificationString);
 				}
+				
 				return result;
 			} catch (Exception e) {
 				activeRequests.remove(metadataIdentificationString);
