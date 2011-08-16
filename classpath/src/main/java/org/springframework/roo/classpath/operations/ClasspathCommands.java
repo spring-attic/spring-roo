@@ -10,11 +10,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
@@ -25,6 +27,7 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Shell commands for creating classes, interfaces, and enums.
@@ -36,6 +39,9 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Component
 @Service
 public class ClasspathCommands implements CommandMarker {
+	
+	// Fields
+	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
 	@Reference private TypeLocationService typeLocationService;
@@ -56,7 +62,11 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "focus", help = "Changes focus to a different type") 
 	public void focus(
-		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") JavaType typeName) {
+		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") JavaType typeName)
+	{
+		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName);
+		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");	
 	}
 	
 	@CliCommand(value = "class", help = "Creates a new Java class source file in any project path")
