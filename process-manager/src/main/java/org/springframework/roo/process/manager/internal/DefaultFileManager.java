@@ -179,7 +179,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 				String newContents = deferredFileWrites.get(fileIdentifier);
 				if (!StringUtils.hasText(newContents)) {
 					if (exists(fileIdentifier)) {
-						delete(fileIdentifier, "no new contents");
+						delete(fileIdentifier, "empty");
 					}
 				} else {
 					createOrUpdateTextFileIfRequired(fileIdentifier, newContents, StringUtils.trimToEmpty(deferredDescriptionOfChanges.get(fileIdentifier)));
