@@ -166,7 +166,11 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		// Find out the entity-level JPA details from the trigger annotation
 		final JpaEntityAnnotationValues jpaEntityAnnotationValues = getJpaEntityAnnotationValues(governorPhysicalType);
 		
-		// Look up the inheritance hierarchy for any existing JpaEntityMetadata
+		/*
+		 * Walk the inheritance hierarchy for any existing JpaEntityMetadata. We
+		 * don't need to monitor any such parent, as any changes to its Java
+		 * type will trickle down to the governing java type.
+		 */
 		final JpaEntityMetadata parentEntity = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
 
 		// If the project itself changes, we want a chance to refresh this item
@@ -181,7 +185,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
 		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectMetadata, governorDetails, identifier, jpaEntityAnnotationValues);
 	}
-	
+
 	/**
 	 * Returns the {@link JpaEntityAnnotationValues} for the given domain type
 	 * 

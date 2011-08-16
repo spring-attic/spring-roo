@@ -120,9 +120,6 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		// If the project itself changes, we want a chance to refresh this item
 		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataId);
 		
-		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
-		// the governing java type
-		
 		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		final FieldMetadata identifierField = getIdentityField(entityType);
 		if (identifierField == null) {
