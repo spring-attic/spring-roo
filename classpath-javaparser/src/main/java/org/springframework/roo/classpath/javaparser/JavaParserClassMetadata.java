@@ -64,7 +64,7 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 
 			JavaType javaType = PhysicalTypeIdentifier.getJavaType(metadataIdentificationString);
 			TypeDeclaration typeDeclaration = JavaParserUtils.locateTypeDeclaration(compilationUnit, javaType);
-			Assert.notNull(typeDeclaration, "Could not locate '" + javaType.getSimpleTypeName() + "' in compilation unit");
+			Assert.notNull(typeDeclaration, "Could not locate type '" + javaType.getSimpleTypeName() + "' in compilation unit '" + fileIdentifier + "'");
 			// Many callers rely on the metadata containing methods that provide mutation of the on-disk compilation unit
 			memberHoldingTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(compilationUnit, typeDeclaration, metadataIdentificationString, javaType, metadataService, physicalTypeMetadataProvider, fileManager, fileIdentifier);
 			Assert.notNull(memberHoldingTypeDetails, "Unable to parse '" + javaType + "'");
