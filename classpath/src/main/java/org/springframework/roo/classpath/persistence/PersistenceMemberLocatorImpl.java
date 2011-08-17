@@ -36,17 +36,17 @@ import org.springframework.roo.model.JavaType;
 @Service
 public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, MetadataNotificationListener {
 	
-	private static final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
-	private static final Map<JavaType, JavaType> domainTypeIdCache = new HashMap<JavaType, JavaType>();
-	private static final Map<JavaType, List<FieldMetadata>> domainTypeEmbeddedIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
-	private static final Map<JavaType, FieldMetadata> domainTypeVersionFieldCache = new HashMap<JavaType, FieldMetadata>();
-	private static final Map<JavaType, MethodMetadata> domainTypeIdAccessorCache = new HashMap<JavaType, MethodMetadata>();
-	private static final Map<JavaType, MethodMetadata> domainTypeVersionAccessorCache = new HashMap<JavaType, MethodMetadata>();
-	
 	// Fields
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	
+	private final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
+	private final Map<JavaType, JavaType> domainTypeIdCache = new HashMap<JavaType, JavaType>();
+	private final Map<JavaType, List<FieldMetadata>> domainTypeEmbeddedIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
+	private final Map<JavaType, FieldMetadata> domainTypeVersionFieldCache = new HashMap<JavaType, FieldMetadata>();
+	private final Map<JavaType, MethodMetadata> domainTypeIdAccessorCache = new HashMap<JavaType, MethodMetadata>();
+	private final Map<JavaType, MethodMetadata> domainTypeVersionAccessorCache = new HashMap<JavaType, MethodMetadata>();
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -64,9 +64,6 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 	}
 	
 	public JavaType getIdentifierType(JavaType domainType) {
-		if (domainTypeIdCache.containsKey(domainType)) {
-			return domainTypeIdCache.get(domainType);
-		}
 		notify(PhysicalTypeIdentifier.createIdentifier(domainType), null);
 		if (domainTypeIdCache.containsKey(domainType)) {
 			return domainTypeIdCache.get(domainType);
@@ -79,11 +76,6 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 	}
 	
 	public List<FieldMetadata> getIdentifierFields(final JavaType domainType) {
-		if (domainTypeIdFieldsCache.containsKey(domainType)) {
-			return domainTypeIdFieldsCache.get(domainType);
-		} else if (domainTypeEmbeddedIdFieldsCache.containsKey(domainType)) {
-			return domainTypeEmbeddedIdFieldsCache.get(domainType);
-		}
 		// It is possible that the notify method has not been called yet for this type, let's try now.
 		notify(PhysicalTypeIdentifier.createIdentifier(domainType), null);
 		if (domainTypeIdFieldsCache.containsKey(domainType)) {
