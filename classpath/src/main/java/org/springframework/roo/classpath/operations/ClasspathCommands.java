@@ -39,7 +39,7 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class ClasspathCommands implements CommandMarker {
-	
+
 	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
@@ -62,8 +62,8 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "focus", help = "Changes focus to a different type") 
 	public void focus(
-		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") JavaType typeName)
-	{
+		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") JavaType typeName) {
+		
 		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName);
 		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");	
