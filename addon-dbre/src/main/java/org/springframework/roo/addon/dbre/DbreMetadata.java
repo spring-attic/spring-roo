@@ -103,7 +103,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (table == null) {
 			return;
 		}
-		System.out.println("1 " + governorTypeDetails.getName().getFullyQualifiedTypeName() + " " + identifierHolder.getEmbeddedIdentifierFields().size());
 
 		// Add fields for many-valued associations with many-to-many multiplicity
 		addManyToManyFields(table);
