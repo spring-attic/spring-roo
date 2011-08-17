@@ -67,6 +67,20 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	void removeDependency(Dependency dependency);
 	
 	/**
+	 * Attempts to update the scope of the specified dependency. If the dependency does not exist according
+	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * Otherwise the located dependency is updated.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param dependency the dependency to update (required)
+	 * @param dependencyScope the dependency scope. May be null, in which case the <scope> element will be removed
+	 */
+	void updateDependencyScope(Dependency dependency, DependencyScope dependencyScope);
+	
+	/**
 	 * Attempts to add the specified plugins. If all the plugins already exist according
 	 * to {@link ProjectMetadata#isAllPluginRegistered(Plugin)}, the method silently returns.
 	 * Otherwise each new dependency is added.

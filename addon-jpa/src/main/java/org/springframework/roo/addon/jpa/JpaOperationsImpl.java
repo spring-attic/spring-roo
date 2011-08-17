@@ -19,6 +19,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.DependencyScope;
 import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.Plugin;
@@ -55,6 +56,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	private static final String PERSISTENCE_UNIT = "persistence-unit";
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
 	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
+	private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency("org.glassfish.web", "jstl-impl", "1.2");
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
@@ -458,6 +460,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				throw new IllegalStateException(e);
 			}
 		}
+		
 	}
 
 	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String databaseName, String userName, String password) {
@@ -471,18 +474,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			return;
 		}
 
-		Properties props = new Properties();
-		try {
-			if (databaseExists) {
-				props.load(fileManager.getInputStream(databasePath));
-			} else {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
-				Assert.notNull(templateInputStream, "Could not acquire database properties template");
-				props.load(templateInputStream);
-			}
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
+		Properties props = getProperties(databasePath, databaseExists, "database-template.properties");
 
 		String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName);
 		if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
@@ -549,20 +541,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		String connectionString = getConnectionString(jdbcDatabase, hostName, null /*databaseName*/).replace("USER_NAME", StringUtils.defaultIfEmpty(userName, "${userName}")).replace("PASSWORD", StringUtils.defaultIfEmpty(password, "${password}"));
+		Properties props = getProperties(configPath, configExists, "database-dot-com-template.properties");
 		
-		Properties props = new Properties();
-		try {
-			if (configExists) {
-				props.load(fileManager.getInputStream(configPath));
-			} else {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-dot-com-template.properties");
-				Assert.notNull(templateInputStream, "Could not acquire Database.com properties template");
-				props.load(templateInputStream);
-			}
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-
 		boolean hasChanged = !props.get("url").equals(StringUtils.trimToEmpty(connectionString));
 		if (!hasChanged) {
 			return;
@@ -587,6 +567,30 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		logger.warning("Please update your database details in src/main/resources/" + persistenceUnit + ".properties.");
+	}
+
+	private Properties getProperties(String path, boolean exists, String templateFilename) {
+		Properties props = new Properties();
+		InputStream inputStream = null;
+		try {
+			if (exists) {
+				inputStream = fileManager.getInputStream(path);
+				props.load(inputStream);
+			} else {
+				inputStream = TemplateUtils.getTemplate(getClass(), templateFilename);
+				Assert.notNull(inputStream, "Could not acquire " + templateFilename);
+				props.load(inputStream);
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException ignored) {}
+			}
+		}
+		return props;
 	}
 
 	private void updateLog4j(OrmProvider ormProvider) {
@@ -751,6 +755,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(true);
 			updateDataNucleusPlugin(true);
+			projectOperations.updateDependencyScope(JSTL_IMPL_DEPENDENCY, DependencyScope.PROVIDED);
 		}
 	}
 
@@ -873,6 +878,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(false);
 			updateDataNucleusPlugin(false);
+			projectOperations.updateDependencyScope(JSTL_IMPL_DEPENDENCY, null);
 		}
 	}
 

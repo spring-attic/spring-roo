@@ -15,6 +15,8 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -198,12 +200,18 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void updateConfiguration() {
+		boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/springWebMvc/dependencies/dependency", configuration);
-		for (Element dependency : springDependencies) {
-			dependencies.add(new Dependency(dependency));
+		for (Element dependencyElement : springDependencies) {
+			Dependency dependency = new Dependency(dependencyElement);
+			if (isGaeEnabled && dependency.getGroupId().equals("org.glassfish.web") && dependency.getArtifactId().equals("jstl-impl")) {
+				dependencies.add(new Dependency(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), DependencyType.JAR, DependencyScope.PROVIDED));
+			} else {
+				dependencies.add(dependency);
+			}
 		}
 		projectOperations.addDependencies(dependencies);
 		

@@ -20,6 +20,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -297,6 +298,42 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	public void removeDependency(Dependency dependency) {
 		removeDependency(dependency, "/project/dependencies", "/project/dependencies/dependency");
 	}
+	
+	public void updateDependencyScope(Dependency dependency, DependencyScope dependencyScope) {
+		Assert.notNull(dependency, "Dependency to update required");
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency updating is unavailable");
+		if (!projectMetadata.isDependencyRegistered(dependency)) {
+			return;
+		}
+
+		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
+		Element root = document.getDocumentElement();
+	
+		Element dependencyElement = XmlUtils.findFirstElement("/project/dependencies/dependency[groupId = '" + dependency.getGroupId() + "' and artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersion() + "']", root);
+		if (dependencyElement == null) {
+			return;
+		}
+		
+		String descriptionOfChange = "";
+		Element scopeElement = XmlUtils.findFirstElement("scope", dependencyElement);
+		if (scopeElement == null) {
+			if (dependencyScope != null) {
+				dependencyElement.appendChild(new XmlElementBuilder("scope", document).setText(dependencyScope.name().toLowerCase()).build());
+				descriptionOfChange = "added <scope>" + dependencyScope.name().toLowerCase() + "</scope> to dependency " + dependency.getSimpleDescription();
+			}
+		} else {
+			if (dependencyScope != null) {
+				scopeElement.setTextContent(dependencyScope.name().toLowerCase());
+				descriptionOfChange = "changed <scope> to " + dependencyScope.name().toLowerCase() + " in dependency " + dependency.getSimpleDescription();
+			} else {
+				dependencyElement.removeChild(scopeElement);
+				descriptionOfChange = "removed <scope> from dependency " + dependency.getSimpleDescription();
+			}
+		}
+
+		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
+	}
 
 	public void addBuildPlugins(List<Plugin> plugins) {
 		Assert.notNull(plugins, "Plugins to add required");
@@ -525,7 +562,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 		}
 
-		if (dependency.getClassifier() != null) {
+		if (StringUtils.hasText(dependency.getClassifier())) {
 			Element classifierElement = document.createElement("classifier");
 			classifierElement.setTextContent(dependency.getClassifier());
 			dependencyElement.appendChild(classifierElement);
@@ -533,7 +570,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Add exclusions if they are defined
 		List<Dependency> exclusions = dependency.getExclusions();
-		if (exclusions.size() > 0) {
+		if (!exclusions.isEmpty()) {
 			Element exclusionsElement = document.createElement("exclusions");
 			for (Dependency exclusion : exclusions) {
 				Element exclusionElement = document.createElement("exclusion");

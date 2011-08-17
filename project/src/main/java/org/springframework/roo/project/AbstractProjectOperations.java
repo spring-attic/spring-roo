@@ -286,6 +286,12 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		projectMetadataProvider.removeDependency(dependency);
 		sendDependencyRemovalNotifications(dependency);
 	}
+	
+	public final void updateDependencyScope(Dependency dependency, DependencyScope dependencyScope) {
+		Assert.isTrue(isProjectAvailable(), "Dependency modification prohibited at this time");
+		Assert.notNull(dependency, "Dependency required");
+		projectMetadataProvider.updateDependencyScope(dependency, dependencyScope);
+	}
 
 	public final void removeDependency(String groupId, String artifactId, String version) {
 		removeDependency(groupId, artifactId, version, "");

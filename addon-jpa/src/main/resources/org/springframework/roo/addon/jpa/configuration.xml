@@ -346,6 +346,7 @@
                     <groupId>org.datanucleus</groupId>
                     <artifactId>datanucleus-enhancer</artifactId>
                     <version>1.1.4</version>
+                    <scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>javax.jdo</groupId>
