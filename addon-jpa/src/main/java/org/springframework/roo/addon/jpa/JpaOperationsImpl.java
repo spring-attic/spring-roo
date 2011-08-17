@@ -575,12 +575,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		try {
 			if (exists) {
 				inputStream = fileManager.getInputStream(path);
-				props.load(inputStream);
 			} else {
 				inputStream = TemplateUtils.getTemplate(getClass(), templateFilename);
 				Assert.notNull(inputStream, "Could not acquire " + templateFilename);
-				props.load(inputStream);
 			}
+			props.load(inputStream);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
