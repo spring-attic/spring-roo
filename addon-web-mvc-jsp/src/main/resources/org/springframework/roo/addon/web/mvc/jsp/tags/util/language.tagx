@@ -24,7 +24,7 @@
     </spring:url>
     <spring:message code="global_language_switch" arguments="${label}" var="lang_label" htmlEscape="false" />
     <a href="${url}" title="${fn:escapeXml(lang_label)}">
-      <img class="flag" src="${fn:escapeXml(img)}" alt="${fn:escapeXml(lang_label)}" />
+      <img class="flag" src="${img}" alt="${fn:escapeXml(lang_label)}" />
     </a>
     <c:out value=" " />
   </c:if>

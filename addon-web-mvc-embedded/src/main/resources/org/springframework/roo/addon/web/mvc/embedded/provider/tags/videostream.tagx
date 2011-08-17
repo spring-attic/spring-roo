@@ -16,7 +16,7 @@
         <param name="flashvars" value="${flashvars}" />
         <param name="allowfullscreen" value="true" />
         <param name="allowscriptaccess" value="always" />
-        <param name="movie" value="${fn:escapeXml(url)}" />
+        <param name="movie" value="${url}" />
         <embed flashvars="${flashvars}" width="545" height="380" allowfullscreen="true" allowscriptaccess="always" id="utv784473" name="utv_n_83122" src="${url}" type="application/x-shockwave-flash" />
       </object>
     </c:when>
@@ -26,10 +26,10 @@
         <spring:param name="channel" value="${streamId}"/>
       </spring:url>
       <object width="545" height="343" id="lsplayer" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
-        <param name="movie" value="${fn:escapeXml(url)}"></param>
+        <param name="movie" value="${url}"></param>
         <param name="allowScriptAccess" value="always"></param>
         <param name="allowFullScreen" value="true"></param>
-        <embed name="lsplayer" wmode="transparent" src="${fn:escapeXml(url)}" width="545" height="330" allowScriptAccess="always" allowFullScreen="true" type="application/x-shockwave-flash"></embed>
+        <embed name="lsplayer" wmode="transparent" src="${url}" width="545" height="330" allowScriptAccess="always" allowFullScreen="true" type="application/x-shockwave-flash"></embed>
       </object>
     </c:when>
 

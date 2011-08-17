@@ -11,7 +11,7 @@
 
     <c:when test="${provider eq 'youtube'}">
       <spring:url value="http://www.youtube.com/v/${videoId}" var="video" />
-      <iframe title="YouTube video player" width="545" height="320" src="http://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen="true"></iframe>
+      <iframe title="YouTube video player" width="545" height="320" src="${video}" frameborder="0" allowfullscreen="true"></iframe>
     </c:when>
 
     <c:when test="${provider eq 'vimeo'}">
@@ -26,8 +26,8 @@
       <object width="545" height="320">
         <param name="allowfullscreen" value="true" />
         <param name="allowscriptaccess" value="always" />
-        <param name="movie" value="${fn:escapeXml(video)}" />
-        <embed src="${fn:escapeXml(video)}" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="545" height="320"></embed>
+        <param name="movie" value="${video}" />
+        <embed src="${video}" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="545" height="320"></embed>
       </object>
     </c:when>
 
@@ -38,7 +38,7 @@
         <param name="allowScriptAccess" value="always" />
         <param name="allowFullScreen" value="true" />
         <param name="flashvars" value="fake=1" />
-        <embed src="${fn:escapeXml(video)}" width="545" height="320" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" flashvars="fake=1" name="viddler"></embed>
+        <embed src="${video}" width="545" height="320" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" flashvars="fake=1" name="viddler"></embed>
       </object>
     </c:when>
 
@@ -47,7 +47,7 @@
         <spring:param name="docid" value="${videoId}" />
         <spring:param name="fs" value="true" />
       </spring:url>
-      <embed id="VideoPlayback" src="${fn:escapeXml(video)}" style="width:545px;height:400px" allowFullScreen="true" allowScriptAccess="always" type="application/x-shockwave-flash">
+      <embed id="VideoPlayback" src="${video}" style="width:545px;height:400px" allowFullScreen="true" allowScriptAccess="always" type="application/x-shockwave-flash">
       </embed>
     </c:when>
 
