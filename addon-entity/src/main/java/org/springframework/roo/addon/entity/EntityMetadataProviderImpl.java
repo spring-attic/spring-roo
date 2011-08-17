@@ -121,30 +121,13 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataId);
 		
 		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		final FieldMetadata identifierField = getIdentityField(entityType);
-		if (identifierField == null) {
+		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entityType);
+		if (idFields.size() != 1) {
+			// The ID field metadata is either unavailable or not stable yet
 			return null;
 		}
 		final String entityName = StringUtils.defaultIfEmpty(jpaEntityAnnotationValues.getEntityName(), entityType.getSimpleTypeName());
-		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, projectMetadata, crudAnnotationValues, pluralMetadata.getPlural(), identifierField, entityName);
-	}
-	
-	/**
-	 * Returns the identifier field for the given entity type
-	 * 
-	 * @param entityType (required)
-	 * @return <code>null</code> if there isn't one (or it's simply unknown to
-	 * the {@link PersistenceMemberLocator})
-	 */
-	private FieldMetadata getIdentityField(final JavaType entityType) {
-		final List<FieldMetadata> identifierFields = persistenceMemberLocator.getIdentifierFields(entityType);
-		if (identifierFields.isEmpty()) {
-			return null;
-		}
-		if (identifierFields.size() == 1) {
-			return identifierFields.get(0);
-		}
-		throw new IllegalStateException("Expected at most one " + entityType.getSimpleTypeName() + " identifier, but found " + identifierFields.size() + ": " + identifierFields);
+		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, projectMetadata, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
