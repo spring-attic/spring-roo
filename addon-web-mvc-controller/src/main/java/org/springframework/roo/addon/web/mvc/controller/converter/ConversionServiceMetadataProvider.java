@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,17 +98,23 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
-		Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
-		for (JavaType type : relevantDomainTypes.keySet()) {
-			JavaType idType = persistenceMemberLocator.getIdentifierType(type);
+		final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
+		
+		for (final Iterator<JavaType> types = relevantDomainTypes.keySet().iterator(); types.hasNext();) {
+			final JavaType type = types.next();
+			final JavaType idType = persistenceMemberLocator.getIdentifierType(type);
 			if (idType == null) {
-				continue;
+				// This type either has no ID field (e.g. an embedded type) or it's ID type is unknown right now;
+				// don't generate a converter for it; this will happen later if and when the ID field becomes known.
+				types.remove();
+			} else {
+				idTypes.put(type, idType);
+				@SuppressWarnings("unchecked")
+				final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), type, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
+				findMethods.put(type, findMethod);
 			}
-			idTypes.put(type, idType);
-			@SuppressWarnings("unchecked")
-			MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), type, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
-			findMethods.put(type, findMethod);
 		}
+		
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
 	
