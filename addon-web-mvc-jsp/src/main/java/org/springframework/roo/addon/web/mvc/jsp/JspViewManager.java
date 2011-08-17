@@ -186,18 +186,26 @@ public class JspViewManager {
 			formCreate.setAttribute("path", controllerPath);
 		}
 		
-		List<FieldMetadata> formFields = new ArrayList<FieldMetadata>();
+		final List<FieldMetadata> formFields = new ArrayList<FieldMetadata>();
+		final List<FieldMetadata> fieldCopy = new ArrayList<FieldMetadata>(fields);
 		
 		// Handle Roo identifiers
-		if (formbackingTypePersistenceMetadata.getRooIdentifierFields().size() > 0) {
+		if (!formbackingTypePersistenceMetadata.getRooIdentifierFields().isEmpty()) {
 			formCreate.setAttribute("compositePkField", formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName());
-			for (FieldMetadata field : formbackingTypePersistenceMetadata.getRooIdentifierFields()) {
-				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-				fieldBuilder.setFieldName(new JavaSymbolName(formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()));
+			for (FieldMetadata embeddedField : formbackingTypePersistenceMetadata.getRooIdentifierFields()) {
+				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(embeddedField);
+				fieldBuilder.setFieldName(new JavaSymbolName(formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + embeddedField.getFieldName().getSymbolName()));
+				fieldLoop: for (int i = 0; i <= fieldCopy.size(); i++) {
+					// Make sure form fields are not presented twice.
+					if (!(fieldCopy.get(i).getFieldName().equals(embeddedField.getFieldName()) && fieldCopy.get(i).getFieldType().equals(embeddedField.getFieldType()))) {
+						fieldCopy.remove(i);
+						break fieldLoop;
+					}
+				}
 				formFields.add(fieldBuilder.build());
 			}
 		}
-		formFields.addAll(fields);
+		formFields.addAll(fieldCopy);
 		
 		createFieldsForCreateAndUpdate(formFields, document, formCreate, true);
 		formCreate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formCreate));
