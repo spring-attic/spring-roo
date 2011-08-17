@@ -84,11 +84,14 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + toTypeMethodName.getSymbolName() + "());");
 			}
 			
-			JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + type.getSimpleTypeName() + "Converter");
-			MethodMetadata stringToTypeMethod = getStringToTypeConverterMethod(type, stringToTypeMethodName, idTypes.get(type));
-			if (stringToTypeMethod != null) {
-				builder.addMethod(stringToTypeMethod);
-				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + stringToTypeMethodName.getSymbolName() + "());");
+			// Only allow conversion if ID type is not String already.
+			if (!idTypes.get(type).equals(JavaType.STRING_OBJECT)) {
+				JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + type.getSimpleTypeName() + "Converter");
+				MethodMetadata stringToTypeMethod = getStringToTypeConverterMethod(type, stringToTypeMethodName, idTypes.get(type));
+				if (stringToTypeMethod != null) {
+					builder.addMethod(stringToTypeMethod);
+					installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + stringToTypeMethodName.getSymbolName() + "());");
+				}
 			}
 		}
 		for (JavaType type: compositePrimaryKeyTypes.keySet()) {
