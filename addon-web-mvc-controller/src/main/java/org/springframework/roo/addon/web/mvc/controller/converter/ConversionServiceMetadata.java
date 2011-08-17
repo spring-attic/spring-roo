@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +45,23 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		// For testing
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 * @param findMethods
+	 * @param idTypes the ID types of the domain types for which to generate converters (required); must be one for each domain type
+	 * @param relevantDomainTypes the types for which to generate converters (required)
+	 * @param compositePrimaryKeyTypes (required)
+	 */
 	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<JavaType, MemberTypeAdditions> findMethods, Map<JavaType, JavaType> idTypes, Map<JavaType, List<MethodMetadata>> relevantDomainTypes, Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(relevantDomainTypes, "List of domain types required");
 		Assert.notNull(compositePrimaryKeyTypes, "List of PK types required");
+		Assert.notNull(idTypes, "List of ID types required");
+		Assert.isTrue(relevantDomainTypes.size() == idTypes.size(), "Expected " + relevantDomainTypes.size() + " ID types, but was " + idTypes.size());
 		
 		if (!isValid() || (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes.isEmpty())) { 
 			return;
@@ -55,7 +69,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
 		//loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
-		for (JavaType type: new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
+		for (final JavaType type : new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
 			JavaSymbolName toIdMethodName = new JavaSymbolName("get" + type.getSimpleTypeName() + "ToStringConverter");
 			MethodMetadata toIdMethod = getToStringConverterMethod(type, toIdMethodName, relevantDomainTypes.get(type));
 			if (toIdMethod != null) {
@@ -190,16 +204,25 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, converterJavaType, bodyBuilder).build();
 	}
 	
-	private MethodMetadata getStringToTypeConverterMethod(JavaType targetType, JavaSymbolName methodName, JavaType idType) {
+	/**
+	 * Returns the "string to type" converter method to be generated, if any
+	 * 
+	 * @param targetType the type being converted into (required)
+	 * @param methodName the name of the method to generate if necessary (required)
+	 * @param idType the ID type of the given target type (required)
+	 * @return <code>null</code> if none is to be generated
+	 */
+	private MethodMetadata getStringToTypeConverterMethod(final JavaType targetType, final JavaSymbolName methodName, final JavaType idType) {
+		Assert.notNull(methodName, "Method name is required");
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) != null) {
 			return null;
 		}
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(JavaType.STRING_OBJECT);
-		parameters.add(targetType);
+		Assert.notNull(targetType, "Target type is required for method = " + methodName);
+		Assert.notNull(idType, "ID type is required for " + targetType);
+		final List<JavaType> parameters = Arrays.asList(JavaType.STRING_OBJECT, targetType);
 		
-		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
+		final JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("@Override");
