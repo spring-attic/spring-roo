@@ -13,8 +13,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class IdentifierHolder {
 	private FieldMetadata identifierField;
-	private List<FieldMetadata> embeddedIdentifierFields;
 	private boolean embeddedIdField;
+	private List<FieldMetadata> embeddedIdentifierFields;
 
 	public IdentifierHolder(FieldMetadata identifierField, boolean embeddedIdField, List<FieldMetadata> embeddedIdentifierFields) {
 		Assert.notNull(identifierField, "Identifier field required");
@@ -24,12 +24,12 @@ public class IdentifierHolder {
 		this.embeddedIdentifierFields = embeddedIdentifierFields;
 	}
 
-	public boolean isEmbeddedIdField() {
-		return embeddedIdField;
-	}
-
 	public FieldMetadata getIdentifierField() {
 		return identifierField;
+	}
+
+	public boolean isEmbeddedIdField() {
+		return embeddedIdField;
 	}
 
 	public List<FieldMetadata> getEmbeddedIdentifierFields() {

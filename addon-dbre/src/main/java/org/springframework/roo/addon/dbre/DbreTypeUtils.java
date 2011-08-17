@@ -27,6 +27,31 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public abstract class DbreTypeUtils {
+	private static final JavaType JPA_TABLE_ANNOTATION = new JavaType("javax.persistence.Table");
+	private static final JavaType ROO_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooEntity");
+	private static final JavaType ROO_JPA_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooJpaEntity");
+
+	private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName("name");
+	private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName("schema");
+	private static final JavaSymbolName TABLE_ATTRIBUTE = new JavaSymbolName("table");
+
+	// The annotation attributes from which to read the db table name
+	// Linked to preserve the iteration order below
+	private static final Map<JavaType, JavaSymbolName> TABLE_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
+	static {
+		TABLE_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, NAME_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
+	}
+	
+	// The annotation attributes from which to read the db schema name
+	// Linked to preserve the iteration order below
+	private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
+	static {
+		SCHEMA_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
+	}
 
 	/**
 	 * Locates the type associated with the presented table name.
@@ -63,23 +88,6 @@ public abstract class DbreTypeUtils {
 		return findTypeForTableName(managedEntities, table.getName(), table.getSchema().getName());
 	}
 	
-	private static final JavaType JPA_TABLE_ANNOTATION = new JavaType("javax.persistence.Table");
-	private static final JavaType ROO_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooEntity");
-	private static final JavaType ROO_JPA_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooJpaEntity");
-	
-	private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName("name");
-	private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName("schema");
-	private static final JavaSymbolName TABLE_ATTRIBUTE = new JavaSymbolName("table");
-	
-	// The annotation attributes from which to read the db schema name
-	// Linked to preserve the iteration order below
-	private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
-	static {
-		SCHEMA_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, SCHEMA_ATTRIBUTE);
-		SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
-		SCHEMA_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
-	}
-	
 	/**
 	 * Returns the database schema for the given entity.
 	 * 
@@ -89,15 +97,6 @@ public abstract class DbreTypeUtils {
 	public static String getSchemaName(final MemberHoldingTypeDetails entityDetails) {
 		Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
 		return getFirstNonBlankAttributeValue(entityDetails, SCHEMA_ATTRIBUTES);
-	}
-	
-	// The annotation attributes from which to read the db table name
-	// Linked to preserve the iteration order below
-	private static final Map<JavaType, JavaSymbolName> TABLE_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
-	static {
-		TABLE_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, NAME_ATTRIBUTE);
-		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
-		TABLE_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
 	}
 	
 	/**
