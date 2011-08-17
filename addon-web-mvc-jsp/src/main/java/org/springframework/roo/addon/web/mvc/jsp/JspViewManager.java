@@ -195,7 +195,7 @@ public class JspViewManager {
 			for (FieldMetadata embeddedField : formbackingTypePersistenceMetadata.getRooIdentifierFields()) {
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(embeddedField);
 				fieldBuilder.setFieldName(new JavaSymbolName(formbackingTypePersistenceMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + embeddedField.getFieldName().getSymbolName()));
-				fieldLoop: for (int i = 0; i <= fieldCopy.size(); i++) {
+				fieldLoop: for (int i = 0; i < fieldCopy.size(); i++) {
 					// Make sure form fields are not presented twice.
 					if (!(fieldCopy.get(i).getFieldName().equals(embeddedField.getFieldName()) && fieldCopy.get(i).getFieldType().equals(embeddedField.getFieldType()))) {
 						fieldCopy.remove(i);
