@@ -59,7 +59,7 @@ public class GitOperationsImpl implements GitOperations {
 			Status status = git.status().call();
 			if (status.getChanged().size() > 0 || status.getAdded().size() > 0 || status.getModified().size() > 0 || status.getRemoved().size() > 0) {
 				RevCommit rev = git.commit().setAll(true).setCommitter(person).setAuthor(person).setMessage(message).call();
-				logger.info("Git commit " + rev.getTree().getId().name() + " [" + message + "]");
+				logger.info("Git commit " + rev.getName() + " [" + message + "]");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Could not commit changes to local Git repository", e);
