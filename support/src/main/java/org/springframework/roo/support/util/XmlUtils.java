@@ -76,7 +76,7 @@ public final class XmlUtils {
 		} finally {
 			try {
 				inputStream.close();
-			} catch (IOException inored) {}
+			} catch (IOException ignored) {}
 		}
 	}
 	
