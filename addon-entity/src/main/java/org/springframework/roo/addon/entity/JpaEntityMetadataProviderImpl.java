@@ -18,6 +18,8 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_FIELD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_MUTATOR_METHOD;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +42,6 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
@@ -80,9 +81,9 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	// use the values of the first one found.
 	private static final JavaType[] TRIGGER_ANNOTATIONS = {
 		// We trigger off RooJpaEntity in case the user doesn't want Active Record methods
-		RooJavaType.ROO_JPA_ENTITY,
+		ROO_JPA_ENTITY,
 		// We trigger off RooEntity so that existing projects don't need to add RooJpaEntity
-		RooJavaType.ROO_ENTITY,
+		ROO_ENTITY,
 	};
 
 	private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();

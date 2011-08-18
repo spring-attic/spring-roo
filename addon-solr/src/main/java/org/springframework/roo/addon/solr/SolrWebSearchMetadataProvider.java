@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.RooJavaType.ROO_SOLR_WEB_SEARCHABLE;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -11,10 +13,8 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
-
 /**
  * Provides {@link SolrWebSearchMetadata}.
  * 
@@ -25,16 +25,13 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public final class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_SOLR_WEB_SEARCHABLE;
-	
 	// Fields
 	@Reference private WebScaffoldMetadataProvider webScaffoldMetadataProvider;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		webScaffoldMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
-		addMetadataTrigger(TRIGGER_ANNOTATION);	
+		webScaffoldMetadataProvider.addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
+		addMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);	
 	}
 
 	/**
@@ -45,8 +42,8 @@ public final class SolrWebSearchMetadataProvider extends AbstractItdMetadataProv
 	 */
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		webScaffoldMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
-		removeMetadataTrigger(TRIGGER_ANNOTATION);	
+		webScaffoldMetadataProvider.removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);
+		removeMetadataTrigger(ROO_SOLR_WEB_SEARCHABLE);	
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

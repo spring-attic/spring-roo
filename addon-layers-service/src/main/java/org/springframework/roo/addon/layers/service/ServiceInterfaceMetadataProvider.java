@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
+import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,9 +23,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
-
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
  * 
@@ -34,9 +34,6 @@ import org.springframework.roo.project.Path;
 @Service
 public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
 
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_SERVICE;
-	
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
@@ -45,13 +42,13 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 	protected void activate(ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(TRIGGER_ANNOTATION);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class, TRIGGER_ANNOTATION, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE)));
+		addMetadataTrigger(ROO_SERVICE);
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE)));
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(ROO_SERVICE);
 	}
 	
 	@Override

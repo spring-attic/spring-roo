@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.test;
 
+import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -42,7 +44,6 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
-
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
  * 
@@ -55,7 +56,6 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_INTEGRATION_TEST;
 	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
@@ -70,15 +70,15 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		// Integration test classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
-		configurableMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		configurableMetadataProvider.addMetadataTrigger(ROO_INTEGRATION_TEST);
+		addMetadataTrigger(ROO_INTEGRATION_TEST);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		configurableMetadataProvider.removeMetadataTrigger(ROO_INTEGRATION_TEST);
+		removeMetadataTrigger(ROO_INTEGRATION_TEST);
 	}
 	
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes

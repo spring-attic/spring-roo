@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
+
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,9 +27,7 @@ import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
-
 /**
  * Provides {@link SolrMetadata}.
  * 
@@ -38,23 +38,20 @@ import org.springframework.roo.project.Path;
 @Service
 public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_SOLR_SEARCHABLE;
-	
 	// Fields
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		entityMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		entityMetadataProvider.addMetadataTrigger(ROO_SOLR_SEARCHABLE);
+		addMetadataTrigger(ROO_SOLR_SEARCHABLE);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		entityMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
-		removeMetadataTrigger(TRIGGER_ANNOTATION);	
+		entityMetadataProvider.removeMetadataTrigger(ROO_SOLR_SEARCHABLE);
+		removeMetadataTrigger(ROO_SOLR_SEARCHABLE);	
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

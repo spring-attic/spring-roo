@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold.finder;
 
+import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
+
 import java.util.Set;
 import java.util.SortedMap;
 
@@ -20,7 +22,6 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 
 /**
@@ -32,21 +33,18 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true) 
 @Service 
 public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider implements WebFinderMetadataProvider {
-	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_WEB_SCAFFOLD;
-	
+
 	// Fields
 	@Reference private WebMetadataService webMetadataService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(ROO_WEB_SCAFFOLD);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(ROO_WEB_SCAFFOLD);
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {

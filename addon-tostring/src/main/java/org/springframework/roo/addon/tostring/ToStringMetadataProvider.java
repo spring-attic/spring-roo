@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.tostring;
 
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +22,6 @@ import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadat
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 
 /**
@@ -33,19 +34,16 @@ import org.springframework.roo.project.Path;
 @Service
 public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_TO_STRING;
-
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(ROO_TO_STRING);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(ROO_TO_STRING);
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

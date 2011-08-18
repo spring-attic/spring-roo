@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.finder;
 
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -18,11 +20,9 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
-
 /**
  * Implementation of {@link FinderMetadataProvider}.
  * 
@@ -35,22 +35,19 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements FinderMetadataProvider {
 	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_ENTITY;
-	
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(ROO_ENTITY);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(ROO_ENTITY);
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

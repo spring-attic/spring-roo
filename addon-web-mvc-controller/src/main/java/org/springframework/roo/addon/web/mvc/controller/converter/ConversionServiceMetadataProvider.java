@@ -60,9 +60,6 @@ import org.springframework.roo.support.util.Pair;
 @Service
 public final class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
 	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = ROO_CONVERSION_SERVICE;
-	
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMetadataService webMetadataService;
@@ -75,13 +72,13 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(ROO_CONVERSION_SERVICE);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(ROO_CONVERSION_SERVICE);
 	}
 
 	@Override

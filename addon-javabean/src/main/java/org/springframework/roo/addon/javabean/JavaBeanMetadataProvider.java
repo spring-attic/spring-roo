@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.javabean;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -22,12 +24,10 @@ import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.StringUtils;
-
 /**
  * Provides {@link JavaBeanMetadata}.
  *
@@ -38,9 +38,6 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_JAVA_BEAN;
-	
 	// Fields
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
@@ -50,13 +47,13 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes

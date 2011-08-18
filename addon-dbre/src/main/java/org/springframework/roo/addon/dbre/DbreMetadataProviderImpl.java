@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
+
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +22,6 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 
 /**
@@ -33,9 +34,6 @@ import org.springframework.roo.project.Path;
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
 	
-	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_DB_MANAGED;
-	
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
@@ -44,12 +42,12 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(ROO_DB_MANAGED);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(ROO_DB_MANAGED);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
@@ -85,7 +83,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		FieldMetadata versionField = getVersionField(javaType, metadataIdentificationString);
 
 		// Search for database-managed entities
-		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(TRIGGER_ANNOTATION);
+		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
 
 		boolean found = false;
 		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
