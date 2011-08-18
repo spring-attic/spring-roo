@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,9 +35,6 @@ import org.springframework.uaa.client.util.Assert;
 @Component
 @Service
 public class ServiceLayerProvider extends CoreLayerProvider {
-	
-	// Constants
-	private static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 	
 	// Fields
 	@Reference private MetadataService metadataService;

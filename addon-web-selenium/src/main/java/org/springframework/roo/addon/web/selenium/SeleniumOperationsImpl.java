@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.selenium;
 
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
+
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -277,7 +279,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			Calendar cal = Calendar.getInstance();
 			AnnotationMetadata dateTimeFormat = null;
 			String style = null;
-			if (null != (dateTimeFormat = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat")))) {
+			if (null != (dateTimeFormat = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT))) {
 				AnnotationAttributeValue<?> value = dateTimeFormat.getAttribute(new JavaSymbolName("style"));
 				if (value != null) {
 					style = value.getValue().toString();

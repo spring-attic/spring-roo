@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +73,7 @@ public class DateField extends FieldDetails {
 			String timeStyle = null != timeFormat ? String.valueOf(timeFormat.getShortKey()) : "-";
 			attributes.add(new StringAttributeValue(new JavaSymbolName("style"), dateStyle + timeStyle));
 		}
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"), attributes));
+		annotations.add(new AnnotationMetadataBuilder(DATE_TIME_FORMAT, attributes));
 	}
 
 	public boolean isPast() {

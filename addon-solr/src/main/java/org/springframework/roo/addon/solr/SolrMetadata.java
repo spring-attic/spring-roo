@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,7 +98,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getSolrServerField() {
 		JavaSymbolName fieldName = new JavaSymbolName("solrServer");
 		List<AnnotationMetadataBuilder> autowired = new ArrayList<AnnotationMetadataBuilder>();
-		autowired.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+		autowired.add(new AnnotationMetadataBuilder(AUTOWIRED));
 		FieldMetadata fieldMd = MemberFindingUtils.getDeclaredField(governorTypeDetails, fieldName);
 		if (fieldMd != null) return fieldMd;
 		return new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, autowired, fieldName, new JavaType("org.apache.solr.client.solrj.SolrServer")).build();
@@ -206,7 +209,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		final List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName(beanPlural.toLowerCase()));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
-		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
+		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
 		return methodBuilder.build();
 	}
 
@@ -232,7 +235,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		final List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName(javaBeanFieldName));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
-		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
+		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
 		return methodBuilder.build();
 	}
 
@@ -242,7 +245,6 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (preDelete != null) return preDelete;
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		// annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.PreRemove")));
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(annotationValues.getDeleteIndexMethod() + "(this);");

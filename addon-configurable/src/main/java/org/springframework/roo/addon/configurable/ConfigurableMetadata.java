@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.configurable;
 
+import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
+
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -19,6 +21,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = ConfigurableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
@@ -45,14 +49,12 @@ public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return the annotation is already exists or will be created, or null if it will not be created (required)
 	 */
 	public AnnotationMetadata getConfigurableAnnotation() {
-		JavaType javaType = new JavaType("org.springframework.beans.factory.annotation.Configurable");
-
 		if (isConfigurableAnnotationIntroduced()) {
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(javaType);
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(CONFIGURABLE);
 			return annotationBuilder.build();
 		}
 
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
+		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, CONFIGURABLE);
 	}
 
 	/**
@@ -62,8 +64,7 @@ public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return true if it will be introduced, false otherwise
 	 */
 	public boolean isConfigurableAnnotationIntroduced() {
-		JavaType javaType = new JavaType("org.springframework.beans.factory.annotation.Configurable");
-		AnnotationMetadata result = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
+		AnnotationMetadata result = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, CONFIGURABLE);
 		return result == null;
 	}
 

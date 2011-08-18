@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -296,7 +297,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(fieldMetadata.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(fieldMetadata.getAnnotations(), DATE_TIME_FORMAT);
 				JavaSymbolName patternSymbol = new JavaSymbolName("pattern");
 				JavaSymbolName styleSymbol = new JavaSymbolName("style");
 				DateTimeFormatDetails dateTimeFormat = null;

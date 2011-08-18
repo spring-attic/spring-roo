@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -221,7 +223,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		temporalBuilder.addEnumAttribute("value", new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(temporalType)));
 		annotations.add(temporalBuilder);
 
-		AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+		AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(DATE_TIME_FORMAT);
 		dateTimeFormatBuilder.addStringAttribute("style", "M-");
 		annotations.add(dateTimeFormatBuilder);
 	}

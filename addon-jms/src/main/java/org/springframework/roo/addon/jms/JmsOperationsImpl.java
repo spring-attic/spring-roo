@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.jms;
 
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.JMS_TEMPLATE;
+
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
@@ -115,7 +119,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		Assert.notNull(fieldName, "Field name required");
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+		annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
 
 		// Obtain the physical type and itd mutable details
@@ -133,7 +137,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(fieldName + ".convertAndSend(messageObject);");
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, Modifier.PRIVATE | Modifier.TRANSIENT, annotations, fieldName, new JavaType("org.springframework.jms.core.JmsTemplate"));
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, Modifier.PRIVATE | Modifier.TRANSIENT, annotations, fieldName, JMS_TEMPLATE);
 		mutableTypeDetails.addField(fieldBuilder.build());
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
@@ -155,7 +159,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
 				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "jms.properties", "executor.poolSize", "10", true);
 			}
-			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
+			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
 		}
 		
 		mutableTypeDetails.addMethod(methodBuilder.build());

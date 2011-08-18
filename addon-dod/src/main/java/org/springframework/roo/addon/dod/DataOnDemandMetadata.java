@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.dod;
 
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.COMPONENT;
+
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -54,7 +57,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
-	private static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
 	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
@@ -266,7 +268,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				// We really expect the field to be correct if we're going to rely on it
 				Assert.isTrue(candidate.getFieldType().equals(collaboratorType), "Field '" + collaboratingFieldName + "' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + collaboratorType.getFullyQualifiedTypeName() + "'");
 				Assert.isTrue(Modifier.isPrivate(candidate.getModifier()), "Field '" + collaboratingFieldName + "' on '" + destination.getFullyQualifiedTypeName() + "' must be private");
-				Assert.notNull(MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), new JavaType("org.springframework.beans.factory.annotation.Autowired")), "Field '" + collaboratingFieldName + "' on '" + destination.getFullyQualifiedTypeName() + "' must be @Autowired");
+				Assert.notNull(MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), AUTOWIRED), "Field '" + collaboratingFieldName + "' on '" + destination.getFullyQualifiedTypeName() + "' must be @Autowired");
 				// It's ok, so we can move onto the new field
 				continue;
 			}
@@ -275,7 +277,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			if (!fields.contains(fieldSymbolName)) {
 				// Must make the field
 				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-				annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+				annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldSymbolName, collaboratorType);
 				FieldMetadata field = fieldBuilder.build();
 				builder.addField(field);

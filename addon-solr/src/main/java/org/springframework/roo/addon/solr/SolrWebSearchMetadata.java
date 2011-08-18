@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.SpringJavaType.MODEL_MAP;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
+import static org.springframework.roo.model.SpringJavaType.RESPONSE_BODY;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,12 +84,12 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), getRequestParamAnnotation("size", false)));
 		paramNames.add(new JavaSymbolName("size"));
 		
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap")));	
+		paramTypes.add(new AnnotatedJavaType(MODEL_MAP));	
 		paramNames.add(new JavaSymbolName("modelMap"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "search"));
-		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
 				
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
@@ -117,8 +122,8 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		reqMapAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "autocomplete"));
 		
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), reqMapAttributes));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.ResponseBody")));
+		annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, reqMapAttributes));
+		annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 		
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -172,7 +177,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 			attributeValue.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 		}
 		attributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), paramName));
-		return new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestParam"), attributeValue).build();
+		return new AnnotationMetadataBuilder(REQUEST_PARAM, attributeValue).build();
 	}
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName) {

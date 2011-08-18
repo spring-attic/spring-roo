@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
+import static org.springframework.roo.model.SpringJavaType.TRANSACTIONAL;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -339,12 +342,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 	
 	private void addTransactionalAnnotation(final List<AnnotationMetadataBuilder> annotations, final boolean isPersistMethod) {
-		final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
+		final AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(TRANSACTIONAL);
 		if (StringUtils.hasText(crudAnnotationValues.getTransactionManager())) {
 			transactionalBuilder.addStringAttribute("value", crudAnnotationValues.getTransactionManager());
 		}
 		if (isGaeEnabled && isPersistMethod) {
-			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW")));
+			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(PROPAGATION, new JavaSymbolName("REQUIRES_NEW")));
 		}
 		annotations.add(transactionalBuilder);
 	}

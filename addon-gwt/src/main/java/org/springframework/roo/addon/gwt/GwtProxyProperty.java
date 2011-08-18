@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
+import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
+
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -172,7 +175,7 @@ class GwtProxyProperty {
 				return formatter;
 			}
 			
-			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("org.springframework.format.annotation.NumberFormat"));
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, NUMBER_FORMAT);
 			if (annotation != null) {
 				AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
 				if (attr != null) {
@@ -203,7 +206,7 @@ class GwtProxyProperty {
 		}
 
 		String style = "";
-		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, DATE_TIME_FORMAT);
 		if (annotation != null) {
 			AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
 			if (attr != null) {

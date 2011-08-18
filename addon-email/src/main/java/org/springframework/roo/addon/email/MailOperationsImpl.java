@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.email;
 
+import static org.springframework.roo.addon.email.MailProtocol.SMTP;
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
+import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +20,7 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -27,6 +34,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -42,6 +50,12 @@ import org.w3c.dom.Element;
 @Component 
 @Service 
 public class MailOperationsImpl implements MailOperations {
+	
+	// Constants
+	private static final int PRIVATE_TRANSIENT = Modifier.PRIVATE | Modifier.TRANSIENT;
+	private static final AnnotatedJavaType STRING = new AnnotatedJavaType(JavaType.STRING_OBJECT);
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
@@ -52,22 +66,28 @@ public class MailOperationsImpl implements MailOperations {
 	}
 
 	public boolean isManageEmailAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(getContextPath());
+		return projectOperations.isProjectAvailable() && fileManager.exists(getApplicationContextPath());
 	}
 
-	private String getContextPath() {
+	/**
+	 * Returns the canonical path of the user project's applicationContext.xml
+	 * file.
+	 * 
+	 * @return a non-blank path
+	 */
+	private String getApplicationContextPath() {
 		return projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 	}
 
-	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
+	public void installEmail(final String hostServer, final MailProtocol protocol, final String port, final String encoding, final String username, final String password) {
 		Assert.hasText(hostServer, "Host server name required");
 
-		String contextPath = getContextPath();
-		Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
-		Element root = document.getDocumentElement();
+		final String contextPath = getApplicationContextPath();
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
+		final Element root = document.getDocumentElement();
 
 		boolean installDependencies = true;
-		Map<String, String> props = new HashMap<String, String>();
+		final Map<String, String> props = new HashMap<String, String>();
 
 		Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.javamail.JavaMailSenderImpl']", root);
 		if (mailBean != null) {
@@ -79,7 +99,7 @@ public class MailOperationsImpl implements MailOperations {
 		mailBean.setAttribute("class", "org.springframework.mail.javamail.JavaMailSenderImpl");
 		mailBean.setAttribute("id", "mailSender");
 
-		Element property = document.createElement("property");
+		final Element property = document.createElement("property");
 		property.setAttribute("name", "host");
 		property.setAttribute("value", "${email.host}");
 		mailBean.appendChild(property);
@@ -87,7 +107,7 @@ public class MailOperationsImpl implements MailOperations {
 		props.put("email.host", hostServer);
 
 		if (protocol != null) {
-			Element pElement = document.createElement("property");
+			final Element pElement = document.createElement("property");
 			pElement.setAttribute("value", "${email.protocol}");
 			pElement.setAttribute("name", "protocol");
 			mailBean.appendChild(pElement);
@@ -95,7 +115,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(port)) {
-			Element pElement = document.createElement("property");
+			final Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "port");
 			pElement.setAttribute("value", "${email.port}");
 			mailBean.appendChild(pElement);
@@ -103,7 +123,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(encoding)) {
-			Element pElement = document.createElement("property");
+			final Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "defaultEncoding");
 			pElement.setAttribute("value", "${email.encoding}");
 			mailBean.appendChild(pElement);
@@ -111,7 +131,7 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(username)) {
-			Element pElement = document.createElement("property");
+			final Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "username");
 			pElement.setAttribute("value", "${email.username}");
 			mailBean.appendChild(pElement);
@@ -119,22 +139,22 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		if (StringUtils.hasText(password)) {
-			Element pElement = document.createElement("property");
+			final Element pElement = document.createElement("property");
 			pElement.setAttribute("name", "password");
 			pElement.setAttribute("value", "${email.password}");
 			mailBean.appendChild(pElement);
 			props.put("email.password", password);
 
-			if (MailProtocol.SMTP.equals(protocol)) {
-				Element javaMailProperties = document.createElement("property");
+			if (SMTP.equals(protocol)) {
+				final Element javaMailProperties = document.createElement("property");
 				javaMailProperties.setAttribute("name", "javaMailProperties");
-				Element securityProps = document.createElement("props");
+				final Element securityProps = document.createElement("props");
 				javaMailProperties.appendChild(securityProps);
-				Element prop = document.createElement("prop");
+				final Element prop = document.createElement("prop");
 				prop.setAttribute("key", "mail.smtp.auth");
 				prop.setTextContent("true");
 				securityProps.appendChild(prop);
-				Element prop2 = document.createElement("prop");
+				final Element prop2 = document.createElement("prop");
 				prop2.setAttribute("key", "mail.smtp.starttls.enable");
 				prop2.setTextContent("true");
 				securityProps.appendChild(prop2);
@@ -153,12 +173,12 @@ public class MailOperationsImpl implements MailOperations {
 		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, true);
 	}
 
-	public void configureTemplateMessage(String from, String subject) {		
-		String contextPath = getContextPath();
-		Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
-		Element root = document.getDocumentElement();
+	public void configureTemplateMessage(final String from, final String subject) {		
+		final String contextPath = getApplicationContextPath();
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
+		final Element root = document.getDocumentElement();
 
-		Map<String, String> props = new HashMap<String, String>();
+		final Map<String, String> props = new HashMap<String, String>();
 
 		if (StringUtils.hasText(from) || StringUtils.hasText(subject)) {
 			Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.SimpleMailMessage']", root);
@@ -204,67 +224,91 @@ public class MailOperationsImpl implements MailOperations {
 		}
 	}
 
-	public void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName, boolean async) {
+	public void injectEmailTemplate(final JavaType targetType, final JavaSymbolName fieldName, final boolean async) {
 		Assert.notNull(targetType, "Java type required");
 		Assert.notNull(fieldName, "Field name required");
 
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
 
-		// Obtain the physical type and itd mutable details
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
-		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
+		// Obtain the physical type and its mutable class details
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType);
+		final MutableClassOrInterfaceTypeDetails mutableTypeDetails = getMutableClass(declaredByMetadataId);
 
-		int modifier = Modifier.PRIVATE | Modifier.TRANSIENT;
+		// Add the MailSender field
+		final FieldMetadataBuilder mailSenderFieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, PRIVATE_TRANSIENT, annotations, fieldName, MAIL_SENDER);
+		mutableTypeDetails.addField(mailSenderFieldBuilder.build());
 		
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, modifier, annotations, fieldName, new JavaType("org.springframework.mail.MailSender"));
-		mutableTypeDetails.addField(fieldBuilder.build());
+		// Add the "sendMessage" method
+		mutableTypeDetails.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, mutableTypeDetails));
+	}
 
-		String contextPath = getContextPath();
-		Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
-		Element root = document.getDocumentElement();
+	/**
+	 * Returns the mutable class of the given physical type
+	 * 
+	 * @param classMetadataId
+	 * @return a non-<code>null</code> instance
+	 */
+	private MutableClassOrInterfaceTypeDetails getMutableClass(final String classMetadataId) {
+		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(classMetadataId);
+		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(classMetadataId));
+		final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
+		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(classMetadataId));
+		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(classMetadataId));
+		return (MutableClassOrInterfaceTypeDetails) ptd;
+	}
 
-		Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
+	/**
+	 * Generates the "send email" method to be added to the domain type
+	 * 
+	 * @param mailSenderName the name of the MailSender field (required)
+	 * @param async whether to send the email asynchronously
+	 * @param targetClassMID the MID of the class to receive the method
+	 * @param mutableTypeDetails the type to which the method is being added (required)
+	 * @return a non-<code>null</code> method
+	 */
+	private MethodMetadata getSendMethod(final JavaSymbolName mailSenderName, final boolean async, final String targetClassMID, final MutableClassOrInterfaceTypeDetails mutableTypeDetails) {
+		final String contextPath = getApplicationContextPath();
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
+		final Element root = document.getDocumentElement();
+
+		// Find the existing SimpleMailMessage bean (if any) in applicationContext.xml
+		final Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
 
 		// Create some method content to get the user started
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		List<AnnotationMetadataBuilder> smmAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		final List<AnnotationMetadataBuilder> smmAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		// Build a list of the types and names of the "send message" method's parameters
+		final PairList<AnnotatedJavaType, JavaSymbolName> parameters = new PairList<AnnotatedJavaType, JavaSymbolName>();
 
-		if (smmBean != null) {
-			smmAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
-			FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, modifier, smmAnnotations, new JavaSymbolName("simpleMailMessage"), new JavaType("org.springframework.mail.SimpleMailMessage"));
-			mutableTypeDetails.addField(smmFieldBuilder.build());
-		} else {
+		if (smmBean == null) {
+			// Use a local variable for the SimpleMailMessage
 			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage simpleMailMessage = new org.springframework.mail.SimpleMailMessage();");
-			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
-			paramNames.add(new JavaSymbolName("mailFrom"));
+			// "From"
+			parameters.add(STRING, new JavaSymbolName("mailFrom"));
 			bodyBuilder.appendFormalLine("simpleMailMessage.setFrom(mailFrom);");
-
-			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
-			paramNames.add(new JavaSymbolName("subject"));
+			// "Subject"
+			parameters.add(STRING, new JavaSymbolName("subject"));
 			bodyBuilder.appendFormalLine("simpleMailMessage.setSubject(subject);");
+		} else {
+			smmAnnotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
+			final FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(targetClassMID, PRIVATE_TRANSIENT, smmAnnotations, new JavaSymbolName("simpleMailMessage"), SIMPLE_MAIL_MESSAGE);
+			mutableTypeDetails.addField(smmFieldBuilder.build());
 		}
 
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
-		paramNames.add(new JavaSymbolName("mailTo"));
+		// "To"
+		parameters.add(STRING, new JavaSymbolName("mailTo"));
 		bodyBuilder.appendFormalLine("simpleMailMessage.setTo(mailTo);");
 
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
-		paramNames.add(new JavaSymbolName("message"));
+		// "Message"
+		parameters.add(STRING, new JavaSymbolName("message"));
 		bodyBuilder.appendFormalLine("simpleMailMessage.setText(message);");
 
 		bodyBuilder.newLine();
-		bodyBuilder.appendFormalLine(fieldName + ".send(simpleMailMessage);");
+		bodyBuilder.appendFormalLine(mailSenderName + ".send(simpleMailMessage);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(targetClassMID, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, parameters.getKeys(), parameters.getValues(), bodyBuilder);
 		
 		if (async) {
 			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
@@ -279,18 +323,17 @@ public class MailOperationsImpl implements MailOperations {
 
 				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "email.properties", "executor.poolSize", "10", true);
 			}
-			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
+			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
 		}
-		
-		mutableTypeDetails.addMethod(methodBuilder.build());
+		return methodBuilder.build();
 	}
 
 	private void updateConfiguration() {
-		Element configuration = XmlUtils.getConfiguration(getClass());
+		final Element configuration = XmlUtils.getConfiguration(getClass());
 
-		List<Dependency> dependencies = new ArrayList<Dependency>();
-		List<Element> emailDependencies = XmlUtils.findElements("/configuration/email/dependencies/dependency", configuration);
-		for (Element dependencyElement : emailDependencies) {
+		final List<Dependency> dependencies = new ArrayList<Dependency>();
+		final List<Element> emailDependencies = XmlUtils.findElements("/configuration/email/dependencies/dependency", configuration);
+		for (final Element dependencyElement : emailDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
 		projectOperations.addDependencies(dependencies);

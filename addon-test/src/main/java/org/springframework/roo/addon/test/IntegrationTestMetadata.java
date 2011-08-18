@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.test;
 
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.CONTEXT_CONFIGURATION;
+import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
+import static org.springframework.roo.model.SpringJavaType.TRANSACTIONAL;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,15 +100,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		
 		// Add an @ContextConfiguration("classpath:/applicationContext.xml") annotation to the type, if the user did not define it on the governor directly
-		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.test.context.ContextConfiguration")) == null) {
-			AnnotationMetadataBuilder contextConfigurationBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.test.context.ContextConfiguration"));
+		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), CONTEXT_CONFIGURATION) == null) {
+			AnnotationMetadataBuilder contextConfigurationBuilder = new AnnotationMetadataBuilder(CONTEXT_CONFIGURATION);
 			contextConfigurationBuilder.addStringAttribute("locations", "classpath:/META-INF/spring/applicationContext*.xml");
 			builder.addAnnotation(contextConfigurationBuilder);
 		}
 		
 		// Add an @Transactional, if the user did not define it on the governor directly
-		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.transaction.annotation.Transactional")) == null) {
-			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
+		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), TRANSACTIONAL) == null) {
+			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(TRANSACTIONAL);
 			if (StringUtils.hasText(transactionManager) && !"transactionManager".equals(transactionManager)) {
 				transactionalBuilder.addStringAttribute("value", transactionManager);
 			}
@@ -114,11 +119,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName("dod"));
 		if (field != null) {
 			Assert.isTrue(field.getFieldType().equals(dodGovernor), "Field 'dod' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + dodGovernor.getFullyQualifiedTypeName() + "'");
-			Assert.notNull(MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.beans.factory.annotation.Autowired")), "Field 'dod' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @Autowired");
+			Assert.notNull(MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), AUTOWIRED), "Field 'dod' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @Autowired");
 		} else {
 			// Add the field via the ITD
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+			annotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("dod"), dodGovernor);
 			builder.addField(fieldBuilder.build());
 		}
@@ -492,11 +497,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 		if (isGaeSupported) {
-			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"));
+			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(TRANSACTIONAL);
 			if (StringUtils.hasText(transactionManager) && !"transactionManager".equals(transactionManager)) {
 				transactionalBuilder.addStringAttribute("value", transactionManager);
 			}
-			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("SUPPORTS")));
+			transactionalBuilder.addEnumAttribute("propagation", new EnumDetails(PROPAGATION, new JavaSymbolName("SUPPORTS")));
 			annotations.add(transactionalBuilder);
 		}
 

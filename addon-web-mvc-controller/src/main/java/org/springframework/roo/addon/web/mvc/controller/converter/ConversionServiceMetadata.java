@@ -1,8 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
+import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
+import static org.springframework.roo.model.SpringJavaType.FORMATTER_REGISTRY;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +22,9 @@ import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMe
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -107,7 +109,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 		builder.addMethod(getAfterPropertiesSetMethod(installMethod));
 		
-		AnnotationMetadata configurable = new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Configurable"), new ArrayList<AnnotationAttributeValue<?>>());
+		AnnotationMetadata configurable = new DefaultAnnotationMetadata(CONFIGURABLE, new ArrayList<AnnotationAttributeValue<?>>());
 		boolean configurablePresent = false;
 		for (AnnotationMetadata annotation : governorTypeDetails.getAnnotations()) {
 			if (annotation.getAnnotationType().equals(configurable.getAnnotationType())) {
@@ -131,10 +133,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		String typeName = targetType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) == null) {
-			List<JavaType> parameters = new ArrayList<JavaType>();
-			parameters.add(JavaType.STRING_OBJECT);
-			parameters.add(targetType);
-			JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
+			final JavaType converterJavaType = SpringJavaType.getConverterType(JavaType.STRING_OBJECT, targetType);
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 			bodyBuilder.indent();
@@ -152,10 +151,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		
 		methodName = new JavaSymbolName("get" + targetType.getSimpleTypeName() + "ToJsonConverter");
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) == null) {
-			List<JavaType> parameters = new ArrayList<JavaType>();
-			parameters.add(targetType);
-			parameters.add(JavaType.STRING_OBJECT);
-			JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
+			final JavaType converterJavaType = SpringJavaType.getConverterType(targetType, JavaType.STRING_OBJECT);
 			String targetTypeName = StringUtils.uncapitalize(targetType.getSimpleTypeName());
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
@@ -178,11 +174,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) != null) {
 			return null;
 		}
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(targetType);
-		parameters.add(JavaType.STRING_OBJECT);
-		
-		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
+		final JavaType converterJavaType = SpringJavaType.getConverterType(targetType, JavaType.STRING_OBJECT);
 		String targetTypeName = StringUtils.uncapitalize(targetType.getSimpleTypeName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
@@ -222,9 +214,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 		Assert.notNull(targetType, "Target type is required for method = " + methodName);
 		Assert.notNull(idType, "ID type is required for " + targetType);
-		final List<JavaType> parameters = Arrays.asList(JavaType.STRING_OBJECT, targetType);
-		
-		final JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
+		final JavaType converterJavaType = SpringJavaType.getConverterType(JavaType.STRING_OBJECT, targetType);
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
@@ -243,11 +233,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		if (findMethod == null || MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) != null) {
 			return null;
 		}
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(idType);
-		parameters.add(targetType);
-		
-		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, parameters);
+		final JavaType converterJavaType = SpringJavaType.getConverterType(idType, targetType);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
@@ -266,7 +252,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	private MethodMetadataBuilder getInstallMethodBuilder() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(new JavaType("org.springframework.format.FormatterRegistry")));
+		parameters.add(new AnnotatedJavaType(FORMATTER_REGISTRY));
 		
 		MethodMetadata method = getGovernorMethod(methodName, parameters);
 		if (getGovernorMethod(methodName, parameters) != null) {

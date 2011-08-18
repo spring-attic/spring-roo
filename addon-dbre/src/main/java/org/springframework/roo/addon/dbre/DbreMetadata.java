@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -672,7 +673,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getJdbcType())));
 			annotations.add(temporalBuilder);
 
-			AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+			AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(DATE_TIME_FORMAT);
 			dateTimeFormatBuilder.addStringAttribute("style", "M-");
 			annotations.add(dateTimeFormatBuilder);
 		}

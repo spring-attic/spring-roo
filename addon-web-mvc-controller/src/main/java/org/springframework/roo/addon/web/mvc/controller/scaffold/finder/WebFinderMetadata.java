@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold.finder;
 
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
+import static org.springframework.roo.model.SpringJavaType.MODEL;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_METHOD;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
+
 import java.beans.Introspector;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -48,16 +54,30 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1.3
  */
 public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = WebFinderMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	private WebScaffoldAnnotationValues annotationValues;
-	private String controllerPath;
-	private MemberDetails memberDetails;
+	// Fields
 	private JavaType formBackingType;
-	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
 	private JavaTypeMetadataDetails javaTypeMetadataHolder;
+	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
+	private MemberDetails memberDetails;
+	private String controllerPath;
+	private WebScaffoldAnnotationValues annotationValues;
 
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 * @param annotationValues
+	 * @param memberDetails
+	 * @param specialDomainTypes
+	 * @param dynamicFinderMethods
+	 */
 	public WebFinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, MemberDetails memberDetails, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, Set<FinderMetadataDetails> dynamicFinderMethods) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -132,7 +152,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "\";");
 
 		if (needmodel) {
-			paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model")));
+			paramTypes.add(new AnnotatedJavaType(MODEL));
 			paramNames.add(new JavaSymbolName("uiModel"));
 		}
 		
@@ -144,8 +164,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"), "find=" + finder.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + javaTypeMetadataHolder.getPlural(), "")));
 		arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"), "form"));
 		requestMappingAttributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("params"), arrayValues));
-		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
-		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
+		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
 		
@@ -173,14 +193,13 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				attributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 			}
-			AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestParam"), attributes);
+			AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM, attributes);
 			annotations.add(requestParamAnnotation.build());
 			if (field.getFieldType().equals(new JavaType(Date.class.getName())) || field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 				dateFieldPresent = true;
-				JavaType dateTimeFormat = new JavaType("org.springframework.format.annotation.DateTimeFormat");
-				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), dateTimeFormat);
+				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT);
 				if (annotation != null) {
-					dateTimeFormat.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+					DATE_TIME_FORMAT.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 					annotations.add(annotation);
 				}
 			}
@@ -198,7 +217,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			methodParams.delete(methodParams.length() - 2, methodParams.length());
 		}
 
-		annotatedParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model")));
+		annotatedParamTypes.add(new AnnotatedJavaType(MODEL));
 		
 		MethodMetadata existingMethod = methodExists(finderMethodName, annotatedParamTypes);
 		if (existingMethod != null) {
@@ -210,8 +229,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "find=" + finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + javaTypeMetadataHolder.getPlural(), "")));
-		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
-		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
+		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
 		

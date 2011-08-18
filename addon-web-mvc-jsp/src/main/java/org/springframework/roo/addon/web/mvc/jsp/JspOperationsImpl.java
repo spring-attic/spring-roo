@@ -1,5 +1,11 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
+import static org.springframework.roo.model.SpringJavaType.CONTROLLER;
+import static org.springframework.roo.model.SpringJavaType.MODEL_MAP;
+import static org.springframework.roo.model.SpringJavaType.PATH_VARIABLE;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_METHOD;
+
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -57,16 +63,18 @@ import org.w3c.dom.Node;
 @Component 
 @Service 
 public class JspOperationsImpl extends AbstractOperations implements JspOperations {
-	@Reference private TypeManagementService typeManagementService;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private WebMvcOperations webMvcOperations;
+	
+	// Fields
+	@Reference private BackupOperations backupOperations;
+	@Reference private I18nSupport i18nSupport;
 	@Reference private MenuOperations menuOperations;
-	@Reference private TilesOperations tilesOperations;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	@Reference private I18nSupport i18nSupport;
+	@Reference private TilesOperations tilesOperations;
+	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeManagementService typeManagementService;
 	@Reference private UaaRegistrationService uaaRegistrationService;
-	@Reference private BackupOperations backupOperations;
+	@Reference private WebMvcOperations webMvcOperations;
 	
 	public boolean isControllerAvailable() {
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
@@ -270,12 +278,12 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		List<AnnotationMetadataBuilder> typeAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), preferredMapping));
-		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
 		typeAnnotations.add(requestMapping);
 
 		// Create annotation @Controller
 		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		AnnotationMetadataBuilder controllerAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.stereotype.Controller"), controllerAttributes);
+		AnnotationMetadataBuilder controllerAnnotation = new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes);
 		typeAnnotations.add(controllerAnnotation);
 		
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
@@ -288,7 +296,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 
 	private MethodMetadataBuilder getIndexMethod(String folderName, String declaredByMetadataId) {
 		List<AnnotationMetadataBuilder> indexMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		indexMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), new ArrayList<AnnotationAttributeValue<?>>()));
+		indexMethodAnnotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, new ArrayList<AnnotationAttributeValue<?>>()));
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return \"" + folderName + "/index\";");
 		MethodMetadataBuilder indexMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("index"), JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -299,14 +307,14 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	private MethodMetadataBuilder getHttpPostMethod(String declaredByMetadataId) {
 		List<AnnotationMetadataBuilder> postMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> postMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		postMethodAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
+		postMethodAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("POST"))));
 		postMethodAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "{id}"));
-		postMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), postMethodAttributes));
+		postMethodAnnotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, postMethodAttributes));
 
 		List<AnnotatedJavaType> postParamTypes = new ArrayList<AnnotatedJavaType>();
-		AnnotationMetadataBuilder idParamAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.PathVariable"));
+		AnnotationMetadataBuilder idParamAnnotation = new AnnotationMetadataBuilder(PATH_VARIABLE);
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Long"), idParamAnnotation.build()));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap")));
+		postParamTypes.add(new AnnotatedJavaType(MODEL_MAP));
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
 		
@@ -324,10 +332,10 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	private MethodMetadataBuilder getHttpGetMethod(String declaredByMetadataId) {
 		List<AnnotationMetadataBuilder> getMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> getMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		getMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), getMethodAttributes));
+		getMethodAnnotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, getMethodAttributes));
 		
 		List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap")));
+		getParamTypes.add(new AnnotatedJavaType(MODEL_MAP));
 		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
 		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
 		

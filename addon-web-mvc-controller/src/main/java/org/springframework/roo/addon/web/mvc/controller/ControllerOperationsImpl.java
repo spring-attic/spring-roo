@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
+import static org.springframework.roo.model.SpringJavaType.CONTROLLER;
+import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -50,8 +52,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class ControllerOperationsImpl implements ControllerOperations {
 	
 	// Constants
-	private static final JavaType CONTROLLER = new JavaType("org.springframework.stereotype.Controller");
-	private static final JavaType REQUEST_MAPPING = new JavaType("org.springframework.web.bind.annotation.RequestMapping");
 	private static final Logger LOG = HandlerUtils.getLogger(ControllerOperationsImpl.class);
 	
 	// Fields

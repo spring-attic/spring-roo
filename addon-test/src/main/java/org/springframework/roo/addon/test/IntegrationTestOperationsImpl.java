@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.test;
 
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
+import static org.springframework.roo.model.SpringJavaType.MOCK_STATIC_ENTITY_METHODS;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -115,7 +116,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.junit.runners.JUnit4")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"), config));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.mock.staticmock.MockStaticEntityMethods")));
+		annotations.add(new AnnotationMetadataBuilder(MOCK_STATIC_ENTITY_METHODS));
 		
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();

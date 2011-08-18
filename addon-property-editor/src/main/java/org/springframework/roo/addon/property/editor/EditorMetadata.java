@@ -20,6 +20,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -67,10 +68,10 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private FieldMetadata getField() {
 		JavaSymbolName fieldName = new JavaSymbolName("typeConverter");
-		JavaType fieldType = new JavaType("org.springframework.beans.SimpleTypeConverter");
 
 		// Locate user-defined field
 		FieldMetadata userField = MemberFindingUtils.getField(governorTypeDetails, fieldName);
+		final JavaType fieldType = SpringJavaType.SIMPLE_TYPE_CONVERTER;
 		if (userField != null) {
 			Assert.isTrue(userField.getFieldType().equals(fieldType), "Field '" + fieldName + "' on '" + destination + "' must be of type '" + fieldType.getNameIncludingTypeParameters() + "'");
 			return userField;

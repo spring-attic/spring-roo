@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.SpringJavaType.VALUE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,12 +21,13 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class FieldDetails {
+	
+	// Constants
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	
-	private static final JavaType VALUE = new JavaType("org.springframework.beans.factory.annotation.Value");
-
+	// Fields
 	/** The JPA @Column value */
-	private String column = null;
+	private String column;
 
 	/** The type that will receive the field */
 	private String physicalTypeIdentifier;
@@ -36,20 +39,27 @@ public class FieldDetails {
 	private JavaSymbolName fieldName;
 
 	/** Whether the JSR 303 @NotNull annotation will be added */
-	private boolean notNull = false;
+	private boolean notNull;
 
 	/** Whether the JSR 303 @Null annotation will be added */
-	private boolean nullRequired = false;
+	private boolean nullRequired;
 
 	/** Any JavaDoc comments (reserved for future expansion) */
 	protected String comment = "";
 	
 	/** Whether unique = true is added to the @Column annotation */
-	private boolean unique = false;
+	private boolean unique;
 	
 	/** The Spring @Value value **/
-	private String value = null;
+	private String value;
 	
+	/**
+	 * Constructor
+	 *
+	 * @param physicalTypeIdentifier
+	 * @param fieldType
+	 * @param fieldName
+	 */
 	public FieldDetails(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Destination physical type identifier is invalid");
 		Assert.notNull(fieldType, "Field type required");
