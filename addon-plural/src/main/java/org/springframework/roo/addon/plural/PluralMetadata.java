@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.plural;
 
+import static org.springframework.roo.model.RooJavaType.ROO_PLURAL;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -28,9 +30,10 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = PluralMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType PLURAL_ANNOTATION_TYPE = new JavaType(RooPlural.class.getName());
 
 	// From annotation
 	@AutoPopulate private String value = "";
@@ -47,7 +50,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, PLURAL_ANNOTATION_TYPE);
+		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_PLURAL);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}
@@ -99,7 +102,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// We need to build the plural
 		String thePlural = "";
-		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PLURAL_ANNOTATION_TYPE);
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), ROO_PLURAL);
 		if (annotation != null) {
 			// Use the plural the user defined via the annotation
 			AnnotationAttributeValue<?> attribute = annotation.getAttribute(new JavaSymbolName("value"));

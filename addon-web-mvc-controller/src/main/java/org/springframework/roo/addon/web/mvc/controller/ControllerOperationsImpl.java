@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +48,13 @@ import org.springframework.roo.support.util.StringUtils;
 @Component 
 @Service 
 public class ControllerOperationsImpl implements ControllerOperations {
+	
+	// Constants
+	private static final JavaType CONTROLLER = new JavaType("org.springframework.stereotype.Controller");
+	private static final JavaType REQUEST_MAPPING = new JavaType("org.springframework.web.bind.annotation.RequestMapping");
+	private static final Logger LOG = HandlerUtils.getLogger(ControllerOperationsImpl.class);
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
@@ -53,11 +62,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-	
-	private static final JavaType ROO_WEB_SCAFFOLD = new JavaType(RooWebScaffold.class.getName());
-	private static final JavaType CONTROLLER = new JavaType("org.springframework.stereotype.Controller");
-	private static final JavaType REQUEST_MAPPING = new JavaType("org.springframework.web.bind.annotation.RequestMapping");
-	private static final Logger log = HandlerUtils.getLogger(ControllerOperationsImpl.class);
 	
 	public boolean isNewControllerAvailable() {
 		return projectOperations.isProjectAvailable();
@@ -112,7 +116,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			if (mappingAttribute != null) {
 				String stringPath = mappingAttribute.getValue();
 				if (StringUtils.hasText(stringPath) && stringPath.equalsIgnoreCase("/" + path)) {
-					log.warning("Your application already contains a mapping to '" + path + "'. Please provide a different path.");
+					LOG.warning("Your application already contains a mapping to '" + path + "'. Please provide a different path.");
 					return;
 				}
 			}

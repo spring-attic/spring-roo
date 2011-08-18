@@ -17,6 +17,8 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 import java.util.List;
 
@@ -63,17 +65,17 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ENTITY_ANNOTATION);
-		configurableMetadataProvider.addMetadataTrigger(ENTITY_ANNOTATION);
-		pluralMetadataProvider.addMetadataTrigger(ENTITY_ANNOTATION);
+		addMetadataTrigger(ROO_ENTITY);
+		configurableMetadataProvider.addMetadataTrigger(ROO_ENTITY);
+		pluralMetadataProvider.addMetadataTrigger(ROO_ENTITY);
 		registerMatchers();
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ENTITY_ANNOTATION);
-		configurableMetadataProvider.removeMetadataTrigger(ENTITY_ANNOTATION);
-		pluralMetadataProvider.removeMetadataTrigger(ENTITY_ANNOTATION);
+		removeMetadataTrigger(ROO_ENTITY);
+		configurableMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
+		pluralMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 	
@@ -81,15 +83,15 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	private void registerMatchers() {
 		customDataKeyDecorator.registerMatchers(
 				getClass(),
-				new MethodMatcher(CLEAR_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("clearMethod"), CLEAR_METHOD_DEFAULT),
-				new MethodMatcher(COUNT_ALL_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("countMethod"), COUNT_METHOD_DEFAULT, true, false),
-				new MethodMatcher(FIND_ALL_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("findAllMethod"), FIND_ALL_METHOD_DEFAULT, true, false),
-				new MethodMatcher(FIND_ENTRIES_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("findEntriesMethod"), "find", false, true, "Entries"),
-				new MethodMatcher(FIND_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("findMethod"), FIND_METHOD_DEFAULT, false, true),
-				new MethodMatcher(FLUSH_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("flushMethod"), FLUSH_METHOD_DEFAULT),
-				new MethodMatcher(MERGE_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("mergeMethod"), MERGE_METHOD_DEFAULT),
-				new MethodMatcher(PERSIST_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("persistMethod"), PERSIST_METHOD_DEFAULT),
-				new MethodMatcher(REMOVE_METHOD, ENTITY_ANNOTATION, new JavaSymbolName("removeMethod"), REMOVE_METHOD_DEFAULT)
+				new MethodMatcher(CLEAR_METHOD, ROO_ENTITY, new JavaSymbolName("clearMethod"), CLEAR_METHOD_DEFAULT),
+				new MethodMatcher(COUNT_ALL_METHOD, ROO_ENTITY, new JavaSymbolName("countMethod"), COUNT_METHOD_DEFAULT, true, false),
+				new MethodMatcher(FIND_ALL_METHOD, ROO_ENTITY, new JavaSymbolName("findAllMethod"), FIND_ALL_METHOD_DEFAULT, true, false),
+				new MethodMatcher(FIND_ENTRIES_METHOD, ROO_ENTITY, new JavaSymbolName("findEntriesMethod"), "find", false, true, "Entries"),
+				new MethodMatcher(FIND_METHOD, ROO_ENTITY, new JavaSymbolName("findMethod"), FIND_METHOD_DEFAULT, false, true),
+				new MethodMatcher(FLUSH_METHOD, ROO_ENTITY, new JavaSymbolName("flushMethod"), FLUSH_METHOD_DEFAULT),
+				new MethodMatcher(MERGE_METHOD, ROO_ENTITY, new JavaSymbolName("mergeMethod"), MERGE_METHOD_DEFAULT),
+				new MethodMatcher(PERSIST_METHOD, ROO_ENTITY, new JavaSymbolName("persistMethod"), PERSIST_METHOD_DEFAULT),
+				new MethodMatcher(REMOVE_METHOD, ROO_ENTITY, new JavaSymbolName("removeMethod"), REMOVE_METHOD_DEFAULT)
 		);
 	}
 
@@ -97,9 +99,9 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		// Get the CRUD-related annotation values
 		final JpaCrudAnnotationValues crudAnnotationValues = new JpaCrudAnnotationValues(governorPhysicalType);
 		// Get the purely JPA-related annotation values, from @RooJpaEntity if present, otherwise from @RooEntity
-		JpaEntityAnnotationValues jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, JpaEntityMetadataProvider.JPA_ENTITY_ANNOTATION);
+		JpaEntityAnnotationValues jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, ROO_JPA_ENTITY);
 		if (!jpaEntityAnnotationValues.isAnnotationFound()) {
-			jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, ENTITY_ANNOTATION);
+			jpaEntityAnnotationValues = new JpaEntityAnnotationValues(governorPhysicalType, ROO_ENTITY);
 			Assert.state(jpaEntityAnnotationValues.isAnnotationFound(), "No @RooJpaEntity or @RooEntity on " + metadataId);
 		}
 
@@ -151,7 +153,7 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	public JpaCrudAnnotationValues getAnnotationValues(final JavaType javaType) {
 		Assert.notNull(javaType, "JavaType required");
 		final MemberHoldingTypeDetailsMetadataItem<?> governor = (MemberHoldingTypeDetailsMetadataItem<?>) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType));
-		if (MemberFindingUtils.getAnnotationOfType(governor, ENTITY_ANNOTATION) == null) {
+		if (MemberFindingUtils.getAnnotationOfType(governor, ROO_ENTITY) == null) {
 			// The type can't be found or it's not annotated with @RooEntity
 			return null;
 		}

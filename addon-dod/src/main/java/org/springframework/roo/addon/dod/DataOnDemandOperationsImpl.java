@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
@@ -74,7 +75,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> dodConfig = new ArrayList<AnnotationAttributeValue<?>>();
 		dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.dod.RooDataOnDemand"), dodConfig));
+		annotations.add(new AnnotationMetadataBuilder(RooJavaType.ROO_DATA_ON_DEMAND, dodConfig));
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);

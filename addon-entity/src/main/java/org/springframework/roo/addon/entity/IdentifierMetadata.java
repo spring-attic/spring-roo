@@ -27,6 +27,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -69,7 +70,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		this.identifierServiceResult = identifierServiceResult;
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooIdentifier.class.getName()));
+		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, RooJavaType.ROO_IDENTIFIER);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}

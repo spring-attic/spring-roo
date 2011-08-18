@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 
 /**
@@ -30,7 +31,7 @@ import org.springframework.roo.project.Path;
 public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Constants
-	private static final JavaType ROO_REPOSITORY_JPA = new JavaType(RooRepositoryJpa.class);
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_REPOSITORY_JPA;
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
@@ -40,13 +41,13 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	protected void activate(final ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_REPOSITORY_JPA);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, RepositoryJpaMetadata.class, ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
+		addMetadataTrigger(TRIGGER_ANNOTATION);
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, RepositoryJpaMetadata.class, TRIGGER_ANNOTATION, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_REPOSITORY_JPA);
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 

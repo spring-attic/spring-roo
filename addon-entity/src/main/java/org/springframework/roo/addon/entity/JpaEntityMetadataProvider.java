@@ -1,8 +1,6 @@
 package org.springframework.roo.addon.entity;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
-import org.springframework.roo.metadata.MetadataProvider;
-import org.springframework.roo.model.JavaType;
 
 /**
  * Provides metadata relating to JPA entities. Has taken over from
@@ -14,10 +12,4 @@ import org.springframework.roo.model.JavaType;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public interface JpaEntityMetadataProvider extends ItdTriggerBasedMetadataProvider {
-	
-	/**
-	 * The annotation specific to this {@link MetadataProvider}
-	 */
-	JavaType JPA_ENTITY_ANNOTATION = new JavaType(RooJpaEntity.class);
-}
+public interface JpaEntityMetadataProvider extends ItdTriggerBasedMetadataProvider {}

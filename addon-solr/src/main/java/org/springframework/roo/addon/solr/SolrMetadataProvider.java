@@ -25,6 +25,7 @@ import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 
 /**
@@ -37,19 +38,23 @@ import org.springframework.roo.project.Path;
 @Service
 public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	
+	// Constants
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_SOLR_SEARCHABLE;
+	
+	// Fields
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		entityMetadataProvider.addMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
-		addMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
+		entityMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		entityMetadataProvider.removeMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
-		removeMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));	
+		entityMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(TRIGGER_ANNOTATION);	
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

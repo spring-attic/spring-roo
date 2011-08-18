@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -36,14 +37,26 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = ToStringMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private List<MethodMetadata> locatedAccessors;
+	
+	// Fields
+	private final List<MethodMetadata> locatedAccessors;
 
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
 	@AutoPopulate private String[] excludeFields;
 
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 * @param locatedAccessors
+	 */
 	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<MethodMetadata> locatedAccessors) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -52,7 +65,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		this.locatedAccessors = locatedAccessors;
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooToString.class.getName()));
+		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, RooJavaType.ROO_TO_STRING);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}

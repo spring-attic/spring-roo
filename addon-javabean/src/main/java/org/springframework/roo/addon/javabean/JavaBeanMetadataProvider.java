@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -38,7 +39,7 @@ import org.springframework.roo.support.util.StringUtils;
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Constants
-	private static final JavaType ROO_JAVA_BEAN_ANNOTATION = new JavaType(RooJavaBean.class);
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_JAVA_BEAN;
 	
 	// Fields
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
@@ -49,13 +50,13 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_JAVA_BEAN_ANNOTATION);
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_JAVA_BEAN_ANNOTATION);
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes

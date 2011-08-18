@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 
@@ -25,6 +26,9 @@ import org.springframework.roo.project.ProjectMetadata;
 @Service
 public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements IdentifierMetadataProvider {
 	
+	// Constants
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_IDENTIFIER;
+	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
@@ -32,16 +36,16 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
-		serializableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
-		addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
+		configurableMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
+		serializableMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
-		serializableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
-		removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
+		configurableMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
+		serializableMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

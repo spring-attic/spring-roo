@@ -5,6 +5,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AbstractA
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooDataOnDemand} annotation.
@@ -13,12 +14,13 @@ import org.springframework.roo.model.JavaType;
  * @since 1.0
  */
 public class DataOnDemandAnnotationValues extends AbstractAnnotationValues {
+	
 	// From annotation
-	@AutoPopulate private JavaType entity = null;
+	@AutoPopulate private JavaType entity;
 	@AutoPopulate private int quantity = 10;
 
 	public DataOnDemandAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooDataOnDemand.class.getName()));
+		super(governorPhysicalTypeMetadata, RooJavaType.ROO_DATA_ON_DEMAND);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

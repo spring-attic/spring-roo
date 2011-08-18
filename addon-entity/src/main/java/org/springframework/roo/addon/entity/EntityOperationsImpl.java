@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,13 +74,13 @@ public class EntityOperationsImpl implements EntityOperations {
 		
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
 
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
+		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Embeddable")));
 		
 		if (serializable) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable")));
+			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
 		}
 
 		int modifier = Modifier.PUBLIC;
@@ -88,12 +93,9 @@ public class EntityOperationsImpl implements EntityOperations {
 	public void newIdentifier(JavaType identifierType, String identifierField, String identifierColumn) {
 		Assert.notNull(identifierType, "Identifier type required");
 		
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-		List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		identifierAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
-		identifierAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.entity.RooIdentifier")));
-		
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+		final List<AnnotationMetadataBuilder> identifierAnnotations = Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
+		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(identifierAnnotations);
 		
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());

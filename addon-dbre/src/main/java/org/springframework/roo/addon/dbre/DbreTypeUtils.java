@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,9 +30,9 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public abstract class DbreTypeUtils {
+	
+	// Constants
 	private static final JavaType JPA_TABLE_ANNOTATION = new JavaType("javax.persistence.Table");
-	private static final JavaType ROO_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooEntity");
-	private static final JavaType ROO_JPA_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooJpaEntity");
 
 	private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName("name");
 	private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName("schema");
@@ -40,8 +43,8 @@ public abstract class DbreTypeUtils {
 	private static final Map<JavaType, JavaSymbolName> TABLE_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
 	static {
 		TABLE_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, NAME_ATTRIBUTE);
-		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
-		TABLE_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, TABLE_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY, TABLE_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(ROO_ENTITY, TABLE_ATTRIBUTE);
 	}
 	
 	// The annotation attributes from which to read the db schema name
@@ -49,8 +52,8 @@ public abstract class DbreTypeUtils {
 	private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
 	static {
 		SCHEMA_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, SCHEMA_ATTRIBUTE);
-		SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
-		SCHEMA_ATTRIBUTES.put(ROO_ENTITY_ANNOTATION, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(ROO_ENTITY, SCHEMA_ATTRIBUTE);
 	}
 
 	/**

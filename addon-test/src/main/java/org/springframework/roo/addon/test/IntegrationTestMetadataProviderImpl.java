@@ -34,6 +34,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -51,29 +52,33 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
-	private static final JavaType ROO_ENTITY_ANNOTATION = new JavaType("org.springframework.roo.addon.entity.RooEntity");
+	
+	// Constants
+	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_INTEGRATION_TEST;
+	
+	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-	private Set<String> producedMids = new LinkedHashSet<String>();
-	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
-	private Boolean wasGaeEnabled = null;
-	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
+	private final Set<String> producedMids = new LinkedHashSet<String>();
+	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
+	private Boolean wasGaeEnabled;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		// Integration test classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
-		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
-		addMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
+		configurableMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
-		removeMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
+		configurableMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 	
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
@@ -181,7 +186,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		}
 	
 		String transactionManager = null;
-		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ROO_ENTITY_ANNOTATION);
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, RooJavaType.ROO_ENTITY);
 		if (rooEntityAnnotation != null) {
 			StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(new JavaSymbolName("transactionManager"));
 			if (transactionManagerAttr != null) {

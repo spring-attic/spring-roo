@@ -4,26 +4,31 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
-import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooSolrSearchable} annotation.
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public class SolrSearchAnnotationValues extends AbstractAnnotationValues {
-	
-	@AutoPopulate String searchMethod = "search";
-	@AutoPopulate String simpleSearchMethod = "search";
+
+	// Fields
+	@AutoPopulate String deleteIndexMethod = "deleteIndex";
+	@AutoPopulate String indexMethod = "index";
 	@AutoPopulate String postPersistOrUpdateMethod = "postPersistOrUpdate";
 	@AutoPopulate String preRemoveMethod = "preRemove";
-	@AutoPopulate String indexMethod = "index";
-	@AutoPopulate String deleteIndexMethod = "deleteIndex";
+	@AutoPopulate String searchMethod = "search";
+	@AutoPopulate String simpleSearchMethod = "search";
 	
+	/**
+	 * Constructor
+	 *
+	 * @param governorPhysicalTypeMetadata
+	 */
 	public SolrSearchAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooSolrSearchable.class.getName()));
+		super(governorPhysicalTypeMetadata, RooJavaType.ROO_SOLR_SEARCHABLE);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

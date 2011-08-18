@@ -33,6 +33,7 @@ import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.util.Pair;
@@ -52,6 +53,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	// Constants
 	private static final String FLUSH_METHOD = PersistenceCustomDataKeys.FLUSH_METHOD.name();
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_DATA_ON_DEMAND;
 	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
@@ -66,15 +68,15 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		
 		// DOD classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
-		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
-		addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
+		configurableMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
-		removeMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
+		configurableMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {

@@ -9,6 +9,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 
 /**
@@ -20,17 +21,18 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service 
 public final class JsonMetadataProvider extends AbstractItdMetadataProvider {
+	
+	// Constants
+	private static final JavaType[] TRIGGER_ANNOTATIONS = { RooJavaType.ROO_JSON, RooJavaType.ROO_IDENTIFIER };
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooJson.class.getName()));
-		addMetadataTrigger(new JavaType("org.springframework.roo.addon.entity.RooIdentifier"));
+		addMetadataTriggers(TRIGGER_ANNOTATIONS);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooJson.class.getName()));
-		removeMetadataTrigger(new JavaType("org.springframework.roo.addon.entity.RooIdentifier"));
+		removeMetadataTriggers(TRIGGER_ANNOTATIONS);
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

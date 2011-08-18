@@ -26,6 +26,7 @@
                                     <fileset dir="${basedir}/..">
                                         <include name="**/Roo*.java" />
                                         <exclude name="core/**" />
+                                        <exclude name="**/RooJavaType.java" />
                                     </fileset>
                                     <!-- Discard the module names prefixes from each file path -->
                                     <regexpmapper from="^(.*).src.main.java.(.*)$$" to="\2" />

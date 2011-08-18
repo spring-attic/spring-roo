@@ -1,5 +1,9 @@
 package org.springframework.roo.classpath.operations;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,11 +106,11 @@ public class ClasspathCommands implements CommandMarker {
 		extendsTypes.add(superclass);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		if (rooAnnotations) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable")));
+			annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
+			annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
+			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
 		}
 		typeDetailsBuilder.setAnnotations(annotations);
 

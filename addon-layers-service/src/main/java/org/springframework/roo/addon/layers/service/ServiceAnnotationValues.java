@@ -5,6 +5,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AbstractA
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 /**
  * The values of a given {@link RooService} annotation.
@@ -18,12 +19,12 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 	// Fields
 	@AutoPopulate private JavaType[] domainTypes;
 	@AutoPopulate private String countAllMethod = RooService.COUNT_ALL_METHOD;
-	@AutoPopulate private String findMethod = RooService.FIND_METHOD;
+	@AutoPopulate private String deleteMethod = RooService.DELETE_METHOD;
 	@AutoPopulate private String findAllMethod = RooService.FIND_ALL_METHOD;
 	@AutoPopulate private String findEntriesMethod = RooService.FIND_ENTRIES_METHOD;
+	@AutoPopulate private String findMethod = RooService.FIND_METHOD;
 	@AutoPopulate private String saveMethod = RooService.SAVE_METHOD;
 	@AutoPopulate private String updateMethod = RooService.UPDATE_METHOD;
-	@AutoPopulate private String deleteMethod = RooService.DELETE_METHOD;
 	@AutoPopulate private boolean transactional = true;
 	
 	/**
@@ -32,7 +33,7 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 	 * @param governorPhysicalTypeMetadata to parse (required)
 	 */
 	public ServiceAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooService.class.getName()));
+		super(governorPhysicalTypeMetadata, RooJavaType.ROO_SERVICE);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

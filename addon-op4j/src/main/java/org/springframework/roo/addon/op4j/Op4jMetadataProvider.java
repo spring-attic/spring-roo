@@ -8,6 +8,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 
 /**
@@ -19,15 +20,18 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service 
 public final class Op4jMetadataProvider extends AbstractItdMetadataProvider {
+	
+	// Constants
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_OP4J;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooOp4j.class.getName()));
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooOp4j.class.getName()));
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

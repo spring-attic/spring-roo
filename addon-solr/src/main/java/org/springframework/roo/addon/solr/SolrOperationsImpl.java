@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Modifier;
@@ -10,8 +14,6 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadataProvider;
-import org.springframework.roo.addon.entity.JpaEntityMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -123,7 +125,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	public void addAll() {
-		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(EntityMetadataProvider.ENTITY_ANNOTATION, JpaEntityMetadataProvider.JPA_ENTITY_ANNOTATION);
+		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_ENTITY, ROO_JPA_ENTITY);
 		for (ClassOrInterfaceTypeDetails cid : cids) {
 			if (!Modifier.isAbstract(cid.getModifier())) {
 				addSolrSearchableAnnotation(cid);
@@ -154,9 +156,8 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	private void addSolrSearchableAnnotation(ClassOrInterfaceTypeDetails typeDetails) {
-		JavaType rooSolrSearchable = new JavaType(RooSolrSearchable.class.getName());
-		if (MemberFindingUtils.getTypeAnnotation(typeDetails, rooSolrSearchable) == null) {
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooSolrSearchable);
+		if (MemberFindingUtils.getTypeAnnotation(typeDetails, ROO_SOLR_SEARCHABLE) == null) {
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
 			((MutableClassOrInterfaceTypeDetails) typeDetails).addTypeAnnotation(annotationBuilder.build());
 		}
 	}

@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
+import static org.springframework.roo.model.RooJavaType.ROO_PLURAL;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -177,7 +179,7 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 		}
 		String plural = pluralMap.get(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 		for (AnnotationMetadata annotationMetadata : classOrInterfaceTypeDetails.getAnnotations()) {
-			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals("org.springframework.roo.addon.plural.RooPlural")) {
+			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals(ROO_PLURAL.getFullyQualifiedTypeName())) {
 				AnnotationAttributeValue<?> annotationAttributeValue = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 				if (annotationAttributeValue != null) {
 					plural  = annotationAttributeValue.getValue().toString();

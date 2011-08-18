@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
@@ -19,17 +20,33 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 @Component(immediate = true)
 @Service
 public final class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
+	
+	// Constants
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_SOLR_WEB_SEARCHABLE;
+	
+	// Fields
 	@Reference private WebScaffoldMetadataProvider webScaffoldMetadataProvider;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		webScaffoldMetadataProvider.addMetadataTrigger(new JavaType(RooSolrWebSearchable.class.getName()));
-		addMetadataTrigger(new JavaType(RooSolrWebSearchable.class.getName()));	
+		webScaffoldMetadataProvider.addMetadataTrigger(TRIGGER_ANNOTATION);
+		addMetadataTrigger(TRIGGER_ANNOTATION);	
+	}
+
+	/**
+	 * OSGi bundle deactivation callback
+	 * 
+	 * @param context
+	 * @since 1.2.0
+	 */
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		webScaffoldMetadataProvider.removeMetadataTrigger(TRIGGER_ANNOTATION);
+		removeMetadataTrigger(TRIGGER_ANNOTATION);	
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

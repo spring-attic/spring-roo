@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.layers.repository;
 
+import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,6 +34,7 @@ import org.springframework.uaa.client.util.Assert;
 import org.w3c.dom.Element;
 
 /**
+ * The {@link RepositoryJpaOperations} implementation.
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
@@ -62,7 +65,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		}
 		
 		// First build interface type
-		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(new JavaType(RooRepositoryJpa.class.getName()));
+		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_JPA);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, projectOperations.getPathResolver().getPath(interfaceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);

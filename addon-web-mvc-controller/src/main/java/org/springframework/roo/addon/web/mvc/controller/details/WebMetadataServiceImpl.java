@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
+import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
+
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +24,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.mvc.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -380,10 +381,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private String getControllerPathForType(JavaType type, String metadataIdentificationString) {
 		String webScaffoldMetadataKey = null;
 		WebScaffoldMetadata webScaffoldMetadata = null;
-		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
-		for (ClassOrInterfaceTypeDetails coitd: typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(rooWebScaffold)) {
+		for (ClassOrInterfaceTypeDetails coitd: typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
 			for (AnnotationMetadata annotation: coitd.getAnnotations()) {
-				if (annotation.getAnnotationType().equals(rooWebScaffold)) {
+				if (annotation.getAnnotationType().equals(ROO_WEB_SCAFFOLD)) {
 					AnnotationAttributeValue<?> formBackingObject = annotation.getAttribute(new JavaSymbolName("formBackingObject"));
 					if (formBackingObject instanceof ClassAttributeValue) {
 						ClassAttributeValue formBackingObjectValue = (ClassAttributeValue) formBackingObject;

@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
+import static org.springframework.roo.model.RooJavaType.ROO_CONVERSION_SERVICE;
+import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,6 +59,11 @@ import org.springframework.roo.support.util.Pair;
 @Component(immediate = true)
 @Service
 public final class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
+	
+	// Constants
+	private static final JavaType TRIGGER_ANNOTATION = ROO_CONVERSION_SERVICE;
+	
+	// Fields
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMetadataService webMetadataService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
@@ -67,13 +75,13 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooConversionService.class.getName()));
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooConversionService.class.getName()));
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	@Override
@@ -94,7 +102,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
 		
 		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
-		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(new JavaType(RooWebScaffold.class.getName()));
+		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(ROO_WEB_SCAFFOLD);
 		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();

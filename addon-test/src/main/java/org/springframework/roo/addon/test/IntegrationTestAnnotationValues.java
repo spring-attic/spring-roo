@@ -5,6 +5,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AbstractA
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooIntegrationTest} annotation.
@@ -27,7 +28,7 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private boolean merge = true; 
 
 	public IntegrationTestAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooIntegrationTest.class.getName()));
+		super(governorPhysicalTypeMetadata, RooJavaType.ROO_INTEGRATION_TEST);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

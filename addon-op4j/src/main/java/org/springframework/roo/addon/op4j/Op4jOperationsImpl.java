@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.op4j;
 
+import static org.springframework.roo.model.RooJavaType.ROO_OP4J;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,10 +56,9 @@ public class Op4jOperationsImpl implements Op4jOperations{
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		if (MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooOp4j.class.getName())) == null) {
-			JavaType rooOp4j = new JavaType(RooOp4j.class.getName());
-			if (!mutableTypeDetails.getAnnotations().contains(rooOp4j)) {
-				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooOp4j);
+		if (MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), ROO_OP4J) == null) {
+			if (!mutableTypeDetails.getAnnotations().contains(ROO_OP4J)) {
+				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_OP4J);
 				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 			}
 		}

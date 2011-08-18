@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.layers.service;
 
+import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
+
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
@@ -53,7 +55,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
 		}
 		
 		// First build interface type
-		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(new JavaType(RooService.class.getName()));
+		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_SERVICE);
 		interfaceAnnotationMetadata.addAttribute(new ArrayAttributeValue<ClassAttributeValue>(new JavaSymbolName("domainTypes"), Arrays.asList(new ClassAttributeValue(new JavaSymbolName("foo"), domainType))));
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, projectOperations.getPathResolver().getPath(interfaceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);

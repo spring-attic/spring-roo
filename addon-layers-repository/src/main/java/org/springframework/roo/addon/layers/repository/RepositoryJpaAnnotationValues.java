@@ -5,6 +5,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AbstractA
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 /**
  * The values of a {@link RooRepositoryJpa} annotation.
@@ -24,7 +25,7 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 	 * @param governorPhysicalTypeMetadata the metadata to parse (required)
 	 */
 	public RepositoryJpaAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooRepositoryJpa.class.getName()));
+		super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

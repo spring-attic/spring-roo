@@ -38,6 +38,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
@@ -333,7 +334,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> rooGwtMirroredFromConfig = new ArrayList<AnnotationAttributeValue<?>>();
 		rooGwtMirroredFromConfig.add(new StringAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName().getFullyQualifiedTypeName()));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType(RooGwtMirroredFrom.class.getName()), rooGwtMirroredFromConfig));
+		annotations.add(new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_MIRRORED_FROM, rooGwtMirroredFromConfig));
 		return annotations;
 	}
 

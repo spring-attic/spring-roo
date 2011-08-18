@@ -9,7 +9,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.EntityMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -19,6 +18,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
@@ -36,8 +36,9 @@ import org.springframework.roo.support.util.Assert;
 public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements FinderMetadataProvider {
 	
 	// Constants
-	private static final JavaType TRIGGER_ANNOTATION = EntityMetadataProvider.ENTITY_ANNOTATION;
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_ENTITY;
 	
+	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
 
 	protected void activate(ComponentContext context) {

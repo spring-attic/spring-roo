@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.serializable;
 
+import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
+
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
 
@@ -27,6 +29,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
@@ -42,7 +46,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooSerializable.class.getName()));
+		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_SERIALIZABLE);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}

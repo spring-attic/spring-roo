@@ -4,7 +4,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
-import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooJson} annotation.
@@ -13,15 +13,22 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1
  */
 public class JsonAnnotationValues extends AbstractAnnotationValues {
+	
+	// Fields
 	@AutoPopulate String toJsonMethod = "toJson";
 	@AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
 	@AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
 	@AutoPopulate String toJsonArrayMethod = "toJsonArray";
 	@AutoPopulate String rootName = "";
-	@AutoPopulate boolean deepSerialize = false;
+	@AutoPopulate boolean deepSerialize;
 
+	/**
+	 * Constructor
+	 *
+	 * @param governorPhysicalTypeMetadata
+	 */
 	public JsonAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooJson.class.getName()));
+		super(governorPhysicalTypeMetadata, RooJavaType.ROO_JSON);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

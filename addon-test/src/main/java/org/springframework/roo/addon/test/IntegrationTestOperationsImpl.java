@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.test;
 
+import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +78,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.test.RooIntegrationTest"), config));
+		annotations.add(new AnnotationMetadataBuilder(ROO_INTEGRATION_TEST, config));
 
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();

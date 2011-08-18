@@ -11,7 +11,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.json.JsonMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
@@ -28,6 +27,7 @@ import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -42,20 +42,24 @@ import org.springframework.roo.support.util.StringUtils;
 @Service 
 public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvider implements WebJsonMetadataProvider {
 	
-	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
+	// Constants
+	private static final JavaType TRIGGER_ANNOTATION = RooJavaType.ROO_WEB_SCAFFOLD;
 	
+	// Fields
 	@Reference private WebMetadataService webMetadataService;
+
+	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
+		addMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
+		removeMetadataTrigger(TRIGGER_ANNOTATION);
 	}
 	
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes

@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.json;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,6 +15,7 @@ import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDeta
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 
@@ -50,10 +53,10 @@ public class JsonOperationsImpl implements JsonOperations {
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooJson.class.getName()))) {
-			JavaType rooJson = new JavaType(RooJson.class.getName());
-			if (!mutableTypeDetails.getAnnotations().contains(rooJson)) {
-				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooJson);
+		// TODO do these two "if" statements check the same thing?
+		if (MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), RooJavaType.ROO_JSON) == null) {
+			if (!mutableTypeDetails.getAnnotations().contains(RooJavaType.ROO_JSON)) {
+				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_JSON);
 				if (rootName != null && rootName.length() > 0) {
 					annotationBuilder.addStringAttribute("rootName", rootName);
 				}
@@ -69,8 +72,8 @@ public class JsonOperationsImpl implements JsonOperations {
 		annotateType(javaType, rootName, false);
 	}
 	
-	public void annotateAll(boolean deepSerialize) {
-		for (JavaType type: typeLocationService.findTypesWithAnnotation(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"))) {
+	public void annotateAll(final boolean deepSerialize) {
+		for (final JavaType type: typeLocationService.findTypesWithAnnotation(ROO_JAVA_BEAN)) {
 			annotateType(type, "", deepSerialize);
 		}
 	}
