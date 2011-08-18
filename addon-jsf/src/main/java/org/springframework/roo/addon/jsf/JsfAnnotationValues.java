@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -18,7 +20,7 @@ public class JsfAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private boolean includeOnMenu = true;
 
 	public JsfAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooJsfManagedBean.class.getName()));
+		super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

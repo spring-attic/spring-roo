@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +138,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("MenuItem item;");
 		
 		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
-			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(managedBean.getAnnotations(), new JavaType(RooJsfManagedBean.class.getName()));
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(managedBean.getAnnotations(), ROO_JSF_MANAGED_BEAN);
 			if (annotation ==  null) {
 				continue;
 			}

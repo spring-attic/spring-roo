@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -41,12 +43,12 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooJsfManagedBean.class.getName()));
+		addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooJsfManagedBean.class.getName()));
+		removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
 	}
 
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {

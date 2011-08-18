@@ -9,6 +9,7 @@ import static org.springframework.roo.addon.entity.RooEntity.FLUSH_METHOD_DEFAUL
 import static org.springframework.roo.addon.entity.RooEntity.MERGE_METHOD_DEFAULT;
 import static org.springframework.roo.addon.entity.RooEntity.PERSIST_METHOD_DEFAULT;
 import static org.springframework.roo.addon.entity.RooEntity.REMOVE_METHOD_DEFAULT;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -45,7 +46,7 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	 * @param annotatedType
 	 */
 	public JpaCrudAnnotationValues(final MemberHoldingTypeDetailsMetadataItem<?> annotatedType) {
-		super(annotatedType, RooEntity.class);
+		super(annotatedType, ROO_ENTITY);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 	

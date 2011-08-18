@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_MENU_BEAN;
+
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -18,7 +21,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
-
 /**
  * Implementation of {@link JsfMenuBeanMetadataProvider}.
  * 
@@ -37,13 +39,13 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(new JavaType(RooJsfMenuBean.class.getName()));
+		addMetadataTrigger(ROO_JSF_MENU_BEAN);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(new JavaType(RooJsfMenuBean.class.getName()));
+		removeMetadataTrigger(ROO_JSF_MENU_BEAN);
 	}
 	
 	@Override
@@ -64,7 +66,7 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 		menuBeanMid = metadataIdentificationString;
 		
 		// To get here we know the governor is the MenuBean so let's go ahead and create its ITD
-		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooJsfManagedBean.class.getName()));
+		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
 		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 			metadataDependencyRegistry.registerDependency(managedBean.getDeclaredByMetadataId(), metadataIdentificationString);
 		}

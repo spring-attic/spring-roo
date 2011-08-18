@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +17,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -43,7 +45,6 @@ import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 /**
  * Implementation of {@link JsfOperations}.
  *
@@ -115,7 +116,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 
 		// Create type annotation for new managed bean
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType(RooJsfManagedBean.class.getName()));
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_MANAGED_BEAN);
 		annotationBuilder.addClassAttribute("entity", entity);
 		if (!includeOnMenu) {
 			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
@@ -133,7 +134,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private void generateManagedBeans(JavaPackage destinationPackage) {
-		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
+		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_ENTITY);
 		for (ClassOrInterfaceTypeDetails cid : cids) {
 			if (Modifier.isAbstract(cid.getModifier())) {
 				continue;
