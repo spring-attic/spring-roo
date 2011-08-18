@@ -111,6 +111,8 @@ public class JspViewManager {
 				} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 					columnElement.setAttribute("calendar", "true");
 					columnElement.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}");
+				} else if (field.getFieldType().isCommonCollectionType() && field.getCustomData().get(PersistenceCustomDataKeys.ONE_TO_MANY_FIELD) != null) {
+					continue;
 				}
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
 				fieldTable.appendChild(columnElement);
