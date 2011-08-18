@@ -242,8 +242,19 @@ public class JspViewManager {
 			final String methodName = versionAccessorMethod.getMethodName().getSymbolName();
 			formUpdate.setAttribute("versionField", methodName.substring("get".length()));
 		}
-
-		createFieldsForCreateAndUpdate(fields, document, formUpdate, false);
+		
+		// Filter out embedded ID fields as they represent the composite PK which is not to be updated.
+		final List<FieldMetadata> fieldCopy = new ArrayList<FieldMetadata>(fields);
+		for (FieldMetadata embeddedField : formbackingTypePersistenceMetadata.getRooIdentifierFields()) {
+			for (int i = 0; i < fieldCopy.size(); i++) {
+				// Make sure form fields are not presented twice.
+				if (fieldCopy.get(i).getFieldName().equals(embeddedField.getFieldName())) {
+					fieldCopy.remove(i);
+				}
+			}
+		}
+		
+		createFieldsForCreateAndUpdate(fieldCopy, document, formUpdate, false);
 		formUpdate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formUpdate));
 		div.appendChild(formUpdate);
 
