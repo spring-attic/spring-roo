@@ -115,14 +115,11 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		JavaSymbolName methodName = new JavaSymbolName("showJson");
 
-		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), identifierField.getFieldName().getSymbolName()));
 		AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.PathVariable"), attributes);
-		parameters.add(pathVariableAnnotation.build());
 		
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(identifierField.getFieldType(), parameters));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(identifierField.getFieldType(), pathVariableAnnotation.build()));
 		
 		MethodMetadata jsonShowMethod = methodExists(methodName, paramTypes);
 		if (jsonShowMethod != null) return jsonShowMethod;
@@ -166,12 +163,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		JavaSymbolName methodName = new JavaSymbolName("createFromJson");
 		
-		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestBody"));
-		parameters.add(requestBodyAnnotation.build());
-		
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, parameters));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
 		
 		MethodMetadata jsonCreateMethod = methodExists(methodName, paramTypes);
 		if (jsonCreateMethod != null) return jsonCreateMethod;
@@ -208,12 +201,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		JavaSymbolName methodName = new JavaSymbolName("createFromJsonArray");
 
-		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestBody"));
-		parameters.add(requestBodyAnnotation.build());
-
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, parameters));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
 
 		MethodMetadata createFromJsonArrayMethod = methodExists(methodName, paramTypes);
 		if (createFromJsonArrayMethod != null) return createFromJsonArrayMethod;
@@ -292,12 +281,9 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		JavaSymbolName methodName = new JavaSymbolName("updateFromJson");
 		
-		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestBody"));
-		parameters.add(requestBodyAnnotation.build());
 		
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, parameters));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
 		
 		MethodMetadata updateFromJsonMethod = methodExists(methodName, paramTypes);
 		if (updateFromJsonMethod != null) return updateFromJsonMethod;
@@ -338,12 +324,9 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		JavaSymbolName methodName = new JavaSymbolName("updateFromJsonArray");
 		
-		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestBody"));
-		parameters.add(requestBodyAnnotation.build());
 		
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, parameters));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
 		
 		MethodMetadata updateFromJsonArrayMethod = methodExists(methodName, paramTypes);
 		if (updateFromJsonArrayMethod != null) return updateFromJsonArrayMethod;
@@ -389,14 +372,11 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	private MethodMetadata getJsonDeleteMethod(MemberTypeAdditions removeMethod, FieldMetadata identifierField, MemberTypeAdditions findMethod) {
 		JavaSymbolName methodName = new JavaSymbolName("deleteFromJson");
 
-		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), identifierField.getFieldName().getSymbolName()));
 		AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.PathVariable"), attributes);
-		typeAnnotations.add(pathVariableAnnotation.build());
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(identifierField.getFieldType(), typeAnnotations));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(identifierField.getFieldType(), pathVariableAnnotation.build()));
 		
 		MethodMetadata deleteFromJsonMethod = methodExists(methodName, paramTypes);
 		if (deleteFromJsonMethod != null) return deleteFromJsonMethod;

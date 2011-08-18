@@ -25,7 +25,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -305,13 +304,11 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		postMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), postMethodAttributes));
 
 		List<AnnotatedJavaType> postParamTypes = new ArrayList<AnnotatedJavaType>();
-		List<AnnotationMetadata> idParamAnnotations = new ArrayList<AnnotationMetadata>();
 		AnnotationMetadataBuilder idParamAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.PathVariable"));
-		idParamAnnotations.add(idParamAnnotation.build());
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Long"), idParamAnnotations));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
+		postParamTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Long"), idParamAnnotation.build()));
+		postParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap")));
+		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
+		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
 		
 		List<JavaSymbolName> postParamNames = new ArrayList<JavaSymbolName>();
 		postParamNames.add(new JavaSymbolName("id"));
@@ -330,9 +327,9 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		getMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), getMethodAttributes));
 		
 		List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
+		getParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap")));
+		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
+		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
 		
 		List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
 		getParamNames.add(new JavaSymbolName("modelMap"));

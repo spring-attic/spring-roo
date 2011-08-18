@@ -266,7 +266,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	private MethodMetadataBuilder getInstallMethodBuilder() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(new JavaType("org.springframework.format.FormatterRegistry"), null));
+		parameters.add(new AnnotatedJavaType(new JavaType("org.springframework.format.FormatterRegistry")));
 		
 		MethodMetadata method = getGovernorMethod(methodName, parameters);
 		if (getGovernorMethod(methodName, parameters) != null) {

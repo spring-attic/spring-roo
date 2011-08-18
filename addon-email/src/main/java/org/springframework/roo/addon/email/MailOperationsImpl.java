@@ -17,7 +17,6 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataService;
@@ -245,20 +244,20 @@ public class MailOperationsImpl implements MailOperations {
 			mutableTypeDetails.addField(smmFieldBuilder.build());
 		} else {
 			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage simpleMailMessage = new org.springframework.mail.SimpleMailMessage();");
-			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
+			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
 			paramNames.add(new JavaSymbolName("mailFrom"));
 			bodyBuilder.appendFormalLine("simpleMailMessage.setFrom(mailFrom);");
 
-			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
+			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
 			paramNames.add(new JavaSymbolName("subject"));
 			bodyBuilder.appendFormalLine("simpleMailMessage.setSubject(subject);");
 		}
 
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
 		paramNames.add(new JavaSymbolName("mailTo"));
 		bodyBuilder.appendFormalLine("simpleMailMessage.setTo(mailTo);");
 
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
 		paramNames.add(new JavaSymbolName("message"));
 		bodyBuilder.appendFormalLine("simpleMailMessage.setText(message);");
 

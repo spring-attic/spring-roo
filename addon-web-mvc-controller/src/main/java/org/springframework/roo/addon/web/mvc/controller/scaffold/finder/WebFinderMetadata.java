@@ -132,7 +132,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "\";");
 
 		if (needmodel) {
-			paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
+			paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model")));
 			paramNames.add(new JavaSymbolName("uiModel"));
 		}
 		
@@ -198,7 +198,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			methodParams.delete(methodParams.length() - 2, methodParams.length());
 		}
 
-		annotatedParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), new ArrayList<AnnotationMetadata>()));
+		annotatedParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model")));
 		
 		MethodMetadata existingMethod = methodExists(finderMethodName, annotatedParamTypes);
 		if (existingMethod != null) {

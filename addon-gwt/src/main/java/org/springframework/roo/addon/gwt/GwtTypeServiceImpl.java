@@ -323,7 +323,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 						}
 						newType = new JavaType(type.getJavaType().getFullyQualifiedTypeName(), type.getJavaType().getArray(), type.getJavaType().getDataType(), type.getJavaType().getArgName(), paramTypes);
 					}
-					abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType, null));
+					abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType));
 				}
 				abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
 

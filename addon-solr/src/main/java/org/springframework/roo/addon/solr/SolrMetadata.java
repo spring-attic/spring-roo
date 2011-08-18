@@ -2,6 +2,7 @@ package org.springframework.roo.addon.solr;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -118,8 +119,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getIndexEntityMethod() {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getIndexMethod() + destination.getSimpleTypeName());
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(destination, new ArrayList<AnnotationMetadata>()));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(destination));
 		MethodMetadata indexEntityMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (indexEntityMethod != null) return indexEntityMethod;
 
@@ -130,8 +130,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine(beanPlural.toLowerCase() + ".add(" + javaBeanFieldName + ");");
 		bodyBuilder.appendFormalLine(annotationValues.getIndexMethod() + beanPlural + "(" + beanPlural.toLowerCase() + ");");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(javaBeanFieldName));
+		final List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName(javaBeanFieldName));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		return methodBuilder.build();
@@ -141,8 +140,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getIndexMethod() + beanPlural);
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(destination);
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("java.util.Collection", 0, DataType.TYPE, null, typeParams), new ArrayList<AnnotationMetadata>()));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(new JavaType("java.util.Collection", 0, DataType.TYPE, null, typeParams)));
 		MethodMetadata indexEntitiesMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (indexEntitiesMethod != null) return indexEntitiesMethod;
 
@@ -206,8 +204,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(beanPlural.toLowerCase()));
+		final List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName(beanPlural.toLowerCase()));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
 		return methodBuilder.build();
@@ -215,8 +212,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getDeleteIndexMethod(MethodMetadata identifierAccessor) {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteIndexMethod());
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(destination, new ArrayList<AnnotationMetadata>()));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(destination));
 		MethodMetadata deleteIndex = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (deleteIndex != null) return deleteIndex;
 
@@ -233,8 +229,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(javaBeanFieldName));
+		final List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName(javaBeanFieldName));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));

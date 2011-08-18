@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -21,7 +22,6 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataService;
@@ -127,10 +127,8 @@ public class JmsOperationsImpl implements JmsOperations {
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
 		// Create some method content to get people started
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType(Object.class.getName()), new ArrayList<AnnotationMetadata>()));
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("messageObject"));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(new JavaType(Object.class)));
+		final List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("messageObject"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(fieldName + ".convertAndSend(messageObject);");
@@ -170,7 +168,7 @@ public class JmsOperationsImpl implements JmsOperations {
 
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Object"), new ArrayList<AnnotationMetadata>()));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Object")));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("message"));
 

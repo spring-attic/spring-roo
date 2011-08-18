@@ -107,7 +107,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private MethodMetadata getSetAsTextMethod(JavaType javaType, JavaType idType, MethodMetadata findMethod) {
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, null));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("text"));

@@ -105,7 +105,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(destination);
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, typeParams), null));
+		parameters.add(new AnnotatedJavaType(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, typeParams)));
 
 		// See if the type itself declared the method
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
@@ -144,7 +144,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, null));
+		parameters.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
 
 		// See if the type itself declared the method
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
@@ -189,7 +189,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, null));
+		parameters.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
 
 		// See if the type itself declared the method
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
