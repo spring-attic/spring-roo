@@ -10,8 +10,19 @@ import org.springframework.roo.model.JavaType;
  */
 public interface MailOperations {
 
+	/**
+	 * Indicates whether the command for adding a JavaMailSender to the user's
+	 * project is available.
+	 * 
+	 * @return see above
+	 */
 	boolean isInstallEmailAvailable();
 
+	/**
+	 * Indicates whether the commands relating to mail templates are available
+	 * 
+	 * @return see above
+	 */
 	boolean isManageEmailAvailable();
 
 	void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password);

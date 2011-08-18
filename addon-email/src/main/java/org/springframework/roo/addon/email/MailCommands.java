@@ -49,8 +49,25 @@ public class MailCommands implements CommandMarker {
 		mailOperations.installEmail(hostServer, protocol, port, encoding, username, password);
 	}
 	
-	@CliAvailabilityIndicator({ "field email template", "email template setup" })	
+	/**
+	 * Indicates whether the mail template commands are available
+	 * 
+	 * @return see above
+	 * @deprecated call {@link #isMailTemplateAvailable()} instead
+	 */
+	@Deprecated
 	public boolean isInsertJmsAvailable() {
+		return isMailTemplateAvailable();
+	}
+	
+	/**
+	 * Indicates whether the mail template commands are available
+	 * 
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	@CliAvailabilityIndicator({ "field email template", "email template setup" })	
+	public boolean isMailTemplateAvailable() {
 		return mailOperations.isManageEmailAvailable();
 	}
 	
