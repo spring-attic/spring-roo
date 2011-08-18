@@ -54,7 +54,7 @@ import org.w3c.dom.Element;
  * @author Ben Alex
  * @since 1.1
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private static final Logger logger = HandlerUtils.getLogger(AddOnRooBotOperationsImpl.class);

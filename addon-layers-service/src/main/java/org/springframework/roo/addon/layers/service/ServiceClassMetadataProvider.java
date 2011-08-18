@@ -37,7 +37,7 @@ import org.springframework.roo.support.util.Pair;
  * @author Andrew Swan
  * @since 1.2.0
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	

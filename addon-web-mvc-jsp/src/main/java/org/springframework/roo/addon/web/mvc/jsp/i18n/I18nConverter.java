@@ -16,7 +16,7 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class I18nConverter implements Converter<I18n> {
 	

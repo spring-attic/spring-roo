@@ -241,7 +241,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private Table updateOrDeleteManagedEntity(final ClassOrInterfaceTypeDetails managedEntity, final Database database) {
 		// Update the attributes of the existing JPA-related annotation
 		final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
-		Assert.state(jpaAnnotation != null, "Neither " + ROO_ENTITY + " nor " + ROO_JPA_ENTITY + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
+		Assert.state(jpaAnnotation != null, "Neither " + ROO_ENTITY.getSimpleTypeName() + " nor " + ROO_JPA_ENTITY.getSimpleTypeName() + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
 		
 		// Find table in database using 'table' and 'schema' attributes from the JPA annotation
 		final AnnotationAttributeValue<?> tableAttribute = jpaAnnotation.getAttribute(new JavaSymbolName("table"));

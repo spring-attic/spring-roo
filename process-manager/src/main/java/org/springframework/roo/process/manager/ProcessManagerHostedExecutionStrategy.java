@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.ReflectionUtils;
  * @since 1.0
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 @Reference(name="processManager", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=ProcessManager.class, cardinality=ReferenceCardinality.MANDATORY_UNARY)
 public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy {

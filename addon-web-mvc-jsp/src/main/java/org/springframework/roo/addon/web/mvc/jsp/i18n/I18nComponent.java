@@ -20,7 +20,7 @@ import org.apache.felix.scr.annotations.Service;
  * @since 1.1
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 @Reference(name="language", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=I18n.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class I18nComponent implements I18nSupport {

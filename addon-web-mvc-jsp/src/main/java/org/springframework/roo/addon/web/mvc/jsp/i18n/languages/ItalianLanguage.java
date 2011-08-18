@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.TemplateUtils;
  * @since 1.1
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class ItalianLanguage extends AbstractLanguage {
 

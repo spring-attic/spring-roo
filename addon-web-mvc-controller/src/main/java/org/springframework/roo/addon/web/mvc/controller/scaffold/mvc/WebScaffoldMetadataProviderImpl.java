@@ -66,7 +66,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 			return localMid;
 		}
 		
-		//TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
+		// TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
 		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), itdTypeDetails.getGovernor());
 		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, LayerCustomDataKeys.LAYER_TYPE);
 		if (memberHoldingTypeDetails != null) {
