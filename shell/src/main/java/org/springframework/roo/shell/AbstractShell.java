@@ -8,11 +8,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Properties;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.JarFile;
@@ -44,43 +45,32 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	
 	// Instance fields
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
-    protected boolean inBlockComment = false;
-    protected ExitShellRequest exitShellRequest = null;
+    protected boolean inBlockComment;
+    protected ExitShellRequest exitShellRequest;
 	
-    // Abstract methods
-	protected abstract Set<URL> findUrls(String resourceName);
+    /**
+     * Returns any classpath resources with the given path
+     * 
+     * @param path the path for which to search (never null)
+     * @return <code>null</code> if the search can't be performed
+     * @since 1.2.0
+     */
+	protected abstract Collection<URI> findResources(String path);
+	
 	protected abstract String getHomeAsString();
+	
 	protected abstract ExecutionStrategy getExecutionStrategy();
+	
 	protected abstract Parser getParser();
 
 	@CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
 	public void script(
-		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File resource, 
+		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File script, 
 		@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") boolean lineNumbers) {
 		
-		Assert.notNull(resource, "Resource to parser is required");
+		Assert.notNull(script, "Script file to parse is required");
 		long started = new Date().getTime();
-		InputStream inputStream = null;
-		try {
-			inputStream = new BufferedInputStream(new FileInputStream(resource));
-		} catch (FileNotFoundException tryTheClassLoaderInstead) {}
-		
-		if (inputStream == null) {
-			// Try to find the resource via the classloader
-			Set<URL> urls = findUrls(resource.getName());
-			
-			// Handle search system failure
-			Assert.notNull(urls, "Unable to process classpath bundles to locate the script");
-			
-			// Handle the file simply not being present, but the search being OK
-			Assert.notEmpty(urls, "Resource '" + resource + "' not found on disk or in classpath");
-			Assert.isTrue(urls.size() == 1, "More than one '" + resource + "' was found in the classpath; unable to continue");
-			try {
-				inputStream = urls.iterator().next().openStream();
-			} catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
-		}
+		final InputStream inputStream = openScript(script);
 
 		BufferedReader in = null;
 		try {
@@ -120,6 +110,37 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			
 			logger.fine("Script required " + ((new Date().getTime() - started) / 1000) + " second(s) to execute");
 		}
+	}
+
+	/**
+	 * Opens the given script for reading
+	 * 
+	 * @param script the script to read (required)
+	 * @return a non-<code>null</code> input stream
+	 */
+	private InputStream openScript(final File script) {
+		InputStream inputStream = null;
+		try {
+			inputStream = new BufferedInputStream(new FileInputStream(script));
+		} catch (FileNotFoundException tryTheClassLoaderInstead) {}
+		
+		if (inputStream == null) {
+			// Try to find the script via the classloader
+			final Collection<URI> uris = findResources(script.getName());
+			
+			// Handle search failure
+			Assert.notNull(uris, "Unexpected error looking for '" + script.getName() + "'");
+			
+			// Handle the search being OK but the file simply not being present
+			Assert.notEmpty(uris, "Script '" + script + "' not found on disk or in classpath");
+			Assert.isTrue(uris.size() == 1, "More than one '" + script + "' was found in the classpath; unable to continue");
+			try {
+				inputStream = uris.iterator().next().toURL().openStream();
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		return inputStream;
 	}
 	
 	/**

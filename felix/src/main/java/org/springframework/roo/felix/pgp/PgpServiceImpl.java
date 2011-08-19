@@ -7,14 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -35,8 +36,9 @@ import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.support.osgi.UrlFindingUtils;
+import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.UrlUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -53,11 +55,11 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Component
 @Service
 public class PgpServiceImpl implements PgpService {
+	
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private boolean automaticTrust = false;
 	private BundleContext context;
@@ -88,22 +90,25 @@ public class PgpServiceImpl implements PgpService {
     }
     
     private void trustDefaultKeys() {
-		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context, "/org/springframework/roo/felix/pgp/*.asc");
+    	// Get the URIs of all PGP keystore files within installed OSGi bundles
+		final Collection<URI> uris = OSGiUtils.findEntriesByPattern(context, "/org/springframework/roo/felix/pgp/*.asc");
 		
-		SortedSet<URL> sortedUrls = new TreeSet<URL>(new Comparator<URL>() {
-			public int compare(URL o1, URL o2) {
-				return o1.toExternalForm().compareTo(o2.toExternalForm());
+		// Sort them by the external form of their URLs
+		final Collection<URI> sortedUris = new TreeSet<URI>(new Comparator<URI>() {
+			public int compare(final URI uri1, final URI uri2) {
+				return UrlUtils.toURL(uri1).toExternalForm().compareTo(UrlUtils.toURL(uri2).toExternalForm());
 			}
 		});
-		sortedUrls.addAll(urls);
+		sortedUris.addAll(uris);
 		
-		for (URL url : sortedUrls) {
+		// Trust each one
+		for (final URI uri : sortedUris) {
 			try {
-				PGPPublicKeyRing key = getPublicKey(url.openStream());
-				trust(key);
-			} catch (IOException ignore) {}
+				trust(getPublicKey(UrlUtils.toURL(uri).openStream()));
+			} catch (final IOException ignore) {}
 		}
     }
+    
 	public String getKeyStorePhysicalLocation() {
 		try {
 			return ROO_PGP_FILE.getCanonicalPath();
@@ -153,17 +158,15 @@ public class PgpServiceImpl implements PgpService {
 		return trust(keyRing);
 	}
 	
-	private PGPPublicKeyRing trust(PGPPublicKeyRing keyRing) {
+	private PGPPublicKeyRing trust(final PGPPublicKeyRing keyRing) {
 		rememberKey(keyRing);
 		
 		// get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
 		
 	    // Do not store if the first key is revoked
-	    if (keyRing.getPublicKey().isRevoked()) {
-	    	throw new IllegalStateException("The public key ID '" + new PgpKeyId(keyRing.getPublicKey()) + "' has been revoked and cannot be trusted");
-	    }
-
+		Assert.state(!keyRing.getPublicKey().isRevoked(), "The public key ID '" + new PgpKeyId(keyRing.getPublicKey()) + "' has been revoked and cannot be trusted");
+		
 		// trust it and write back to disk
 		trusted.add(keyRing);
 		OutputStream fos = null;

@@ -3,6 +3,7 @@ package org.springframework.roo.addon.gwt;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,11 +29,12 @@ import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
-import org.springframework.roo.support.osgi.UrlFindingUtils;
+import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.UrlUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -321,10 +323,11 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		}
 
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
-		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
-		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
+		final Set<URI> uris = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
+		Assert.notNull(uris, "Could not search bundles for resources for Ant Path '" + path + "'");
 
-		for (URL url : urls) {
+		for (final URI uri : uris) {
+			final URL url = UrlUtils.toURL(uri);
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
 			fileName = fileName.replace("-template", "");
 			String targetFilename = targetDirectory + fileName;
