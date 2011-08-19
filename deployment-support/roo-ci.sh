@@ -46,18 +46,17 @@ l_error() {
 }
 
 s3_execute() {
-    type -P s3cmd &>/dev/null || { l_error "s3cmd not found. Aborting." >&2; exit 1; }
-    S3CMD_OPTS=''
-    if [ "$DRY_RUN" = "1" ]; then
-        S3CMD_OPTS="$S3CMD_OPTS --dry-run"
-    fi
-    if [ "$VERBOSE" = "1" ]; then
-        S3CMD_OPTS="$S3CMD_OPTS -v"
-    fi
-    s3cmd $S3CMD_OPTS $@
-    EXITED=$?
-    if [[ ! "$EXITED" = "0" ]]; then
-        l_error "s3cmd failed (exit code $EXITED)." >&2; exit 1;
+    if [ "$DRY_RUN" = "0" ]; then
+        type -P s3cmd &>/dev/null || { l_error "s3cmd not found. Aborting." >&2; exit 1; }
+        S3CMD_OPTS=''
+        if [ "$VERBOSE" = "1" ]; then
+            S3CMD_OPTS="$S3CMD_OPTS -v"
+        fi
+        s3cmd $S3CMD_OPTS $@
+        EXITED=$?
+        if [[ ! "$EXITED" = "0" ]]; then
+            l_error "s3cmd failed (exit code $EXITED)." >&2; exit 1;
+        fi
     fi
 }
 
@@ -214,20 +213,22 @@ if [[ "$DRY_RUN" = "0" ]]; then
 fi
 
 # Prune some old releases. We can rely on the fact CI runs at least every 24 hours and thus we can prune anything older than say 3 days
-OK_DATE_0=`date +%Y-%m-%d`
-OK_DATE_1=`date --date '-1 day' +%Y-%m-%d`
-OK_DATE_2=`date --date '-2 day' +%Y-%m-%d`
-log "Obtaining listing of all snapshot resources on S3"
-s3_execute ls -r s3://spring-roo-repository.springsource.org/snapshot > /tmp/dist_snapshots.txt
-log "Retain Dates...: $OK_DATE_0 $OK_DATE_1 $OK_DATE_2"
-log "S3 Found.......: `grep -v "/$" /tmp/dist_snapshots.txt | wc -l`"
-grep -v -e $OK_DATE_0 -e $OK_DATE_1 -e $OK_DATE_2 /tmp/dist_snapshots.txt > /tmp/dist_delete.txt
-log "S3 To Delete...: `grep -v "/$" /tmp/dist_delete.txt | wc -l`"
-cat /tmp/dist_delete.txt | cut -c "30-" > /tmp/dist_delete_cut.txt
-for filename in `grep -v "/$" /tmp/dist_delete_cut.txt`; do
-    s3_execute del "$filename"
-done
-log "Pruning old snapshots completed successfully"
+if [[ "$DRY_RUN" = "0" ]]; then
+    OK_DATE_0=`date +%Y-%m-%d`
+    OK_DATE_1=`date --date '-1 day' +%Y-%m-%d`
+    OK_DATE_2=`date --date '-2 day' +%Y-%m-%d`
+    log "Obtaining listing of all snapshot resources on S3"
+    s3_execute ls -r s3://spring-roo-repository.springsource.org/snapshot > /tmp/dist_snapshots.txt
+    log "Retain Dates...: $OK_DATE_0 $OK_DATE_1 $OK_DATE_2"
+    log "S3 Found.......: `grep -v "/$" /tmp/dist_snapshots.txt | wc -l`"
+    grep -v -e $OK_DATE_0 -e $OK_DATE_1 -e $OK_DATE_2 /tmp/dist_snapshots.txt > /tmp/dist_delete.txt
+    log "S3 To Delete...: `grep -v "/$" /tmp/dist_delete.txt | wc -l`"
+    cat /tmp/dist_delete.txt | cut -c "30-" > /tmp/dist_delete_cut.txt
+    for filename in `grep -v "/$" /tmp/dist_delete_cut.txt`; do
+        s3_execute del "$filename"
+    done
+    log "Pruning old snapshots completed successfully"
+fi
 
 # Return to the original directory
 popd &>/dev/null
