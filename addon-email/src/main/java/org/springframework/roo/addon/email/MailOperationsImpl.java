@@ -8,6 +8,7 @@ import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,10 @@ public class MailOperationsImpl implements MailOperations {
 	// Constants
 	private static final int PRIVATE_TRANSIENT = Modifier.PRIVATE | Modifier.TRANSIENT;
 	private static final AnnotatedJavaType STRING = new AnnotatedJavaType(JavaType.STRING_OBJECT);
+	private static final String LOCAL_MESSAGE_VARIABLE = "mailMessage";
+	private static final String SPRING_TASK_NS = "http://www.springframework.org/schema/task";
+	private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.0.xsd";
+	private static final String TEMPLATE_MESSAGE_FIELD = "templateMessage";
 	
 	// Fields
 	@Reference private FileManager fileManager;
@@ -181,7 +186,7 @@ public class MailOperationsImpl implements MailOperations {
 		final Map<String, String> props = new HashMap<String, String>();
 
 		if (StringUtils.hasText(from) || StringUtils.hasText(subject)) {
-			Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.SimpleMailMessage']", root);
+			Element smmBean = getSimpleMailMessageBean(root);
 			if (smmBean == null) {
 				smmBean = document.createElement("bean");
 				smmBean.setAttribute("class", "org.springframework.mail.SimpleMailMessage");
@@ -222,6 +227,17 @@ public class MailOperationsImpl implements MailOperations {
 		if (props.size() > 0) {
 			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, true);
 		}
+	}
+
+	/**
+	 * Finds the SimpleMailMessage bean in the Spring XML file with the given
+	 * root element
+	 * 
+	 * @param root
+	 * @return <code>null</code> if there is no such bean
+	 */
+	private Element getSimpleMailMessageBean(final Element root) {
+		return XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.SimpleMailMessage']", root);
 	}
 
 	public void injectEmailTemplate(final JavaType targetType, final JavaSymbolName fieldName, final boolean async) {
@@ -272,55 +288,56 @@ public class MailOperationsImpl implements MailOperations {
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		final Element root = document.getDocumentElement();
 
-		// Find the existing SimpleMailMessage bean (if any) in applicationContext.xml
-		final Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
-
-		// Create some method content to get the user started
+		// Make a builder for the created method's body
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		final List<AnnotationMetadataBuilder> smmAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
-		// Build a list of the types and names of the "send message" method's parameters
+		// Collect the types and names of the created method's parameters
 		final PairList<AnnotatedJavaType, JavaSymbolName> parameters = new PairList<AnnotatedJavaType, JavaSymbolName>();
 
-		if (smmBean == null) {
-			// Use a local variable for the SimpleMailMessage
-			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage simpleMailMessage = new org.springframework.mail.SimpleMailMessage();");
-			// "From"
+		if (getSimpleMailMessageBean(root) == null) {
+			// There's no SimpleMailMessage bean; use a local variable
+			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage " + LOCAL_MESSAGE_VARIABLE	+ " = new org.springframework.mail.SimpleMailMessage();");
+			// Set the from address
 			parameters.add(STRING, new JavaSymbolName("mailFrom"));
-			bodyBuilder.appendFormalLine("simpleMailMessage.setFrom(mailFrom);");
-			// "Subject"
+			bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE	+ ".setFrom(mailFrom);");
+			// Set the subject
 			parameters.add(STRING, new JavaSymbolName("subject"));
-			bodyBuilder.appendFormalLine("simpleMailMessage.setSubject(subject);");
+			bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE	+ ".setSubject(subject);");
 		} else {
-			smmAnnotations.add(new AnnotationMetadataBuilder(AUTOWIRED));
-			final FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(targetClassMID, PRIVATE_TRANSIENT, smmAnnotations, new JavaSymbolName("simpleMailMessage"), SIMPLE_MAIL_MESSAGE);
+			// A SimpleMailMessage bean exists; auto-wire it into the entity and use it as a template
+			final List<AnnotationMetadataBuilder> smmAnnotations = Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED));
+			final FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(targetClassMID, PRIVATE_TRANSIENT, smmAnnotations, new JavaSymbolName(TEMPLATE_MESSAGE_FIELD), SIMPLE_MAIL_MESSAGE);
 			mutableTypeDetails.addField(smmFieldBuilder.build());
+			// Use the injected bean as a template (for thread safety)
+			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage " + LOCAL_MESSAGE_VARIABLE	+ " = new org.springframework.mail.SimpleMailMessage(" + TEMPLATE_MESSAGE_FIELD + ");");
 		}
 
-		// "To"
+		// Set the to address
 		parameters.add(STRING, new JavaSymbolName("mailTo"));
-		bodyBuilder.appendFormalLine("simpleMailMessage.setTo(mailTo);");
+		bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE	+ ".setTo(mailTo);");
 
-		// "Message"
+		// Set the message body
 		parameters.add(STRING, new JavaSymbolName("message"));
-		bodyBuilder.appendFormalLine("simpleMailMessage.setText(message);");
+		bodyBuilder.appendFormalLine(LOCAL_MESSAGE_VARIABLE	+ ".setText(message);");
 
 		bodyBuilder.newLine();
-		bodyBuilder.appendFormalLine(mailSenderName + ".send(simpleMailMessage);");
+		bodyBuilder.appendFormalLine(mailSenderName + ".send(" + LOCAL_MESSAGE_VARIABLE + ");");
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(targetClassMID, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, parameters.getKeys(), parameters.getValues(), bodyBuilder);
 		
 		if (async) {
 			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
-				if (root.getAttribute("xmlns:task").length() == 0) {
-					root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
-					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
+				// Add asynchronous email support to the application
+				if (!StringUtils.hasText(root.getAttribute("xmlns:task"))) {
+					// Add the "task" namespace to the Spring config file
+					root.setAttribute("xmlns:task", SPRING_TASK_NS);
+					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  " + SPRING_TASK_NS + " " + SPRING_TASK_XSD);
 				}
 				root.appendChild(new XmlElementBuilder("task:annotation-driven", document).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
 				root.appendChild(new XmlElementBuilder("task:executor", document).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
-				
+				// Write out the new Spring config file
 				fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
-
+				// Update the email properties file
 				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "email.properties", "executor.poolSize", "10", true);
 			}
 			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
