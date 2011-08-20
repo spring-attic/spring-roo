@@ -83,24 +83,21 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private AnnotationMetadata getManagedBeanAnnotation() {
-		JavaType managedBeanAnnotation = new JavaType("javax.faces.bean.ManagedBean");
-		if (getTypeAnnotation(managedBeanAnnotation) != null) {
-			return null;
-		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(managedBeanAnnotation);
-		return annotationBuilder.build();
+		return getTypeAnnotation(new JavaType("javax.faces.bean.ManagedBean"));
 	}
 
 	private AnnotationMetadata getScopeAnnotation() {
 		if (hasScopeAnnotation()) { 
 			return null;
 		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.RequestScoped"));
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.SessionScoped"));
 		return annotationBuilder.build();
 	}
 	
 	private boolean hasScopeAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.RequestScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.ViewScoped")) != null;
+		return (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.SessionScoped")) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.ViewScoped")) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.RequestScoped")) != null);
 	}
 
 	private FieldMetadata getMenuModelField() {
@@ -150,18 +147,24 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("entity"));
 			JavaType entity = (JavaType) value.getValue();
-			String plural = getInflectorPlural(entity.getSimpleTypeName());
+			// String plural = getInflectorPlural(entity.getSimpleTypeName());
 
 			bodyBuilder.appendFormalLine("");
 			bodyBuilder.appendFormalLine("submenu = new Submenu();");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
-			bodyBuilder.appendFormalLine("item.setValue(\"List all " + plural + "\");");
-			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".findAll" + plural + "}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_new}\", String.class));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".showNew}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
-			bodyBuilder.appendFormalLine("item.setHelpText(\"List all " + entity.getSimpleTypeName() + " domain objects\");");
+			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
+
+			bodyBuilder.appendFormalLine("item = new MenuItem();");
+			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_list}\", String.class));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".list}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setAjax(false);");
+			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 
 			bodyBuilder.appendFormalLine("menuModel.addSubmenu(submenu);");

@@ -16,12 +16,11 @@ import javax.faces.model.SelectItem;
 public class LocaleBean {
 	private Locale locale;
 
-	public LocaleBean() {
-		locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
-	}
-
 	public Locale getLocale() {
-		return this.locale;
+		if (locale == null) {
+			locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
+		}
+		return locale;
 	}
 
 	public void setLocale(Locale locale) {

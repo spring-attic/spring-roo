@@ -21,6 +21,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+
 /**
  * Implementation of {@link JsfMenuBeanMetadataProvider}.
  * 

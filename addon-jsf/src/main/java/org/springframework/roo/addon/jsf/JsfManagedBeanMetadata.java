@@ -106,24 +106,21 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private AnnotationMetadata getManagedBeanAnnotation() {
-		JavaType managedBeanAnnotation = new JavaType("javax.faces.bean.ManagedBean");
-		if (getTypeAnnotation(managedBeanAnnotation) != null) {
-			return null;
-		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(managedBeanAnnotation);
-		return annotationBuilder.build();
+		return getTypeAnnotation(new JavaType("javax.faces.bean.ManagedBean"));
 	}
 
 	private AnnotationMetadata getScopeAnnotation() {
 		if (hasScopeAnnotation()) { 
 			return null;
 		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.ViewScoped"));
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.SessionScoped"));
 		return annotationBuilder.build();
 	}
 	
 	private boolean hasScopeAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.faces.bean.SessionScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.RequestScoped")) != null || getTypeAnnotation(new JavaType("javax.faces.bean.ViewScoped")) != null;
+		return (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.SessionScoped")) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.ViewScoped")) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.RequestScoped")) != null);
 	}
 	
 	private FieldMetadata getEntityField() {

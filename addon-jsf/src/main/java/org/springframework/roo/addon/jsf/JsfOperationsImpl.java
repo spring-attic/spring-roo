@@ -78,13 +78,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		changeJsfImplementation(jsfImplementation);
 		copyWebXml();
-		
+
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		copyDirectoryContents("index.html", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/"), false);
 		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
 		copyDirectoryContents("css/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
-		copyDirectoryContents("css/skin/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin"), false);
-		copyDirectoryContents("css/skin/images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css/skin/images"), false);
 		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/templates"), false);
 		copyDirectoryContents("pages/main.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/pages"), false);
 		
@@ -163,23 +161,15 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private void installI18n(JavaPackage destinationPackage) {
 		String packagePath = destinationPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar);
 		String i18nDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n");
-		if (!fileManager.exists(i18nDirectory + "/application.properties")) {
-			try {
-				String projectName = projectOperations.getProjectMetadata().getProjectName();
-				fileManager.createFile(i18nDirectory + "/application.properties");
-				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n/application.properties", "application_name", StringUtils.capitalize(projectName), true);
-				copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
-			} catch (Exception e) {
-				throw new IllegalStateException("Unable to create i18n files", e);
-			}
-		}
+		copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
 	}
 	
 	private void copyEntityTypePage(JavaType entity) {
 		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
+		InputStream inputStream = null;
 		try {
-			InputStream template = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
-			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
+			inputStream = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
+			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__DOMAIN_TYPE__", entity.getSimpleTypeName());
 			input = input.replace("__LC_DOMAIN_TYPE__", StringUtils.uncapitalize(entity.getSimpleTypeName()));
 
@@ -189,6 +179,12 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			fileManager.createOrUpdateTextFileIfRequired(domainTypeFile, input, false);
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create '" + domainTypeFile + "'", e);
+		} finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException ignored) {}
+			}
 		}
 	}
 
@@ -220,16 +216,23 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			return;
 		}
 
+		InputStream inputStream = null;
 		try {
-			InputStream template = TemplateUtils.getTemplate(getClass(), "faces-config-template.xml");
-			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
+			inputStream = TemplateUtils.getTemplate(getClass(), "faces-config-template.xml");
+			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), input, false);
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create 'faces.config.xml'", e);
+		} finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException ignored) {}
+			}
 		}
 	}
-
+	
 	private boolean hasFacesConfig() {
 		return fileManager.exists(getFacesConfigFile());
 	}
