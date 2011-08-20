@@ -14,7 +14,7 @@
                 <f:facet name="header">
                     <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.name}" />
                 </f:facet>
-                <p:dataTable id="list" value="#{__LC_DOMAIN_TYPE__Bean.__DOMAIN_TYPE_PLURAL__}" var="foo" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,15" rows="10" resizableColumns="true">
+                <p:dataTable id="list" value="#{__LC_DOMAIN_TYPE__Bean.__LC_DOMAIN_TYPE_PLURAL__}" var="foo" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,15" rows="10" resizableColumns="true">
                     <p:columns value="#{__LC_DOMAIN_TYPE__Bean.columns}" var="column" columnIndexVar="colIndex">
                         <f:facet name="header">
                             <h:outputText value="#{column}" />
@@ -25,7 +25,7 @@
                         <f:facet name="header">
                             <h:outputText value="Actions" />
                         </f:facet>
-                        <p:commandButton id="viewButton" image="view" update="fooDetails" oncomplete="viewDlg.show()" title="#{messages.label_view}" styleClass="action-icon">
+                        <p:commandButton id="viewButton" image="view" update="__LC_DOMAIN_TYPE__Details" oncomplete="viewDlg.show()" title="#{messages.label_view}" styleClass="action-icon">
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{fooBean.selected__DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="viewButton" value="#{messages.label_view}" showEffect="fade" hideEffect="slide" />
@@ -58,9 +58,9 @@
             <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:panelGrid id="details" columns="2">
                 <h:outputText value="Bar:" />
-                <h:outputText value="#{fooBean.selectedFoo.bar}" />
+                <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selectedFoo.bar}" />
                 <h:outputText value="Cnt:" />
-                <h:outputText value="#{fooBean.selectedFoo.cnt}" />
+                <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selectedFoo.cnt}" />
             </h:panelGrid>
         </p:dialog>
         <p:dialog id="newDialog" visible="#{__LC_DOMAIN_TYPE__Bean.visible}" header="New __DOMAIN_TYPE__" modal="true" widgetVar="newDlg" resizable="true" width="350" showEffect="fade" hideEffect="explode">
@@ -68,11 +68,11 @@
             <h:form id="newForm" prependId="false" styleClass="editForm">
                 <h:panelGrid columns="3" cellpadding="5">
                     <h:outputText value="Bar:" />
-                    <p:inputText id="bar" value="#{__LC_DOMAIN_TYPE__Bean.selectedFoo.bar}">
+                    <p:inputText id="bar" value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.bar}">
                     </p:inputText>
                     <p:message id="barMessage" for="bar" />
                     <h:outputText value="Cnt:" />
-                    <p:inputTextarea id="fooCnt" value="#{__LC_DOMAIN_TYPE__Bean.selectedFoo.cnt}">
+                    <p:inputTextarea id="fooCnt" value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}">
                         <p:message id="fooCntMessage" for="fooCnt" />
                     </p:inputTextarea>
                 </h:panelGrid>

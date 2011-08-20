@@ -175,6 +175,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
 			input = input.replace("__DOMAIN_TYPE_PLURAL__", entityMetadata.getPlural());
+			input = input.replace("__LC_DOMAIN_TYPE_PLURAL__", StringUtils.uncapitalize(entityMetadata.getPlural()));
 
 			fileManager.createOrUpdateTextFileIfRequired(domainTypeFile, input, false);
 		} catch (IOException e) {

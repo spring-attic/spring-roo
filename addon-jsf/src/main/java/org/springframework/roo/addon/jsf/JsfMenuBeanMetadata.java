@@ -151,9 +151,11 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 			bodyBuilder.appendFormalLine("");
 			bodyBuilder.appendFormalLine("submenu = new Submenu();");
+			bodyBuilder.appendFormalLine("submenu.setId(\"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "Submenu\");");
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
+			bodyBuilder.appendFormalLine("item.setId(\"new" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_new}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".showNew}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
@@ -161,6 +163,7 @@ public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
+			bodyBuilder.appendFormalLine("item.setId(\"list" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_list}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".list}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
