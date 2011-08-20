@@ -77,8 +77,8 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
-	@Reference private ProjectOperations projectOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
@@ -186,7 +186,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		 * There are one or more existing entities; preserve the existing
 		 * decision, based on the first such entity. This saves the user from
 		 * having to enter the same value for the "activeRecord" option each
-		 * time they run the DBRE command.
+		 * time they run the database reverse engineer command.
 		 */
 		return MemberFindingUtils.getDeclaredTypeAnnotation(managedEntities.iterator().next(), ROO_ENTITY) != null;
 	}
@@ -320,12 +320,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
 
 		// Find primary key from db metadata and add identifier attributes to @RooEntity
-		final AnnotationMetadataBuilder jpaAnnotationBuilder;
-		if (activeRecord) {
-			jpaAnnotationBuilder = new AnnotationMetadataBuilder(ROO_ENTITY);
-		} else {
-			jpaAnnotationBuilder = new AnnotationMetadataBuilder(ROO_JPA_ENTITY);
-		}
+		final AnnotationMetadataBuilder jpaAnnotationBuilder = new AnnotationMetadataBuilder(activeRecord ? ROO_ENTITY : ROO_JPA_ENTITY);
 		manageIdentifier(javaType, jpaAnnotationBuilder, new HashSet<JavaSymbolName>(), table);
 
 		if (!hasVersionField(table)) {
