@@ -13,10 +13,6 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath*:META-INF/spring/applicationContext*.xml</param-value>
     </context-param>
-    <context-param>
-        <param-name>primefaces.THEME</param-name>
-        <param-value>none</param-value>
-    </context-param>
     <filter>
         <filter-name>Spring OpenEntityManagerInViewFilter</filter-name>
         <filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
