@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
-import static org.springframework.roo.model.RooJavaType.ROO_JSF_MENU_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_APPLICATION_BEAN;
 
 import java.util.Set;
 
@@ -23,30 +23,30 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Implementation of {@link JsfMenuBeanMetadataProvider}.
+ * Implementation of {@link JsfApplicationBeanMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.2.0
  */
 @Component(immediate = true) 
 @Service 
-public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfMenuBeanMetadataProvider {
+public final class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfApplicationBeanMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ProjectOperations projectOperations;
 
-	// Stores the MID (as accepted by this JsfMenuBeanMetadataProvider) for the one (and only one) application-wide menu bean
+	// Stores the MID (as accepted by this JsfApplicationBeanMetadataProvider) for the one (and only one) application-wide menu bean
 	private String menuBeanMid;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_JSF_MENU_BEAN);
+		addMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(JsfManagedBeanMetadata.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_JSF_MENU_BEAN);
+		removeMetadataTrigger(ROO_JSF_APPLICATION_BEAN);
 	}
 	
 	@Override
@@ -75,7 +75,7 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		Assert.notNull(projectMetadata, "Project metadata required");
 
-		return new JsfMenuBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getProjectName());
+		return new JsfApplicationBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, managedBeans, projectMetadata.getProjectName());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
@@ -83,16 +83,16 @@ public final class JsfMenuBeanMetadataProviderImpl extends AbstractItdMetadataPr
 	}
 
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
-		JavaType javaType = JsfMenuBeanMetadata.getJavaType(metadataIdentificationString);
-		Path path = JsfMenuBeanMetadata.getPath(metadataIdentificationString);
+		JavaType javaType = JsfApplicationBeanMetadata.getJavaType(metadataIdentificationString);
+		Path path = JsfApplicationBeanMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
-		return JsfMenuBeanMetadata.createIdentifier(javaType, path);
+		return JsfApplicationBeanMetadata.createIdentifier(javaType, path);
 	}
 
 	public String getProvidesType() {
-		return JsfMenuBeanMetadata.getMetadataIdentiferType();
+		return JsfApplicationBeanMetadata.getMetadataIdentiferType();
 	}
 }

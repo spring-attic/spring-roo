@@ -1,6 +1,6 @@
 package __PACKAGE__;
 
-import org.springframework.roo.addon.jsf.RooJsfMenuBean;
+import org.springframework.roo.addon.jsf.RooJsfApplicationBean;
 
-@RooJsfMenuBean
+@RooJsfApplicationBean
 public class ApplicationBean {}

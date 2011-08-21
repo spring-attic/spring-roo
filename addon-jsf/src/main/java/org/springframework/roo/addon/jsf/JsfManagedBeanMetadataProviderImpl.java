@@ -59,7 +59,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
-		JsfAnnotationValues annotationValues = new JsfAnnotationValues(governorPhysicalTypeMetadata);
+		JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(governorPhysicalTypeMetadata);
 		JavaType entityType = annotationValues.getEntity();
 		if (!annotationValues.isAnnotationFound() || entityType == null) {
 			return null;

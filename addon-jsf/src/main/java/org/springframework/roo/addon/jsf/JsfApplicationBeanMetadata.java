@@ -33,19 +33,19 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Metadata for {@link RooJsfMenuBean}.
+ * Metadata for {@link RooJsfApplicationBean}.
  * 
  * @author Alan Stewart
  * @since 1.2.0
  */
-public class JsfMenuBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	private static final String PROVIDES_TYPE_STRING = JsfMenuBeanMetadata.class.getName();
+public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	private static final String PROVIDES_TYPE_STRING = JsfApplicationBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType PRIMEFACES_MENU_MODEL = new JavaType("org.primefaces.model.MenuModel");
 	private Set<ClassOrInterfaceTypeDetails> managedBeans;
 	private String projectName;
 
-	public JsfMenuBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Set<ClassOrInterfaceTypeDetails> managedBeans, String projectName) {
+	public JsfApplicationBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Set<ClassOrInterfaceTypeDetails> managedBeans, String projectName) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(managedBeans, "Managed beans required");

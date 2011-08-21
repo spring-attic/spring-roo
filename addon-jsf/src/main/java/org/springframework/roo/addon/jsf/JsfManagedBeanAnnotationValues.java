@@ -14,12 +14,12 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart
  * @since 1.2.0
  */
-public class JsfAnnotationValues extends AbstractAnnotationValues {
+public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
 	@AutoPopulate private JavaType entity = null;
 	@AutoPopulate private boolean includeOnMenu = true;
 
-	public JsfAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public JsfManagedBeanAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
