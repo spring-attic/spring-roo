@@ -157,7 +157,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"new" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_new}\", String.class));");
-			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".showNew}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".showNewDialog}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
@@ -165,7 +165,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"list" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_list}\", String.class));");
-			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".list}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".showList}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");

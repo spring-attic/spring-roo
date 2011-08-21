@@ -41,10 +41,10 @@
                 </p:dataTable>
             </p:panel>
         </h:form>
-        <p:dialog id="editDialog" header="Edit __DOMAIN_TYPE__" widgetVar="editDlg" resizable="false" width="300" showEffect="fade" hideEffect="explode" styleClass="form-dialog">
+        <p:dialog id="editDialog" header="Edit __DOMAIN_TYPE__" widgetVar="editDlg" resizable="true" width="300" showEffect="fade" hideEffect="explode" styleClass="form-dialog">
             <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="editForm">
-                <h:panelGrid columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.outputPanel}" />
+                <h:panelGrid columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.editPanel}" />
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" oncomplete="editDlg.hide()" styleClass="form_button" update="list" />
             </h:form>
         </p:dialog>
@@ -63,7 +63,7 @@
                 <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}" />
             </h:panelGrid>
         </p:dialog>
-        <p:dialog id="newDialog" visible="#{__LC_DOMAIN_TYPE__Bean.visible}" header="New __DOMAIN_TYPE__" modal="true" widgetVar="newDlg" resizable="true" width="350" showEffect="fade" hideEffect="explode">
+        <p:dialog id="newDialog" visible="#{__LC_DOMAIN_TYPE__Bean.newDialogVisible}" header="New __DOMAIN_TYPE__" modal="true" widgetVar="newDlg" resizable="true" width="350" showEffect="fade" hideEffect="explode">
             <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="newForm" prependId="false" styleClass="editForm">
                 <h:panelGrid columns="3" cellpadding="5">
