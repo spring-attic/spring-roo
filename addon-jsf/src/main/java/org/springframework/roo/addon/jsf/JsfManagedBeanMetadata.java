@@ -465,7 +465,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("reset();");
-		bodyBuilder.appendFormalLine(getEntityName() + " = null;");
 		bodyBuilder.appendFormalLine(NEW_DIALOG_VISIBLE + " = false;");
 		bodyBuilder.appendFormalLine("return " + findAllMethod.getMethodName() + "();");
 
