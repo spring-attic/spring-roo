@@ -95,11 +95,11 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.isTrue(isApplicationType(javaType), "The supplied type " + javaType + " is not a type which is present in this application");
 		
+		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
+		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(javaType);
+
 		SortedMap<JavaType, JavaTypeMetadataDetails> specialTypes = new TreeMap<JavaType, JavaTypeMetadataDetails>();
 		JavaTypeMetadataDetails javaTypeMetadataDetails = getJavaTypeMetadataDetails(javaType, memberDetails, metadataIdentificationString);
-
-		MethodMetadata idMethod = persistenceMemberLocator.getIdentifierAccessor(javaType);
-		MethodMetadata versionMethod = persistenceMemberLocator.getVersionAccessor(javaType);
 		specialTypes.put(javaType, javaTypeMetadataDetails);
 		
 		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
@@ -108,7 +108,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				continue;
 			}
 			// Not interested in persistence identifiers and version fields
-			if (isPersistenceIdentifierOrVersionMethod(method, idMethod, versionMethod)) {
+			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
 				continue;
 			}
 			// Not interested in fields that are JPA transient fields or immutable fields
@@ -158,15 +158,18 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
 		
+		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
+		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(javaType);		
+
 		Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
-		
 		List<MethodMetadata> methods = MemberFindingUtils.getMethods(memberDetails);
+
 		for (MethodMetadata method : methods) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(javaType), persistenceMemberLocator.getVersionAccessor(javaType))) {
+			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
 				continue;
 			}
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
@@ -279,15 +282,19 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(memberDetails, "Member details required");
 		
+		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
+		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(javaType);
+
 		Map<JavaSymbolName, DateTimeFormatDetails> dates = new LinkedHashMap<JavaSymbolName, DateTimeFormatDetails>();
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString);
+
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator and accessor and in identifiers and version fields
-			if (isPersistenceIdentifierOrVersionMethod(method, persistenceMemberLocator.getIdentifierAccessor(javaType), persistenceMemberLocator.getVersionAccessor(javaType))) {
+			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
 				continue;
 			}
 			JavaType type = method.getReturnType();
@@ -364,8 +371,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, MethodMetadata idMethod, MethodMetadata versionMethod) {
 		Assert.notNull(method, "Method metadata required");
 		
-		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName()))
-					|| (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
+		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName())) || (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
 	}
 	
 	public JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
