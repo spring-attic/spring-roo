@@ -100,7 +100,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getInitMethod());
 		builder.addMethod(getNameAccessorMethod());
 		builder.addMethod(getColumnsAccessorMethod());
-		builder.addMethod(getColumnsMutatorMethod());
 		builder.addMethod(getCreateEntityMethod());
 		builder.addMethod(getSelectedEntityAccessorMethod());
 		builder.addMethod(getSelectedEntityMutatorMethod());
@@ -234,26 +233,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("return columns;");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, getColumnsListType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
-	}
-	
-	private MethodMetadata getColumnsMutatorMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("setColumns");
-		JavaType columnsListType = getColumnsListType();
-		MethodMetadata method = methodExists(methodName, columnsListType.getParameters());
-		if (method != null) return method;
-
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(columnsListType);
-		
-		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		String fieldName = "columns";
-		parameterNames.add(new JavaSymbolName(fieldName));
-		
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
-		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -465,7 +444,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("reset();");
-		bodyBuilder.appendFormalLine(NEW_DIALOG_VISIBLE + " = false;");
 		bodyBuilder.appendFormalLine("return " + findAllMethod.getMethodName() + "();");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -493,6 +471,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(getEntityName() + " = null;");
+		bodyBuilder.appendFormalLine(NEW_DIALOG_VISIBLE + " = false;");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
