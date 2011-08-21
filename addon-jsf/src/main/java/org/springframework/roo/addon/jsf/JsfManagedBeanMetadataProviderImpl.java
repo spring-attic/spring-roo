@@ -3,13 +3,10 @@ package org.springframework.roo.addon.jsf;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
@@ -18,13 +15,16 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
@@ -38,8 +38,12 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true) 
 @Service 
 public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
+	
+	// Fields
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	private Map<JavaType, String> entityToManagedBeandMidMap = new LinkedHashMap<JavaType, String>();
 	private Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
+
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -92,61 +96,70 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
 		String plural = pluralMetadata.getPlural();
 
-		Set<MethodMetadata> locatedMethods = locateMethods(memberDetails, metadataIdentificationString);
+		Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataIdentificationString);
 
-		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, locatedMethods);
+		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, locatedFieldsAndAccessors);
 	}
 
-	private List<MethodMetadata> findAccessors(MemberDetails memberDetails, String metadataIdentificationString) {
-		List<MethodMetadata> locatedAccessors = new LinkedList<MethodMetadata>();
+	private Map<FieldMetadata, MethodMetadata> locateFieldsAndAccessors(JavaType entityType, MemberDetails memberDetails, String metadataIdentificationString) {
+		Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = new LinkedHashMap<FieldMetadata, MethodMetadata>();
+		
+		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
+		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entityType);
 
 		int counter = 0;
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-			// Track any changes to the method (eg it goes away)
 			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			
-			if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
-				counter++;
-				locatedAccessors.add(method);
-			} 
-		}
-
-		return locatedAccessors;
-	}
-
-	private Set<MethodMetadata> locateMethods(MemberDetails memberDetails, String metadataIdentificationString) {
-		Set<MethodMetadata> locatedMethods = new LinkedHashSet<MethodMetadata>();
-		
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-			if (isMethodOfInterest(method, memberDetails)) {
-				locatedMethods.add(method);
+			if (!BeanInfoUtils.isAccessorMethod(method)) {
+				continue;
 			}
+			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
+				continue;
+			}
+			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+			if (field == null) {
+				continue;
+			}
+			if (counter < 4 && isFieldOfInterest(field)) {
+				counter++;
+				CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+				customDataBuilder.put("converterField", "true");
+				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+				fieldBuilder.append(customDataBuilder.build());
+				field = fieldBuilder.build();
+			}
+			
+			locatedFieldsAndAccessors.put(field, method);
 		}
-		return locatedMethods;
+		return locatedFieldsAndAccessors;
 	}
-
-	private boolean isMethodOfInterest(MethodMetadata method, MemberDetails memberDetails) {
-		if (!(BeanInfoUtils.isMutatorMethod(method) || BeanInfoUtils.isAccessorMethod(method))) {
-			return false; 
-		}
-		if (method.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {
-			return false; 
-		}
-		FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-		if (field == null) {
+	
+	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, MethodMetadata idMethod, MethodMetadata versionMethod) {
+		Assert.notNull(method, "Method metadata required");
+		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName())) || (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
+	}
+	
+	private boolean isFieldOfInterest(FieldMetadata field) {
+		JavaType fieldType = field.getFieldType();
+		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
+				|| isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
+				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
+				|| field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) /* Not interested in embedded types */) {
 			return false;
 		}
-//		JavaType fieldType = field.getFieldType();
-//		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
-//				|| isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
-//				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-//				|| field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) /* Not interested in embedded types */) {
-//			return false;
-//		}
 		return true;
 	}
 
+	private FieldMetadata getFieldOfInterest(MethodMetadata method, MemberDetails memberDetails) {
+		if (!(BeanInfoUtils.isMutatorMethod(method) || BeanInfoUtils.isAccessorMethod(method))) {
+			return null; 
+		}
+		if (method.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {
+			return null; 
+		}
+		return BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+	}
+	
 	public boolean isApplicationType(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null;

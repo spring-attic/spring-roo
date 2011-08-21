@@ -14,23 +14,23 @@
                 <f:facet name="header">
                     <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.name}" />
                 </f:facet>
-                <p:dataTable id="list" value="#{__LC_DOMAIN_TYPE__Bean.__LC_DOMAIN_TYPE_PLURAL__}" var="foo" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,15" rows="10" resizableColumns="true">
+                <p:dataTable id="list" value="#{__LC_DOMAIN_TYPE__Bean.all__DOMAIN_TYPE_PLURAL__}" var="__LC_DOMAIN_TYPE__" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,15" rows="10" resizableColumns="true">
                     <p:columns value="#{__LC_DOMAIN_TYPE__Bean.columns}" var="column" columnIndexVar="colIndex">
                         <f:facet name="header">
                             <h:outputText value="#{column}" />
                         </f:facet>
-                        <h:outputText value="#{foo[column]}" />
+                        <h:outputText value="#{__LC_DOMAIN_TYPE__[column]}" />
                     </p:columns>
                     <p:column styleClass="action-column">
                         <f:facet name="header">
                             <h:outputText value="Actions" />
                         </f:facet>
                         <p:commandButton id="viewButton" image="view" update="__LC_DOMAIN_TYPE__Details" oncomplete="viewDlg.show()" title="#{messages.label_view}" styleClass="action-icon">
-                            <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{fooBean.selected__DOMAIN_TYPE__}" />
+                            <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="viewButton" value="#{messages.label_view}" showEffect="fade" hideEffect="slide" />
                         <p:commandButton id="editButton" image="edit" update="editForm" oncomplete="editDlg.show()" title="#{messages.label_edit}" styleClass="action-icon">
-                            <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{fooBean.selected__DOMAIN_TYPE__}" />
+                            <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="editButton" value="#{messages.label_edit}" showEffect="fade" hideEffect="slide" />
                         <p:commandButton id="deleteButton" image="delete" oncomplete="deleteDlg.show()" title="#{messages.label_delete}" styleClass="action-icon">
@@ -42,13 +42,13 @@
             </p:panel>
         </h:form>
         <p:dialog id="editDialog" header="Edit __DOMAIN_TYPE__" widgetVar="editDlg" resizable="false" width="300" showEffect="fade" hideEffect="explode" styleClass="form-dialog">
-            <p:ajax event="close" update="growl" listener="#{fooBean.handleDialogClose}" />
+            <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="editForm">
                 <h:panelGrid columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.outputPanel}" />
-                <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" oncomplete="editDlg.hide()" styleClass="form_button" update="fooList" />
+                <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" oncomplete="editDlg.hide()" styleClass="form_button" update="list" />
             </h:form>
         </p:dialog>
-        <p:confirmDialog id="deleteDialog" widgetVar="deleteDlg" message="Are you sure you want to delete this Foo?" showEffect="fade" hideEffect="explode" header="Confirm Deletion" severity="alarm">
+        <p:confirmDialog id="deleteDialog" widgetVar="deleteDlg" message="Are you sure you want to delete this record?" showEffect="fade" hideEffect="explode" header="Confirm Deletion" severity="alarm">
             <h:form id="deleteForm">
                 <p:commandButton value="Yes" action="#{__LC_DOMAIN_TYPE__Bean.delete}" update="data" oncomplete="deleteDlg.hide()" />
                 <p:commandButton value="No" onclick="deleteDlg.hide()" type="button" />
@@ -58,9 +58,9 @@
             <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:panelGrid id="details" columns="2">
                 <h:outputText value="Bar:" />
-                <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selectedFoo.bar}" />
+                <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.bar}" />
                 <h:outputText value="Cnt:" />
-                <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selectedFoo.cnt}" />
+                <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}" />
             </h:panelGrid>
         </p:dialog>
         <p:dialog id="newDialog" visible="#{__LC_DOMAIN_TYPE__Bean.visible}" header="New __DOMAIN_TYPE__" modal="true" widgetVar="newDlg" resizable="true" width="350" showEffect="fade" hideEffect="explode">
@@ -72,8 +72,8 @@
                     </p:inputText>
                     <p:message id="barMessage" for="bar" />
                     <h:outputText value="Cnt:" />
-                    <p:inputTextarea id="fooCnt" value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}">
-                        <p:message id="fooCntMessage" for="fooCnt" />
+                    <p:inputTextarea id="__DOMAIN_TYPE__Cnt" value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}">
+                        <p:message id="__DOMAIN_TYPE__CntMessage" for="__DOMAIN_TYPE__Cnt" />
                     </p:inputTextarea>
                 </h:panelGrid>
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" styleClass="form_button" ajax="false" update="list" />

@@ -4,13 +4,12 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -45,19 +44,20 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private JavaType entityType;
 	private String plural;
-	private Set<MethodMetadata> locatedMethods;
+	private Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata persistMethod;
 	private MethodMetadata mergeMethod;
 	private MethodMetadata removeMethod;
 	private MethodMetadata findAllMethod;
 
-	public JsfManagedBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JsfManagedBeanAnnotationValues annotationValues, MemberDetails memberDetails, String plural, Set<MethodMetadata> locatedMethods) {
+	public JsfManagedBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JsfManagedBeanAnnotationValues annotationValues, MemberDetails memberDetails, String plural, Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.isTrue(StringUtils.hasText(plural), "Plural required");
+		Assert.notNull(locatedFieldsAndAccessors, "Located fields and accessors map required");
 		
 		if (!isValid()) {
 			return;
@@ -65,7 +65,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		
 		entityType = annotationValues.getEntity();
 		this.plural = plural;
-		this.locatedMethods = locatedMethods;
+		this.locatedFieldsAndAccessors = locatedFieldsAndAccessors;
 
 		identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		persistMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
@@ -83,17 +83,24 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addAnnotation(getScopeAnnotation());
 
 		// Add fields
+		builder.addField(getNameField());
 		builder.addField(getEntityField());
 		builder.addField(getAllEntitiesField());
+		builder.addField(getColumnsField());
 		builder.addField(getTableVisibleField());
 		builder.addField(getFormModelField());
 
 		// Add methods
+		builder.addMethod(getInitMethod());
+		builder.addMethod(getNameAccessorMethod());
+		builder.addMethod(getColumnsAccessorMethod());
+		builder.addMethod(getColumnsMutatorMethod());
 		builder.addMethod(getCreateEntityMethod());
 		builder.addMethod(getEntityAccessorMethod());
 		builder.addMethod(getEntityMutatorMethod());
 		builder.addMethod(getGetAllEntitiesMethod());
 		builder.addMethod(getFindAllEntitiesMethod());
+
 		builder.addMethod(getPersistMethod());
 		builder.addMethod(getDeleteMethod());
 		builder.addMethod(getResetMethod());
@@ -137,6 +144,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (field != null) return field;
 
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(new JavaType("java.util.List"));
+
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new ArrayList<AnnotationMetadataBuilder>(), fieldName, getEntityListType());
 		return fieldBuilder.build();
 	}
@@ -147,6 +157,30 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return new JavaType("java.util.List", 0, DataType.TYPE, null, paramTypes);
 	}
 	
+	private FieldMetadata getNameField() {
+		JavaSymbolName fieldName = new JavaSymbolName("name");
+		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
+		if (field != null) return field;
+
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, JavaType.STRING_OBJECT, "\"" + plural + "\"");
+		return fieldBuilder.build();
+	}
+
+	private FieldMetadata getColumnsField() {
+		JavaSymbolName fieldName = new JavaSymbolName("columns");
+		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
+		if (field != null) return field;
+
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new ArrayList<AnnotationMetadataBuilder>(), fieldName, getColumnsListType());
+		return fieldBuilder.build();
+	}
+
+	private JavaType getColumnsListType() {
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(JavaType.STRING_OBJECT);
+		return new JavaType("java.util.List", 0, DataType.TYPE, null, paramTypes);
+	}
+
 	private FieldMetadata getTableVisibleField() {
 		JavaSymbolName fieldName = new JavaSymbolName("tableVisible");
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
@@ -167,6 +201,58 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new ArrayList<AnnotationMetadataBuilder>(), fieldName, panelGrid);
 		return fieldBuilder.build();
+	}
+	
+	private MethodMetadata getInitMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("init");
+		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
+		if (method != null) return method;
+
+		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(new JavaType("java.util.ArrayList"));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("all" + plural + " = " + entityType.getSimpleTypeName() + ".findAll" + plural + "();");
+		bodyBuilder.appendFormalLine("columns = new ArrayList<String>();");
+		for (FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
+			bodyBuilder.appendFormalLine("columns.add(\"" + field.getFieldName().getSymbolName() + "\");");
+		}
+		
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("javax.annotation.PostConstruct")));
+		return methodBuilder.build();
+	}
+	
+	private MethodMetadata getColumnsAccessorMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("getColumns");
+		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
+		if (method != null) return method;
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return columns;");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, getColumnsListType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		return methodBuilder.build();
+	}
+	
+	private MethodMetadata getColumnsMutatorMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("setColumns");
+		JavaType columnsListType = getColumnsListType();
+		MethodMetadata method = methodExists(methodName, columnsListType.getParameters());
+		if (method != null) return method;
+
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(columnsListType);
+		
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+		String fieldName = "columns";
+		parameterNames.add(new JavaSymbolName(fieldName));
+		
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
+		
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), parameterNames, bodyBuilder);
+		return methodBuilder.build();
 	}
 	
 	private MethodMetadata getCreateEntityMethod() {
@@ -254,6 +340,18 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
+	private MethodMetadata getNameAccessorMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("getName");
+		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
+		if (method != null) return method;
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return name;");
+		
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		return methodBuilder.build();
+	}
+	
 	private MethodMetadata getPersistMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("persist");
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
@@ -344,7 +442,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return null;
 		}
 
-		if (locatedMethods.isEmpty()) {
+		List<MethodMetadata> converterMethods = getConverterMethods();
+		if (converterMethods.isEmpty()) {
 			return null;
 		}
 		
@@ -367,7 +466,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		parameterNames.add(new JavaSymbolName("value"));
 
 		String typeName = StringUtils.uncapitalize(simpleTypeName);
-		List<MethodMetadata> accessors = getAccessors();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		// Create getAsObject method
@@ -377,7 +475,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine(getEntityListType().getNameIncludingTypeParameters(false, imports) + " " + StringUtils.uncapitalize(plural) + " = " + simpleTypeName + "." + findAllMethod.getMethodName() + "();");
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + typeName + " : " + StringUtils.uncapitalize(plural) + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(new StringBuilder("String ").append(typeName).append("Str = ").append(getBuilderString(accessors)).toString());
+		bodyBuilder.appendFormalLine(new StringBuilder("String ").append(typeName).append("Str = ").append(getBuilderString(converterMethods)).toString());
 		bodyBuilder.appendFormalLine("if (" + typeName +"Str.equals(value)) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return " + typeName + ";");
@@ -396,7 +494,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(simpleTypeName + " " + typeName + " = (" + simpleTypeName + ") value;" );
-		bodyBuilder.appendFormalLine(new StringBuilder("return ").append(getBuilderString(accessors)).toString());
+		bodyBuilder.appendFormalLine(new StringBuilder("return ").append(getBuilderString(converterMethods)).toString());
 		bodyBuilder.indentRemove();
 		
 		MethodMetadataBuilder getAsStringMethod = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("getAsString"), JavaType.STRING_OBJECT, AnnotatedJavaType.convertFromJavaTypes(getAsStringParameterTypes), parameterNames, bodyBuilder);
@@ -409,34 +507,34 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return typeDetailsBuilder.build();
 	}
 
-	private List<MethodMetadata> getAccessors() {
-		List<MethodMetadata> accessors = new LinkedList<MethodMetadata>();
-		for (MethodMetadata method : locatedMethods) {
-			if (BeanInfoUtils.isAccessorMethod(method)) {
-				accessors.add(method);
-			}
-		}
-		return accessors;
-	}
-
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<JavaType> paramTypes) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
 	}
 	
-	private String getComponentCreationStr(String componentName) {
-		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
+	private List<MethodMetadata> getConverterMethods() {
+		List<MethodMetadata> converterMethods = new LinkedList<MethodMetadata>();
+		for (FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
+			if (field.getCustomData() != null && field.getCustomData().keySet().contains("converterField")) {
+				converterMethods.add(locatedFieldsAndAccessors.get(field));
+			}
+		}
+		return converterMethods;
 	}
 
-	private String getBuilderString(List<MethodMetadata> accessors) {
+	private String getBuilderString(List<MethodMetadata> converterMethods) {
 		StringBuilder sb = new StringBuilder("new StringBuilder()");
-		for (int i = 0; i < accessors.size(); i++) {
+		for (int i = 0; i < converterMethods.size(); i++) {
 			if (i > 0) {
 				sb.append(".append(\" \")");
 			}
-			sb.append(".append(").append(StringUtils.uncapitalize(entityType.getSimpleTypeName())).append(".").append(accessors.get(i).getMethodName().getSymbolName()).append("())");
+			sb.append(".append(").append(StringUtils.uncapitalize(entityType.getSimpleTypeName())).append(".").append(converterMethods.get(i).getMethodName().getSymbolName()).append("())");
 		}
 		sb.append(".toString();");
 		return sb.toString();
+	}
+	
+	private String getComponentCreationStr(String componentName) {
+		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
 	}
 	
 	public String toString() {

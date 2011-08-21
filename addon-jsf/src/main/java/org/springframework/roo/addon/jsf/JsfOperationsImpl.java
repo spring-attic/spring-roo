@@ -17,7 +17,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -58,7 +57,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private PropFileOperations propFileOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
