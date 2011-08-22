@@ -81,7 +81,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Get the entity metadata
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
 		if (entityMetadata == null) {
-			throw new IllegalArgumentException("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not a entity");
+			throw new IllegalArgumentException("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity");
 		}
 		
 		// Get the member details
@@ -152,7 +152,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Get the entity metadata
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
 		if (entityMetadata == null) {
-			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not a entity");
+			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity");
 			return;
 		}
 
