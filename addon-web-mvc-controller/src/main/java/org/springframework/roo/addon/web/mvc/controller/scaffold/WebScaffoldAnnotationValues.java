@@ -21,7 +21,6 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate boolean create = true;
 	@AutoPopulate boolean delete = true;
 	@AutoPopulate boolean exposeFinders = true;
-	@AutoPopulate boolean exposeJson = true;
 	@AutoPopulate boolean populateMethods = true;
 	@AutoPopulate boolean registerConverters = true;
 	@AutoPopulate boolean update = true;
@@ -66,10 +65,6 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 		return registerConverters;
 	}
 
-	public boolean isExposeJson() {
-		return exposeJson;
-	}
-	
 	public boolean isPopulateMethods() {
 		return populateMethods;
 	}

@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.roo.addon.web.mvc.json.RooWebJson;
+
 /**
  * Indicates a type that requires ROO controller support.
  * 
@@ -83,10 +85,12 @@ public @interface RooWebScaffold {
 	boolean exposeFinders() default true;
 	
 	/**
-	 * Will scan the formBackingObjects for org.springframework.roo.addon.json.RooJson annotation and expose json when configured. 
+	 * This flag is not used any more as of Roo 1.2.0. Please annotate controller types with {@link RooWebJson} instead.
+	 * (Was: Will scan the formBackingObjects for org.springframework.roo.addon.json.RooJson annotation and expose json when configured.)
 	 * 
 	 * @return indicates if the json methods should be provided (defaults to "true"; optional)
 	 */
+	@Deprecated
 	boolean exposeJson() default true;
 	
 	/**

@@ -10,7 +10,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
@@ -54,17 +53,15 @@ public class JsonOperationsImpl implements JsonOperations {
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
 		// TODO do these two "if" statements check the same thing?
-		if (MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), RooJavaType.ROO_JSON) == null) {
-			if (!mutableTypeDetails.getAnnotations().contains(RooJavaType.ROO_JSON)) {
-				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_JSON);
-				if (rootName != null && rootName.length() > 0) {
-					annotationBuilder.addStringAttribute("rootName", rootName);
-				}
-				if (deepSerialize) {
-					annotationBuilder.addBooleanAttribute("deepSerialize", true);
-				}
-				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
+		if (!mutableTypeDetails.getAnnotations().contains(RooJavaType.ROO_JSON)) {
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_JSON);
+			if (rootName != null && rootName.length() > 0) {
+				annotationBuilder.addStringAttribute("rootName", rootName);
 			}
+			if (deepSerialize) {
+				annotationBuilder.addBooleanAttribute("deepSerialize", true);
+			}
+			mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 		}
 	}
 	
@@ -73,7 +70,7 @@ public class JsonOperationsImpl implements JsonOperations {
 	}
 	
 	public void annotateAll(final boolean deepSerialize) {
-		for (final JavaType type: typeLocationService.findTypesWithAnnotation(ROO_JAVA_BEAN)) {
+		for (final JavaType type : typeLocationService.findTypesWithAnnotation(ROO_JAVA_BEAN)) {
 			annotateType(type, "", deepSerialize);
 		}
 	}
