@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.Application;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -16,10 +17,12 @@ import javax.faces.model.SelectItem;
 public class LocaleBean {
 	private Locale locale;
 
+	@PostConstruct
+	public void init() {
+		locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
+	}
+
 	public Locale getLocale() {
-		if (locale == null) {
-			locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
-		}
 		return locale;
 	}
 

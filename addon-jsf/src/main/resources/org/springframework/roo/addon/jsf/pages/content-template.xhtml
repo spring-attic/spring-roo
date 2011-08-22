@@ -92,16 +92,18 @@
                 <p:commandButton value="No" onclick="deleteDlg.hide()" type="button" />
             </h:form>
         </p:confirmDialog>
-        <p:dialog id="viewDialog" header="__DOMAIN_TYPE__ Details" widgetVar="viewDlg" resizable="true" width="250" showEffect="fade" hideEffect="explode">
-            <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
-            <h:panelGrid id="details" columns="2">
+        <p:dialog id="viewDialog" header="Foo Details" widgetVar="viewDlg" resizable="true" width="250" showEffect="fade" hideEffect="explode">
+            <p:ajax event="close" update="growl" listener="#{fooBean.handleDialogClose}" />
+            <h:panelGrid id="fooDetails" columns="2">
                 <h:outputText value="Bar:" />
                 <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.bar}" />
                 <h:outputText value="Cnt:" />
                 <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}" />
+                <h:outputText value="Start date:" />
+                <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.registered}" />
             </h:panelGrid>
         </p:dialog>
-        <p:dialog id="newDialog" visible="#{__LC_DOMAIN_TYPE__Bean.newDialogVisible}" header="New __DOMAIN_TYPE__" modal="true" widgetVar="newDlg" resizable="true" width="350" showEffect="fade" hideEffect="explode">
+        <p:dialog id="newDialog" visible="#{fooBean.newDialogVisible}" header="New Foo" modal="true" widgetVar="newDlg" resizable="true" width="350" showEffect="fade" hideEffect="explode">
             <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="newForm" prependId="false" styleClass="editForm">
                 <h:panelGrid columns="3" cellpadding="5">
@@ -110,11 +112,14 @@
                     </p:inputText>
                     <p:message id="barMessage" for="bar" />
                     <h:outputText value="Cnt:" />
-                    <p:inputTextarea id="__DOMAIN_TYPE__Cnt" value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}">
-                        <p:message id="__DOMAIN_TYPE__CntMessage" for="__DOMAIN_TYPE__Cnt" />
+                    <p:inputTextarea id="fooCnt" value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.cnt}">
                     </p:inputTextarea>
+                    <p:message id="fooCntMessage" for="fooCnt" />
+                    <h:outputText value="Start date:" />
+                    <p:calendar id="startDate" value="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__.registered}" locale="#{localeBean.locale}" navigator="true" effect="slideDown" pattern="dd/MM/yyyy" />
+                    <p:message id="foodateMessage" for="startDate" />
                 </h:panelGrid>
-                <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" styleClass="form_button" ajax="false" update="list" />
+                <p:commandButton id="newFooSaveButton" action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" styleClass="form_button" ajax="false" update="fooList" />
             </h:form>
         </p:dialog>
     </ui:define>

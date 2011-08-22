@@ -1,14 +1,20 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.addon.jsf.JsfUtils.MANAGED_BEAN;
+import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_DEFAULT_MENU_MODEL;
+import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_MENU_ITEM;
+import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_MENU_MODEL;
+import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_SUB_MENU;
+import static org.springframework.roo.addon.jsf.JsfUtils.REQUEST_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfUtils.SESSION_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfUtils.VIEW_SCOPED;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
-import org.jvnet.inflector.Noun;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -41,7 +47,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = JsfApplicationBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType PRIMEFACES_MENU_MODEL = new JavaType("org.primefaces.model.MenuModel");
 	private Set<ClassOrInterfaceTypeDetails> managedBeans;
 	private String projectName;
 
@@ -83,21 +88,21 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	}
 	
 	private AnnotationMetadata getManagedBeanAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.faces.bean.ManagedBean"));
+		return getTypeAnnotation(MANAGED_BEAN);
 	}
 
 	private AnnotationMetadata getScopeAnnotation() {
 		if (hasScopeAnnotation()) { 
 			return null;
 		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.SessionScoped"));
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(SESSION_SCOPED);
 		return annotationBuilder.build();
 	}
 	
 	private boolean hasScopeAnnotation() {
-		return (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.SessionScoped")) != null 
-			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.ViewScoped")) != null 
-			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.RequestScoped")) != null);
+		return (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, SESSION_SCOPED) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, VIEW_SCOPED) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, REQUEST_SCOPED) != null);
 	}
 
 	private FieldMetadata getMenuModelField() {
@@ -118,18 +123,12 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		if (method != null) return method;
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType("javax.el.ELContext"));
-		imports.addImport(new JavaType("javax.el.ExpressionFactory"));
-		imports.addImport(new JavaType("javax.faces.context.FacesContext"));
-		imports.addImport(new JavaType("org.primefaces.component.menuitem.MenuItem"));
-		imports.addImport(new JavaType("org.primefaces.component.submenu.Submenu"));
-		imports.addImport(new JavaType("org.primefaces.model.DefaultMenuModel"));
-
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
-		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
-		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
-		bodyBuilder.appendFormalLine("");
+		JsfUtils.addCommonJsfFields(imports, bodyBuilder);
+		imports.addImport(PRIMEFACES_MENU_ITEM);
+		imports.addImport(PRIMEFACES_SUB_MENU);
+		imports.addImport(PRIMEFACES_DEFAULT_MENU_MODEL);
+
 		bodyBuilder.appendFormalLine("menuModel = new DefaultMenuModel();");
 		bodyBuilder.appendFormalLine("Submenu submenu;");
 		bodyBuilder.appendFormalLine("MenuItem item;");
@@ -147,6 +146,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("entity"));
 			JavaType entity = (JavaType) value.getValue();
+			String beanName = StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName());
 			// String plural = getInflectorPlural(entity.getSimpleTypeName());
 
 			bodyBuilder.appendFormalLine("");
@@ -157,7 +157,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"new" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_new}\", String.class));");
-			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".showNewDialog}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + ".displayNewDialog}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
@@ -165,7 +165,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"list" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_list}\", String.class));");
-			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName()) + ".showList}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + ".displayList}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
@@ -209,14 +209,14 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
 	}
 	
-	private String getInflectorPlural(String term) {
-		try {
-			return Noun.pluralOf(term, Locale.ENGLISH);
-		} catch (RuntimeException e) {
-			// Inflector failed (see for example ROO-305), so don't pluralize it
-			return term;
-		}
-	}
+//	private String getInflectorPlural(String term) {
+//		try {
+//			return Noun.pluralOf(term, Locale.ENGLISH);
+//		} catch (RuntimeException e) {
+//			// Inflector failed (see for example ROO-305), so don't pluralize it
+//			return term;
+//		}
+//	}
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

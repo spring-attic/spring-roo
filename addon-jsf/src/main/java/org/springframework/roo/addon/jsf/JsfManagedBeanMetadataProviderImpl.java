@@ -153,16 +153,6 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		return true;
 	}
 
-	private FieldMetadata getFieldOfInterest(MethodMetadata method, MemberDetails memberDetails) {
-		if (!(BeanInfoUtils.isMutatorMethod(method) || BeanInfoUtils.isAccessorMethod(method))) {
-			return null; 
-		}
-		if (method.getCustomData().keySet().contains(PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD)) {
-			return null; 
-		}
-		return BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-	}
-	
 	public boolean isApplicationType(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null;

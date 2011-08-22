@@ -1,5 +1,16 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.addon.jsf.JsfUtils.CONVERTER;
+import static org.springframework.roo.addon.jsf.JsfUtils.FACES_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfUtils.HTML_OUTPUT_TEXT;
+import static org.springframework.roo.addon.jsf.JsfUtils.HTML_PANEL_GRID;
+import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_CALENDAR;
+import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_CLOSE_EVENT;
+import static org.springframework.roo.addon.jsf.JsfUtils.REQUEST_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfUtils.SESSION_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfUtils.UI_COMPONENT;
+import static org.springframework.roo.addon.jsf.JsfUtils.VIEW_SCOPED;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,7 +56,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = JsfManagedBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType HTML_PANEL_GRID = new JavaType("javax.faces.component.html.HtmlPanelGrid");
+	
 	private static final String NEW_DIALOG_VISIBLE = "newDialogVisible";
 	
 	// Fields
@@ -111,8 +122,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getPopulatePanelMethod());
 		builder.addMethod(getBooleanAccessorMethod(NEW_DIALOG_VISIBLE));
 		builder.addMethod(getBooleanMutatorMethod(NEW_DIALOG_VISIBLE));
-		builder.addMethod(getShowListMethod());
-		builder.addMethod(getShowNewDialogMethod());
+		builder.addMethod(getDisplayListMethod());
+		builder.addMethod(getDisplayNewDialogMethod());
 		builder.addMethod(getPersistMethod());
 		builder.addMethod(getDeleteMethod());
 		builder.addMethod(getResetMethod());
@@ -131,14 +142,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (hasScopeAnnotation()) { 
 			return null;
 		}
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(new JavaType("javax.faces.bean.SessionScoped"));
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(SESSION_SCOPED);
 		return annotationBuilder.build();
 	}
 	
 	private boolean hasScopeAnnotation() {
-		return (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.SessionScoped")) != null 
-			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.ViewScoped")) != null 
-			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.faces.bean.RequestScoped")) != null);
+		return (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, SESSION_SCOPED) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, VIEW_SCOPED) != null 
+			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, REQUEST_SCOPED) != null);
 	}
 	
 	private FieldMetadata getSelectedEntityField() {
@@ -376,8 +387,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		addCommonJsfFields(imports, bodyBuilder);
-		imports.addImport(new JavaType("javax.faces.component.html.HtmlOutputText"));
+		JsfUtils.addCommonJsfFields(imports, bodyBuilder);
+		imports.addImport(HTML_PANEL_GRID);
+		imports.addImport(HTML_OUTPUT_TEXT);
 
 		bodyBuilder.appendFormalLine("HtmlPanelGrid htmlPanelGrid = " + getComponentCreationStr("HtmlPanelGrid"));
 		bodyBuilder.appendFormalLine("htmlPanelGrid.setId(\"editPanelGrid\");");
@@ -395,7 +407,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + outputFieldVar + ");");
 			bodyBuilder.appendFormalLine("");
 			if (isDateField(fieldType)) {
-				imports.addImport(new JavaType("org.primefaces.component.calendar.Calendar"));
+				imports.addImport(PRIMEFACES_CALENDAR);
 				imports.addImport(new JavaType("java.util.Date"));
 				bodyBuilder.appendFormalLine("Calendar " + inputFieldVar + " = " + getComponentCreationStr("Calendar"));
 				bodyBuilder.appendFormalLine(getValueExpressionStr(inputFieldVar, fieldName, Date.class));
@@ -418,8 +430,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getShowNewDialogMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("showNewDialog");
+	private MethodMetadata getDisplayNewDialogMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("displayNewDialog");
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
 
@@ -431,8 +443,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getShowListMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("showList");
+	private MethodMetadata getDisplayListMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("displayList");
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
 
@@ -462,7 +474,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("reset();");
-		bodyBuilder.appendFormalLine("return " + findAllMethod.getMethodName() + "();");
+		bodyBuilder.appendFormalLine("return findAll" + plural + "();");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
@@ -476,7 +488,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(getEntityName() + "." + removeMethod.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("reset();");
-		bodyBuilder.appendFormalLine("return " + findAllMethod.getMethodName() + "();");
+		bodyBuilder.appendFormalLine("return findAll" + plural + "();");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
@@ -497,14 +509,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getHandleDialogCloseMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("handleDialogClose");
-		JavaType javaType = new JavaType("org.primefaces.event.CloseEvent");
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
-		parameterTypes.add(javaType);
+		parameterTypes.add(PRIMEFACES_CLOSE_EVENT);
 		MethodMetadata method = methodExists(methodName, parameterTypes);
 		if (method != null) return method;
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(javaType);
+		imports.addImport(PRIMEFACES_CLOSE_EVENT);
 		
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		parameterNames.add(new JavaSymbolName("event"));
@@ -518,18 +529,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private String getEntityName() {
 		return "selected" + entityType.getSimpleTypeName();
-	}
-	
-	private void addCommonJsfFields(ImportRegistrationResolver imports, InvocableMemberBodyBuilder bodyBuilder) {
-		imports.addImport(HTML_PANEL_GRID);
-		imports.addImport(new JavaType("javax.el.ELContext"));
-		imports.addImport(new JavaType("javax.el.ExpressionFactory"));
-		imports.addImport(new JavaType("javax.faces.context.FacesContext"));
-
-		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
-		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
-		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
-		bodyBuilder.appendFormalLine("");
 	}
 	
 	private FieldMetadata getBooleanField(JavaSymbolName fieldName) {
@@ -581,18 +580,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return null;
 		}
 		
-		JavaType uiComponent = new JavaType("javax.faces.component.UIComponent");
-		JavaType facesContext = new JavaType("javax.faces.context.FacesContext");
-		JavaType converter = new JavaType("javax.faces.convert.Converter");
-
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(uiComponent);
-		imports.addImport(converter);
-		imports.addImport(facesContext);
+		imports.addImport(UI_COMPONENT);
+		imports.addImport(CONVERTER);
+		imports.addImport(FACES_CONTEXT);
 
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(facesContext);
-		paramTypes.add(uiComponent);
+		paramTypes.add(FACES_CONTEXT);
+		paramTypes.add(UI_COMPONENT);
 
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		parameterNames.add(new JavaSymbolName("context"));
@@ -634,7 +629,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		MethodMetadataBuilder getAsStringMethod = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("getAsString"), JavaType.STRING_OBJECT, AnnotatedJavaType.convertFromJavaTypes(getAsStringParameterTypes), parameterNames, bodyBuilder);
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, innerType, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.addImplementsType(converter);
+		typeDetailsBuilder.addImplementsType(CONVERTER);
 		typeDetailsBuilder.addMethod(getAsObjectMethod);
 		typeDetailsBuilder.addMethod(getAsStringMethod);
 
