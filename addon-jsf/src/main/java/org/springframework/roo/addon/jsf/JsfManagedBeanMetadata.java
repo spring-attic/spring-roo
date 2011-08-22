@@ -2,6 +2,7 @@ package org.springframework.roo.addon.jsf;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +101,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getInitMethod());
 		builder.addMethod(getNameAccessorMethod());
 		builder.addMethod(getColumnsAccessorMethod());
-		builder.addMethod(getCreateEntityMethod());
 		builder.addMethod(getSelectedEntityAccessorMethod());
 		builder.addMethod(getSelectedEntityMutatorMethod());
 		builder.addMethod(getAllEntitiesAccessorMethod());
@@ -236,20 +236,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getCreateEntityMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("create" + entityType.getSimpleTypeName());
-		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
-		if (method != null) return method;
-
-		String fieldName = getEntityName();
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(fieldName + " = get" + StringUtils.capitalize(fieldName) + "();");
-		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "\";");
-		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
-	}
-	
 	private MethodMetadata getSelectedEntityAccessorMethod() {
 		String fieldName = getEntityName();
 		JavaSymbolName methodName = new JavaSymbolName("get" + StringUtils.capitalize(fieldName));
@@ -323,7 +309,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(fieldName + " = " + entityType.getSimpleTypeName() + "." + findAllMethod.getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "\";");
+		bodyBuilder.appendFormalLine("return null;");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
@@ -391,9 +377,41 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		addCommonJsfFields(imports, bodyBuilder);
+		imports.addImport(new JavaType("javax.faces.component.html.HtmlOutputText"));
 
 		bodyBuilder.appendFormalLine("HtmlPanelGrid htmlPanelGrid = " + getComponentCreationStr("HtmlPanelGrid"));
 		bodyBuilder.appendFormalLine("htmlPanelGrid.setId(\"editPanelGrid\");");
+		bodyBuilder.appendFormalLine("");
+		
+		for (FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
+			JavaType fieldType = field.getFieldType();
+			String fieldName = field.getFieldName().getSymbolName();
+			String outputFieldVar = fieldName + "Output";
+			String inputFieldVar = fieldName + "Input";
+			
+			bodyBuilder.appendFormalLine("HtmlOutputText " + outputFieldVar + " = " + getComponentCreationStr("HtmlOutputText"));
+			bodyBuilder.appendFormalLine(outputFieldVar + ".setId(\"" + outputFieldVar + "\");");
+			bodyBuilder.appendFormalLine(outputFieldVar + ".setValue(\"" + fieldName + "\");");
+			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + outputFieldVar + ");");
+			bodyBuilder.appendFormalLine("");
+			if (isDateField(fieldType)) {
+				imports.addImport(new JavaType("org.primefaces.component.calendar.Calendar"));
+				imports.addImport(new JavaType("java.util.Date"));
+				bodyBuilder.appendFormalLine("Calendar " + inputFieldVar + " = " + getComponentCreationStr("Calendar"));
+				bodyBuilder.appendFormalLine(getValueExpressionStr(inputFieldVar, fieldName, Date.class));
+				bodyBuilder.appendFormalLine(inputFieldVar + ".setNavigator(true);");
+				bodyBuilder.appendFormalLine(inputFieldVar + ".setEffect(\"slideDown\");");
+				bodyBuilder.appendFormalLine(inputFieldVar + ".setPattern(\"dd/MM/yyyy\");");
+			} else {
+				imports.addImport(new JavaType("org.primefaces.component.inputtext.InputText"));
+				bodyBuilder.appendFormalLine("InputText " + inputFieldVar + " = " + getComponentCreationStr("InputText"));
+				bodyBuilder.appendFormalLine(getValueExpressionStr(inputFieldVar, fieldName, String.class));
+			}
+			bodyBuilder.appendFormalLine(inputFieldVar + ".setId(\"" + inputFieldVar + "\");");
+			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + inputFieldVar + ");");	
+			bodyBuilder.appendFormalLine("");
+		}
+		
 		bodyBuilder.appendFormalLine("return htmlPanelGrid;");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -653,6 +671,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
 	}
 	
+	private String getValueExpressionStr(String inputFieldVar, String fieldName, Class<?> clazz) {
+		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean.selected" + entityType.getSimpleTypeName() + "." + fieldName + "}\", " + clazz.getSimpleName() + ".class));";
+	}
+
+	private boolean isDateField(JavaType fieldType) {
+		return fieldType.equals(new JavaType("java.util.Date")) || fieldType.equals(new JavaType("java.util.Calendar")) || fieldType.equals(new JavaType("java.util.GregorianCalendar"));
+	}
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

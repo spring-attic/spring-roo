@@ -40,6 +40,44 @@
                     </p:column>
                 </p:dataTable>
             </p:panel>
+            <h:panelGrid columns="2">
+                <p:panel header="Export All Data">
+                    <h:commandLink>
+                        <p:graphicImage value="/images/excel.png" />
+                        <p:dataExporter type="xls" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" />
+                    </h:commandLink>
+                    <h:commandLink>
+                        <p:graphicImage value="/images/pdf.png" />
+                        <p:dataExporter type="pdf" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" />
+                    </h:commandLink>
+                    <h:commandLink>
+                        <p:graphicImage value="/images/csv.png" />
+                        <p:dataExporter type="csv" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" />
+                    </h:commandLink>
+                    <h:commandLink>
+                        <p:graphicImage value="/images/xml.png" />
+                        <p:dataExporter type="xml" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" />
+                    </h:commandLink>
+                </p:panel>
+                <p:panel header="Export Page Data">
+                    <h:commandLink>
+                        <p:graphicImage value="/images/excel.png" />
+                        <p:dataExporter type="xls" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" pageOnly="true" />
+                    </h:commandLink>
+                    <h:commandLink>
+                        <p:graphicImage value="/images/pdf.png" />
+                        <p:dataExporter type="pdf" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" pageOnly="true" />
+                    </h:commandLink>
+                    <h:commandLink>
+                        <p:graphicImage value="/images/csv.png" />
+                        <p:dataExporter type="csv" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" pageOnly="true" />
+                    </h:commandLink>
+                    <h:commandLink>
+                        <p:graphicImage value="/images/xml.png" />
+                        <p:dataExporter type="xml" target="list" fileName="__LC_DOMAIN_TYPE_PLURAL__" pageOnly="true" />
+                    </h:commandLink>
+                </p:panel>
+            </h:panelGrid>
         </h:form>
         <p:dialog id="editDialog" header="Edit __DOMAIN_TYPE__" widgetVar="editDlg" resizable="true" width="300" showEffect="fade" hideEffect="explode" styleClass="form-dialog">
             <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />

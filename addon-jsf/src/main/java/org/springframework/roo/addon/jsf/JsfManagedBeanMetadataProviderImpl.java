@@ -46,11 +46,13 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 
 	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
 	}
 
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
 	}
@@ -109,7 +111,6 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 		int counter = 0;
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
@@ -120,6 +121,8 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			if (field == null) {
 				continue;
 			}
+			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
+
 			if (counter < 4 && isFieldOfInterest(field)) {
 				counter++;
 				CustomDataBuilder customDataBuilder = new CustomDataBuilder();
