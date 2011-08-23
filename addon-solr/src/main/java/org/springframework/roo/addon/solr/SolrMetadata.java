@@ -60,6 +60,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		this.beanPlural = javaTypePlural;
 		
 		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
+			valid = false;
 			// TODO Do something with supertype
 			return;
 		}

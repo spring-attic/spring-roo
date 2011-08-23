@@ -1,15 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller.converter;
 
-import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
-import static org.springframework.roo.model.SpringJavaType.FORMATTER_REGISTRY;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-
 import org.springframework.roo.addon.json.CustomDataJsonTags;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -28,7 +18,16 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+
 import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
+import static org.springframework.roo.model.SpringJavaType.FORMATTER_REGISTRY;
+
 /**
  * Represents metadata for the application-wide conversion service. Generates the following ITD methods:
  * <ul>
@@ -66,7 +65,8 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		Assert.notNull(idTypes, "List of ID types required");
 		Assert.isTrue(relevantDomainTypes.size() == idTypes.size(), "Expected " + relevantDomainTypes.size() + " ID types, but was " + idTypes.size());
 		
-		if (!isValid() || (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes.isEmpty())) { 
+		if (!isValid() || (relevantDomainTypes.isEmpty() && compositePrimaryKeyTypes.isEmpty())) {
+			valid = false;
 			return;
 		}
 

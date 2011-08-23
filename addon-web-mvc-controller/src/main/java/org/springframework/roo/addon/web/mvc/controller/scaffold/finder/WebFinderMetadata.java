@@ -6,16 +6,6 @@ import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_METHOD;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 
-import java.beans.Introspector;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
@@ -46,6 +36,16 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.beans.Introspector;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 /**
  * Metadata for finder functionality provided via {@link RooWebScaffold}.
@@ -97,6 +97,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		this.memberDetails = memberDetails;
 		
 		if (dynamicFinderMethods.isEmpty()) {
+			valid = false;
 			return;
 		}
 
@@ -132,7 +133,6 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			if (javaType.isCommonCollectionType()) {
 				JavaTypeMetadataDetails paramTypeMd = specialDomainTypes.get(javaType.getParameters().get(0));
 				if (paramTypeMd != null && paramTypeMd.isApplicationType()) {
-					javaType = javaType.getParameters().get(0);
 					javaTypePersistenceMetadataHolder = paramTypeMd.getPersistenceDetails();
 				}
 			} else if (typeMd != null && typeMd.isEnumType()) {
