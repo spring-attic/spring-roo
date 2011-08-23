@@ -1,15 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -40,6 +30,16 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Implementation of {@link GwtOperations}.
@@ -121,7 +121,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 
 		// Do a "get" for every .java file, thus ensuring the metadata is fired
 		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
-			metadataService.get(GwtMetadata.createIdentifier(classOrInterfaceTypeDetails.getName(), Path.SRC_MAIN_JAVA));
+			metadataService.get(GwtMetadata.createIdentifier(classOrInterfaceTypeDetails.getName(), Path.SRC_MAIN_JAVA), true);
 		}
 	}
 
