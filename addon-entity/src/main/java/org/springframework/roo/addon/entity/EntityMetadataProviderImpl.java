@@ -1,27 +1,5 @@
 package org.springframework.roo.addon.entity;
 
-import static org.springframework.roo.addon.entity.RooEntity.CLEAR_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.COUNT_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FIND_ALL_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FIND_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FLUSH_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.MERGE_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.PERSIST_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.REMOVE_METHOD_DEFAULT;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.CLEAR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
-
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -46,6 +24,28 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.util.List;
+
+import static org.springframework.roo.addon.entity.RooEntity.CLEAR_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.COUNT_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.FIND_ALL_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.FIND_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.FLUSH_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.MERGE_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.PERSIST_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.REMOVE_METHOD_DEFAULT;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.CLEAR_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 /**
  * Implementation of {@link EntityMetadataProvider}.
@@ -107,7 +107,14 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 
 		// Look up the inheritance hierarchy for existing EntityMetadata
 		final EntityMetadata parent = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
-		
+
+		//If the parent is null, but the type has a super class it is likely that the we don't have information to proceed
+		if (parent == null && ((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails()).getSuperclass() != null) {
+			//If the superclass is annotated with the Entity trigger annotation then we can be pretty sure that we don't have enough information to proceed
+			if (MemberFindingUtils.getAnnotationOfType(governorPhysicalType.getMemberHoldingTypeDetails().getAnnotations(), ROO_ENTITY) != null) {
+				return null;
+			}
+		}
 		// We also need the plural
 		final JavaType entityType = EntityMetadata.getJavaType(metadataId);
 		final Path path = EntityMetadata.getPath(metadataId);
