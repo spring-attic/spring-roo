@@ -1,21 +1,18 @@
 package org.springframework.roo.addon.layers.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataItem;
-import org.springframework.roo.metadata.MetadataNotificationListener;
-import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Locates interfaces annotated with {@link RooService} that meet certain
@@ -30,49 +27,22 @@ import org.springframework.roo.model.JavaType;
  */
 @Component
 @Service
-public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator, MetadataNotificationListener {
-	
-	// Constants
-	private static final Map<JavaType, Collection<ClassOrInterfaceTypeDetails>> domainTypeToServiceMap = new HashMap<JavaType, Collection<ClassOrInterfaceTypeDetails>>();
+public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
 
 	// Fields
-	@Reference private MetadataService metadataService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	
-	protected void activate(ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
-	}
-	
-	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
-	}
-
-	public void notify(String upstreamDependency, String downstreamDependency) {
-		MetadataItem metadataItem = metadataService.get(upstreamDependency);
-		if (metadataItem == null) {
-			return;
-		}
-		if (metadataItem instanceof ServiceInterfaceMetadata) {
-			ServiceInterfaceMetadata serviceMetadata = (ServiceInterfaceMetadata) metadataItem;
-			ItdTypeDetails serviceItd = serviceMetadata.getMemberHoldingTypeDetails();
-			if (serviceItd == null) {
-				return;
-			}
-			for (JavaType domainType : serviceMetadata.getServiceAnnotationValues().getDomainTypes()) {
-				initMapValue(domainType);
-				domainTypeToServiceMap.get(domainType).add(serviceItd.getGovernor());
-			}
-		}
-	}
+	@Reference private TypeLocationService typeLocationService;
 	
 	public Collection<ClassOrInterfaceTypeDetails> getServiceInterfaces(JavaType domainType) {
-		initMapValue(domainType);
-		return domainTypeToServiceMap.get(domainType);
-	}
-
-	private void initMapValue(JavaType domainType) {
-		if (!domainTypeToServiceMap.containsKey(domainType)) {
-			domainTypeToServiceMap.put(domainType, new ArrayList<ClassOrInterfaceTypeDetails>());
+		Set<ClassOrInterfaceTypeDetails> located = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
+		Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
+		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : located) {
+			ServiceAnnotationValues annotationValues = new ServiceAnnotationValues(new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId()), classOrInterfaceTypeDetails));
+			for (JavaType javaType : annotationValues.getDomainTypes()) {
+				if (javaType != null && javaType.equals(domainType)) {
+					toReturn.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), classOrInterfaceTypeDetails);
+				}
+			}
 		}
+		return toReturn.values();
 	}
 }

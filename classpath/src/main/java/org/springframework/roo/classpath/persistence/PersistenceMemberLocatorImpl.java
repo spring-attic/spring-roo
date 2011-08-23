@@ -1,28 +1,28 @@
 package org.springframework.roo.classpath.persistence;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This implementation of {@link PersistenceMemberLocator} scans for the presence of 
@@ -33,37 +33,32 @@ import org.springframework.roo.model.JavaType;
  */
 @Component(immediate = true)
 @Service
-public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, MetadataNotificationListener {
+public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	
 	// Fields
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	
+	@Reference private FileMonitorService fileMonitorService;
+	@Reference private TypeLocationService typeLocationService;
+
 	private final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
 	private final Map<JavaType, JavaType> domainTypeIdCache = new HashMap<JavaType, JavaType>();
 	private final Map<JavaType, List<FieldMetadata>> domainTypeEmbeddedIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
 	private final Map<JavaType, FieldMetadata> domainTypeVersionFieldCache = new HashMap<JavaType, FieldMetadata>();
 	private final Map<JavaType, MethodMetadata> domainTypeIdAccessorCache = new HashMap<JavaType, MethodMetadata>();
 	private final Map<JavaType, MethodMetadata> domainTypeVersionAccessorCache = new HashMap<JavaType, MethodMetadata>();
-	
-	protected void activate(ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
-	}
-	
-	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
-	}
 
 	public List<FieldMetadata> getEmbeddedIdentifierFields(final JavaType domainType) {
+		updateCache(domainType);
 		if (domainTypeEmbeddedIdFieldsCache.containsKey(domainType)) {
-			return domainTypeEmbeddedIdFieldsCache.get(domainType);
+			return new ArrayList<FieldMetadata>(domainTypeEmbeddedIdFieldsCache.get(domainType));
 		}
 		return new ArrayList<FieldMetadata>();
 	}
 	
 	public JavaType getIdentifierType(JavaType domainType) {
-		notify(PhysicalTypeIdentifier.createIdentifier(domainType), null);
+		updateCache(domainType);
 		if (domainTypeIdCache.containsKey(domainType)) {
 			return domainTypeIdCache.get(domainType);
 		}
@@ -71,61 +66,86 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 	}
 	
 	public MethodMetadata getIdentifierAccessor(final JavaType domainType) {
+		updateCache(domainType);
 		return domainTypeIdAccessorCache.get(domainType);
 	}
 	
 	public List<FieldMetadata> getIdentifierFields(final JavaType domainType) {
-		// It is possible that the notify method has not been called yet for this type, let's try now.
-		notify(PhysicalTypeIdentifier.createIdentifier(domainType), null);
+		updateCache(domainType);
 		if (domainTypeIdFieldsCache.containsKey(domainType)) {
-			return domainTypeIdFieldsCache.get(domainType);
+			return new ArrayList<FieldMetadata>(domainTypeIdFieldsCache.get(domainType));
 		} else if (domainTypeEmbeddedIdFieldsCache.containsKey(domainType)) {
-			return domainTypeEmbeddedIdFieldsCache.get(domainType);
+			return new ArrayList<FieldMetadata>(domainTypeEmbeddedIdFieldsCache.get(domainType));
 		}
+
 		return new ArrayList<FieldMetadata>();
 	}
 	
 	public MethodMetadata getVersionAccessor(final JavaType domainType) {
+		updateCache(domainType);
 		return domainTypeVersionAccessorCache.get(domainType);
 	}
 
 	public FieldMetadata getVersionField(JavaType domainType) {
+		updateCache(domainType);
 		return domainTypeVersionFieldCache.get(domainType);
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
-		if (!PhysicalTypeIdentifier.isValid(upstreamDependency)) {
+	private Set<String> changeSet = new HashSet<String>();
+
+	private boolean hasRelevantFilesChange(JavaType javaType) {
+
+		String mid = typeLocationService.findIdentifier(javaType);
+		if (!PhysicalTypeIdentifier.isValid(mid)) {
+			return false;
+		}
+
+		Set<String> changes = typeLocationService.getWhatsDirty(getClass().getName());
+		changeSet.addAll(changes);
+		Set<String> toRemove = new HashSet<String>();
+		boolean updateCache = false;
+		for (String change : changeSet) {
+			JavaType changedType = PhysicalTypeIdentifier.getJavaType(change);
+			if (!javaType.equals(changedType)) {
+				continue;
+			}
+			toRemove.add(change);
+			updateCache = true;
+		}
+		changeSet.removeAll(toRemove);
+
+		return updateCache;
+	}
+
+	public void updateCache(JavaType domainType) {
+		if (!hasRelevantFilesChange(domainType)) {
 			return;
 		}
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(upstreamDependency);
-		if (physicalTypeMetadata == null) {
-			return;
-		}
-		MemberHoldingTypeDetails memberHoldingTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (memberHoldingTypeDetails == null || !(memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails)) {
-			return;
-		}
-		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails);
+
+		MemberDetails details = getMemberDetails(domainType);
 		
 		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, PersistenceCustomDataKeys.PERSISTENT_TYPE) == null) {
 			return;
 		}
-		JavaType type = memberHoldingTypeDetails.getName();
-		
-		// Get normal persistence ID fields
-		populateIdTypes(details, type);
+
+		// Update normal persistence ID fields cache
+		populateIdTypes(details, domainType);
 				
-		// Get normal persistence ID fields
-		populateIdFields(details, type);
+		// Update normal persistence ID cache
+		populateIdFields(details, domainType);
 		
-		// Get embedded ID fields 
-		populateEmbeddedIdFields(details, type);
+		// Update embedded ID fields cache
+		populateEmbeddedIdFields(details, domainType);
 		
-		// Get ID accessor
-		populateIdAccessors(details, type);
-		
-		// Get version accessor
-		populateVersionAccessor(details, type);
+		// Update ID accessor cache
+		populateIdAccessors(details, domainType);
+
+		// Update version field cache
+		populateVersionField(details, domainType);
+
+		// Update version accessor cache
+		populateVersionAccessor(details, domainType);
+
 	}
 
 	private void populateVersionAccessor(MemberDetails details, JavaType type) {
@@ -186,11 +206,20 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator, M
 		}
 	}
 
+	private void populateVersionField(MemberDetails details, JavaType type) {
+		List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.VERSION_FIELD);
+		if (!versionFields.isEmpty()) {
+			domainTypeVersionFieldCache.put(type, versionFields.get(0));
+		} else if (domainTypeVersionFieldCache.containsKey(type)) {
+			domainTypeVersionFieldCache.remove(type);
+		}
+	}
+
 	private MemberDetails getMemberDetails(final JavaType type) {
-		final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type));
-		if (physicalTypeMetadata == null || !(physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+		final ClassOrInterfaceTypeDetails physicalTypeMetadata = typeLocationService.getTypeForIdentifier(PhysicalTypeIdentifier.createIdentifier(type));
+		if (physicalTypeMetadata == null ) {
 			return null;
 		}
-		return memberDetailsScanner.getMemberDetails(getClass().getName(), (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails());
+		return memberDetailsScanner.getMemberDetails(getClass().getName(),  physicalTypeMetadata);
 	}
 }

@@ -1,21 +1,19 @@
 package org.springframework.roo.addon.layers.repository;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataItem;
-import org.springframework.roo.metadata.MetadataNotificationListener;
-import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The {@link RepositoryJpaLocator} implementation.
@@ -26,48 +24,31 @@ import org.springframework.roo.model.JavaType;
  */
 @Component
 @Service
-public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator, MetadataNotificationListener {
+public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator{
 	
-	// Constants
-	private static final Map<JavaType, Collection<ClassOrInterfaceTypeDetails>> domainTypeToRepoMap = new HashMap<JavaType, Collection<ClassOrInterfaceTypeDetails>>();
-
 	// Fields
-	@Reference private MetadataService metadataService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	
-	protected void activate(ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
-	}
-	
-	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
-	}
+	@Reference private TypeLocationService typeLocationService;
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
-		MetadataItem metadataItem = metadataService.get(upstreamDependency);
-		if (metadataItem == null) {
-			return;
+	private HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>>();
+
+	public Collection<ClassOrInterfaceTypeDetails> getRepositories(JavaType domainType) {
+		if (!cacheMap.containsKey(domainType)) {
+			cacheMap.put(domainType, new HashSet<ClassOrInterfaceTypeDetails>());
 		}
-		if (metadataItem instanceof RepositoryJpaMetadata) {
-			RepositoryJpaMetadata repositoryJpaMetadata = (RepositoryJpaMetadata) metadataItem;
-			ItdTypeDetails repoItd = repositoryJpaMetadata.getMemberHoldingTypeDetails();
-			if (repoItd == null) {
-				return;
+		Set<ClassOrInterfaceTypeDetails> existing = cacheMap.get(domainType);
+		Set<ClassOrInterfaceTypeDetails> located = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_REPOSITORY_JPA);
+		if (existing.containsAll(located)) {
+			return existing;
+		}
+		System.out.println("getRepositories: " + domainType + " - " + located.size());
+		Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
+		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : located) {
+			System.out.println("getRepositories: " + classOrInterfaceTypeDetails.hashCode());
+			RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId()), classOrInterfaceTypeDetails));
+			if (annotationValues.getDomainType() != null && annotationValues.getDomainType().equals(domainType)) {
+				toReturn.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), classOrInterfaceTypeDetails);
 			}
-			JavaType domainType = repositoryJpaMetadata.getAnnotationValues().getDomainType();
-			initMapValue(domainType);
-			domainTypeToRepoMap.get(domainType).add(repoItd.getGovernor());
 		}
-	}
-
-	public Collection<ClassOrInterfaceTypeDetails> getRepositories(final JavaType domainType) {
-		initMapValue(domainType);
-		return domainTypeToRepoMap.get(domainType);
-	}
-	
-	private void initMapValue(JavaType domainType) {
-		if (!domainTypeToRepoMap.containsKey(domainType)) {
-			domainTypeToRepoMap.put(domainType, new ArrayList<ClassOrInterfaceTypeDetails>());
-		}
+		return toReturn.values();
 	}
 }
