@@ -1,10 +1,11 @@
 package org.springframework.roo.file.monitor;
 
-import java.util.List;
-import java.util.SortedSet;
-
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEventListener;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.SortedSet;
 
 /**
  * Provides a mechanism to monitor disk locations and publish events when those disk locations change.
@@ -27,11 +28,13 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
 public interface FileMonitorService {
 	
 	/**
-     * @return true if the monitor did not already contain the specified request
+     * @param request a monitoring request
+	 * @return true if the monitor did not already contain the specified request
 	 */
 	boolean add(MonitoringRequest request);
 	
 	/**
+	 * @param request a monitoring request
 	 * @return true if this set contained the specified element
 	 */
 	boolean remove(MonitoringRequest request);
@@ -69,4 +72,18 @@ public interface FileMonitorService {
 	 */
 	public SortedSet<FileDetails> findMatchingAntPath(String antPath);
 
+	/**
+	 * Provides a list of canonical paths which represent changes to the file system since the requesting class last
+	 * requested the change set. The returned change set is relative the requesting class in order to provide a list of
+	 * changes to a number of callers, instead of a point of time snapshot which would change depending on the order
+	 * invocation.
+	 *
+	 * This method should provide a more robust implementation of {@link #isDirty()} as the change set isn't cleared
+	 * when a scan is performed and greater insight is given into what has changed instead of just indicating if the
+	 * filesystem is dirty.
+	 *
+	 * @param requestingClass the invoking class (required)
+	 * @return file system changes that occurred since the last invocation by the requesting class (may be empty, but never null)
+	 */
+	LinkedHashSet<String> getWhatsDirty(String requestingClass);
 }

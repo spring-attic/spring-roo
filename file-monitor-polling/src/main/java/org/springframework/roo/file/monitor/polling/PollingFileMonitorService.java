@@ -1,5 +1,15 @@
 package org.springframework.roo.file.monitor.polling;
 
+import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
+import org.springframework.roo.file.monitor.FileMonitorService;
+import org.springframework.roo.file.monitor.MonitoringRequest;
+import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
+import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.file.monitor.event.FileEvent;
+import org.springframework.roo.file.monitor.event.FileEventListener;
+import org.springframework.roo.file.monitor.event.FileOperation;
+import org.springframework.roo.support.util.Assert;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,16 +22,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-
-import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
-import org.springframework.roo.file.monitor.FileMonitorService;
-import org.springframework.roo.file.monitor.MonitoringRequest;
-import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.file.monitor.event.FileEvent;
-import org.springframework.roo.file.monitor.event.FileEventListener;
-import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * A simple polling-based {@link FileMonitorService}.
@@ -47,12 +47,14 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
-	protected Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
-	private Set<MonitoringRequest> requests = new LinkedHashSet<MonitoringRequest>();
-	private Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();
-	private Set<String> notifyChanged = new HashSet<String>();
-	private Set<String> notifyCreated = new HashSet<String>();
-	private Set<String> notifyDeleted = new HashSet<String>();
+	private final Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
+	private final Set<MonitoringRequest> requests = new LinkedHashSet<MonitoringRequest>();
+	private final Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();
+	private final Set<String> notifyChanged = new HashSet<String>();
+	private final Set<String> notifyCreated = new HashSet<String>();
+	private final Set<String> notifyDeleted = new HashSet<String>();
+	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
+	private final HashSet<String> allFiles = new HashSet<String>();
 
 	// Mutex
 	private final Object lock = new Object();
@@ -92,6 +94,21 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	public boolean isDirty() {
 		synchronized (lock) {
 			return !notifyChanged.isEmpty() || !notifyCreated.isEmpty() || !notifyDeleted.isEmpty();
+		}
+	}
+
+	public LinkedHashSet<String> getWhatsDirty(String requestingClass) {
+		synchronized (lock) {
+			LinkedHashSet<String> changesSinceLastRequest = changeMap.get(requestingClass);
+			if (changesSinceLastRequest == null) {
+				changesSinceLastRequest = new LinkedHashSet<String>(allFiles);
+				changeMap.put(requestingClass, new LinkedHashSet<String>());
+			} else {
+				LinkedHashSet<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
+				changesSinceLastRequest.removeAll(copyOfChangesSinceLastRequest);
+				changesSinceLastRequest = copyOfChangesSinceLastRequest;
+			}
+			return changesSinceLastRequest;
 		}
 	}
 	
@@ -209,7 +226,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 						notifyDeleted.remove(remove);
 					}
 				}
-				
+
 				publish(eventsToPublish);
 				
 				changes += eventsToPublish.size();
@@ -300,7 +317,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					eventsToPublish.add(new FileEvent(new FileDetails(file, file.lastModified()), FileOperation.UPDATED, null));
 				}
 				notifyChanged.clear();
-				
 				publish(eventsToPublish);
 				
 				changes += eventsToPublish.size();
@@ -355,6 +371,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 		
 		map.put(currentFile, currentFile.lastModified());
+
+		try {
+			updateAllFiles(currentFile.getCanonicalPath(), false);
+		} catch (IOException ignored) {}
 
 		if (currentFile.isDirectory()) {
 			File[] files = currentFile.listFiles();
@@ -497,10 +517,38 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 		return false;
 	}
+
+	private void updateChanges(String fileCanonicalPath, boolean remove) {
+		for (String requestingClass : changeMap.keySet()) {
+			if (remove) {
+				changeMap.get(requestingClass).remove(fileCanonicalPath);
+			} else {
+				changeMap.get(requestingClass).add(fileCanonicalPath);
+			}
+		}
+		if (remove) {
+			allFiles.remove(fileCanonicalPath);
+		} else {
+			allFiles.add(fileCanonicalPath);
+		}
+	}
+
+	private void updateAllFiles(String fileCanonicalPath, boolean remove) {
+		if (remove) {
+			allFiles.remove(fileCanonicalPath);
+			updateChanges(fileCanonicalPath, remove);
+		} else {
+			allFiles.add(fileCanonicalPath);
+			if (!allFiles.contains(fileCanonicalPath)) {
+				updateChanges(fileCanonicalPath, remove);
+			}
+		}
+	}
 	
 	public void notifyChanged(String fileCanonicalPath) {
 		synchronized (lock) {
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
+				updateChanges(fileCanonicalPath, false);
 				notifyChanged.add(fileCanonicalPath);
 			}
 		}
@@ -509,6 +557,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	public void notifyCreated(String fileCanonicalPath) {
 		synchronized (lock) {
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
+				updateChanges(fileCanonicalPath, false);
 				notifyCreated.add(fileCanonicalPath);
 			}
 		}
@@ -517,6 +566,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	public void notifyDeleted(String fileCanonicalPath) {
 		synchronized (lock) {
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
+				updateChanges(fileCanonicalPath, true);
 				notifyDeleted.add(fileCanonicalPath);
 			}
 		}
