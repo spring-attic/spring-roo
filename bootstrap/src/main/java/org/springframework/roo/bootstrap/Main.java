@@ -280,11 +280,13 @@ public class Main {
 		}
 	}
 
+	// **** CHANGE FROM ORIGINAL FELIX VERSION ****
 	private static double round(double valueToRound, int numberOfDecimalPlaces) {
 		double multiplicationFactor = Math.pow(10, numberOfDecimalPlaces);
 		double interestedInZeroDPs = valueToRound * multiplicationFactor;
 		return Math.round(interestedInZeroDPs) / multiplicationFactor;
 	}
+	// **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
 
 	/**
 	 * Simple method to parse META-INF/services file for framework factory.
