@@ -1,16 +1,5 @@
 package org.springframework.roo.addon.dod;
 
-import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -38,6 +27,17 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.util.Pair;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.
@@ -83,18 +83,14 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
 		
-		// TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
-		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), itdTypeDetails.getGovernor());
-		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, LayerCustomDataKeys.LAYER_TYPE);
-		if (memberHoldingTypeDetails != null) {
+		Object layerTypeValue = itdTypeDetails.getGovernor().getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+		if (layerTypeValue != null) {
 			@SuppressWarnings("unchecked")
-			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
-			if (domainTypes != null) {
-				for (JavaType type : domainTypes) {
-					String localMidType = entityToDodMidMap.get(type);
-					if (localMidType != null) {
-						return localMidType;
-					}
+			List<JavaType> domainTypes = (List<JavaType>) layerTypeValue;
+			for (JavaType type : domainTypes) {
+				String localMidType = entityToDodMidMap.get(type);
+				if (localMidType != null) {
+					return localMidType;
 				}
 			}
 		}
