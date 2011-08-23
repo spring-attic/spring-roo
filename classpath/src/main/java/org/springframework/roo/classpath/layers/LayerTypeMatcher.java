@@ -1,10 +1,6 @@
 package org.springframework.roo.classpath.layers;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.roo.classpath.customdata.taggers.TypeMatcher;
-import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.customdata.taggers.AnnotatedTypeMatcher;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -15,13 +11,16 @@ import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Layer type specific matcher which populates a tag value based on the layer provider specific trigger annotation.
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
-public class LayerTypeMatcher extends TypeMatcher {
+public class LayerTypeMatcher extends AnnotatedTypeMatcher {
 	
 	// Fields
 	private final JavaSymbolName annotationAttributeValue;
@@ -31,19 +30,19 @@ public class LayerTypeMatcher extends TypeMatcher {
 	 * Constructor
 	 *
 	 * @param customDataKey
-	 * @param declaredBy the declaring class (required)
 	 * @param annotationType
 	 * @param annotationAttributeName
+	 * @param annotationsToMatchOn
 	 */
-	public LayerTypeMatcher(CustomDataKey<MemberHoldingTypeDetails> customDataKey, Class<?> declaredBy, JavaType annotationType, JavaSymbolName annotationAttributeName) {
-		super(customDataKey, declaredBy);
+	public LayerTypeMatcher(CustomDataKey<MemberHoldingTypeDetails> customDataKey, JavaType annotationType, JavaSymbolName annotationAttributeName, JavaType... annotationsToMatchOn) {
+		super(customDataKey, annotationsToMatchOn);
 		this.annotationAttributeValue = annotationAttributeName;
 		this.annotationType = annotationType;
 	}
 	
 	@Override
 	public Object getTagValue(MemberHoldingTypeDetails key) {
-		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(((ItdTypeDetails) key).getGovernor().getAnnotations(), annotationType);
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(key.getAnnotations(), annotationType);
 		if (annotation == null || annotation.getAttribute(annotationAttributeValue) == null) {
 			return null;
 		}

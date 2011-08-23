@@ -1,10 +1,10 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import java.util.List;
-
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.CustomDataKey;
+
+import java.util.List;
 
 /**
  * Matches {@link CustomDataAccessor}s based on a specific criteria and provides
@@ -32,4 +32,12 @@ public interface Matcher<T extends CustomDataAccessor> {
 	 * @return a non-<code>null</code> key
 	 */
 	CustomDataKey<T> getCustomDataKey();
+
+	/**
+	 * Returns the value associated with the given key that should be applied to the matched instance.
+	 *
+	 * @param key the custom data key
+	 * @return a value (can be null)
+	 */
+	Object getTagValue(T key);
 }

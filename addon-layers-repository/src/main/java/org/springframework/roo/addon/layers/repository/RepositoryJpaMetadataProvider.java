@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.layers.repository;
 
-import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -19,6 +17,8 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
+import static org.springframework.roo.model.RooJavaType.ROO_REPOSITORY_JPA;
 /**
  * Provides the metadata for an ITD that implements a Spring Data JPA repository
  * 
@@ -39,7 +39,7 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_REPOSITORY_JPA);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, RepositoryJpaMetadata.class, ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE)));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ROO_REPOSITORY_JPA, new JavaSymbolName(RooRepositoryJpa.DOMAIN_TYPE_ATTRIBUTE), ROO_REPOSITORY_JPA));
 	}
 
 	protected void deactivate(final ComponentContext context) {

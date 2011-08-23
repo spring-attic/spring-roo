@@ -1,10 +1,5 @@
 package org.springframework.roo.addon.layers.service;
 
-import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -24,6 +19,11 @@ import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
  * 
@@ -43,7 +43,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_SERVICE);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ServiceInterfaceMetadata.class, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE)));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE), ROO_SERVICE));
 	}
 
 	protected void deactivate(ComponentContext context) {

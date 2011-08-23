@@ -1,13 +1,5 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.jvnet.inflector.Noun;
@@ -20,6 +12,14 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsBuilder;
 import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.support.util.Assert;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An implementation of {@link CustomDataKeyDecorator}.
@@ -71,6 +71,16 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 			}
 		}
 
+		return memberDetailsBuilder.build();
+	}
+
+	public MemberDetails decorateTypes(String requestingClass,  MemberDetails memberDetails) {
+		MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(memberDetails);
+		for (TypeMatcher typeTagger : getTypeTaggers()) {
+			for (MemberHoldingTypeDetails typeDetails : typeTagger.matches(memberDetails.getDetails())) {
+				memberDetailsBuilder.tag(typeDetails, typeTagger.getCustomDataKey(), typeTagger.getTagValue(typeDetails));
+			}
+		}
 		return memberDetailsBuilder.build();
 	}
 

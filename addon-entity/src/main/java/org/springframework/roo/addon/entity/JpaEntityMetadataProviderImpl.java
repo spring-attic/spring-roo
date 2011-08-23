@@ -1,5 +1,32 @@
 package org.springframework.roo.addon.entity;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.taggers.AnnotatedTypeMatcher;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
+import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
+import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
+import org.springframework.roo.classpath.customdata.taggers.MidTypeMatcher;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.util.Assert;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COLUMN_FIELD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_ID_FIELD;
@@ -20,31 +47,6 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_MUTATOR_METHOD;
 import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
-import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
-import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
-import org.springframework.roo.classpath.customdata.taggers.TypeMatcher;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
@@ -132,8 +134,8 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		customDataKeyDecorator.registerMatchers(
 				getClass(),
 				// Type matchers
-				new TypeMatcher(IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"),
-				new TypeMatcher(PERSISTENT_TYPE, "org.springframework.roo.addon.entity.JpaEntityMetadata"),
+				new MidTypeMatcher(IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"),
+				new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_ENTITY, RooJavaType.ROO_JPA_ENTITY),
 				// Field matchers
 				JPA_COLUMN_FIELD_MATCHER,
 				JPA_EMBEDDED_FIELD_MATCHER,
