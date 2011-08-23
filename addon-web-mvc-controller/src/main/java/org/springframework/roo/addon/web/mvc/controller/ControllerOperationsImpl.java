@@ -124,7 +124,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		
 		webMvcOperations.installConversionService(controller.getPackage());
 		
-		String resourceIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
+		String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(resourceIdentifier)) {
 			return; // Type exists already - nothing to do
 		}

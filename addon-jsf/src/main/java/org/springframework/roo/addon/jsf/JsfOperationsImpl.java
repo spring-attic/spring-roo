@@ -107,7 +107,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		installBean("ApplicationBean-template.java", managedBean.getPackage(), "ApplicationBean");
 		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
 
-		if (fileManager.exists(typeLocationService.getPhysicalLocationCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
+		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
 			return; 
 		}
@@ -310,7 +310,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	private void installBean(String templateName, JavaPackage destinationPackage, String beanName) {
 		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + beanName);
-		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}

@@ -1,132 +1,105 @@
 package org.springframework.roo.classpath;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataNotificationListener;
+import org.springframework.roo.file.monitor.event.FileEvent;
+import org.springframework.roo.file.monitor.event.FileEventListener;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Implementation of {@link TypeLocationService}.
  * 
  * <p>
- * For performance reasons automatically caches the queries, invalidating the cache 
- * when any {@link PhysicalTypeMetadata} notification is received.
+ * For performance reasons automatically caches the queries. The cache is invalidated on
+ * changes to the file system.
  * 
  * @author Alan Stewart
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author James Tyrrell
  * @since 1.1
  */
 @Component(immediate = true) 
 @Service 
-public class TypeLocationServiceImpl implements TypeLocationService, MetadataNotificationListener {
+public class TypeLocationServiceImpl implements TypeLocationService, FileEventListener {
+
+	private static Logger logger = HandlerUtils.getLogger(TypeLocationServiceImpl.class);
 	
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private FileMonitorService fileMonitorService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	
 	@Reference private ProjectOperations projectOperations;
+
 	private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
 	private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
+	private final LinkedHashMap<String, ClassOrInterfaceTypeDetails> typeMap = new LinkedHashMap<String, ClassOrInterfaceTypeDetails>();
+	private final HashMap<String, String> pathCacheMap = new HashMap<String, String>();
+	private Map<JavaType, String> javaTypeIdentifierCache = new HashMap<JavaType, String>();
 
-	protected void activate(ComponentContext context) {
-		dependencyRegistry.addNotificationListener(this);
-	}
-
-	protected void deactivate(ComponentContext context) {
-		dependencyRegistry.removeNotificationListener(this);
-	}
-
-	public void notify(String upstreamDependency, String downstreamDependency) {
-		if (upstreamDependency != null && PhysicalTypeIdentifier.isValid(upstreamDependency)) {
-			// Change to Java, so drop the cache
-			ClassOrInterfaceTypeDetails cid = getClassOrInterfaceTypeDetails(upstreamDependency);
-			if (cid == null) return;
-			
-			// Iterate over the entire annotation cache
-			for (JavaType annotationDetected : annotationToMidMap.keySet()) {
-				if (MemberFindingUtils.getTypeAnnotation(cid, annotationDetected) != null) {
-					// This type has the annotation, so guarantee insertion
-					annotationToMidMap.get(annotationDetected).add(cid.getDeclaredByMetadataId());
-				} else {
-					// This type does not have the annotation, so guarantee removal
-					annotationToMidMap.get(annotationDetected).remove(cid.getDeclaredByMetadataId());
-				}
-			}
-			
-			// Iterate over the entire tag cache
-			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(TypeLocationServiceImpl.class.getName(), cid);
-			for (Object tagDetected : tagToMidMap.keySet()) {
-				if (!MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, tagDetected).isEmpty()) {
-					// This type has the tag, so guarantee insertion
-					tagToMidMap.get(tagDetected).add(cid.getDeclaredByMetadataId());
-				} else {
-					// This type does not have the tag, so guarantee removal
-					tagToMidMap.get(tagDetected).remove(cid.getDeclaredByMetadataId());
-				}
-			}
-		}
-	}
-
-	public String getPhysicalLocationCanonicalPath(JavaType javaType, Path path) {
+	public String getPhysicalTypeCanonicalPath(JavaType javaType, Path path) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");
-		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType);
+		return getPhysicalTypeCanonicalPath(physicalTypeIdentifier);
 	}
 	
-	public String getPhysicalLocationCanonicalPath(String physicalTypeIdentifier) {
+	public String getPhysicalTypeCanonicalPath(String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
-		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
-		Path path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
-		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
+		if (!pathCacheMap.containsKey(physicalTypeIdentifier)) {
+			JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
+			Path path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+			String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
+			pathCacheMap.put(physicalTypeIdentifier, projectOperations.getPathResolver().getIdentifier(path, relativePath));
+		}
+		return pathCacheMap.get(physicalTypeIdentifier);
 	}
 
 	public ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface) {
-		String metadataIdentificationString = physicalTypeMetadataProvider.findIdentifier(requiredClassOrInterface);
+		// The cached is used so update it
+		updateCache();
+		String metadataIdentificationString = findIdentifier(requiredClassOrInterface);
 		Assert.notNull(metadataIdentificationString, "Unable to locate requested type'" + requiredClassOrInterface.getFullyQualifiedTypeName() + "'");
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(metadataIdentificationString);
-		PhysicalTypeDetails physicalTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
-		Assert.notNull(physicalTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' exists on disk but cannot be parsed");
-		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' is not an interface or class");
-		return (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeMap.get(metadataIdentificationString);
+		Assert.notNull(classOrInterfaceTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' exists on disk but cannot be parsed");
+		return classOrInterfaceTypeDetails;
 	}
 
 	public ClassOrInterfaceTypeDetails findClassOrInterface(JavaType requiredClassOrInterface) {
-		String metadataIdentificationString = physicalTypeMetadataProvider.findIdentifier(requiredClassOrInterface);
+		String metadataIdentificationString = findIdentifier(requiredClassOrInterface);
 		if (metadataIdentificationString == null) {
 			return null;
+		}
+		ClassOrInterfaceTypeDetails cachedType = typeMap.get(metadataIdentificationString);
+		if (cachedType != null) {
+			return cachedType;
 		}
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(metadataIdentificationString);
 		if (physicalTypeMetadata == null) {
@@ -140,50 +113,86 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void processTypesWithTag(Object tag, LocatedTypeCallback callback) {
-		boolean cacheAllowed = !fileMonitorService.isDirty();
-		if (cacheAllowed && tagToMidMap.containsKey(tag)) {
-			for (String locatedMid : tagToMidMap.get(tag)) {
-				ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedMid);
-				callback.process(located);
-			}
-		} else {
-			Set<String> locatedMids = new HashSet<String>();
-			for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
-				MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(TypeLocationServiceImpl.class.getName(), cid);
-				if (!MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, tag).isEmpty()) {
-					locatedMids.add(cid.getDeclaredByMetadataId());
-					callback.process(cid);
-				}
-			}
-			// Only cache tag if there are MIDs associated with it
-			if (cacheAllowed && !locatedMids.isEmpty()) {
-				tagToMidMap.put(tag, locatedMids);
-			}
+		// If the cache doesn't yet contain the tag it should be added
+		if (!tagToMidMap.containsKey(tag)) {
+			tagToMidMap.put(tag, new HashSet<String>());
+		}
+
+		// Before processing the call any changes to the project should be processed and the cache updated accordingly
+		updateCache();
+
+		for (String locatedMid : tagToMidMap.get(tag)) {
+			ClassOrInterfaceTypeDetails located = getCachedClassOrInterfaceTypeDetails(locatedMid);
+			callback.process(located);
 		}
 	}
 
+	public String findIdentifier(JavaType javaType) {
+		Assert.notNull(javaType, "Java type to locate is required");
+		String result = javaTypeIdentifierCache.get(javaType);
+		if (result != null) {
+			return result;
+		}
+
+		PathResolver pathResolver = getPathResolver();
+		for (Path sourcePath : pathResolver.getSourcePaths()) {
+			String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
+			String fileIdentifier = pathResolver.getIdentifier(sourcePath, relativePath);
+			if (fileManager.exists(fileIdentifier)) {
+				// Found the file, so use this one
+				String mid = PhysicalTypeIdentifier.createIdentifier(javaType, sourcePath);
+				javaTypeIdentifierCache.put(javaType, mid);
+				return mid;
+			}
+		}
+		return null;
+	}
+
+	public String findIdentifier(String fileIdentifier) {
+		if (doesPathIndicateJavaType(fileIdentifier)) {
+			PathResolver pathResolver = getPathResolver();
+			Path sourcePath = null;
+			for (Path path : pathResolver.getSourcePaths()) {
+				if (new FileDetails(new File(pathResolver.getRoot(path)), null).isParentOf(fileIdentifier)) {
+					sourcePath = path;
+					break;
+				}
+			}
+			if (sourcePath == null) {
+				// The .java file is not under a source path, so ignore it
+				return null;
+			}
+			// Determine the JavaType for this file
+			String relativePath = pathResolver.getRelativeSegment(fileIdentifier);
+			Assert.hasText(relativePath, "Could not determine compilation unit name for file '" + fileIdentifier + "'");
+			Assert.isTrue(relativePath.startsWith(File.separator), "Relative path unexpectedly dropped the '" + File.separator + "' prefix (received '" + relativePath + "' from '" + fileIdentifier + "'");
+			relativePath = relativePath.substring(1);
+			Assert.isTrue(relativePath.endsWith(".java"), "The relative path unexpectedly dropped the .java extension for file '" + fileIdentifier + "'");
+			relativePath = relativePath.substring(0, relativePath.lastIndexOf(".java"));
+
+			JavaType javaType = new JavaType(relativePath.replace(File.separatorChar, '.'));
+
+			// Figure out the PhysicalTypeIdentifier
+			return PhysicalTypeIdentifier.createIdentifier(javaType, sourcePath);
+		}
+		return null;
+	}
+
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
-		// TODO research why file monitor service is marked as not dirty when it actully is dirty
-//		boolean cacheAllowed = !fileMonitorService.isDirty();
-		boolean cacheAllowed = false;
+		// If the cache doesn't yet contain the annotation to be found it should be added
 		for (JavaType annotationType : annotationsToDetect) {
-			if (cacheAllowed && annotationToMidMap.containsKey(annotationType)) {
-				for (String locatedMid : annotationToMidMap.get(annotationType)) {
-					ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedMid);
-					callback.process(located);
-				}
-			} else {
-				Set<String> locatedMids = new HashSet<String>();
-				for (ClassOrInterfaceTypeDetails cid : getProjectJavaTypes(Path.SRC_MAIN_JAVA)) {
-					if (MemberFindingUtils.getTypeAnnotation(cid, annotationType) != null) {
-						locatedMids.add(cid.getDeclaredByMetadataId());
-						callback.process(cid);
-					}
-				}
-				// Only cache annotation if there are MIDs associated with it
-				if (cacheAllowed && !locatedMids.isEmpty()) {
-					annotationToMidMap.put(annotationType, locatedMids);
-				}
+			if (!annotationToMidMap.containsKey(annotationType)) {
+				annotationToMidMap.put(annotationType, new HashSet<String>());
+			}
+		}
+
+		// Before processing the call any changes to the project should be processed and the cache updated accordingly
+		updateCache();
+
+		for (JavaType annotationType : annotationsToDetect) {
+			for (String locatedMid : annotationToMidMap.get(annotationType)) {
+				ClassOrInterfaceTypeDetails located = getCachedClassOrInterfaceTypeDetails(locatedMid);
+				callback.process(located);
 			}
 		}
 	}
@@ -228,45 +237,156 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		return Collections.unmodifiableSet(types);
 	}
 
+	public ClassOrInterfaceTypeDetails getTypeForIdentifier(String physicalTypeIdentifier) {
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Metadata identification string '" + physicalTypeIdentifier + "' is not valid for this metadata provider");
+		updateCache();
+		return typeMap.get(physicalTypeIdentifier);
+	}
+
+	public List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(Path path) {
+
+		// Before processing the call any changes to the project should be processed and the cache updated accordingly
+		updateCache();
+
+		List<ClassOrInterfaceTypeDetails> projectTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+		for (String physicalTypeIdentifier : typeMap.keySet()) {
+			// Returns Path?TypeLocation
+			String instance = MetadataIdentificationUtils.getMetadataInstance(physicalTypeIdentifier);
+			if (instance.startsWith(path.getName())) {
+				projectTypes.add(typeMap.get(physicalTypeIdentifier));
+			}
+		}
+
+		return projectTypes;
+	}
+
 	/**
-	 * Obtains the class or interface details for this physical type identifier, or null if it cannot be found.
+	 * Obtains the a cached copy of the {@link ClassOrInterfaceTypeDetails} for this physical type identifier,
+	 * or null if it cannot be found.
+	 *
 	 * @param physicalTypeMid to lookup (required)
 	 * @return the details (or null if unavailable)
 	 */
-	private ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails(String physicalTypeMid) {
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid);
+	private ClassOrInterfaceTypeDetails getCachedClassOrInterfaceTypeDetails(String physicalTypeMid) {
+		return typeMap.get(physicalTypeMid);
+	}
+
+	/**
+	 * Obtains the a fresh copy of the {@link ClassOrInterfaceTypeDetails} for this physical type identifier,
+	 * or null if it cannot be found.
+	 *
+	 * @param physicalTypeMid to lookup (required)
+	 * @return the details (or null if unavailable)
+	 */
+	private ClassOrInterfaceTypeDetails lookupClassOrInterfaceTypeDetails(String physicalTypeMid) {
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid, true);
 		if (physicalTypeMetadata != null && physicalTypeMetadata.getMemberHoldingTypeDetails() != null && physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			return (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		}
 		return null;
 	}
-	
-	public List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(Path path) {
-		PathResolver pathResolver = projectOperations.getPathResolver();
-		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(path)), null);
-		List<ClassOrInterfaceTypeDetails> projectTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
-		
-		for (FileDetails file : fileManager.findMatchingAntPath(pathResolver.getRoot(path) + File.separatorChar + "**" + File.separatorChar + "*.java")) {
-			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
-			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
-			JavaType javaType;
-			try {
-				javaType = new JavaType(fullPath);
-			} catch (RuntimeException e) { // ROO-1022
-				continue;
-			}
-			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
-			if (id == null) {
-				continue;
-			}
-			// Now I've found it, let's work out the Path it is from
-			Path locatedPath = PhysicalTypeIdentifier.getPath(id);
-			String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, locatedPath);
-			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(physicalTypeMid);
-			if (located != null) {
-				projectTypes.add(located);
+
+	private PathResolver getPathResolver() {
+		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata unavailable");
+		return projectOperations.getPathResolver();
+	}
+
+	private boolean doesPathIndicateJavaType(String filePath) {
+		return filePath.endsWith(".java") && !filePath.endsWith("package-info.java");
+	}
+
+	private void cacheType(String fileCanonicalPath) {
+		if (doesPathIndicateJavaType(fileCanonicalPath)) {
+			String id = findIdentifier(fileCanonicalPath);
+			if (id != null && PhysicalTypeIdentifier.isValid(id)) {
+				// Change to Java, so drop the cache
+				ClassOrInterfaceTypeDetails cid = lookupClassOrInterfaceTypeDetails(id);
+				if (cid == null) {
+					if (!fileManager.exists(fileCanonicalPath)) {
+						typeMap.remove(id);
+						updateChanges(id, true);
+					}
+					return;
+				}
+				if (cid.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+					return;
+				}
+				updateChanges(id, false);
+				typeMap.put(id, cid);
+				updateAttributeCache(cid);
 			}
 		}
-		return projectTypes;
+	}
+
+	private void updateAttributeCache(MemberHoldingTypeDetails cid) {
+		for (AnnotationMetadata annotationMetadata : cid.getAnnotations()) {
+			if (!annotationToMidMap.containsKey(annotationMetadata.getAnnotationType())) {
+				annotationToMidMap.put(annotationMetadata.getAnnotationType(), new HashSet<String>());
+			}
+			annotationToMidMap.get(annotationMetadata.getAnnotationType()).add(cid.getDeclaredByMetadataId());
+		}
+		for (Object customData : cid.getCustomData().keySet()) {
+			if (!tagToMidMap.containsKey(customData)) {
+				tagToMidMap.put(customData, new HashSet<String>());
+			}
+			tagToMidMap.get(customData).add(cid.getDeclaredByMetadataId());
+		}
+	}
+
+	private void updateCache() {
+		// Retrieve a list of paths that have been discovered or modified since the last invocation by this class
+		HashSet<String> changes = fileMonitorService.getWhatsDirty(TypeLocationServiceImpl.class.getName());
+
+		// Update the type cache
+		for (String change : changes) {
+			if (doesPathIndicateJavaType(change)) {
+				//logger.severe("Update cache: " + change);
+				cacheType(change);
+			}
+		}
+	}
+
+	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
+
+	public LinkedHashSet<String> getWhatsDirty(String requestingClass) {
+		updateCache();
+		LinkedHashSet<String> changesSinceLastRequest = changeMap.get(requestingClass);
+		if (changesSinceLastRequest == null) {
+			changesSinceLastRequest = new LinkedHashSet<String>(typeMap.keySet());
+			changeMap.put(requestingClass, new LinkedHashSet<String>());
+		} else {
+			LinkedHashSet<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
+			changesSinceLastRequest.removeAll(copyOfChangesSinceLastRequest);
+			changesSinceLastRequest = copyOfChangesSinceLastRequest;
+		}
+		LinkedHashSet<String> changedTypes = new LinkedHashSet<String>();
+		for (String changedId : changesSinceLastRequest) {
+			changedTypes.add(changedId);
+		}
+		return changedTypes;
+
+	}
+
+	private void updateChanges(String physicalTypeIdentifier, boolean remove) {
+		for (String requestingClass : changeMap.keySet()) {
+			if (remove) {
+				changeMap.get(requestingClass).remove(physicalTypeIdentifier);
+			} else {
+				changeMap.get(requestingClass).add(physicalTypeIdentifier);
+			}
+		}
+	}
+
+	public void onFileEvent(FileEvent fileEvent) {
+
+		/*String change = fileEvent.getFileDetails().getCanonicalPath();
+
+		if (doesPathIndicateJavaType(change)) {
+			String id = findIdentifier(change);
+			if (id != null && PhysicalTypeIdentifier.isValid(id)) {
+				logger.warning("Update cache: " + change);
+				cacheType(change);
+			}
+		}*/
 	}
 }

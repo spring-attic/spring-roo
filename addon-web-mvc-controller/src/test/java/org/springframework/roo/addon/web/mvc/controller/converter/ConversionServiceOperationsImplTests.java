@@ -73,7 +73,7 @@ public class ConversionServiceOperationsImplTests {
 	public void testInstallJavaClass() throws Exception {
 		JavaType javaType = new JavaType(getClass().getPackage().getName() + ".ApplicationConversionServiceFactoryBean");
 		String targetPath = "doesntMatter";
-		when(typeLocationService.getPhysicalLocationCanonicalPath(javaType , Path.SRC_MAIN_JAVA)).thenReturn(targetPath);
+		when(typeLocationService.getPhysicalTypeCanonicalPath(javaType , Path.SRC_MAIN_JAVA)).thenReturn(targetPath);
 		when(pathResolver.getPath(targetPath)).thenReturn(new Path(targetPath));
 		StubMutableFile file = new StubMutableFile();
 		when(fileManager.createFile(targetPath)).thenReturn(file);

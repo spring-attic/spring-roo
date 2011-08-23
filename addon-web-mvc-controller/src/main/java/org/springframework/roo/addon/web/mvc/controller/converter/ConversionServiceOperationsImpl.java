@@ -47,7 +47,7 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 
 	void installJavaClass(JavaPackage thePackage) {
 		JavaType javaType = new JavaType(thePackage.getFullyQualifiedPackageName() + "." + CONVERSION_SERVICE_SIMPLE_TYPE);
-		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}
