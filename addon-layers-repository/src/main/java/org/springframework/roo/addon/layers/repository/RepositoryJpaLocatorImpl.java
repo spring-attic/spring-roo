@@ -40,10 +40,8 @@ public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator{
 		if (existing.containsAll(located)) {
 			return existing;
 		}
-		System.out.println("getRepositories: " + domainType + " - " + located.size());
 		Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();
 		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : located) {
-			System.out.println("getRepositories: " + classOrInterfaceTypeDetails.hashCode());
 			RepositoryJpaAnnotationValues annotationValues = new RepositoryJpaAnnotationValues(new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId()), classOrInterfaceTypeDetails));
 			if (annotationValues.getDomainType() != null && annotationValues.getDomainType().equals(domainType)) {
 				toReturn.put(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), classOrInterfaceTypeDetails);

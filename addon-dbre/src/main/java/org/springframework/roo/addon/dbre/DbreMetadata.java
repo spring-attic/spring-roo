@@ -115,10 +115,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add fields for single-valued associations to other entities that have one-to-one multiplicity
 		addOneToOneFields(table);
 
-		if (identifierHolder.getEmbeddedIdentifierFields().size() > 0) {
-			System.out.println("****** embedded id fields for type " + governorTypeDetails.getName().getFullyQualifiedTypeName() + ": " + identifierHolder.getEmbeddedIdentifierFields().size() + " - " + identifierHolder.getEmbeddedIdentifierFields().get(0).getFieldName() + " - " + identifierHolder.getEmbeddedIdentifierFields().get(0).getFieldType());
-
-		}
 		// Add fields for many-valued associations with one-to-many multiplicity
 		addOneToManyFields(table);
 
