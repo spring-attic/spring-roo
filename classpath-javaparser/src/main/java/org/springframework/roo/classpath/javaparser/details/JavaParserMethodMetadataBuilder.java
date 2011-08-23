@@ -15,6 +15,19 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.javaparser.JavaParserUtils;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Modifier;
@@ -24,28 +37,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.javaparser.JavaParserMutableClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.javaparser.JavaParserUtils;
-import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
-import org.springframework.roo.model.CustomDataImpl;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
-
 /**
  * Java Parser implementation of {@link MethodMetadata}.
  * 
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider implements MethodMetadata {
+public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -55,9 +53,12 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 	private String body;
 	private String declaredByMetadataId;
 	private int modifier;
+
+	public static JavaParserMethodMetadataBuilder getInstance(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+		return new JavaParserMethodMetadataBuilder(declaredByMetadataId, methodDeclaration, compilationUnitServices, typeParameters);
+	}
 	
-	public JavaParserMethodMetadata(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
-		super(CustomDataImpl.NONE);
+	private JavaParserMethodMetadataBuilder(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(methodDeclaration, "Method declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
@@ -103,8 +104,8 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 				if (annotationsList != null) {
 					for (AnnotationExpr candidate : annotationsList) {
-						JavaParserAnnotationMetadata md = JavaParserAnnotationMetadata.getInstance(candidate, compilationUnitServices);
-						annotations.add(md);
+						AnnotationMetadata annotationMetadata = JavaParserAnnotationMetadataBuilder.getInstance(candidate, compilationUnitServices).build();
+						annotations.add(annotationMetadata);
 					}
 				}
 				AnnotatedJavaType param = new AnnotatedJavaType(parameterType, annotations);
@@ -123,60 +124,22 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		
 		if (methodDeclaration.getAnnotations() != null) {
 			for (AnnotationExpr annotation : methodDeclaration.getAnnotations()) {
-				this.annotations.add(JavaParserAnnotationMetadata.getInstance(annotation, compilationUnitServices));
+				this.annotations.add(JavaParserAnnotationMetadataBuilder.getInstance(annotation, compilationUnitServices).build());
 			}
 		}
 	}
 
-	public int getModifier() {
-		return modifier;
-	}
-
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
-
-	public List<AnnotationMetadata> getAnnotations() {
-		return Collections.unmodifiableList(annotations);
-	}
-	
-	public List<JavaSymbolName> getParameterNames() {
-		return Collections.unmodifiableList(parameterNames);
-	}
-
-	public List<AnnotatedJavaType> getParameterTypes() {
-		return Collections.unmodifiableList(parameterTypes);
-	}
-
-	public JavaType getReturnType() {
-		return returnType;
-	}
-
-	public JavaSymbolName getMethodName() {
-		return methodName;
-	}
-
-	public List<JavaType> getThrowsTypes() {
-		return throwsTypes;
-	}
-
-	public String getBody() {
-		return body;
-	}
-
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("declaredByMetadataId", declaredByMetadataId);
-		tsc.append("modifier", Modifier.toString(modifier));
-		tsc.append("methodName", methodName);
-		tsc.append("parameterTypes", parameterTypes);
-		tsc.append("parameterNames", parameterNames);
-		tsc.append("returnType", returnType);
-		tsc.append("throwsTypes", throwsTypes);
-		tsc.append("annotations", annotations);
-		tsc.append("customData", getCustomData());
-		tsc.append("body", body);
-		return tsc.toString();
+	public MethodMetadata build() {
+		MethodMetadataBuilder methodMetadataBuilder = new MethodMetadataBuilder(declaredByMetadataId);
+		methodMetadataBuilder.setMethodName(methodName);
+		methodMetadataBuilder.setReturnType(returnType);
+		methodMetadataBuilder.setAnnotations(annotations);
+		methodMetadataBuilder.setBodyBuilder(InvocableMemberBodyBuilder.getInstance().append(body));
+		methodMetadataBuilder.setModifier(modifier);
+		methodMetadataBuilder.setParameterNames(parameterNames);
+		methodMetadataBuilder.setParameterTypes(parameterTypes);
+		methodMetadataBuilder.setThrowsTypes(throwsTypes);
+		return methodMetadataBuilder.build();
 	}
 
 	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, Set<JavaSymbolName> typeParameters) {
@@ -226,7 +189,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		d.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : method.getAnnotations()) {
-			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation);
+			JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
 	
 		// Add any method parameters, including their individual annotations and type parameters
@@ -241,7 +204,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
 	
 			for (AnnotationMetadata parameterAnnotation : methodParameter.getAnnotations()) {
-				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
+				JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
 			}
 			
 			// Compute the parameter name
@@ -252,7 +215,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 			if (methodParameter.getJavaType().isPrimitive()) {
 				parameterType = JavaParserUtils.getType(methodParameter.getJavaType());
 			} else {
-				parameterType = JavaParserMutableClassOrInterfaceTypeDetails.getResolvedName(compilationUnitServices.getEnclosingTypeName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(Collections.singletonList(methodParameter)).get(0), compilationUnitServices);
+				parameterType = JavaParserUtils.getResolvedName(compilationUnitServices.getEnclosingTypeName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(Collections.singletonList(methodParameter)).get(0), compilationUnitServices);
 			}
 
 			// Create a Java Parser method parameter and add it to the list of parameters
@@ -323,10 +286,10 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 						throw new IllegalStateException("Method '" + method.getMethodName().getSymbolName() + "' already exists");
 					} else if (md.getParameters() != null && md.getParameters().size() == d.getParameters().size()) {
 						// Possible match, we need to consider parameter types as well now
-						JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices, typeParameters);
+						MethodMetadata methodMetadata = JavaParserMethodMetadataBuilder.getInstance(method.getDeclaredByMetadataId(), md, compilationUnitServices, typeParameters).build();
 						boolean matchesFully = true;
 						index = -1;
-						for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
+						for (AnnotatedJavaType existingParameter : methodMetadata.getParameterTypes()) {
 							index++;
 							AnnotatedJavaType parameterType = method.getParameterTypes().get(index);
 							if (!existingParameter.getJavaType().equals(parameterType.getJavaType())) {

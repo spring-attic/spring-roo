@@ -18,7 +18,7 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -28,6 +28,7 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
+import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
 /**
  * Represents metadata for the application-wide conversion service. Generates the following ITD methods:
  * <ul>
@@ -109,7 +110,8 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 		builder.addMethod(getAfterPropertiesSetMethod(installMethod));
 		
-		AnnotationMetadata configurable = new DefaultAnnotationMetadata(CONFIGURABLE, new ArrayList<AnnotationAttributeValue<?>>());
+
+		AnnotationMetadata configurable = AnnotationMetadataBuilder.getInstance(CONFIGURABLE, new ArrayList<AnnotationAttributeValue<?>>()).build();
 		boolean configurablePresent = false;
 		for (AnnotationMetadata annotation : governorTypeDetails.getAnnotations()) {
 			if (annotation.getAnnotationType().equals(configurable.getAnnotationType())) {

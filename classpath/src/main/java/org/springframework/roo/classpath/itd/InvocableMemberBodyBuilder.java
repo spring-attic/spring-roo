@@ -19,6 +19,10 @@ public class InvocableMemberBodyBuilder {
 	private int indentLevel;
 	private final StringBuilder stringBuilder = new StringBuilder();
 
+	public static InvocableMemberBodyBuilder getInstance() {
+		return new InvocableMemberBodyBuilder();
+	}
+
 	/**
 	 * Constructor for an empty body
 	 */

@@ -14,27 +14,24 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.javaparser.JavaParserUtils;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 
 import java.io.ByteArrayInputStream;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.javaparser.JavaParserUtils;
-import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
-import org.springframework.roo.model.CustomDataImpl;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Java Parser implementation of {@link ConstructorMetadata}.
@@ -43,7 +40,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorProvider implements ConstructorMetadata {
+public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata>{
 
 	// TODO: Should parse the throws types from JavaParser source
 
@@ -54,9 +51,12 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 	private String body;
 	private String declaredByMetadataId;
 	private int modifier;
+
+	public static JavaParserConstructorMetadataBuilder getInstance(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
+		return new JavaParserConstructorMetadataBuilder(declaredByMetadataId, constructorDeclaration, compilationUnitServices, typeParameterNames);
+	}
 	
-	public JavaParserConstructorMetadata(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
-		super(CustomDataImpl.NONE);
+	private JavaParserConstructorMetadataBuilder(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(constructorDeclaration, "Constructor declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
@@ -97,8 +97,8 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 				if (annotationsList != null) {
 					for (AnnotationExpr candidate : annotationsList) {
-						JavaParserAnnotationMetadata md = JavaParserAnnotationMetadata.getInstance(candidate, compilationUnitServices);
-						annotations.add(md);
+						JavaParserAnnotationMetadataBuilder md = JavaParserAnnotationMetadataBuilder.getInstance(candidate, compilationUnitServices);
+						annotations.add(md.build());
 					}
 				}
 				
@@ -109,50 +109,21 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 		
 		if (constructorDeclaration.getAnnotations() != null) {
 			for (AnnotationExpr annotation : constructorDeclaration.getAnnotations()) {
-				this.annotations.add(JavaParserAnnotationMetadata.getInstance(annotation, compilationUnitServices));
+				this.annotations.add(JavaParserAnnotationMetadataBuilder.getInstance(annotation, compilationUnitServices).build());
 			}
 		}
 		
 	}
-	
-	public int getModifier() {
-		return modifier;
-	}
 
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
-
-	public List<AnnotationMetadata> getAnnotations() {
-		return Collections.unmodifiableList(annotations);
-	}
-	
-	public List<JavaSymbolName> getParameterNames() {
-		return Collections.unmodifiableList(parameterNames);
-	}
-
-	public List<AnnotatedJavaType> getParameterTypes() {
-		return Collections.unmodifiableList(parameterTypes);
-	}
-	
-	public List<JavaType> getThrowsTypes() {
-		return Collections.unmodifiableList(throwsTypes);
-	}
-
-	public String getBody() {
-		return body;
-	}
-	
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("declaredByMetadataId", declaredByMetadataId);
-		tsc.append("modifier", Modifier.toString(modifier));
-		tsc.append("parameterTypes", parameterTypes);
-		tsc.append("parameterNames", parameterNames);
-		tsc.append("annotations", annotations);
-		tsc.append("customData", getCustomData());
-		tsc.append("body", body);
-		return tsc.toString();
+	public ConstructorMetadata build() {
+		ConstructorMetadataBuilder constructorMetadataBuilder = new ConstructorMetadataBuilder(declaredByMetadataId);
+		constructorMetadataBuilder.setAnnotations(annotations);
+		constructorMetadataBuilder.setBodyBuilder(InvocableMemberBodyBuilder.getInstance().append(body));
+		constructorMetadataBuilder.setModifier(modifier);
+		constructorMetadataBuilder.setParameterNames(parameterNames);
+		constructorMetadataBuilder.setParameterTypes(parameterTypes);
+		constructorMetadataBuilder.setThrowsTypes(throwsTypes);
+		return constructorMetadataBuilder.build();
 	}
 	
 	public static void addConstructor(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, ConstructorMetadata constructor, Set<JavaSymbolName> typeParameters) {
@@ -169,7 +140,7 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		d.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : constructor.getAnnotations()) {
-			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation);
+			JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
 	
 		// Add any constructor parameters, including their individual annotations and type parameters
@@ -183,7 +154,7 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
 	
 			for (AnnotationMetadata parameterAnnotation : constructorParameter.getAnnotations()) {
-				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
+				JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
 			}
 			
 			// Compute the parameter name
@@ -264,9 +235,9 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 				ConstructorDeclaration cd = (ConstructorDeclaration) bd;
 				if (cd.getParameters().size() == d.getParameters().size()) {
 					// Possible match, we need to consider parameter types as well now
-					JavaParserConstructorMetadata jpmm = new JavaParserConstructorMetadata(constructor.getDeclaredByMetadataId(), cd, compilationUnitServices, typeParameters);
+					ConstructorMetadata constructorMetadata = new JavaParserConstructorMetadataBuilder(constructor.getDeclaredByMetadataId(), cd, compilationUnitServices, typeParameters).build();
 					boolean matchesFully = true;
-					for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
+					for (AnnotatedJavaType existingParameter : constructorMetadata.getParameterTypes()) {
 						if (!existingParameter.getJavaType().equals(constructor.getParameterTypes().get(index))) {
 							matchesFully = false;
 							break;

@@ -1,12 +1,12 @@
 package org.springframework.roo.classpath.details;
 
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaType;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.JavaType;
 
 /**
  * Abstract {@link Builder} to assist building {@link MemberHoldingTypeDetails} implementations.
@@ -219,6 +219,13 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		}
 		return addMethod(new MethodMetadataBuilder(method));
 	}
+
+	public final boolean addInnerType(ClassOrInterfaceTypeDetails innerType) {
+        if (innerType == null) {
+            return false;
+        }
+        return addInnerType(new ClassOrInterfaceTypeDetailsBuilder(innerType));
+    }
 
     public final boolean addInnerType(ClassOrInterfaceTypeDetailsBuilder innerType) {
         if (innerType == null || !getDeclaredByMetadataId().equals(innerType.getDeclaredByMetadataId())) {

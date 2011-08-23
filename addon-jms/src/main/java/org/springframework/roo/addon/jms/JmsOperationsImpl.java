@@ -1,30 +1,19 @@
 package org.springframework.roo.addon.jms;
 
-import static org.springframework.roo.model.SpringJavaType.ASYNC;
-import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
-import static org.springframework.roo.model.SpringJavaType.JMS_TEMPLATE;
-
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -43,6 +32,17 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.JMS_TEMPLATE;
+
 /**
  * Provides JMS configuration operations.
  * 
@@ -55,9 +55,10 @@ import org.w3c.dom.Element;
 public class JmsOperationsImpl implements JmsOperations {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
-	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
+	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isInstallJmsAvailable() {
 		return projectOperations.isProjectAvailable() && !hasJmsContext();
@@ -127,8 +128,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
+		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) ptd);
 
 		// Create some method content to get people started
 		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(new JavaType(Object.class)));
@@ -138,7 +138,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		bodyBuilder.appendFormalLine(fieldName + ".convertAndSend(messageObject);");
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, Modifier.PRIVATE | Modifier.TRANSIENT, annotations, fieldName, JMS_TEMPLATE);
-		mutableTypeDetails.addField(fieldBuilder.build());
+		classOrInterfaceTypeDetailsBuilder.addField(fieldBuilder);
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		
@@ -162,7 +162,9 @@ public class JmsOperationsImpl implements JmsOperations {
 			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(ASYNC));
 		}
 		
-		mutableTypeDetails.addMethod(methodBuilder.build());
+		classOrInterfaceTypeDetailsBuilder.addMethod(methodBuilder);
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
+		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
 	}
 
 	public void addJmsListener(JavaType targetType, String name, JmsDestinationType destinationType) {
@@ -190,9 +192,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		// Check the file doesn't already exist
 		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), projectOperations.getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
 
-		// Compute physical location
-		PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(declaredByMetadataId, physicalLocationCanonicalPath, typeDetailsBuilder.build());
-		physicalTypeMetadataProvider.createPhysicalType(toCreate);
+		typeManipulationService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build(), physicalLocationCanonicalPath);
 
 		String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));

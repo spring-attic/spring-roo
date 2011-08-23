@@ -247,7 +247,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	
 	private void installConversionServiceJavaClass(JavaPackage thePackage) {
 		JavaType javaType = new JavaType(thePackage.getFullyQualifiedPackageName() + ".ApplicationConversionServiceFactoryBean");
-		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}

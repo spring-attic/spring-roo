@@ -18,17 +18,13 @@ import japa.parser.ast.expr.NormalAnnotationExpr;
 import japa.parser.ast.expr.SingleMemberAnnotationExpr;
 import japa.parser.ast.expr.StringLiteralExpr;
 import japa.parser.ast.type.Type;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.CharAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DoubleAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
@@ -37,10 +33,15 @@ import org.springframework.roo.classpath.details.annotations.NestedAnnotationAtt
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
+import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Java Parser implementation of {@link AnnotationMetadata}.
@@ -49,7 +50,16 @@ import org.springframework.roo.support.util.Assert;
  * @author Andrew Swan
  * @since 1.0
  */
-public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadata {
+public final class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata>{
+
+	// Fields
+	private JavaType annotationType;
+	private List<AnnotationAttributeValue<?>> attributeValues;
+
+
+	public static JavaParserAnnotationMetadataBuilder getInstance(final AnnotationExpr annotationExpr, final CompilationUnitServices compilationUnitServices) {
+		return new JavaParserAnnotationMetadataBuilder(annotationExpr, compilationUnitServices);
+	}
 
 	/**
 	 * Factory method
@@ -59,7 +69,7 @@ public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadat
 	 * @return a non-<code>null</code> instance
 	 * @since 1.2.0
 	 */
-	public static JavaParserAnnotationMetadata getInstance(final AnnotationExpr annotationExpr, final CompilationUnitServices compilationUnitServices) {
+	private JavaParserAnnotationMetadataBuilder(final AnnotationExpr annotationExpr, final CompilationUnitServices compilationUnitServices) {
 		Assert.notNull(annotationExpr, "Annotation expression required");
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 
@@ -67,7 +77,7 @@ public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadat
 		final NameExpr nameToFind = JavaParserUtils.getNameExpr(annotationExpr);
 
 		// Compute the actual annotation type, having regard to the compilation unit package and imports
-		final JavaType annotationType = JavaParserUtils.getJavaType(compilationUnitServices, nameToFind, null);
+		this.annotationType = JavaParserUtils.getJavaType(compilationUnitServices, nameToFind, null);
 
 		// Generate some member-value pairs for subsequent parsing
 		List<MemberValuePair> annotationPairs = new ArrayList<MemberValuePair>();
@@ -94,17 +104,22 @@ public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadat
 			AnnotationAttributeValue<?> value = convert(annotationName, p.getValue(), compilationUnitServices);
 			attributeValues.add(value);
 		}
-		return new JavaParserAnnotationMetadata(annotationType, attributeValues, annotationExpr);
+		this.attributeValues = attributeValues;
 	}
 
-	private static AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, Expression expression, final CompilationUnitServices compilationUnitServices) {
+	public AnnotationMetadata build() {
+		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationType, attributeValues);
+		return annotationMetadataBuilder.build();
+	}
+
+	private AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, Expression expression, final CompilationUnitServices compilationUnitServices) {
 		if (annotationName == null) {
 			annotationName = new JavaSymbolName("__ARRAY_ELEMENT__");
 		}
 
 		if (expression instanceof AnnotationExpr) {
 			AnnotationExpr annotationExpr = (AnnotationExpr) expression;
-			AnnotationMetadata value = getInstance(annotationExpr, compilationUnitServices);
+			AnnotationMetadata value = getInstance(annotationExpr, compilationUnitServices).build();
 			return new NestedAnnotationAttributeValue(annotationName, value);
 		}
 
@@ -337,50 +352,26 @@ public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadat
 		}
 	}
 
-	/**
-	 * Facilitates the removal of the annotation type indicated.
-	 * 
-	 * @param compilationUnitServices to use (required)
-	 * @param annotations to remove the annotation from (required)
-	 * @param annotation to remove (required)
-	 */
-	public static void removeAnnotationFromList(final CompilationUnitServices compilationUnitServices, final List<AnnotationExpr> annotations, JavaType annotation) {
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
-		Assert.notNull(annotations, "Annotations required");
-		Assert.notNull(annotation, "Annotation metadata required");
-
-		AnnotationExpr toRemove = null;
-		for (AnnotationExpr candidate : annotations) {
-			NameExpr existingName = null;
-			if (candidate instanceof NormalAnnotationExpr) {
-				existingName = ((NormalAnnotationExpr) candidate).getName();
-			} else if (candidate instanceof MarkerAnnotationExpr) {
-				existingName = ((MarkerAnnotationExpr) candidate).getName();
-			} else if (candidate instanceof SingleMemberAnnotationExpr) {
-				existingName = ((SingleMemberAnnotationExpr) candidate).getName();
-			}
-
-			JavaType javaType = JavaParserUtils.getJavaType(compilationUnitServices, existingName, null);
-			if (annotation.equals(javaType)) {
-				toRemove = candidate;
-				break;
-			}
-		}
-
-		Assert.notNull(toRemove, "Could not find annotation for type '" + annotation.getFullyQualifiedTypeName() + "' to remove");
-
-		annotations.remove(toRemove);
-	}
-
 	@SuppressWarnings("unchecked")
 	private static MemberValuePair convert(AnnotationAttributeValue<?> value) {
 		if (value instanceof NestedAnnotationAttributeValue) {
 			NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
-			Assert.isInstanceOf(JavaParserAnnotationMetadata.class, castValue.getValue(), "Cannot present nested annotations unless created by this class");
-			JavaParserAnnotationMetadata javaParserMutableAnnotationMetadata = (JavaParserAnnotationMetadata) castValue.getValue();
-
+			Assert.isInstanceOf(JavaParserAnnotationMetadataBuilder.class, castValue.getValue(), "Cannot present nested annotations unless created by this class");
+			AnnotationExpr annotationExpr;
+			AnnotationMetadata nestedAnnotation = castValue.getValue();
+			if (castValue.getValue().getAttributeNames().size() == 0) {
+				annotationExpr = new MarkerAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation.getAnnotationType().getFullyQualifiedTypeName()));
+			} else if (castValue.getValue().getAttributeNames().size() == 1) {
+				annotationExpr = new SingleMemberAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation.getAnnotationType().getFullyQualifiedTypeName()), convert(nestedAnnotation.getAttribute(nestedAnnotation.getAttributeNames().get(0))).getValue());
+			} else {
+				List<MemberValuePair> memberValuePairs = new LinkedList<MemberValuePair>();
+				for (JavaSymbolName attributeName : nestedAnnotation.getAttributeNames()) {
+					memberValuePairs.add(convert(nestedAnnotation.getAttribute(attributeName)));
+				}
+				annotationExpr = new NormalAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation.getAnnotationType().getFullyQualifiedTypeName()), memberValuePairs);
+			}
 			// Rely on the nested instance to know its member value pairs
-			return new MemberValuePair(value.getName().getSymbolName(), javaParserMutableAnnotationMetadata.annotationExpr);
+			return new MemberValuePair(value.getName().getSymbolName(), annotationExpr);
 		}
 
 		if (value instanceof BooleanAttributeValue) {
@@ -451,21 +442,5 @@ public final class JavaParserAnnotationMetadata extends DefaultAnnotationMetadat
 		}
 
 		throw new UnsupportedOperationException("Unsupported attribute value '" + value.getName() + "' of type '" + value.getClass().getName() + "'");
-	}
-	
-	// Fields
-	private final Expression annotationExpr;
-
-	/**
-	 * Constructor
-	 *
-	 * @param annotationType the type of annotation for which these are the
-	 * metadata (required)
-	 * @param attributeValues the given annotation's values; can be <code>null</code>
-	 * @param annotationExpr
-	 */
-	public JavaParserAnnotationMetadata(final JavaType annotationType, final List<AnnotationAttributeValue<?>> attributeValues, final Expression annotationExpr) {
-		super(annotationType, attributeValues);
-		this.annotationExpr = annotationExpr;
 	}
 }

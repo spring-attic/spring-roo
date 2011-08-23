@@ -1,29 +1,16 @@
 package org.springframework.roo.addon.email;
 
-import static org.springframework.roo.addon.email.MailProtocol.SMTP;
-import static org.springframework.roo.model.SpringJavaType.ASYNC;
-import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
-import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
-import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -41,6 +28,19 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.springframework.roo.addon.email.MailProtocol.SMTP;
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
+import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
 
 /**
  * Implementation of {@link MailOperationsImpl}.
@@ -65,6 +65,8 @@ public class MailOperationsImpl implements MailOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
+	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeManagementService typeManipulationService;
 
 	public boolean isInstallEmailAvailable() {
 		return projectOperations.isProjectAvailable();
@@ -249,29 +251,14 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Obtain the physical type and its mutable class details
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType);
-		final MutableClassOrInterfaceTypeDetails mutableTypeDetails = getMutableClass(declaredByMetadataId);
+		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
 
 		// Add the MailSender field
 		final FieldMetadataBuilder mailSenderFieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, PRIVATE_TRANSIENT, annotations, fieldName, MAIL_SENDER);
-		mutableTypeDetails.addField(mailSenderFieldBuilder.build());
-		
-		// Add the "sendMessage" method
-		mutableTypeDetails.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, mutableTypeDetails));
-	}
+		classOrInterfaceTypeDetailsBuilder.addField(mailSenderFieldBuilder.build());
 
-	/**
-	 * Returns the mutable class of the given physical type
-	 * 
-	 * @param classMetadataId
-	 * @return a non-<code>null</code> instance
-	 */
-	private MutableClassOrInterfaceTypeDetails getMutableClass(final String classMetadataId) {
-		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(classMetadataId);
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(classMetadataId));
-		final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(classMetadataId));
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(classMetadataId));
-		return (MutableClassOrInterfaceTypeDetails) ptd;
+		// Add the "sendMessage" method
+		classOrInterfaceTypeDetailsBuilder.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, classOrInterfaceTypeDetailsBuilder));
 	}
 
 	/**
@@ -283,7 +270,7 @@ public class MailOperationsImpl implements MailOperations {
 	 * @param mutableTypeDetails the type to which the method is being added (required)
 	 * @return a non-<code>null</code> method
 	 */
-	private MethodMetadata getSendMethod(final JavaSymbolName mailSenderName, final boolean async, final String targetClassMID, final MutableClassOrInterfaceTypeDetails mutableTypeDetails) {
+	private MethodMetadata getSendMethod(final JavaSymbolName mailSenderName, final boolean async, final String targetClassMID, final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder) {
 		final String contextPath = getApplicationContextPath();
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		final Element root = document.getDocumentElement();
@@ -307,7 +294,7 @@ public class MailOperationsImpl implements MailOperations {
 			// A SimpleMailMessage bean exists; auto-wire it into the entity and use it as a template
 			final List<AnnotationMetadataBuilder> smmAnnotations = Arrays.asList(new AnnotationMetadataBuilder(AUTOWIRED));
 			final FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(targetClassMID, PRIVATE_TRANSIENT, smmAnnotations, new JavaSymbolName(TEMPLATE_MESSAGE_FIELD), SIMPLE_MAIL_MESSAGE);
-			mutableTypeDetails.addField(smmFieldBuilder.build());
+			classOrInterfaceTypeDetailsBuilder.addField(smmFieldBuilder.build());
 			// Use the injected bean as a template (for thread safety)
 			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage " + LOCAL_MESSAGE_VARIABLE	+ " = new org.springframework.mail.SimpleMailMessage(" + TEMPLATE_MESSAGE_FIELD + ");");
 		}

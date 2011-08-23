@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.scanner;
 
 import org.springframework.roo.model.CustomDataAccessor;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 
 /**
  * Provides the ability to modify or log the result of a {@link MemberDetailsScanner} operation
@@ -31,4 +32,14 @@ public interface MemberDetailsDecorator {
 	 * @return the originally-passed details (where possible) or a replacement details (never returns null)
 	 */
 	MemberDetails decorate(String requestingClass, MemberDetails memberDetails);
+
+	/**
+	 * Performs essentially the same function as decorate but only decorates {@link MemberHoldingTypeDetails} instances
+	 * and ignores the type's members.
+	 *
+	 * @param requestingClass the fully-qualified class name requesting the member details (required)
+	 * @param memberDetails the current member holders (required)
+	 * @return the originally-passed details (where possible) or a replacement details (never returns null)
+	 */
+	MemberDetails decorateTypes(String requestingClass,  MemberDetails memberDetails);
 }

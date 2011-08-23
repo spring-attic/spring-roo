@@ -1,10 +1,5 @@
 package org.springframework.roo.addon.dbre;
 
-import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
-
-import java.util.List;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,8 +8,8 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -23,6 +18,11 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
+import java.util.List;
+import java.util.Set;
+
+import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
 
 /**
  * Implementation of  {@link DbreMetadataProvider}.
@@ -37,8 +37,8 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeManagementService typeManipulationService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -93,12 +93,17 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			}
 		}
 		if (!found) {
-			String mid = physicalTypeMetadataProvider.findIdentifier(javaType);
+			String mid = typeLocationService.findIdentifier(javaType);
 			metadataDependencyRegistry.registerDependency(mid, metadataIdentificationString);
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierHolder, versionField, managedEntities, database);
+		DbreMetadata dbreMetadata = new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierHolder, versionField, managedEntities, database);
+		ClassOrInterfaceTypeDetails updatedGovernor = dbreMetadata.getUpdatedGovernor();
+		if (updatedGovernor != null) {
+			typeManipulationService.createOrUpdateTypeOnDisk(updatedGovernor, typeLocationService.getPhysicalTypeCanonicalPath(updatedGovernor.getDeclaredByMetadataId()));
+		}
+		return dbreMetadata;
 	}
 
 	private IdentifierHolder getIdentifierHolder(JavaType javaType) {
@@ -110,7 +115,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		FieldMetadata identifierField = identifierFields.get(0);
 		boolean embeddedIdField = identifierField.getCustomData().get(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD) != null;
 		List<FieldMetadata> embeddedIdFields = persistenceMemberLocator.getEmbeddedIdentifierFields(javaType);
-		
 		return new IdentifierHolder(identifierField, embeddedIdField, embeddedIdFields);
 	}
 

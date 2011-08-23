@@ -780,4 +780,30 @@ public class JavaParserUtils  {
 		}
 		return null;
 	}
+
+	public static ClassOrInterfaceType getResolvedName(JavaType target, JavaType current, CompilationUnit compilationUnit) {
+		NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target, compilationUnit.getImports(), current);
+		ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
+		if (current.getParameters() != null && current.getParameters().size() > 0) {
+			resolvedName.setTypeArgs(new ArrayList<Type>());
+			for (JavaType param : current.getParameters()) {
+				resolvedName.getTypeArgs().add(getResolvedName(target, param, compilationUnit));
+			}
+		}
+
+		return resolvedName;
+	}
+
+	public static ClassOrInterfaceType getResolvedName(JavaType target, JavaType current, CompilationUnitServices compilationUnit) {
+		NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(target, compilationUnit.getImports(), current);
+		ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
+		if (current.getParameters() != null && current.getParameters().size() > 0) {
+			resolvedName.setTypeArgs(new ArrayList<Type>());
+			for (JavaType param : current.getParameters()) {
+				resolvedName.getTypeArgs().add(getResolvedName(target, param, compilationUnit));
+			}
+		}
+
+		return resolvedName;
+	}
 }

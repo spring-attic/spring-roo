@@ -1,27 +1,16 @@
 package org.springframework.roo.addon.solr;
 
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Modifier;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
@@ -36,6 +25,17 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Modifier;
+import java.util.Date;
+import java.util.Properties;
+import java.util.Set;
+
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
+
 /**
  * Provides Search configuration operations.
  * 
@@ -47,10 +47,10 @@ import org.w3c.dom.Element;
 public class SolrOperationsImpl implements SolrOperations {
 	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.1");
 	@Reference private FileManager fileManager;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeManagementService typeManipulationService;
 
 	public boolean isInstallSearchAvailable() {
 		return projectOperations.isProjectAvailable() && !solrPropsInstalled() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -136,7 +136,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	public void addSearch(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
-		String id = physicalTypeMetadataProvider.findIdentifier(javaType);
+		String id = typeLocationService.findIdentifier(javaType);
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
@@ -146,19 +146,21 @@ public class SolrOperationsImpl implements SolrOperations {
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 
-		if (Modifier.isAbstract(mutableTypeDetails.getModifier())) {
+		if (Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier())) {
 			throw new IllegalStateException("The class specified is an abstract type. Can only add solr search for concrete types.");
 		}
-		addSolrSearchableAnnotation(mutableTypeDetails);
+		addSolrSearchableAnnotation(classOrInterfaceTypeDetails);
 	}
 
-	private void addSolrSearchableAnnotation(ClassOrInterfaceTypeDetails typeDetails) {
-		if (MemberFindingUtils.getTypeAnnotation(typeDetails, ROO_SOLR_SEARCHABLE) == null) {
+	private void addSolrSearchableAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+		if (MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, ROO_SOLR_SEARCHABLE) == null) {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
-			((MutableClassOrInterfaceTypeDetails) typeDetails).addTypeAnnotation(annotationBuilder.build());
+			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
+			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
+			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails, fileIdentifier);
 		}
 	}
 }

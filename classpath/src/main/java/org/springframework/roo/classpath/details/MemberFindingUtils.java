@@ -1,16 +1,17 @@
 package org.springframework.roo.classpath.details;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility methods for finding members in {@link MemberHoldingTypeDetails} instances.
@@ -93,10 +94,28 @@ public abstract class MemberFindingUtils {
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static AnnotationMetadata getDeclaredTypeAnnotation(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType type) {
+	public static AnnotationMetadata getDeclaredTypeAnnotation(IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, JavaType type) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(type, "Annotation type to locate required");
 		for (AnnotationMetadata md : memberHoldingTypeDetails.getAnnotations()) {
+			if (md.getAnnotationType().equals(type)) {
+				return md;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Locates the specified type-level annotation.
+	 *
+	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
+	 * @param type to locate (required)
+	 * @return the annotation, or null if not found
+	 */
+	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure> memberHoldingTypeDetails, JavaType type) {
+		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
+		Assert.notNull(type, "Annotation type to locate required");
+		for (AnnotationMetadataBuilder md : memberHoldingTypeDetails.getAnnotations()) {
 			if (md.getAnnotationType().equals(type)) {
 				return md;
 			}
@@ -206,10 +225,10 @@ public abstract class MemberFindingUtils {
 	 * @param annotationType annotation to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static AnnotationMetadata getTypeAnnotation(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType annotationType) {
+	public static AnnotationMetadata getTypeAnnotation(IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, JavaType annotationType) {
 		Assert.notNull(memberHoldingTypeDetails, "Class or interface type details required");
 		Assert.notNull(annotationType, "Annotation type required");
-		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
+		IdentifiableAnnotatedJavaStructure current = memberHoldingTypeDetails;
 		while (current != null) {
 			AnnotationMetadata result = getDeclaredTypeAnnotation(current, annotationType);
 			if (result != null) {

@@ -57,8 +57,8 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
 		
-		String interfaceIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(interfaceType, Path.SRC_MAIN_JAVA);
-		String classIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(classType, Path.SRC_MAIN_JAVA);
+		String interfaceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(interfaceType, Path.SRC_MAIN_JAVA);
+		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
 		
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
 			return; //type exists already - nothing to do

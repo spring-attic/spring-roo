@@ -25,9 +25,9 @@ import org.springframework.roo.support.util.Assert;
 public class MetadataCommands implements CommandMarker {
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataLogger metadataLogger;
+	@Reference private TypeLocationService typeLocationService;
 	
 	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications")
 	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true, help="The verbosity of notifications (0=none, 1=some, 2=all)") int level) {
@@ -92,7 +92,7 @@ public class MetadataCommands implements CommandMarker {
 	
 	@CliCommand(value="metadata for type", help="Shows detailed metadata for the indicated type")
 	public String metadataForType(@CliOption(key={"", "type"}, mandatory=true, help="The Java type name to display metadata for") JavaType javaType) {
-		String id = physicalTypeMetadataProvider.findIdentifier(javaType);
+		String id = typeLocationService.findIdentifier(javaType);
 		if (id == null) {
 			return "Cannot locate source for " + javaType.getFullyQualifiedTypeName();
 		}

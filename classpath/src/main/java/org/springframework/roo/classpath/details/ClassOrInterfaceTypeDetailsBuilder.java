@@ -108,6 +108,10 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		this.superclass = superclass;
 	}
 
+	public void setSuperclass(ClassOrInterfaceTypeDetails superclass) {
+		setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclass));
+	}
+
 	public List<JavaSymbolName> getEnumConstants() {
 		return enumConstants;
 	}

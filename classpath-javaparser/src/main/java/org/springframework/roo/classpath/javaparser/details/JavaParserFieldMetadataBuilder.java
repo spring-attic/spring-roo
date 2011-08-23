@@ -14,26 +14,21 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
-
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.javaparser.JavaParserMutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
-import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
-import org.springframework.roo.model.CustomDataImpl;
+import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Java Parser implementation of {@link FieldMetadata}.
@@ -42,7 +37,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  *
  */
-public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider implements FieldMetadata {
+public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata>{
 	private JavaType fieldType;
 	private String fieldInitializer;
 	private JavaSymbolName fieldName;
@@ -50,8 +45,11 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 	private String declaredByMetadataId;
 	private int modifier;
 
-	public JavaParserFieldMetadata(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
-		super(CustomDataImpl.NONE);
+	public static JavaParserFieldMetadataBuilder getInstance(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+		return new JavaParserFieldMetadataBuilder(declaredByMetadataId, fieldDeclaration, var, compilationUnitServices, typeParameters);
+	}
+
+	private JavaParserFieldMetadataBuilder(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldDeclaration, "Field declaration is mandatory");
 		Assert.notNull(var, "Variable declarator required");
@@ -82,29 +80,19 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		List<AnnotationExpr> annotations = fieldDeclaration.getAnnotations();
 		if (annotations != null) {
 			for (AnnotationExpr annotation : annotations) {
-				this.annotations.add(JavaParserAnnotationMetadata.getInstance(annotation, compilationUnitServices));
+				this.annotations.add(JavaParserAnnotationMetadataBuilder.getInstance(annotation, compilationUnitServices).build());
 			}
 		}
 	}
 
-	public int getModifier() {
-		return modifier;
-	}
-
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
-
-	public List<AnnotationMetadata> getAnnotations() {
-		return Collections.unmodifiableList(annotations);
-	}
-
-	public JavaSymbolName getFieldName() {
-		return fieldName;
-	}
-
-	public JavaType getFieldType() {
-		return fieldType;
+	public FieldMetadata build() {
+		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(declaredByMetadataId);
+		fieldMetadataBuilder.setAnnotations(annotations);
+		fieldMetadataBuilder.setFieldInitializer(fieldInitializer);
+		fieldMetadataBuilder.setFieldName(fieldName);
+		fieldMetadataBuilder.setFieldType(fieldType);
+		fieldMetadataBuilder.setModifier(modifier);
+		return fieldMetadataBuilder.build();
 	}
 	
 	public static void addField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, FieldMetadata field) {
@@ -113,7 +101,7 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		Assert.notNull(field, "Field required");
 		
 		JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
-		ClassOrInterfaceType initType = JavaParserMutableClassOrInterfaceTypeDetails.getResolvedName(compilationUnitServices.getEnclosingTypeName(), field.getFieldType(), compilationUnitServices);
+		ClassOrInterfaceType initType = JavaParserUtils.getResolvedName(compilationUnitServices.getEnclosingTypeName(), field.getFieldType(), compilationUnitServices);
 		
 		FieldDeclaration newField = ASTHelper.createFieldDeclaration(JavaParserUtils.getJavaParserModifier(field.getModifier()), initType, field.getFieldName().getSymbolName());
 		
@@ -193,7 +181,7 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		newField.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : field.getAnnotations()) {
-			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation);
+			JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
 
 		// Locate where to add this field; also verify if this field already exists
@@ -240,21 +228,5 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		
 		// Do removal outside iteration of body declaration members, to avoid concurrent modification exceptions
 		members.remove(toDelete);
-	}
-
-	public String getFieldInitializer() {
-		return this.fieldInitializer;
-	}
-
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("declaredByMetadataId", declaredByMetadataId);
-		tsc.append("modifier", Modifier.toString(modifier));
-		tsc.append("fieldType", fieldType);
-		tsc.append("fieldName", fieldName);
-		tsc.append("fieldInitializer", fieldInitializer);
-		tsc.append("annotations", annotations);
-		tsc.append("customData", getCustomData());
-		return tsc.toString();
 	}
 }

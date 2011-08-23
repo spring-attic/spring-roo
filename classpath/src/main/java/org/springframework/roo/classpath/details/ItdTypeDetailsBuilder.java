@@ -1,9 +1,5 @@
 package org.springframework.roo.classpath.details;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -12,6 +8,10 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Assists in the building of an {@link ItdTypeDetails} instance.
@@ -38,7 +38,6 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	private final ClassOrInterfaceTypeDetails governor;
 	private final ImportRegistrationResolver importRegistrationResolver;
 	private final JavaType aspect;
-	private final List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	private final List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
 	private final List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
 
@@ -74,7 +73,7 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	}
 
 	public ItdTypeDetails build() {
-		return new DefaultItdTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), buildConstructors(), buildFields(), buildMethods(), getExtendsTypes(), getImplementsTypes(), buildAnnotations(), fieldAnnotations, methodAnnotations, innerTypes);
+		return new DefaultItdTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), buildConstructors(), buildFields(), buildMethods(), getExtendsTypes(), getImplementsTypes(), buildAnnotations(), fieldAnnotations, methodAnnotations, buildInnerTypes());
 	}
 
 	public ImportRegistrationResolver getImportRegistrationResolver() {
@@ -145,12 +144,12 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 		methodAnnotations.add(declaredMethodAnnotationDetails);
 	}
 
-	public void addInnerType(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	@Override
+	public void onAddInnerType(ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetails) {
 		if (classOrInterfaceTypeDetails == null) {
 			return;
 		}
 		Assert.isTrue(Modifier.isStatic(classOrInterfaceTypeDetails.getModifier()), "Currently only static inner types are supported by AspectJ");
-		innerTypes.add(classOrInterfaceTypeDetails);
 	}
 
 	@Deprecated

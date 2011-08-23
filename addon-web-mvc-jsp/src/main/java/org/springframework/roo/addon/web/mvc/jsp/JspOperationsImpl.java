@@ -233,7 +233,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	public void createManualController(JavaType controller, String preferredMapping) {
 		Assert.notNull(controller, "Controller Java Type required");
 
-		String resourceIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
+		String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 		String folderName = null;
 
 		// Create annotation @RequestMapping("/myobject/**")

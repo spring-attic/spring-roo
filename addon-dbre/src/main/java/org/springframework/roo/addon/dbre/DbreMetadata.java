@@ -1,18 +1,5 @@
 package org.springframework.roo.addon.dbre;
 
-import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
-import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.CascadeAction;
 import org.springframework.roo.addon.dbre.model.Column;
@@ -25,12 +12,12 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -51,6 +38,19 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 /**
  * Metadata for {@link RooDbManaged}.
@@ -87,6 +87,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata versionField;
 	private Set<ClassOrInterfaceTypeDetails> managedEntities;
 	private Database database;
+	private ClassOrInterfaceTypeDetailsBuilder updatedGovernorBuilder;
 
 	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DbManagedAnnotationValues annotationValues, IdentifierHolder identifierHolder, FieldMetadata versionField, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -104,6 +105,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		Table table = this.database.getTable(DbreTypeUtils.getTableName(governorTypeDetails), DbreTypeUtils.getSchemaName(governorTypeDetails));
 		if (table == null) {
+			valid = false;
 			return;
 		}
 
@@ -113,6 +115,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add fields for single-valued associations to other entities that have one-to-one multiplicity
 		addOneToOneFields(table);
 
+		if (identifierHolder.getEmbeddedIdentifierFields().size() > 0) {
+			System.out.println("****** embedded id fields for type " + governorTypeDetails.getName().getFullyQualifiedTypeName() + ": " + identifierHolder.getEmbeddedIdentifierFields().size() + " - " + identifierHolder.getEmbeddedIdentifierFields().get(0).getFieldName() + " - " + identifierHolder.getEmbeddedIdentifierFields().get(0).getFieldType());
+
+		}
 		// Add fields for many-valued associations with one-to-many multiplicity
 		addOneToManyFields(table);
 
@@ -124,6 +130,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+	}
+
+	public ClassOrInterfaceTypeDetails getUpdatedGovernor() {
+		return updatedGovernorBuilder == null ? null : updatedGovernorBuilder.build();
 	}
 
 	private void addManyToManyFields(Table table) {
@@ -422,8 +432,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private void excludeFieldsInToStringAnnotation(String fieldName) {
 		PhysicalTypeDetails ptd = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd);
-		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
 
 		AnnotationMetadata toStringAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_TO_STRING);
 		if (toStringAnnotation == null) {
@@ -458,9 +466,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			ignoreFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), fieldName));
 		}
 
+
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), ignoreFields));
 		AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(ROO_TO_STRING, attributes);
-		mutable.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
+		updatedGovernorBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) ptd);
+		updatedGovernorBuilder.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
 	}
 
 	private FieldMetadata getOneToManyMappedByField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, String foreignTableName, String foreignSchemaName, CascadeAction onUpdate, CascadeAction onDelete) {

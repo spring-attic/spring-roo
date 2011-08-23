@@ -39,4 +39,29 @@ public interface TypeManagementService {
 	 * @param fieldMetadata the field to add (required)
 	 */
 	void addField(FieldMetadata fieldMetadata);
+
+	/**
+	 * Creates a physical type with the contents based on the {@link ClassOrInterfaceTypeDetails} passed in at the
+	 * location denoted by the passed in path.  This method expects the passed in file location to be correct.
+	 *
+	 * @param classOrInterfaceTypeDetails {@link ClassOrInterfaceTypeDetails} to base the file contents on (required)
+	 * @param fileIdentifier the path to the type (required)
+	 */
+	void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, String fileIdentifier);
+
+	/**
+	 * Creates the physical type on the disk, with the structure shown.
+	 *
+	 * <p>
+	 * An implementation is not required to support all of the constructs in the presented {@link PhysicalTypeMetadata}.
+	 * An implementation must throw an exception if it cannot create the presented type.
+	 *
+	 * <p>
+	 * An implementation may merge the contents with an existing file, if the type already exists.
+	 *
+	 * @param toCreate to create (required)
+	 */
+	void createPhysicalType(PhysicalTypeMetadata toCreate);
+
+
 }

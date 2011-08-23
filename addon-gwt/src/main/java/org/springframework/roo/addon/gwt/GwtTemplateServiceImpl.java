@@ -5,21 +5,12 @@ import hapax.TemplateDataDictionary;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeParsingService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -37,6 +28,14 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Provides a basic implementation of {@link GwtTemplateService} which
  * is used to create {@link ClassOrInterfaceTypeDetails} objects from
@@ -52,8 +51,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	@Reference private FileManager fileManager;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
-	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeParsingService typeParsingService;
 
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
@@ -138,7 +137,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			Template template = templateLoader.getTemplate(templateFile);
 			templateContents = template.renderToString(dataDictionary);
 			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, Path.SRC_MAIN_JAVA);
-			return physicalTypeMetadataProvider.parse(templateContents, templateId, templateType);
+			return typeParsingService.getTypeFromString(templateContents, templateId, templateType);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}

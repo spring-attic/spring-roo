@@ -48,6 +48,10 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	public static AnnotationMetadata getInstance(final String annotationType) {
 		return new AnnotationMetadataBuilder(annotationType).build();
 	}
+
+	public static AnnotationMetadataBuilder getInstance(JavaType annotationType, Collection<AnnotationAttributeValue<?>> attributeValues) {
+		return new AnnotationMetadataBuilder(annotationType, attributeValues);
+	}
 	
 	/**
 	 * Returns the metadata for the existing annotation, with no attribute

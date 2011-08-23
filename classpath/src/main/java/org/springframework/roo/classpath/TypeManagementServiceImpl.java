@@ -1,21 +1,16 @@
 package org.springframework.roo.classpath;
 
-import java.io.File;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -30,22 +25,21 @@ import org.springframework.roo.support.util.Assert;
 public class TypeManagementServiceImpl implements TypeManagementService {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
-	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
+	@Reference private TypeParsingService typeParsingService;
 	
 	public void generateClassFile(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		Assert.isTrue(projectOperations.isProjectAvailable(), "Class file cannot be generated at this time");
 		Assert.notNull(classOrInterfaceTypeDetails, "Details required");
 		
 		// Determine the canonical filename
-		String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
+		String physicalLocationCanonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 	
 		// Check the file doesn't already exist
 		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), projectOperations.getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
 		
-		// Compute physical location
-		PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), physicalLocationCanonicalPath, classOrInterfaceTypeDetails);
-		physicalTypeMetadataProvider.createPhysicalType(toCreate);
+		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails, physicalLocationCanonicalPath);
 	}
 	
 	public void addEnumConstant(String physicalTypeIdentifier, JavaSymbolName constantName) {
@@ -58,13 +52,14 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
+		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) ptd);
 
 		// Ensure it's an enum
-		Assert.isTrue(mutableTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,  PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is not an enum");
-		
-		mutableTypeDetails.addEnumConstant(constantName);
+		Assert.isTrue(classOrInterfaceTypeDetailsBuilder.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,  PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is not an enum");
+
+		classOrInterfaceTypeDetailsBuilder.addEnumConstant(constantName);
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
+		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
 	}
 	
 	public void addField(FieldMetadata fieldMetadata) {
@@ -76,8 +71,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
+		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) ptd);
 		
 		// Automatically add JSR 303 (Bean Validation API) support if there is no current JSR 303 support but a JSR 303 annotation is present
 		boolean jsr303Required = false;
@@ -92,15 +86,27 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
 			projectOperations.addDependency(new Dependency("javax.validation", "validation-api", "1.0.0.GA"));
 		}
-		
-		mutableTypeDetails.addField(fieldMetadata);
+		classOrInterfaceTypeDetailsBuilder.addField(fieldMetadata);
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
+		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
 	}
-	
-	private String getPhysicalLocationCanonicalPath(String physicalTypeIdentifier) {
-		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
-		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
-		Path path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
-		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
+
+	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cit, String fileIdentifier) {
+		Assert.notNull(fileManager, "File manager required");
+		Assert.notNull(cit, "Class or interface type details required");
+		Assert.hasText(fileIdentifier, "File identifier required");
+
+		final String newContents = typeParsingService.getCompilationUnitContents(cit);
+		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents, true);
+	}
+
+	public void createPhysicalType(PhysicalTypeMetadata toCreate) {
+		Assert.notNull(toCreate, "Metadata to create is required");
+		PhysicalTypeDetails physicalTypeDetails = toCreate.getMemberHoldingTypeDetails();
+		Assert.notNull(physicalTypeDetails, "Unable to parse '" + toCreate + "'");
+		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "This implementation can only create class or interface types");
+		ClassOrInterfaceTypeDetails cit = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+		String fileIdentifier = toCreate.getPhysicalLocationCanonicalPath();
+		createOrUpdateTypeOnDisk(cit, fileIdentifier);
 	}
 }

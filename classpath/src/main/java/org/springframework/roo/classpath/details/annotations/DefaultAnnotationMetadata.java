@@ -1,14 +1,14 @@
 package org.springframework.roo.classpath.details.annotations;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Default implementation of {@link AnnotationMetadata}.
@@ -30,7 +30,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 	 * metadata (required)
 	 * @param attributeValues the given annotation's values; can be <code>null</code>
 	 */
-	public DefaultAnnotationMetadata(final JavaType annotationType, final List<AnnotationAttributeValue<?>> attributeValues) {
+	DefaultAnnotationMetadata(final JavaType annotationType, final List<AnnotationAttributeValue<?>> attributeValues) {
 		Assert.notNull(annotationType, "Annotation type required");
 		this.annotationType = annotationType;
 		this.attributes = new ArrayList<AnnotationAttributeValue<?>>();

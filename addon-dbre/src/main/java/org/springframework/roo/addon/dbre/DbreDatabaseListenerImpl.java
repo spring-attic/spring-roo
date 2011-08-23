@@ -1,24 +1,5 @@
 package org.springframework.roo.addon.dbre;
 
-import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
-import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -37,7 +18,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -57,6 +37,25 @@ import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+
+import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
 /**
  * Implementation of {@link DbreDatabaseListener}.
@@ -82,6 +81,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
+	@Reference private TypeManagementService typeManipulationService;
 	private Map<JavaType, List<Identifier>> identifierResults;
 
 	public void onFileEvent(final FileEvent fileEvent) {
@@ -114,7 +114,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	private void reverseEngineer(final Database database) {
 		final Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
-		
 		// Determine whether to create "active record" CRUD methods
 		database.setActiveRecord(isActiveRecord(database, managedEntities));
 
@@ -283,9 +282,10 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Update the annotation on disk
-		final MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) managedEntity;
-		mutableTypeDetails.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
-
+		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(managedEntity);
+		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(managedEntity.getDeclaredByMetadataId());
+		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
 		return table;
 	}
 	
@@ -448,7 +448,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			final String columnDefinition = table.isIncludeNonPortableAttributes() ? column.getTypeName() : "";
 			result.add(new Identifier(fieldName, fieldType, columnName, column.getColumnSize(), column.getScale(), columnDefinition));
 		}
-
 		return result;
 	}
 

@@ -1,15 +1,5 @@
 package org.springframework.roo.addon.finder;
 
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,11 +7,12 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -38,6 +29,16 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.logging.Logger;
+
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 
 /**
  * Implementation of {@link FinderOperations}.
@@ -58,8 +59,9 @@ public class FinderOperationsImpl implements FinderOperations {
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeLocationService typeLocationService;
 	
 	public boolean isFinderCommandAvailable() {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -68,7 +70,7 @@ public class FinderOperationsImpl implements FinderOperations {
 	public SortedSet<String> listFindersFor(JavaType typeName, Integer depth) {
 		Assert.notNull(typeName, "Java type required");
 		
-		String id = physicalTypeMetadataProvider.findIdentifier(typeName);
+		String id = typeLocationService.findIdentifier(typeName);
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 		}
@@ -138,7 +140,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		Assert.notNull(typeName, "Java type required");
 		Assert.notNull(finderName, "Finer name required");
 
-		String id = physicalTypeMetadataProvider.findIdentifier(typeName);
+		String id = typeLocationService.findIdentifier(typeName);
 		if (id == null) {
 			logger.warning("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
@@ -164,11 +166,10 @@ public class FinderOperationsImpl implements FinderOperations {
 			return;
 		}
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getMemberHoldingTypeDetails();
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd);
-		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 
 		// We know there should be an existing RooEntity annotation
-		List<? extends AnnotationMetadata> annotations = mutable.getAnnotations();
+		List<? extends AnnotationMetadata> annotations = classOrInterfaceTypeDetails.getAnnotations();
 		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_ENTITY);
 		if (rooEntityAnnotation == null) {
 			logger.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");
@@ -176,7 +177,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		}
 
 		// Confirm they typed a valid finder name
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), mutable);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
 		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural(), entityMetadata.getEntityName()) == null) {
 			logger.warning("Finder name '" + finderName.getSymbolName() + "' either does not exist or contains an error");
 			return;
@@ -217,8 +218,11 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Now let's add the "finders" attribute
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("finders"), desiredFinders));
 
+		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(ROO_ENTITY, attributes);
-		mutable.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
+		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
+		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
 	}
 
 	private String getErrorMsg() {
