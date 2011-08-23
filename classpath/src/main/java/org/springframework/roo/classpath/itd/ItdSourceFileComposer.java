@@ -1,10 +1,5 @@
 package org.springframework.roo.classpath.itd;
 
-import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -22,12 +17,17 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 /**
  * A simple way of producing an inter-type declaration source file.
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
- * @aurhor Alan Stewart
+ * @author Alan Stewart
  * @since 1.0
  */
 public class ItdSourceFileComposer {
