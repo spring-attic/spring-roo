@@ -4,7 +4,6 @@ import org.apache.felix.framework.util.Util;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.springframework.roo.support.util.MathUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -269,7 +268,7 @@ public class Main {
 			boolean devModeAtShutdown = System.getProperty("developmentMode") == null ? false : System.getProperty("developmentMode").equals(Boolean.TRUE.toString());
 			if (devModeAtShutdown) {
 				double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds);
-				System.out.println("Total execution time " + MathUtils.round(executionDurationInSeconds/1000000000D, 3) + " seconds");
+				System.out.println("Total execution time " + round(executionDurationInSeconds/1000000000D, 3) + " seconds");
 			}
 
 			System.exit(exitCode);
@@ -279,6 +278,12 @@ public class Main {
 			ex.printStackTrace();
 			System.exit(-1); // **** CHANGE FROM ORIGINAL FELIX VERSION ****
 		}
+	}
+
+	private static double round(double valueToRound, int numberOfDecimalPlaces) {
+		double multiplicationFactor = Math.pow(10, numberOfDecimalPlaces);
+		double interestedInZeroDPs = valueToRound * multiplicationFactor;
+		return Math.round(interestedInZeroDPs) / multiplicationFactor;
 	}
 
 	/**
