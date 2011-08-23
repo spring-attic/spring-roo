@@ -1,17 +1,5 @@
 package org.springframework.roo.addon.web.selenium;
 
-import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
-
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -35,7 +23,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -46,6 +33,18 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.logging.Logger;
+
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 /**
  * Provides property file configuration operations.
@@ -197,14 +196,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	}
 
 	private void installMavenPlugin() {
-		PathResolver pathResolver = projectOperations.getPathResolver();
-		String pom = pathResolver.getIdentifier(Path.ROOT, "/pom.xml");
-		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		Element root = (Element) document.getLastChild();
-
 		// Stop if the plugin is already installed
-		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'selenium-maven-plugin']", root) != null) {
-			return;
+		for (Plugin plugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
+			if (plugin.getArtifactId().equals("selenium-maven-plugin")) {
+				return;
+			}
 		}
 		
 		Element configuration = XmlUtils.getConfiguration(getClass());
