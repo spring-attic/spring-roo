@@ -1,5 +1,12 @@
 package org.springframework.roo.shell;
 
+import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
+import org.springframework.roo.shell.event.ShellStatus;
+import org.springframework.roo.shell.event.ShellStatus.Status;
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.MathUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,12 +28,6 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
-
-import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
-import org.springframework.roo.shell.event.ShellStatus;
-import org.springframework.roo.shell.event.ShellStatus.Status;
-import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides a base {@link Shell} implementation.
@@ -67,9 +68,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	public void script(
 		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File script, 
 		@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") boolean lineNumbers) {
-		
+
 		Assert.notNull(script, "Script file to parse is required");
-		long started = new Date().getTime();
+		double startedNanoseconds = System.nanoTime();
 		final InputStream inputStream = openScript(script);
 
 		BufferedReader in = null;
@@ -107,8 +108,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 					in.close();
 				} catch (IOException ignored) {}
 			}
-			
-			logger.fine("Script required " + ((new Date().getTime() - started) / 1000) + " second(s) to execute");
+
+			double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds)/1000000000D;
+			logger.fine("Script required " + MathUtils.round(executionDurationInSeconds, 3)  + " seconds to execute");
 		}
 	}
 

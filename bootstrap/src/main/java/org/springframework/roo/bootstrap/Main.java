@@ -1,5 +1,11 @@
 package org.springframework.roo.bootstrap;
 
+import org.apache.felix.framework.util.Util;
+import org.osgi.framework.Constants;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
+import org.springframework.roo.support.util.MathUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,11 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import org.apache.felix.framework.util.Util;
-import org.osgi.framework.Constants;
-import org.osgi.framework.launch.Framework;
-import org.osgi.framework.launch.FrameworkFactory;
 
 /**
  * Loads Roo via Felix.
@@ -247,7 +248,7 @@ public class Main {
 
 		try {
 			// **** CHANGE FROM ORIGINAL FELIX VERSION ****
-			long startedNanoseconds = System.nanoTime();
+			double startedNanoseconds = System.nanoTime();
 			// **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
 
 			// Create an instance of the framework.
@@ -267,8 +268,8 @@ public class Main {
 			int exitCode = System.getProperty("roo.exit") == null ? 99 : new Integer(System.getProperty("roo.exit")).intValue();
 			boolean devModeAtShutdown = System.getProperty("developmentMode") == null ? false : System.getProperty("developmentMode").equals(Boolean.TRUE.toString());
 			if (devModeAtShutdown) {
-				long uptimeNanoseconds = System.nanoTime() - startedNanoseconds;
-				System.out.println("Total execution time " + uptimeNanoseconds / 1000000000 + " seconds");
+				double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds);
+				System.out.println("Total execution time " + MathUtils.round(executionDurationInSeconds/1000000000D, 3) + " seconds");
 			}
 
 			System.exit(exitCode);
