@@ -1,18 +1,5 @@
 package org.springframework.roo.classpath;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -30,8 +17,19 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of {@link TypeLocationService}.
@@ -49,8 +47,8 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true) 
 @Service 
 public class TypeLocationServiceImpl implements TypeLocationService, FileEventListener {
-
-	private static Logger logger = HandlerUtils.getLogger(TypeLocationServiceImpl.class);
+	// This is left here for verification purposes, but not for long - JTT 24/08/11
+	// private static Logger logger = HandlerUtils.getLogger(TypeLocationServiceImpl.class);
 	
 	// Fields
 	@Reference private FileManager fileManager;

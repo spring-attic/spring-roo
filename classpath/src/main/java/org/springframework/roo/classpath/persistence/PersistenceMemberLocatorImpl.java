@@ -1,12 +1,5 @@
 package org.springframework.roo.classpath.persistence;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -19,10 +12,14 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.file.monitor.FileMonitorService;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This implementation of {@link PersistenceMemberLocator} scans for the presence of 
@@ -37,9 +34,6 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	
 	// Fields
 	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private MetadataService metadataService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private FileMonitorService fileMonitorService;
 	@Reference private TypeLocationService typeLocationService;
 
 	private final Map<JavaType, List<FieldMetadata>> domainTypeIdFieldsCache = new HashMap<JavaType, List<FieldMetadata>>();
