@@ -832,4 +832,31 @@ public abstract class ObjectUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Compares the two given objects, with <code>null</code> equivalent to
+	 * <code>null</code> and <code>null</code> "less than" any
+	 * non-<code>null</code> instance. Two non-<code>null</code> instances are
+	 * compared using the first one's {@link Comparable#compareTo(Object)}
+	 * method.
+	 * 
+	 * @param <T> the type of objects being compared
+	 * @param one the first object being compared (can be <code>null</code>)
+	 * @param other the second object being compared (can be <code>null</code>)
+	 * @return see {@link Comparable#compareTo(Object)}
+	 * @since 1.2.0
+	 */
+	public static <T> int nullSafeComparison(final Comparable<T> one, final T other) {
+		if (one == null) {
+			if (other == null) {
+				return 0;
+			}
+			// First is null, second is not
+			return -1;
+		}
+		// If we get here, the first object is non-null
+		if (other == null) {
+			return 1;
+		}			
+		return one.compareTo(other);
+	}
 }

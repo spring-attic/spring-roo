@@ -10,10 +10,34 @@ import org.w3c.dom.Element;
  * @author Alan Stewart
  * @since 1.1
  */
-public final class Configuration {
+public class Configuration implements Comparable<Configuration> {
+	
+	/**
+	 * Factory method
+	 * 
+	 * @param configurationElement the XML node from which to parse the instance
+	 * (can be <code>null</code>)
+	 * @return <code>null</code> if a <code>null</code> element is given
+	 * @since 1.2.0
+	 */
+	public static Configuration getInstance(final Element configurationElement) {
+		if (configurationElement == null) {
+			return null;
+		}
+		return new Configuration(configurationElement);
+	}
+	
+	// Fields
 	private final Element configuration;
 
-	public Configuration(Element configuration) {
+	/**
+	 * Constructor from an XML element.
+	 * 
+	 * Consider using {@link #getInstance(Element)} instead for null-safety.
+	 *
+	 * @param configuration the XML element specifying the configuration (required)
+	 */
+	public Configuration(final Element configuration) {
 		Assert.notNull(configuration, "configuration must be specified");
 		this.configuration = configuration;
 	}
@@ -29,8 +53,8 @@ public final class Configuration {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Configuration && this.compareTo((Configuration) obj) == 0;
+	public boolean equals(final Object obj) {
+		return obj instanceof Configuration && this.compareTo((Configuration) obj) == 0;
 	}
 
 	public int compareTo(Configuration o) {

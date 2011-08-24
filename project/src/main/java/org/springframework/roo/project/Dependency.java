@@ -22,6 +22,8 @@ import org.w3c.dom.NodeList;
  * @since 1.0
  */
 public class Dependency implements Comparable<Dependency> {
+	
+	// Fields
 	private String groupId;
 	private String artifactId;
 	private String version;
@@ -283,5 +285,17 @@ public class Dependency implements Comparable<Dependency> {
 			tsc.append("classifier", classifier);
 		}
 		return tsc.toString();
+	}
+
+	/**
+	 * Adds the given exclusion to this dependency
+	 * 
+	 * @param exclusionGroupId the groupId of the dependency to exclude (required)
+	 * @param exclusionArtifactId the artifactId of the dependency to exclude (required)
+	 */
+	public void addExclusion(final String exclusionGroupId, final String exclusionArtifactId) {
+		Assert.hasText(exclusionGroupId, "Excluded groupId required");
+		Assert.hasText(exclusionArtifactId, "Excluded artifactId required");
+		this.exclusions.add(new Dependency(exclusionGroupId, exclusionArtifactId, "ignored"));
 	}
 }

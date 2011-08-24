@@ -50,13 +50,12 @@ import org.w3c.dom.ls.LSSerializer;
  * @since 1.0
  */
 public final class XmlUtils {
-	private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
-	private static final XPath xpath = XPathFactory.newInstance().newXPath();
-	private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-	private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	
-	private XmlUtils() {
-	}
+	// Constants
+	private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
+	private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private static final XPath xpath = XPathFactory.newInstance().newXPath();
 
 	/**
 	 * Read an XML document from the supplied input stream and return a document.
@@ -527,4 +526,25 @@ public final class XmlUtils {
 			}
 		}
 	}
+	
+	/**
+	 * Returns the text content of the given {@link Node}, null safe
+	 * 
+	 * @param node can be <code>null</code>
+	 * @param defaultValue the value to return if the node is <code>null</code>
+	 * @return the given default value if the node is <code>null</code>
+	 * @see Node#getTextContent()
+	 * @since 1.2.0
+	 */
+	public static String getTextContent(final Node node, final String defaultValue) {
+		if (node == null) {
+			return defaultValue;
+		}
+		return node.getTextContent();
+	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private XmlUtils() {}
 }

@@ -4,37 +4,80 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.roo.support.style.DefaultValueStyler;
+import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.ObjectUtils;
 
 /**
  * Immutable representation of an execution specification for a (Maven) build plugin
  * 
  * @author Adrian Colyer
  * @author Alan Stewart
+ * @author Andrew Swan
  * @since 1.0
  */
-public final class Execution {
+public class Execution implements Comparable<Execution> {
+	
+	// Fields
+	private final Configuration configuration;
+	private final List<String> goals;
 	private final String id;
 	private final String phase;
-	private final List<String> goals;
 
-	public Execution(String id, String phase, String... goals) {
+	/**
+	 * Constructor for no execution-level {@link Configuration}
+	 *
+	 * @param id the unique ID of this execution (required)
+	 * @param phase the Maven life-cycle phase to which this execution is bound (required)
+	 * @param goals the goals to execute (must be at least one)
+	 */
+	public Execution(final String id, final String phase, final String... goals) {
+		this(id, phase, null, goals);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param id the unique ID of this execution (required)
+	 * @param phase the Maven life-cycle phase to which this execution is bound (required)
+	 * @param configuration the execution-level configuration; can be <code>null</code>
+	 * @param goals the goals to execute (must be at least one)
+	 * @since 1.2.0
+	 */
+	public Execution(final String id, final String phase, final Configuration configuration, final String... goals) {
 		Assert.notNull(id, "execution id must be specified");
 		Assert.notNull(phase, "execution phase must be specified");
 		Assert.notEmpty(goals, "at least one goal must be specified");
-		this.id = id;
-		this.phase = phase;
+		this.configuration = configuration;
 		this.goals = Collections.unmodifiableList(Arrays.asList(goals));
+		this.id = id.trim();
+		this.phase = phase.trim();
 	}
 
+	/**
+	 * Returns the Maven lifecycle phase to which this execution is bound
+	 * 
+	 * @return a non-blank phase name
+	 */
 	public String getPhase() {
 		return this.phase;
 	}
 
+	/**
+	 * Returns the unique ID of this execution
+	 * 
+	 * @return a non-blank ID
+	 */
 	public String getId() {
 		return this.id;
 	}
 
+	/**
+	 * Returns the goals this execution will execute
+	 * 
+	 * @return a non-empty list
+	 */
 	public List<String> getGoals() {
 		return this.goals;
 	}
@@ -42,31 +85,45 @@ public final class Execution {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((goals == null) ? 0 : goals.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((phase == null) ? 0 : phase.hashCode());
+		result = prime * result + ObjectUtils.nullSafeHashCode(goals);
+		result = prime * result + ObjectUtils.nullSafeHashCode(id);
+		result = prime * result + ObjectUtils.nullSafeHashCode(phase);
+		result = prime * result + ObjectUtils.nullSafeHashCode(configuration);
 		return result;
 	}
 
 	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Execution && this.compareTo((Execution) obj) == 0;
+		return obj instanceof Execution && this.compareTo((Execution) obj) == 0;
 	}
 
-	public int compareTo(Execution o) {
-		if (o == null) {
+	public int compareTo(final Execution other) {
+		if (other == null) {
 			throw new NullPointerException();
 		}
-		int result = id.compareTo(o.id);
+		int result = id.compareTo(other.id);
 		if (result == 0) {
-			result = phase.compareTo(o.phase);
+			result = phase.compareTo(other.phase);
 		}
 		if (result == 0) {
 			String[] thisGoals = (String[]) goals.toArray();
-			String[] oGoals = (String[]) o.goals.toArray();
+			String[] oGoals = (String[]) other.goals.toArray();
 			Arrays.sort(thisGoals);
 			Arrays.sort(oGoals);
 			result = Arrays.toString(thisGoals).compareTo(Arrays.toString(oGoals));
 		}
+		if (result == 0) {
+			result = ObjectUtils.nullSafeComparison(this.configuration, other.configuration);
+		}
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		final ToStringCreator toStringCreator = new ToStringCreator(this, new DefaultValueStyler());
+		toStringCreator.append("id", this.id);
+		toStringCreator.append("phase", this.phase);
+		toStringCreator.append("goals", this.goals);
+		toStringCreator.append("configuration", this.configuration);
+		return toStringCreator.toString();
 	}
 }
