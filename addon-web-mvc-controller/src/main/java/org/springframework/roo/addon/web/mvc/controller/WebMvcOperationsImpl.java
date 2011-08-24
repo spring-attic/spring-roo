@@ -38,7 +38,7 @@ import org.w3c.dom.Element;
  * @author Ben Alex
  * @since 1.0
  */
-@Component 
+@Component(immediate = true)
 @Service
 public class WebMvcOperationsImpl implements WebMvcOperations {
 	private static final String CONVERSION_SERVICE_SIMPLE_TYPE = "ApplicationConversionServiceFactoryBean";
