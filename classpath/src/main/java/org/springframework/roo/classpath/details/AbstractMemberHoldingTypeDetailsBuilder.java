@@ -1,12 +1,12 @@
 package org.springframework.roo.classpath.details;
 
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.JavaType;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Abstract {@link Builder} to assist building {@link MemberHoldingTypeDetails} implementations.

@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.classpath.details.AbstractMemberHoldingTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
@@ -22,6 +21,7 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.CustomDataBuilder;
+import org.springframework.roo.model.CustomDataKey;
 
 /**
  * Builder for {@link MemberDetails}.

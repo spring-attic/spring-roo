@@ -1,7 +1,7 @@
 package org.springframework.roo.classpath.scanner;
 
-import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.model.CustomDataAccessor;
 
 /**
  * Provides the ability to modify or log the result of a {@link MemberDetailsScanner} operation

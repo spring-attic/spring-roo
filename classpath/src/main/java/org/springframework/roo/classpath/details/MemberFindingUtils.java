@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.details;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -9,9 +12,6 @@ import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Utility methods for finding members in {@link MemberHoldingTypeDetails} instances.

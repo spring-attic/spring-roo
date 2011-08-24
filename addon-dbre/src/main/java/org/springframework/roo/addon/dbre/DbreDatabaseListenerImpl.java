@@ -1,5 +1,24 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -37,25 +56,6 @@ import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-
-import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
-import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
 /**
  * Implementation of {@link DbreDatabaseListener}.

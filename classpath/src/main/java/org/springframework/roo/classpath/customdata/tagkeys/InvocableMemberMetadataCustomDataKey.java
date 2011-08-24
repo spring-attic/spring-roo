@@ -1,12 +1,12 @@
 package org.springframework.roo.classpath.customdata.tagkeys;
 
+import java.util.List;
+
 import org.springframework.roo.classpath.details.InvocableMemberMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-
-import java.util.List;
 
 /**
  * {@link InvocableMemberMetadata}-specific implementation of {@link IdentifiableAnnotatedJavaStructureCustomDataKey}.

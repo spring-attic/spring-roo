@@ -1,5 +1,16 @@
 package org.springframework.roo.addon.dod;
 
+import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -27,17 +38,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.util.Pair;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.

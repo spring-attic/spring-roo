@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.layers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.roo.classpath.customdata.taggers.AnnotatedTypeMatcher;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -10,9 +13,6 @@ import org.springframework.roo.classpath.details.annotations.ClassAttributeValue
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Layer type specific matcher which populates a tag value based on the layer provider specific trigger annotation.

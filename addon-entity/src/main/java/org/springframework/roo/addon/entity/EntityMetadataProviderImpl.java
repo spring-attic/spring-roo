@@ -1,5 +1,27 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.addon.entity.RooEntity.CLEAR_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.COUNT_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.FIND_ALL_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.FIND_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.FLUSH_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.MERGE_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.PERSIST_METHOD_DEFAULT;
+import static org.springframework.roo.addon.entity.RooEntity.REMOVE_METHOD_DEFAULT;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.CLEAR_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -24,28 +46,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.util.List;
-
-import static org.springframework.roo.addon.entity.RooEntity.CLEAR_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.COUNT_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FIND_ALL_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FIND_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.FLUSH_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.MERGE_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.PERSIST_METHOD_DEFAULT;
-import static org.springframework.roo.addon.entity.RooEntity.REMOVE_METHOD_DEFAULT;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.CLEAR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 /**
  * Implementation of {@link EntityMetadataProvider}.

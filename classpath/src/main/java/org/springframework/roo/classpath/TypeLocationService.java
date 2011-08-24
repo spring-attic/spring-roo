@@ -1,12 +1,12 @@
 package org.springframework.roo.classpath;
 
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 
 /**
  * Locates types.

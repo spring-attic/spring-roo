@@ -1,15 +1,15 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.model.CustomDataKey;
-import org.springframework.roo.model.JavaType;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.CustomDataKey;
+import org.springframework.roo.model.JavaType;
 
 
 public class AnnotatedTypeMatcher extends TypeMatcher {

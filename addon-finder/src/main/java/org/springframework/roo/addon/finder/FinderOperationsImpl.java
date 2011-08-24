@@ -1,5 +1,15 @@
 package org.springframework.roo.addon.finder;
 
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -29,16 +39,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Logger;
-
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 
 /**
  * Implementation of {@link FinderOperations}.

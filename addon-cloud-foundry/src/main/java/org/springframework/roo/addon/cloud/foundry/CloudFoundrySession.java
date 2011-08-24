@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.cloud.foundry;
 
+import java.util.List;
+import java.util.Map;
+
 import com.vmware.appcloud.client.AppCloudClient;
 import com.vmware.appcloud.client.CloudService;
 import com.vmware.appcloud.client.ServiceConfiguration;
-
-import java.util.List;
-import java.util.Map;
 
 public interface CloudFoundrySession {
 

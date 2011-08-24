@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.json;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -17,8 +19,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
-
-import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 
 /**
  * Implementation of addon-json operations interface.

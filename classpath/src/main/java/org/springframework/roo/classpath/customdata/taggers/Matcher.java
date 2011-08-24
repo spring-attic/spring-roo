@@ -1,10 +1,10 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
+import java.util.List;
+
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.CustomDataKey;
-
-import java.util.List;
 
 /**
  * Matches {@link CustomDataAccessor}s based on a specific criteria and provides

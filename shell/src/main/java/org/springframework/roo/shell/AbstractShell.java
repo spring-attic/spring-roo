@@ -1,12 +1,5 @@
 package org.springframework.roo.shell;
 
-import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
-import org.springframework.roo.shell.event.ShellStatus;
-import org.springframework.roo.shell.event.ShellStatus.Status;
-import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.MathUtils;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,6 +21,13 @@ import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
+
+import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
+import org.springframework.roo.shell.event.ShellStatus;
+import org.springframework.roo.shell.event.ShellStatus.Status;
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.MathUtils;
 
 /**
  * Provides a base {@link Shell} implementation.

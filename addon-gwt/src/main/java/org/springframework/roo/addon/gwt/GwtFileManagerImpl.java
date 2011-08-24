@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.gwt;
 
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -8,8 +10,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.TypeParsingService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.process.manager.FileManager;
-
-import java.util.List;
 
 /**
  * Implementation of {@link GwtFileManager}.

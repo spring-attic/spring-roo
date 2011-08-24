@@ -1,5 +1,17 @@
 package org.springframework.roo.addon.web.selenium;
 
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -33,18 +45,6 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.logging.Logger;
-
-import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 /**
  * Provides property file configuration operations.

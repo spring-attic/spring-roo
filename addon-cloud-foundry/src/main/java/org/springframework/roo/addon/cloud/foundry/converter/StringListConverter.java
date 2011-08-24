@@ -1,12 +1,12 @@
 package org.springframework.roo.addon.cloud.foundry.converter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @Component

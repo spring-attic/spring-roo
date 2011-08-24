@@ -1,10 +1,5 @@
 package org.springframework.roo.bootstrap;
 
-import org.apache.felix.framework.util.Util;
-import org.osgi.framework.Constants;
-import org.osgi.framework.launch.Framework;
-import org.osgi.framework.launch.FrameworkFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,6 +10,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
+
+import org.apache.felix.framework.util.Util;
+import org.osgi.framework.Constants;
+import org.osgi.framework.launch.Framework;
+import org.osgi.framework.launch.FrameworkFactory;
 
 /**
  * Loads Roo via Felix.

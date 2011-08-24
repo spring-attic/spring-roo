@@ -1,8 +1,8 @@
 package org.springframework.roo.classpath.details;
 
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-
 import java.lang.reflect.Modifier;
+
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 
 /**
  * Builder for {@link InitializerMetadata}.

@@ -1,12 +1,5 @@
 package org.springframework.roo.classpath.details;
 
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.model.Builder;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -14,6 +7,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.model.Builder;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Assists in the creation of a {@link Builder} for types that eventually implement {@link IdentifiableAnnotatedJavaStructure}.

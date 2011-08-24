@@ -1,11 +1,11 @@
 package org.springframework.roo.classpath.customdata.taggers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.support.util.Assert;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * {@link MemberHoldingTypeDetails}-specific implementation of {@link Matcher}. Matches

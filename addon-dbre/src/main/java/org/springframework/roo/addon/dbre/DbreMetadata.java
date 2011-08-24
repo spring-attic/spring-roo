@@ -1,5 +1,18 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
+import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.CascadeAction;
 import org.springframework.roo.addon.dbre.model.Column;
@@ -38,19 +51,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
-import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 /**
  * Metadata for {@link RooDbManaged}.

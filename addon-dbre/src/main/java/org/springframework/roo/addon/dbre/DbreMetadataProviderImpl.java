@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
+
+import java.util.List;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -18,11 +23,6 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-
-import java.util.List;
-import java.util.Set;
-
-import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
 
 /**
  * Implementation of  {@link DbreMetadataProvider}.

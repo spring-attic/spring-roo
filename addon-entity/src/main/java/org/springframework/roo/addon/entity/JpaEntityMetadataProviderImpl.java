@@ -1,5 +1,29 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COLUMN_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_ID_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ENUMERATED_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_MUTATOR_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_TYPE;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.LOB_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_MANY_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_ONE_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_MANY_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_ONE_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.TRANSIENT_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_MUTATOR_METHOD;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -23,30 +47,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COLUMN_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_ID_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ENUMERATED_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_MUTATOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_TYPE;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.LOB_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_MANY_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_ONE_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_MANY_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_ONE_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.TRANSIENT_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_MUTATOR_METHOD;
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
 /**
  * The {@link JpaEntityMetadataProvider} implementation.

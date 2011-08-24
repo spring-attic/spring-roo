@@ -1,9 +1,9 @@
 package org.springframework.roo.classpath.customdata.tagkeys;
 
+import java.util.List;
+
 import org.springframework.roo.classpath.details.IdentifiableAnnotatedJavaStructure;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-
-import java.util.List;
 
 /**
  * {@link IdentifiableAnnotatedJavaStructure}-specific implementation of {@link IdentifiableJavaStructureCustomDataKey}.

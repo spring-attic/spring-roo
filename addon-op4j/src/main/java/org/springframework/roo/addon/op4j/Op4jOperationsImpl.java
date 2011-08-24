@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.op4j;
 
+import static org.springframework.roo.model.RooJavaType.ROO_OP4J;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -19,11 +24,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.springframework.roo.model.RooJavaType.ROO_OP4J;
 
 /**
  * Implementation of commands that are available via the Roo shell.

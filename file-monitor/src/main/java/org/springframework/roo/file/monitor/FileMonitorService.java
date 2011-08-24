@@ -1,11 +1,11 @@
 package org.springframework.roo.file.monitor;
 
-import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.file.monitor.event.FileEventListener;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SortedSet;
+
+import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.file.monitor.event.FileEventListener;
 
 /**
  * Provides a mechanism to monitor disk locations and publish events when those disk locations change.

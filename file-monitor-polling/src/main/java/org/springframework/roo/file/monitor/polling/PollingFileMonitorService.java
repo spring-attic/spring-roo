@@ -1,15 +1,5 @@
 package org.springframework.roo.file.monitor.polling;
 
-import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
-import org.springframework.roo.file.monitor.FileMonitorService;
-import org.springframework.roo.file.monitor.MonitoringRequest;
-import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.file.monitor.event.FileEvent;
-import org.springframework.roo.file.monitor.event.FileEventListener;
-import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.util.Assert;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +12,16 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
+
+import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
+import org.springframework.roo.file.monitor.FileMonitorService;
+import org.springframework.roo.file.monitor.MonitoringRequest;
+import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
+import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.file.monitor.event.FileEvent;
+import org.springframework.roo.file.monitor.event.FileEventListener;
+import org.springframework.roo.file.monitor.event.FileOperation;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * A simple polling-based {@link FileMonitorService}.

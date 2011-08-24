@@ -1,5 +1,16 @@
 package org.springframework.roo.addon.jms;
 
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.JMS_TEMPLATE;
+
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,17 +42,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.springframework.roo.model.SpringJavaType.ASYNC;
-import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
-import static org.springframework.roo.model.SpringJavaType.JMS_TEMPLATE;
 
 /**
  * Provides JMS configuration operations.

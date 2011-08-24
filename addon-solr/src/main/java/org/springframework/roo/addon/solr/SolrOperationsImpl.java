@@ -1,5 +1,16 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
+import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Modifier;
+import java.util.Date;
+import java.util.Properties;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -24,17 +35,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Modifier;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Set;
-
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
 
 /**
  * Provides Search configuration operations.

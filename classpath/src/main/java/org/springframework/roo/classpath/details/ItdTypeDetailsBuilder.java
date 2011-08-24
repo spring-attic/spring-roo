@@ -1,5 +1,9 @@
 package org.springframework.roo.classpath.details;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -8,10 +12,6 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Assists in the building of an {@link ItdTypeDetails} instance.
