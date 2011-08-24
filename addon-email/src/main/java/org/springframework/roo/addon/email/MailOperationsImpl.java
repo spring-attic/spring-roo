@@ -1,24 +1,10 @@
 package org.springframework.roo.addon.email;
 
-import static org.springframework.roo.addon.email.MailProtocol.SMTP;
-import static org.springframework.roo.model.SpringJavaType.ASYNC;
-import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
-import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
-import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -27,7 +13,6 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -41,6 +26,19 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.springframework.roo.addon.email.MailProtocol.SMTP;
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
+import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
 
 /**
  * Implementation of {@link MailOperationsImpl}.
@@ -62,10 +60,8 @@ public class MailOperationsImpl implements MailOperations {
 	
 	// Fields
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManipulationService;
 
 	public boolean isInstallEmailAvailable() {
@@ -259,6 +255,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Add the "sendMessage" method
 		classOrInterfaceTypeDetailsBuilder.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, classOrInterfaceTypeDetailsBuilder));
+		typeManipulationService.generateClassFile(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	/**
