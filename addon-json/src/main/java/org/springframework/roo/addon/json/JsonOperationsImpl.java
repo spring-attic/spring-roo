@@ -54,10 +54,8 @@ public class JsonOperationsImpl implements JsonOperations {
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
-
 		if (null == MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_JSON)) {
-			JavaType rooJson = RooJavaType.ROO_JSON;
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooJson);
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_JSON);
 			if (rootName != null && rootName.length() > 0) {
 				annotationBuilder.addStringAttribute("rootName", rootName);
 			}
@@ -66,7 +64,7 @@ public class JsonOperationsImpl implements JsonOperations {
 			}
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails, fileIdentifier);
+			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
 		}
 	}
 	
