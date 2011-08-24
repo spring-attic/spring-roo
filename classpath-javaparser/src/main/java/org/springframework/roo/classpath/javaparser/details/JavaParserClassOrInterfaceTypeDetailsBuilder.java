@@ -140,32 +140,6 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 
 		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
 
-		final PhysicalTypeCategory finalPhysicalTypeCategory = physicalTypeCategory;
-
-		final CompilationUnitServices finalCompilationUnitServices = compilationUnitServices;
-		// A hybrid CompilationUnitServices must be provided that references the enclosing types imports and package
-		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
-			public List<ImportDeclaration> getImports() {
-				return finalCompilationUnitServices.getImports();
-			}
-
-			public JavaPackage getCompilationUnitPackage() {
-				return finalCompilationUnitServices.getCompilationUnitPackage();
-			}
-
-			public List<TypeDeclaration> getInnerTypes() {
-				return innerTypes;
-			}
-
-			public JavaType getEnclosingTypeName() {
-				return finalCompilationUnitServices.getEnclosingTypeName();
-			}
-
-			public PhysicalTypeCategory getPhysicalTypeCategory() {
-				return finalPhysicalTypeCategory;
-			}
-		};
-
 		for (ImportDeclaration importDeclaration : imports) {
 			if (importDeclaration.getName() instanceof QualifiedNameExpr) {
 				String qualifier = ((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString();

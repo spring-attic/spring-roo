@@ -228,7 +228,12 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
     }
 
     public final boolean addInnerType(ClassOrInterfaceTypeDetailsBuilder innerType) {
-        if (innerType == null || !getDeclaredByMetadataId().equals(innerType.getDeclaredByMetadataId())) {
+		/* There was originally a check to see if the declaredMIDs matched, but this doesn't really make much sense.
+		 * We need to come up with a better model for inner types. I thought about adding an enclosingType attribute
+		 * but this prototype just felt like a hack. In the short term I have just disabled the MID comparison as I
+		 * think this is fairly reasonable until this is given some more time. JTT - 24/08/11
+		 */
+        if (innerType == null) {
             return false;
         }
         onAddInnerType(innerType);
