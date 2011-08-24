@@ -13,6 +13,8 @@ public interface WebJsonOperations {
 	
 	boolean isSetupAvailable();
 	
+	void setup();
+	
 	boolean isCommandAvailable();
 	
 	void annotateType(JavaType type, JavaType jsonType);

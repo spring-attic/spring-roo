@@ -63,6 +63,6 @@
 		</property>
 	</bean>
 	
-	<!-- allows for integration of file upload functionality -->
-	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/>
+	<!-- enable this for integration of file upload functionality 
+	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/> -->
 </beans>
