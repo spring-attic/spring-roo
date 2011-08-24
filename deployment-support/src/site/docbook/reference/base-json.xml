@@ -34,7 +34,7 @@
           xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestbody">@RequestBody</link>
           and <link
           xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-responsebody">@ResponseBody</link>
-          annotations in the controllers, or </para>
+          annotations in the controllers, or</para>
         </listitem>
 
         <listitem>
@@ -116,35 +116,35 @@
     <title>Json REST Interface in Spring MVC controllers</title>
 
     <para>Once your domain types are annotated with the @RooJson annotation
-    and Spring MVC scaffolding is selected Roo will automatically create a
-    RESTful interface in the scaffolded controllers for all backing types
-    where JSON support is enabled. To disable this feature simply set the
-    exposeJson attribute in the @RooWebScaffold annotation to false:</para>
-
-    <para><programlisting>@RooWebSAcaffold(..., <emphasis role="bold">exposeJson=false</emphasis>)</programlisting>If
-    Json scaffolding is enabled Roo will provide the following methods via its
-    Spring MVC controllers:</para>
+    you can create Spring MVC scaffolding for your json enabled types.</para>
 
     <orderedlist>
       <listitem>
-        <para><programlisting>@RequestMapping(headers = "Accept=application/json")
+        <para>Annotating an existing Spring MVC controller with the
+        @RooWebJson annotation will prompt Roo to create an ITD with a number
+        of methods:</para>
+
+        <para><orderedlist>
+            <listitem>
+              <para><programlisting>@RequestMapping(headers = "Accept=application/json")
 @ResponseBody
 public String <emphasis role="bold">listJson</emphasis>() {
     return Owner.toJsonArray(Owner.findAllOwners());
 }</programlisting>As you can see this method takes advantage of Springs
-        request mappings and will respond to HTTP GET requests which contain a
-        'Accept=application/json' header. The @ResponseBody annotation is used
-        to serialize the JSON document.</para>
+              request mappings and will respond to HTTP GET requests which
+              contain a 'Accept=application/json' header. The @ResponseBody
+              annotation is used to serialize the JSON document.</para>
 
-        <para>To test the functionality with curl you can try out the Roo pet
-        clinic sample script (run roo&gt; script clinic.roo; then quit the Roo
-        shell and start Tomcat 'mvn tomcat:run'):</para>
+              <para>To test the functionality with curl you can try out the
+              Roo pet clinic sample script (run roo&gt; script clinic.roo;
+              then quit the Roo shell and start Tomcat 'mvn
+              tomcat:run'):</para>
 
-        <para><programlisting>curl -i -H "Accept: application/json" http://localhost:8080/petclinic/owners</programlisting></para>
-      </listitem>
+              <para><programlisting>curl -i -H "Accept: application/json" http://localhost:8080/petclinic/owners</programlisting></para>
+            </listitem>
 
-      <listitem>
-        <para><programlisting>@RequestMapping(value="/{id}", method=RequestMethod.GET, headers="Accept=application/json")
+            <listitem>
+              <para><programlisting>@RequestMapping(value="/{id}", method=RequestMethod.GET, headers="Accept=application/json")
 @ResponseBody
 public Object <emphasis role="bold">showJson</emphasis>(@PathVariable("id") Long id) {
     Owner owner = Owner.findOwner(id);
@@ -153,27 +153,28 @@ public Object <emphasis role="bold">showJson</emphasis>(@PathVariable("id") Long
     }
     return owner.toJson();
 }</programlisting>This method accepts a HTTP GET request with a <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam">@PathVariable</link>
-        for the requested Owner ID. The owner is serialized and returned as
-        JSON document if found, otherwise a HTTP 404 (NOT FOUND) status code
-        is returned. The accompanying curl command is as follows:</para>
+              xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-ann-requestparam">@PathVariable</link>
+              for the requested Owner ID. The owner is serialized and returned
+              as JSON document if found, otherwise a HTTP 404 (NOT FOUND)
+              status code is returned. The accompanying curl command is as
+              follows:</para>
 
-        <programlisting>curl -i -H "Accept: application/json" http://localhost:8080/petclinic/owners/1</programlisting>
-      </listitem>
+              <programlisting>curl -i -H "Accept: application/json" http://localhost:8080/petclinic/owners/1</programlisting>
+            </listitem>
 
-      <listitem>
-        <para><programlisting>@RequestMapping(method = RequestMethod.POST, headers = "Accept=application/json")
+            <listitem>
+              <para><programlisting>@RequestMapping(method = RequestMethod.POST, headers = "Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJson</emphasis>(@RequestBody String json) {
     Owner.fromJsonToOwner(json).persist();
     return new ResponseEntity&lt;String&gt;(HttpStatus.CREATED);
 }</programlisting>This method accepts a JSON document sent via HTTP POST
-        converts it into an Owner instance and persists that new instance
-        before returning a HTTP 201 (CREATED) status code. The accompanying
-        curl command is as follows:</para>
-      </listitem>
+              converts it into an Owner instance and persists that new
+              instance before returning a HTTP 201 (CREATED) status code. The
+              accompanying curl command is as follows:</para>
+            </listitem>
 
-      <listitem>
-        <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.POST, 
+            <listitem>
+              <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.POST, 
                 headers = "Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJsonArray</emphasis>(@RequestBody String json) {
     for (Owner owner: Owner.fromJsonArrayToOwners(json)) {
@@ -181,11 +182,11 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJsonArray</e
     }
     return new ResponseEntity&lt;String&gt;(HttpStatus.CREATED);
 }</programlisting>This method accepts a document containing a JSON array sent
-        via HTTP POST and converts the array into Owner instances which are
-        then persisted. The method returns a HTTP 201 (CREATED) status code.
-        The accompanying curl command is as follows:</para>
+              via HTTP POST and converts the array into Owner instances which
+              are then persisted. The method returns a HTTP 201 (CREATED)
+              status code. The accompanying curl command is as follows:</para>
 
-        <programlisting>curl -i -X POST -H Accept:application/json -H Content-Type:application/json 
+              <programlisting>curl -i -X POST -H Accept:application/json -H Content-Type:application/json 
      -d '[{"address":"The Boulevard","birthDay":861372000000,"city":"Springfield",
            "email":"homer@simpsons.com","firstName":"Homer Jay",
            "homePage":"http://simpsons.com","lastName":"Simpson",
@@ -196,33 +197,33 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJsonArray</e
            "lastName":"Simpson","telephone":"123456789",}]' 
      http://localhost:8080/petclinic/owners/jsonArray
 </programlisting>
-      </listitem>
+            </listitem>
 
-      <listitem>
-        <para><programlisting>@RequestMapping(method = RequestMethod.PUT, headers = "Accept=application/json")
+            <listitem>
+              <para><programlisting>@RequestMapping(method = RequestMethod.PUT, headers = "Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJson</emphasis>(@RequestBody String json) {
     if (Owner.fromJsonToOwner(json).merge() == null) {
         return new ResponseEntity&lt;String&gt;(HttpStatus.NOT_FOUND);
     }
     return new ResponseEntity&lt;String&gt;(HttpStatus.OK);
 }</programlisting>This method accepts a JSON document sent via HTTP PUT and
-        converts it into an Owner instance before attempting to merge it with
-        an existing record. If the xisting record is not found a HTTP 404 (NOT
-        FOUND) status code is sent to the client, otherwise a HTTP 200 (OK)
-        status code is sent. The accompanying curl command is as
-        follows:</para>
+              converts it into an Owner instance before attempting to merge it
+              with an existing record. If the xisting record is not found a
+              HTTP 404 (NOT FOUND) status code is sent to the client,
+              otherwise a HTTP 200 (OK) status code is sent. The accompanying
+              curl command is as follows:</para>
 
-        <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
+              <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
      -d '{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield",
           "email":"maggie@simpsons.com","firstName":"Maggie",
           "homePage":"http://simpsons.com","id":1,"lastName":"Simpson",
           "telephone":"123456789","version"=0}' 
      http://localhost:8080/petclinic/owners
 </programlisting>
-      </listitem>
+            </listitem>
 
-      <listitem>
-        <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.PUT, 
+            <listitem>
+              <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.PUT, 
                 headers = "Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJsonArray</emphasis>(@RequestBody String json) {
     for (Owner owner: Owner.fromJsonArrayToOwners(json)) {
@@ -232,11 +233,11 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJsonArray</e
     }
     return new ResponseEntity&lt;String&gt;(HttpStatus.OK);
 }</programlisting>This method accepts a document containing a JSON array sent
-        via HTTP PUT and converts the array into Owner instances which are
-        then merged. The method returns a HTTP 201 (CREATED) status code. The
-        accompanying curl command is as follows:</para>
+              via HTTP PUT and converts the array into Owner instances which
+              are then merged. The method returns a HTTP 201 (CREATED) status
+              code. The accompanying curl command is as follows:</para>
 
-        <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
+              <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
      -d '[{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield",
            "email":"lisa@simpsons.com","firstName":"Lisa","homePage":"http://simpsons.com",
            "id":2,"lastName":"Simpson","telephone":"123456789","version"=0},
@@ -244,10 +245,10 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJsonArray</e
            "email":"abraham@simpsons.com","firstName":"Abraham","homePage":"http://simpsons.com",
            "id":3,"lastName":"Simpson","telephone":"123456789","version"=0}]' 
      http://localhost:8080/petclinic/owners/jsonArray</programlisting>
-      </listitem>
+            </listitem>
 
-      <listitem>
-        <para><programlisting>@RequestMapping(value="/{id}", method=RequestMethod.DELETE, headers="Accept=application/json")
+            <listitem>
+              <para><programlisting>@RequestMapping(value="/{id}", method=RequestMethod.DELETE, headers="Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">deleteFromJson</emphasis>(@PathVariable("id") Long id) {
     Owner owner = Owner.findOwner(id);
     if (owner == null) {
@@ -256,32 +257,57 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">deleteFromJson</emphas
     owner.remove();
     return new ResponseEntity&lt;String&gt;(HttpStatus.OK);
 }</programlisting>This method accepts a HTTP DELETE request with a
-        @PathVariable identifying the Owner record marked for deletion. HTTP
-        status code 200 (OK) is returned if an Owner record with the given ID
-        was found, otherwise HTTOP status code 404 (NOT FOUND) is returned.
-        The accompanying curl command is as follows:</para>
+              @PathVariable identifying the Owner record marked for deletion.
+              HTTP status code 200 (OK) is returned if an Owner record with
+              the given ID was found, otherwise HTTOP status code 404 (NOT
+              FOUND) is returned. The accompanying curl command is as
+              follows:</para>
 
-        <programlisting>curl -i -H Accept:application/json -X DELETE http://localhost:8080/petclinic/owners/1</programlisting>
-      </listitem>
+              <programlisting>curl -i -H Accept:application/json -X DELETE http://localhost:8080/petclinic/owners/1</programlisting>
+            </listitem>
 
-      <listitem>
-        <para>[Optional] Roo will also generate a method to retrieve a
-        document containing a JSON array if the form backing object defines
-        dynamic finders. Here is an example taken from VisitController in the
-        pet clinic sample application:</para>
+            <listitem>
+              <para>[Optional] Roo will also generate a method to retrieve a
+              document containing a JSON array if the form backing object
+              defines dynamic finders. Here is an example taken from
+              VisitController in the pet clinic sample application:</para>
 
-        <para><programlisting>@RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, 
+              <para><programlisting>@RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, 
                 headers = "Accept=application/json")
 public String <emphasis role="bold">jsonFindVisitsByDescriptionAndVisitDate</emphasis>(@RequestParam("description") String desc, 
         @RequestParam("visitDate") @DateTimeFormat(style = "M-") Date visitDate, Model model) {
     return Visit.toJsonArray(Visit.findVisitsByDescriptionAndVisitDate(desc, visitDate).getResultList());
 }</programlisting>This method accepts a HTTP GET request with a number of
-        request parameters which define the finder method as well as the
-        finder method arguments. The accompanying curl command is as
-        follows:</para>
+              request parameters which define the finder method as well as the
+              finder method arguments. The accompanying curl command is as
+              follows:</para>
 
-        <programlisting>curl -i -H Accept:application/json 
+              <programlisting>curl -i -H Accept:application/json 
      http://localhost:8080/petclinic/visits?find=ByDescriptionAndVisitDate%26description=test%26visitDate=12/1/10</programlisting>
+            </listitem>
+          </orderedlist></para>
+      </listitem>
+
+      <listitem>
+        <para>The <link linkend="command-index-web-mvc-json-setup">web mvc
+        json setup</link> command used from the Roo shell configures the
+        current project to support JSON integration using Spring MVC.</para>
+      </listitem>
+
+      <listitem>
+        <para>The <link linkend="command-index-web-mvc-json-add">web mvc json
+        add</link> command used from the Roo shell will introdroduce the
+        <emphasis role="bold">@RooWebJson</emphasis> annotation into the
+        specified target type.</para>
+      </listitem>
+
+      <listitem>
+        <para>The <link linkend="command-index-web-mvc-json-all">web mvc json
+        all</link> command used from the Roo shell will find all JSON enabled
+        types (<emphasis role="bold">@RooJson</emphasis>) in the project and
+        create Spring MVC controllers for each (if a controller does not
+        already exist), or add <emphasis role="bold">@RooWebJson</emphasis> to
+        existing controllers (should they exist already).</para>
       </listitem>
     </orderedlist>
 

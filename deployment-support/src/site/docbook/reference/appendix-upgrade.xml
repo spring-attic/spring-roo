@@ -66,9 +66,9 @@
         combination with Hibernate. We have found OpenJPA works reliably in
         all cases, so you might want to consider switching to OpenJPA if you
         are seriously impacted by this issue (the "<link
-        linkend="command-index-jpa-setup">jpa setup</link>"
-        command can be used multiple times, which is useful for experimentally
-        switching between different JPA providers).</para>
+        linkend="command-index-jpa-setup">jpa setup</link>" command can be
+        used multiple times, which is useful for experimentally switching
+        between different JPA providers).</para>
       </listitem>
 
       <listitem>
@@ -113,7 +113,7 @@
         <para>Applications with a scaffolded GWT UI require a manual
         adjustment in
         <code>src/main/webapp/WEB-INF/spring/webmvc-config.xml</code> (this
-        will not be required when using Spring Framework 3.0.5):</para>
+        will not be required when using Spring Framework 3.0.5+):</para>
 
         <programlisting>&lt;mvc:default-servlet-handler <emphasis role="bold">default-servlet-name="_ah_default"</emphasis> /&gt;</programlisting>
       </listitem>
@@ -180,11 +180,12 @@
     <itemizedlist>
       <listitem>
         <para>Run the <link linkend="command-index-backup">backup</link>
-        command using your currently-installed (i.e. existing) version of Spring
-        Roo. This will help create a ZIP of your project, which may help if
-        you need to revert. Don't install the new version of Roo until you've
-        firstly completed this backup. Naturally you can skip this step if you
-        have an alternate backup technique and have confidence in it.</para>
+        command using your currently-installed (i.e. existing) version of
+        Spring Roo. This will help create a ZIP of your project, which may
+        help if you need to revert. Don't install the new version of Roo until
+        you've firstly completed this backup. Naturally you can skip this step
+        if you have an alternate backup technique and have confidence in
+        it.</para>
       </listitem>
 
       <listitem>
@@ -222,6 +223,23 @@
     <para>If you experience any difficulty with upgrading your projects,
     please use the <link linkend="resources-forums">community support
     forum</link> for assistance.</para>
+  </section>
+
+  <section>
+    <title>Upgrading to 1.2.0.M1</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.5.RELEASE to Spring Roo 1.2.0.M1 are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The presence of @RooWebScaffold does not automatically trigger
+        Spring MVC JSON integration any more. The exposeJson attribute in this
+        annotation has been depricated and will be removed for subsequent
+        releases. To create Spring MVC JSON integration please see Chapter
+        7.</para>
+      </listitem>
+    </itemizedlist>
   </section>
 
   <section xml:id="upgrade-1.1.3.RELEASE">
