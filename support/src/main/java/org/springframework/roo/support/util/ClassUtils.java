@@ -32,8 +32,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mockito.cglib.core.TypeUtils;
-
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
  * framework; consider
@@ -45,7 +43,7 @@ import org.mockito.cglib.core.TypeUtils;
  * @author Rob Harrop
  * @author Sam Brannen
  * @since 1.1
- * @see TypeUtils
+ * @see org.springframework.util.TypeUtils
  * @see ReflectionUtils
  */
 @SuppressWarnings("all")
@@ -803,7 +801,7 @@ public abstract class ClassUtils {
 	 * @param lhsType the target type
 	 * @param rhsType the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
-	 * @see TypeUtils#isAssignable
+	 * @see org.springframework.util.TypeUtils#isAssignable
 	 */
 	public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
 		Assert.notNull(lhsType, "Left-hand side type must not be null");
