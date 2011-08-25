@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.scaffold.mvc;
+package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
