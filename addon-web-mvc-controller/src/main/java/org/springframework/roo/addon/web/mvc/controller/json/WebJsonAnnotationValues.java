@@ -1,13 +1,13 @@
-package org.springframework.roo.addon.web.mvc.json;
+package org.springframework.roo.addon.web.mvc.controller.json;
 
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.CREATE_FROM_JSON;
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.CREATE_FROM_JSON_ARRAY;
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.DELETE_FROM_JSON_ARRAY;
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.EXPOSE_FINDERS;
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.LIST_JSON;
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.SHOW_JSON;
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.UPDATE_FROM_JSON;
-import static org.springframework.roo.addon.web.mvc.json.RooWebJson.UPDATE_FROM_JSON_ARRAY;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.CREATE_FROM_JSON;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.CREATE_FROM_JSON_ARRAY;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.DELETE_FROM_JSON_ARRAY;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.EXPOSE_FINDERS;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.LIST_JSON;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.SHOW_JSON;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.UPDATE_FROM_JSON;
+import static org.springframework.roo.addon.web.mvc.controller.json.RooWebJson.UPDATE_FROM_JSON_ARRAY;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;

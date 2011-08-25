@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.json;
+package org.springframework.roo.addon.web.mvc.controller.json;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;

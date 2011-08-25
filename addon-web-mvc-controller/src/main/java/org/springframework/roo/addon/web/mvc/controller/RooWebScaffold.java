@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.roo.addon.web.mvc.json.RooWebJson;
+import org.springframework.roo.addon.web.mvc.controller.json.RooWebJson;
 
 /**
  * Indicates a type that requires ROO controller support.

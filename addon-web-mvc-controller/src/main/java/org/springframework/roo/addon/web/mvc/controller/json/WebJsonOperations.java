@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.json;
+package org.springframework.roo.addon.web.mvc.controller.json;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;

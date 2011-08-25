@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.json;
+package org.springframework.roo.addon.web.mvc.controller.json;
 
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.HTTP_HEADERS;

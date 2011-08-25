@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.json;
+package org.springframework.roo.addon.web.mvc.controller.json;
 
 /**
  * Indicates a type that requires ROO controller support.
