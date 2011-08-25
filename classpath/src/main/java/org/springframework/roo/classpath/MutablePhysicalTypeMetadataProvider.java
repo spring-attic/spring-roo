@@ -1,9 +1,9 @@
 package org.springframework.roo.classpath;
 
-// TODO: Consider whether this should be an operations object, not an extension of PhysicalTypeMetadataProvider
 /**
  * Extends {@link PhysicalTypeMetadataProvider} to include mutable operations.
- * 
+ * TODO: Consider whether this should be an operations object, not an extension of PhysicalTypeMetadataProvider
+ *
  * @author Ben Alex
  * @since 1.0
  */

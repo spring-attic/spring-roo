@@ -94,16 +94,16 @@ public class EntityCommands implements CommandMarker {
 		}
 
 		// Create entity's annotations
-		final List<AnnotationMetadataBuilder> annotationBuilders = new ArrayList<AnnotationMetadataBuilder>();
-		annotationBuilders.add(ROO_JAVA_BEAN_BUILDER);
-		annotationBuilders.add(ROO_TO_STRING_BUILDER);
-		annotationBuilders.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, versionType, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
+		final List<AnnotationMetadataBuilder> annotationBuilder = new ArrayList<AnnotationMetadataBuilder>();
+		annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
+		annotationBuilder.add(ROO_TO_STRING_BUILDER);
+		annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, versionType, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
 		if (serializable) {
-			annotationBuilders.add(ROO_SERIALIZABLE_BUILDER);
+			annotationBuilder.add(ROO_SERIALIZABLE_BUILDER);
 		}
 
 		// Produce the entity itself
-		entityOperations.newEntity(name, createAbstract, superclass, annotationBuilders);
+		entityOperations.newEntity(name, createAbstract, superclass, annotationBuilder);
 		
 		// Create entity identifier class if required
 		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(GAE_DATASTORE_KEY))) {

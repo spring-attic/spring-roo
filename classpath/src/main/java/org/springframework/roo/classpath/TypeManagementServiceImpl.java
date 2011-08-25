@@ -10,7 +10,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -84,7 +83,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		
 		if (jsr303Required) {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
-			projectOperations.addDependency(new Dependency("javax.validation", "validation-api", "1.0.0.GA"));
+			projectOperations.addDependency("javax.validation", "validation-api", "1.0.0.GA");
 		}
 		classOrInterfaceTypeDetailsBuilder.addField(fieldMetadata);
 		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());

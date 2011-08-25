@@ -93,7 +93,7 @@ public class FieldCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({"field reference", "field set"})
 	public boolean isJpaFieldManagementAvailable() {
-		// in a separate method in case we decide to check for JPA registration in the future
+		// In a separate method in case we decide to check for JPA registration in the future
 		return projectOperations.isProjectAvailable();
 	}
 
@@ -140,6 +140,7 @@ public class FieldCommands implements CommandMarker {
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), modifier, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		fieldBuilder.setFieldInitializer(initializer);
+		
 		typeManagementService.addField(fieldBuilder.build());
 	}
 	

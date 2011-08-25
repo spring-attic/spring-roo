@@ -129,6 +129,7 @@ public class ClasspathCommands implements CommandMarker {
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
+	
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 	}
 
@@ -144,6 +145,7 @@ public class ClasspathCommands implements CommandMarker {
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
+	
 		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 	}
 
@@ -159,6 +161,7 @@ public class ClasspathCommands implements CommandMarker {
 		}
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
+	
 		typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
 	}
 }

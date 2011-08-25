@@ -62,6 +62,4 @@ public interface TypeManagementService {
 	 * @param toCreate to create (required)
 	 */
 	void createPhysicalType(PhysicalTypeMetadata toCreate);
-
-
 }
