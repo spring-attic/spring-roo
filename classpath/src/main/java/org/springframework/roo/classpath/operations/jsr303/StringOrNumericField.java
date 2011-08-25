@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +29,12 @@ public class StringOrNumericField extends FieldDetails {
 		if (decimalMin != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("value"), decimalMin));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.DecimalMin"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(DECIMAL_MIN, attrs));
 		}
 		if (decimalMax != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("value"), decimalMax));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.DecimalMax"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(DECIMAL_MAX, attrs));
 		}
 	}
 

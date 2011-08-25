@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
+import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
@@ -143,7 +144,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			JavaType type = method.getReturnType();
 			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
 				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-				if (field != null && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null) {
+				if (field != null && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null) {
 					MemberDetails typeMemberDetails = getMemberDetails(type);
 					if (getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataIdentificationString) != null) {
 						dependentTypes.add(getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));

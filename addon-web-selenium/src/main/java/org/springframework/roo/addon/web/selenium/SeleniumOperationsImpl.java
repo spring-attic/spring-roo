@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.selenium;
 
+import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
+import static org.springframework.roo.model.Jsr303JavaType.MIN;
+import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.io.InputStream;
@@ -260,7 +263,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	private String convertToInitializer(FieldMetadata field) {
 		String initializer = " ";
 		short index = 1;
-		AnnotationMetadata min = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min"));
+		AnnotationMetadata min = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
 		if (min != null) {
 			AnnotationAttributeValue<?> value = min.getAttribute(new JavaSymbolName("value"));
 			if (value != null) {
@@ -281,11 +284,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 					style = value.getValue().toString();
 				}
 			}
-			if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past"))) {
+			if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST)) {
 				cal.add(Calendar.YEAR, -1);
 				cal.add(Calendar.MONTH, -1);
 				cal.add(Calendar.DAY_OF_MONTH, -1);
-			} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
+			} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE)) {
 				cal.add(Calendar.YEAR, +1);
 				cal.add(Calendar.MONTH, +1);
 				cal.add(Calendar.DAY_OF_MONTH, +1);

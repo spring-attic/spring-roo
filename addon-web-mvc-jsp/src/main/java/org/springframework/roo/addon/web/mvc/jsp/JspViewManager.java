@@ -1,5 +1,15 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
+import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
+import static org.springframework.roo.model.Jsr303JavaType.MAX;
+import static org.springframework.roo.model.Jsr303JavaType.MIN;
+import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
+import static org.springframework.roo.model.Jsr303JavaType.PAST;
+import static org.springframework.roo.model.Jsr303JavaType.PATTERN;
+import static org.springframework.roo.model.Jsr303JavaType.SIZE;
+
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -377,15 +387,15 @@ public class JspViewManager {
 				// Only include the date picker for styles supported by Dojo (SMALL & MEDIUM)
 				fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}").build();
 
-				if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
+				if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE)) {
 					fieldElement.setAttribute("future", "true");
-				} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past"))) {
+				} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST)) {
 					fieldElement.setAttribute("past", "true");
 				}
 			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.LOB_FIELD)) {
 				fieldElement = new XmlElementBuilder("field:textarea", document).build();
 			} 
-			if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")))) {
+			if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE))) {
 				AnnotationAttributeValue<?> max = annotationMetadata.getAttribute(new JavaSymbolName("max"));
 				if (max != null) {
 					int maxValue = (Integer) max.getValue();
@@ -437,39 +447,39 @@ public class JspViewManager {
 		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_number");
 		}
-		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN))) {
 			AnnotationAttributeValue<?> min = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if (min != null) {
 				fieldElement.setAttribute("min", min.getValue().toString());
 				fieldElement.setAttribute("required", "true");
 			}
 		}
-		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max"))) && !"field:textarea".equals(fieldElement.getTagName())) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX)) && !"field:textarea".equals(fieldElement.getTagName())) {
 			AnnotationAttributeValue<?> maxA = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if (maxA != null) {
 				fieldElement.setAttribute("max", maxA.getValue().toString());
 			}
 		}
-		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin"))) && !"field:textarea".equals(fieldElement.getTagName())) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DECIMAL_MIN)) && !"field:textarea".equals(fieldElement.getTagName())) {
 			AnnotationAttributeValue<?> decimalMin = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if (decimalMin != null) {
 				fieldElement.setAttribute("decimalMin", decimalMin.getValue().toString());
 				fieldElement.setAttribute("required", "true");
 			}
 		}
-		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DECIMAL_MAX))) {
 			AnnotationAttributeValue<?> decimalMax = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if (decimalMax != null) {
 				fieldElement.setAttribute("decimalMax", decimalMax.getValue().toString());
 			}
 		}
-		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Pattern")))) {
+		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PATTERN))) {
 			AnnotationAttributeValue<?> regexp = annotationMetadata.getAttribute(new JavaSymbolName("regexp"));
 			if (regexp != null) {
 				fieldElement.setAttribute("validationRegex", regexp.getValue().toString());
 			}
 		}
-		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE))) {
 			AnnotationAttributeValue<?> max = annotationMetadata.getAttribute(new JavaSymbolName("max"));
 			if (max != null) {
 				fieldElement.setAttribute("max", max.getValue().toString());
@@ -480,7 +490,7 @@ public class JspViewManager {
 				fieldElement.setAttribute("required", "true");
 			}
 		}
-		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")))) {
+		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL))) {
 			String tagName = fieldElement.getTagName();
 			if (tagName.endsWith("textarea") || tagName.endsWith("input") || tagName.endsWith("datetime") || tagName.endsWith("textarea") || tagName.endsWith("select") || tagName.endsWith("reference")) {
 				fieldElement.setAttribute("required", "true");

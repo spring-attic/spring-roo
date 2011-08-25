@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
+import static org.springframework.roo.model.Jsr303JavaType.VALID;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.BINDING_RESULT;
 import static org.springframework.roo.model.SpringJavaType.CONVERSION_SERVICE;
@@ -394,7 +395,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 		
-		AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(new JavaType("javax.validation.Valid"));
+		AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(VALID);
 
 		final List<AnnotatedJavaType> paramTypes = Arrays.asList(
 			new AnnotatedJavaType(formBackingType, validAnnotation.build()),
@@ -494,7 +495,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 
-		AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(new JavaType("javax.validation.Valid"));
+		AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(VALID);
 
 		final List<AnnotatedJavaType> paramTypes = Arrays.asList(
 				new AnnotatedJavaType(formBackingType, validAnnotation.build()),

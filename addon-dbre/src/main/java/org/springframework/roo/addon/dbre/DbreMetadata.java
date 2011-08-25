@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
@@ -670,7 +671,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @NotNull if applicable
 		if (column.isRequired()) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.NotNull")));
+			annotations.add(new AnnotationMetadataBuilder(NOT_NULL));
 		}
 
 		// Add JSR 220 @Temporal annotation to date fields

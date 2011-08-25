@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.Jsr303JavaType.ASSERT_FALSE;
+import static org.springframework.roo.model.Jsr303JavaType.ASSERT_TRUE;
+
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -21,10 +24,10 @@ public class BooleanField extends FieldDetails {
 	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (assertTrue) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.AssertTrue")));
+			annotations.add(new AnnotationMetadataBuilder(ASSERT_TRUE));
 		}
 		if (assertFalse) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.AssertFalse")));
+			annotations.add(new AnnotationMetadataBuilder(ASSERT_FALSE));
 		}
 	}
 

@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.Jsr303JavaType.PATTERN;
+import static org.springframework.roo.model.Jsr303JavaType.SIZE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,12 +44,12 @@ public class StringField extends StringOrNumericField {
 			if (sizeMax != null) {
 				attrs.add(new IntegerAttributeValue(new JavaSymbolName("max"), sizeMax));
 			}
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Size"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(SIZE, attrs));
 		}
 		if (regexp != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("regexp"), regexp));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Pattern"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(PATTERN, attrs));
 		}
 	}
 

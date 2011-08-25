@@ -63,6 +63,7 @@ public class RepositoryJpaLayerProviderTest {
 		when(mockRepositoryLocator.getRepositories(mockTargetEntity)).thenReturn(Arrays.asList(mockRepositoryDetails));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForNonRepositoryLayerMethod() {
 		// Invoke
@@ -72,6 +73,7 @@ public class RepositoryJpaLayerProviderTest {
 		assertNull(additions);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsWhenNoRepositoriesExist() {
 		// Invoke
@@ -100,6 +102,7 @@ public class RepositoryJpaLayerProviderTest {
 		assertEquals(expectedMethodCall, additions.getMethodCall());
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetFindAllAdditions() {
 		assertMethodCall("clinicRepo.findAll()", FIND_ALL_METHOD);

@@ -1,5 +1,9 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.Jsr303JavaType.DIGITS;
+import static org.springframework.roo.model.Jsr303JavaType.MAX;
+import static org.springframework.roo.model.Jsr303JavaType.MIN;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,19 +38,19 @@ public class NumericField extends StringOrNumericField {
 		if (min != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new LongAttributeValue(new JavaSymbolName("value"), min));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Min"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(MIN, attrs));
 		}
 		if (max != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new LongAttributeValue(new JavaSymbolName("value"), max));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Max"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(MAX, attrs));
 		}
 		Assert.isTrue(isDigitsSetCorrectly(), "Validation constraints for @Digit are not correctly set");
 		if (digitsInteger != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new IntegerAttributeValue(new JavaSymbolName("integer"), digitsInteger));
 			attrs.add(new IntegerAttributeValue(new JavaSymbolName("fraction"), digitsFraction));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Digits"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(DIGITS, attrs));
 		}
 	}
 	

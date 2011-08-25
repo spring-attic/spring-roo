@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
+import static org.springframework.roo.model.Jsr303JavaType.NULL;
 import static org.springframework.roo.model.SpringJavaType.VALUE;
 
 import java.util.ArrayList;
@@ -73,11 +75,11 @@ public class FieldDetails {
 		Assert.notNull(annotations);
 		
 		if (notNull) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.NotNull")));
+			annotations.add(new AnnotationMetadataBuilder(NOT_NULL));
 		}
 		
 		if (nullRequired) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Null")));
+			annotations.add(new AnnotationMetadataBuilder(NULL));
 		}
 		
 		AnnotationMetadataBuilder columnBuilder = null;

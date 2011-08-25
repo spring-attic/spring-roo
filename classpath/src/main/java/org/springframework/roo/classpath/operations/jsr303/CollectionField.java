@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.Jsr303JavaType.SIZE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +39,7 @@ public abstract class CollectionField extends FieldDetails {
 			if (sizeMax != null) {
 				attrs.add(new IntegerAttributeValue(new JavaSymbolName("max"), sizeMax));
 			}
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Size"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(SIZE, attrs));
 		}
 	}
 

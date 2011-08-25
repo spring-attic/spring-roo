@@ -1,5 +1,13 @@
 package org.springframework.roo.addon.dod;
 
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
+import static org.springframework.roo.model.Jsr303JavaType.DIGITS;
+import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
+import static org.springframework.roo.model.Jsr303JavaType.MAX;
+import static org.springframework.roo.model.Jsr303JavaType.MIN;
+import static org.springframework.roo.model.Jsr303JavaType.PAST;
+import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.COMPONENT;
 
@@ -57,9 +65,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
-	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
-	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
-	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
 	
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -544,9 +549,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 		} else if (isDecimalFieldType(fieldType)) {
 			// Check for @Digits, @DecimalMax, @DecimalMin
-			AnnotationMetadata digitsAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Digits"));
-			AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin"));
-			AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax"));
+			AnnotationMetadata digitsAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DIGITS);
+			AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DECIMAL_MIN);
+			AnnotationMetadata decimalMaxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DECIMAL_MAX);
 
 			if (digitsAnnotation != null) {
 				bodyBuilder.append(getDigitsBody(field, digitsAnnotation, suffix));
@@ -957,10 +962,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Date fields included for DataNucleus (
 		if (fieldType.equals(new JavaType(Date.class.getName()))) {			
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
 				imports.addImport(new JavaType("java.util.Date"));
 				initializer = "new Date(new Date().getTime() - 10000000L)";
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future")) != null) {
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE) != null) {
 				imports.addImport(new JavaType("java.util.Date"));
 				initializer = "new Date(new Date().getTime() + 10000000L)";
 			} else {
@@ -1028,9 +1033,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			imports.addImport(new JavaType("java.util.GregorianCalendar"));
 			
 			String calendarString = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)";
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
 				initializer = calendarString + " - 1)";
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future")) != null) {
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE) != null) {
 				initializer = calendarString + " + 1)";
 			} else {
 				initializer = "Calendar.getInstance()";

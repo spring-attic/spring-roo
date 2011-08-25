@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
+import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.util.ArrayList;
@@ -45,10 +47,10 @@ public class DateField extends FieldDetails {
 	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (past) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Past")));
+			annotations.add(new AnnotationMetadataBuilder(PAST));
 		}
 		if (future) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Future")));
+			annotations.add(new AnnotationMetadataBuilder(FUTURE));
 		}
 		if (persistenceType != null) {
 			// Add JSR 220 @Temporal annotation
