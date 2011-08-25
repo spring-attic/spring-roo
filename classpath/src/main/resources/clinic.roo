@@ -54,6 +54,7 @@ finder add --finderName findVisitsByDescriptionLike
 
 web mvc setup
 web mvc all --package ~.web
+web mvc finder all
 
 web mvc language --code de
 web mvc language --code es

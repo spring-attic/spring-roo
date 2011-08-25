@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.scaffold.finder;
+package org.springframework.roo.addon.web.mvc.controller.finder;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 

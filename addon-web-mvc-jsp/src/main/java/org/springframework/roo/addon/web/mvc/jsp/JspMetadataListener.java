@@ -18,14 +18,17 @@ import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDe
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
+import org.springframework.roo.addon.web.mvc.controller.finder.WebFinderMetadata;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.mvc.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -37,6 +40,7 @@ import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -73,11 +77,13 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
+		metadataDependencyRegistry.registerDependency(WebFinderMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.addNotificationListener(this);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
+		metadataDependencyRegistry.deregisterDependency(WebFinderMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
@@ -230,25 +236,29 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		
 		List<String> allowedMenuItems = new ArrayList<String>();
-		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
-			Set<FinderMetadataDetails> finderMethodsDetails = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, memberDetails, metadataIdentificationString);
-			for (FinderMetadataDetails finderDetails : finderMethodsDetails) {
-				String finderName = finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName();
-				String listPath = destinationDirectory + "/" + finderName + ".jspx";
-				// Finders only get scaffolded if the finder name is not too long (see ROO-1027)
-				if (listPath.length() > 244) {
-					continue;
+		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(JspMetadata.getJavaType(metadataIdentificationString), JspMetadata.getPath(metadataIdentificationString)));
+		if (ptm != null) {
+			MemberHoldingTypeDetails mhtd = ptm.getMemberHoldingTypeDetails();
+			if (mhtd != null && MemberFindingUtils.getAnnotationOfType(mhtd.getAnnotations(), RooJavaType.ROO_WEB_FINDER) != null) {
+				Set<FinderMetadataDetails> finderMethodsDetails = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, memberDetails, metadataIdentificationString);
+				for (FinderMetadataDetails finderDetails : finderMethodsDetails) {
+					String finderName = finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName();
+					String listPath = destinationDirectory + "/" + finderName + ".jspx";
+					// Finders only get scaffolded if the finder name is not too long (see ROO-1027)
+					if (listPath.length() > 244) {
+						continue;
+					}
+					writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderDetails));
+					JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + formBackingTypeMetadataDetails.getPlural() + "By", ""));
+					// Add 'Find by' menu item
+					menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + formBackingTypeMetadataDetails.getPlural(), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
+					properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase() + "_label", finderLabel.getReadableSymbolName());
+					allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
+					for (JavaSymbolName paramName : finderDetails.getFinderMethodMetadata().getParameterNames()) {
+						properties.put(XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName());
+					}
+					tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/" + finderName + ".jspx");
 				}
-				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderDetails));
-				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + formBackingTypeMetadataDetails.getPlural() + "By", ""));
-				// Add 'Find by' menu item
-				menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + formBackingTypeMetadataDetails.getPlural(), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
-				properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase() + "_label", finderLabel.getReadableSymbolName());
-				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
-				for (JavaSymbolName paramName : finderDetails.getFinderMethodMetadata().getParameterNames()) {
-					properties.put(XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName());
-				}
-				tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/" + finderName + ".jspx");
 			}
 		}
 		
@@ -277,9 +287,15 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	public void notify(String upstreamDependency, String downstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
-			JavaType javaType = WebScaffoldMetadata.getJavaType(upstreamDependency);
-			Path path = WebScaffoldMetadata.getPath(upstreamDependency);
-			downstreamDependency = JspMetadata.createIdentifier(javaType, path);
+			if (WebScaffoldMetadata.isValid(upstreamDependency)) {
+				JavaType javaType = WebScaffoldMetadata.getJavaType(upstreamDependency);
+				Path path = WebScaffoldMetadata.getPath(upstreamDependency);
+				downstreamDependency = JspMetadata.createIdentifier(javaType, path);
+			} else if (WebFinderMetadata.isValid(upstreamDependency)) {
+				JavaType javaType = WebFinderMetadata.getJavaType(upstreamDependency);
+				Path path = WebFinderMetadata.getPath(upstreamDependency);
+				downstreamDependency = JspMetadata.createIdentifier(javaType, path);
+			}
 
 			// We only need to proceed if the downstream dependency relationship is not already registered
 			// (if it's already registered, the event will be delivered directly later on)

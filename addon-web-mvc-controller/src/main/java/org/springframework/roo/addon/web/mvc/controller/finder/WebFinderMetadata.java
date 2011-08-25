@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller.scaffold.finder;
+package org.springframework.roo.addon.web.mvc.controller.finder;
 
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.MODEL;

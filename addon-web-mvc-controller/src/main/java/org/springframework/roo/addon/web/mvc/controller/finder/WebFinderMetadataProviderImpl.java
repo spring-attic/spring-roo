@@ -1,6 +1,6 @@
-package org.springframework.roo.addon.web.mvc.controller.scaffold.finder;
+package org.springframework.roo.addon.web.mvc.controller.finder;
 
-import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
+import static org.springframework.roo.model.RooJavaType.ROO_WEB_FINDER;
 
 import java.util.Set;
 import java.util.SortedMap;
@@ -39,12 +39,12 @@ public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProv
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_WEB_SCAFFOLD);
+		addMetadataTrigger(ROO_WEB_FINDER);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_WEB_SCAFFOLD);
+		removeMetadataTrigger(ROO_WEB_FINDER);
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
