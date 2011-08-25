@@ -236,8 +236,16 @@
         <para>The presence of @RooWebScaffold does not automatically trigger
         Spring MVC JSON integration any more. The exposeJson attribute in this
         annotation has been depricated and will be removed for subsequent
-        releases. To create Spring MVC JSON integration please see Chapter
-        7.</para>
+        releases. To create Spring MVC JSON integration please see the <link
+        linkend="base-json">JSON chapter</link>.</para>
+      </listitem>
+
+      <listitem>
+        <para>The presence of @RooWebScaffold does not automatically trigger
+        Spring MVC Finder integration any more. The exposeFinders attribute in
+        this annotation has been depricated and will be removed for subsequent
+        releases. To create Spring MVC Finder integration please see <link
+        linkend="base-web">MVC chapter</link>.</para>
       </listitem>
     </itemizedlist>
   </section>

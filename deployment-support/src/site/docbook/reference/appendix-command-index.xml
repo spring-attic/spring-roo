@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.0.BUILD-SNAPSHOT [rev 87a29b1].</para>
+    <para>This appendix was automatically built from Roo 1.2.0.BUILD-SNAPSHOT [rev b96df7e].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -4091,6 +4091,35 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-web-finder-commands">
+        <title>Web Finder Commands</title>
+        <para>Web Finder Commands are contained in org.springframework.roo.addon.web.mvc.controller.finder.WebFinderCommands.</para>
+        <section xml:id="command-index-web-mvc-finder-add">
+            <title>web mvc finder add</title>
+            <para>Adds @RooWebFinder annotation to MVC controller type</para>
+            <programlisting><![CDATA[web mvc finder add --formBackingType]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--formBackingType</term>
+                    <listitem>
+                        <para>The finder-enabled type; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The controller java type to apply this annotation to; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-finder-all">
+            <title>web mvc finder all</title>
+            <para>Adds  @RooWebFinder annotation to existing MVC controllers</para>
+            <programlisting><![CDATA[web mvc finder all]]></programlisting>
+            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-web-flow-commands">

@@ -91,141 +91,147 @@
   <section xml:id="controller-commands">
     <title>Controller commands</title>
 
-    <para>The Web MVC addon offers three commands to generate and maintain
-    various Web artifacts:</para>
+    <para>The Web MVC addon offers a number of commands to generate and
+    maintain various Web artifacts:</para>
 
     <orderedlist>
       <listitem>
-        <para><programlisting>~.Person roo&gt; <emphasis role="bold">controller scaffold</emphasis> --class com.foo.web.PersonController</programlisting>The
-        first time a controller command is executed Roo will install all
-        artifacts required for the Web UI. The controller scaffold command
-        will also create a Spring MVC controller for the Person entity with
-        the following method signatures:</para>
+        <para><programlisting>~.Person roo&gt; <emphasis role="bold">web mvc setup</emphasis></programlisting>The
+        first time the <link linkend="command-index-web-mvc-setup">web mvc
+        setup</link> command is executed Roo will install all artifacts
+        required for the Web UI. </para>
 
-        <informaltable>
-          <tgroup cols="2">
-            <thead>
-              <row>
-                <entry align="center">Method Signature </entry>
+        <para></para>
+      </listitem>
 
-                <entry align="center">Comment </entry>
-              </row>
-            </thead>
+      <listitem>
+        <para><programlisting>~.Person roo&gt; <emphasis role="bold">web mvc scaffold</emphasis> --class com.foo.web.PersonController</programlisting>The
+        controller scaffold command will create a Spring MVC controller for
+        the Person entity with the following method signatures:</para>
 
-            <tbody>
-              <row>
-                <entry>public String <emphasis
-                role="bold">create</emphasis>(@Valid Person person,
-                BindingResult result, ModelMap modelMap) {..}</entry>
+        <para><informaltable>
+            <tgroup cols="2">
+              <thead>
+                <row>
+                  <entry align="center">Method Signature </entry>
 
-                <entry>The create method is triggered by HTTP POST requests to
-                /&lt;app-name&gt;/people. The submitted form data will be
-                converted to a Person object and validated against JSR 303
-                constraints (if present). Response is redirected to the show
-                method.</entry>
-              </row>
+                  <entry align="center">Comment </entry>
+                </row>
+              </thead>
 
-              <row>
-                <entry>public String <emphasis
-                role="bold">createForm</emphasis>(ModelMap modelMap)
-                {..}</entry>
+              <tbody>
+                <row>
+                  <entry>public String <emphasis
+                  role="bold">create</emphasis>(@Valid Person person,
+                  BindingResult result, ModelMap modelMap) {..}</entry>
 
-                <entry>The create form method is triggered by a HTTP GET
-                request to /&lt;app-name&gt;/people?form. The resulting form
-                will be prepopulated with a new instance of Person, referenced
-                Cars and datepatterns (if needed). Returns the Tiles view
-                name.</entry>
-              </row>
+                  <entry>The create method is triggered by HTTP POST requests
+                  to /&lt;app-name&gt;/people. The submitted form data will be
+                  converted to a Person object and validated against JSR 303
+                  constraints (if present). Response is redirected to the show
+                  method.</entry>
+                </row>
 
-              <row>
-                <entry>public String <emphasis
-                role="bold">show</emphasis>(@PathVariable("id") Long id,
-                ModelMap modelMap) {..}</entry>
+                <row>
+                  <entry>public String <emphasis
+                  role="bold">createForm</emphasis>(ModelMap modelMap)
+                  {..}</entry>
 
-                <entry>The show method is triggered by a HTTP GET request to
-                /&lt;app-name&gt;/people/&lt;id&gt;. The resulting form is
-                populated with a Person instance identifier by the id
-                parameter. Returns the Tiles view name.</entry>
-              </row>
+                  <entry>The create form method is triggered by a HTTP GET
+                  request to /&lt;app-name&gt;/people?form. The resulting form
+                  will be prepopulated with a new instance of Person,
+                  referenced Cars and datepatterns (if needed). Returns the
+                  Tiles view name.</entry>
+                </row>
 
-              <row>
-                <entry>public String <emphasis
-                role="bold">list</emphasis>(@RequestParam(value = "page",
-                required = false) Integer page, @RequestParam(value = "size",
-                required = false) Integer size, ModelMap modelMap)
-                {..}</entry>
+                <row>
+                  <entry>public String <emphasis
+                  role="bold">show</emphasis>(@PathVariable("id") Long id,
+                  ModelMap modelMap) {..}</entry>
 
-                <entry>The list method is triggered by a HTTP GET request to
-                /&lt;app-name&gt;/people. This method has optional parameters
-                for pagination (page, size). Returns the Tiles view
-                name.</entry>
-              </row>
+                  <entry>The show method is triggered by a HTTP GET request to
+                  /&lt;app-name&gt;/people/&lt;id&gt;. The resulting form is
+                  populated with a Person instance identifier by the id
+                  parameter. Returns the Tiles view name.</entry>
+                </row>
 
-              <row>
-                <entry>public String <emphasis
-                role="bold">update</emphasis>(@Valid Person person,
-                BindingResult result, ModelMap modelMap) {..}</entry>
+                <row>
+                  <entry>public String <emphasis
+                  role="bold">list</emphasis>(@RequestParam(value = "page",
+                  required = false) Integer page, @RequestParam(value =
+                  "size", required = false) Integer size, ModelMap modelMap)
+                  {..}</entry>
 
-                <entry>The update method is triggered by a HTTP PUT request to
-                /&lt;app-name/people. The submitted form data will be
-                converted to a Person object and validated against JSR 303
-                constraints (if present). Response is redirected to the show
-                method.</entry>
-              </row>
+                  <entry>The list method is triggered by a HTTP GET request to
+                  /&lt;app-name&gt;/people. This method has optional
+                  parameters for pagination (page, size). Returns the Tiles
+                  view name.</entry>
+                </row>
 
-              <row>
-                <entry>public String <emphasis
-                role="bold">updateForm</emphasis>(@PathVariable("id") Long id,
-                ModelMap modelMap) {</entry>
+                <row>
+                  <entry>public String <emphasis
+                  role="bold">update</emphasis>(@Valid Person person,
+                  BindingResult result, ModelMap modelMap) {..}</entry>
 
-                <entry>The update form method is triggered by a HTTP GET
-                request to /&lt;app-name&gt;/people/&lt;id&gt;?form. The
-                resulting form will be prepopulated with a Person instance
-                identified by the id parameter, referenced Cars and
-                datepatterns (if needed). Returns the Tiles view name.</entry>
-              </row>
+                  <entry>The update method is triggered by a HTTP PUT request
+                  to /&lt;app-name/people. The submitted form data will be
+                  converted to a Person object and validated against JSR 303
+                  constraints (if present). Response is redirected to the show
+                  method.</entry>
+                </row>
 
-              <row>
-                <entry>public String <emphasis
-                role="bold">delete</emphasis>(@PathVariable("id") Long id,
-                @RequestParam(value = "page", required = false) Integer page,
-                @RequestParam(value = "size", required = false) Integer size)
-                {..}</entry>
+                <row>
+                  <entry>public String <emphasis
+                  role="bold">updateForm</emphasis>(@PathVariable("id") Long
+                  id, ModelMap modelMap) {</entry>
 
-                <entry>The delete method is triggered by a HTTP DELETE request
-                to /&lt;app-name&gt;/people/&lt;id&gt;. This method has
-                optional parameters for pagination (page, size). Response is
-                redirected to the list method.</entry>
-              </row>
+                  <entry>The update form method is triggered by a HTTP GET
+                  request to /&lt;app-name&gt;/people/&lt;id&gt;?form. The
+                  resulting form will be prepopulated with a Person instance
+                  identified by the id parameter, referenced Cars and
+                  datepatterns (if needed). Returns the Tiles view
+                  name.</entry>
+                </row>
 
-              <row>
-                <entry>public Collection&lt;Car&gt; <emphasis
-                role="bold">populateCars</emphasis>() {..}</entry>
+                <row>
+                  <entry>public String <emphasis
+                  role="bold">delete</emphasis>(@PathVariable("id") Long id,
+                  @RequestParam(value = "page", required = false) Integer
+                  page, @RequestParam(value = "size", required = false)
+                  Integer size) {..}</entry>
 
-                <entry>This method prepopulates the 'car' attribute. This
-                method can be adjusted to handle larger collections in
-                different ways (pagination, caching, etc).</entry>
-              </row>
+                  <entry>The delete method is triggered by a HTTP DELETE
+                  request to /&lt;app-name&gt;/people/&lt;id&gt;. This method
+                  has optional parameters for pagination (page, size).
+                  Response is redirected to the list method.</entry>
+                </row>
 
-              <row>
-                <entry>void <emphasis
-                role="bold">addDateTimeFormatPatterns</emphasis>(ModelMap
-                modelMap) {..}</entry>
+                <row>
+                  <entry>public Collection&lt;Car&gt; <emphasis
+                  role="bold">populateCars</emphasis>() {..}</entry>
 
-                <entry>Method to register date and time patterns used for date
-                and time binding for form submissions.</entry>
-              </row>
-            </tbody>
-          </tgroup>
-        </informaltable>
+                  <entry>This method prepopulates the 'car' attribute. This
+                  method can be adjusted to handle larger collections in
+                  different ways (pagination, caching, etc).</entry>
+                </row>
 
-        <para>As you can see Roo implements a number of methods to offer a
-        RESTful MVC frontend to your domain layer. All of these methods can be
-        found in the PersonController_Roo_Controller.aj ITD. Feel free to
-        push-in any (or all) of these methods to change default behaviour
-        implemented by Roo.</para>
+                <row>
+                  <entry>void <emphasis
+                  role="bold">addDateTimeFormatPatterns</emphasis>(ModelMap
+                  modelMap) {..}</entry>
 
-        <para>The <link linkend="command-index-controller-scaffold">controller
+                  <entry>Method to register date and time patterns used for
+                  date and time binding for form submissions.</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>As you can see Roo implements a number of methods to
+        offer a RESTful MVC frontend to your domain layer. All of these
+        methods can be found in the PersonController_Roo_Controller.aj ITD.
+        Feel free to push-in any (or all) of these methods to change default
+        behaviour implemented by Roo.</para>
+
+        <para>The <link linkend="command-index-web-mvc-scaffold">web mvc
         scaffold</link> command offers a number of optional attributes which
         let you refine the way paths are managed and which methods should be
         generated in the controller. The <emphasis
@@ -238,7 +244,7 @@
 
         <para><programlisting>@RooWebScaffold(path = "people", formBackingObject = Person.class, <emphasis
               role="bold">create</emphasis> = false, <emphasis role="bold">
-                update</emphasis> = false, <emphasis role="bold">delete</emphasis> = false, exposeFinders = true)
+                update</emphasis> = false, <emphasis role="bold">delete</emphasis> = false)
 @RequestMapping("/people")
 @Controller
 public class PersonController {}</programlisting>If you don't define a custom
@@ -253,30 +259,26 @@ public class PersonController {}</programlisting>If you don't define a custom
         admin access (/admin/people). This way you can easily secure the
         /admin/* path with the Spring Security addon.</para>
 
-        <para>Finally if you installed finders in your form backing entity you
-        an choose to not expose these finders through the Web MVC
-        frontend.</para>
-
         <para></para>
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">controller all</emphasis> --package ~.web</programlisting>The
-        <link linkend="command-index-controller-all">controller all</link>
-        command provides a convenient way to quickly generate Web MVC
-        controllers for all JPA entities Roo can find in your project. You
-        need to specify the <emphasis role="bold">--package</emphasis>
-        attribute to define a package where these controllers should be
-        generated. While the controller all command is convenient, it does not
-        give you the same level of control compared to the <link
-        linkend="command-index-controller-scaffold">controller scaffold</link>
+        <para><programlisting>roo&gt; <emphasis role="bold">web mvc all</emphasis> --package ~.web</programlisting>The
+        <link linkend="command-index-web-mvc-all">web mvc all</link> command
+        provides a convenient way to quickly generate Web MVC controllers for
+        all JPA entities Roo can find in your project. You need to specify the
+        <emphasis role="bold">--package</emphasis> attribute to define a
+        package where these controllers should be generated. While the
+        controller all command is convenient, it does not give you the same
+        level of control compared to the <link
+        linkend="command-index-web-mvc-scaffold">web mvc scaffold</link>
         command.</para>
 
         <para></para>
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">controller class</emphasis> --class com.foo.web.CarController --preferredMapping /public/car
+        <para><programlisting>roo&gt; <emphasis role="bold">web mvc class</emphasis> --class com.foo.web.CarController --preferredMapping /public/car
 Created SRC_MAIN_JAVA/com/foo/web/CarController.java
 Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car
 Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car/index.jspx
@@ -314,6 +316,27 @@ public class CarController {
 </programlisting>In addition, this controller is registered in the Web MVC
         menu and the application Tiles definition. Furthermore, a simple view
         (under WEB-INF/views/public/car/index.jspx).</para>
+
+        <para></para>
+      </listitem>
+
+      <listitem>
+        <para><programlisting>roo&gt; <emphasis role="bold">web mvc finder add</emphasis> --class ~.web.PersonController --formBackingType ~.domain.Person</programlisting>The
+        <link linkend="command-index-web-mvc-finder-add">web mvc finder
+        add</link> command used from the Roo shell will introdroduce the
+        <emphasis role="bold">@RooWebFinder</emphasis> annotation into the
+        specified target type.</para>
+
+        <para></para>
+      </listitem>
+
+      <listitem>
+        <para><programlisting>roo&gt; <emphasis role="bold">web mvc finder all</emphasis></programlisting>The
+        <link linkend="command-index-web-mvc-finder-all">web mvc finder
+        all</link> command used from the Roo shell will introdroduce the
+        <emphasis role="bold">@RooWebFinder</emphasis> annotations to all
+        existing controllers which have a form backing type that offers
+        dynamic finders.</para>
 
         <para></para>
       </listitem>
