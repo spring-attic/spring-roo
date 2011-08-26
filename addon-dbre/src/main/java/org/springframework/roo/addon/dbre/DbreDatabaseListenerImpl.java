@@ -284,7 +284,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Update the annotation on disk
 		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(managedEntity);
 		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(managedEntity.getDeclaredByMetadataId());
 		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		return table;
 	}
