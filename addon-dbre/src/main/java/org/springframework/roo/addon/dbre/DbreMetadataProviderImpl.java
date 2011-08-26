@@ -101,7 +101,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		DbreMetadata dbreMetadata = new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierHolder, versionField, managedEntities, database);
 		ClassOrInterfaceTypeDetails updatedGovernor = dbreMetadata.getUpdatedGovernor();
 		if (updatedGovernor != null) {
-			typeManipulationService.createOrUpdateTypeOnDisk(updatedGovernor, typeLocationService.getPhysicalTypeCanonicalPath(updatedGovernor.getDeclaredByMetadataId()));
+			typeManipulationService.createOrUpdateTypeOnDisk(updatedGovernor);
 		}
 		return dbreMetadata;
 	}

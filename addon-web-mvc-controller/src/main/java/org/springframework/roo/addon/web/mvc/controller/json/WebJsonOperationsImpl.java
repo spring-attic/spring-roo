@@ -11,7 +11,6 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -90,7 +89,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	
 	public void annotateType(JavaType type, JavaType jsonEntity) {
 		Assert.notNull(type, "Target type required");
-		Assert.notNull(jsonEntity, "Json entity requiured");
+		Assert.notNull(jsonEntity, "Json entity required");
 		
 		String id = typeLocationService.findIdentifier(type);
 		if (id == null) {
@@ -129,22 +128,18 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	}
 	
 	private void appendToExistingType(JavaType type, JavaType jsonEntity) {
-		String id = typeLocationService.findIdentifier(type);
-		if (id == null) {
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(jsonEntity);
+		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + type.getFullyQualifiedTypeName() + "'");
 		}
 
-		// Obtain the physical type and itd mutable details
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
-		if (null == MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_WEB_JSON)) {
-			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
-			classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), typeLocationService.getPhysicalTypeCanonicalPath(id));
+		if (MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_WEB_JSON) == null) {
+			return;
 		}
+
+		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
+		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
+		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 	}
 	
 	private void createNewType(JavaType type, JavaType jsonEntity) {
@@ -159,15 +154,14 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING);
 		requestMapping.addAttribute(new StringAttributeValue(new JavaSymbolName("value"), "/" + plural.getPlural().toLowerCase()));
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(requestMapping);
-		typeManagementService.generateClassFile(classOrInterfaceTypeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	private AnnotationMetadataBuilder getAnnotation(JavaType type) {
 		// Create annotation @RooWebJson(jsonObject = MyObject.class)
 		List<AnnotationAttributeValue<?>> rooJsonAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		rooJsonAttributes.add(new ClassAttributeValue(new JavaSymbolName("jsonObject"), type));
-		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_JSON, rooJsonAttributes);
-		return annotation;
+		return new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_JSON, rooJsonAttributes);
 	}
 	
 	private void updateConfiguration() {

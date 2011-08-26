@@ -14,7 +14,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -159,14 +158,10 @@ public class FinderOperationsImpl implements FinderOperations {
 		}
 
 		// We know the file exists, as there's already entity metadata for it
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(id);
-		if (physicalTypeMetadata == null) {
-			// For some reason we found the source file a few lines ago, but suddenly it has gone away
-			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is unavailable");
-			return;
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getTypeForIdentifier(id);
+		if (classOrInterfaceTypeDetails == null) {
+			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
-		PhysicalTypeDetails ptd = physicalTypeMetadata.getMemberHoldingTypeDetails();
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 
 		// We know there should be an existing RooEntity annotation
 		List<? extends AnnotationMetadata> annotations = classOrInterfaceTypeDetails.getAnnotations();
@@ -221,8 +216,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(ROO_ENTITY, attributes);
 		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
-		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
+		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	private String getErrorMsg() {

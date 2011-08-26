@@ -285,7 +285,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(managedEntity);
 		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
 		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(managedEntity.getDeclaredByMetadataId());
-		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
+		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		return table;
 	}
 	
@@ -348,7 +348,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		typeDetailsBuilder.setAnnotations(annotations);
 
 		final ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
-		typeManagementService.generateClassFile(entityType);
+		typeManagementService.createOrUpdateTypeOnDisk(entityType);
 
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
@@ -417,7 +417,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 		final ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		idTypeDetailsBuilder.setAnnotations(identifierAnnotations);
-		typeManagementService.generateClassFile(idTypeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(idTypeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());

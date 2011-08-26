@@ -92,7 +92,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		typeDetailsBuilder.setAnnotations(annotations);
 		typeDetailsBuilder.setDeclaredMethods(methods);
 		
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		typeDetailsBuilder.setAnnotations(annotations);
 		typeDetailsBuilder.setDeclaredMethods(methods);
 		
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 	
 	public void newTestStub(JavaType javaType) {
@@ -212,7 +212,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			
 			typeDetailsBuilder.setDeclaredMethods(methods);
 
-			typeManagementService.generateClassFile(typeDetailsBuilder.build());
+			typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 		}
 	}
 	

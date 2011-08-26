@@ -70,13 +70,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		String interfaceMdId = PhysicalTypeIdentifier.createIdentifier(interfaceType, projectOperations.getPathResolver().getPath(interfaceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
-		typeManagementService.generateClassFile(interfaceTypeBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
 		
 		// Second build the implementing class
 //		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
 //		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
 //		classTypeBuilder.addImplementsType(interfaceType);
-//		typeManagementService.generateClassFile(classTypeBuilder.build());
+//		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
 		
 		// Third, take care of project configs
 		configureProject();

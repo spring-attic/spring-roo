@@ -153,6 +153,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 }

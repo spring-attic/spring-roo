@@ -8,9 +8,6 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -46,25 +43,16 @@ public class Op4jOperationsImpl implements Op4jOperations{
 	public void annotateType(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
-		String id = typeLocationService.findIdentifier(javaType);
-		if (id == null) {
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
+		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
-
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(id);
-
-		// Obtain the physical type and itd mutable details
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 
 		if (MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), ROO_OP4J) == null) {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_OP4J);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails, fileIdentifier);
+			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 		}
 	}
 	

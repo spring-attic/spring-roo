@@ -132,7 +132,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.addAnnotation(annotationBuilder);
 
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());

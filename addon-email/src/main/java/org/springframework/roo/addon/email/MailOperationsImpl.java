@@ -255,7 +255,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Add the "sendMessage" method
 		classOrInterfaceTypeDetailsBuilder.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, classOrInterfaceTypeDetailsBuilder));
-		typeManipulationService.generateClassFile(classOrInterfaceTypeDetailsBuilder.build());
+		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	/**

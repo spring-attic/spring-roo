@@ -80,7 +80,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 		
 	/**

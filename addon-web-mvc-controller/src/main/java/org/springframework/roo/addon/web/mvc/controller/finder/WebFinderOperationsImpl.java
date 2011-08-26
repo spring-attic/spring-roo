@@ -72,7 +72,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + controllerType.getFullyQualifiedTypeName() + "'");
 		}
-		
+
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
@@ -86,7 +86,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 		if (null == MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_WEB_FINDER)) {
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_FINDER));
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), typeLocationService.getPhysicalTypeCanonicalPath(id));
+			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		}
 	}
 

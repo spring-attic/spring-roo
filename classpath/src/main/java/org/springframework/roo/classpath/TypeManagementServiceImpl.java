@@ -27,18 +27,10 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeParsingService typeParsingService;
-	
+
+	@Deprecated
 	public void generateClassFile(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Class file cannot be generated at this time");
-		Assert.notNull(classOrInterfaceTypeDetails, "Details required");
-		
-		// Determine the canonical filename
-		String physicalLocationCanonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
-	
-		// Check the file doesn't already exist
-		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), projectOperations.getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
-		
-		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails, physicalLocationCanonicalPath);
+		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 	}
 	
 	public void addEnumConstant(String physicalTypeIdentifier, JavaSymbolName constantName) {
@@ -57,8 +49,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		Assert.isTrue(classOrInterfaceTypeDetailsBuilder.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,  PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is not an enum");
 
 		classOrInterfaceTypeDetailsBuilder.addEnumConstant(constantName);
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
-		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
+		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 	
 	public void addField(FieldMetadata fieldMetadata) {
@@ -86,26 +77,16 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 			projectOperations.addDependency("javax.validation", "validation-api", "1.0.0.GA");
 		}
 		classOrInterfaceTypeDetailsBuilder.addField(fieldMetadata);
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetailsBuilder.getDeclaredByMetadataId());
-		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build(), fileIdentifier);
+		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
-	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cit, String fileIdentifier) {
+	public void createOrUpdateTypeOnDisk(final ClassOrInterfaceTypeDetails cit) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(cit, "Class or interface type details required");
+		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(cit.getDeclaredByMetadataId());
 		Assert.hasText(fileIdentifier, "File identifier required");
 
 		final String newContents = typeParsingService.getCompilationUnitContents(cit);
 		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents, true);
-	}
-
-	public void createPhysicalType(PhysicalTypeMetadata toCreate) {
-		Assert.notNull(toCreate, "Metadata to create is required");
-		PhysicalTypeDetails physicalTypeDetails = toCreate.getMemberHoldingTypeDetails();
-		Assert.notNull(physicalTypeDetails, "Unable to parse '" + toCreate + "'");
-		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "This implementation can only create class or interface types");
-		ClassOrInterfaceTypeDetails cit = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
-		String fileIdentifier = toCreate.getPhysicalLocationCanonicalPath();
-		createOrUpdateTypeOnDisk(cit, fileIdentifier);
 	}
 }

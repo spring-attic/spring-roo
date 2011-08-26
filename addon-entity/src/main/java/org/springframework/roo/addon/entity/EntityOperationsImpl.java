@@ -66,7 +66,7 @@ public class EntityOperationsImpl implements EntityOperations {
 		typeDetailsBuilder.setExtendsTypes(Arrays.asList(superclass));
 		typeDetailsBuilder.setAnnotations(annotations);
 
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
 	public void newEmbeddableClass(JavaType name, boolean serializable) {
@@ -87,7 +87,7 @@ public class EntityOperationsImpl implements EntityOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
 	public void newIdentifier(JavaType identifierType, String identifierField, String identifierColumn) {
@@ -98,6 +98,6 @@ public class EntityOperationsImpl implements EntityOperations {
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(identifierAnnotations);
 		
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 }

@@ -14,9 +14,6 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -136,17 +133,10 @@ public class SolrOperationsImpl implements SolrOperations {
 	public void addSearch(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
-		String id = typeLocationService.findIdentifier(javaType);
-		if (id == null) {
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
+		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
-
-		// Obtain the physical type and itd mutable details
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 
 		if (Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier())) {
 			throw new IllegalStateException("The class specified is an abstract type. Can only add solr search for concrete types.");
@@ -155,12 +145,11 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	private void addSolrSearchableAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 		if (MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, ROO_SOLR_SEARCHABLE) == null) {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails, fileIdentifier);
+			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 		}
 	}
 }

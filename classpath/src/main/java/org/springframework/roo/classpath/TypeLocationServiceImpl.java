@@ -1,5 +1,17 @@
 package org.springframework.roo.classpath;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -18,18 +30,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Implementation of {@link TypeLocationService}.
@@ -338,6 +338,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 		// Update the type cache
 		for (String change : changes) {
 			if (doesPathIndicateJavaType(change)) {
+				// This is left here for verification purposes, but not for long - JTT 24/08/11
 				//logger.severe("Update cache: " + change);
 				cacheType(change);
 			}
@@ -376,7 +377,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 	}
 
 	public void onFileEvent(FileEvent fileEvent) {
-
+		// This is left here for verification purposes, but not for long - JTT 24/08/11
 		/*String change = fileEvent.getFileDetails().getCanonicalPath();
 
 		if (doesPathIndicateJavaType(change)) {

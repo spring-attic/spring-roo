@@ -114,7 +114,7 @@ public class ClasspathCommands implements CommandMarker {
 		}
 		typeDetailsBuilder.setAnnotations(annotations);
 
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
 	@CliCommand(value = "interface", help = "Creates a new Java interface source file in any project path")
@@ -129,8 +129,8 @@ public class ClasspathCommands implements CommandMarker {
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
-	
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
 	@CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
@@ -145,8 +145,7 @@ public class ClasspathCommands implements CommandMarker {
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
-	
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
 	@CliCommand(value = "enum constant", help = "Inserts a new enum constant into an enum")
