@@ -116,6 +116,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 
 		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		final Map<String, MemberTypeAdditions> crudAdditions = webMetadataService.getCrudAdditions(formBackingType, metadataIdentificationString);
+		
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dependentApplicationTypeMetadata, datePatterns, crudAdditions);
 	}
 	

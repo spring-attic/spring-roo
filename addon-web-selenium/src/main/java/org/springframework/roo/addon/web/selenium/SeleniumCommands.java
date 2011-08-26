@@ -20,7 +20,7 @@ import org.springframework.roo.shell.CommandMarker;
 public class SeleniumCommands implements CommandMarker {
 	@Reference private SeleniumOperations seleniumOperations;
 	
-	@CliAvailabilityIndicator({"selenium test"})
+	@CliAvailabilityIndicator({ "selenium test" })
 	public boolean isJdkFieldManagementAvailable() {
 		return seleniumOperations.isProjectAvailable();
 	}

@@ -143,7 +143,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			}
 		}
 
-		tbody.appendChild(clickAndWaitCommand(document, "//input[@id='proceed']"));
+		tbody.appendChild(clickAndWaitCommand(document, "//input[@id = 'proceed']"));
 
 		// Add verifications for all other fields
 		for (FieldMetadata field : fields) {
@@ -156,6 +156,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 
 		manageTestSuite(relativeTestFilePath, name, serverURL);
 
+		// Install selenium-maven-plugin
 		installMavenPlugin();
 	}
 
@@ -270,21 +271,22 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 				index = new Short(value.getValue().toString());
 			}
 		}
+		JavaType fieldType = field.getFieldType();
 		if (field.getFieldName().getSymbolName().contains("email") || field.getFieldName().getSymbolName().contains("Email")) {
 			initializer = "some@email.com";
-		} else if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
+		} else if (fieldType.equals(JavaType.STRING_OBJECT)) {
 			initializer = "some" + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + index;
-		} else if (field.getFieldType().equals(new JavaType(Date.class.getName())) || field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+		} else if (fieldType.equals(new JavaType(Date.class.getName())) || fieldType.equals(new JavaType(Calendar.class.getName()))) {
 			Calendar cal = Calendar.getInstance();
 			AnnotationMetadata dateTimeFormat = null;
 			String style = null;
-			if (null != (dateTimeFormat = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT))) {
+			if ((dateTimeFormat = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT)) != null) {
 				AnnotationAttributeValue<?> value = dateTimeFormat.getAttribute(new JavaSymbolName("style"));
 				if (value != null) {
 					style = value.getValue().toString();
 				}
 			}
-			if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST)) {
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
 				cal.add(Calendar.YEAR, -1);
 				cal.add(Calendar.MONTH, -1);
 				cal.add(Calendar.DAY_OF_MONTH, -1);
@@ -305,19 +307,19 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 				initializer = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())).format(cal.getTime());
 			}
 
-		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+		} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
 			initializer = new Boolean(false).toString();
-		} else if (field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
+		} else if (fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.INT_PRIMITIVE)) {
 			initializer = new Integer(index).toString();
-		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
+		} else if (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
 			initializer = new Double(index).toString();
-		} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
+		} else if (fieldType.equals(JavaType.FLOAT_OBJECT) || fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 			initializer = new Float(index).toString();
-		} else if (field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+		} else if (fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 			initializer = new Long(index).toString();
-		} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
+		} else if (fieldType.equals(JavaType.SHORT_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE)) {
 			initializer = new Short(index).toString();
-		} else if (field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
+		} else if (fieldType.equals(new JavaType("java.math.BigDecimal"))) {
 			initializer = new BigDecimal(index).toString();
 		}
 		return initializer;

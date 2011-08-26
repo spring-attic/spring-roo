@@ -650,7 +650,6 @@ public abstract class StringUtils {
 		return locale.getLanguage() + (hasText(locale.getCountry()) ? "-" + locale.getCountry() : "");
 	}
 
-
 	//---------------------------------------------------------------------
 	// Convenience methods for working with String arrays
 	//---------------------------------------------------------------------
