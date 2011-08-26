@@ -10,10 +10,7 @@ package org.springframework.roo.model;
  */
 public final class RooJavaType {
 
-	// Currently these are all annotations, but there's no reason why other
-	// Roo-specific types couldn't be added here if necessary.
-	
-	// Literal class names are used to avoid dependencies upon the relevant addons.
+	// Literal class names are used to avoid dependencies upon the relevant add-ons.
 	
 	public static final JavaType ROO_CONFIGURABLE = new JavaType("org.springframework.roo.addon.configurable.RooConfigurable");
 	public static final JavaType ROO_CONVERSION_SERVICE = new JavaType("org.springframework.roo.addon.web.mvc.controller.RooConversionService");

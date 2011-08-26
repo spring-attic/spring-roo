@@ -4,14 +4,12 @@ package org.springframework.roo.model;
  * Constants for JSR303-specific {@link JavaType}s.
  * 
  * Use them in preference to creating new instances of these types.
- *
+ * 
  * @author Alan
  * @since 1.2.0
-	 */
+ */
 public final class Jsr303JavaType {
 
-	// Literal class names are used to avoid dependencies upon the relevant addons.
-	
 	public static final JavaType ASSERT_FALSE = new JavaType("javax.validation.constraints.AssertFalse");
 	public static final JavaType ASSERT_TRUE = new JavaType("javax.validation.constraints.AssertTrue");
 	public static final JavaType DECIMAL_MIN = new JavaType("javax.validation.constraints.DecimalMin");
@@ -30,5 +28,6 @@ public final class Jsr303JavaType {
 	/**
 	 * Constructor is private to prevent instantiation
 	 */
-	private Jsr303JavaType() {}
+	private Jsr303JavaType() {
+	}
 }

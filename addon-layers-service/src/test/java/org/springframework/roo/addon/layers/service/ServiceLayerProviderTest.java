@@ -134,13 +134,13 @@ public class ServiceLayerProviderTest {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForEntityWithNullPluralMetadata() {
 		// Set up
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
 		
 		// Invoke
-		@SuppressWarnings("unchecked")
 		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, BOGUS_METHOD, mockTargetType, mockIdType);
 		
 		// Check
