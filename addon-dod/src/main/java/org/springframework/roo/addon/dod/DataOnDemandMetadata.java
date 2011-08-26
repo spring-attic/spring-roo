@@ -1092,7 +1092,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ")";
 		} else if (fieldType.equals(JavaType.BYTE_PRIMITIVE)) {
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ").byteValue()";
-		} else if (fieldType.equals(new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null))) {
+		} else if (fieldType.equals(JavaType.BYTE_ARRAY_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "String.valueOf(index).getBytes()");
 		} else if (fieldType.equals(annotationValues.getEntity())) {
 			// Avoid circular references (ROO-562)

@@ -68,10 +68,10 @@ a img {
 }
 
 .form_button  {
-    font-size:10px !important;
     margin-top: 0px;
     clear:both;
     float:right;
+    text-align:right;
 
 }
 
@@ -156,11 +156,6 @@ a img {
 .action-icon {
     margin:0px 1px ;
     padding: 0px;
-}
-
-.editForm {
-    height:160px;
-    width:330px;
 }
 
 

@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,25 +10,29 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.AbstractOperations;
+import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
@@ -44,6 +48,7 @@ import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 /**
  * Implementation of {@link JsfOperations}.
  *
@@ -111,6 +116,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			// Type exists already - nothing to do
 			return; 
 		}
+		
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
+		if (pluralMetadata == null) {
+			return;
+		}
 
 		// Create type annotation for new managed bean
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_MANAGED_BEAN);
@@ -127,26 +137,72 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 		
-		copyEntityTypePage(entity);
+		copyEntityTypePage(entity, pluralMetadata.getPlural());
+	}
+
+	public void changeTheme(Theme theme) {
+		Assert.notNull(theme, "Theme required");
+		
+		// Add theme to the pom if not already there
+		String themeName = StringUtils.toLowerCase(theme.name().replace("_", "-"));
+		projectOperations.addDependency("org.primefaces.themes", themeName, "1.0.1");
+		
+		// Update the web.xml primefaces.THEME content-param
+		String webXmlPath = getWebXmlFile();
+		Document document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
+		Element root = document.getDocumentElement();
+		
+		Element contextParamElement = XmlUtils.findFirstElement("/web-app/context-param[param-name = 'primefaces.THEME']", root);
+		Assert.notNull(contextParamElement, "The web.xml primefaces.THEME context param element required");
+		Element paramValueElement =  XmlUtils.findFirstElement("param-value", contextParamElement);
+		Assert.notNull(paramValueElement, "primefaces.THEME param-value element required");
+		paramValueElement.setTextContent(themeName);
+
+		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), false);
+	}
+
+	public void addFileUploadField(JavaSymbolName fieldName, JavaType typeName, String fileName, String contentType, String column, Boolean notNull, boolean permitReservedWords) {
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
+		JavaType fieldType = JavaType.BYTE_ARRAY_PRIMITIVE;
+		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, fieldType, fieldName);
+
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_UPLOADED_FILE);
+		if (StringUtils.hasText(fileName)) {
+			annotationBuilder.addStringAttribute("fileName", fileName);
+		}
+		if (StringUtils.hasText(contentType)) {
+			annotationBuilder.addStringAttribute("contentType", contentType);
+		}
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(annotationBuilder);
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Lob")));
+		
+		fieldDetails.decorateAnnotationsList(annotations);
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
+			if (fieldDetails.getColumn() != null) {
+				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
+			}
+		}
+		
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		
+		typeManagementService.addField(fieldBuilder.build());
 	}
 
 	private void generateManagedBeans(JavaPackage destinationPackage) {
-		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_ENTITY);
-		for (ClassOrInterfaceTypeDetails cid : cids) {
+		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithTag(PersistenceCustomDataKeys.PERSISTENT_TYPE)) {
 			if (Modifier.isAbstract(cid.getModifier())) {
 				continue;
 			}
 			
 			JavaType entity = cid.getName();
 			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, path));
-			if (entityMetadata == null || (!entityMetadata.isValid())) {
-				continue;
-			}
 			
-			// Check to see if this entity metadata has a JSF metadata listening to it
+			// Check to see if this persistent type has a JSF metadata listening to it
 			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
-			if (dependencyRegistry.getDownstream(entityMetadata.getId()).contains(downstreamJsfMetadataId)) {
+			if (dependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamJsfMetadataId)) {
 				// There is already a JSF managed bean for this entity
 				continue;
 			}
@@ -163,7 +219,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
 	}
 	
-	private void copyEntityTypePage(JavaType entity) {
+	private void copyEntityTypePage(JavaType entity, String plural) {
 		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
 		InputStream inputStream = null;
 		try {
@@ -172,9 +228,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			input = input.replace("__DOMAIN_TYPE__", entity.getSimpleTypeName());
 			input = input.replace("__LC_DOMAIN_TYPE__", StringUtils.uncapitalize(entity.getSimpleTypeName()));
 
-			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
-			input = input.replace("__DOMAIN_TYPE_PLURAL__", entityMetadata.getPlural());
-			input = input.replace("__LC_DOMAIN_TYPE_PLURAL__", StringUtils.uncapitalize(entityMetadata.getPlural()));
+			input = input.replace("__DOMAIN_TYPE_PLURAL__", plural);
+			input = input.replace("__LC_DOMAIN_TYPE_PLURAL__", StringUtils.uncapitalize(plural));
 
 			fileManager.createOrUpdateTextFileIfRequired(domainTypeFile, input, false);
 		} catch (IOException e) {

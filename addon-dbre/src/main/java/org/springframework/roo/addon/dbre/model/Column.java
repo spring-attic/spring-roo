@@ -9,7 +9,6 @@ import java.sql.Struct;
 import java.sql.Types;
 import java.util.Date;
 
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
@@ -109,15 +108,15 @@ public class Column {
 				break;
 			case Types.BINARY:
 				jdbcType = "BINARY";
-				javaType = new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null);
+				javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
 				break;
 			case Types.VARBINARY:
 				jdbcType = "VARBINARY";
-				javaType = new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null);
+				javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
 				break;
 			case Types.LONGVARBINARY:
 				jdbcType = "LONGVARBINARY";
-				javaType = new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null);
+				javaType = JavaType.BYTE_ARRAY_PRIMITIVE;
 				break;
 			case Types.DATE:
 				jdbcType = "DATE";

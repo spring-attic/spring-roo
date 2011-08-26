@@ -136,7 +136,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		}
 		return locatedFieldsAndAccessors;
 	}
-	
+
 	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, MethodMetadata idMethod, MethodMetadata versionMethod) {
 		Assert.notNull(method, "Method metadata required");
 		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName())) || (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
@@ -147,6 +147,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
 				|| isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
 				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
+				|| fieldType.equals(JavaType.BYTE_ARRAY_PRIMITIVE) // Exclude byte[] fields
 				|| field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) /* Not interested in embedded types */) {
 			return false;
 		}

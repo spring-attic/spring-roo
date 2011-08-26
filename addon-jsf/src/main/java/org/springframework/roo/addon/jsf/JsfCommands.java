@@ -4,6 +4,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -26,7 +27,7 @@ public class JsfCommands implements CommandMarker {
 		return jsfOperations.isSetupAvailable();
 	}
 
-	@CliAvailabilityIndicator({ "web jsf implementation", "web jsf all", "web jsf scaffold" }) 
+	@CliAvailabilityIndicator({ "web jsf implementation", "web jsf all", "web jsf scaffold", "web jsf theme", "field file" }) 
 	public boolean isJsfAvailable() {
 		return jsfOperations.isScaffoldAvailable();
 	}
@@ -59,5 +60,25 @@ public class JsfCommands implements CommandMarker {
 		@CliOption(key = "includeOnMenu", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Include this entity on the generated JSF menu") boolean includeOnMenu) {
 		
 		jsfOperations.createManagedBean(managedBean, entity, includeOnMenu);
+	}
+	
+	@CliCommand(value = "web jsf theme", help = "Change the PrimeFaces theme") 
+	public void webJsfTheme(
+		@CliOption(key = "name", mandatory = true, help = "The name of the theme") Theme theme) {
+		
+		jsfOperations.changeTheme(theme);
+	}
+	
+	@CliCommand(value = "field file", help ="Adds a field for storing uploaded file contents")	
+	public void addFileUploadField(
+		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the file upload field to add") JavaSymbolName fieldName, 
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName, 
+		@CliOption(key = "fileName", mandatory = false, help = "The file name") String fileName, 
+		@CliOption(key = "contentType", mandatory = true, help = "The content type of the file") String contentType, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") String column, 
+		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") Boolean notNull, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		jsfOperations.addFileUploadField(fieldName, typeName, fileName, contentType, column, notNull, permitReservedWords);
 	}
 }

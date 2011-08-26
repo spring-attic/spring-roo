@@ -46,6 +46,7 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType BYTE_ARRAY_PRIMITIVE = new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null);
 	public static final JavaType SHORT_PRIMITIVE = new JavaType("java.lang.Short", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType INT_PRIMITIVE = new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", 0, DataType.PRIMITIVE, null, null);
@@ -369,7 +370,8 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 		int result = 1;
 		result = prime * result + ((fullyQualifiedTypeName == null) ? 0 : fullyQualifiedTypeName.hashCode());
 		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
-		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+		result = prime * result + arrayDimensions;
+		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
 		return result;
 	}
 

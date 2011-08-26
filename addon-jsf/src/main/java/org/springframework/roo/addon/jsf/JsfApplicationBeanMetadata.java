@@ -1,13 +1,16 @@
 package org.springframework.roo.addon.jsf;
 
-import static org.springframework.roo.addon.jsf.JsfUtils.MANAGED_BEAN;
-import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_DEFAULT_MENU_MODEL;
-import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_MENU_ITEM;
-import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_MENU_MODEL;
-import static org.springframework.roo.addon.jsf.JsfUtils.PRIMEFACES_SUB_MENU;
-import static org.springframework.roo.addon.jsf.JsfUtils.REQUEST_SCOPED;
-import static org.springframework.roo.addon.jsf.JsfUtils.SESSION_SCOPED;
-import static org.springframework.roo.addon.jsf.JsfUtils.VIEW_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.EL_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.EXPRESSION_FACTORY;
+import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.MANAGED_BEAN;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_DEFAULT_MENU_MODEL;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MENU_ITEM;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MENU_MODEL;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SUB_MENU;
+import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.VIEW_SCOPED;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.lang.reflect.Modifier;
@@ -123,11 +126,18 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		if (method != null) return method;
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		JsfUtils.addCommonJsfFields(imports, bodyBuilder);
+		imports.addImport(EL_CONTEXT);
+		imports.addImport(EXPRESSION_FACTORY);
+		imports.addImport(FACES_CONTEXT);
 		imports.addImport(PRIMEFACES_MENU_ITEM);
 		imports.addImport(PRIMEFACES_SUB_MENU);
 		imports.addImport(PRIMEFACES_DEFAULT_MENU_MODEL);
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
+		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
+		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
+		bodyBuilder.appendFormalLine("");
 
 		bodyBuilder.appendFormalLine("menuModel = new DefaultMenuModel();");
 		bodyBuilder.appendFormalLine("Submenu submenu;");
