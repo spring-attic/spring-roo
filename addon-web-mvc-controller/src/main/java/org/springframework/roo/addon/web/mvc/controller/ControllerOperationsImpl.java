@@ -84,7 +84,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			JavaType javaType = cid.getName();
 			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
 			
-			// Check to see if this entity metadata has a web scaffold metadata listening to it
+			// Check to see if this persistent type has a web scaffold metadata listening to it
 			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(javaType, path);
 			if (dependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamWebScaffoldMetadataId)) {
 				// There is already a controller for this entity
