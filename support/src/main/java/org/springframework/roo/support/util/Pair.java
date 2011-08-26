@@ -1,8 +1,7 @@
 package org.springframework.roo.support.util;
 
 /**
- * A pair with a key of type "K" and a value of tpye "V". Instances are
- * immutable.
+ * A pair with a key of type "K" and a value of type "V". Instances are immutable.
  *
  * @author Andrew Swan
  * @since 1.2.0
