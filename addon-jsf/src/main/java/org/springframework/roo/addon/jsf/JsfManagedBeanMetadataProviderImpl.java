@@ -2,7 +2,11 @@ package org.springframework.roo.addon.jsf;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -22,12 +26,18 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.layers.LayerService;
+import org.springframework.roo.classpath.layers.LayerType;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.CustomDataBuilder;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.Pair;
+import org.springframework.roo.support.util.PairList;
 
 /**
  * Implementation of {@link JsfManagedBeanMetadataProvider}.
@@ -39,7 +49,18 @@ import org.springframework.roo.support.util.Assert;
 @Service 
 public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
 	
+	// Constants
+	private static final String COUNT_ALL_METHOD = PersistenceCustomDataKeys.COUNT_ALL_METHOD.name();
+	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
+	private static final String FIND_METHOD = PersistenceCustomDataKeys.FIND_METHOD.name();
+	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
+	private static final String FIND_ENTRIES_METHOD = PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name();
+	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
+	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
+
 	// Fields
+	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	private Map<JavaType, String> entityToManagedBeandMidMap = new LinkedHashMap<JavaType, String>();
 	private Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
@@ -98,11 +119,50 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
 		String plural = pluralMetadata.getPlural();
 
+		Map<String, MemberTypeAdditions> crudAdditions = getCrudAdditions(entityType, memberDetails, metadataIdentificationString);
 		Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataIdentificationString);
 
-		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, locatedFieldsAndAccessors);
+		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, crudAdditions, locatedFieldsAndAccessors);
 	}
 
+	@SuppressWarnings("unchecked") 
+	private Map<String, MemberTypeAdditions> getCrudAdditions(final JavaType javaType, final MemberDetails memberDetails, String metadataIdentificationString) {
+		Map<String, MemberTypeAdditions> additions = new HashMap<String, MemberTypeAdditions>();
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
+		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(javaType);
+		if (idFields.isEmpty()) {
+			return additions;
+		}
+		FieldMetadata identifierField = idFields.get(0);
+		JavaType idType = persistenceMemberLocator.getIdentifierType(javaType);
+		if (idType == null) {
+			return additions;
+		}
+		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
+
+		JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(javaType);
+		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(javaType, entityName);
+		final Pair<JavaType, JavaSymbolName> idParameter = new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id"));
+		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("sizeNo")));
+
+		MemberTypeAdditions persistMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions removeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions mergeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, javaType, idType, LAYER_POSITION);
+		MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD, javaType, idType, LAYER_POSITION, idParameter);
+		MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, javaType, idType, LAYER_POSITION);
+		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, javaType, idType, LAYER_POSITION, findEntriesParameters.toArray());
+
+		additions.put(COUNT_ALL_METHOD, countMethod);
+		additions.put(DELETE_METHOD, removeMethod);
+		additions.put(FIND_METHOD, findMethod);
+		additions.put(FIND_ALL_METHOD, findAllMethod);
+		additions.put(FIND_ENTRIES_METHOD, findEntriesMethod);
+		additions.put(MERGE_METHOD, mergeMethod);
+		additions.put(PERSIST_METHOD, persistMethod);
+		return Collections.unmodifiableMap(additions);
+	}
+	
 	private Map<FieldMetadata, MethodMetadata> locateFieldsAndAccessors(JavaType entityType, MemberDetails memberDetails, String metadataIdentificationString) {
 		Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = new LinkedHashMap<FieldMetadata, MethodMetadata>();
 		

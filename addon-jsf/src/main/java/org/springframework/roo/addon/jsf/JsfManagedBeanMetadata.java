@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.jsf;
 
 import static org.springframework.roo.addon.jsf.JsfJavaType.CONVERTER;
+import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_CREATE_DIALOG;
+import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_LIST;
 import static org.springframework.roo.addon.jsf.JsfJavaType.EL_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.EXPRESSION_FACTORY;
 import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
@@ -11,6 +13,7 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_CALENDAR;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_CLOSE_EVENT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD_EVENT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_UPLOADED_FILE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
@@ -44,6 +47,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
@@ -66,11 +70,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = JsfManagedBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final String NEW_DIALOG_VISIBLE = "newDialogVisible";
+	private static final String CREATE_DIALOG_VISIBLE = "createDialogVisible";
 	
 	// Fields
 	private JavaType entityType;
 	private String plural;
+	private Map<String, MemberTypeAdditions> crudAdditions;
 	private Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata persistMethod;
@@ -78,12 +83,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata removeMethod;
 	private MethodMetadata findAllMethod;
 
-	public JsfManagedBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JsfManagedBeanAnnotationValues annotationValues, MemberDetails memberDetails, String plural, Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors) {
+	private enum Action {
+		CREATE, EDIT, VIEW;
+	};
+
+	public JsfManagedBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JsfManagedBeanAnnotationValues annotationValues, MemberDetails memberDetails, String plural, Map<String, MemberTypeAdditions> crudAdditions, Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.isTrue(StringUtils.hasText(plural), "Plural required");
+		Assert.notNull(crudAdditions, "Crud additions map required");
 		Assert.notNull(locatedFieldsAndAccessors, "Located fields and accessors map required");
 		
 		if (!isValid()) {
@@ -118,8 +128,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addField(getSelectedEntityField());
 		builder.addField(getAllEntitiesField());
 		builder.addField(getColumnsField());
-		builder.addField(getEditPanelField());
-		builder.addField(getBooleanField(new JavaSymbolName(NEW_DIALOG_VISIBLE)));
+		builder.addField(getPanelGridField(Action.CREATE));
+		builder.addField(getPanelGridField(Action.EDIT));
+		builder.addField(getPanelGridField(Action.VIEW));
+		builder.addField(getBooleanField(new JavaSymbolName(CREATE_DIALOG_VISIBLE)));
 		
 		for (FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
 			builder.addField(getUploadedFileField(rooUploadedFileField));
@@ -134,9 +146,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getAllEntitiesAccessorMethod());
 		builder.addMethod(getAllEntitiesMutatorMethod());
 		builder.addMethod(getFindAllEntitiesMethod());
-		builder.addMethod(getEditPanelAccessorMethod());
-		builder.addMethod(getEditPanelMutatorMethod());
-		builder.addMethod(getPopulatePanelMethod());
+		builder.addMethod(getPanelGridAccessorMethod(Action.CREATE));
+		builder.addMethod(getPanelGridMutatorMethod(Action.CREATE));
+		builder.addMethod(getPanelGridAccessorMethod(Action.EDIT));
+		builder.addMethod(getPanelGridMutatorMethod(Action.EDIT));
+		builder.addMethod(getPanelGridAccessorMethod(Action.VIEW));
+		builder.addMethod(getPanelGridMutatorMethod(Action.VIEW));
+		builder.addMethod(getPopulatePanelMethod(Action.CREATE)); // Handles Action.EDIT as well
+		builder.addMethod(getPopulatePanelMethod(Action.VIEW)); 
 	
 		for (FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
 			builder.addMethod(getFileUploadListenerMethod(rooUploadedFileField));
@@ -144,10 +161,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			builder.addMethod(getUploadedFileMutatorMethod(rooUploadedFileField));
 		}
 
-		builder.addMethod(getBooleanAccessorMethod(NEW_DIALOG_VISIBLE));
-		builder.addMethod(getBooleanMutatorMethod(NEW_DIALOG_VISIBLE));
+		builder.addMethod(getBooleanAccessorMethod(CREATE_DIALOG_VISIBLE));
+		builder.addMethod(getBooleanMutatorMethod(CREATE_DIALOG_VISIBLE));
 		builder.addMethod(getDisplayListMethod());
-		builder.addMethod(getDisplayNewDialogMethod());
+		builder.addMethod(getDisplayCreateDialogMethod());
 		builder.addMethod(getPersistMethod());
 		builder.addMethod(getDeleteMethod());
 		builder.addMethod(getResetMethod());
@@ -227,8 +244,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return new JavaType("java.util.List", 0, DataType.TYPE, null, paramTypes);
 	}
 
-	private FieldMetadata getEditPanelField() {
-		JavaSymbolName fieldName = new JavaSymbolName("editPanel");
+	private FieldMetadata getPanelGridField(Action panelType) {
+		JavaSymbolName fieldName = new JavaSymbolName(StringUtils.toLowerCase(panelType.name()) + "PanelGrid");
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (field != null) return field;
 
@@ -375,8 +392,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getEditPanelAccessorMethod() {
-		String fieldName = "editPanel";
+	private MethodMetadata getPanelGridAccessorMethod(Action action) {
+		String fieldName = StringUtils.toLowerCase(action.name()) + "PanelGrid";
 		JavaSymbolName methodName = new JavaSymbolName("get" + StringUtils.capitalize(fieldName));
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
@@ -387,7 +404,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(fieldName + " = populatePanel();");
+		switch (action) {
+			case CREATE:
+			case EDIT:
+				bodyBuilder.appendFormalLine(fieldName + " = populatePanel();");
+				break;
+			case VIEW:
+				bodyBuilder.appendFormalLine(fieldName + " = populateViewPanel();");
+				break;
+		}
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return " + fieldName + ";");
@@ -396,8 +421,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getEditPanelMutatorMethod() {
-		String fieldName = "editPanel";
+	private MethodMetadata getPanelGridMutatorMethod(Action action) {
+		String fieldName = StringUtils.toLowerCase(action.name()) + "PanelGrid";
 		JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(fieldName));
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		parameterTypes.add(HTML_PANEL_GRID);
@@ -417,11 +442,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getPopulatePanelMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("populatePanel");
+	private MethodMetadata getPopulatePanelMethod(Action action) {
+		JavaSymbolName methodName = new JavaSymbolName(action == Action.VIEW ? "populateViewPanel" : "populatePanel");
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
 
+		String fieldSuffix1 = action == Action.VIEW ? "Label" : "Output";
+		String fieldSuffix2 = action == Action.VIEW ? "Value" : "Input";
+		
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(EL_CONTEXT);
 		imports.addImport(EXPRESSION_FACTORY);
@@ -438,43 +466,51 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		imports.addImport(HTML_OUTPUT_TEXT);
 
 		bodyBuilder.appendFormalLine("HtmlPanelGrid htmlPanelGrid = " + getComponentCreationStr("HtmlPanelGrid"));
-		bodyBuilder.appendFormalLine("htmlPanelGrid.setId(\"editPanelGrid\");");
 		bodyBuilder.appendFormalLine("");
-		
+
 		for (FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
 			JavaType fieldType = field.getFieldType();
 			String fieldName = field.getFieldName().getSymbolName();
-			String outputFieldVar = fieldName + "Output";
-			String inputFieldVar = fieldName + "Input";
-			
-			bodyBuilder.appendFormalLine("HtmlOutputText " + outputFieldVar + " = " + getComponentCreationStr("HtmlOutputText"));
-			bodyBuilder.appendFormalLine(outputFieldVar + ".setId(\"" + outputFieldVar + "\");");
-			bodyBuilder.appendFormalLine(outputFieldVar + ".setValue(\"" + fieldName + "\");");
-			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + outputFieldVar + ");");
+			String fieldLabelVar = fieldName + fieldSuffix1;
+			String fieldValueVar = fieldName + fieldSuffix2;
+
+			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelVar + " = " + getComponentCreationStr("HtmlOutputText"));
+			bodyBuilder.appendFormalLine(fieldLabelVar + ".setId(\"" + fieldLabelVar + "\");");
+			bodyBuilder.appendFormalLine(fieldLabelVar + ".setValue(\"" + fieldName + "\");");
+			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldLabelVar + ");");
 			bodyBuilder.appendFormalLine("");
 			if (isRooUploadFileField(field)) {
 				imports.addImport(PRIMEFACES_FILE_UPLOAD);
 				imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 				imports.addImport(PRIMEFACES_UPLOADED_FILE);
-				bodyBuilder.appendFormalLine("FileUpload " + inputFieldVar + " = " + getComponentCreationStr("FileUpload"));
-				bodyBuilder.appendFormalLine(inputFieldVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean." + fieldName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
-				bodyBuilder.appendFormalLine(inputFieldVar + ".setMode(\"advanced\");");
-				bodyBuilder.appendFormalLine(inputFieldVar + ".setUpdate(\"messages\");");
+				bodyBuilder.appendFormalLine("FileUpload " + fieldValueVar + " = " + getComponentCreationStr("FileUpload"));
+				bodyBuilder.appendFormalLine(fieldValueVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean." + fieldName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
+				bodyBuilder.appendFormalLine(fieldValueVar + ".setMode(\"advanced\");");
+				bodyBuilder.appendFormalLine(fieldValueVar + ".setUpdate(\"messages\");");
 			} else if (isDateField(fieldType)) {
-				imports.addImport(PRIMEFACES_CALENDAR);
-				imports.addImport(new JavaType("java.util.Date"));
-				bodyBuilder.appendFormalLine("Calendar " + inputFieldVar + " = " + getComponentCreationStr("Calendar"));
-				bodyBuilder.appendFormalLine(getValueExpressionStr(inputFieldVar, fieldName, Date.class));
-				bodyBuilder.appendFormalLine(inputFieldVar + ".setNavigator(true);");
-				bodyBuilder.appendFormalLine(inputFieldVar + ".setEffect(\"slideDown\");");
-				bodyBuilder.appendFormalLine(inputFieldVar + ".setPattern(\"dd/MM/yyyy\");");
+				if (action == Action.VIEW) {
+					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, String.class));
+				} else {
+					imports.addImport(PRIMEFACES_CALENDAR);
+					imports.addImport(new JavaType("java.util.Date"));
+					bodyBuilder.appendFormalLine("Calendar " + fieldValueVar + " = " + getComponentCreationStr("Calendar"));
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, Date.class));
+					bodyBuilder.appendFormalLine(fieldValueVar + ".setNavigator(true);");
+					bodyBuilder.appendFormalLine(fieldValueVar + ".setEffect(\"slideDown\");");
+					bodyBuilder.appendFormalLine(fieldValueVar + ".setPattern(\"dd/MM/yyyy\");");
+				}
 			} else {
-				imports.addImport(new JavaType("org.primefaces.component.inputtext.InputText"));
-				bodyBuilder.appendFormalLine("InputText " + inputFieldVar + " = " + getComponentCreationStr("InputText"));
-				bodyBuilder.appendFormalLine(getValueExpressionStr(inputFieldVar, fieldName, String.class));
+				imports.addImport(PRIMEFACES_INPUT_TEXT);
+				if (action == Action.VIEW) {
+					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
+				} else {
+					bodyBuilder.appendFormalLine("InputText " + fieldValueVar + " = " + getComponentCreationStr("InputText"));
+				}
+				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, String.class));
 			}
-			bodyBuilder.appendFormalLine(inputFieldVar + ".setId(\"" + inputFieldVar + "\");");
-			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + inputFieldVar + ");");	
+			bodyBuilder.appendFormalLine(fieldValueVar + ".setId(\"" + fieldValueVar + "\");");
+			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");	
 			bodyBuilder.appendFormalLine("");
 		}
 		
@@ -543,13 +579,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getDisplayNewDialogMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("displayNewDialog");
+	private MethodMetadata getDisplayCreateDialogMethod() {
+		JavaSymbolName methodName = new JavaSymbolName(DISPLAY_CREATE_DIALOG);
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(NEW_DIALOG_VISIBLE + " = true;");
+		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = true;");
 		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "\";");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -557,12 +593,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private MethodMetadata getDisplayListMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("displayList");
+		JavaSymbolName methodName = new JavaSymbolName(DISPLAY_LIST);
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(NEW_DIALOG_VISIBLE + " = false;");
+		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
 		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "\";");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -621,7 +657,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(getEntityName() + " = null;");
-		bodyBuilder.appendFormalLine(NEW_DIALOG_VISIBLE + " = false;");
+		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();

@@ -12,6 +12,11 @@ import org.springframework.roo.model.JavaType;
  */
 public class JsfJavaType {
 
+	// Constants
+	public static final String DISPLAY_CREATE_DIALOG = "displayCreateDialog";
+	public static final String DISPLAY_LIST = "displayList";
+	
+	// PrimeFaces and JSF 2.0 types
 	public static final JavaType CONVERTER = new JavaType("javax.faces.convert.Converter");
 	public static final JavaType EL_CONTEXT = new JavaType("javax.el.ELContext");
 	public static final JavaType EXPRESSION_FACTORY = new JavaType("javax.el.ExpressionFactory");
@@ -25,6 +30,7 @@ public class JsfJavaType {
 	public static final JavaType PRIMEFACES_DEFAULT_MENU_MODEL = new JavaType("org.primefaces.model.DefaultMenuModel");
 	public static final JavaType PRIMEFACES_FILE_UPLOAD = new JavaType("org.primefaces.component.fileupload.FileUpload");
 	public static final JavaType PRIMEFACES_FILE_UPLOAD_EVENT = new JavaType("org.primefaces.event.FileUploadEvent");
+	public static final JavaType PRIMEFACES_INPUT_TEXT = new JavaType("org.primefaces.component.inputtext.InputText");
 	public static final JavaType PRIMEFACES_MENU_ITEM = new JavaType("org.primefaces.component.menuitem.MenuItem");
 	public static final JavaType PRIMEFACES_MENU_MODEL = new JavaType("org.primefaces.model.MenuModel");
 	public static final JavaType PRIMEFACES_SUB_MENU = new JavaType("org.primefaces.component.submenu.Submenu");

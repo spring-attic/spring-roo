@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_CREATE_DIALOG;
+import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_LIST;
 import static org.springframework.roo.addon.jsf.JsfJavaType.EL_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.EXPRESSION_FACTORY;
 import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
@@ -165,9 +167,9 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
-			bodyBuilder.appendFormalLine("item.setId(\"new" + entity.getSimpleTypeName() + "MenuItem\");");
-			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_new}\", String.class));");
-			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + ".displayNewDialog}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setId(\"create" + entity.getSimpleTypeName() + "MenuItem\");");
+			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_create}\", String.class));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_CREATE_DIALOG + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
@@ -175,7 +177,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"list" + entity.getSimpleTypeName() + "MenuItem\");");
 			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_list}\", String.class));");
-			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + ".displayList}\", String.class, new Class[0]));");
+			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_LIST + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
 			bodyBuilder.appendFormalLine("submenu.getChildren().add(item);");
