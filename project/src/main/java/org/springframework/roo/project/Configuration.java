@@ -42,6 +42,11 @@ public class Configuration implements Comparable<Configuration> {
 		this.configuration = configuration;
 	}
 
+	/**
+	 * Returns the XML element that defines this configuration
+	 * 
+	 * @return a non-<code>null</code> element
+	 */
 	public Element getConfiguration() {
 		return configuration;
 	}

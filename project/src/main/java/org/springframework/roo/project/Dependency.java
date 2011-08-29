@@ -7,6 +7,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -297,5 +298,56 @@ public class Dependency implements Comparable<Dependency> {
 		Assert.hasText(exclusionGroupId, "Excluded groupId required");
 		Assert.hasText(exclusionArtifactId, "Excluded artifactId required");
 		this.exclusions.add(new Dependency(exclusionGroupId, exclusionArtifactId, "ignored"));
+	}
+	
+	/**
+	 * Returns the XML element for this dependency
+	 * 
+	 * @param document the parent XML document
+	 * @return a non-<code>null</code> element
+	 * @since 1.2.0
+	 */
+	public Element getElement(final Document document) {
+		final Element dependencyElement = document.createElement("dependency");
+		dependencyElement.appendChild(XmlUtils.createTextElement(document, "groupId", this.groupId));
+		dependencyElement.appendChild(XmlUtils.createTextElement(document, "artifactId", this.artifactId));
+		dependencyElement.appendChild(XmlUtils.createTextElement(document, "version", this.version));
+
+		if (this.type != null) {
+			final Element typeElement = document.createElement("type");
+			typeElement.setTextContent(this.type.toString().toLowerCase());
+			if (!DependencyType.JAR.equals(this.type)) {
+				// Keep the XML short, we don't need "JAR" given it's the default
+				dependencyElement.appendChild(typeElement);
+			}
+		}
+
+		if (this.scope != null) {
+			// Keep the XML short, we don't need "compile" given it's the default
+			if (!DependencyScope.COMPILE.equals(this.scope)) {
+				dependencyElement.appendChild(XmlUtils.createTextElement(document, "scope", this.scope.toString().toLowerCase()));
+			}
+			if (DependencyScope.SYSTEM.equals(this.scope) && this.systemPath != null) {
+				dependencyElement.appendChild(XmlUtils.createTextElement(document, "systemPath", this.systemPath));
+			}
+		}
+
+		if (StringUtils.hasText(this.classifier)) {
+			dependencyElement.appendChild(XmlUtils.createTextElement(document, "classifier", this.classifier));
+		}
+
+		// Add exclusions if any
+		if (!this.exclusions.isEmpty()) {
+			final Element exclusionsElement = document.createElement("exclusions");
+			for (final Dependency exclusion : this.exclusions) {
+				final Element exclusionElement = document.createElement("exclusion");
+				exclusionElement.appendChild(XmlUtils.createTextElement(document, "groupId", exclusion.getGroupId()));
+				exclusionElement.appendChild(XmlUtils.createTextElement(document, "artifactId", exclusion.getArtifactId()));
+				exclusionsElement.appendChild(exclusionElement);
+			}
+			dependencyElement.appendChild(exclusionsElement);
+		}
+		
+		return dependencyElement;
 	}
 }

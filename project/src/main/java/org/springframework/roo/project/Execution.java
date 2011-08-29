@@ -8,6 +8,11 @@ import org.springframework.roo.support.style.DefaultValueStyler;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ObjectUtils;
+import org.springframework.roo.support.util.StringUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Immutable representation of an execution specification for a (Maven) build plugin
@@ -81,6 +86,17 @@ public class Execution implements Comparable<Execution> {
 	public List<String> getGoals() {
 		return this.goals;
 	}
+	
+	/**
+	 * Returns this execution's configuration, if any; this is separate from any
+	 * configuration defined at the plugin level
+	 * 
+	 * @return <code>null</code> if there is none
+	 * @since 1.2.0
+	 */
+	public Configuration getConfiguration() {
+		return this.configuration;
+	}
 
 	public int hashCode() {
 		final int prime = 31;
@@ -125,5 +141,40 @@ public class Execution implements Comparable<Execution> {
 		toStringCreator.append("goals", this.goals);
 		toStringCreator.append("configuration", this.configuration);
 		return toStringCreator.toString();
+	}
+	
+	/**
+	 * Returns the XML element for this execution within the given Maven POM
+	 * 
+	 * @param document the Maven POM to which to add the element (required)
+	 * @return a non-<code>null</code> element
+	 */
+	public Element getElement(final Document document) {
+		final Element executionElement = document.createElement("execution");
+		
+		// ID
+		if (StringUtils.hasText(this.id)) {
+			executionElement.appendChild(XmlUtils.createTextElement(document, "id", this.id));
+		}
+		
+		// Phase
+		if (StringUtils.hasText(this.phase)) {
+			executionElement.appendChild(XmlUtils.createTextElement(document, "phase", this.phase));
+		}
+		
+		// Goals
+		final Element goalsElement = document.createElement("goals");
+		for (final String goal : this.goals) {
+			goalsElement.appendChild(XmlUtils.createTextElement(document, "goal", goal));
+		}
+		executionElement.appendChild(goalsElement);
+		
+		// Configuration
+		if (this.configuration != null) {
+			final Node configurationNode = document.importNode(this.configuration.getConfiguration(), true);
+			executionElement.appendChild(configurationNode);
+		}
+		
+		return executionElement;
 	}
 }

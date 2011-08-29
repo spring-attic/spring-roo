@@ -2,7 +2,10 @@ package org.springframework.roo.project;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -16,68 +19,58 @@ import org.w3c.dom.Element;
  *
  */
 public class Repository implements Comparable<Repository> {
-	private String id;
-	private String name;
-	private String url;
-	private boolean enableSnapshots = false;
+	
+	// Fields
+	private final boolean enableSnapshots;
+	private final String id;
+	private final String name;
+	private final String url;
 	
 	/**
-	 * Convenience constructor creating a repository instance
+	 * Constructor for snapshots disabled
 	 * 
 	 * @param id the repository id (required)
 	 * @param name the repository name (optional)
 	 * @param url the repository url (required)
 	 */
-	public Repository(String id, String name, String url) {
-		Assert.hasText(id, "Group ID required");
-		Assert.notNull(url, "URL required");
-		this.id = id;
-		this.url = url;
-		if (name != null && name.length() > 0) {
-			this.name = name;
-		}
+	public Repository(final String id, final String name, final String url) {
+		this(id, name, url, false);
 	}
 	
 	/**
-	 * Convenience constructor for creating a repository instance
+	 * Constructor for snapshots optionally enabled
 	 * 
 	 * @param id the repository id (required)
-	 * @param name the repository name (required)
+	 * @param name the repository name (optional)
 	 * @param url the repository url (required)
 	 * @param enableSnapshots true if snapshots are allowed, otherwise false
 	 */
-	public Repository(String id, String name, String url, boolean enableSnapshots) {
-		Assert.hasText(id, "Group ID required");
+	public Repository(final String id, final String name, final String url, final boolean enableSnapshots) {
+		Assert.hasText(id, "ID required");
 		Assert.hasText(url, "URL required");
-		this.id = id;
-		if (name != null && name.length() > 0) {
-			this.name = name;
-		}
-		this.url = url;
 		this.enableSnapshots = enableSnapshots;
+		this.id = id;
+		this.name = StringUtils.trimToNull(name);
+		this.url = url;
 	}
 	
 	/**
-	 * Convenience constructor for creating a repository instance from a 
-	 * XML Element
+	 * Convenience constructor for creating a repository instance from an XML Element
 	 * 
 	 * @param element containing the repository definition (required)
 	 */
-	public Repository(Element element) {
+	public Repository(final Element element) {
 		Assert.notNull(element, "Element required");
+		final Element name = XmlUtils.findFirstElement("name", element);
+		final Element snapshotsElement = XmlUtils.findFirstElement("snapshots", element);
+		this.enableSnapshots = (snapshotsElement == null ? false : Boolean.valueOf(XmlUtils.findRequiredElement("snapshots/enabled", element).getTextContent()));
 		this.id = XmlUtils.findRequiredElement("id", element).getTextContent();
+		this.name = (name == null ? null : name.getTextContent());
 		this.url = XmlUtils.findRequiredElement("url", element).getTextContent();
-		Element name = XmlUtils.findFirstElement("name", element);
-		if (name != null) {
-			this.name = name.getTextContent();
-		}
-		if (null != XmlUtils.findFirstElement("snapshots", element)) {
-			this.enableSnapshots = new Boolean(XmlUtils.findRequiredElement("snapshots/enabled", element).getTextContent());
-		}
 	}
 
 	/**
-	 * The id of a repository
+	 * The id of the repository
 	 * 
 	 * @return the id (never null)
 	 */
@@ -86,7 +79,7 @@ public class Repository implements Comparable<Repository> {
 	}
 
 	/**
-	 * The name of a repository
+	 * The name of the repository
 	 * 
 	 * @return the name of the repository (null if not exists)
 	 */
@@ -95,7 +88,7 @@ public class Repository implements Comparable<Repository> {
 	}
 
 	/**
-	 * The url of a repository
+	 * The url of the repository
 	 * 
 	 * @return the url (never null)
 	 */
@@ -112,15 +105,17 @@ public class Repository implements Comparable<Repository> {
 		return enableSnapshots;
 	}
 	
+	@Override
 	public int hashCode() {
 		return 11 * this.id.hashCode() * this.url.hashCode();
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		return obj != null && obj instanceof Repository && this.compareTo((Repository) obj) == 0;
 	}
 
-	public int compareTo(Repository o) {
+	public int compareTo(final Repository o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}
@@ -131,11 +126,31 @@ public class Repository implements Comparable<Repository> {
 		return result;
 	}
 	
+	@Override
 	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("id", id);
 		tsc.append("name", name);
 		tsc.append("url", url);
 		return tsc.toString();
+	}
+	
+	/**
+	 * Returns the XML element for this repository
+	 * 
+	 * @param document the document in which to create the element (required)
+	 * @param tagName the name of the element to create (required)
+	 * @return a non-<code>null</code> element
+	 * @since 1.2.0
+	 */
+	public Element getElement(final Document document, final String tagName) {
+		final Element repositoryElement = new XmlElementBuilder(tagName, document).addChild(new XmlElementBuilder("id", document).setText(this.id).build()).addChild(new XmlElementBuilder("url", document).setText(this.url).build()).build();
+		if (this.name != null) {
+			repositoryElement.appendChild(new XmlElementBuilder("name", document).setText(this.name).build());
+		}
+		if (this.enableSnapshots) {
+			repositoryElement.appendChild(new XmlElementBuilder("snapshots", document).addChild(new XmlElementBuilder("enabled", document).setText("true").build()).build());
+		}
+		return repositoryElement;
 	}
 }

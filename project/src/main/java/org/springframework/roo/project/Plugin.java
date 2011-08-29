@@ -8,7 +8,9 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -209,6 +211,13 @@ public class Plugin implements Comparable<Plugin> {
 		return version;
 	}
 
+	/**
+	 * Returns the top-level configuration of this plugin, if any. Note that
+	 * individual {@link Execution}s may have their own {@link Configuration}s
+	 * instead of or in addition to this configuration.
+	 * 
+	 * @return <code>null</code> if none exists
+	 */
 	public Configuration getConfiguration() {
 		return configuration;
 	}
@@ -268,5 +277,49 @@ public class Plugin implements Comparable<Plugin> {
 			tsc.append("configuration", configuration);
 		}
 		return tsc.toString();
+	}
+	
+	/**
+	 * Returns the {@link Element} to add to the given POM {@link Document} for
+	 * this plugin
+	 * 
+	 * @param plugin the plugin for which to create an XML Element (required)
+	 * @param document the document to which the element will belong (required)
+	 * @return a non-<code>null</code> element
+	 * @since 1.2.0
+	 */
+	public Element getElement(final Document document) {
+		final Element pluginElement = document.createElement("plugin");
+		
+		// Basic coordinates
+		pluginElement.appendChild(XmlUtils.createTextElement(document, "groupId", this.groupId));
+		pluginElement.appendChild(XmlUtils.createTextElement(document, "artifactId", this.artifactId));
+		pluginElement.appendChild(XmlUtils.createTextElement(document, "version", this.version));
+		
+		// Configuration
+		if (this.configuration != null) {
+			final Node configuration = document.importNode(this.configuration.getConfiguration(), true);
+			pluginElement.appendChild(configuration);
+		}
+		
+		// Executions
+		if (!this.executions.isEmpty()) {
+			final Element executionsElement = document.createElement("executions");
+			for (final Execution execution : this.executions) {
+				executionsElement.appendChild(execution.getElement(document));
+			}
+			pluginElement.appendChild(executionsElement);
+		}
+		
+		// Dependencies
+		if (!this.dependencies.isEmpty()) {
+			final Element dependenciesElement = document.createElement("dependencies");
+			for (final Dependency dependency : this.dependencies) {
+				dependenciesElement.appendChild(dependency.getElement(document));
+			}
+			pluginElement.appendChild(dependenciesElement);
+		}
+		
+		return pluginElement;
 	}
 }

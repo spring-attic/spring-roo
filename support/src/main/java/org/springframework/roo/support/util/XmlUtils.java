@@ -2,6 +2,7 @@ package org.springframework.roo.support.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,6 +41,7 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSException;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
+import org.xml.sax.SAXException;
 
 /**
  * Utilities related to DOM and XML usage.
@@ -47,6 +49,7 @@ import org.w3c.dom.ls.LSSerializer;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Andrew Swan
  * @since 1.0
  */
 public final class XmlUtils {
@@ -56,6 +59,38 @@ public final class XmlUtils {
 	private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
 	private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	private static final XPath xpath = XPathFactory.newInstance().newXPath();
+	
+	/**
+	 * Returns the given XML as the root {@link Element} of a new {@link Document}
+	 * 
+	 * @param xml the XML to convert; can be blank
+	 * @return <code>null</code> if the given XML is blank
+	 * @throws IOException
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @since 1.2.0
+	 */
+	public static Element stringToElement(final String xml) throws IOException, ParserConfigurationException, SAXException {
+		if (StringUtils.hasText(xml)) {
+			return factory.newDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes())).getDocumentElement();
+		}
+		return null;
+	}
+	
+	/**
+	 * Creates an {@link Element} containing the given text
+	 * 
+	 * @param document the document to contain the new element
+	 * @param tagName the element's tag name (required)
+	 * @param text the text to set; can be <code>null</code> for none
+	 * @return a non-<code>null</code> element
+	 * @since 1.2.0
+	 */
+	public static final Element createTextElement(final Document document, final String tagName, final String text) {
+		final Element element = document.createElement(tagName);
+		element.setTextContent(text);
+		return element;
+	}
 
 	/**
 	 * Read an XML document from the supplied input stream and return a document.

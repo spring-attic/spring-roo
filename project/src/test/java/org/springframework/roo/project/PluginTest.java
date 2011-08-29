@@ -2,8 +2,10 @@ package org.springframework.roo.project;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.roo.support.util.XmlUtils.nodeToString;
+import static org.springframework.roo.support.util.XmlUtils.stringToElement;
 
-import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +15,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
-import org.springframework.roo.support.util.StringUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -25,16 +27,22 @@ import org.w3c.dom.Element;
 public class PluginTest {
 
 	// Constants
-	private static final DocumentBuilder DOCUMENT_BUILDER;
 	private static final List<Dependency> NO_DEPENDENCIES = Collections.emptyList();
 	private static final List<Execution> NO_EXECUTIONS = Collections.emptyList();
-	private static final String ARTIFACT_ID = "bar";
+	
+	private static final String DEPENDENCY_ARTIFACT_ID = "huge-thing";
+	private static final String DEPENDENCY_GROUP_ID = "com.acme";
+	private static final String DEPENDENCY_VERSION = "1.1";
+	
 	private static final String EXECUTION_GOAL = "add-tests";
 	private static final String EXECUTION_ID = "build-it";
 	private static final String EXECUTION_PHASE = "test";
-	private static final String GROUP_ID = "com.foo";
-	private static final String VERSION = "1.2.3";
 	
+	private static final String PLUGIN_ARTIFACT_ID = "bar";
+	private static final String PLUGIN_GROUP_ID = "com.foo";
+	private static final String PLUGIN_VERSION = "1.2.3";
+	
+	private static final DocumentBuilder DOCUMENT_BUILDER;
 	static {
 		try {
 			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -63,19 +71,26 @@ public class PluginTest {
 			"<version>1.4</version>" +
 			"<dependencies>" +
 				"<dependency>" +
-					"<groupId>com.acme</groupId>" +
-					"<artifactId>huge-thing</artifactId>" +
-					"<version>1.1</version>" +
+					"<groupId>" + DEPENDENCY_GROUP_ID + "</groupId>" +
+					"<artifactId>" + DEPENDENCY_ARTIFACT_ID + "</artifactId>" +
+					"<version>" + DEPENDENCY_VERSION + "</version>" +
 				"</dependency>" +
 			"</dependencies>" +
 		"</plugin>";
 	
 	private static final String EXECUTION_CONFIGURATION_XML =
-		"<configuration>" +
-			"<sources>" +
-				"<source>src/main/groovy</source>" +
-			"</sources>" +
-		"</configuration>";
+		"            <configuration>\n" +
+		"                <sources>\n" +
+		"                    <source>src/main/groovy</source>\n" +
+		"                </sources>\n" +
+		"            </configuration>\n";
+	
+	private static final String PLUGIN_CONFIGURATION_XML =
+		"    <configuration>\n" +
+		"        <targets>\n" +
+		"            <target>classes</target>\n" +
+		"        </targets>\n" +
+		"    </configuration>\n";
 	
 	private static final String PLUGIN_XML_WITH_EXECUTION =
 		"<plugin>" +
@@ -107,13 +122,13 @@ public class PluginTest {
 	
 	@Test
 	public void testXmlElementConstructorWithOneDependency() throws Exception {
-		final Dependency dependency = new Dependency("com.acme", "huge-thing", "1.1");
-		assertPluginFromXml(PLUGIN_XML_WITH_DEPENDENCY, "com.example", "ball-of-mud", "1.4", null, Arrays.asList(dependency), NO_EXECUTIONS);
+		final Dependency expectedDependency = new Dependency(DEPENDENCY_GROUP_ID, DEPENDENCY_ARTIFACT_ID, DEPENDENCY_VERSION);
+		assertPluginFromXml(PLUGIN_XML_WITH_DEPENDENCY, "com.example", "ball-of-mud", "1.4", null, Arrays.asList(expectedDependency), NO_EXECUTIONS);
 	}
 	
 	@Test
 	public void testXmlElementConstructorWithOneExecution() throws Exception {
-		final Configuration executionConfiguration = new Configuration(getElement(EXECUTION_CONFIGURATION_XML));
+		final Configuration executionConfiguration = new Configuration(stringToElement(EXECUTION_CONFIGURATION_XML));
 		final Execution execution = new Execution(EXECUTION_ID, EXECUTION_PHASE, executionConfiguration, EXECUTION_GOAL);
 		assertPluginFromXml(PLUGIN_XML_WITH_EXECUTION, "tv.reality", "view-plugin", "2.5", null, NO_DEPENDENCIES, Arrays.asList(execution));
 	}
@@ -122,32 +137,32 @@ public class PluginTest {
 	 * Asserts that constructing a {@link Plugin} from the given XML gives rise to the given properties
 	 * 
 	 * @param xml the XML from which to construct the {@link Plugin}
-	 * @param groupId
-	 * @param artifactId
-	 * @param version
-	 * @param configuration
-	 * @param dependencies
-	 * @param executions
+	 * @param expectedGroupId
+	 * @param expectedArtifactId
+	 * @param expectedVersion
+	 * @param expectedConfiguration
+	 * @param expectedDependencies
+	 * @param expectedExecutions
 	 * @throws Exception
 	 */
-	private void assertPluginFromXml(final String xml, final String groupId, final String artifactId, final String version, final Configuration configuration, final List<Dependency> dependencies, final List<Execution> executions) throws Exception {
+	private void assertPluginFromXml(final String xml, final String expectedGroupId, final String expectedArtifactId, final String expectedVersion, final Configuration expectedConfiguration, final List<Dependency> expectedDependencies, final List<Execution> expectedExecutions) throws Exception {
 		// Set up
-		final Element pluginElement = getElement(xml);
+		final Element pluginElement = stringToElement(xml);
 		
 		// Invoke
 		final Plugin plugin = new Plugin(pluginElement);
 		
 		// Check
-		assertPluginEquals(groupId, artifactId, version, configuration, dependencies, executions, plugin);
+		assertPluginEquals(expectedGroupId, expectedArtifactId, expectedVersion, expectedConfiguration, expectedDependencies, expectedExecutions, plugin);
 	}
 
 	@Test
 	public void testGroupArtifactVersionConstructor() {
 		// Invoke
-		final Plugin plugin = new Plugin(GROUP_ID, ARTIFACT_ID, VERSION);
+		final Plugin plugin = new Plugin(PLUGIN_GROUP_ID, PLUGIN_ARTIFACT_ID, PLUGIN_VERSION);
 		
 		// Check
-		assertPluginEquals(GROUP_ID, ARTIFACT_ID, VERSION, null, NO_DEPENDENCIES, NO_EXECUTIONS, plugin);
+		assertPluginEquals(PLUGIN_GROUP_ID, PLUGIN_ARTIFACT_ID, PLUGIN_VERSION, null, NO_DEPENDENCIES, NO_EXECUTIONS, plugin);
 	}
 
 	@Test
@@ -158,10 +173,10 @@ public class PluginTest {
 		final List<Execution> mockExecutions = Arrays.asList(mock(Execution.class), mock(Execution.class));
 		
 		// Invoke
-		final Plugin plugin = new Plugin(GROUP_ID, ARTIFACT_ID, VERSION, mockConfiguration, mockDependencies, mockExecutions);
+		final Plugin plugin = new Plugin(PLUGIN_GROUP_ID, PLUGIN_ARTIFACT_ID, PLUGIN_VERSION, mockConfiguration, mockDependencies, mockExecutions);
 		
 		// Check
-		assertPluginEquals(GROUP_ID, ARTIFACT_ID, VERSION, mockConfiguration, mockDependencies, mockExecutions, plugin);
+		assertPluginEquals(PLUGIN_GROUP_ID, PLUGIN_ARTIFACT_ID, PLUGIN_VERSION, mockConfiguration, mockDependencies, mockExecutions, plugin);
 	}
 	
 	/**
@@ -185,17 +200,85 @@ public class PluginTest {
 		assertEquals(version, actual.getVersion());
 	}
 	
+	private static final String MININAL_PLUGIN_XML =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"<plugin>\n" +
+		"    <groupId>" + PLUGIN_GROUP_ID + "</groupId>\n" +
+		"    <artifactId>" + PLUGIN_ARTIFACT_ID + "</artifactId>\n" +
+		"    <version>" + PLUGIN_VERSION + "</version>\n" +
+		"</plugin>\n";
+	
+	@Test
+	public void testGetElementForMinimalPlugin() {
+		assertElement(new Plugin(PLUGIN_GROUP_ID, PLUGIN_ARTIFACT_ID, PLUGIN_VERSION), DOCUMENT_BUILDER.newDocument(), MININAL_PLUGIN_XML);
+	}
+	
+	private static final String DEPENDENCY_XML = 
+		"        <dependency>\n" +
+		"            <groupId>" + DEPENDENCY_GROUP_ID + "</groupId>\n" +
+		"            <artifactId>" + DEPENDENCY_ARTIFACT_ID + "</artifactId>\n" +
+		"            <version>" + DEPENDENCY_VERSION + "</version>\n" +
+		"        </dependency>\n";
+	
+	private static final String EXECUTION_XML = 
+		"        <execution>\n" +
+		"            <id>" + EXECUTION_ID + "</id>\n" +
+		"            <phase>" + EXECUTION_PHASE + "</phase>\n" +
+		"            <goals>\n" +
+		"                <goal>" + EXECUTION_GOAL + "</goal>\n" +
+		"            </goals>\n" +
+		EXECUTION_CONFIGURATION_XML +
+		"        </execution>\n";
+	
+	private static final String MAXIMAL_PLUGIN_XML =
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"<plugin>\n" +
+		"    <groupId>" + PLUGIN_GROUP_ID + "</groupId>\n" +
+		"    <artifactId>" + PLUGIN_ARTIFACT_ID + "</artifactId>\n" +
+		"    <version>" + PLUGIN_VERSION + "</version>\n" +
+		PLUGIN_CONFIGURATION_XML +
+		"    <executions>\n" +
+		EXECUTION_XML +
+		"    </executions>\n" +
+		"    <dependencies>\n" +
+		DEPENDENCY_XML +
+		"    </dependencies>\n" +
+		"</plugin>\n";
+	
+	@Test
+	public void testGetElementForMaximalPlugin() throws Exception {
+		// Set up
+		final Configuration mockPluginConfiguration = mock(Configuration.class);
+		when(mockPluginConfiguration.getConfiguration()).thenReturn(stringToElement(PLUGIN_CONFIGURATION_XML));
+		
+		final Document document = DOCUMENT_BUILDER.newDocument();
+		
+		final Dependency mockDependency = mock(Dependency.class);
+		final Element dependencyElement = (Element) document.importNode(stringToElement(DEPENDENCY_XML), true);
+		when(mockDependency.getElement(document)).thenReturn(dependencyElement);
+		
+		final Execution mockExecution = mock(Execution.class);
+		final Element executionElement = (Element) document.importNode(stringToElement(EXECUTION_XML), true);
+		when(mockExecution.getElement(document)).thenReturn(executionElement);
+		
+		final Plugin plugin = new Plugin(PLUGIN_GROUP_ID, PLUGIN_ARTIFACT_ID, PLUGIN_VERSION, mockPluginConfiguration, Arrays.asList(mockDependency), Arrays.asList(mockExecution));
+		
+		// Invoke and check
+		assertElement(plugin, document, MAXIMAL_PLUGIN_XML);
+	}
+	
 	/**
-	 * Returns the XML {@link Element} for the root of the given XML test
+	 * Asserts that the given plugin returns the expected XML for its POM element
 	 * 
-	 * @param text can be blank
-	 * @return <code>null</code> if the text is blank
-	 * @throws Exception
+	 * @param plugin the plugin for which to check the XML (required)
+	 * @param document the document in which to create the element (required)
+	 * @param expectedXml the expected XML element; can be blank
 	 */
-	private Element getElement(final String text) throws Exception {
-		if (StringUtils.hasText(text)) {
-			return DOCUMENT_BUILDER.parse(new ByteArrayInputStream(text.getBytes())).getDocumentElement();
-		}
-		return null;
+	private void assertElement(final Plugin plugin, final Document document, final String expectedXml) {
+		// Invoke
+		final Element element = plugin.getElement(document);
+		
+		// Check
+		assertEquals(expectedXml, nodeToString(element));
 	}
 }

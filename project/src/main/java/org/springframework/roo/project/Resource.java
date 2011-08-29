@@ -1,12 +1,14 @@
 package org.springframework.roo.project;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -18,34 +20,36 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class Resource implements Comparable<Resource> {
-	private Path directory;
-	private Boolean filtering;
-	private List<String> includes = new ArrayList<String>();
+	
+	// Fields
+	private final Boolean filtering;
+	private final List<String> includes = new ArrayList<String>();
+	private final Path directory;
 
 	/**
-	 * Creates an immutable {@link Resource}.
+	 * Creates an immutable {@link Resource} with no "includes".
 	 * 
 	 * @param directory the {@link Path directory} (required)
 	 * @param filtering whether filtering should occur
 	 */
-	public Resource(Path directory, Boolean filtering) {
-		Assert.notNull(directory, "Directory required");
-		this.directory = directory;
-		this.filtering = filtering;
+	public Resource(final Path directory, final Boolean filtering) {
+		this(directory, filtering, null);
 	}
 
 	/**
-	 * Creates an immutable {@link Resource}.
+	 * Creates an immutable {@link Resource} with optional "includes".
 	 * 
 	 * @param directory the {@link Path directory} (required)
 	 * @param filtering whether filtering should occur
-	 * @param includes the list of includes
+	 * @param includes the list of includes; can be <code>null</code>
 	 */
-	public Resource(Path directory, Boolean filtering, List<String> includes) {
+	public Resource(final Path directory, final Boolean filtering, final Collection<String> includes) {
 		Assert.notNull(directory, "Directory required");
 		this.directory = directory;
 		this.filtering = filtering;
-		this.includes = includes;
+		if (includes != null) {
+			this.includes.addAll(includes);
+		}
 	}
 
 	/**
@@ -53,22 +57,17 @@ public class Resource implements Comparable<Resource> {
 	 * 
 	 * @param resource to parse (required)
 	 */
-	public Resource(Element resource) {
-		Element directoryElement = XmlUtils.findFirstElement("directory", resource);
+	public Resource(final Element resource) {
+		final Element directoryElement = XmlUtils.findFirstElement("directory", resource);
 		Assert.notNull(directoryElement, "directory element required");
-		directory = new Path(directoryElement.getTextContent());
+		this.directory = new Path(directoryElement.getTextContent());
 
-		Element filteringElement = XmlUtils.findFirstElement("filtering", resource);
-		if (filteringElement != null) {
-			filtering = Boolean.valueOf(filteringElement.getTextContent());
-		}
+		final Element filteringElement = XmlUtils.findFirstElement("filtering", resource);
+		this.filtering = (filteringElement == null ? null : Boolean.valueOf(filteringElement.getTextContent()));
 
 		// Parsing for includes
-		List<Element> includeList = XmlUtils.findElements("includes/include", resource);
-		if (includeList != null && !includeList.isEmpty()) {
-			for (Element include : includeList) {
-				includes.add(include.getTextContent());
-			}
+		for (final Element include : XmlUtils.findElements("includes/include", resource)) {
+			this.includes.add(include.getTextContent());
 		}
 	}
 
@@ -84,22 +83,24 @@ public class Resource implements Comparable<Resource> {
 		return includes;
 	}
 
+	@Override
 	public int hashCode() {
 		return getSimpleDescription().hashCode();
 	}
 	
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Resource other = (Resource) obj;
+		final Resource other = (Resource) obj;
 		return getSimpleDescription().equals(other.getSimpleDescription());
 	}
 
-	public int compareTo(Resource o) {
+	public int compareTo(final Resource o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}
@@ -107,22 +108,51 @@ public class Resource implements Comparable<Resource> {
 	}
 	
 	public String getSimpleDescription() {
-		StringBuilder builder = new StringBuilder();
+		final StringBuilder builder = new StringBuilder();
 		builder.append("directory ").append(directory.getName());
 		if (filtering != null) {
 			builder.append(", filtering ").append(filtering.toString());
 		}
-		if (includes != null && !includes.isEmpty()) {
-		builder.append(", includes ").append(StringUtils.collectionToCommaDelimitedString(includes));
+		if (!includes.isEmpty()) {
+			builder.append(", includes ").append(StringUtils.collectionToCommaDelimitedString(includes));
 		}
 		return builder.toString();
 	}
 
+	@Override
 	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("directory", directory);
 		tsc.append("filtering", filtering);
 		tsc.append("includes", includes);
 		return tsc.toString();
+	}
+	
+	/**
+	 * Returns the Maven POM element for this resource
+	 * 
+	 * @param document the POM document (required)
+	 * @return a non-<code>null</code> element
+	 */
+	public Element getElement(final Document document) {
+		final Element resourceElement = document.createElement("resource");
+		resourceElement.appendChild(XmlUtils.createTextElement(document, "directory", this.directory.getName()));
+
+		if (this.filtering != null) {
+			resourceElement.appendChild(XmlUtils.createTextElement(document, "filtering", this.filtering.toString()));
+		}
+
+		if (!this.includes.isEmpty()) {
+			Element includes = XmlUtils.findFirstElement("includes", resourceElement);
+			if (includes == null) {
+				includes = document.createElement("includes");
+			}
+			for (final String include : this.includes) {
+				includes.appendChild(XmlUtils.createTextElement(document, "include", include));
+			}
+			resourceElement.appendChild(includes);
+		}
+		
+		return resourceElement;
 	}
 }

@@ -9,11 +9,11 @@ import org.w3c.dom.Node;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class XmlElementBuilder {	
 
-	private Element element;
+	// Fields
+	private final Element element;
 
 	/**
 	 * Create a new Element instance.
@@ -21,8 +21,8 @@ public class XmlElementBuilder {
 	 * @param name The name of the element (required, not empty)
 	 * @param document The parent document (required)
 	 */
-	public XmlElementBuilder (String name, Document document) {	
-		Assert.hasText(name, "Element name required.");
+	public XmlElementBuilder(String name, Document document) {	
+		Assert.hasText(name, "Element name required");
 		Assert.notNull(document, "Owner document required");
 		element = document.createElement(name);
 	}
@@ -35,8 +35,8 @@ public class XmlElementBuilder {
 	 * @return the current XmlElementBuilder
 	 */
 	public XmlElementBuilder addAttribute(String qName, String value) {
-		Assert.hasText(qName, "Attribute qName required.");
-		Assert.notNull(value, "Attribute value required.");
+		Assert.hasText(qName, "Attribute qName required");
+		Assert.notNull(value, "Attribute value required");
 		element.setAttribute(qName, value);
 		return this;
 	}
@@ -48,7 +48,7 @@ public class XmlElementBuilder {
 	 * @return The builder for the current element
 	 */
 	public XmlElementBuilder addChild(Node node) {
-		Assert.notNull(node, "Node required.");
+		Assert.notNull(node, "Node required");
 		this.element.appendChild(node);
 		return this;
 	}
@@ -61,7 +61,7 @@ public class XmlElementBuilder {
 	 * @return The builder for the current element
 	 */
 	public XmlElementBuilder setText(String text) {
-		Assert.hasText(text, "Text content required.");
+		Assert.hasText(text, "Text content required");
 		element.setTextContent(text);
 		return this;
 	}

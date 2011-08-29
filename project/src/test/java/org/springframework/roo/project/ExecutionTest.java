@@ -2,11 +2,20 @@ package org.springframework.roo.project;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Unit test of the {@link Execution} class
@@ -19,7 +28,18 @@ public class ExecutionTest {
 	// Constants
 	private static final String ID = "some-id";
 	private static final String PHASE = "test";
-	private static final String[] GOALS = {"lock", "load"};
+	private static final String GOAL_1 = "lock";
+	private static final String GOAL_2 = "load";
+	private static final String[] GOALS = {GOAL_1, GOAL_2};
+
+	private static final DocumentBuilder DOCUMENT_BUILDER;
+	static {
+		try {
+			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		} catch (final ParserConfigurationException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 	
 	// Fixture
 	@Mock private Configuration mockConfiguration;
@@ -48,5 +68,39 @@ public class ExecutionTest {
 		// Invoke
 		assertFalse(execution1.equals(execution2));
 		assertFalse(execution2.equals(execution1));
+	}
+	
+	private static final String EXECUTION_CONFIGURATION_XML =
+		"    <configuration>\n" +
+		"        <sources>\n" +
+		"            <source>src/main/groovy</source>\n" +
+		"        </sources>\n" +
+		"    </configuration>\n";
+	
+	private static final String EXECUTION_XML = 
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+		"<execution>\n" +
+		"    <id>" + ID + "</id>\n" +
+		"    <phase>" + PHASE + "</phase>\n" +
+		"    <goals>\n" +
+		"        <goal>" + GOAL_1 + "</goal>\n" +
+		"        <goal>" + GOAL_2 + "</goal>\n" +
+		"    </goals>\n" +
+		EXECUTION_CONFIGURATION_XML +
+		"</execution>\n";
+	
+	@Test
+	public void testGetElementForMinimalExecution() throws Exception {
+		// Set up
+		final Document document = DOCUMENT_BUILDER.newDocument();
+		final Configuration mockConfiguration = mock(Configuration.class);
+		when(mockConfiguration.getConfiguration()).thenReturn(XmlUtils.stringToElement(EXECUTION_CONFIGURATION_XML));
+		final Execution execution = new Execution(ID, PHASE, mockConfiguration, GOALS);
+		
+		// Invoke
+		final Element element = execution.getElement(document);
+		
+		// Check
+		assertEquals(EXECUTION_XML, XmlUtils.nodeToString(element));
 	}
 }
