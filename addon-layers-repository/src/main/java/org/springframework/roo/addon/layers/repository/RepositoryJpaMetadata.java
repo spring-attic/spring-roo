@@ -6,7 +6,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
@@ -34,14 +33,12 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	 * @param identifier the identifier for this item of metadata (required)
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
-	 * @param governorDetails (required)
-	 * @param javaType 
+	 * @param idType
 	 * @param annotationValues (required)
 	 */
-	public RepositoryJpaMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, JavaType idType, RepositoryJpaAnnotationValues annotationValues) {
+	public RepositoryJpaMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType idType, RepositoryJpaAnnotationValues annotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(governorDetails, "Governor member details required");
 		Assert.notNull(idType, "Id type required");
 		
 		this.annotationValues = annotationValues;
@@ -60,19 +57,19 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 		return annotationValues;
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

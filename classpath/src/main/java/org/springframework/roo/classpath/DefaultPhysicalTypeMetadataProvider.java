@@ -40,8 +40,7 @@ import org.springframework.roo.support.util.Assert;
  * project metadata may implement this interface, the {@link #findIdentifier(JavaType)} will ignore
  * such paths in the current release.
  *
- * Prior to 1.2.0 the default implementation of PhysicalTypeMetadataProvider was JavaParserMetadataProvider via the now
- * obsolete MutablePhysicalTypeMetadataProvider.
+ * Prior to 1.2.0 the default implementation of PhysicalTypeMetadataProvider was JavaParserMetadataProvider.
  *
  * @author Ben Alex
  * @author James Tyrrell

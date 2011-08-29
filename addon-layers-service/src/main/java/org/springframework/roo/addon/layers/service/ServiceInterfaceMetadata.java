@@ -75,6 +75,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 * 
 	 * @param method the method to declare
 	 * @param domainType the domain type being managed
+	 * @param idType
 	 * @param plural the domain type's plural
 	 * @return <code>null</code> if the method isn't required or is already
 	 * declared in the governor
@@ -100,19 +101,19 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		return annotationValues;
 	}
 	
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
