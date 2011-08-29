@@ -28,13 +28,13 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-    private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
-    private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
+	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+	private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
 	private ClassOrInterfaceTypeDetails superclass;
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
-    private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
+	private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
 	
 	/**
 	 * Constructor is package protected to mandate the use of
@@ -58,23 +58,23 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 	 * @param registeredImports
 	 */
     DefaultClassOrInterfaceTypeDetails(CustomData customData,
-			String declaredByMetadataId,
-			int modifier,
-			List<AnnotationMetadata> annotations,
-			JavaType name,
-			PhysicalTypeCategory physicalTypeCategory,
-			List<ConstructorMetadata> declaredConstructors,
-			List<FieldMetadata> declaredFields,
-			List<MethodMetadata> declaredMethods,
-            List<ClassOrInterfaceTypeDetails> declaredInnerTypes,
-            List<InitializerMetadata> declaredInitializers,
-			ClassOrInterfaceTypeDetails superclass,
-			List<JavaType> extendsTypes,
-			List<JavaType> implementsTypes,
-			List<JavaSymbolName> enumConstants,
-            Collection<ImportMetadata> registeredImports)
-    {
-		super(customData, declaredByMetadataId, modifier, annotations);
+		String declaredByMetadataId,
+		int modifier,
+		List<AnnotationMetadata> annotations,
+		JavaType name,
+		PhysicalTypeCategory physicalTypeCategory,
+		List<ConstructorMetadata> declaredConstructors,
+		List<FieldMetadata> declaredFields,
+		List<MethodMetadata> declaredMethods,
+		List<ClassOrInterfaceTypeDetails> declaredInnerTypes,
+		List<InitializerMetadata> declaredInitializers,
+		ClassOrInterfaceTypeDetails superclass,
+		List<JavaType> extendsTypes,
+		List<JavaType> implementsTypes,
+		List<JavaSymbolName> enumConstants,
+		Collection<ImportMetadata> registeredImports) {
+		
+    	super(customData, declaredByMetadataId, modifier, annotations);
 		Assert.notNull(name, "Name required");
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
 
@@ -94,11 +94,11 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 			this.declaredMethods = declaredMethods;
 		}
 
-        if (declaredInnerTypes != null) {
-            this.declaredInnerTypes = declaredInnerTypes;
-        }
+		if (declaredInnerTypes != null) {
+			this.declaredInnerTypes = declaredInnerTypes;
+		}
 
-        if (declaredInitializers != null) {
+		if (declaredInitializers != null) {
 			this.declaredInitializers = declaredInitializers;
 		}
 
@@ -115,9 +115,9 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		}
 
 		this.registeredImports = new HashSet<ImportMetadata>();
-        if (registeredImports != null) {
-            this.registeredImports.addAll(registeredImports);
-        }
+		if (registeredImports != null) {
+			this.registeredImports.addAll(registeredImports);
+		}
 	}
 
 	public PhysicalTypeCategory getPhysicalTypeCategory() {

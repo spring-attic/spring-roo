@@ -242,8 +242,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 	}
 
 	public List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(Path path) {
-
-		// Before processing the call any changes to the project should be processed and the cache updated accordingly
+		// Before processing the call, any changes to the project should be processed and the cache updated accordingly
 		updateCache();
 
 		List<ClassOrInterfaceTypeDetails> projectTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
