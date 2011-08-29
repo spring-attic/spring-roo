@@ -20,15 +20,23 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
         </dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.url.stream.jdk</artifactId>
+		</dependency>
         <!-- External modules -->
         <dependency>
-            <groupId>jline</groupId>
+            <groupId>net.sourceforge.jline</groupId>
             <artifactId>jline</artifactId>
         </dependency>
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
             <artifactId>jansi</artifactId>
         </dependency>
+		<dependency>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
+		</dependency>
     </dependencies>
     <build>
         <plugins>

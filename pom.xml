@@ -292,9 +292,9 @@
                 <version>1.0.2.RELEASE</version>
             </dependency>
             <dependency>
-                <groupId>jline</groupId>
+                <groupId>net.sourceforge.jline</groupId>
                 <artifactId>jline</artifactId>
-                <version>1.0</version>
+                <version>1.0.S2-A</version>
             </dependency>
             <dependency>
                 <groupId>org.fusesource.jansi</groupId>

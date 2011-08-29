@@ -44,7 +44,7 @@
         </dependency>
         <!-- External modules -->
         <dependency>
-            <groupId>jline</groupId>
+            <groupId>net.sourceforge.jline</groupId>
             <artifactId>jline</artifactId>
         </dependency>
         <dependency>
