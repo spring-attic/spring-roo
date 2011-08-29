@@ -35,9 +35,9 @@ public final class RooJavaType {
 	public static final JavaType ROO_SOLR_WEB_SEARCHABLE = new JavaType("org.springframework.roo.addon.solr.RooSolrWebSearchable");
 	public static final JavaType ROO_TO_STRING = new JavaType("org.springframework.roo.addon.tostring.RooToString");
 	public static final JavaType ROO_UPLOADED_FILE = new JavaType("org.springframework.roo.addon.jsf.RooUploadedFile");
+	public static final JavaType ROO_WEB_FINDER = new JavaType("org.springframework.roo.addon.web.mvc.controller.finder.RooWebFinder");
 	public static final JavaType ROO_WEB_JSON = new JavaType("org.springframework.roo.addon.web.mvc.controller.json.RooWebJson");
 	public static final JavaType ROO_WEB_SCAFFOLD = new JavaType("org.springframework.roo.addon.web.mvc.controller.RooWebScaffold");
-	public static final JavaType ROO_WEB_FINDER = new JavaType("org.springframework.roo.addon.web.mvc.controller.finder.RooWebFinder");
 	
 	/**
 	 * Constructor is private to prevent instantiation
