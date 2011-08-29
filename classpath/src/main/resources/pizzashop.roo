@@ -41,18 +41,17 @@ service --interface ~.service.PizzaService --entity ~.domain.Pizza
 service --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
 
 // Offer JSON remoting for all domain types trough Spring MVC
-json all
+json all --deepSerialize
 web mvc json setup
 web mvc json all
-
 
 // Example scripts for JSON remoting:
 // curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name: "Thin Crust"}' http://localhost:8080/pizzashop/bases
 // curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '[{name: "Cheesy Crust"},{name: "Thick Crust"}]' http://localhost:8080/pizzashop/bases/jsonArray
-// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '[{name: "Fresh Tomato"},{name: "Salami"},{name: "Mozarella"}]' http://localhost:8080/pizzashop/toppings/jsonArray
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '[{name: "Fresh Tomato"},{name: "Prawns"},{name: "Mozarella"},{name: "Bogus"}]' http://localhost:8080/pizzashop/toppings/jsonArray
+// curl -i -X DELETE -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/7
+// curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -d '{id:6,name:"Mozzarella",version:1}' http://localhost:8080/pizzashop/toppings
 // curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings
 // curl -i -H "Accept: application/json" http://localhost:8080/pizzashop/toppings/6
-// curl -i -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -d '{id:6,name:"Mozzarella1",version:1}' http://localhost:8080/pizzashop/toppings
-// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name:"Napolitana",price:7.5,base:{id:1}}' http://localhost:8080/pizzashop/pizzas
-// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name:"Stefan",total:7.5,address:"Sydney, AU",deliverydate:"2011-08-21",id:{shopcountry:"AU",shopcity:"Sydney",shopname:"Pizza Pan"}}' http://localhost:8080/pizzashop/pizzaorders
-// curl -i -X DELETE -H "Accept: application/json" http://localhost:8080/pizzashop/pizzaorders/8
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name:"Napolitana",price:7.5,base:{id:1},toppings:[{name: "Anchovy fillets"},{name: "Mozzarella"}]}' http://localhost:8080/pizzashop/pizzas
+// curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name:"Stefan",total:7.5,address:"Sydney, AU",deliveryDate:1314595427866,id:{shopCountry:"AU",shopCity:"Sydney",shopName:"Pizza Pan 1"},pizzas:[{id:8,version:1}]}' http://localhost:8080/pizzashop/pizzaorders
