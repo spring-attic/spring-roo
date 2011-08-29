@@ -135,7 +135,6 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + identifierField.getFieldName().getSymbolName() + "}"));
-		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -191,10 +190,10 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		String formBackingTypeName = jsonEnabledType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(formBackingTypeName + " " + JavaSymbolName.getReservedWordSaveName(jsonEnabledType) + "=  " + formBackingTypeName + "." + fromJsonMethodName.getSymbolName() + "(json);");
+		bodyBuilder.appendFormalLine(formBackingTypeName + " " + JavaSymbolName.getReservedWordSaveName(jsonEnabledType) + " = " + formBackingTypeName + "." + fromJsonMethodName.getSymbolName() + "(json);");
 		bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
-		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
@@ -241,7 +240,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
-		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
@@ -318,7 +317,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		String beanShortName = jsonEnabledType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String beanSymbolName = JavaSymbolName.getReservedWordSaveName(jsonEnabledType).getSymbolName();
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
-		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine(beanShortName + " " + beanSymbolName + " = " + beanShortName + "." + fromJsonMethodName.getSymbolName() + "(json);");
 		bodyBuilder.appendFormalLine("if (" + mergeMethod.getMethodCall() + " == null) {");
@@ -367,7 +366,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(jsonEnabledType);
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
-		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("for (" + beanName + " " + entityName + ": " + beanName + "." + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
 		bodyBuilder.indent();
@@ -420,7 +419,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortNameField + " = " + findMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
-		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
+		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("if (" + beanShortNameField + " == null) {");
 		bodyBuilder.indent();
@@ -487,7 +486,6 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "find=" + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + plural, "")));
-		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
