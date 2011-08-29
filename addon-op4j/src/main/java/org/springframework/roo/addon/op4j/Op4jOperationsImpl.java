@@ -14,7 +14,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.ProjectOperations;
@@ -31,7 +30,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class Op4jOperationsImpl implements Op4jOperations{
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManipulationService;

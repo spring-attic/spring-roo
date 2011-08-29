@@ -26,7 +26,6 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -52,7 +51,6 @@ import org.w3c.dom.Element;
 @Service 
 public class JmsOperationsImpl implements JmsOperations {
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private TypeManagementService typeManipulationService;

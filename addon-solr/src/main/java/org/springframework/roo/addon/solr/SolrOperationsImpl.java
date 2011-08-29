@@ -20,7 +20,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -44,7 +43,6 @@ import org.w3c.dom.Element;
 public class SolrOperationsImpl implements SolrOperations {
 	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.1");
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManipulationService;
