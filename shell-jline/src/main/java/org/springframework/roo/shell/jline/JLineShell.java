@@ -110,6 +110,11 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 
 		logger.info("Welcome to Spring Roo. For assistance press " + completionKeys + " or type \"hint\" then hit ENTER.");
 
+		String startupNotifications = getStartupNotifications();
+		if (StringUtils.hasText(startupNotifications)) {
+			System.out.println(startupNotifications);
+		}
+
 		setShellStatus(Status.STARTED);
 
 		// Monitor CTRL+C initiated shutdowns (ROO-1599)
@@ -135,6 +140,10 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			// Normal RPEL processing
 			promptLoop();
 		}
+	}
+
+	public String getStartupNotifications() {
+		return null;
 	}
 
 	private void removeHandlers(Logger l) {
