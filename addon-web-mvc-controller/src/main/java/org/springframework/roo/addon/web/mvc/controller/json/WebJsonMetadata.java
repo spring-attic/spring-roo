@@ -416,12 +416,13 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		annotations.add(requestMapping);
 
 		String beanShortName = jsonEnabledType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String beanShortNameField = StringUtils.uncapitalize(beanShortName);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + findMethod.getMethodCall() + ";");
+		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortNameField + " = " + findMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers= new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
-		bodyBuilder.appendFormalLine("if (" + beanShortName.toLowerCase() + " == null) {");
+		bodyBuilder.appendFormalLine("if (" + beanShortNameField + " == null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return new " + getShortName(RESPONSE_ENTITY) + "<String>(headers, " + getShortName(HTTP_STATUS) + ".NOT_FOUND);");
 		bodyBuilder.indentRemove();
