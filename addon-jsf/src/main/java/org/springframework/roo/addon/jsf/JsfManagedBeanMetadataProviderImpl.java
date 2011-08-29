@@ -5,19 +5,24 @@ import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -62,6 +67,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	// Fields
 	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private TypeLocationService typeLocationService;
 	private Map<JavaType, String> entityToManagedBeandMidMap = new LinkedHashMap<JavaType, String>();
 	private Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
@@ -121,8 +127,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 		Map<String, MemberTypeAdditions> crudAdditions = getCrudAdditions(entityType, memberDetails, metadataIdentificationString);
 		Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataIdentificationString);
+		Set<FieldMetadata> enumTypes = getEnumTypes(locatedFieldsAndAccessors);
 
-		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, crudAdditions, locatedFieldsAndAccessors);
+		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes);
 	}
 
 	@SuppressWarnings("unchecked") 
@@ -195,6 +202,17 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			locatedFieldsAndAccessors.put(field, method);
 		}
 		return locatedFieldsAndAccessors;
+	}
+	
+	private Set<FieldMetadata> getEnumTypes(Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors) {
+		Set<FieldMetadata> enumTypes = new HashSet<FieldMetadata>();
+		for (FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
+			ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
+			if (cid != null && cid.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+				enumTypes.add(field);
+			}
+		}
+		return enumTypes;
 	}
 
 	private boolean isPersistenceIdentifierOrVersionMethod(MethodMetadata method, MethodMetadata idMethod, MethodMetadata versionMethod) {
