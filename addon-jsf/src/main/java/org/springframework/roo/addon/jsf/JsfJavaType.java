@@ -18,6 +18,7 @@ public class JsfJavaType {
 	
 	// PrimeFaces and JSF 2.0 types
 	public static final JavaType CONVERTER = new JavaType("javax.faces.convert.Converter");
+	public static final JavaType DATE_TIME_CONVERTER =  new JavaType("javax.faces.convert.DateTimeConverter");
 	public static final JavaType EL_CONTEXT = new JavaType("javax.el.ELContext");
 	public static final JavaType EXPRESSION_FACTORY = new JavaType("javax.el.ExpressionFactory");
 	public static final JavaType FACES_CONTEXT = new JavaType("javax.faces.context.FacesContext");
@@ -25,6 +26,7 @@ public class JsfJavaType {
 	public static final JavaType HTML_OUTPUT_TEXT = new JavaType("javax.faces.component.html.HtmlOutputText");
 	public static final JavaType HTML_PANEL_GRID = new JavaType("javax.faces.component.html.HtmlPanelGrid");
 	public static final JavaType MANAGED_BEAN = new JavaType("javax.faces.bean.ManagedBean");
+	public static final JavaType PRIMEFACES_AUTO_COMPLETE = new JavaType("org.primefaces.component.autocomplete.AutoComplete");
 	public static final JavaType PRIMEFACES_CALENDAR = new JavaType("org.primefaces.component.calendar.Calendar");
 	public static final JavaType PRIMEFACES_CLOSE_EVENT = new JavaType("org.primefaces.event.CloseEvent");
 	public static final JavaType PRIMEFACES_DEFAULT_MENU_MODEL = new JavaType("org.primefaces.model.DefaultMenuModel");

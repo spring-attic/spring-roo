@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
 import static org.springframework.roo.addon.jsf.JsfJavaType.CONVERTER;
+import static org.springframework.roo.addon.jsf.JsfJavaType.DATE_TIME_CONVERTER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_CREATE_DIALOG;
 import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_LIST;
 import static org.springframework.roo.addon.jsf.JsfJavaType.EL_CONTEXT;
@@ -15,6 +16,7 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLO
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD_EVENT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_UPLOADED_FILE;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_AUTO_COMPLETE;;
 import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.UI_COMPONENT;
@@ -152,7 +154,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getPanelGridMutatorMethod(Action.EDIT));
 		builder.addMethod(getPanelGridAccessorMethod(Action.VIEW));
 		builder.addMethod(getPanelGridMutatorMethod(Action.VIEW));
-		builder.addMethod(getPopulatePanelMethod(Action.CREATE)); // Handles Action.EDIT as well
+		builder.addMethod(getPopulatePanelMethod(Action.CREATE));
+		builder.addMethod(getPopulatePanelMethod(Action.EDIT)); 
 		builder.addMethod(getPopulatePanelMethod(Action.VIEW)); 
 	
 		for (FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
@@ -406,10 +409,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.indent();
 		switch (action) {
 			case CREATE:
-			case EDIT:
-				bodyBuilder.appendFormalLine(fieldName + " = populatePanel();");
+				bodyBuilder.appendFormalLine(fieldName + " = populateCreatePanel();");
 				break;
-			case VIEW:
+			case EDIT:
+				bodyBuilder.appendFormalLine(fieldName + " = populateEditPanel();");
+				break;
+			default:
 				bodyBuilder.appendFormalLine(fieldName + " = populateViewPanel();");
 				break;
 		}
@@ -443,12 +448,28 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 	
 	private MethodMetadata getPopulatePanelMethod(Action action) {
-		JavaSymbolName methodName = new JavaSymbolName(action == Action.VIEW ? "populateViewPanel" : "populatePanel");
+		JavaSymbolName methodName;
+		String fieldSuffix1;
+		String fieldSuffix2;
+		switch (action) {
+			case CREATE:
+				fieldSuffix1 = "CreateOutput";
+				fieldSuffix2 = "CreateInput";
+				methodName = new JavaSymbolName("populateCreatePanel");
+				break;
+			case EDIT:
+				fieldSuffix1 = "EditOutput";
+				fieldSuffix2 = "EditInput";
+				methodName = new JavaSymbolName("populateEditPanel");
+				break;
+			default:
+				fieldSuffix1 = "Label";
+				fieldSuffix2 = "Value";
+				methodName = new JavaSymbolName("populateViewPanel");
+				break;
+		}
 		MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
-
-		String fieldSuffix1 = action == Action.VIEW ? "Label" : "Output";
-		String fieldSuffix2 = action == Action.VIEW ? "Value" : "Input";
 		
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(EL_CONTEXT);
@@ -479,18 +500,30 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			bodyBuilder.appendFormalLine(fieldLabelVar + ".setValue(\"" + fieldName + "\");");
 			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldLabelVar + ");");
 			bodyBuilder.appendFormalLine("");
+			
 			if (isRooUploadFileField(field)) {
 				imports.addImport(PRIMEFACES_FILE_UPLOAD);
 				imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 				imports.addImport(PRIMEFACES_UPLOADED_FILE);
+				JavaSymbolName fileUploadMethodName = getFileUploadMethodName(field.getFieldName());
 				bodyBuilder.appendFormalLine("FileUpload " + fieldValueVar + " = " + getComponentCreationStr("FileUpload"));
-				bodyBuilder.appendFormalLine(fieldValueVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean." + fieldName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
+				bodyBuilder.appendFormalLine(fieldValueVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 				bodyBuilder.appendFormalLine(fieldValueVar + ".setMode(\"advanced\");");
 				bodyBuilder.appendFormalLine(fieldValueVar + ".setUpdate(\"messages\");");
+			} else if (isEnum(fieldType)) {
+				imports.addImport(PRIMEFACES_AUTO_COMPLETE);
+//				bodyBuilder.appendFormalLine("AutoComplete " + fieldValueVar + " = " + getComponentCreationStr("AutoComplete"));
+//				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, Enum.class));
+//				bodyBuilder.appendFormalLine(fieldValueVar + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean.enumComplete" + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
+
 			} else if (isDateField(fieldType)) {
 				if (action == Action.VIEW) {
+					imports.addImport(DATE_TIME_CONVERTER);
 					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
 					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, String.class));
+					bodyBuilder.appendFormalLine("DateTimeConverter converter = new DateTimeConverter();");
+					bodyBuilder.appendFormalLine("converter.setPattern(\"dd/MM/yyyy\");");
+					bodyBuilder.appendFormalLine(fieldValueVar + ".setConverter(converter);");
 				} else {
 					imports.addImport(PRIMEFACES_CALENDAR);
 					imports.addImport(new JavaType("java.util.Date"));
@@ -519,9 +552,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
-
+	
+	private boolean isEnum(JavaType fieldType) {
+		try {
+			return Class.forName(fieldType.getFullyQualifiedTypeName()).isEnum();
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	
 	private MethodMetadata getFileUploadListenerMethod(FieldMetadata rooUploadedFileField) {
-		JavaSymbolName methodName = new JavaSymbolName("handleFileUploadFor" + StringUtils.capitalize(rooUploadedFileField.getFieldName().getSymbolName()));
+		JavaSymbolName methodName = getFileUploadMethodName(rooUploadedFileField.getFieldName());
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		parameterTypes.add(PRIMEFACES_FILE_UPLOAD_EVENT);
 		MethodMetadata method = methodExists(methodName, parameterTypes);
@@ -687,6 +728,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return "selected" + entityType.getSimpleTypeName();
 	}
 	
+	private JavaSymbolName getFileUploadMethodName(JavaSymbolName fieldName) {
+		return new JavaSymbolName("handleFileUploadFor" + StringUtils.capitalize(fieldName.getSymbolName()));
+	}
+
 	private FieldMetadata getBooleanField(JavaSymbolName fieldName) {
 		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (field != null) return field;

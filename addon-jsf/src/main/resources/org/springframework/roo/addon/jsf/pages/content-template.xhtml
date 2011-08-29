@@ -26,7 +26,7 @@
                         <f:facet name="header">
                             <h:outputText value="Actions" />
                         </f:facet>
-                        <p:commandButton id="viewButton" image="view" update="__LC_DOMAIN_TYPE__Details" oncomplete="viewDlg.show()" title="#{messages.label_view}" styleClass="action-icon">
+                        <p:commandButton id="viewButton" image="view" update="createForm" oncomplete="viewDlg.show()" title="#{messages.label_view}" styleClass="action-icon">
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__LC_DOMAIN_TYPE__Bean.selected__DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="viewButton" value="#{messages.label_view}" showEffect="fade" hideEffect="fade" />
@@ -60,7 +60,7 @@
             <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="viewForm" enctype="multipart/form-data">
                 <h:panelGrid id="viewPanelGrid" columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.viewPanelGrid}" />
-                <p:commandButton value="Close" onclick="viewDlg.hide()" styleClass="form_button" update="list messages" />
+                <p:commandButton value="Close" onclick="viewDlg.hide()" styleClass="form_button" update="messages" />
             </h:form>
         </p:dialog>
         <p:confirmDialog id="deleteDialog" widgetVar="deleteDlg" message="Are you sure you want to delete this record?" showEffect="fade" hideEffect="explode" header="Confirm Deletion" severity="alarm">

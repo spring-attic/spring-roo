@@ -8,7 +8,7 @@
 <ui:composition>
   <div id="footer" class="wrapper">
     <h:form style="display:inline">
-      <h:panelGrid columns="4">
+      <h:panelGrid columns="3">
         <h:outputLink value="../pages/main.jsf">Home</h:outputLink>
         <h:panelGrid columns="4">
           <h:outputText value="| Language:" />
@@ -25,7 +25,6 @@
             <h:graphicImage value="/images/es.png" alt="Switch language to Espanol" styleClass="flag" />
           </h:commandLink>
         </h:panelGrid>
-        <p:themeSwitcher initialText="Change Theme" buttonPreText="Theme: " />
         <h:panelGrid align="right">
           <h:outputLink value="http://springsource.com">
             <h:graphicImage value="/images/springsource-logo.png" />
