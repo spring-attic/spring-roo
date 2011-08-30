@@ -33,6 +33,7 @@ import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
+import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.OsUtils;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -101,6 +102,18 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		// reader.setDebug(new PrintWriter(new FileWriter("writer.debug", true)));
 
 		openFileLogIfPossible();
+
+		// Try to build previous command history from the project's log
+		try {
+			String logFileContents = FileCopyUtils.copyToString(new File("log.roo"));
+			String[] logEntries = logFileContents.split(System.getProperty("line.separator"));
+			//LIFO
+			for (String logEntry : logEntries) {
+				if (!logEntry.startsWith("//")) {
+					reader.getHistory().addToHistory(logEntry);
+				}
+			}
+		} catch (IOException ignored) {}
 
 		flashMessageRenderer();
 
