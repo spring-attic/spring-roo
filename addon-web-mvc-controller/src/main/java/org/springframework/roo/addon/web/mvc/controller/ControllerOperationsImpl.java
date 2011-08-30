@@ -110,27 +110,43 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		JavaSymbolName pathName = new JavaSymbolName("path");
 		JavaSymbolName value = new JavaSymbolName("value");
 		
+		ClassOrInterfaceTypeDetails existing = null;
 		// Check if a controller mapping for this path exists already
 		for (ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(REQUEST_MAPPING)) {
 			StringAttributeValue mappingAttribute = (StringAttributeValue) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), REQUEST_MAPPING).getAttribute(value);
 			if (mappingAttribute != null) {
 				String stringPath = mappingAttribute.getValue();
 				if (StringUtils.hasText(stringPath) && stringPath.equalsIgnoreCase("/" + path)) {
-					LOG.warning("Your application already contains a mapping to '" + path + "'. Please provide a different path.");
-					return;
+					existing = coitd;
+					LOG.info("Found existing controller for mapping '/" + path + "', applying @RooWebScaffold annotation to this type");
 				}
 			}
 		}
 		
 		webMvcOperations.installConversionService(controller.getPackage());
 		
-		String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
-		if (fileManager.exists(resourceIdentifier)) {
-			return; // Type exists already - nothing to do
+		List<AnnotationMetadataBuilder> annotations = null;
+		
+		
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
+		if (existing == null) {
+			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(existing == null ? controller : existing.getName(), Path.SRC_MAIN_JAVA);
+			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
+			
+			// Create annotation @RequestMapping("/myobject/**")
+			List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + path));
+			annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes));
+			
+			// Create annotation @Controller
+			List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			annotations.add(new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes));
+			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
+		} else {
+			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
+			annotations = typeDetailsBuilder.getAnnotations();
 		}
-		
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		
 		// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
 		List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		rooWebScaffoldAttributes.add(new StringAttributeValue(pathName, path));
@@ -139,18 +155,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));
 		}
 		annotations.add(new AnnotationMetadataBuilder(ROO_WEB_SCAFFOLD, rooWebScaffoldAttributes));
-		
-		// Create annotation @RequestMapping("/myobject/**")
-		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + path));
-		annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes));
-		
-		// Create annotation @Controller
-		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		annotations.add(new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes));
-		
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());

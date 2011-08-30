@@ -30,6 +30,7 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * Provides operations to create various view layer resources.
@@ -178,21 +179,17 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		// Verify the middle tier application context already exists
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
-		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
-		if (fileManager.exists(webConfigFile)) {
-			// This file already exists, nothing to do
-			return;
-		}
-
 		Document document;
-		try {
+		
+		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		if (!fileManager.exists(webConfigFile)) {
 			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
 			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
 			document = XmlUtils.readXml(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+		} else {
+			document = XmlUtils.readXml(fileManager.getInputStream(webConfigFile));
 		}
-
+		
 		Element root = (Element) document.getFirstChild();
 		XmlUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
 		
@@ -200,6 +197,26 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void updateConfiguration() {
+		// Update webmvc-config.xml if needed.
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		Assert.isTrue(fileManager.exists(webConfigFile), "Aborting: Unable to find " + webConfigFile);
+		InputStream webMvcConfigInputStream = fileManager.getInputStream(webConfigFile);
+		Assert.notNull(webMvcConfigInputStream, "Aborting: Unable to acquire webmvc-config.xml file");
+		Document webMvcConfig = XmlUtils.readXml(webMvcConfigInputStream);
+		if (webMvcConfig.getChildNodes().getLength() < 5) {
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config-additions.xml");
+			Assert.notNull(templateInputStream, "Could not acquire webmvc-config-additions.xml template");
+			Document webMvcConfigAdditions = XmlUtils.readXml(templateInputStream);
+			Element root = webMvcConfig.getDocumentElement();
+			NodeList nodes = webMvcConfigAdditions.getDocumentElement().getChildNodes();
+			for(int i = 0; i < nodes.getLength(); i++) {
+				root.appendChild(webMvcConfig.importNode(nodes.item(i), true));
+			}
+		}
+		fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(webMvcConfig), true);
+		
+		// Add MVC dependencies.
 		boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
