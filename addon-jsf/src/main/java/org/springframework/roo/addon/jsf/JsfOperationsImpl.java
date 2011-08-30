@@ -58,7 +58,11 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JsfOperationsImpl extends AbstractOperations implements JsfOperations {
+	
+	// Constants
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
+	
+	// Fields
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
@@ -84,6 +88,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		copyDirectoryContents("index.html", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/"), false);
+		copyDirectoryContents("viewExpired.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/"), false);
 		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"), false);
 		copyDirectoryContents("css/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/css"), false);
 		copyDirectoryContents("js/*.js", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/js"), false);
@@ -111,6 +116,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		installI18n(managedBean.getPackage());
 		installBean("ApplicationBean-template.java", managedBean.getPackage(), "ApplicationBean");
 		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
+		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", managedBean.getPackage(), "ViewExpiredExceptionExceptionHandlerFactory");
+		installBean("ViewExpiredExceptionExceptionHandler-template.java", managedBean.getPackage(), "ViewExpiredExceptionExceptionHandler");
 
 		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
@@ -136,7 +143,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
-		
+
 		copyEntityTypePage(entity, pluralMetadata.getPlural());
 	}
 

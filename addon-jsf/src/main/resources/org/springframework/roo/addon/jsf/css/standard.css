@@ -16,12 +16,12 @@ a img {
 }
 
 .wrapper {
-    width: 800px;
-    min-width: 800px;
-    max-width: 800px;
+    width: 1024px;
+    min-width: 1024px;
+    max-width: 1024px;
     margin-right: auto;
     margin-left: auto; /* fix max-width incompatibility in IE6 */
-    width: expression(document.body.clientWidth >  800 ? "800px" : "auto");
+    width: expression(document.body.clientWidth >  1024 ? "1024px" : "auto");
     overflow: hidden;
     display: block;
 }
@@ -29,18 +29,22 @@ a img {
 .menu {
     width: 200px;
     vertical-align: top;
-    text-align: left;
+    text-align: center;
+     margin-right: 5px;
 }
+
+
 
 .listrow td {
     height: 15px !important;
 }
 
 .content {
-    width: 600px;
+    width: 800px;
     height: auto;
     vertical-align: top;
     text-align: left;
+   
 }
 
 .form_textarea  {

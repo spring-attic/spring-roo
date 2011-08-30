@@ -118,7 +118,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			valid = false;
 			return;
 		}
-
 		Set<FieldMetadata> rooUploadedFileFields = getRooUploadedFileFields();
 		List<MethodMetadata> converterMethods = getConverterMethods();
 
