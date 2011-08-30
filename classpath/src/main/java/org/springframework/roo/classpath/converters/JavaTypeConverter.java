@@ -200,8 +200,14 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		}
 
 		PathResolver pathResolver = projectMetadata.getPathResolver();
+
+		// Pass 1: If a '.' suffixes the value then sub-folders will be picked up explicitly
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator) + "*";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
+
+		// Pass 2: Add a separator to the end of the value to pick up sub-folders
+		antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator) + File.separator + "*";
+		entries.addAll(fileManager.findMatchingAntPath(antPath));
 
 		for (FileDetails fileIdentifier : entries) {
 			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath()).substring(1); // drop the leading "/"
