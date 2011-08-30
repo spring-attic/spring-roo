@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.layers.repository;
+package org.springframework.roo.addon.layers.repository.jpa;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.roo.addon.layers.repository.jpa.RepositoryJpaLayerMethod;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.StringUtils;

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.layers.repository;
+package org.springframework.roo.addon.layers.repository.jpa;
 
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;

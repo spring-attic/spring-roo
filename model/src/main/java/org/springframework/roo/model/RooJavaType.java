@@ -28,7 +28,7 @@ public final class RooJavaType {
 	public static final JavaType ROO_JSON = new JavaType("org.springframework.roo.addon.json.RooJson");
 	public static final JavaType ROO_OP4J = new JavaType("org.springframework.roo.addon.op4j.RooOp4j");
 	public static final JavaType ROO_PLURAL = new JavaType("org.springframework.roo.addon.plural.RooPlural");
-	public static final JavaType ROO_REPOSITORY_JPA = new JavaType("org.springframework.roo.addon.layers.repository.RooRepositoryJpa");
+	public static final JavaType ROO_REPOSITORY_JPA = new JavaType("org.springframework.roo.addon.layers.repository.jpa.RooRepositoryJpa");
 	public static final JavaType ROO_SERIALIZABLE = new JavaType("org.springframework.roo.addon.serializable.RooSerializable");
 	public static final JavaType ROO_SERVICE = new JavaType("org.springframework.roo.addon.layers.service.RooService");
 	public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType("org.springframework.roo.addon.solr.RooSolrSearchable");

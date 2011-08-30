@@ -7,7 +7,7 @@
 		<version>1.2.0.BUILD-SNAPSHOT</version>
 		<relativePath>../osgi-roo-bundle</relativePath>
 	</parent>
-	<artifactId>org.springframework.roo.addon.layers.repository</artifactId>
+	<artifactId>org.springframework.roo.addon.layers.repository.jpa</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - JPA Repository Layer</name>
 	<description>Support for common layering options in Java Enterprise Applications</description>

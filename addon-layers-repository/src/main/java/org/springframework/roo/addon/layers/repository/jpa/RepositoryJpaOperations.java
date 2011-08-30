@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.layers.repository;
+package org.springframework.roo.addon.layers.repository.jpa;
 
 import org.springframework.roo.model.JavaType;
 

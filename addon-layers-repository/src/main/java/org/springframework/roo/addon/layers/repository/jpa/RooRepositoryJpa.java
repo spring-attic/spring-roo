@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.layers.repository;
+package org.springframework.roo.addon.layers.repository.jpa;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
