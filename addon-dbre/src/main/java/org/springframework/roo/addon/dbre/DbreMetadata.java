@@ -652,7 +652,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Add length attribute for Strings
-		if (column.getColumnSize() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {
+		if (column.getColumnSize() < 4000 && fieldType.equals(JavaType.STRING)) {
 			columnBuilder.addIntegerAttribute("length", column.getColumnSize());
 		}
 

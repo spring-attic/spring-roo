@@ -52,7 +52,7 @@ public class MailOperationsImpl implements MailOperations {
 	
 	// Constants
 	private static final int PRIVATE_TRANSIENT = Modifier.PRIVATE | Modifier.TRANSIENT;
-	private static final AnnotatedJavaType STRING = new AnnotatedJavaType(JavaType.STRING_OBJECT);
+	private static final AnnotatedJavaType STRING = new AnnotatedJavaType(JavaType.STRING);
 	private static final String LOCAL_MESSAGE_VARIABLE = "mailMessage";
 	private static final String SPRING_TASK_NS = "http://www.springframework.org/schema/task";
 	private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.0.xsd";

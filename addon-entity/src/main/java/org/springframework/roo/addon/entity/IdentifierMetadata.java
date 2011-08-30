@@ -200,7 +200,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		columnBuilder.addBooleanAttribute("nullable", false);
 
 		// Add length attribute for Strings
-		if (identifier.getColumnSize() < 4000 && identifier.getFieldType().equals(JavaType.STRING_OBJECT)) {
+		if (identifier.getColumnSize() < 4000 && identifier.getFieldType().equals(JavaType.STRING)) {
 			columnBuilder.addIntegerAttribute("length", identifier.getColumnSize());
 		}
 

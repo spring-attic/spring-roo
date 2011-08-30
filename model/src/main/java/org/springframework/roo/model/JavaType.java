@@ -35,6 +35,8 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character");
+	public static final JavaType STRING = new JavaType("java.lang.String");	// less verbose and just as informative
+	@Deprecated
 	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String");
 	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte");
 	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
@@ -53,7 +55,7 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
-
+	
 	// Used for wildcard type parameters; it must be one or the other
 	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>

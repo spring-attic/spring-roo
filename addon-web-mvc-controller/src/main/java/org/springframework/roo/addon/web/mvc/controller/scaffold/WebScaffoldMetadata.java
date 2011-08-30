@@ -269,7 +269,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"size\", (size == null) ? \"10\" : size.toString());");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -336,7 +336,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -380,7 +380,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"itemId\", " + (compositePk ? "conversionService.convert(" : "") + "id" + (compositePk ? ", String.class)" : "") + ");");
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -430,7 +430,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." + javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -481,7 +481,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/create\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -531,7 +531,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine(updateMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." +  javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -572,7 +572,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/update\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -620,7 +620,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		JavaSymbolName encodeUrlPathSegment = new JavaSymbolName("encodeUrlPathSegment");
 		
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
 		
 		MethodMetadata encodeUrlPathSegmentMethod = methodExists(encodeUrlPathSegment);
@@ -645,7 +645,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("catch (" + new JavaType("java.io.UnsupportedEncodingException").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " uee) {}");
 		bodyBuilder.appendFormalLine("return pathSegment;");
 		
-		return new MethodMetadataBuilder(getId(), 0, encodeUrlPathSegment, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), 0, encodeUrlPathSegment, JavaType.STRING, paramTypes, paramNames, bodyBuilder).build();
 	}
 	
 	private MethodMetadata getDateTimeFormatHelperMethod() {

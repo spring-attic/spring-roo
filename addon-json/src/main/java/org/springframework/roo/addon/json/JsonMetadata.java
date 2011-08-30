@@ -144,7 +144,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
+		parameters.add(new AnnotatedJavaType(JavaType.STRING));
 
 		// See if the type itself declared the method
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
@@ -189,7 +189,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
+		parameters.add(new AnnotatedJavaType(JavaType.STRING));
 
 		// See if the type itself declared the method
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));

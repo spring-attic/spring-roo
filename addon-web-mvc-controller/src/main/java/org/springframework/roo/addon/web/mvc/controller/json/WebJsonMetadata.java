@@ -59,7 +59,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	
 	// Constants
-	private static final JavaType RESPONSE_ENTITY_STRING = new JavaType(RESPONSE_ENTITY.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING_OBJECT));
+	private static final JavaType RESPONSE_ENTITY_STRING = new JavaType(RESPONSE_ENTITY.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(JavaType.STRING));
 	private static final String PROVIDES_TYPE_STRING = WebJsonMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
@@ -176,7 +176,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		JavaSymbolName fromJsonMethodName = jsonMetadata.getFromJsonMethodName();
 		
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));
@@ -216,7 +216,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		JavaSymbolName fromJsonArrayMethodName = jsonMetadata.getFromJsonArrayMethodName();
 		
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));
@@ -301,7 +301,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
 		
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));
@@ -347,7 +347,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
 		
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING_OBJECT, requestBodyAnnotation.build()));
+		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));

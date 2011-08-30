@@ -257,7 +257,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getSimpleSearchMethod() {
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(JavaType.STRING_OBJECT);
+		paramTypes.add(JavaType.STRING);
 
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSimpleSearchMethod());
 		MethodMetadata searchMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);

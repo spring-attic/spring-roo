@@ -79,7 +79,7 @@ class GwtProxyProperty {
 	}
 
 	public boolean isString() {
-		return type.equals(JavaType.STRING_OBJECT);
+		return type.equals(JavaType.STRING);
 	}
 
 	public String getBinder() {

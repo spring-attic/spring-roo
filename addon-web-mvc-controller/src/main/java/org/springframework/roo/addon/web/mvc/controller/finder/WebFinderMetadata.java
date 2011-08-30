@@ -169,7 +169,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderFormMethodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderFormMethodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -240,7 +240,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING_OBJECT, annotatedParamTypes, newParamNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING, annotatedParamTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}

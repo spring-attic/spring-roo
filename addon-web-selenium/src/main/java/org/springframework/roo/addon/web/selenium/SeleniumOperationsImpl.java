@@ -274,7 +274,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		JavaType fieldType = field.getFieldType();
 		if (field.getFieldName().getSymbolName().contains("email") || field.getFieldName().getSymbolName().contains("Email")) {
 			initializer = "some@email.com";
-		} else if (fieldType.equals(JavaType.STRING_OBJECT)) {
+		} else if (fieldType.equals(JavaType.STRING)) {
 			initializer = "some" + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + index;
 		} else if (fieldType.equals(new JavaType(Date.class.getName())) || fieldType.equals(new JavaType(Calendar.class.getName()))) {
 			Calendar cal = Calendar.getInstance();

@@ -14,7 +14,7 @@ public abstract class SolrUtils {
 	public static String getSolrDynamicFieldPostFix(JavaType type) {
 		if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.INT_PRIMITIVE)) {
 			return "_i";
-		} else if (type.equals(JavaType.STRING_OBJECT)) {
+		} else if (type.equals(JavaType.STRING)) {
 			return "_s";
 		} else if (type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.LONG_PRIMITIVE)) {
 			return "_l";

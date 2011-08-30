@@ -303,7 +303,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			}
 			
 			// Add length attribute for String field
-			if (identifier != null && identifier.getColumnSize() > 0 && identifier.getColumnSize() < 4000 && identifierType.equals(JavaType.STRING_OBJECT)) {
+			if (identifier != null && identifier.getColumnSize() > 0 && identifier.getColumnSize() < 4000 && identifierType.equals(JavaType.STRING)) {
 				columnBuilder.addIntegerAttribute("length", identifier.getColumnSize());
 			}
 			
@@ -391,7 +391,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 */
 	private JavaType getIdentifierType() {
 		if (project.isDatabaseDotComEnabled()) {
-			return JavaType.STRING_OBJECT;
+			return JavaType.STRING;
 		}
 		if (annotationValues.getIdentifierType() != null) {
 			return annotationValues.getIdentifierType();

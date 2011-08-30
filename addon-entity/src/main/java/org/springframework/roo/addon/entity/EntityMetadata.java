@@ -530,7 +530,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder = new InvocableMemberBodyBuilder();
 		
-		if (JavaType.STRING_OBJECT.equals(identifierField.getFieldType())) {
+		if (JavaType.STRING.equals(identifierField.getFieldType())) {
 			bodyBuilder.appendFormalLine("if (" + idFieldName + " == null || " + idFieldName + ".length() == 0) return null;");
 		} else if (!identifierField.getFieldType().isPrimitive()) {
 			bodyBuilder.appendFormalLine("if (" + idFieldName + " == null) return null;");

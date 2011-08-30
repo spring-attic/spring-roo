@@ -88,7 +88,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			}
 			
 			// Only allow conversion if ID type is not String already.
-			if (!idTypes.get(type).equals(JavaType.STRING_OBJECT)) {
+			if (!idTypes.get(type).equals(JavaType.STRING)) {
 				JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + type.getSimpleTypeName() + "Converter");
 				MethodMetadata stringToTypeMethod = getStringToTypeConverterMethod(type, stringToTypeMethodName, idTypes.get(type));
 				if (stringToTypeMethod != null) {
@@ -135,7 +135,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		String typeName = targetType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) == null) {
-			final JavaType converterJavaType = SpringJavaType.getConverterType(JavaType.STRING_OBJECT, targetType);
+			final JavaType converterJavaType = SpringJavaType.getConverterType(JavaType.STRING, targetType);
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 			bodyBuilder.indent();
@@ -153,7 +153,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		
 		methodName = new JavaSymbolName("get" + targetType.getSimpleTypeName() + "ToJsonConverter");
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) == null) {
-			final JavaType converterJavaType = SpringJavaType.getConverterType(targetType, JavaType.STRING_OBJECT);
+			final JavaType converterJavaType = SpringJavaType.getConverterType(targetType, JavaType.STRING);
 			String targetTypeName = StringUtils.uncapitalize(targetType.getSimpleTypeName());
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
@@ -176,7 +176,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) != null) {
 			return null;
 		}
-		final JavaType converterJavaType = SpringJavaType.getConverterType(targetType, JavaType.STRING_OBJECT);
+		final JavaType converterJavaType = SpringJavaType.getConverterType(targetType, JavaType.STRING);
 		String targetTypeName = StringUtils.uncapitalize(targetType.getSimpleTypeName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
@@ -216,7 +216,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 		Assert.notNull(targetType, "Target type is required for method = " + methodName);
 		Assert.notNull(idType, "ID type is required for " + targetType);
-		final JavaType converterJavaType = SpringJavaType.getConverterType(JavaType.STRING_OBJECT, targetType);
+		final JavaType converterJavaType = SpringJavaType.getConverterType(JavaType.STRING, targetType);
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();

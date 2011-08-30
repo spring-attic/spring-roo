@@ -83,7 +83,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	private MethodMetadata getGetAsTextMethod(JavaType javaType, MethodMetadata identifierAccessorMethod) {
-		JavaType returnType = JavaType.STRING_OBJECT;
+		JavaType returnType = JavaType.STRING;
 		JavaSymbolName methodName = new JavaSymbolName("getAsText");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -110,7 +110,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private MethodMetadata getSetAsTextMethod(JavaType javaType, JavaType idType, MethodMetadata findMethod) {
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("text"));

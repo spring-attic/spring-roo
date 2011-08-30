@@ -299,7 +299,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		indexMethodAnnotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, new ArrayList<AnnotationAttributeValue<?>>()));
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return \"" + folderName + "/index\";");
-		MethodMetadataBuilder indexMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("index"), JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder indexMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("index"), JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		indexMethodBuilder.setAnnotations(indexMethodAnnotations);
 		return indexMethodBuilder;
 	}

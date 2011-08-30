@@ -476,7 +476,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			|| JavaType.LONG_OBJECT.equals(type) 
 			|| JavaType.FLOAT_OBJECT.equals(type) 
 			|| JavaType.DOUBLE_OBJECT.equals(type) 
-			|| JavaType.STRING_OBJECT.equals(type) 
+			|| JavaType.STRING.equals(type) 
 			|| new JavaType("java.util.Date").equals(type) 
 			|| new JavaType("java.math.BigDecimal").equals(type) 
 			|| type.isPrimitive() 

@@ -48,7 +48,7 @@ public class Column {
 			case Types.CHAR:
 				if (columnSize > 1) {
 					jdbcType = "VARCHAR";
-					javaType = JavaType.STRING_OBJECT;
+					javaType = JavaType.STRING;
 				} else {
 					jdbcType = "CHAR";
 					javaType = JavaType.CHAR_OBJECT;
@@ -56,11 +56,11 @@ public class Column {
 				break;
 			case Types.VARCHAR:
 				jdbcType = "VARCHAR";
-				javaType = JavaType.STRING_OBJECT;
+				javaType = JavaType.STRING;
 				break;
 			case Types.LONGVARCHAR:
 				jdbcType = "LONGVARCHAR";
-				javaType = JavaType.STRING_OBJECT;
+				javaType = JavaType.STRING;
 				break;
 			case Types.NUMERIC:
 				jdbcType = "NUMERIC";
@@ -144,7 +144,7 @@ public class Column {
 				break;
 			case Types.DISTINCT:
 				jdbcType = "DISTINCT";
-				javaType = JavaType.STRING_OBJECT;
+				javaType = JavaType.STRING;
 				break;
 			case Types.REF:
 				jdbcType = "REF";
@@ -163,11 +163,11 @@ public class Column {
 				break;
 			case Types.OTHER:
 				jdbcType = "OTHER";
-				javaType = JavaType.STRING_OBJECT;
+				javaType = JavaType.STRING;
 				break;
 			default:
 				jdbcType = "VARCHAR";
-				javaType = JavaType.STRING_OBJECT;
+				javaType = JavaType.STRING;
 				break;
 		}	
 	}

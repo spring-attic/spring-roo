@@ -513,7 +513,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		bodyBuilder.appendFormalLine(getTypeStr(fieldType) + " " + fieldName + " = " + initializer + ";");
 
-		if (fieldType.equals(JavaType.STRING_OBJECT)) {
+		if (fieldType.equals(JavaType.STRING)) {
 			boolean isUnique = false;
 			@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
 			if (values != null && values.containsKey("unique")) {
@@ -973,7 +973,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				imports.addImport(new JavaType("java.util.GregorianCalendar"));
 				initializer = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH), Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), Calendar.getInstance().get(Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime()";
 			}
-		} else if (fieldType.equals(JavaType.STRING_OBJECT)) {
+		} else if (fieldType.equals(JavaType.STRING)) {
 			if (fieldInitializer != null && fieldInitializer.contains("\"")) {
 				int offset = fieldInitializer.indexOf("\"");
 				initializer = fieldInitializer.substring(offset + 1, fieldInitializer.lastIndexOf("\""));

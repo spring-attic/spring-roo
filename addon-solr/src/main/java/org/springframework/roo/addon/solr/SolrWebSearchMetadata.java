@@ -107,7 +107,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return \"" + webScaffoldAnnotationValues.getPath() + "/search\";");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -128,10 +128,10 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, getRequestParamAnnotation("q", true)));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("q", true)));
 		paramNames.add(new JavaSymbolName("q"));
 		
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, getRequestParamAnnotation("facetFields", true)));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("facetFields", true)));
 		paramNames.add(new JavaSymbolName("facetFields"));
 		
 		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), getRequestParamAnnotation("rows", false)));
@@ -166,7 +166,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("dojo.append(\"]}\");");
 		bodyBuilder.appendFormalLine("return dojo.toString();");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
