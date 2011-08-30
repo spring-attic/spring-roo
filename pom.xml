@@ -69,7 +69,7 @@
         <module>addon-git</module>
         <module>addon-cloud-foundry</module>
         <module>addon-layers-service</module>
-        <module>addon-layers-repository</module>
+        <module>addon-layers-repository-jpa</module>
         <module>annotations</module>
     </modules>
     <organization>
