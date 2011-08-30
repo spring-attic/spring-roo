@@ -139,7 +139,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine("@Override");
 			bodyBuilder.appendFormalLine("public " + targetType.getSimpleTypeName() + " convert(String encodedJson) {");
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return " + typeName + "." + jsonMethodNames.get(CustomDataJsonTags.FROM_JSON_METHOD).getSymbolName() + "(new String(" + base64Name + ".decodeBase64(encodedJson)));");
@@ -158,7 +157,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine("@Override");
 			bodyBuilder.appendFormalLine("public String convert(" + targetType.getSimpleTypeName() + " " + targetTypeName + ") {");
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("return " + base64Name + ".encodeBase64URLSafeString(" + targetTypeName + "." + jsonMethodNames.get(CustomDataJsonTags.TO_JSON_METHOD).getSymbolName() + "().getBytes());");
@@ -181,7 +179,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("@Override");
 		bodyBuilder.appendFormalLine("public String convert(" + targetType.getSimpleTypeName() + " " + targetTypeName + ") {");
 		StringBuilder sb = new StringBuilder("return new StringBuilder()");
 		for (int i=0; i < methods.size(); i++) {
@@ -220,7 +217,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("@Override");
 		bodyBuilder.appendFormalLine("public " + targetType.getFullyQualifiedTypeName() + " convert(String id) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return getObject().convert(getObject().convert(id, " + idType.getSimpleTypeName() + ".class), " + targetType.getSimpleTypeName() + ".class);");
@@ -239,7 +235,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("@Override");
 		bodyBuilder.appendFormalLine("public " + targetType.getFullyQualifiedTypeName() + " convert(" + idType + " id) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
