@@ -99,4 +99,17 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
 	}
+	
+	/**
+	 * Ensures that the governor extends the given type, i.e. introduces that
+	 * type as a supertype iff it's not already one
+	 * 
+	 * @param javaType the type to extend (required)
+	 * @since 1.2.0
+	 */
+	protected final void ensureGovernorExtends(final JavaType javaType) {
+		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(javaType)) {
+			builder.addExtendsTypes(javaType);
+		}		
+	}
 }

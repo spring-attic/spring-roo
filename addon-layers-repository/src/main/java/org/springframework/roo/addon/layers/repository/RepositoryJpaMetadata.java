@@ -25,6 +25,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	private static final String PROVIDES_TYPE_STRING = RepositoryJpaMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String SPRING_JPA_REPOSITORY = "org.springframework.data.jpa.repository.JpaRepository";
+	private static final String SPRING_JPA_SPECIFICATION_EXECUTOR = "org.springframework.data.jpa.repository.JpaSpecificationExecutor";
 	private final RepositoryJpaAnnotationValues annotationValues;
 	
 	/**
@@ -33,7 +34,7 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	 * @param identifier the identifier for this item of metadata (required)
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
-	 * @param idType
+	 * @param idType the type of the entity's identifier field (required)
 	 * @param annotationValues (required)
 	 */
 	public RepositoryJpaMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType idType, RepositoryJpaAnnotationValues annotationValues) {
@@ -44,10 +45,10 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 		this.annotationValues = annotationValues;
 		
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
-		final JavaType springJpaRepository = new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType));
-		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(springJpaRepository)) {
-			builder.addExtendsTypes(springJpaRepository);
-		}
+		ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType)));
+		
+		// ... and likewise extend JpaSpecificationExecutor<Foo>, to allow query by specification
+		ensureGovernorExtends(new JavaType(SPRING_JPA_SPECIFICATION_EXECUTOR, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType())));
 		
 		// Build the ITD
 		itdTypeDetails = builder.build();
