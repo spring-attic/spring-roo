@@ -29,7 +29,7 @@ public class JsonOperationsImpl implements JsonOperations {
 	
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
@@ -53,7 +53,7 @@ public class JsonOperationsImpl implements JsonOperations {
 			}
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		}
 	}
 	

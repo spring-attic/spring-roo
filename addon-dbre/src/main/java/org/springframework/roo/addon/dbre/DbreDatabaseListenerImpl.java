@@ -81,7 +81,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
-	@Reference private TypeManagementService typeManipulationService;
 	private Map<JavaType, List<Identifier>> identifierResults;
 
 	public void onFileEvent(final FileEvent fileEvent) {
@@ -284,7 +283,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Update the annotation on disk
 		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(managedEntity);
 		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(jpaAnnotationBuilder.build(), attributesToDeleteIfPresent);
-		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		return table;
 	}
 	

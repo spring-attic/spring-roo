@@ -59,7 +59,7 @@ public class FinderOperationsImpl implements FinderOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
 	
 	public boolean isFinderCommandAvailable() {
@@ -216,7 +216,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(ROO_ENTITY, attributes);
 		classOrInterfaceTypeDetailsBuilder.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
-		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	private String getErrorMsg() {

@@ -53,7 +53,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isInstallJmsAvailable() {
@@ -159,7 +159,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		}
 		
 		classOrInterfaceTypeDetailsBuilder.addMethod(methodBuilder);
-		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	public void addJmsListener(JavaType targetType, String name, JmsDestinationType destinationType) {
@@ -187,7 +187,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		// Check the file doesn't already exist
 		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), projectOperations.getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
 
-		typeManipulationService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 
 		String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));

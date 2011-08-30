@@ -38,7 +38,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	@Reference private DbreModelService dbreModelService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeManagementService typeManagementService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -101,7 +101,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		DbreMetadata dbreMetadata = new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierHolder, versionField, managedEntities, database);
 		ClassOrInterfaceTypeDetails updatedGovernor = dbreMetadata.getUpdatedGovernor();
 		if (updatedGovernor != null) {
-			typeManipulationService.createOrUpdateTypeOnDisk(updatedGovernor);
+			typeManagementService.createOrUpdateTypeOnDisk(updatedGovernor);
 		}
 		return dbreMetadata;
 	}

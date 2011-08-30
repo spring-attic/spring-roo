@@ -62,7 +62,7 @@ public class MailOperationsImpl implements MailOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isInstallEmailAvailable() {
 		return projectOperations.isProjectAvailable();
@@ -255,7 +255,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Add the "sendMessage" method
 		classOrInterfaceTypeDetailsBuilder.addMethod(getSendMethod(fieldName, async, declaredByMetadataId, classOrInterfaceTypeDetailsBuilder));
-		typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
+		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
 	/**

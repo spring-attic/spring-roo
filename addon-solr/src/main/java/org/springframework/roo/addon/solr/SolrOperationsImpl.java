@@ -45,7 +45,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isInstallSearchAvailable() {
 		return projectOperations.isProjectAvailable() && !solrPropsInstalled() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -147,7 +147,7 @@ public class SolrOperationsImpl implements SolrOperations {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
+			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 		}
 	}
 }

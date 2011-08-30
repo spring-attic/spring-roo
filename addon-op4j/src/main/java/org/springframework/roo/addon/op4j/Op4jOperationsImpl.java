@@ -32,7 +32,7 @@ import org.w3c.dom.Element;
 public class Op4jOperationsImpl implements Op4jOperations{
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManipulationService;
+	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isOp4jAvailable() {
 		return projectOperations.isProjectAvailable();
@@ -50,7 +50,7 @@ public class Op4jOperationsImpl implements Op4jOperations{
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_OP4J);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManipulationService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
+			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 		}
 	}
 	
