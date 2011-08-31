@@ -25,7 +25,6 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.UI_COMPONENT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.VIEW_SCOPED;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
@@ -57,7 +56,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
-import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
@@ -84,7 +82,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	// Fields
 	private JavaType entity;
 	private Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors;
-	private MethodMetadata identifierAccessorMethod;
 	private final Set<FieldMetadata> autoCompleteFields = new LinkedHashSet<FieldMetadata>();
 	private Set<FieldMetadata> enumTypes;
 	private String plural;
@@ -100,18 +97,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	 * @param aspectName
 	 * @param governorPhysicalTypeMetadata
 	 * @param annotationValues
-	 * @param memberDetails
 	 * @param plural
 	 * @param crudAdditions the additions this metadata should make in order to
 	 * invoke the target entity type's CRUD methods (required)
 	 * @param locatedFieldsAndAccessors
 	 * @param enumTypes
+	 * @param identifierAccessor the entity id's accessor (getter) method (can be <code>null</code>)
 	 */
-	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final MemberDetails memberDetails, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final Set<FieldMetadata> enumTypes) {
+	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final Set<FieldMetadata> enumTypes, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(memberDetails, "Member details required");
 		Assert.isTrue(StringUtils.hasText(plural), "Plural required");
 		Assert.notNull(crudAdditions, "Crud additions map required");
 		Assert.notNull(locatedFieldsAndAccessors, "Located fields and accessors map required");
@@ -129,8 +125,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
 		final MemberTypeAdditions persistMethod = crudAdditions.get(PERSIST_METHOD);
 		final MemberTypeAdditions removeMethod = crudAdditions.get(REMOVE_METHOD);
-		identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, IDENTIFIER_ACCESSOR_METHOD);
-		if (identifierAccessorMethod == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null) {
+		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null) {
 			valid = false;
 			return;
 		}
@@ -190,7 +185,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getBooleanMutatorMethod(CREATE_DIALOG_VISIBLE));
 		builder.addMethod(getDisplayListMethod());
 		builder.addMethod(getDisplayCreateDialogMethod());
-		builder.addMethod(getPersistMethod(mergeMethod, persistMethod));
+		builder.addMethod(getPersistMethod(mergeMethod, persistMethod, identifierAccessor));
 		builder.addMethod(getDeleteMethod(removeMethod));
 		builder.addMethod(getResetMethod());
 		builder.addMethod(getHandleDialogCloseMethod());
@@ -698,7 +693,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getPersistMethod(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod) {
+	private MethodMetadata getPersistMethod(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod, final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("persist");
 		final MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
@@ -709,7 +704,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final String fieldName = getEntityName();
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("String message = \"\";");
-		bodyBuilder.appendFormalLine("if (" + fieldName + "." +  identifierAccessorMethod.getMethodName().getSymbolName() + "() != null) {");
+		bodyBuilder.appendFormalLine("if (" + fieldName + "." +  identifierAccessor.getMethodName().getSymbolName() + "() != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(mergeMethod.getMethodCall() + ";");
 		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);

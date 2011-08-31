@@ -1,12 +1,18 @@
 package org.springframework.roo.addon.jsf;
 
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
+import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.util.Arrays;
@@ -27,7 +33,6 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -69,7 +74,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private TypeLocationService typeLocationService;
-	private final Map<JavaType, String> entityToManagedBeandMidMap = new LinkedHashMap<JavaType, String>();
+	private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
 
@@ -88,7 +93,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
-		return entityToManagedBeandMidMap.get(itdTypeDetails.getName());
+		return entityToManagedBeanMidMap.get(itdTypeDetails.getName());
 	}
 
 	@Override
@@ -106,7 +111,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			return null;
 		}
 
-		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
+		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
@@ -118,20 +123,21 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		// Start by clearing the previous association
 		final JavaType oldEntity = managedBeanMidToEntityMap.get(metadataIdentificationString);
 		if (oldEntity != null) {
-			entityToManagedBeandMidMap.remove(oldEntity);
+			entityToManagedBeanMidMap.remove(oldEntity);
 		}
-		entityToManagedBeandMidMap.put(entityType, metadataIdentificationString);
+		entityToManagedBeanMidMap.put(entityType, metadataIdentificationString);
 		managedBeanMidToEntityMap.put(metadataIdentificationString, entityType);
 
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType, Path.SRC_MAIN_JAVA));
+		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
 		final String plural = pluralMetadata.getPlural();
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entityType, metadataIdentificationString);
 		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataIdentificationString);
 		final Set<FieldMetadata> enumTypes = getEnumTypes(locatedFieldsAndAccessors);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
 
-		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes);
+		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes, identifierAccessor);
 	}
 
 	/**
@@ -144,7 +150,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	 */
 	@SuppressWarnings("unchecked") 
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(final JavaType entity, final String metadataId) {
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA), metadataId);
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(entity), metadataId);
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.isEmpty()) {
 			return Collections.emptyMap();
@@ -159,7 +165,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		final JavaSymbolName entityName = JavaSymbolName.getReservedWordSafeName(entity);
 		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, entityName);
 		final Pair<JavaType, JavaSymbolName> idParameter = new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id"));
-		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("sizeNo")));
+		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(INT_PRIMITIVE, INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("sizeNo")));
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> additions = new HashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
 		additions.put(COUNT_ALL_METHOD, layerService.getMemberTypeAdditions(metadataId, COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION));
@@ -226,9 +232,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		final JavaType fieldType = field.getFieldType();
 		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
 				|| isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
-				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| fieldType.equals(JavaType.BYTE_ARRAY_PRIMITIVE) // Exclude byte[] fields
-				|| field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) /* Not interested in embedded types */) {
+				|| fieldType.equals(BOOLEAN_PRIMITIVE) || fieldType.equals(BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
+				|| fieldType.equals(BYTE_ARRAY_PRIMITIVE) // Exclude byte[] fields
+				|| field.getCustomData().keySet().contains(EMBEDDED_FIELD) /* Not interested in embedded types */) {
 			return false;
 		}
 		return true;
@@ -236,7 +242,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 	public boolean isApplicationType(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
-		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null;
+		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType)) != null;
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
