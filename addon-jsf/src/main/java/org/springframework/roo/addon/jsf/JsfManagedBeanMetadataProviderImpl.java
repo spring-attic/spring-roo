@@ -69,6 +69,8 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
+	// -- The maximum number of entity fields to show in a list view.
+	private static final int MAX_LIST_VIEW_FIELDS = 4;
 
 	// Fields
 	@Reference private LayerService layerService;
@@ -180,9 +182,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	
 	/**
 	 * Returns a map of the given entity's fields to their accessor methods,
-	 * excluding any ID or version field;
-	 * along the way, TODO flags up to 4 of those fields as being (or requiring)
-	 * a converter?
+	 * excluding any ID or version field; along the way, flags the first
+	 * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable in
+	 * the list view for this entity type.
 	 * 
 	 * @param entityType the entity for which to find the fields and accessors (required)
 	 * @param memberDetails the entity's members (required)
@@ -195,7 +197,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entityType);
 
-		int counter = 0;	// TODO rename to reflect what it's counting, e.g. convertible fields?
+		int listViewFields = 0;
 		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
@@ -209,10 +211,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 
-			// TODO why limit it, and why to 4? make this a meaningfully-named constant for readability
-			if (counter < 4 && isFieldOfInterest(field)) {
-				counter++;
-				// Flag this field as what, being a converter/convertible?
+			if (listViewFields < MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
+				listViewFields++;
+				// Flag this field as being displayable in the entity's list view
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 				customDataBuilder.put(JsfManagedBeanMetadata.CONVERTER_FIELD_CUSTOM_DATA_KEY, "true");
 				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
@@ -255,13 +256,12 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	}
 	
 	/**
-	 * TODO assign a more meaningful name to this method, e.g. does it indicate
-	 * that the given field requires a converter?
+	 * Indicates whether the given field is for display in the entity's list view.
 	 * 
 	 * @param field the field to check (required)
 	 * @return see above
 	 */
-	private boolean isFieldOfInterest(final FieldMetadata field) {
+	private boolean isDisplayableInListView(final FieldMetadata field) {
 		final JavaType fieldType = field.getFieldType();
 		return !fieldType.isCommonCollectionType()
 			&& !fieldType.isArray()
