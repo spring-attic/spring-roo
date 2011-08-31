@@ -18,9 +18,10 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Andrew Swan
  * @since 1.0
  */
-public abstract class MemberFindingUtils {
+public final class MemberFindingUtils {
 
 	/**
 	 * Locates the specified field.
@@ -490,4 +491,31 @@ public abstract class MemberFindingUtils {
 		}
 		return memberHoldingTypeDetailsList.get(memberHoldingTypeDetailsList.size() - 1);
 	}
+
+	/**
+	 * Indicates whether the given method has the same name (case-sensitive) as
+	 * any of the other given methods
+	 * 
+	 * @param method the method to check against the others (required)
+	 * @param otherMethods the methods to check against; can be empty or
+	 * contain <code>null</code> elements, which will be ignored
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public static boolean hasSameName(final MethodMetadata method, final MethodMetadata... otherMethods) {
+		Assert.notNull(method, "Method metadata required");
+		for (final MethodMetadata otherMethod : otherMethods) {
+			if (otherMethod != null && method.getMethodName().equals(otherMethod.getMethodName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 * 
+	 * @since 1.2.0
+	 */
+	private MemberFindingUtils() {}
 }

@@ -75,6 +75,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	
 	// Constants
+	static final String CONVERTER_FIELD_CUSTOM_DATA_KEY = "converterField";
 	private static final String PROVIDES_TYPE_STRING = JsfManagedBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String CREATE_DIALOG_VISIBLE = "createDialogVisible";
@@ -83,7 +84,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private JavaType entity;
 	private Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors;
 	private final Set<FieldMetadata> autoCompleteFields = new LinkedHashSet<FieldMetadata>();
-	private Set<FieldMetadata> enumTypes;
 	private String plural;
 
 	private enum Action {
@@ -104,7 +104,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	 * @param enumTypes
 	 * @param identifierAccessor the entity id's accessor (getter) method (can be <code>null</code>)
 	 */
-	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final Set<FieldMetadata> enumTypes, final MethodMetadata identifierAccessor) {
+	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final Iterable<JavaType> enumTypes, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -116,10 +116,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return;
 		}
 		
-		this.plural = plural;
+		this.entity = annotationValues.getEntity();
 		this.locatedFieldsAndAccessors = locatedFieldsAndAccessors;
-		this.enumTypes = enumTypes;
-		entity = annotationValues.getEntity();
+		this.plural = plural;
 		
 		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
@@ -153,7 +152,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		}
 
 		// Add methods
-		builder.addMethod(getInitMethod(converterMethods));
+		builder.addMethod(getInitMethod(converterMethods, findAllMethod));
 		builder.addMethod(getNameAccessorMethod());
 		builder.addMethod(getColumnsAccessorMethod());
 		builder.addMethod(getSelectedEntityAccessorMethod());
@@ -167,9 +166,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getPanelGridMutatorMethod(Action.EDIT));
 		builder.addMethod(getPanelGridAccessorMethod(Action.VIEW));
 		builder.addMethod(getPanelGridMutatorMethod(Action.VIEW));
-		builder.addMethod(getPopulatePanelMethod(Action.CREATE));
-		builder.addMethod(getPopulatePanelMethod(Action.EDIT)); 
-		builder.addMethod(getPopulatePanelMethod(Action.VIEW)); 
+		builder.addMethod(getPopulatePanelMethod(Action.CREATE, enumTypes));
+		builder.addMethod(getPopulatePanelMethod(Action.EDIT, enumTypes)); 
+		builder.addMethod(getPopulatePanelMethod(Action.VIEW, enumTypes)); 
 	
 		for (final FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
 			builder.addMethod(getFileUploadListenerMethod(rooUploadedFileField));
@@ -286,7 +285,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return fieldBuilder.build();
 	}
 
-	private MethodMetadata getInitMethod(final List<MethodMetadata> converterMethods) {
+	private MethodMetadata getInitMethod(final List<MethodMetadata> converterMethods, final MemberTypeAdditions findAllAdditions) {
 		final JavaSymbolName methodName = new JavaSymbolName("init");
 		final MethodMetadata method = methodExists(methodName, new ArrayList<JavaType>());
 		if (method != null) return method;
@@ -295,7 +294,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		imports.addImport(new JavaType("java.util.ArrayList"));
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("all" + plural + " = " + entity.getSimpleTypeName() + ".findAll" + plural + "();");
+		bodyBuilder.appendFormalLine("all" + plural + " = " + findAllAdditions.getMethodCall() + ";");
+		findAllAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("columns = new ArrayList<String>();");
 		for (final MethodMetadata converterMethod : converterMethods) {
 			final String fieldName = StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(converterMethod).getSymbolName());
@@ -460,7 +460,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getPopulatePanelMethod(final Action action) {
+	private MethodMetadata getPopulatePanelMethod(final Action action, final Iterable<JavaType> enumTypes) {
 		JavaSymbolName methodName;
 		String fieldSuffix1;
 		String fieldSuffix2;
@@ -523,7 +523,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				bodyBuilder.appendFormalLine(fieldValueVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + getEntityName() + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 				bodyBuilder.appendFormalLine(fieldValueVar + ".setMode(\"advanced\");");
 				bodyBuilder.appendFormalLine(fieldValueVar + ".setUpdate(\"messages\");");
-			} else if (isEnum(field)) {
+			} else if (isEnum(field, enumTypes)) {
 				imports.addImport(PRIMEFACES_AUTO_COMPLETE);
 				imports.addImport(fieldType);
 				bodyBuilder.appendFormalLine("AutoComplete " + fieldValueVar + " = " + getComponentCreationStr("AutoComplete"));
@@ -567,9 +567,16 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
-	private boolean isEnum(final FieldMetadata field) {
-		for (final FieldMetadata enumType : enumTypes) {
-			if (field.getFieldType().equals(enumType.getFieldType())) {
+	/**
+	 * Indicates whether the given field contains an enum value
+	 * 
+	 * @param field the field to check (required)
+	 * @param enumTypes the enum types used as fields of the governor (required)
+	 * @return see above
+	 */
+	private boolean isEnum(final FieldMetadata field, final Iterable<JavaType> enumTypes) {
+		for (final JavaType enumType : enumTypes) {
+			if (field.getFieldType().equals(enumType)) {
 				return true;
 			}
 		}
@@ -913,13 +920,19 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private List<MethodMetadata> getConverterMethods() {
 		final List<MethodMetadata> converterMethods = new LinkedList<MethodMetadata>();
 		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
-			if (field.getCustomData() != null && field.getCustomData().keySet().contains("converterField")) {
+			if (field.getCustomData() != null && field.getCustomData().keySet().contains(CONVERTER_FIELD_CUSTOM_DATA_KEY)) {
 				converterMethods.add(locatedFieldsAndAccessors.get(field));
 			}
 		}
 		return converterMethods;
 	}
 
+	/**
+	 * TODO does this need to be called twice by the same method?
+	 * 
+	 * @param converterMethods
+	 * @return
+	 */
 	private String getBuilderString(final List<MethodMetadata> converterMethods) {
 		final StringBuilder sb = new StringBuilder("new StringBuilder()");
 		for (int i = 0; i < converterMethods.size(); i++) {

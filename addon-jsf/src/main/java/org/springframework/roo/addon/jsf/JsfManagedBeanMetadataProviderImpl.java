@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.classpath.PhysicalTypeCategory.ENUMERATION;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
@@ -16,20 +17,19 @@ import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -97,7 +97,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType entityType = annotationValues.getEntity();
@@ -117,27 +117,27 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		}
 
 		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
+		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
 
 		// Remember that this entity JavaType matches up with this metadata identification string
-		// Start by clearing the previous association
-		final JavaType oldEntity = managedBeanMidToEntityMap.get(metadataIdentificationString);
+		// Start by clearing any previous association
+		final JavaType oldEntity = managedBeanMidToEntityMap.get(metadataId);
 		if (oldEntity != null) {
 			entityToManagedBeanMidMap.remove(oldEntity);
 		}
-		entityToManagedBeanMidMap.put(entityType, metadataIdentificationString);
-		managedBeanMidToEntityMap.put(metadataIdentificationString, entityType);
+		entityToManagedBeanMidMap.put(entityType, metadataId);
+		managedBeanMidToEntityMap.put(metadataId, entityType);
 
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
 		final String plural = pluralMetadata.getPlural();
 
-		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entityType, metadataIdentificationString);
-		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataIdentificationString);
-		final Set<FieldMetadata> enumTypes = getEnumTypes(locatedFieldsAndAccessors);
+		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entityType, metadataId);
+		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataId);
+		final Iterable<JavaType> enumTypes = getEnumTypes(locatedFieldsAndAccessors.keySet());
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
 
-		return new JsfManagedBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes, identifierAccessor);
+		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes, identifierAccessor);
 	}
 
 	/**
@@ -178,13 +178,24 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		return additions;
 	}
 	
+	/**
+	 * Returns a map of the given entity's fields to their accessor methods,
+	 * excluding any ID or version field;
+	 * along the way, TODO flags up to 4 of those fields as being (or requiring)
+	 * a converter?
+	 * 
+	 * @param entityType the entity for which to find the fields and accessors (required)
+	 * @param memberDetails the entity's members (required)
+	 * @param metadataIdentificationString the ID of the metadata being generated (required)
+	 * @return a non-<code>null</code> map
+	 */
 	private Map<FieldMetadata, MethodMetadata> locateFieldsAndAccessors(final JavaType entityType, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = new LinkedHashMap<FieldMetadata, MethodMetadata>();
 		
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entityType);
 
-		int counter = 0;
+		int counter = 0;	// TODO rename to reflect what it's counting, e.g. convertible fields?
 		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
@@ -198,10 +209,12 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 
+			// TODO why limit it, and why to 4? make this a meaningfully-named constant for readability
 			if (counter < 4 && isFieldOfInterest(field)) {
 				counter++;
+				// Flag this field as what, being a converter/convertible?
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-				customDataBuilder.put("converterField", "true");
+				customDataBuilder.put(JsfManagedBeanMetadata.CONVERTER_FIELD_CUSTOM_DATA_KEY, "true");
 				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
 				fieldBuilder.append(customDataBuilder.build());
 				field = fieldBuilder.build();
@@ -212,32 +225,53 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		return locatedFieldsAndAccessors;
 	}
 	
-	private Set<FieldMetadata> getEnumTypes(final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors) {
-		final Set<FieldMetadata> enumTypes = new HashSet<FieldMetadata>();
-		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
+	/**
+	 * Returns the enum types found among the given fields
+	 * 
+	 * @param locatedFields the fields to look through (required) 
+	 * @return a non-<code>null</code> set
+	 */
+	private Iterable<JavaType> getEnumTypes(final Iterable<FieldMetadata> locatedFields) {
+		final Collection<JavaType> enumTypes = new HashSet<JavaType>();
+		for (final FieldMetadata field : locatedFields) {
 			final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
-			if (cid != null && cid.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
-				enumTypes.add(field);
+			if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
+				enumTypes.add(field.getFieldType());
 			}
 		}
 		return enumTypes;
 	}
 
+	/**
+	 * Indicates whether the given method is the ID or version accessor
+	 * 
+	 * @param method the method to check (required)
+	 * @param idMethod the ID accessor method (can be <code>null</code>)
+	 * @param versionMethod the version accessor method (can be <code>null</code>)
+	 * @return see above
+	 */
 	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
-		Assert.notNull(method, "Method metadata required");
-		return (idMethod != null && method.getMethodName().equals(idMethod.getMethodName())) || (versionMethod != null && method.getMethodName().equals(versionMethod.getMethodName()));
+		return MemberFindingUtils.hasSameName(method, idMethod, versionMethod);
 	}
 	
+	/**
+	 * TODO assign a more meaningful name to this method, e.g. does it indicate
+	 * that the given field requires a converter?
+	 * 
+	 * @param field the field to check (required)
+	 * @return see above
+	 */
 	private boolean isFieldOfInterest(final FieldMetadata field) {
 		final JavaType fieldType = field.getFieldType();
-		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
-				|| isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
-				|| fieldType.equals(BOOLEAN_PRIMITIVE) || fieldType.equals(BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| fieldType.equals(BYTE_ARRAY_PRIMITIVE) // Exclude byte[] fields
-				|| field.getCustomData().keySet().contains(EMBEDDED_FIELD) /* Not interested in embedded types */) {
-			return false;
-		}
-		return true;
+		return !fieldType.isCommonCollectionType()
+			&& !fieldType.isArray()
+			// Boolean values would not be meaningful in this presentation
+			&& !fieldType.equals(BOOLEAN_PRIMITIVE)
+			&& !fieldType.equals(BOOLEAN_OBJECT)
+			&& !fieldType.equals(BYTE_ARRAY_PRIMITIVE)
+			&& !field.getCustomData().keySet().contains(EMBEDDED_FIELD)
+			// References to other domain objects would be too verbose
+			&& !isApplicationType(fieldType);
 	}
 
 	public boolean isApplicationType(final JavaType javaType) {
