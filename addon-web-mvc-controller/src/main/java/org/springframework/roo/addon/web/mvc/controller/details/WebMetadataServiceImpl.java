@@ -203,7 +203,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		}
 		registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
 
-		JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(javaType);
+		JavaSymbolName entityName = JavaSymbolName.getReservedWordSafeName(javaType);
 		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(javaType, entityName);
 		final Pair<JavaType, JavaSymbolName> idParameter = new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id"));
 		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("sizeNo")));

@@ -63,7 +63,7 @@ enum ServiceLayerMethod {
 
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
-			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
+			return Arrays.asList(JavaSymbolName.getReservedWordSafeName(entityType));
 		}
 
 		@Override
@@ -164,7 +164,7 @@ enum ServiceLayerMethod {
 		
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
-			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
+			return Arrays.asList(JavaSymbolName.getReservedWordSafeName(entityType));
 		}
 
 		@Override
@@ -189,7 +189,7 @@ enum ServiceLayerMethod {
 		
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
-			return Arrays.asList(JavaSymbolName.getReservedWordSaveName(entityType));
+			return Arrays.asList(JavaSymbolName.getReservedWordSafeName(entityType));
 		}
 
 		@Override

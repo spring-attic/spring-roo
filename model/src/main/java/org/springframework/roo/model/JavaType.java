@@ -36,8 +36,11 @@ public class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character");
 	public static final JavaType STRING = new JavaType("java.lang.String");	// less verbose and just as informative
+	/**
+	 * @deprecated use {@link #STRING} instead
+	 */
 	@Deprecated
-	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String");
+	public static final JavaType STRING_OBJECT = STRING;
 	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte");
 	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
 	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer");

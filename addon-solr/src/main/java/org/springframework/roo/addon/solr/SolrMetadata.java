@@ -55,7 +55,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (!isValid()) {
 			return;
 		}
-		this.javaBeanFieldName = JavaSymbolName.getReservedWordSaveName(destination).getSymbolName();
+		this.javaBeanFieldName = JavaSymbolName.getReservedWordSafeName(destination).getSymbolName();
 		this.annotationValues = annotationValues;
 		this.beanPlural = javaTypePlural;
 		

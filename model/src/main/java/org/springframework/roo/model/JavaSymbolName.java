@@ -19,109 +19,11 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JavaSymbolName implements Comparable<JavaSymbolName> {
 
-	/** Constant for keyword "true" */
-	public static final JavaSymbolName TRUE = new JavaSymbolName("true");
-
 	/** Constant for keyword "false" */
 	public static final JavaSymbolName FALSE = new JavaSymbolName("false");
-	
-	// Fields
-	private final String symbolName;
 
-	/**
-	 * Construct a Java symbol name.
-	 * 
-	 * <p>
-	 * The name will be enforced as follows:
-	 * 
-	 * <ul>
-	 * <li>The rules listed in {@link #assertJavaNameLegal(String)}
-	 * </ul>
-     *
-	 * @param symbolName the name (mandatory)
-	 */
-	public JavaSymbolName(String symbolName) {
-		Assert.hasText(symbolName, "Fully qualified type name required");
-		assertJavaNameLegal(symbolName);
-		this.symbolName = symbolName;
-	}
-	
-	/**
-	 * @return the symbol name (never null or empty)
-	 */
-	public String getSymbolName() {
-		return symbolName;
-	}
-	
-	/**
-	 * @return the symbol name, capitalising the first letter (never null or empty)
-	 */
-	public String getSymbolNameCapitalisedFirstLetter() {
-		return StringUtils.capitalize(symbolName);
-	}
-	
-	/**
-	 * @return the name of a setter for the symbol
-	 */
-	public String getSymbolNameTurnedIntoMutatorMethodName() {
-		return "set" + getSymbolNameCapitalisedFirstLetter();
-	}
-
-	
-	/**
-	 * @return the symbol name in human readable form
-	 */
-	public String getReadableSymbolName() {
-		String camelCase = symbolName;
-		return getReadableSymbolName(camelCase);
-	}
-
-	/**
-	 * @return a camel case string in human readable form
-	 */
-	public static String getReadableSymbolName(String camelCase) {
-	  Pattern p = Pattern.compile("[A-Z][^A-Z]*");
-		Matcher m = p.matcher(StringUtils.capitalize(camelCase));
-		StringBuilder string = new StringBuilder();
-		while (m.find()) {
-			string.append(m.group()).append(" ");
-		}
-		return string.toString().trim();
-	}
-	
-	/**
-	 * Construct a Java symbol name which adheres to the strict JavaBean naming conventions and avoids
-	 * use of {@link ReservedWords} by prefixing '_'
-	 * 
-	 * @param javaType the {@link JavaType} for which the symbol name is created
-	 * @return a Java symbol name adhering to JavaBean conventions and avoids reserved words
-	 */
-	public static JavaSymbolName getReservedWordSaveName(JavaType javaType) {
-		String entityNameString = Introspector.decapitalize(StringUtils.capitalize(javaType.getSimpleTypeName()));
-		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(entityNameString)) {
-			entityNameString = "_" + entityNameString;
-		}
-		return new JavaSymbolName(entityNameString);
-	}
-	
-	public int hashCode() {
-		return this.symbolName.hashCode();
-	}
-
-	public boolean equals(Object obj) {
-		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName) obj).symbolName);
-	}
-
-	public final int compareTo(JavaSymbolName o) {
-		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly 
-		if (o == null) return -1;
-		return this.symbolName.compareTo(o.symbolName);
-	}
-	
-	public final String toString() {
-		return symbolName;
-	}
+	/** Constant for keyword "true" */
+	public static final JavaSymbolName TRUE = new JavaSymbolName("true");
 	
 	/**
 	 * Verifies the presented name is a valid Java name. Specifically, the following is enforced:
@@ -136,13 +38,13 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * 
 	 * @param name to the package name to evaluate (required)
 	 */
-	public static final void assertJavaNameLegal(String name) {
+	public static final void assertJavaNameLegal(final String name) {
 		Assert.notNull(name, "Name required");
 		
 		// Note regular expression for legal characters found to be x5 slower in profiling than this approach
-		char[] value = name.toCharArray();
+		final char[] value = name.toCharArray();
 		for (int i = 0; i < value.length; i++) {
-			char c = value[i];
+			final char c = value[i];
 			if ('/' == c || ' ' == c || '*' == c || '>' == c || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c ||
 				'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
 				'|' == c || '\\' == c || '\'' == c || '+' == c || '-' == c)  {
@@ -159,42 +61,121 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 				}
 			}
 		}
-		/*
-		Assert.notNull(name, "Name required");
-		Assert.isTrue(!name.contains("/"), "Slashes are prohibited in the name");
-		Assert.isTrue(!name.contains(" "), "Spaces are prohibited in the name");
-		Assert.isTrue(!name.contains("*"), "Illegal name");
-		Assert.isTrue(!name.contains(">"), "Illegal name");
-		Assert.isTrue(!name.contains("<"), "Illegal name");
-		Assert.isTrue(!name.contains("!"), "Illegal name");
-		Assert.isTrue(!name.contains("@"), "Illegal name");
-		Assert.isTrue(!name.contains("%"), "Illegal name");
-		Assert.isTrue(!name.contains("^"), "Illegal name");
-		Assert.isTrue(!name.contains("?"), "Illegal name");
-		Assert.isTrue(!name.contains("("), "Illegal name");
-		Assert.isTrue(!name.contains(")"), "Illegal name");
-		Assert.isTrue(!name.contains("~"), "Illegal name");
-		Assert.isTrue(!name.contains("`"), "Illegal name");
-		Assert.isTrue(!name.contains("{"), "Illegal name");
-		Assert.isTrue(!name.contains("}"), "Illegal name");
-		Assert.isTrue(!name.contains("["), "Illegal name");
-		Assert.isTrue(!name.contains("]"), "Illegal name");
-		Assert.isTrue(!name.contains("|"), "Illegal name");
-		Assert.isTrue(!name.contains("\""), "Illegal name");
-		Assert.isTrue(!name.contains("'"), "Illegal name");
-		Assert.isTrue(!name.contains("+"), "Illegal name");
-		Assert.isTrue(!name.startsWith("1"), "Illegal name");
-		Assert.isTrue(!name.startsWith("2"), "Illegal name");
-		Assert.isTrue(!name.startsWith("3"), "Illegal name");
-		Assert.isTrue(!name.startsWith("4"), "Illegal name");
-		Assert.isTrue(!name.startsWith("5"), "Illegal name");
-		Assert.isTrue(!name.startsWith("6"), "Illegal name");
-		Assert.isTrue(!name.startsWith("7"), "Illegal name");
-		Assert.isTrue(!name.startsWith("8"), "Illegal name");
-		Assert.isTrue(!name.startsWith("9"), "Illegal name");
-		Assert.isTrue(!name.startsWith("0"), "Illegal name");
-		Assert.isTrue(!name.startsWith("."), "The name cannot begin with a period");
-		Assert.isTrue(!name.endsWith("."), "The name cannot end with a period");
-		*/
+	}
+
+	/**
+	 * @return a camel case string in human readable form
+	 */
+	public static String getReadableSymbolName(final String camelCase) {
+	  final Pattern p = Pattern.compile("[A-Z][^A-Z]*");
+		final Matcher m = p.matcher(StringUtils.capitalize(camelCase));
+		final StringBuilder string = new StringBuilder();
+		while (m.find()) {
+			string.append(m.group()).append(" ");
+		}
+		return string.toString().trim();
+	}
+	
+	/**
+	 * Construct a Java symbol name which adheres to the strict JavaBean naming
+	 * conventions and avoids use of {@link ReservedWords} by suffixing '_'
+	 * 
+	 * @param javaType the {@link JavaType} for which the symbol name is created
+	 * @return a Java symbol name adhering to JavaBean conventions and avoids reserved words
+	 * @since 1.2.0
+	 */
+	public static JavaSymbolName getReservedWordSafeName(final JavaType javaType) {
+		String entityNameString = Introspector.decapitalize(StringUtils.capitalize(javaType.getSimpleTypeName()));
+		while (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(entityNameString)) {
+			// Prefixing can create names that don't work in the Derby DB
+			entityNameString += "_";
+		}
+		return new JavaSymbolName(entityNameString);
+	}
+	
+	/**
+	 * Construct a Java symbol name which adheres to the strict JavaBean naming conventions and avoids
+	 * use of {@link ReservedWords} by prefixing '_'
+	 * 
+	 * @param javaType the {@link JavaType} for which the symbol name is created
+	 * @return a Java symbol name adhering to JavaBean conventions and avoids reserved words
+	 * @deprecated use {@link #getReservedWordSafeName(JavaType)} instead (does the same thing, just better named)
+	 */
+	@Deprecated
+	public static JavaSymbolName getReservedWordSaveName(final JavaType javaType) {
+		return getReservedWordSafeName(javaType);
+	}
+	
+	// Fields
+	private final String symbolName;
+	
+	/**
+	 * Construct a Java symbol name.
+	 * 
+	 * <p>
+	 * The name will be enforced as follows:
+	 * 
+	 * <ul>
+	 * <li>The rules listed in {@link #assertJavaNameLegal(String)}
+	 * </ul>
+     *
+	 * @param symbolName the name (mandatory)
+	 */
+	public JavaSymbolName(final String symbolName) {
+		Assert.hasText(symbolName, "Fully qualified type name required");
+		assertJavaNameLegal(symbolName);
+		this.symbolName = symbolName;
+	}
+
+	
+	public int compareTo(final JavaSymbolName o) {
+		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly 
+		if (o == null) return -1;
+		return this.symbolName.compareTo(o.symbolName);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
+		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName) obj).symbolName);
+	}
+	
+	/**
+	 * @return the symbol name in human readable form
+	 */
+	public String getReadableSymbolName() {
+		final String camelCase = symbolName;
+		return getReadableSymbolName(camelCase);
+	}
+	
+	/**
+	 * @return the symbol name (never null or empty)
+	 */
+	public String getSymbolName() {
+		return symbolName;
+	}
+
+	/**
+	 * @return the symbol name, capitalising the first letter (never null or empty)
+	 */
+	public String getSymbolNameCapitalisedFirstLetter() {
+		return StringUtils.capitalize(symbolName);
+	}
+
+	/**
+	 * @return the name of a setter for the symbol
+	 */
+	public String getSymbolNameTurnedIntoMutatorMethodName() {
+		return "set" + getSymbolNameCapitalisedFirstLetter();
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.symbolName.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return symbolName;
 	}
 }

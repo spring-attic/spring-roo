@@ -82,7 +82,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		}
 		this.annotationValues = annotationValues;
 		this.jsonEnabledType = annotationValues.getJsonObject();
-		this.entityName = JavaSymbolName.getReservedWordSaveName(jsonEnabledType).getSymbolName();
+		this.entityName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType).getSymbolName();
 		this.servicesInjected = servicesInjected;
 
 		this.jsonMetadata = jsonMetadata;
@@ -190,7 +190,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		String formBackingTypeName = jsonEnabledType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(formBackingTypeName + " " + JavaSymbolName.getReservedWordSaveName(jsonEnabledType) + " = " + formBackingTypeName + "." + fromJsonMethodName.getSymbolName() + "(json);");
+		bodyBuilder.appendFormalLine(formBackingTypeName + " " + JavaSymbolName.getReservedWordSafeName(jsonEnabledType) + " = " + formBackingTypeName + "." + fromJsonMethodName.getSymbolName() + "(json);");
 		bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
@@ -315,7 +315,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String beanShortName = jsonEnabledType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		String beanSymbolName = JavaSymbolName.getReservedWordSaveName(jsonEnabledType).getSymbolName();
+		String beanSymbolName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType).getSymbolName();
 		String httpHeadersShortName = getShortName(HTTP_HEADERS);
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");

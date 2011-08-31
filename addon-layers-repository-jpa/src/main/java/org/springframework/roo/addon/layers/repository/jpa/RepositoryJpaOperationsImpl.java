@@ -26,7 +26,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;

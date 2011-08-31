@@ -109,7 +109,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.annotationValues = annotationValues;
 		this.controllerPath = annotationValues.getPath();
 		this.formBackingType = annotationValues.getFormBackingObject();
-		this.entityName = JavaSymbolName.getReservedWordSaveName(formBackingType).getSymbolName();
+		this.entityName = JavaSymbolName.getReservedWordSafeName(formBackingType).getSymbolName();
 		this.specialDomainTypes = specialDomainTypes;
 		javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);

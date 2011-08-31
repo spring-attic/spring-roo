@@ -88,8 +88,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
-		final String localMid = entityToManagedBeandMidMap.get(itdTypeDetails.getName());
-		return localMid == null ? null : localMid;
+		return entityToManagedBeandMidMap.get(itdTypeDetails.getName());
 	}
 
 	@Override
@@ -157,7 +156,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		}
 		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataId);
 
-		final JavaSymbolName entityName = JavaSymbolName.getReservedWordSaveName(entity);
+		final JavaSymbolName entityName = JavaSymbolName.getReservedWordSafeName(entity);
 		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, entityName);
 		final Pair<JavaType, JavaSymbolName> idParameter = new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id"));
 		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("sizeNo")));
