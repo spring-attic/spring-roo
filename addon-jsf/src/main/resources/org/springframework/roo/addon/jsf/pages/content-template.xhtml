@@ -43,21 +43,21 @@
             </p:panel>
         </h:form>
         <p:dialog id="createDialog" header="Create __DOMAIN_TYPE__" widgetVar="createDialog" visible="#{__LC_DOMAIN_TYPE__Bean.createDialogVisible}" resizable="true" width="660" showEffect="fade" hideEffect="explode">
-            <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
+            <p:ajax event="close" update="messages" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="createForm" enctype="multipart/form-data">
                 <h:panelGrid id="createPanelGrid" columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.createPanelGrid}" />
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" oncomplete="createDialog.hide()" styleClass="form_button" update="list messages" />
             </h:form>
         </p:dialog>
         <p:dialog id="editDialog" header="Edit __DOMAIN_TYPE__" widgetVar="editDialog" resizable="true" width="660" showEffect="fade" hideEffect="explode">
-            <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
+            <p:ajax event="close" update="messages" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="editForm" enctype="multipart/form-data">
                 <h:panelGrid id="editPanelGrid" columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.editPanelGrid}" />
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" oncomplete="editDialog.hide()" styleClass="form_button" update="list messages" />
             </h:form>
         </p:dialog>
         <p:dialog id="viewDialog" header="View __DOMAIN_TYPE__" widgetVar="viewDialog" resizable="true" width="660" showEffect="fade" hideEffect="explode">
-            <p:ajax event="close" update="growl" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
+            <p:ajax event="close" update="messages" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="viewForm" enctype="multipart/form-data">
                 <h:panelGrid id="viewPanelGrid" columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.viewPanelGrid}" />
                 <p:commandButton value="Close" onclick="viewDialog.hide()" styleClass="form_button" update="messages" />

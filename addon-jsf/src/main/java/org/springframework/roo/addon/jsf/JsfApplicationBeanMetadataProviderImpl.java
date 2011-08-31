@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
-import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_APPLICATION_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.util.Set;
 
@@ -79,7 +79,7 @@ public final class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMet
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
-		return "MenuBean";
+		return "ApplicationBean";
 	}
 
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {

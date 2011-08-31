@@ -6,29 +6,32 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.prime.com.tr/ui">
-<f:view contentType="text/html">
+<f:view locale="#{localeBean.locale}" contentType="text/html">
     <h:head>
         <title>#{applicationBean.appName}</title>
         <link type="text/css" rel="stylesheet" href="#{request.contextPath}/css/standard.css" />
-        <script type="text/javascript" src="#{request.contextPath}/js/calendar.js" />
     </h:head>
     <h:body>
-        <h:panelGrid styleClass="wrapper" cellspacing="0" cellpadding="0">
-            <p:panel>
-                <f:facet name="header">
-                    <h:outputFormat value="#{messages.welcome_titlepane}">
-                        <f:param value="#{applicationBean.appName}" />
-                    </h:outputFormat>
-                </f:facet>
-                <h:panelGrid width="700">
-                    <h:panelGrid columns="4">
-                        <p:graphicImage value="/images/roo_logo.png" styleClass="banner" />
-                        <h:outputText value="Your session has expired. Click " />
-                        <h:outputLink value="#{request.contextPath}#{currentViewId}">here</h:outputLink>
-                        <h:outputText value=" to return" />
-                    </h:panelGrid>
+        <h:panelGrid cellspacing="0" cellpadding="0" styleClass="wrapper">
+            <h:panelGrid columns="2" columnClasses="menu,content">
+                <p:panel cellspacing="0" cellpadding="0" styleClass="menu">
+                    <h:form>
+                        <h:outputLink value="#{request.contextPath}#{currentViewId}">
+                            <p:graphicImage value="/images/roo_logo.png" styleClass="banner" />
+                        </h:outputLink>
+                    </h:form>
+                </p:panel>
+                <h:panelGrid cellspacing="0" cellpadding="0" styleClass="content">
+                    <p:panel id="data" toggleable="true" toggleSpeed="250">
+                        <f:facet name="header">
+                            <h:outputFormat value="#{messages.welcome_titlepane}">
+                                <f:param value="#{applicationBean.appName}" />
+                            </h:outputFormat>
+                        </f:facet>
+                        <h:outputText value="Your session has expired. Click the Spring Roo logo to return." />
+                    </p:panel>
                 </h:panelGrid>
-            </p:panel>
+            </h:panelGrid>
         </h:panelGrid>
     </h:body>
 </f:view>
