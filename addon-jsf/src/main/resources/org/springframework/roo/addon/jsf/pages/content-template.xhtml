@@ -26,15 +26,15 @@
                         <f:facet name="header">
                             <h:outputText value="Actions" />
                         </f:facet>
-                        <p:commandButton id="viewButton" image="view" update="createForm" oncomplete="viewDialog.show()" title="#{messages.label_view}" styleClass="action-icon">
+                        <p:commandButton id="viewButton" image="ui-icon-zoomin" update="createForm" oncomplete="viewDialog.show()" title="#{messages.label_view}">
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__LC_DOMAIN_TYPE__Bean.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="viewButton" value="#{messages.label_view}" showEffect="fade" hideEffect="fade" />
-                        <p:commandButton id="editButton" image="edit" update="editForm" oncomplete="editDialog.show()" title="#{messages.label_edit}" styleClass="action-icon">
+                        <p:commandButton id="editButton" image="ui-icon-pencil" update="editForm" oncomplete="editDialog.show()" title="#{messages.label_edit}">
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__LC_DOMAIN_TYPE__Bean.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="editButton" value="#{messages.label_edit}" showEffect="fade" hideEffect="fade" />
-                        <p:commandButton id="deleteButton" image="delete" oncomplete="deleteDialog.show()" title="#{messages.label_delete}" styleClass="action-icon">
+                        <p:commandButton id="deleteButton" image="ui-icon-trash" oncomplete="deleteDialog.show()" title="#{messages.label_delete}" >
                             <f:setPropertyActionListener value="#{__LC_DOMAIN_TYPE__}" target="#{__LC_DOMAIN_TYPE__Bean.__LC_DOMAIN_TYPE__}" />
                         </p:commandButton>
                         <p:tooltip for="deleteButton" value="#{messages.label_delete}" showEffect="fade" hideEffect="fade" />
