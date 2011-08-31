@@ -5,10 +5,12 @@ import java.util.Arrays;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
@@ -49,6 +51,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 		
 		// ... and likewise extend JpaSpecificationExecutor<Foo>, to allow query by specification
 		ensureGovernorExtends(new JavaType(SPRING_JPA_SPECIFICATION_EXECUTOR, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType())));
+		
+		builder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.REPOSITORY));
 		
 		// Build the ITD
 		itdTypeDetails = builder.build();

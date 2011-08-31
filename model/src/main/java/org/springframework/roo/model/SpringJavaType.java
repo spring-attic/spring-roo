@@ -38,6 +38,7 @@ public final class SpringJavaType {
 	public static final JavaType NUMBER_FORMAT = new JavaType("org.springframework.format.annotation.NumberFormat");
 	public static final JavaType PATH_VARIABLE = new JavaType("org.springframework.web.bind.annotation.PathVariable");
 	public static final JavaType PROPAGATION = new JavaType("org.springframework.transaction.annotation.Propagation");
+	public static final JavaType REPOSITORY = new JavaType("org.springframework.stereotype.Repository");
 	public static final JavaType REQUEST_BODY = new JavaType("org.springframework.web.bind.annotation.RequestBody");
 	public static final JavaType REQUEST_MAPPING = new JavaType("org.springframework.web.bind.annotation.RequestMapping");
 	public static final JavaType REQUEST_METHOD = new JavaType("org.springframework.web.bind.annotation.RequestMethod");
