@@ -33,7 +33,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -83,7 +82,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private static final String CREATE_DIALOG_VISIBLE = "createDialogVisible";
 	
 	// Fields
-	private JavaType entityType;
+	private JavaType entity;
 	private Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors;
 	private MethodMetadata identifierAccessorMethod;
 	private final Set<FieldMetadata> autoCompleteFields = new LinkedHashSet<FieldMetadata>();
@@ -124,7 +123,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		this.plural = plural;
 		this.locatedFieldsAndAccessors = locatedFieldsAndAccessors;
 		this.enumTypes = enumTypes;
-		entityType = annotationValues.getEntity();
+		entity = annotationValues.getEntity();
 		
 		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
@@ -224,7 +223,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (field != null) return field;
 		
-		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), PRIVATE, new ArrayList<AnnotationMetadataBuilder>(), fieldName, entityType);
+		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), PRIVATE, new ArrayList<AnnotationMetadataBuilder>(), fieldName, entity);
 		return fieldBuilder.build();
 	}
 
@@ -241,7 +240,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private JavaType getEntityListType() {
-		return new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entityType));
+		return new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(entity));
 	}
 	
 	private FieldMetadata getNameField() {
@@ -301,7 +300,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		imports.addImport(new JavaType("java.util.ArrayList"));
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("all" + plural + " = " + entityType.getSimpleTypeName() + ".findAll" + plural + "();");
+		bodyBuilder.appendFormalLine("all" + plural + " = " + entity.getSimpleTypeName() + ".findAll" + plural + "();");
 		bodyBuilder.appendFormalLine("columns = new ArrayList<String>();");
 		for (final MethodMetadata converterMethod : converterMethods) {
 			final String fieldName = StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(converterMethod).getSymbolName());
@@ -334,19 +333,19 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(fieldName + " = new " + entityType.getSimpleTypeName() + "();");
+		bodyBuilder.appendFormalLine(fieldName + " = new " + entity.getSimpleTypeName() + "();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return " + fieldName + ";");
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, entityType, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, entity, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 	
 	private MethodMetadata getSelectedEntityMutatorMethod() {
 		final String fieldName = getEntityName();
 		final JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(fieldName));
-		final List<JavaType> paramTypes = Arrays.asList(entityType);
+		final List<JavaType> paramTypes = Arrays.asList(entity);
 		final MethodMetadata method = methodExists(methodName, paramTypes);
 		if (method != null) return method;
 
@@ -376,7 +375,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getAllEntitiesMutatorMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("setAll" + plural);
-		final MethodMetadata method = methodExists(methodName, Arrays.asList(entityType));
+		final MethodMetadata method = methodExists(methodName, Arrays.asList(entity));
 		if (method != null) return method;
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -526,21 +525,21 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				imports.addImport(PRIMEFACES_UPLOADED_FILE);
 				final JavaSymbolName fileUploadMethodName = getFileUploadMethodName(field.getFieldName());
 				bodyBuilder.appendFormalLine("FileUpload " + fieldValueVar + " = " + getComponentCreationStr("FileUpload"));
-				bodyBuilder.appendFormalLine(fieldValueVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
+				bodyBuilder.appendFormalLine(fieldValueVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + getEntityName() + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 				bodyBuilder.appendFormalLine(fieldValueVar + ".setMode(\"advanced\");");
 				bodyBuilder.appendFormalLine(fieldValueVar + ".setUpdate(\"messages\");");
 			} else if (isEnum(field)) {
 				imports.addImport(PRIMEFACES_AUTO_COMPLETE);
 				imports.addImport(fieldType);
 				bodyBuilder.appendFormalLine("AutoComplete " + fieldValueVar + " = " + getComponentCreationStr("AutoComplete"));
-				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, Enum.class));
-				bodyBuilder.appendFormalLine(fieldValueVar + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean.complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));");
+				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, fieldType.getSimpleTypeName()));
+				bodyBuilder.appendFormalLine(fieldValueVar + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + getEntityName() + "Bean.complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));");
 				autoCompleteFields.add(field);
 			} else if (isDateField(fieldType)) {
 				if (action == Action.VIEW) {
 					imports.addImport(DATE_TIME_CONVERTER);
 					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, String.class));
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "String"));
 					bodyBuilder.appendFormalLine("DateTimeConverter converter = new DateTimeConverter();");
 					bodyBuilder.appendFormalLine("converter.setPattern(\"dd/MM/yyyy\");");
 					bodyBuilder.appendFormalLine(fieldValueVar + ".setConverter(converter);");
@@ -548,7 +547,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(PRIMEFACES_CALENDAR);
 					imports.addImport(new JavaType("java.util.Date"));
 					bodyBuilder.appendFormalLine("Calendar " + fieldValueVar + " = " + getComponentCreationStr("Calendar"));
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, Date.class));
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "Date"));
 					bodyBuilder.appendFormalLine(fieldValueVar + ".setNavigator(true);");
 					bodyBuilder.appendFormalLine(fieldValueVar + ".setEffect(\"slideDown\");");
 					bodyBuilder.appendFormalLine(fieldValueVar + ".setPattern(\"dd/MM/yyyy\");");
@@ -560,7 +559,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				} else {
 					bodyBuilder.appendFormalLine("InputText " + fieldValueVar + " = " + getComponentCreationStr("InputText"));
 				}
-				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, String.class));
+				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "String"));
 			}
 			bodyBuilder.appendFormalLine(fieldValueVar + ".setId(\"" + fieldValueVar + "\");");
 			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");	
@@ -680,7 +679,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = true;");
-		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "\";");
+		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "\";");
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
@@ -693,7 +692,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
-		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "\";");
+		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "\";");
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
@@ -781,7 +780,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private String getEntityName() {
-		return "selected" + entityType.getSimpleTypeName();
+		return JavaSymbolName.getReservedWordSafeName(entity).getSymbolName();
 	}
 	
 	private JavaSymbolName getFileUploadMethodName(final JavaSymbolName fieldName) {
@@ -845,7 +844,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 	
 	private ClassOrInterfaceTypeDetails getConverterInnerType(final List<MethodMetadata> converterMethods, final MemberTypeAdditions findAllMethod) {
-		final String simpleTypeName = entityType.getSimpleTypeName();
+		final String simpleTypeName = entity.getSimpleTypeName();
 		final JavaType innerType = new JavaType(simpleTypeName + "Converter");
 		if (MemberFindingUtils.getDeclaredInnerType(governorTypeDetails, innerType) != null) {
 			return null;
@@ -932,7 +931,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			if (i > 0) {
 				sb.append(".append(\" \")");
 			}
-			sb.append(".append(").append(StringUtils.uncapitalize(entityType.getSimpleTypeName())).append(".").append(converterMethods.get(i).getMethodName().getSymbolName()).append("())");
+			sb.append(".append(").append(StringUtils.uncapitalize(entity.getSimpleTypeName())).append(".").append(converterMethods.get(i).getMethodName().getSymbolName()).append("())");
 		}
 		sb.append(".toString();");
 		return sb.toString();
@@ -942,8 +941,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
 	}
 	
-	private String getValueExpressionStr(final String inputFieldVar, final String fieldName, final Class<?> clazz) {
-		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + StringUtils.uncapitalize(entityType.getSimpleTypeName()) + "Bean.selected" + entityType.getSimpleTypeName() + "." + fieldName + "}\", " + clazz.getSimpleName() + ".class));";
+	private String getValueExpressionStr(final String inputFieldVar, final String fieldName, final String className) {
+		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "Bean." + getEntityName() + "." + fieldName + "}\", " + className + ".class));";
 	}
 
 	private boolean isDateField(final JavaType fieldType) {

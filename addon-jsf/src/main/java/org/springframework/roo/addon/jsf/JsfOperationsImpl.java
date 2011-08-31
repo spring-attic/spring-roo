@@ -233,8 +233,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			inputStream = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__DOMAIN_TYPE__", entity.getSimpleTypeName());
-			input = input.replace("__LC_DOMAIN_TYPE__", StringUtils.uncapitalize(entity.getSimpleTypeName()));
-
+			input = input.replace("__LC_DOMAIN_TYPE__", JavaSymbolName.getReservedWordSafeName(entity).getSymbolName());
 			input = input.replace("__DOMAIN_TYPE_PLURAL__", plural);
 			input = input.replace("__LC_DOMAIN_TYPE_PLURAL__", StringUtils.uncapitalize(plural));
 
