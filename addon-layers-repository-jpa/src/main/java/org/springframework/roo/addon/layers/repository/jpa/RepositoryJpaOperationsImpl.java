@@ -90,14 +90,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-
-		List<Repository> repositories = new ArrayList<Repository>();
-		List<Element> repositoryElements = XmlUtils.findElements("/configuration/repository/repository", configuration);
-		for (Element repositoryElement : repositoryElements) {
-			repositories.add(new Repository(repositoryElement));
-		}
 		
-		projectOperations.addRepositories(repositories);
 		projectOperations.addDependencies(dependencies);
 		
 		String appCtxId = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
