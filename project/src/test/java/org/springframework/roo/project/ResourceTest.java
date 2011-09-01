@@ -1,15 +1,8 @@
 package org.springframework.roo.project;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Arrays;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.Test;
-import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -18,7 +11,7 @@ import org.w3c.dom.Element;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class ResourceTest {
+public class ResourceTest extends XmlTestCase {
 
 	// Constants
 	private static final boolean FILTERING = true;
@@ -35,16 +28,7 @@ public class ResourceTest {
 		"        <include>" + INCLUDE_1 + "</include>\n" +
 		"        <include>" + INCLUDE_2 + "</include>\n" +
 		"    </includes>\n" +
-		"</resource>\n";
-	
-	private static final DocumentBuilder DOCUMENT_BUILDER;
-	static {
-		try {
-			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		} catch (final ParserConfigurationException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+		"</resource>";
 	
 	@Test
 	public void testGetElement() {
@@ -55,6 +39,6 @@ public class ResourceTest {
 		final Element element = resource.getElement(DOCUMENT_BUILDER.newDocument());
 		
 		// Check
-		assertEquals(EXPECTED_XML, XmlUtils.nodeToString(element));
+		assertXmlEquals(EXPECTED_XML, element);
 	}
 }

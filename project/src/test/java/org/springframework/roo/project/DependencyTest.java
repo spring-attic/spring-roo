@@ -2,12 +2,7 @@ package org.springframework.roo.project;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.Test;
-import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -16,7 +11,7 @@ import org.w3c.dom.Element;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class DependencyTest {
+public class DependencyTest extends XmlTestCase {
 	
 	// Constants
 	private static final String DEPENDENCY_GROUP_ID = "com.bar";
@@ -25,15 +20,6 @@ public class DependencyTest {
 	
 	private static final String EXCLUSION_GROUP_ID = "com.ugliness";
 	private static final String EXCLUSION_ARTIFACT_ID = "ugly-api";
-	
-	private static final DocumentBuilder DOCUMENT_BUILDER;
-	static {
-		try {
-			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		} catch (final ParserConfigurationException e) {
-			throw new IllegalStateException(e);
-		}
-	}
 	
 	@Test
 	public void testAddExclusion() {
@@ -54,7 +40,7 @@ public class DependencyTest {
 		"    <groupId>" + DEPENDENCY_GROUP_ID + "</groupId>\n" +
 		"    <artifactId>" + DEPENDENCY_ARTIFACT_ID + "</artifactId>\n" +
 		"    <version>" + DEPENDENCY_VERSION + "</version>\n" +
-		"</dependency>\n";
+		"</dependency>";
 	
 	@Test
 	public void testGetElementForMinimalDependency() {
@@ -65,6 +51,6 @@ public class DependencyTest {
 		final Element element = dependency.getElement(DOCUMENT_BUILDER.newDocument());
 		
 		// Check
-		assertEquals(EXPECTED_ELEMENT_FOR_MINIMAL_DEPENDENCY, XmlUtils.nodeToString(element));
+		assertXmlEquals(EXPECTED_ELEMENT_FOR_MINIMAL_DEPENDENCY, element);
 	}
 }

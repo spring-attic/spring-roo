@@ -2,10 +2,6 @@ package org.springframework.roo.project;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.Test;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
@@ -16,7 +12,7 @@ import org.w3c.dom.Element;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class RepositoryTest {
+public class RepositoryTest extends XmlTestCase {
 
 	// Constants
 	private static final boolean ENABLE_SNAPSHOTS = true;
@@ -24,15 +20,6 @@ public class RepositoryTest {
 	private static final String NAME = "the_name";
 	private static final String URL = "the-url";
 	private static final String PATH = "pluginRepo";
-	
-	private static final DocumentBuilder DOCUMENT_BUILDER;
-	static {
-		try {
-			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		} catch (final ParserConfigurationException e) {
-			throw new IllegalStateException(e);
-		}
-	}
 	
 	private static final String EXPECTED_XML =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +

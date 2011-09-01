@@ -5,10 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -23,7 +19,7 @@ import org.w3c.dom.Element;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class ExecutionTest {
+public class ExecutionTest extends XmlTestCase {
 
 	// Constants
 	private static final String ID = "some-id";
@@ -31,15 +27,6 @@ public class ExecutionTest {
 	private static final String GOAL_1 = "lock";
 	private static final String GOAL_2 = "load";
 	private static final String[] GOALS = {GOAL_1, GOAL_2};
-
-	private static final DocumentBuilder DOCUMENT_BUILDER;
-	static {
-		try {
-			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		} catch (final ParserConfigurationException e) {
-			throw new IllegalStateException(e);
-		}
-	}
 	
 	// Fixture
 	@Mock private Configuration mockConfiguration;
@@ -77,7 +64,7 @@ public class ExecutionTest {
 		"        </sources>\n" +
 		"    </configuration>\n";
 	
-	private static final String EXECUTION_XML = 
+	private static final String EXECUTION_XML =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 		"<execution>\n" +
 		"    <id>" + ID + "</id>\n" +
@@ -87,7 +74,7 @@ public class ExecutionTest {
 		"        <goal>" + GOAL_2 + "</goal>\n" +
 		"    </goals>\n" +
 		EXECUTION_CONFIGURATION_XML +
-		"</execution>\n";
+		"</execution>";
 	
 	@Test
 	public void testGetElementForMinimalExecution() throws Exception {
@@ -101,6 +88,6 @@ public class ExecutionTest {
 		final Element element = execution.getElement(document);
 		
 		// Check
-		assertEquals(EXECUTION_XML, XmlUtils.nodeToString(element));
+		assertXmlEquals(EXECUTION_XML, element);
 	}
 }

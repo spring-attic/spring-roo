@@ -36,12 +36,21 @@ import java.util.TreeSet;
  * @since 16 April 2001
  * @see org.apache.commons.lang.StringUtils
  */
-public abstract class StringUtils {
+public final class StringUtils {
+	
+	// Constants
 	private static final String FOLDER_SEPARATOR = "/";
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
 	private static final String TOP_PATH = "..";
 	private static final String CURRENT_PATH = ".";
 	private static final char EXTENSION_SEPARATOR = '.';
+	
+	/**
+	 * The platform-specific line separator.
+	 * 
+	 * @since 1.2.0
+	 */
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	//---------------------------------------------------------------------
 	// General convenience methods for working with Strings
@@ -1210,4 +1219,9 @@ public abstract class StringUtils {
 		}
 		return new String(buf);
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private StringUtils() {}
 }

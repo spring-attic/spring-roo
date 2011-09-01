@@ -3,16 +3,11 @@ package org.springframework.roo.project;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.roo.support.util.XmlUtils.nodeToString;
 import static org.springframework.roo.support.util.XmlUtils.stringToElement;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -24,7 +19,7 @@ import org.w3c.dom.Element;
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class PluginTest {
+public class PluginTest extends XmlTestCase {
 
 	// Constants
 	private static final List<Dependency> NO_DEPENDENCIES = Collections.emptyList();
@@ -41,15 +36,6 @@ public class PluginTest {
 	private static final String PLUGIN_ARTIFACT_ID = "bar";
 	private static final String PLUGIN_GROUP_ID = "com.foo";
 	private static final String PLUGIN_VERSION = "1.2.3";
-	
-	private static final DocumentBuilder DOCUMENT_BUILDER;
-	static {
-		try {
-			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		} catch (final ParserConfigurationException e) {
-			throw new IllegalStateException(e);
-		}
-	}
 
 	private static final String PLUGIN_XML_AV =
 		"<plugin>" +
@@ -206,7 +192,7 @@ public class PluginTest {
 		"    <groupId>" + PLUGIN_GROUP_ID + "</groupId>\n" +
 		"    <artifactId>" + PLUGIN_ARTIFACT_ID + "</artifactId>\n" +
 		"    <version>" + PLUGIN_VERSION + "</version>\n" +
-		"</plugin>\n";
+		"</plugin>";
 	
 	@Test
 	public void testGetElementForMinimalPlugin() {
@@ -243,7 +229,7 @@ public class PluginTest {
 		"    <dependencies>\n" +
 		DEPENDENCY_XML +
 		"    </dependencies>\n" +
-		"</plugin>\n";
+		"</plugin>";
 	
 	@Test
 	public void testGetElementForMaximalPlugin() throws Exception {
@@ -279,6 +265,6 @@ public class PluginTest {
 		final Element element = plugin.getElement(document);
 		
 		// Check
-		assertEquals(expectedXml, nodeToString(element));
+		assertXmlEquals(expectedXml, element);
 	}
 }
