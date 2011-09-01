@@ -9,11 +9,11 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.layers.CoreLayerProvider;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -33,7 +33,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private MetadataService metadataService;
 
-	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final Pair<JavaType, JavaSymbolName>... methodParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final MethodParameter... methodParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Metadata identifier required");
 		Assert.hasText(methodIdentifier, "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");

@@ -6,7 +6,6 @@ import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -46,6 +45,7 @@ import org.springframework.roo.classpath.details.annotations.ClassAttributeValue
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
@@ -57,8 +57,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.Pair;
-import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -204,9 +202,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		JavaSymbolName entityName = JavaSymbolName.getReservedWordSafeName(javaType);
-		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(javaType, entityName);
-		final Pair<JavaType, JavaSymbolName> idParameter = new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id"));
-		final PairList<JavaType, JavaSymbolName> findEntriesParameters = new PairList<JavaType, JavaSymbolName>(Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE), Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("sizeNo")));
+		final MethodParameter entityParameter = new MethodParameter(javaType, entityName);
+		final MethodParameter idParameter = new MethodParameter(idType, "id");
+		final MethodParameter firstResultParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "firstResult");
+		final MethodParameter maxResultsParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "sizeNo");
 
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
@@ -216,7 +215,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, javaType, idType, LAYER_POSITION);
 		MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD, javaType, idType, LAYER_POSITION, idParameter);
 		MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, javaType, idType, LAYER_POSITION);
-		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, javaType, idType, LAYER_POSITION, findEntriesParameters.toArray());
+		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, javaType, idType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
 		List<String> dynamicFinderNames = new ArrayList<String>();
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
 			if (mhtd.getCustomData().keySet().contains(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES)) {

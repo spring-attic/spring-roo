@@ -1,8 +1,6 @@
 package org.springframework.roo.classpath.layers;
 
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Pair;
 
 /**
  * Provides persistence-related methods at a given layer of the application.
@@ -29,7 +27,7 @@ public interface LayerProvider {
 	 * @param methodParameters parameters which are passed in to the method
 	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, null otherwise
 	 */
-	MemberTypeAdditions getMemberTypeAdditions(String callerMID, String methodIdentifier, JavaType targetEntity, JavaType idType, Pair<JavaType, JavaSymbolName>... methodParameters);
+	MemberTypeAdditions getMemberTypeAdditions(String callerMID, String methodIdentifier, JavaType targetEntity, JavaType idType, MethodParameter... methodParameters);
 	
 	/**
 	 * Returns the position of this layer relative to others. 

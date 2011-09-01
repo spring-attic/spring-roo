@@ -1,8 +1,8 @@
 package org.springframework.roo.classpath.layers;
 
-import org.springframework.roo.model.JavaSymbolName;
+import java.util.Collection;
+
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Pair;
 
 /**
  * Provides upper-layer code (such as MVC, GWT, and tests) with the
@@ -26,5 +26,18 @@ public interface LayerService {
 	 * @param methodParameters parameters passed in to the method (types and names), if any
 	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, <code>null</code> otherwise
 	 */
-	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, JavaType idType, int layerPosition, Pair<JavaType, JavaSymbolName>... methodParameters);
+	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, JavaType idType, int layerPosition, MethodParameter... methodParameters);
+	
+	/**
+	 * Returns source code modifications for a requested operation offered by a layer provider
+	 * 
+	 * @param metadataId Id of calling metadata provider (required)
+	 * @param methodIdentifier specifies the method which is being requested (required)
+	 * @param targetEntity specifies the target entity  (required)
+	 * @param idType specifies the ID type used by the target entity (required)
+	 * @param layerPosition the position of the layer invoking this method
+	 * @param methodParameters parameters passed in to the method (types and names), if any
+	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, <code>null</code> otherwise
+	 */
+	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, JavaType idType, int layerPosition, Collection<? extends MethodParameter> methodParameters);
 }

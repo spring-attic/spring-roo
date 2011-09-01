@@ -1,5 +1,18 @@
 package org.springframework.roo.addon.email;
 
+import static org.springframework.roo.addon.email.MailProtocol.SMTP;
+import static org.springframework.roo.model.SpringJavaType.ASYNC;
+import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
+import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
+import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -26,19 +39,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.springframework.roo.addon.email.MailProtocol.SMTP;
-import static org.springframework.roo.model.SpringJavaType.ASYNC;
-import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
-import static org.springframework.roo.model.SpringJavaType.MAIL_SENDER;
-import static org.springframework.roo.model.SpringJavaType.SIMPLE_MAIL_MESSAGE;
 
 /**
  * Implementation of {@link MailOperationsImpl}.

@@ -16,10 +16,10 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.layers.CoreLayerProvider;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.CollectionUtils;
-import org.springframework.roo.support.util.Pair;
 import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
@@ -38,7 +38,7 @@ public class RepositoryJpaLayerProvider extends CoreLayerProvider {
 	// Fields
 	@Reference private RepositoryJpaLocator repositoryLocator;
 	
-	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final Pair<JavaType, JavaSymbolName>... callerParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final MethodParameter... callerParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata ID required");
 		Assert.isTrue(StringUtils.hasText(methodIdentifier), "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");

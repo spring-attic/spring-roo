@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.layers;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -12,10 +13,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.Pair;
 
 /**
  * The {@link LayerService} implementation.
@@ -31,8 +30,13 @@ public class LayerServiceImpl implements LayerService {
 	private final Object mutex = this;
 
 	private final Set<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
+
+	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition, final Collection<? extends MethodParameter> methodParameters) {
+		final MethodParameter[] methodParametersArray = methodParameters.toArray(new MethodParameter[methodParameters.size()]);
+		return getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, idType, layerPosition, methodParametersArray);
+	}
 	
-	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition,	final Pair<JavaType, JavaSymbolName>... methodParameters) {
+	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition,	final MethodParameter... methodParameters) {
 		Assert.hasText(metadataId, "metadataId is required");
 		Assert.hasText(methodIdentifier, "methodIdentifier is required");
 		Assert.notNull(targetEntity, "targetEntity is required");

@@ -37,6 +37,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -44,7 +45,6 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.Pair;
 
 /**
  * Metadata provider for {@link ConversionServiceMetadata}. Monitors
@@ -114,8 +114,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 				types.remove();
 			} else {
 				idTypes.put(type, idType);
-				@SuppressWarnings("unchecked")
-				final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), type, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
+				final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), type, idType, LayerType.HIGHEST.getPosition(), new MethodParameter(idType, "id"));
 				findMethods.put(type, findMethod);
 			}
 		}

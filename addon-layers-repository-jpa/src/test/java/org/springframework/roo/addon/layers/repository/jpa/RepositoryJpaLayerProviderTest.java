@@ -13,16 +13,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.roo.addon.layers.repository.jpa.RepositoryJpaLayerProvider;
-import org.springframework.roo.addon.layers.repository.jpa.RepositoryJpaLocator;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Pair;
 
 
 /**
@@ -65,7 +62,6 @@ public class RepositoryJpaLayerProviderTest {
 		when(mockRepositoryLocator.getRepositories(mockTargetEntity)).thenReturn(Arrays.asList(mockRepositoryDetails));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForNonRepositoryLayerMethod() {
 		// Invoke
@@ -75,7 +71,6 @@ public class RepositoryJpaLayerProviderTest {
 		assertNull(additions);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsWhenNoRepositoriesExist() {
 		// Invoke
@@ -93,7 +88,7 @@ public class RepositoryJpaLayerProviderTest {
 	 * @param methodKey
 	 * @param callerParameters
 	 */
-	private void assertMethodCall(final String expectedMethodCall, final MethodMetadataCustomDataKey methodKey, final Pair<JavaType, JavaSymbolName>... callerParameters) {
+	private void assertMethodCall(final String expectedMethodCall, final MethodMetadataCustomDataKey methodKey, final MethodParameter... callerParameters) {
 		// Set up
 		setUpMockRepository();
 		
@@ -104,16 +99,14 @@ public class RepositoryJpaLayerProviderTest {
 		assertEquals(expectedMethodCall, additions.getMethodCall());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetFindAllAdditions() {
 		assertMethodCall("clinicRepo.findAll()", FIND_ALL_METHOD);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetFlushAdditions() {
-		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(mockTargetEntity, new JavaSymbolName("anything"));
+		final MethodParameter entityParameter = new MethodParameter(mockTargetEntity, "anything");
 		assertMethodCall("clinicRepo.flush()", FLUSH_METHOD, entityParameter);
 	}
 }

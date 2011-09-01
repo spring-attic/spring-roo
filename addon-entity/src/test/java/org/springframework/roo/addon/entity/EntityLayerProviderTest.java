@@ -87,7 +87,6 @@ public class EntityLayerProviderTest {
 		when(mockPluralMetadata.getPlural()).thenReturn(plural);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsWhenEntityAnnotationValuesNotAvailable() {
 		// Set up
@@ -100,7 +99,6 @@ public class EntityLayerProviderTest {
 		assertNull(additions);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsWhenGovernorPluralMetadataIsNull() {
 		setUpMockAnnotationValues();
@@ -113,7 +111,6 @@ public class EntityLayerProviderTest {
 		assertNull(additions);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsWhenGovernorPluralIsEmpty() {
 		// Set up
@@ -127,7 +124,6 @@ public class EntityLayerProviderTest {
 		assertNull(additions);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForBogusMethod() {
 		// Set up
@@ -141,7 +137,6 @@ public class EntityLayerProviderTest {
 		assertNull(additions);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForMethodAnnotatedWithEmptyName() {
 		// Set up
@@ -156,7 +151,6 @@ public class EntityLayerProviderTest {
 		assertNull(additions);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForMethodAnnotatedWithNonEmptyName() {
 		// Set up

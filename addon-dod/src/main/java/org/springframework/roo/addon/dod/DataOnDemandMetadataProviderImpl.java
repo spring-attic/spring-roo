@@ -31,13 +31,13 @@ import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.NaturalOrderComparator;
-import org.springframework.roo.support.util.Pair;
 
 /**
  * Implementation of {@link DataOnDemandMetadataProvider}.
@@ -150,17 +150,13 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 		
 		// Get the additions to make for each required method
-		final Pair<JavaType, JavaSymbolName> fromParameter = new Pair<JavaType, JavaSymbolName>(JavaType.INT_PRIMITIVE, new JavaSymbolName("from"));
-		final Pair<JavaType, JavaSymbolName> toParameter = new Pair<JavaType, JavaSymbolName>(JavaType.INT_PRIMITIVE, new JavaSymbolName("to"));
-		@SuppressWarnings("unchecked")
+		final MethodParameter fromParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "from");
+		final MethodParameter toParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "to");
 		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), fromParameter, toParameter);
-		@SuppressWarnings("unchecked")
-		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), new Pair<JavaType, JavaSymbolName>(idType, new JavaSymbolName("id")));
-		final Pair<JavaType, JavaSymbolName> entityParameter = new Pair<JavaType, JavaSymbolName>(entity, new JavaSymbolName("obj"));
-		@SuppressWarnings("unchecked")
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), new MethodParameter(idType, "id"));
+		final MethodParameter entityParameter = new MethodParameter(entity, "obj");
 		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		@SuppressWarnings("unchecked")
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		
 		if (findEntriesMethod == null || findMethodAdditions == null || flushMethod == null || identifierAccessor == null || persistMethodAdditions == null) {

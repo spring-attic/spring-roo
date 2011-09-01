@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.layers.service;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -22,12 +23,11 @@ import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.util.Pair;
 
 /**
  * Provides {@link ServiceClassMetadata} for building the ITD for the
@@ -147,7 +147,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 			// Collect the additions the service class needs in order to invoke each service layer method
 			final Map<ServiceLayerMethod, MemberTypeAdditions> methodAdditions = new LinkedHashMap<ServiceLayerMethod, MemberTypeAdditions>();
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-				final Pair<JavaType, JavaSymbolName>[] methodParameters = method.getParameters(domainType, idType).toArray();
+				final Collection<MethodParameter> methodParameters = MethodParameter.asList(method.getParameters(domainType, idType));
 				final MemberTypeAdditions memberTypeAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, method.getKey(), domainType, idType, LAYER_POSITION, methodParameters);
 				if (memberTypeAdditions != null) {
 					// A lower layer implements this method
@@ -163,7 +163,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		final MemberDetails serviceClassDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), serviceClass);
 		return new ServiceClassMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, serviceClassDetails, serviceAnnotationValues, domainTypeToIdTypeMap, allCrudAdditions, domainTypePlurals);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Service";
 	}
