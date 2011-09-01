@@ -1,9 +1,6 @@
 package org.springframework.roo.project;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
-import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -30,7 +27,7 @@ public class RepositoryTest extends XmlTestCase {
 		"    <snapshots>\n" +
 		"        <enabled>true</enabled>\n" +
 		"    </snapshots>\n" +
-		"</pluginRepo>\n";
+		"</pluginRepo>";
 	
 	@Test
 	public void testGetElement() {
@@ -41,6 +38,6 @@ public class RepositoryTest extends XmlTestCase {
 		final Element element = repository.getElement(DOCUMENT_BUILDER.newDocument(), PATH);
 		
 		// Check
-		assertEquals(EXPECTED_XML, XmlUtils.nodeToString(element));
+		assertXmlEquals(EXPECTED_XML, element);
 	}
 }
