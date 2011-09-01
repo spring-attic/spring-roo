@@ -2,11 +2,13 @@
 body, div, td {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px; /* color: #666; */
+     word-wrap: break-word;
 }
 
 body {
     background-color: #fff;
     text-align: left;
+    
 }
 
 a img {
@@ -24,13 +26,15 @@ a img {
     width: expression(document.body.clientWidth >  1024 ? "1024px" : "auto");
     overflow: hidden;
     display: block;
+   
 }
 
 .menu {
-    width: 200px;
+    width: 230px;
     vertical-align: top;
     text-align: center;
      margin-right: 5px;
+      word-wrap: break-word;
 }
 
 
@@ -40,7 +44,7 @@ a img {
 }
 
 .content {
-    width: 800px;
+    width: 770px;
     height: auto;
     vertical-align: top;
     text-align: left;

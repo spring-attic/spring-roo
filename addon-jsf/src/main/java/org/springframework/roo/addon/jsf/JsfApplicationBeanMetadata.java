@@ -158,13 +158,14 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("entity"));
 			JavaType entity = (JavaType) value.getValue();
+			String entityLabel = entity.getSimpleTypeName().length() > 26 ? entity.getSimpleTypeName().substring(0, 23) + "..." : entity.getSimpleTypeName();
 			String beanName = StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName());
-			// String plural = getInflectorPlural(entity.getSimpleTypeName());
 
 			bodyBuilder.appendFormalLine("");
 			bodyBuilder.appendFormalLine("submenu = new Submenu();");
 			bodyBuilder.appendFormalLine("submenu.setId(\"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "Submenu\");");
-			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entity.getSimpleTypeName() + "\");");
+			bodyBuilder.appendFormalLine("submenu.setLabel(\"" + entityLabel + "\");");
+			// bodyBuilder.appendFormalLine("submenu.setIcon(\"ui-icon ui-icon-document\");");
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"create" + entity.getSimpleTypeName() + "MenuItem\");");
@@ -220,15 +221,6 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<JavaType> paramTypes) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
 	}
-	
-//	private String getInflectorPlural(String term) {
-//		try {
-//			return Noun.pluralOf(term, Locale.ENGLISH);
-//		} catch (RuntimeException e) {
-//			// Inflector failed (see for example ROO-305), so don't pluralize it
-//			return term;
-//		}
-//	}
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

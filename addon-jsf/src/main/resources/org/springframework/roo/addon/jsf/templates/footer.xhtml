@@ -6,25 +6,46 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:p="http://primefaces.prime.com.tr/ui">
 <ui:composition>
-    <div id="footer" class="wrapper">
+    <div id="footer">
         <h:form>
             <h:panelGrid columns="2">
-                <h:panelGrid columns="2" width="860">
+                <h:panelGrid columns="2" width="600">
                     <h:panelGrid columns="5">
                         <h:outputLink value="../pages/main.jsf">Home</h:outputLink>
                         <h:outputText value="| Language:" />
-                        <h:commandLink title="Switch language to English" action="#{localeBean.setSelectedLocale}">
-                            <f:param name="locale" value="en" />
-                            <h:graphicImage value="/images/en.png" alt="Switch language to English" styleClass="flag" />
-                        </h:commandLink>
-                        <h:commandLink title="Switch language to Deutsch" action="#{localeBean.setSelectedLocale}">
-                            <f:param name="locale" value="de" />
-                            <h:graphicImage value="/images/de.png" alt="Switch language to Deutsch" styleClass="flag" />
-                        </h:commandLink>
-                        <h:commandLink title="Switch language to Espanol" action="#{localeBean.setSelectedLocale}">
-                            <f:param name="locale" value="es" />
-                            <h:graphicImage value="/images/es.png" alt="Switch language to Espanol" styleClass="flag" />
-                        </h:commandLink>
+                        <h:panelGroup>
+                            <h:commandLink id="switchToEnglish" action="#{localeBean.setSelectedLocale}">
+                                <f:param name="locale" value="en" />
+                                <h:graphicImage value="/images/en.png" styleClass="flag" />
+                            </h:commandLink>
+                            <p:tooltip for="switchToEnglish">
+                                <h:outputFormat value="#{messages.global_language_switch}">
+                                    <f:param value="English" />
+                                </h:outputFormat>
+                            </p:tooltip>
+                        </h:panelGroup>
+                        <h:panelGroup>
+                            <h:commandLink id="switchToGerman" action="#{localeBean.setSelectedLocale}">
+                                <f:param name="locale" value="de" />
+                                <h:graphicImage value="/images/de.png" styleClass="flag" />
+                            </h:commandLink>
+                            <p:tooltip for="switchToGerman">
+                                <h:outputFormat value="#{messages.global_language_switch}">
+                                    <f:param value="Deutsch" />
+                                </h:outputFormat>
+                            </p:tooltip>
+                        </h:panelGroup>
+                        <h:panelGroup>
+                            <h:commandLink id="switchToSpanish" action="#{localeBean.setSelectedLocale}">
+                                <f:param name="locale" value="es" />
+                                <h:graphicImage value="/images/es.png" styleClass="flag" />
+                            </h:commandLink>
+                            <p:tooltip for="switchToSpanish">
+                                <h:outputFormat value="#{messages.global_language_switch}">
+                                    <f:param value="Espanol" />
+                                </h:outputFormat>
+                            </p:tooltip>
+                        </h:panelGroup>
                     </h:panelGrid>
                 </h:panelGrid>
                 <h:panelGrid align="right">

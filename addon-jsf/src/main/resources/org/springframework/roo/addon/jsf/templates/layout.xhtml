@@ -20,16 +20,18 @@
                         <h:link outcome="main">
                             <p:graphicImage value="/images/roo_logo.png" styleClass="banner" />
                         </h:link>
-                        <p:menu model="#{applicationBean.menuModel}" style="width:170px;" />
+                        <p:menu model="#{applicationBean.menuModel}" style="width:198px;" />
                     </h:form>
                 </p:panel>
-                <h:panelGrid cellspacing="0" cellpadding="0" styleClass="content">
-                    <ui:insert name="content" />
-                </h:panelGrid>
+                <h:panelGroup>
+                    <h:panelGrid cellspacing="0" cellpadding="0" styleClass="content">
+                        <ui:insert name="content" />
+                    </h:panelGrid>
+                    <ui:insert name="footer">
+                        <ui:include src="footer.xhtml" />
+                    </ui:insert>
+                </h:panelGroup>
             </h:panelGrid>
-            <ui:insert name="footer">
-                <ui:include src="footer.xhtml" />
-            </ui:insert>
         </h:panelGrid>
     </h:body>
 </f:view>

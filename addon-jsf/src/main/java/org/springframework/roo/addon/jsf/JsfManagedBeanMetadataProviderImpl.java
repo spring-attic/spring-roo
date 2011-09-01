@@ -33,6 +33,7 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -66,7 +67,7 @@ import org.springframework.roo.support.util.PairList;
 @Component(immediate = true) 
 @Service 
 public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
-	
+
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 	// -- The maximum number of entity fields to show in a list view.
@@ -78,7 +79,6 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	@Reference private TypeLocationService typeLocationService;
 	private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
-
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -210,8 +210,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				continue;
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
-
-			if (listViewFields < MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
+			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
 				listViewFields++;
 				// Flag this field as being displayable in the entity's list view
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
@@ -235,9 +234,13 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	private Iterable<JavaType> getEnumTypes(final Iterable<FieldMetadata> locatedFields) {
 		final Collection<JavaType> enumTypes = new HashSet<JavaType>();
 		for (final FieldMetadata field : locatedFields) {
-			final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
-			if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
+			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
 				enumTypes.add(field.getFieldType());
+			} else {
+				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
+				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
+					enumTypes.add(field.getFieldType());
+				}
 			}
 		}
 		return enumTypes;
