@@ -754,6 +754,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
 		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
+		bodyBuilder.appendFormalLine("FacesMessage facesMessage = new FacesMessage(\"Successfully deleted\");");
+		bodyBuilder.appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
 		bodyBuilder.appendFormalLine("reset();");
 		bodyBuilder.appendFormalLine("return findAll" + plural + "();");
 
