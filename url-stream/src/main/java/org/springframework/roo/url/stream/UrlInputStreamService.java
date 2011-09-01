@@ -15,7 +15,6 @@ import java.net.URL;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface UrlInputStreamService {
 	

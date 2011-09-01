@@ -27,12 +27,11 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DeferredLogHandler extends Handler {
 
+	// Fields
 	private List<LogRecord> logRecords = Collections.synchronizedList(new ArrayList<LogRecord>());
-	
 	private Handler fallbackHandler;
 	private Level fallbackPushLevel;
 	private boolean fallbackMode = false;
@@ -126,5 +125,4 @@ public class DeferredLogHandler extends Handler {
 			logRecords.clear();
 		}
 	}
-	
 }

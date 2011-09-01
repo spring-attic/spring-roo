@@ -11,7 +11,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public abstract class BundleFindingUtils {
 	

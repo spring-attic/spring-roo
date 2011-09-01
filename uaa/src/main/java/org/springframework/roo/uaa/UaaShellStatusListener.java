@@ -55,6 +55,4 @@ public class UaaShellStatusListener implements ShellStatusListener {
 			}
 		}
 	}
-	
 }
-

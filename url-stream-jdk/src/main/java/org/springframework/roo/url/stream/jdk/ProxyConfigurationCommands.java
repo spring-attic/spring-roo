@@ -17,15 +17,16 @@ import org.springframework.uaa.client.ProxyService;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Component
 @Service
 public class ProxyConfigurationCommands implements CommandMarker {
 
-	@Reference private ProxyService proxyService;
-
+	// Constants
 	private static final String NEW_LINE = System.getProperty("line.separator");
+
+	// Fields
+	@Reference private ProxyService proxyService;
 
 	@CliCommand(value="proxy configuration", help="Shows the proxy server configuration")
 	public String proxyConfiguration() throws MalformedURLException {
@@ -41,5 +42,4 @@ public class ProxyConfigurationCommands implements CommandMarker {
 		}
 		return sb.toString();
 	}
-	
 }

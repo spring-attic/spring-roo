@@ -32,16 +32,12 @@ public class ToStringCreator {
 	/**
 	 * Default ToStringStyler instance used by this ToStringCreator.
 	 */
-	private static final ToStringStyler DEFAULT_TO_STRING_STYLER =
-			new DefaultToStringStyler(StylerUtils.DEFAULT_VALUE_STYLER);
+	private static final ToStringStyler DEFAULT_TO_STRING_STYLER = new DefaultToStringStyler(StylerUtils.DEFAULT_VALUE_STYLER);
 
 
 	private StringBuilder buffer = new StringBuilder(512);
-
 	private ToStringStyler styler;
-
 	private Object object;
-
 	private boolean styledFirstField;
 
 
@@ -176,7 +172,6 @@ public class ToStringCreator {
 		return this;
 	}
 
-
 	/**
 	 * Return the String representation that this ToStringCreator built.
 	 */
@@ -185,5 +180,4 @@ public class ToStringCreator {
 		this.styler.styleEnd(this.buffer, this.object);
 		return this.buffer.toString();
 	}
-
 }

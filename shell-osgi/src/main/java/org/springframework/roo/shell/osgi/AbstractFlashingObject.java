@@ -26,10 +26,9 @@ import org.springframework.roo.shell.Shell;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
-@Component(componentAbstract=true)
-@Reference(name="shell", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=Shell.class, cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+@Component(componentAbstract = true)
+@Reference(name = "shell", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Shell.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 public abstract class AbstractFlashingObject {
 
 	/**
@@ -81,5 +80,4 @@ public abstract class AbstractFlashingObject {
 			}
 		}
 	}
-
 }

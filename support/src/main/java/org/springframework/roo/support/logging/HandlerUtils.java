@@ -109,7 +109,6 @@ public abstract class HandlerUtils {
 		Assert.notNull(target, "Target handler is required");
 		
 		int replaced = 0;
-		
 		Handler[] handlers = logger.getHandlers();
 		if (handlers != null && handlers.length > 0) {
 			for (Handler h : handlers) {
@@ -134,7 +133,6 @@ public abstract class HandlerUtils {
 		Assert.notNull(logger, "Logger is required");
 		
 		int flushed = 0;
-		
 		Handler[] handlers = logger.getHandlers();
 		if (handlers != null && handlers.length > 0) {
 			for (Handler h : handlers) {

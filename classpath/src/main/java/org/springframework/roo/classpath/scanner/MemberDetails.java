@@ -32,13 +32,13 @@ import org.springframework.roo.metadata.MetadataProvider;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface MemberDetails {
 
 	/**
-	 * @return an immutable representation of the member holders (never null or empty)
+	 * Returns an immutable representation of the member holders.
+	 * 
+	 * @return a List of immutable member holders (never null or empty)
 	 */
 	List<MemberHoldingTypeDetails> getDetails();
-
 }

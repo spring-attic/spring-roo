@@ -94,6 +94,4 @@ public class UaaCommands implements CommandMarker {
 		
 		return sb.toString();
 	}
-	
 }
-

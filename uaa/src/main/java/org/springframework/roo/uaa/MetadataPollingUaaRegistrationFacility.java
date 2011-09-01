@@ -21,9 +21,8 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
-@Component(enabled=true)
+@Component(enabled = true)
 public class MetadataPollingUaaRegistrationFacility {
 	@Reference private MetadataLogger metadataLogger;
 	@Reference private UaaRegistrationService uaaRegistrationService;

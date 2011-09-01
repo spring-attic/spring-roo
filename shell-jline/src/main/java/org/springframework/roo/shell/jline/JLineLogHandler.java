@@ -22,8 +22,10 @@ import org.springframework.roo.support.util.OsUtils;
  */
 public class JLineLogHandler extends Handler {
 
+	// Constants
 	private static final boolean BRIGHT_COLORS = Boolean.getBoolean("roo.bright");
 	
+	// Fields
 	private ConsoleReader reader;
 	private ShellPromptAccessor shellPromptAccessor;
 	private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
@@ -39,31 +41,27 @@ public class JLineLogHandler extends Handler {
 		this.reader = reader;
 		this.shellPromptAccessor = shellPromptAccessor;
 		this.userInterfaceThreadName = Thread.currentThread().getName();
-		
 		this.ansiSupported = reader.getTerminal().isANSISupported();
 		
 		setFormatter(new Formatter() {
 			public String format(LogRecord record) {
 				StringBuffer sb = new StringBuffer();
-				
 				if (record.getMessage() != null) {
 					sb.append(record.getMessage()).append(System.getProperty("line.separator"));
 				}
-				
 				if (record.getThrown() != null) {
-				    try {
-				        StringWriter sw = new StringWriter();
-				        PrintWriter pw = new PrintWriter(sw);
-				        record.getThrown().printStackTrace(pw);
-				        pw.close();
-					sb.append(sw.toString());
-				    } catch (Exception ex) {
-				    }
+					try {
+						StringWriter sw = new StringWriter();
+						PrintWriter pw = new PrintWriter(sw);
+						record.getThrown().printStackTrace(pw);
+						pw.close();
+						sb.append(sw.toString());
+					} catch (Exception ex) {
+					}
 				}
 				return sb.toString();
 			}
 		});
-		
 	}
 
 	@Override
@@ -141,30 +139,30 @@ public class JLineLogHandler extends Handler {
 	}
 	
 	private String toDisplay(LogRecord event) {
-	    StringBuilder sb = new StringBuilder();
-		
-	    String threadName;
-	    String eventString;
+		StringBuilder sb = new StringBuilder();
+
+		String threadName;
+		String eventString;
 		if (includeThreadName && !userInterfaceThreadName.equals(Thread.currentThread().getName()) && !"".equals(Thread.currentThread().getName())) {
-	    	threadName = "[" + Thread.currentThread().getName() + "]";
-	    	
-	    	// Build an event string that will indent nicely given the left hand side now contains a thread name
-	    	StringBuilder lineSeparatorAndIndentingString = new StringBuilder();
-	    	for (int i = 0; i <= threadName.length(); i++) {
-	    		lineSeparatorAndIndentingString.append(" ");
-	    	}
-	    	
-	    	eventString = " " + getFormatter().format(event).replace(System.getProperty("line.separator"), System.getProperty("line.separator") + lineSeparatorAndIndentingString.toString());
-	    	
-	    	if (eventString.endsWith(lineSeparatorAndIndentingString.toString())) {
-	    		eventString = eventString.substring(0, eventString.length() - lineSeparatorAndIndentingString.length());
-	    	}
-	    	
-	    } else {
-	    	threadName = "";
-	    	eventString = getFormatter().format(event);
-	    }
-	    
+			threadName = "[" + Thread.currentThread().getName() + "]";
+
+			// Build an event string that will indent nicely given the left hand side now contains a thread name
+			StringBuilder lineSeparatorAndIndentingString = new StringBuilder();
+			for (int i = 0; i <= threadName.length(); i++) {
+				lineSeparatorAndIndentingString.append(" ");
+			}
+
+			eventString = " " + getFormatter().format(event).replace(System.getProperty("line.separator"), System.getProperty("line.separator") + lineSeparatorAndIndentingString.toString());
+
+			if (eventString.endsWith(lineSeparatorAndIndentingString.toString())) {
+				eventString = eventString.substring(0, eventString.length() - lineSeparatorAndIndentingString.length());
+			}
+
+		} else {
+			threadName = "";
+			eventString = getFormatter().format(event);
+		}
+
 		if (ansiSupported) {
 			if (event.getLevel().intValue() >= Level.SEVERE.intValue()) {
 				sb.append(getANSIBuffer().reverse(threadName).red(eventString));
@@ -178,7 +176,7 @@ public class JLineLogHandler extends Handler {
 		} else {
 			sb.append(threadName).append(eventString);
 		}
-	    
+
 		return sb.toString();
 	}
 	
@@ -207,5 +205,4 @@ public class JLineLogHandler extends Handler {
 			}
 		};
 	}
-	
 }

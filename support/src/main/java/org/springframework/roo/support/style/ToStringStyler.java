@@ -65,5 +65,4 @@ public interface ToStringStyler {
 	 * @param buffer buffer to print to
 	 */
 	void styleFieldSeparator(StringBuilder buffer);
-
 }

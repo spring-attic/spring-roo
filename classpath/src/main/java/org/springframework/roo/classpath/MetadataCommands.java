@@ -118,5 +118,4 @@ public class MetadataCommands implements CommandMarker {
 		// show them that the change has taken place
 		return metadataTimings();
 	}
-
 }

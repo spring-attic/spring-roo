@@ -50,12 +50,15 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public abstract class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
+	
+	// Constants
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
 	private static final boolean APPLE_TERMINAL = Boolean.getBoolean("is.apple.terminal");
 	private static final char ESC = 27;
 	private static final String BEL = "\007";
 
+	// Fields
 	private ConsoleReader reader;
 	private boolean developmentMode = false;
 	private FileWriter fileLog;
@@ -107,7 +110,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		try {
 			String logFileContents = FileCopyUtils.copyToString(new File("log.roo"));
 			String[] logEntries = logFileContents.split(System.getProperty("line.separator"));
-			//LIFO
+			// LIFO
 			for (String logEntry : logEntries) {
 				if (!logEntry.startsWith("//")) {
 					reader.getHistory().addToHistory(logEntry);
@@ -204,9 +207,10 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			}
 		};
 		addShellStatusListener(statusListener);
+		
 		return new ConsoleReader(new FileInputStream(FileDescriptor.in), new PrintWriter(new OutputStreamWriter(ansiOut,
 		// Default to Cp850 encoding for Windows console output (ROO-439)
-				System.getProperty("jline.WindowsTerminal.output.encoding", "Cp850"))), null, ansiTerminal);
+			System.getProperty("jline.WindowsTerminal.output.encoding", "Cp850"))), null, ansiTerminal);
 	}
 
 	private void flashMessageRenderer() {
@@ -251,8 +255,6 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Assert.notNull(level, "Level is required for a flash message");
 		Assert.notNull(message, "Message is required for a flash message");
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
-
-		//System.out.println("flash: " + message);
 
 		if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
 			if (reader != null && reader.getTerminal().isANSISupported()) {
@@ -371,8 +373,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		try {
 			reader.printString(stg);
 			reader.flushConsole();
-		} catch (IOException ignore) {
-		}
+		} catch (IOException ignored) {}
 	}
 
 	public void promptLoop() {

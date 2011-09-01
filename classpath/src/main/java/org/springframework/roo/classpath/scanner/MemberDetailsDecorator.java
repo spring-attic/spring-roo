@@ -9,7 +9,6 @@ import org.springframework.roo.model.CustomDataAccessor;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface MemberDetailsDecorator {
 	

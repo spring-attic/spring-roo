@@ -141,7 +141,6 @@ public interface TypeLocationService {
 	 */
 	String getPhysicalTypeCanonicalPath(JavaType javaType, Path path);
 
-
 	/**
 	 * Returns a collection of MIDs representing types changed since last invocation.
 	 *
@@ -149,5 +148,4 @@ public interface TypeLocationService {
 	 * @return a collection of MIDs which represent changed types
 	 */
 	LinkedHashSet<String> getWhatsDirty(String requestingClass);
-
 }

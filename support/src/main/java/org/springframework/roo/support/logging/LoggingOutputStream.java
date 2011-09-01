@@ -15,13 +15,11 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public class LoggingOutputStream extends OutputStream {
+	protected static final Logger logger = HandlerUtils.getLogger(LoggingOutputStream.class);
 	private Level level;
 	private String sourceClassName = LoggingOutputStream.class.getName();
-	protected static final Logger logger = HandlerUtils.getLogger(LoggingOutputStream.class);
-
 	private int count = 0;
 	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	

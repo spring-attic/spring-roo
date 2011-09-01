@@ -50,11 +50,11 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 
-
 @Component(immediate = true) 
 @Service
 public class JavaParserTypeParsingService implements TypeParsingService {
 
+	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 
@@ -105,14 +105,13 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		}
 	}
 
-
 	/**
 	 * Appends the presented class to the end of the presented body declarations. The body declarations appear within the presented compilation unit. This is used to progressively build inner types.
-	 *
+	 * 
 	 * @param compilationUnit the work-in-progress compilation unit (required)
 	 * @param enclosingCompilationUnitServices
-	 * @param cit             the new class to add (required)
-	 * @param parent          the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
+	 * @param cit the new class to add (required)
+	 * @param parent the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
 	 */
 	private void updateOutput(final CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, final ClassOrInterfaceTypeDetails cit, List<BodyDeclaration> parent) {
 		// Append the new imports this class declares

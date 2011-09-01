@@ -12,20 +12,14 @@ import java.util.Map;
  */
 class AntPatchStringMatcher {
 
+	// Fields
 	private final char[] patArr;
-
 	private final char[] strArr;
-
 	private int patIdxStart = 0;
-
 	private int patIdxEnd;
-
 	private int strIdxStart = 0;
-
 	private int strIdxEnd;
-
 	private char ch;
-
 	private final Map<String, String> uriTemplateVariables;
 
 	/** Constructs a new instance of the <code>AntPatchStringMatcher</code>. */
@@ -73,8 +67,7 @@ class AntPatchStringMatcher {
 		if (allCharsUsed()) {
 			return onlyStarsLeft();
 		}
-		// process pattern between stars. padIdxStart and patIdxEnd point
-		// always to a '*'.
+		// Process pattern between stars. padIdxStart and patIdxEnd point always to a '*'.
 		while (patIdxStart != patIdxEnd && strIdxStart <= strIdxEnd) {
 			int patIdxTmp;
 			if (patArr[patIdxStart] == '{') {
@@ -88,8 +81,7 @@ class AntPatchStringMatcher {
 			if (consecutiveStars(patIdxTmp)) {
 				continue;
 			}
-			// Find the pattern between padIdxStart & padIdxTmp in str between
-			// strIdxStart & strIdxEnd
+			// Find the pattern between padIdxStart & padIdxTmp in str between strIdxStart & strIdxEnd
 			int patLength = (patIdxTmp - patIdxStart - 1);
 			int strLength = (strIdxEnd - strIdxStart + 1);
 			int foundIdx = -1;
@@ -224,5 +216,4 @@ class AntPatchStringMatcher {
 		}
 		return true;
 	}
-
 }

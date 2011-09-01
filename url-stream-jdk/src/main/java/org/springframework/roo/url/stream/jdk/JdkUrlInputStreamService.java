@@ -21,12 +21,12 @@ import org.springframework.uaa.client.UaaService;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Component
 @Service
 public class JdkUrlInputStreamService extends AbstractFlashingObject implements UrlInputStreamService {
 
+	// Fields
 	@Reference private UaaService uaaService;
 	@Reference private ProxyService proxyService;
 	
@@ -64,10 +64,10 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 			this.delegate = connection.getInputStream();
 			this.text = connection.getURL().getPath();
 			if ("".equals(this.text)) {
-				// fallback to the host name
+				// Fallback to the host name
 				this.text = connection.getURL().getHost();
 			} else {
-				// we only want the filename
+				// We only want the filename
 				int lastSlash = this.text.lastIndexOf("/");
 				if (lastSlash > -1) {
 					this.text = this.text.substring(lastSlash+1);
@@ -97,7 +97,6 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 			}
 			
 			int result = delegate.read();
-			
 			if (result == -1) {
 				if (totalSize > 0) {
 					flash(Level.FINE, "Downloaded 100% of " + text, MY_SLOT);
@@ -116,7 +115,5 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 			delegate.close();
 		}
 	}
-
-
 }
 

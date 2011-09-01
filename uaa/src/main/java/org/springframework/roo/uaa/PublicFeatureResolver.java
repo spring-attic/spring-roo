@@ -8,7 +8,6 @@ package org.springframework.roo.uaa;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public interface PublicFeatureResolver {
 

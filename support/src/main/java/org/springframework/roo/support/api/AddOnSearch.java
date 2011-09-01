@@ -12,7 +12,6 @@ import java.util.logging.Logger;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.1.1
- *
  */
 public interface AddOnSearch {
 	
@@ -36,5 +35,4 @@ public interface AddOnSearch {
 	 * (or null if the add-on list is unavailable for some reason, eg network problems etc)
 	 */
 	Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand);
-
 }

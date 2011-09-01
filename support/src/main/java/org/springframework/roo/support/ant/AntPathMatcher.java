@@ -1,21 +1,5 @@
 package org.springframework.roo.support.ant;
 
-/*
- * Copyright 2002-2007 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -47,7 +31,6 @@ public class AntPathMatcher implements PathMatcher {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 	}
 
-
 	public boolean isPattern(String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
 	}
@@ -59,7 +42,6 @@ public class AntPathMatcher implements PathMatcher {
 	public boolean matchStart(String pattern, String path) {
 		return doMatch(pattern, path, false, null);
 	}
-
 
 	/**
 	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
@@ -99,8 +81,7 @@ public class AntPathMatcher implements PathMatcher {
 		if (pathIdxStart > pathIdxEnd) {
 			// Path is exhausted, only match if rest of pattern is * or **'s
 			if (pattIdxStart > pattIdxEnd) {
-				return (pattern.endsWith(this.pathSeparator) ? path.endsWith(this.pathSeparator) :
-						!path.endsWith(this.pathSeparator));
+				return (pattern.endsWith(this.pathSeparator) ? path.endsWith(this.pathSeparator) : !path.endsWith(this.pathSeparator));
 			}
 			if (!fullMatch) {
 				return true;
@@ -114,17 +95,15 @@ public class AntPathMatcher implements PathMatcher {
 				}
 			}
 			return true;
-		}
-		else if (pattIdxStart > pattIdxEnd) {
+		} else if (pattIdxStart > pattIdxEnd) {
 			// String not exhausted, but pattern is. Failure.
 			return false;
-		}
-		else if (!fullMatch && "**".equals(pattDirs[pattIdxStart])) {
+		} else if (!fullMatch && "**".equals(pattDirs[pattIdxStart])) {
 			// Path start definitely matches due to "**" part in pattern.
 			return true;
 		}
 
-		// up to last '**'
+		// Up to last '**'
 		while (pattIdxStart <= pattIdxEnd && pathIdxStart <= pathIdxEnd) {
 			String patDir = pattDirs[pattIdxEnd];
 			if (patDir.equals("**")) {
@@ -159,14 +138,12 @@ public class AntPathMatcher implements PathMatcher {
 				pattIdxStart++;
 				continue;
 			}
-			// Find the pattern between padIdxStart & padIdxTmp in str between
-			// strIdxStart & strIdxEnd
+			// Find the pattern between padIdxStart & padIdxTmp in str between strIdxStart & strIdxEnd
 			int patLength = (patIdxTmp - pattIdxStart - 1);
 			int strLength = (pathIdxEnd - pathIdxStart + 1);
 			int foundIdx = -1;
 
-			strLoop:
-			for (int i = 0; i <= strLength - patLength; i++) {
+			strLoop: for (int i = 0; i <= strLength - patLength; i++) {
 				for (int j = 0; j < patLength; j++) {
 					String subPat = pattDirs[pattIdxStart + j + 1];
 					String subStr = pathDirs[pathIdxStart + i + j];
@@ -264,5 +241,4 @@ public class AntPathMatcher implements PathMatcher {
 		Assert.state(result, "Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
 		return variables;
 	}
-
 }

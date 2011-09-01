@@ -22,7 +22,6 @@ import org.springframework.uaa.client.UaaServiceFactory;
  */
 @Component
 public class UaaRelatedComponentRegistrationHelper {
-
 	private Set<ServiceRegistration> registrations = new HashSet<ServiceRegistration>();
 	
 	protected void activate(ComponentContext context) {

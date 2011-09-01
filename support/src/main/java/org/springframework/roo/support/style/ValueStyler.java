@@ -31,5 +31,4 @@ public interface ValueStyler {
 	 * @return the styled String
 	 */
 	String style(Object value);
-
 }

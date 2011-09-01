@@ -35,11 +35,12 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class JLineShellComponent extends JLineShell {
 
+	// Constants
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	
 	// Fields
-    @Reference private ExecutionStrategy executionStrategy;
-    @Reference private Parser parser;
+	@Reference private ExecutionStrategy executionStrategy;
+	@Reference private Parser parser;
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private ComponentContext context;
 

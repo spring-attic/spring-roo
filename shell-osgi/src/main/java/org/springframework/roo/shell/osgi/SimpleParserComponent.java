@@ -26,7 +26,7 @@ import org.springframework.roo.support.api.AddOnSearch;
  * @since 1.1
  */
 @Component
-@Service(value=Parser.class) // important, as auto-detection includes CommandMarker which is unacceptable as we'd have a circular dependency to ourself
+@Service(value = Parser.class) // Important, as auto-detection includes CommandMarker which is unacceptable as we'd have a circular dependency to ourself
 @References(value = {
 	@Reference(name = "converter", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Converter.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE), 
 	@Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
@@ -105,7 +105,9 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 	}
 
 	@CliCommand(value = "help", help = "Shows system help")
-	public void obtainHelp(@CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") String buffer) {
+	public void obtainHelp(
+		@CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") String buffer) {
+		
 		super.obtainHelp(buffer);
 	}
 }

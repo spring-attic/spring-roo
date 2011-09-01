@@ -23,20 +23,19 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public interface UaaRegistrationService {
 
 	/**
 	 * A HTTP URL of an "empty file" that add-ons can request if they wish to eagerly perform a UAA upload.
 	 */
-	public static final String EMPTY_FILE_URL = "http://spring-roo-repository.springsource.org/empty_file.html";
+	String EMPTY_FILE_URL = "http://spring-roo-repository.springsource.org/empty_file.html";
 	
 	/**
 	 * Static representation of the Spring Roo product that should be used by any modules
 	 * requiring a product representation.
 	 */
-	public static final Product SPRING_ROO = VersionHelper.getProductFromManifest(UaaRegistrationServiceImpl.class, "Spring Roo");
+	Product SPRING_ROO = VersionHelper.getProductFromManifest(UaaRegistrationServiceImpl.class, "Spring Roo");
 
 	/**
 	 * Registers a new "feature use" within UAA. This method requires every feature to be a bundle

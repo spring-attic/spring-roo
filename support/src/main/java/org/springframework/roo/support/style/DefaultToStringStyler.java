@@ -34,7 +34,6 @@ public class DefaultToStringStyler implements ToStringStyler {
 
 	private final ValueStyler valueStyler;
 
-
 	/**
 	 * Create a new DefaultToStringStyler.
 	 * @param valueStyler the ValueStyler to use
@@ -94,5 +93,4 @@ public class DefaultToStringStyler implements ToStringStyler {
 	public void styleFieldSeparator(StringBuilder buffer) {
 		buffer.append(',');
 	}
-
 }

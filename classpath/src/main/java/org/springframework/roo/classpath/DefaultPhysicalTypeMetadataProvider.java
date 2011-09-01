@@ -46,7 +46,6 @@ import org.springframework.roo.support.util.Assert;
  * @author James Tyrrell
  * @since 1.2.0
  */
-
 @Component(immediate = true)
 @Service
 @References(
@@ -54,7 +53,15 @@ import org.springframework.roo.support.util.Assert;
 		@Reference(name = "memberHoldingDecorator", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MemberDetailsDecorator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 	}
 )
-public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadataProvider, FileEventListener{
+public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadataProvider, FileEventListener {
+
+	// Fields
+	@Reference private TypeParsingService typeParsingService;
+	@Reference private FileManager fileManager;
+	@Reference private MetadataService metadataService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeLocationService typeLocationService;
 
 	// Mutex
 	private final Object lock = new Object();
@@ -76,13 +83,6 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 			decorators.remove(decorator);
 		}
 	}
-
-	@Reference private TypeParsingService typeParsingService;
-	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeLocationService typeLocationService;
 
 	public String getProvidesType() {
 		return PhysicalTypeIdentifier.getMetadataIdentiferType();

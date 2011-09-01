@@ -8,5 +8,4 @@ public class EclipseTerminal extends UnsupportedTerminal {
 	public boolean isANSISupported() {
 		return false;
 	}
-
 }
