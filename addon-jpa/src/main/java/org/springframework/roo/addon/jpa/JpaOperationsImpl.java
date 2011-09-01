@@ -48,6 +48,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JpaOperationsImpl implements JpaOperations {
+	
+	// Constants
 	private static Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
 	private static final String DATABASE_URL = "database.url";
 	private static final String DATABASE_DRIVER = "database.driverClassName";
@@ -57,6 +59,8 @@ public class JpaOperationsImpl implements JpaOperations {
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
 	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
 	private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency("org.glassfish.web", "jstl-impl", "1.2");
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
@@ -90,7 +94,6 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	public void configureJpa(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String transactionManager, String persistenceUnit) {
-		// long start = System.currentTimeMillis();
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(jdbcDatabase, "JDBC database required");
 
@@ -173,15 +176,15 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 			String validationQuery = "";
 			switch (jdbcDatabase) {
-			case ORACLE:
-				validationQuery = "SELECT 1 FROM DUAL";
-				break;
-			case POSTGRES:
-				validationQuery = "SELECT version();";
-				break;
-			case MYSQL:
-				validationQuery = "SELECT 1";
-				break;
+				case ORACLE:
+					validationQuery = "SELECT 1 FROM DUAL";
+					break;
+				case POSTGRES:
+					validationQuery = "SELECT version();";
+					break;
+				case MYSQL:
+					validationQuery = "SELECT 1";
+					break;
 			}
 			if (StringUtils.hasText(validationQuery)) {
 				dataSource.appendChild(createPropertyElement("validationQuery", validationQuery, appCtx));
@@ -217,17 +220,17 @@ public class JpaOperationsImpl implements JpaOperations {
 		entityManagerFactory.setAttribute("id", "entityManagerFactory");
 
 		switch (jdbcDatabase) {
-		case GOOGLE_APP_ENGINE:
-			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
-			entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), appCtx));
-			break;
-		default:
-			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-			entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), appCtx));
-			if (!ormProvider.name().startsWith("DATANUCLEUS")) {
-				entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
-			}
-			break;
+			case GOOGLE_APP_ENGINE:
+				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), appCtx));
+				break;
+			default:
+				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), appCtx));
+				if (!ormProvider.name().startsWith("DATANUCLEUS")) {
+					entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
+				}
+				break;
 		}
 
 		root.appendChild(entityManagerFactory);
@@ -296,79 +299,79 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Add provider element
 		Element provider = persistence.createElement("provider");
 		switch (jdbcDatabase) {
-		case GOOGLE_APP_ENGINE:
-			persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME));
-			persistenceUnitElement.removeAttribute("transaction-type");
-			provider.setTextContent(ormProvider.getAlternateAdapter());
-			break;
-		case DATABASE_DOT_COM:
-			persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
-			persistenceUnitElement.removeAttribute("transaction-type");
-			provider.setTextContent(ormProvider.getAlternateAdapter());
-			break;
-		default:
-			persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
-			persistenceUnitElement.setAttribute("transaction-type", "RESOURCE_LOCAL");
-			provider.setTextContent(ormProvider.getAdapter());
-			break;
+			case GOOGLE_APP_ENGINE:
+				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME));
+				persistenceUnitElement.removeAttribute("transaction-type");
+				provider.setTextContent(ormProvider.getAlternateAdapter());
+				break;
+			case DATABASE_DOT_COM:
+				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
+				persistenceUnitElement.removeAttribute("transaction-type");
+				provider.setTextContent(ormProvider.getAlternateAdapter());
+				break;
+			default:
+				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
+				persistenceUnitElement.setAttribute("transaction-type", "RESOURCE_LOCAL");
+				provider.setTextContent(ormProvider.getAdapter());
+				break;
 		}
 		persistenceUnitElement.appendChild(provider);
 
 		// Add properties
 		Element properties = persistence.createElement("properties");
 		switch (ormProvider) {
-		case HIBERNATE:
-			properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
-			properties.appendChild(persistence.createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
-			String hbm2dll = "create";
-			if (jdbcDatabase == JdbcDatabase.DB2_400) {
-				hbm2dll = "validate";
-			}
-			properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", hbm2dll, persistence));
-			properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
-			properties.appendChild(createPropertyElement("hibernate.connection.charSet", "UTF-8", persistence));
-			properties.appendChild(persistence.createComment(" Uncomment the following two properties for JBoss only "));
-			properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.apply_to_ddl\" value=\"false\" /"));
-			properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.autoregister_listeners\" value=\"false\" /"));
-			break;
-		case OPENJPA:
-			properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
-			properties.appendChild(persistence.createComment(" value=\"buildSchema\" to runtime forward map the DDL SQL; value=\"validate\" makes no changes to the database ")); // ROO-627
-			properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));
-			properties.appendChild(createPropertyElement("openjpa.RuntimeUnenhancedClasses", "supported", persistence));
-			break;
-		case ECLIPSELINK:
-			properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
-			properties.appendChild(persistence.createComment(" value=\"drop-and-create-tables\" to build a new database on each run; value=\"create-tables\" creates new tables if needed; value=\"none\" makes no changes to the database ")); // ROO-627
-			properties.appendChild(createPropertyElement("eclipselink.ddl-generation", "drop-and-create-tables", persistence));
-			properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
-			properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
-			break;
-		case DATANUCLEUS:
-		case DATANUCLEUS_2:
-			String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName);
-			switch (jdbcDatabase) {
-			case GOOGLE_APP_ENGINE:
-				properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
-				properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
-				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
-				break;
-			case DATABASE_DOT_COM:
-				properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "force", persistence));
-				properties.appendChild(createPropertyElement("datanucleus.Optimistic", "false", persistence));
-				properties.appendChild(createPropertyElement("datanucleus.datastoreTransactionDelayOperations", "true", persistence));
-				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
-				break;
-			default:
-				properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", jdbcDatabase.getDriverClassName(), persistence));
-				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
-				ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-				connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-				if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
-					userName = StringUtils.hasText(userName) ? userName : "sa";
+			case HIBERNATE:
+				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
+				properties.appendChild(persistence.createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
+				String hbm2dll = "create";
+				if (jdbcDatabase == JdbcDatabase.DB2_400) {
+					hbm2dll = "validate";
 				}
-				properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "rdbms", persistence));
-			}
+				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", hbm2dll, persistence));
+				properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
+				properties.appendChild(createPropertyElement("hibernate.connection.charSet", "UTF-8", persistence));
+				properties.appendChild(persistence.createComment(" Uncomment the following two properties for JBoss only "));
+				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.apply_to_ddl\" value=\"false\" /"));
+				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.autoregister_listeners\" value=\"false\" /"));
+				break;
+			case OPENJPA:
+				properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
+				properties.appendChild(persistence.createComment(" value=\"buildSchema\" to runtime forward map the DDL SQL; value=\"validate\" makes no changes to the database ")); // ROO-627
+				properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));
+				properties.appendChild(createPropertyElement("openjpa.RuntimeUnenhancedClasses", "supported", persistence));
+				break;
+			case ECLIPSELINK:
+				properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
+				properties.appendChild(persistence.createComment(" value=\"drop-and-create-tables\" to build a new database on each run; value=\"create-tables\" creates new tables if needed; value=\"none\" makes no changes to the database ")); // ROO-627
+				properties.appendChild(createPropertyElement("eclipselink.ddl-generation", "drop-and-create-tables", persistence));
+				properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
+				properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
+				break;
+			case DATANUCLEUS:
+			case DATANUCLEUS_2:
+				String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName);
+				switch (jdbcDatabase) {
+					case GOOGLE_APP_ENGINE:
+						properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
+						break;
+					case DATABASE_DOT_COM:
+						properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "force", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.Optimistic", "false", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.datastoreTransactionDelayOperations", "true", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
+						break;
+					default:
+						properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", jdbcDatabase.getDriverClassName(), persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
+						ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+						connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
+						if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
+							userName = StringUtils.hasText(userName) ? userName : "sa";
+						}
+						properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "rdbms", persistence));
+				}
 
 			if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) { 
 				// These are specified in the connection properties file
@@ -513,19 +516,19 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		// Log message to console
 		switch (jdbcDatabase) {
-		case ORACLE:
-		case DB2_EXPRESS_C:
-		case DB2_400:
-			logger.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
-			break;
-		case POSTGRES:
-		case DERBY_EMBEDDED:
-		case DERBY_CLIENT:
-		case MSSQL:
-		case SYBASE:
-		case MYSQL:
-			logger.warning("Please update your database details in src/main/resources/META-INF/spring/database.properties.");
-			break;
+			case ORACLE:
+			case DB2_EXPRESS_C:
+			case DB2_400:
+				logger.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+				break;
+			case POSTGRES:
+			case DERBY_EMBEDDED:
+			case DERBY_CLIENT:
+			case MSSQL:
+			case SYBASE:
+			case MYSQL:
+				logger.warning("Please update your database details in src/main/resources/META-INF/spring/database.properties.");
+				break;
 		}
 	}
 
