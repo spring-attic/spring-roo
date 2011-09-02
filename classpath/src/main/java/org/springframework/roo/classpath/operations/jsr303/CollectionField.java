@@ -15,10 +15,10 @@ import org.springframework.roo.support.util.Assert;
 public abstract class CollectionField extends FieldDetails {
 	
 	/** Whether the JSR 303 @Size annotation will be added; provides the "min" attribute (defaults to 0) */
-	private Integer sizeMin = null;
+	private Integer sizeMin;
 	
 	/** Whether the JSR 303 @Size annotation will be added; provides the "max" attribute (defaults to {@link Integer#MAX_VALUE}) */
-	private Integer sizeMax = null;
+	private Integer sizeMax;
 	
 	/** The generic type that will be used within the collection */
 	private JavaType genericParameterTypeName;

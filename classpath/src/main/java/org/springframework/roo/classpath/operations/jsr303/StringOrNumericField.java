@@ -15,10 +15,10 @@ import org.springframework.roo.model.JavaType;
 public class StringOrNumericField extends FieldDetails {
 		
 	/** Whether the JSR 303 @DecimalMin annotation will be added */
-	private String decimalMin = null;
+	private String decimalMin;
 	
 	/** Whether the JSR 303 @DecimalMax annotation will be added */
-	private String decimalMax = null;
+	private String decimalMax;
 	
 	public StringOrNumericField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);

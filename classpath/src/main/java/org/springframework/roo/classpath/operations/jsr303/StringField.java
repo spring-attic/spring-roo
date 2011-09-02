@@ -22,16 +22,21 @@ import org.springframework.roo.model.JavaType;
 public class StringField extends StringOrNumericField {
 	
 	/** Whether the JSR 303 @Size annotation will be added; provides the "min" attribute (defaults to 0) */
-	private Integer sizeMin = null;
+	private Integer sizeMin;
 	
 	/** Whether the JSR 303 @Size annotation will be added; provides the "max" attribute (defaults to {@link Integer#MAX_VALUE}) */
-	private Integer sizeMax = null;
+	private Integer sizeMax;
 
 	/** Whether the JSR 3030 @Pattern annotation will be added */
-	private String regexp = null;
+	private String regexp;
 	
+	@Deprecated
 	public StringField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
+	}
+
+	public StringField(String physicalTypeIdentifier, JavaSymbolName fieldName) {
+		super(physicalTypeIdentifier, JavaType.STRING, fieldName);
 	}
 
 	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {

@@ -33,7 +33,7 @@ public class ReferenceField extends FieldDetails {
 	private String joinColumnName;
 	private String referencedColumnName;
 	private Fetch fetch = null;
-	private Cardinality cardinality = null;
+	private Cardinality cardinality;
 
 	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, Cardinality cardinality) {		
 		super(physicalTypeIdentifier, fieldType, fieldName);

@@ -18,16 +18,16 @@ import org.springframework.roo.support.util.Assert;
 public class NumericField extends StringOrNumericField {
 
 	/** Whether the JSR 303 @Min annotation will be added */
-	private Long min = null;
+	private Long min;
 	
 	/** Whether the JSR 303 @Max annotation will be added */
-	private Long max = null;
+	private Long max;
 	
 	/** Whether the JSR 303 @Digits annotation will be added (you must also set digitsFractional) */
-	private Integer digitsInteger = null;
+	private Integer digitsInteger;
 	
 	/** Whether the JSR 303 @Digits annotation will be added (you must also set digitsInteger) */
-	private Integer digitsFraction = null;
+	private Integer digitsFraction;
 
 	public NumericField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);

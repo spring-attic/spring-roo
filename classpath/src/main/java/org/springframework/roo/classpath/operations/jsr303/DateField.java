@@ -25,20 +25,20 @@ import org.springframework.roo.model.JavaType;
 public class DateField extends FieldDetails {
 	
 	/** Whether the JSR 220 @Temporal annotation will be added */
-	private DateFieldPersistenceType persistenceType = null;
+	private DateFieldPersistenceType persistenceType;
 	
 	/** Whether the JSR 303 @Past annotation will be added */
-	private boolean past = false;
+	private boolean past;
 	
 	/** Whether the JSR 303 @Future annotation will be added */
-	private boolean future = false;
+	private boolean future;
 
-	private DateTime dateFormat = null;
+	private DateTime dateFormat;
 	
-	private DateTime timeFormat = null;
+	private DateTime timeFormat;
 
 	/** Custom date formatting through a DateTime pattern such as yyyy/mm/dd h:mm:ss a. */
-	private String pattern = null;
+	private String pattern;
 
 	public DateField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);

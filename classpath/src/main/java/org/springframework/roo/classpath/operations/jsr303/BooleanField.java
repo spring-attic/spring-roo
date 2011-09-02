@@ -12,10 +12,10 @@ import org.springframework.roo.model.JavaType;
 public class BooleanField extends FieldDetails {
 
 	/** Whether the JSR 303 @AssertTrue annotation will be added */
-	private boolean assertTrue = false;
+	private boolean assertTrue;
 
 	/** Whether the JSR 303 @AssertFalse annotation will be added */
-	private boolean assertFalse = false;
+	private boolean assertFalse;
 
 	public BooleanField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
