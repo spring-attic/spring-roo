@@ -7,7 +7,7 @@
       xmlns:p="http://primefaces.prime.com.tr/ui">
 <ui:composition>
     <title>#{applicationBean.appName}</title>
-    <link type="text/css" rel="stylesheet" href="#{request.contextPath}/css/standard.css" />
-    <script type="text/javascript" src="#{request.contextPath}/js/calendar.js" />
+    <h:outputStylesheet library="css" name="standard.css" />
+    <h:outputScript library="js" name="calendar.js" />
 </ui:composition>
 </html>
