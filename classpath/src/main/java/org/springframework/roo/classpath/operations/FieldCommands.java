@@ -207,7 +207,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
-		StringField fieldDetails = new StringField(physicalTypeIdentifier, new JavaType("java.lang.String"), fieldName);
+		StringField fieldDetails = new StringField(physicalTypeIdentifier, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (decimalMin != null) fieldDetails.setDecimalMin(decimalMin);
@@ -247,9 +247,8 @@ public class FieldCommands implements CommandMarker {
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (future != null) fieldDetails.setFuture(future);
-		if (past != null) fieldDetails.setPast(past);
-		if (persistenceType != null) fieldDetails.setPersistenceType(persistenceType);
-		if (persistenceType == null) fieldDetails.setPersistenceType(DateFieldPersistenceType.JPA_TIMESTAMP);
+		if (past != null) fieldDetails.setPast(past);		
+		if (isDateField(fieldType)) fieldDetails.setPersistenceType(persistenceType != null ? persistenceType : DateFieldPersistenceType.JPA_TIMESTAMP);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
 		if (dateFormat != null) fieldDetails.setDateFormat(dateFormat);
@@ -431,4 +430,9 @@ public class FieldCommands implements CommandMarker {
 	
 		insertField(fieldDetails, permitReservedWords, false);
 	}
+	
+	private boolean isDateField(final JavaType fieldType) {
+		return fieldType.equals(new JavaType("java.util.Date")) || fieldType.equals(new JavaType("java.util.Calendar")) || fieldType.equals(new JavaType("java.util.GregorianCalendar"));
+	}
+
 }
