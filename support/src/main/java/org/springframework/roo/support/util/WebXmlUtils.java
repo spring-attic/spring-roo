@@ -16,11 +16,17 @@ import org.w3c.dom.NodeList;
  * @since 1.1
  */
 public final class WebXmlUtils {
-	
+
 	// Constants
 	private static final String WHITESPACE = "[ \t\r\n]";
-	
+
 	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private WebXmlUtils() {
+	}
+
+    /**
 	 * Set the display-name element in the web.xml document.
 	 * 
 	 * @param displayName (required)
@@ -600,9 +606,4 @@ public final class WebXmlUtils {
             return description;
         }
     }
-    
-    /**
-     * Constructor is private to prevent instantiation
-     */
-    private WebXmlUtils() {}
 }

@@ -40,10 +40,10 @@ public class Column {
 		this.typeName = typeName;
 		this.columnSize = columnSize;
 		this.scale = scale;
-		initialize();
+		init();
 	}
 
-	private void initialize() {
+	private void init() {
 		switch (dataType) {
 			case Types.CHAR:
 				if (columnSize > 1) {

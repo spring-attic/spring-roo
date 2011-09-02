@@ -13,16 +13,18 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class AbstractMetadataCache implements MetadataCache {
 
-	private LinkedHashMap<String,MetadataItem> map;
+	// Constants
 	private static final float hashTableLoadFactor = 0.75f;
+	
+	// Fields
+	private LinkedHashMap<String,MetadataItem> map;
 	private int maxCapacity = 100000;
 	
 	protected AbstractMetadataCache() {
-		initialize();
+		init();
 	}
 	
 	protected int getCacheSize() {
@@ -34,7 +36,7 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 			maxCapacity = 100;
 		}
 		this.maxCapacity = maxCapacity;
-		initialize();
+		init();
 	}
 
 	public int getMaxCapacity() {
@@ -57,10 +59,10 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 	}
 
 	public void evictAll() {
-		initialize();
+		init();
 	}
 	
-	private void initialize() {
+	private void init() {
 		int hashTableCapacity = (int) Math.ceil(maxCapacity / hashTableLoadFactor) + 1;
 		map = new LinkedHashMap<String,MetadataItem>(hashTableCapacity, hashTableLoadFactor, true) {
 			private static final long serialVersionUID = 1;
@@ -70,5 +72,4 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 			}
 		};
 	}
-
 }

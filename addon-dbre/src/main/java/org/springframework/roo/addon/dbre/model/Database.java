@@ -45,7 +45,7 @@ public class Database {
 	Database(final Set<Table> tables) {
 		Assert.notNull(tables, "Tables required");
 		this.tables = tables;
-		initialize();
+		init();
 	}
 
 	public Set<Table> getTables() {
@@ -118,7 +118,7 @@ public class Database {
 	/**
 	 * Initialises the model by establishing the relationships between elements in this model eg. in foreign keys etc.
 	 */
-	private void initialize() {
+	private void init() {
 		Set<Schema> schemas = new HashSet<Schema>();
 		for (Table table : tables) {
 			schemas.add(table.getSchema());
