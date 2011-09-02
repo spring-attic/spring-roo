@@ -65,8 +65,8 @@
         </p:dialog>
         <p:confirmDialog id="deleteDialog" widgetVar="deleteDialog" message="Are you sure you want to delete this record?" showEffect="fade" hideEffect="explode" header="Confirm Deletion" severity="alarm">
             <h:form id="deleteForm">
-                <p:commandButton value="Yes" action="#{__LC_DOMAIN_TYPE__Bean.delete}" styleClass="form_button" update="data" oncomplete="deleteDialog.hide()" />
-                <p:commandButton value="No" onclick="deleteDialog.hide()" styleClass="form_button" type="button" />
+                <p:commandButton value="Yes" action="#{__LC_DOMAIN_TYPE__Bean.delete}" update="data" oncomplete="deleteDialog.hide()" />
+                <p:commandButton value="No" onclick="deleteDialog.hide()" type="button" />
             </h:form>
         </p:confirmDialog>
     </ui:define>
