@@ -164,8 +164,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", document, "Creates the Spring Container shared by all Servlets and Filters");
 		WebXmlUtils.addServlet(projectOperations.getProjectMetadata().getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
-		WebXmlUtils.setSessionTimeout(new Integer(10), document, null);
-		// WebXmlUtils.addWelcomeFile("/", webXml, null);
+		WebXmlUtils.setSessionTimeout(10, document, null);
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", document, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", document, null);
 
