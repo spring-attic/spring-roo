@@ -2,7 +2,6 @@ package org.springframework.roo.classpath.operations;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
@@ -30,7 +29,11 @@ import org.w3c.dom.Document;
  */
 @Component(componentAbstract = true)
 public abstract class AbstractOperations {
+	
+	// Constants
 	protected static Logger logger = HandlerUtils.getLogger(AbstractOperations.class);
+	
+	// Fields
 	@Reference protected FileManager fileManager;
 	protected ComponentContext context;
 
@@ -39,15 +42,7 @@ public abstract class AbstractOperations {
 	}
 	
 	public Document getDocumentTemplate(String templateName) {
-		Document document;
-		try {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), templateName);
-			Assert.notNull(templateInputStream, "Could not acquire " + templateName + " template");
-			document = XmlUtils.readXml(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		return document;
+		return XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), templateName));
 	}
 
 	/**
