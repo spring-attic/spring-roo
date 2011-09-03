@@ -16,17 +16,16 @@ public abstract class LayerAdapter implements LayerProvider {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LayerProvider other = (LayerProvider) obj;
-		if (getLayerPosition() == other.getLayerPosition()) {
-			return true;
-		} else {
+		}
+		if (obj == null) {
 			return false;
 		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		LayerProvider other = (LayerProvider) obj;
+		return getLayerPosition() == other.getLayerPosition();
 	}
 }
