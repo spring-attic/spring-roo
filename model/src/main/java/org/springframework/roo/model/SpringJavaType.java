@@ -24,6 +24,7 @@ public final class SpringJavaType {
 	public static final JavaType CONTEXT_CONFIGURATION = new JavaType("org.springframework.test.context.ContextConfiguration");
 	public static final JavaType CONTROLLER = new JavaType("org.springframework.stereotype.Controller");
 	public static final JavaType CONVERSION_SERVICE = new JavaType("org.springframework.core.convert.ConversionService");
+	public static final JavaType DATA_ID = new JavaType("org.springframework.data.annotation.Id");
 	public static final JavaType DATE_TIME_FORMAT = new JavaType("org.springframework.format.annotation.DateTimeFormat");
 	public static final JavaType FORMATTER_REGISTRY = new JavaType("org.springframework.format.FormatterRegistry");
 	public static final JavaType HTTP_HEADERS = new JavaType("org.springframework.http.HttpHeaders");

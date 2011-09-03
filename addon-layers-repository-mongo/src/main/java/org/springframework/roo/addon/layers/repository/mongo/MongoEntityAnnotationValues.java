@@ -1,0 +1,41 @@
+package org.springframework.roo.addon.layers.repository.mongo;
+
+import java.math.BigInteger;
+
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+
+/**
+ * The values of a {@link RooRepositoryMongo} annotation.
+ * 
+ * @author Stefan Schmidt
+ * @since 1.2.0
+ */
+public class MongoEntityAnnotationValues extends AbstractAnnotationValues {
+
+	// Fields
+	@AutoPopulate private JavaType identifierType = new JavaType(BigInteger.class.getName());
+	
+	/**
+	 * Constructor
+	 *
+	 * @param governorPhysicalTypeMetadata the metadata to parse (required)
+	 */
+	public MongoEntityAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+		super(governorPhysicalTypeMetadata, RooJavaType.ROO_MONGO_ENTITY);
+		AutoPopulationUtils.populate(this, annotationMetadata);
+	}
+
+	/**
+	 * Returns the Identifier type for this domain entity
+	 * 
+	 * @return a non-<code>null</code> type
+	 */
+	public JavaType getIdentifierType() {
+		return identifierType;
+	}
+}

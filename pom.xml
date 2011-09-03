@@ -70,6 +70,7 @@
         <module>addon-cloud-foundry</module>
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
+		<module>addon-layers-repository-mongo</module>
         <module>annotations</module>
     </modules>
     <organization>
