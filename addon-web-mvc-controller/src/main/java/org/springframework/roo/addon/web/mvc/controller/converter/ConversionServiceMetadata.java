@@ -215,11 +215,12 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		Assert.notNull(idType, "ID type is required for " + targetType);
 		final JavaType converterJavaType = SpringJavaType.getConverterType(JavaType.STRING, targetType);
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
+		final String idTypeName = idType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("public " + targetType.getFullyQualifiedTypeName() + " convert(String id) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return getObject().convert(getObject().convert(id, " + idType.getSimpleTypeName() + ".class), " + targetType.getSimpleTypeName() + ".class);");
+		bodyBuilder.appendFormalLine("return getObject().convert(getObject().convert(id, " + idTypeName + ".class), " + targetType.getSimpleTypeName() + ".class);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();
