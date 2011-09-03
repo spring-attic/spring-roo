@@ -576,6 +576,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "String"));
 			}
 			bodyBuilder.appendFormalLine(fieldValueVar + ".setId(\"" + fieldValueVar + "\");");
+			bodyBuilder.appendFormalLine(fieldValueVar + ".setStyle(\"font-weight:normal\");");
 			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");	
 			bodyBuilder.appendFormalLine("");
 		}

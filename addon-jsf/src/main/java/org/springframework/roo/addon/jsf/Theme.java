@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
 /**
- * Enum to represent themes. PrimeFaces is integrated with the <a href="http://jqueryui.com/themeroller/">ThemeRoller</a> CSS framework.
+ * Enum to represent PrimeFaces themes. PrimeFaces is integrated with the <a href="http://jqueryui.com/themeroller/">ThemeRoller</a> CSS framework.
  * 
  * @author Alan Stewart
  * @since 1.2.0

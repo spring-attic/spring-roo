@@ -263,7 +263,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			return;
 		}
 
-		Document document = getDocumentTemplate("web-template.xml");
+		Document document = getDocumentTemplate("WEB-INF/web-template.xml");
 		String projectName = projectOperations.getProjectMetadata().getProjectName();
 		WebXmlUtils.setDisplayName(projectName, document, null);
 		WebXmlUtils.setDescription("Roo generated " + projectName + " application", document, null);
@@ -279,7 +279,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		InputStream inputStream = null;
 		try {
-			inputStream = TemplateUtils.getTemplate(getClass(), "faces-config-template.xml");
+			inputStream = TemplateUtils.getTemplate(getClass(), "WEB-INF/faces-config-template.xml");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(getFacesConfigFile(), input, false);
