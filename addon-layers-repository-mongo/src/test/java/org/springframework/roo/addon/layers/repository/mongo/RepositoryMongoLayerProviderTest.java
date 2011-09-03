@@ -16,11 +16,9 @@ import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustom
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Pair;
-
 
 /**
  * Unit test of {@link RepositoryMongoLayerProvider}
@@ -61,7 +59,6 @@ public class RepositoryMongoLayerProviderTest {
 		when(mockRepositoryLocator.getRepositories(mockTargetEntity)).thenReturn(Arrays.asList(mockRepositoryDetails));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsForNonRepositoryLayerMethod() {
 		// Invoke
@@ -71,7 +68,6 @@ public class RepositoryMongoLayerProviderTest {
 		assertNull(additions);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetAdditionsWhenNoRepositoriesExist() {
 		// Invoke
@@ -89,7 +85,7 @@ public class RepositoryMongoLayerProviderTest {
 	 * @param methodKey
 	 * @param callerParameters
 	 */
-	private void assertMethodCall(final String expectedMethodCall, final MethodMetadataCustomDataKey methodKey, final Pair<JavaType, JavaSymbolName>... callerParameters) {
+	private void assertMethodCall(final String expectedMethodCall, final MethodMetadataCustomDataKey methodKey, final MethodParameter... callerParameters) {
 		// Set up
 		setUpMockRepository();
 		
@@ -100,7 +96,6 @@ public class RepositoryMongoLayerProviderTest {
 		assertEquals(expectedMethodCall, additions.getMethodCall());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetFindAllAdditions() {
 		assertMethodCall("clinicRepo.findAll()", FIND_ALL_METHOD);
