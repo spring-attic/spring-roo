@@ -20,11 +20,15 @@ import org.springframework.roo.metadata.MetadataService;
  */
 @Component
 public class AutomaticProjectUpgradeService implements MetadataNotificationListener {
+	
+	// Constants
 	private static final String MY_BUNDLE_SYMBOLIC_NAME = AutomaticProjectUpgradeService.class.getPackage().getName();
+	
+	// Fields
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
-	private VersionInfo bundleVersionInfo = null;
+	private VersionInfo bundleVersionInfo;
 	
 	private static final String PROJECT_METADATA_IDENTIFIER = ProjectMetadata.getProjectIdentifier();
 	

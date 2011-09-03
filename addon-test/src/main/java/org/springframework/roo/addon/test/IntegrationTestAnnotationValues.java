@@ -16,7 +16,7 @@ import org.springframework.roo.model.RooJavaType;
 public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 	
 	// From annotation
-	@AutoPopulate private JavaType entity = null;
+	@AutoPopulate private JavaType entity;
 	@AutoPopulate private boolean count = true; 
 	@AutoPopulate private boolean find = true; 
 	@AutoPopulate private boolean findEntries = true; 

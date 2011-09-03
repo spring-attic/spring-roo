@@ -30,9 +30,11 @@ import org.springframework.roo.model.JavaType;
  * @since 1.0
  */
 public class ReferenceField extends FieldDetails {
+	
+	// Fields
 	private String joinColumnName;
 	private String referencedColumnName;
-	private Fetch fetch = null;
+	private Fetch fetch;
 	private Cardinality cardinality;
 
 	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, Cardinality cardinality) {		

@@ -54,6 +54,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class GwtOperationsImpl implements GwtOperations, MetadataNotificationListener {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private GwtTypeService gwtTypeService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -62,7 +64,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	private ComponentContext context;
-	private Boolean wasGaeEnabled = null;
+	private Boolean wasGaeEnabled;
 
 	protected void activate(ComponentContext context) {
 		this.context = context;

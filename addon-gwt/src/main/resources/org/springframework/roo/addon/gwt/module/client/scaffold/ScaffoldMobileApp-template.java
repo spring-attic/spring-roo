@@ -37,6 +37,10 @@ __GAE_IMPORT__
  * Mobile application for browsing entities.
  */
 public class ScaffoldMobileApp extends ScaffoldApp {
+	
+	// Constants
+	private static final Logger log = Logger.getLogger(Scaffold.class.getName());
+	public static final Place ROOT_PLACE = new Place() {};
 
 	/**
 	 * The root activity that shows all entities.
@@ -74,8 +78,6 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		}
 	}
 
-	public static final Place ROOT_PLACE = new Place() {};
-
 	private static MobileListResources res = GWT.create(MobileListResources.class);
 
 	/**
@@ -89,9 +91,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		return res;
 	}
 
-	private IsScaffoldMobileActivity lastActivity = null;
-
-	private static final Logger log = Logger.getLogger(Scaffold.class.getName());
+	private IsScaffoldMobileActivity lastActivity;
 
 	private final ScaffoldMobileShell shell;
 	private final ScaffoldMobileActivities scaffoldMobileActivities;

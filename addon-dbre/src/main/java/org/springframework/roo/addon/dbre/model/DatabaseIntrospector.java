@@ -20,10 +20,12 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class DatabaseIntrospector extends AbstractIntrospector {
+	
+	// Fields
 	private Set<Schema> schemas;
 	private boolean view;
-	private Set<String> includeTables = null;
-	private Set<String> excludeTables = null;
+	private Set<String> includeTables;
+	private Set<String> excludeTables;
 
 	public DatabaseIntrospector(Connection connection, Set<Schema> schemas, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
 		super(connection);

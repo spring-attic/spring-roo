@@ -32,7 +32,11 @@ import org.springframework.roo.support.util.ExceptionUtils;
 @Component(immediate = true)
 @Service
 public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher implements ProcessManager {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(DefaultProcessManager.class);
+	
+	// Fields
 	@Reference private UndoManager undoManager;
 	@Reference private FileMonitorService fileMonitorService;
 	@Reference private StartLevel startLevel;
@@ -40,7 +44,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	private long minimumDelayBetweenPoll = -1; // How many ms must pass at minimum between each poll (negative denotes auto-scaling; 0 = never)
 	private long lastPollTime = 0; // What time the last poll was completed
 	private long lastPollDuration = 0; // How many ms the last poll actually took
-	private String workingDir = null; // The working directory of the current roo project
+	private String workingDir; // The working directory of the current roo project
 	
 	protected void activate(ComponentContext context) {
 		// Obtain the working directory from the framework properties

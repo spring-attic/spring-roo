@@ -26,10 +26,12 @@ import org.springframework.roo.support.util.HexUtils;
  *
  */
 public class MonitoredOutputStream extends ByteArrayOutputStream {
+	
+	// Fields
 	private File file;
 	private NotifiableFileMonitorService fileMonitorService;
 	private ManagedMessageRenderer managedMessageRenderer;
-	private static MessageDigest sha = null;
+	private static MessageDigest sha;
 	
 	static {
 		try {
@@ -81,5 +83,4 @@ public class MonitoredOutputStream extends ByteArrayOutputStream {
 			fileMonitorService.notifyChanged(fileCanonicalPath);
 		}
 	}
-	
 }

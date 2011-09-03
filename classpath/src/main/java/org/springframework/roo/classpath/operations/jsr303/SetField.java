@@ -33,11 +33,13 @@ import org.springframework.roo.model.JavaType;
  */
 public class SetField extends CollectionField {
 	
+	
+	// Fields
 	/** Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be added */
 	private JavaSymbolName mappedBy;
 	
 	private Cardinality cardinality;
-	private Fetch fetch = null;
+	private Fetch fetch;
 	
 	public SetField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, JavaType genericParameterTypeName, Cardinality cardinality) {
 		super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);

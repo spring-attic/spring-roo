@@ -48,9 +48,13 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Component
 @Service
 public class CloudFoundryOperationsImpl extends AbstractFlashingObject implements CloudFoundryOperations {
+	
+	// Constants
 	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
+	
+	// Fields
 	@Reference private CloudFoundrySession session;
-	private AppCloudClient client = null;
+	private AppCloudClient client;
 
 	public void info() {
 		executeCommand(new CloudCommand("Cloud information failed to be retrieved.") {

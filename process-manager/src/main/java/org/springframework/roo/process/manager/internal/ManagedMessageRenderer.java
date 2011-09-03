@@ -8,13 +8,17 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 public class ManagedMessageRenderer {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(ManagedMessageRenderer.class);
+	
+	// Fields
 	private FilenameResolver filenameResolver;
 	private File file;
-	private String descriptionOfChange = null;
+	private String descriptionOfChange;
 	private boolean createOperation;
-	private String hashCode = null;
-	private boolean includeHashCode = false;
+	private String hashCode;
+	private boolean includeHashCode;
 	
 	public void setDescriptionOfChange(String message) {
 		this.descriptionOfChange = message;
