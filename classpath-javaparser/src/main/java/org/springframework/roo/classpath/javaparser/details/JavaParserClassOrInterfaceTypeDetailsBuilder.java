@@ -181,6 +181,10 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 			}
 		}
 
+		List<ClassOrInterfaceType> implementsList;
+		List<AnnotationExpr> annotationsList = null;
+		List<BodyDeclaration> members = null;
+
 		if (clazz != null) {
 			List<ClassOrInterfaceType> extendsList = clazz.getExtends();
 			if (extendsList != null) {
@@ -203,6 +207,17 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 					classOrInterfaceTypeDetailsBuilder.setSuperclass((ClassOrInterfaceTypeDetails) superPtm.getMemberHoldingTypeDetails());
 				}
 			}
+			
+			implementsList = clazz.getImplements();
+			if (implementsList != null) {
+				for (ClassOrInterfaceType candidate : implementsList) {
+					JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
+					classOrInterfaceTypeDetailsBuilder.addImplementsType(javaType);
+				}
+			}
+
+			annotationsList = typeDeclaration.getAnnotations();
+			members = clazz.getMembers();
 		}
 
 		if (enumClazz != null) {
@@ -212,25 +227,18 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 					classOrInterfaceTypeDetailsBuilder.addEnumConstant(new JavaSymbolName(enumConstants.getName()));
 				}
 			}
+
+			implementsList = enumClazz.getImplements();
+			annotationsList = enumClazz.getAnnotations();
+			members = enumClazz.getMembers();
 		}
 
-		List<ClassOrInterfaceType> implementsList = clazz == null ? enumClazz.getImplements() : clazz.getImplements();
-		if (implementsList != null) {
-			for (ClassOrInterfaceType candidate : implementsList) {
-				JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
-				classOrInterfaceTypeDetailsBuilder.addImplementsType(javaType);
-			}
-		}
-
-		List<AnnotationExpr> annotationsList = clazz == null ? enumClazz.getAnnotations() : typeDeclaration.getAnnotations();
 		if (annotationsList != null) {
 			for (AnnotationExpr candidate : annotationsList) {
 				AnnotationMetadata md = JavaParserAnnotationMetadataBuilder.getInstance(candidate, compilationUnitServices).build();
 				classOrInterfaceTypeDetailsBuilder.addAnnotation(md);
 			}
 		}
-
-		List<BodyDeclaration> members = clazz == null ? enumClazz.getMembers() : clazz.getMembers();
 
 		if (members != null) {
 			// Now we've finished declaring the type, we should introspect for any inner types that can thus be referred to in other body members
