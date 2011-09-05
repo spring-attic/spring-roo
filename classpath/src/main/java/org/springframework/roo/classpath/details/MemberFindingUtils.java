@@ -166,6 +166,27 @@ public final class MemberFindingUtils {
 	}
 
 	/**
+	 * Locates a method with the name and parameter signature presented that is not declared by the presented MID.
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param methodName the method name to locate (can be <code>null</code>)
+	 * @param parameters the method parameter signature to locate (can be null
+	 * if no parameters are required)
+	 * @param excludingMid the MID that a found method cannot be declared by
+	 * @return the first located method, or <code>null</code> if the method name
+	 * is <code>null</code> or such a method cannot be found
+	 */
+	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName, final List<JavaType> parameters, String excludingMid) {
+		Assert.notNull(memberDetails, "Member details required");
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			MethodMetadata md = getDeclaredMethod(memberHoldingTypeDetails, methodName, parameters);
+			if (md != null && !md.getDeclaredByMetadataId().equals(excludingMid)) {
+				return md;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Locates the metadata for an annotation of the specified type from within
 	 * the given list.
 	 * 
@@ -510,6 +531,43 @@ public final class MemberFindingUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Indicates whether the requesting MID is annotated with the specified annotation.
+	 *
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param annotationMetadata the annotation to look for
+	 * @param requestingMid the MID interested in
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public static boolean isRequestingAnnotatedWith(MemberDetails memberDetails, AnnotationMetadata annotationMetadata, String requestingMid) {
+		Assert.notNull(memberDetails, "Member details required");
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			if (getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), annotationMetadata.getAnnotationType()) != null) {
+				if (memberHoldingTypeDetails.getDeclaredByMetadataId().equals(requestingMid)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Indicates whether the requesting MID is annotated with the specified annotation.
+	 *
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param methodName the name of the method being searched for
+	 * @param parameterTypes the parameters of the method being searched for
+	 * @param declaredByMetadataId the MID that the found method should belong to
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public static boolean isMethodDeclaredBy(MemberDetails memberDetails,  JavaSymbolName methodName, List<JavaType> parameterTypes, String declaredByMetadataId) {
+		Assert.notNull(memberDetails, "Member details required");
+		MethodMetadata methodMetadata = MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes);
+		return methodMetadata != null && methodMetadata.getDeclaredByMetadataId().equals(declaredByMetadataId);
 	}
 	
 	/**

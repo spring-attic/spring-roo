@@ -61,7 +61,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			final Map<ServiceLayerMethod, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 				final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, domainTypePlurals.get(domainType));
-				if (methodName != null && MemberFindingUtils.getMethod(governorDetails, methodName, method.getParameterTypes(domainType, idType)) == null) {
+				if (methodName != null && MemberFindingUtils.isMethodDeclaredBy(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
 					// The method is desired and the service class' Java file doesn't contain it, so generate it
 					final MemberTypeAdditions lowerLayerCallAdditions = crudAdditions.get(method);
 					if (lowerLayerCallAdditions != null) {
@@ -87,16 +87,16 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		
 		// Introduce the @Service annotation via the ITD if it's not already on the service's Java class
-		final AnnotationMetadata serviceAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorDetails, SERVICE);
-		if (serviceAnnotation == null) {
-			builder.addAnnotation(new AnnotationMetadataBuilder(SERVICE));
+		final AnnotationMetadata serviceAnnotation = new AnnotationMetadataBuilder(SERVICE).build();
+		if (MemberFindingUtils.isRequestingAnnotatedWith(governorDetails, serviceAnnotation, getId())) {
+			builder.addAnnotation(serviceAnnotation);
 		}
 		
 		// Introduce the @Transactional annotation via the ITD if it's not already on the service's Java class
 		if (annotationValues.isTransactional()) {
-			final AnnotationMetadata transactionalAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorDetails, TRANSACTIONAL);
-			if (transactionalAnnotation == null) {
-				builder.addAnnotation(new AnnotationMetadataBuilder(TRANSACTIONAL));
+			final AnnotationMetadata transactionalAnnotation = new AnnotationMetadataBuilder(TRANSACTIONAL).build();
+			if (MemberFindingUtils.isRequestingAnnotatedWith(governorDetails, serviceAnnotation, getId())) {
+				builder.addAnnotation(transactionalAnnotation);
 			}
 		}
 		

@@ -58,14 +58,14 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
-		
+
 		for (final JavaType domainType : domainTypeToIdTypeMap.keySet()) {
 			final String plural = domainTypePlurals.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 				builder.addMethod(getMethod(method, domainType, domainTypeToIdTypeMap.get(domainType), plural));
 			}
 		}
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
@@ -82,7 +82,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 */
 	private MethodMetadata getMethod(final ServiceLayerMethod method, final JavaType domainType, final JavaType idType, final String plural) {
 		final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, plural);
-		if (methodName == null || MemberFindingUtils.getMethod(governorDetails, methodName, null) != null) {
+		if (methodName != null && !MemberFindingUtils.isMethodDeclaredBy(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
 			// We don't want this method, or the governor already declares it
 			return null;
 		}

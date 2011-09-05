@@ -108,7 +108,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			builder.addMethod(getFinderFormMethod(finder));
 			builder.addMethod(getFinderMethod(finder));
 		}
-		
+
 		itdTypeDetails = builder.build();
 	}
 
@@ -246,7 +246,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	}
 
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		return MemberFindingUtils.getMethod(memberDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+		return MemberFindingUtils.getMethod(memberDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters), getId());
 	}
 	
 	private String uncapitalize(String term) {

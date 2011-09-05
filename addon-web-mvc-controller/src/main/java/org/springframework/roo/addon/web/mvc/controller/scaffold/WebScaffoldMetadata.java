@@ -679,7 +679,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName) {
 		for (MethodMetadata md : methods) {
-			if (md.getMethodName().equals(methodName)) {
+			if (md.getMethodName().equals(methodName) && !md.getDeclaredByMetadataId().equals(getId())) {
 				return md;
 			}
 		}
