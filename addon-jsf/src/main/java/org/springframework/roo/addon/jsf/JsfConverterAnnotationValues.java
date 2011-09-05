@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.jsf;
 
-import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
@@ -9,26 +9,21 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.model.JavaType;
 
 /**
- * Represents a parsed {@link RooJsfManagedBean} annotation.
+ * Represents a parsed {@link RooJsfConverter} annotation.
  * 
  * @author Alan Stewart
  * @since 1.2.0
  */
-public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
+public class JsfConverterAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
 	@AutoPopulate private JavaType entity;
-	@AutoPopulate private boolean includeOnMenu = true;
 
-	public JsfManagedBeanAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
+	public JsfConverterAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+		super(governorPhysicalTypeMetadata, ROO_JSF_CONVERTER);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 
 	public JavaType getEntity() {
 		return entity;
-	}
-
-	public boolean isIncludeOnMenu() {
-		return includeOnMenu;
 	}
 }

@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.jsf;
 
-import static org.springframework.roo.classpath.PhysicalTypeCategory.ENUMERATION;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
@@ -14,12 +13,10 @@ import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
 import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
-import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,14 +25,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -57,14 +50,14 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Implementation of {@link JsfManagedBeanMetadataProvider}.
+ * Implementation of {@link JsfConverterMetadataProvider}.
  * 
  * @author Alan Stewart
  * @since 1.2.0
  */
 @Component(immediate = true) 
 @Service 
-public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
+public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfConverterMetadataProvider {
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
@@ -74,32 +67,31 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	// Fields
 	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-	@Reference private TypeLocationService typeLocationService;
-	private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
+	private final Map<JavaType, String> entityToConverterMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> managedBeanMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
+		addMetadataTrigger(ROO_JSF_CONVERTER);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
+		removeMetadataTrigger(ROO_JSF_CONVERTER);
 	}
 
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
-		return entityToManagedBeanMidMap.get(itdTypeDetails.getName());
+		return entityToConverterMidMap.get(itdTypeDetails.getName());
 	}
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
-		final JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(governorPhysicalTypeMetadata);
+		final JsfConverterAnnotationValues annotationValues = new JsfConverterAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType entityType = annotationValues.getEntity();
 		if (!annotationValues.isAnnotationFound() || entityType == null) {
 			return null;
@@ -119,21 +111,15 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		// Start by clearing any previous association
 		final JavaType oldEntity = managedBeanMidToEntityMap.get(metadataId);
 		if (oldEntity != null) {
-			entityToManagedBeanMidMap.remove(oldEntity);
+			entityToConverterMidMap.remove(oldEntity);
 		}
-		entityToManagedBeanMidMap.put(entityType, metadataId);
+		entityToConverterMidMap.put(entityType, metadataId);
 		managedBeanMidToEntityMap.put(metadataId, entityType);
-
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType));
-		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
-		final String plural = pluralMetadata.getPlural();
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entityType, metadataId);
 		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataId);
-		final Iterable<JavaType> enumTypes = getEnumTypes(locatedFieldsAndAccessors.keySet());
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
 
-		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes, identifierAccessor);
+		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, crudAdditions, locatedFieldsAndAccessors);
 	}
 
 	/**
@@ -208,7 +194,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				listViewFields++;
 				// Flag this field as being displayable in the entity's list view
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-				customDataBuilder.put(JsfManagedBeanMetadata.CONVERTER_FIELD_CUSTOM_DATA_KEY, "true");
+				customDataBuilder.put(JsfConverterMetadata.CONVERTER_FIELD_CUSTOM_DATA_KEY, "true");
 				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
 				fieldBuilder.append(customDataBuilder.build());
 				field = fieldBuilder.build();
@@ -217,27 +203,6 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			locatedFieldsAndAccessors.put(field, method);
 		}
 		return locatedFieldsAndAccessors;
-	}
-	
-	/**
-	 * Returns the enum types found among the given fields
-	 * 
-	 * @param locatedFields the fields to look through (required) 
-	 * @return a non-<code>null</code> set
-	 */
-	private Iterable<JavaType> getEnumTypes(final Iterable<FieldMetadata> locatedFields) {
-		final Collection<JavaType> enumTypes = new HashSet<JavaType>();
-		for (final FieldMetadata field : locatedFields) {
-			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
-				enumTypes.add(field.getFieldType());
-			} else {
-				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
-				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
-					enumTypes.add(field.getFieldType());
-				}
-			}
-		}
-		return enumTypes;
 	}
 
 	/**
@@ -277,22 +242,22 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
-		return "ManagedBean";
+		return "Converter";
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		final JavaType javaType = JsfManagedBeanMetadata.getJavaType(metadataIdentificationString);
-		final Path path = JsfManagedBeanMetadata.getPath(metadataIdentificationString);
+		final JavaType javaType = JsfConverterMetadata.getJavaType(metadataIdentificationString);
+		final Path path = JsfConverterMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
-		return JsfManagedBeanMetadata.createIdentifier(javaType, path);
+		return JsfConverterMetadata.createIdentifier(javaType, path);
 	}
 
 	public String getProvidesType() {
-		return JsfManagedBeanMetadata.getMetadataIdentiferType();
+		return JsfConverterMetadata.getMetadataIdentiferType();
 	}
 }

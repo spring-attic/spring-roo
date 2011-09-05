@@ -24,6 +24,7 @@ public final class RooJavaType {
 	public static final JavaType ROO_JAVA_BEAN = new JavaType("org.springframework.roo.addon.javabean.RooJavaBean");
 	public static final JavaType ROO_JPA_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooJpaEntity");
 	public static final JavaType ROO_JSF_APPLICATION_BEAN = new JavaType("org.springframework.roo.addon.jsf.RooJsfApplicationBean");
+	public static final JavaType ROO_JSF_CONVERTER = new JavaType("org.springframework.roo.addon.jsf.RooJsfConverter");
 	public static final JavaType ROO_JSF_MANAGED_BEAN = new JavaType("org.springframework.roo.addon.jsf.RooJsfManagedBean");
 	public static final JavaType ROO_JSON = new JavaType("org.springframework.roo.addon.json.RooJson");
 	public static final JavaType ROO_MONGO_ENTITY = new JavaType("org.springframework.roo.addon.layers.repository.mongo.RooMongoEntity");

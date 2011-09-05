@@ -17,7 +17,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -218,10 +217,6 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata methodExists(JavaSymbolName methodName, List<JavaType> paramTypes) {
-		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
-	}
-	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

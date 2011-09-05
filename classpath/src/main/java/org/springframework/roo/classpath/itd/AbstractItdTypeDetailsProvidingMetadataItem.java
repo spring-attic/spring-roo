@@ -1,14 +1,18 @@
 package org.springframework.roo.classpath.itd;
 
+import java.util.List;
+
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -85,6 +89,27 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		return new AnnotationMetadataBuilder(annotationType).build();
 	}
 
+	/**
+	 * Determines if the presented class (or any of its superclasses) implements the target interface.
+	 * 
+	 * @param clazz to search
+	 * @param interfaceTarget the interface to locate
+	 * @return true if the class or any of its superclasses contains the specified interface
+	 */
+	protected boolean isImplementing(final ClassOrInterfaceTypeDetails clazz, final JavaType interfaceTarget) {
+		if (clazz.getImplementsTypes().contains(interfaceTarget)) {
+			return true;
+		}
+		if (clazz.getSuperclass() != null) {
+			return isImplementing(clazz.getSuperclass(), interfaceTarget);
+		}
+		return false;
+	}
+	
+	protected MethodMetadata methodExists(final JavaSymbolName methodName, final List<JavaType> parameterTypes) {
+		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, parameterTypes);
+	}
+	
 	@Override
 	public int hashCode() {
 		return builder.build().hashCode();
