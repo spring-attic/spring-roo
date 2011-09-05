@@ -9,7 +9,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.web.mvc.controller.XmlFileManager;
+import org.springframework.roo.addon.web.mvc.controller.XmlRoundTripFileManager;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
@@ -62,7 +62,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private XmlFileManager xmlFileManager;
+	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 	
 	private WebScaffoldMetadata webScaffoldMetadata;
 	private EntityMetadata entityMetadata;
@@ -100,7 +100,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
 		
-		xmlFileManager.writeToDiskIfNecessary(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
+		xmlRoundTripFileManager.writeToDiskIfNecessary(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
 		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");

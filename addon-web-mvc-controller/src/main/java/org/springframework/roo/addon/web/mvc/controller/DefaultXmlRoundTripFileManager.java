@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.HexUtils;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
@@ -18,7 +19,7 @@ import org.w3c.dom.Document;
 
 @Component
 @Service
-public class DefaultXmlFileManager implements XmlFileManager{
+public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 
 	@Reference private FileManager fileManager;
 
@@ -33,6 +34,8 @@ public class DefaultXmlFileManager implements XmlFileManager{
 	}
 
 	public void writeToDiskIfNecessary(String filename, Document proposed) {
+		Assert.notNull(filename, "The file name is required");
+		Assert.notNull(proposed, "The proposed document is required");
 		Document original = null;
 		if (fileManager.exists(filename)) {
 			String proposedContents = XmlUtils.nodeToString(proposed);

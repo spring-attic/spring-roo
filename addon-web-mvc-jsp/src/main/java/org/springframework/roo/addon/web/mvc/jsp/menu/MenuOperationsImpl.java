@@ -10,7 +10,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.addon.web.mvc.controller.XmlFileManager;
+import org.springframework.roo.addon.web.mvc.controller.XmlRoundTripFileManager;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
@@ -38,7 +38,7 @@ public class MenuOperationsImpl implements MenuOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
-	@Reference private XmlFileManager xmlFileManager;
+	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
 	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix) {
 		addMenuItem(menuCategoryName, menuItemId, "", globalMessageCode, link, idPrefix, false);
@@ -96,7 +96,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			properties.put("menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
 			propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", properties, true, false);
 		}
-		xmlFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
+		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
 	
 	public void cleanUpFinderMenuItems(JavaSymbolName menuCategoryName, List<String> allowedFinderMenuIds) {
@@ -120,7 +120,7 @@ public class MenuOperationsImpl implements MenuOperations {
 				element.getParentNode().removeChild(element);
 			}
 		}
-		xmlFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
+		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
 	
 	/**
@@ -154,7 +154,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			element.getParentNode().removeChild(element);
 		}
 		
-		xmlFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
+		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
 	
 	private InputStream getMenuFileInputStream() {

@@ -14,7 +14,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.addon.web.mvc.controller.XmlFileManager;
+import org.springframework.roo.addon.web.mvc.controller.XmlRoundTripFileManager;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
@@ -72,7 +72,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private WebMetadataService webMetadataService;
-	@Reference private XmlFileManager xmlFileManager;
+	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
 	private Map<JavaType, String> formBackingObjectTypesToLocalMids = new HashMap<JavaType, String>();
 
@@ -155,11 +155,11 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		// By now we have a directory to put the JSPs inside
 		String listPath1 = destinationDirectory + "/list.jspx";
-		xmlFileManager.writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
+		xmlRoundTripFileManager.writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
 		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/list.jspx");
 
 		String showPath = destinationDirectory + "/show.jspx";
-		xmlFileManager.writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
+		xmlRoundTripFileManager.writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
 		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/show.jspx");
 
 		JavaSymbolName categoryName = new JavaSymbolName(formBackingType.getSimpleTypeName());
@@ -169,7 +169,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
-			xmlFileManager.writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
+			xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
 			JavaSymbolName menuItemId = new JavaSymbolName("new");
 			// Add 'create new' menu item
 			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
@@ -181,7 +181,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
-			xmlFileManager.writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument());
+			xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument());
 			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, WEB_INF_VIEWS + controllerPath + "/update.jspx");
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath);
@@ -249,7 +249,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					if (listPath.length() > 244) {
 						continue;
 					}
-					xmlFileManager.writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderDetails));
+					xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderDetails));
 					JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + formBackingTypeMetadataDetails.getPlural() + "By", ""));
 					// Add 'Find by' menu item
 					menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + formBackingTypeMetadataDetails.getPlural(), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
