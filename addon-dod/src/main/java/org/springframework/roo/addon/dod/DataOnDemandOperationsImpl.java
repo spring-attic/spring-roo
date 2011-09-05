@@ -25,7 +25,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -39,14 +38,13 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
-	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeManagementService typeManagementService;
 
 	public boolean isPersistentClassAvailable() {
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isProjectAvailable();
 	}
 
 	public void newDod(JavaType entity, JavaType name, Path path) {
