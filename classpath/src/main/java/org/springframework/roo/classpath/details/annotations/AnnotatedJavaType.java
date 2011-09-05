@@ -3,7 +3,6 @@ package org.springframework.roo.classpath.details.annotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
@@ -57,7 +56,7 @@ public class AnnotatedJavaType {
 	 */
 	public static List<JavaType> convertFromAnnotatedJavaTypes(final List<AnnotatedJavaType> annotatedJavaTypes) {
 		Assert.notNull(annotatedJavaTypes, "Annotated Java types required");
-		final List<JavaType> result = new LinkedList<JavaType>();
+		final List<JavaType> result = new ArrayList<JavaType>();
 		for (final AnnotatedJavaType annotatedJavaType : annotatedJavaTypes) {
 			result.add(convertFromAnnotatedJavaType(annotatedJavaType));
 		}
