@@ -2,12 +2,10 @@ package org.springframework.roo.addon.serializable;
 
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 
-import java.io.Serializable;
 import java.lang.reflect.Modifier;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -33,6 +31,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType SERIALIZABLE = new JavaType("java.io.Serializable");
 
 	// From annotation
 	@AutoPopulate private String serialVersionUIDField = "serialVersionUID";
@@ -53,41 +52,23 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		
 		// Generate "implements Serializable"
 		if (!isJavaSerializableInterfaceIntroduced()) {
-			builder.addImplementsType(new JavaType(Serializable.class.getName()));
+			builder.addImplementsType(SERIALIZABLE);
 		}
 
 		// Generate the serialVersionUID field
-		FieldMetadata serialVersionUIDField = getSerialVersionUIDField();
-		builder.addField(serialVersionUIDField);
+		builder.addField(getSerialVersionUIDField());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 
 	/**
-	 * @return true if the ITD will be introducing a serializable interface (false means the class already was serializable)
+	 * @return true if the ITD will be introducing a java.io.Serializable interface (false means the class already was Serializable)
 	 */
-	public boolean isJavaSerializableInterfaceIntroduced() {
-		return isImplementing(governorTypeDetails, new JavaType("java.io.Serializable"));
+	private boolean isJavaSerializableInterfaceIntroduced() {
+		return isImplementing(governorTypeDetails, SERIALIZABLE);
 	}
-	
-	/**
-	 * Determines if the presented class (or any of its superclasses) implements the target interface.
-	 * 
-	 * @param clazz to search
-	 * @param interfaceTarget the interface to locate
-	 * @return true if the class or any of its superclasses contains the specified interface
-	 */
-	private static boolean isImplementing(ClassOrInterfaceTypeDetails clazz, JavaType interfaceTarget) {
-		if (clazz.getImplementsTypes().contains(interfaceTarget)) {
-			return true;
-		}
-		if (clazz.getSuperclass() != null) {
-			return isImplementing(clazz.getSuperclass(), interfaceTarget);
-		}
-		return false;
-	}
-	
+
 	/**
 	 * Obtains the "serialVersionUID" field for this type, if available.
 	 * 
@@ -96,7 +77,11 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * 
 	 * @return the "serialVersionUID" field declared on this type or that will be introduced (or null if undeclared and not introduced)
 	 */
-	public FieldMetadata getSerialVersionUIDField() {
+	private FieldMetadata getSerialVersionUIDField() {
+		if (isJavaSerializableInterfaceIntroduced()) {
+			return null;
+		}
+		
 		// Compute the relevant toString method name
 		JavaSymbolName fieldName = new JavaSymbolName("serialVersionUID");
 		if (!this.serialVersionUIDField.equals("")) {
