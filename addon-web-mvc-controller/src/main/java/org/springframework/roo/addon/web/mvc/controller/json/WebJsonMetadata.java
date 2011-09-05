@@ -444,10 +444,9 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			return null;
 		}
 		
-
 		List<AnnotatedJavaType> annotatedParamTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		StringBuilder methodParams = new StringBuilder();
 		
@@ -469,21 +468,21 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			}
 			paramNames.add(fieldName);
 			annotatedParamTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
-
+			
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				methodParams.append(field.getFieldName() + " == null ? new Boolean(false) : " + field.getFieldName() + ", ");
 			} else {
 				methodParams.append(field.getFieldName() + ", ");
 			}
 		}
-
+		
 		if (methodParams.length() > 0) {
 			methodParams.delete(methodParams.length() - 2, methodParams.length());
 		}
 		
 		List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
 		newParamNames.addAll(paramNames);
-
+		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "find=" + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + plural, "")));
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
@@ -498,7 +497,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine(httpHeadersShortName + " headers = new " + httpHeadersShortName + "();");
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + shortBeanName + "." + jsonMetadata.getToJsonArrayMethodName().getSymbolName().toString() + "(" + shortBeanName + "." + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList()), headers, " +  httpStatusShortName + ".OK);");
-
+		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, RESPONSE_ENTITY_STRING, annotatedParamTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
