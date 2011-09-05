@@ -17,6 +17,7 @@ import org.springframework.roo.addon.dod.DataOnDemandMetadata;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -60,6 +61,8 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	@Reference private ProjectOperations projectOperations;
 	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private TypeLocationService typeLocationService;
+
 	private final Set<String> producedMids = new LinkedHashSet<String>();
 	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 	private Boolean wasGaeEnabled;
@@ -87,21 +90,17 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 			return;
 		}
 		
-		//TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing;
 		// We do need to be informed if a new layer is available to see if we should use that
 		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
-			MemberDetails memberDetails = getMemberDetails(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
-			if (memberDetails != null) {
-				MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, LayerCustomDataKeys.LAYER_TYPE);
-				if (memberHoldingTypeDetails != null) {
-					@SuppressWarnings("unchecked")
-					List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
-					if (domainTypes != null) {
-						for (JavaType type : domainTypes) {
-							String localMidType = managedEntityTypes.get(type);
-							if (localMidType != null) {
-								metadataService.get(localMidType);
-							}
+			MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
+			if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+				@SuppressWarnings("unchecked")
+				List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+				if (domainTypes != null) {
+					for (JavaType type : domainTypes) {
+						String localMidType = managedEntityTypes.get(type);
+						if (localMidType != null) {
+							metadataService.get(localMidType);
 						}
 					}
 				}

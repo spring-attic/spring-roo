@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 
 import org.apache.felix.scr.annotations.Component;
@@ -16,9 +17,10 @@ import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadata
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -41,6 +43,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	
 	// Fields
 	@Reference private WebMetadataService webMetadataService;
+	@Reference private TypeLocationService typeLocationService;
+
 	private final Map<JavaType, String> entityToWebScaffoldMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> webScaffoldMidToEntityMap = new LinkedHashMap<String, JavaType>();
 
@@ -63,11 +67,9 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		if (localMid != null) {
 			return localMid;
 		}
-		
-		// TODO: review need for member details scanning to pick up newly added tags (ideally these should be added automatically during MD processing; 
-		MemberDetails details = memberDetailsScanner.getMemberDetails(getClass().getName(), itdTypeDetails.getGovernor());
-		MemberHoldingTypeDetails memberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, LayerCustomDataKeys.LAYER_TYPE);
-		if (memberHoldingTypeDetails != null) {
+
+		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getGovernor().getName());
+		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
 			@SuppressWarnings("unchecked")
 			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
 			if (domainTypes != null) {
@@ -92,9 +94,19 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		// Lookup the form backing object's metadata
 		final JavaType formBackingType = annotationValues.getFormBackingObject();
 		final PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
-		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingObjectPhysicalTypeMetadata);
-		final MemberHoldingTypeDetails formBackingMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
-		if (formBackingMemberHoldingTypeDetails == null) {
+
+		Set<ClassOrInterfaceTypeDetails> persistentTypes = typeLocationService.findClassesOrInterfaceDetailsWithTag(PersistenceCustomDataKeys.PERSISTENT_TYPE);
+
+		boolean found = false;
+		MemberHoldingTypeDetails formBackingMemberHoldingTypeDetails = typeLocationService.getClassOrInterface(formBackingType);
+		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : persistentTypes) {
+			if (classOrInterfaceTypeDetails.getName().equals(formBackingType)) {
+				formBackingMemberHoldingTypeDetails = classOrInterfaceTypeDetails;
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
 			return null;
 		}
 
@@ -110,6 +122,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		entityToWebScaffoldMidMap.put(formBackingType, metadataIdentificationString);
 		webScaffoldMidToEntityMap.put(metadataIdentificationString, formBackingType);
 
+		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingObjectPhysicalTypeMetadata);
 		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
