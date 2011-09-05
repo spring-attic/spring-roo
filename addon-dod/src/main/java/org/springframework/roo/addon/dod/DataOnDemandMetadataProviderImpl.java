@@ -312,7 +312,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		
 		// The field points to a single instance of another domain entity - register for changes to it
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-		
+		metadataDependencyRegistry.registerDependency(otherProvider, metadataIdentificationString);
 		return (DataOnDemandMetadata) metadataService.get(otherProvider);
 	}
 
