@@ -1,6 +1,5 @@
 package org.springframework.roo.classpath;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -142,10 +141,11 @@ public interface TypeLocationService {
 	String getPhysicalTypeCanonicalPath(JavaType javaType, Path path);
 
 	/**
-	 * Returns a collection of MIDs representing types changed since last invocation.
+	 * Indicates whether the passed in type has changed since last invocation by the requesting class.
 	 *
 	 * @param requestingClass the class requesting the changed types
+	 * @param javaType the type to lookup to see if a change has occurred
 	 * @return a collection of MIDs which represent changed types
 	 */
-	LinkedHashSet<String> getWhatsDirty(String requestingClass);
+	boolean hasTypeChanged(String requestingClass, JavaType javaType);
 }

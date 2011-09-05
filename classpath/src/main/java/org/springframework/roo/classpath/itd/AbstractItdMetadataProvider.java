@@ -5,12 +5,14 @@ import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.springframework.roo.classpath.ItdDiscoveryService;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -52,8 +54,9 @@ import org.springframework.roo.support.util.Assert;
 @Component(componentAbstract = true)
 public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTrackingMetadataNotifier implements ItdMetadataProvider, MetadataNotificationListener {
 	@Reference protected FileManager fileManager;
+	@Reference protected ItdDiscoveryService itdDiscoveryService;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;
-	
+
 	/** Cancel production if the governor type details are required, but aren't available */
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
 	
@@ -328,13 +331,16 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 			// Handle the management of the ITD file
 			boolean deleteItdFile = false;
-			
-			if (metadata.getMemberHoldingTypeDetails() == null) {
+			ItdTypeDetails itdTypeDetails = metadata.getMemberHoldingTypeDetails();
+
+			if (itdTypeDetails == null) {
 				// We have no members in this ITD, so its on-disk existence falls into question... :-)
 				// Exterminate it.
 				deleteItdFile = true;
+				// And remove if from memberDetailsScanner
+				itdDiscoveryService.removeItdTypeDetails(itdTypeDetails);
 			}
-			
+
 			if (!deleteItdFile) {
 				// We have some members in the ITD, so decide if we're to write something to disk
 				ItdSourceFileComposer itdSourceFileComposer = new ItdSourceFileComposer(metadata.getMemberHoldingTypeDetails());
@@ -342,8 +348,8 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 				// Decide whether the get an ITD on-disk based on whether there is physical content to write
 				if (itdSourceFileComposer.isContent()) {
 					// We have content to write
+					itdDiscoveryService.addItdTypeDetails(itdTypeDetails);
 					String itd = itdSourceFileComposer.getOutput();
-					
 					fileManager.createOrUpdateTextFileIfRequired(itdFilename, itd, false);
 				} else {
 					// We don't have content to write
@@ -362,7 +368,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			// Eagerly notify that the metadata has been updated; this also registers the metadata hash code in the superclass' cache to avoid
 			// unnecessary subsequent notifications if it hasn't changed
 			notifyIfRequired(metadata);
-			
+
 			return metadata;
 		}
 		

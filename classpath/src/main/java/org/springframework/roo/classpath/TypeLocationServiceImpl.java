@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,8 +21,6 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.file.monitor.event.FileEvent;
-import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
@@ -29,6 +28,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.shell.NaturalOrderComparator;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -44,11 +44,9 @@ import org.springframework.roo.support.util.Assert;
  * @author James Tyrrell
  * @since 1.1
  */
-@Component(immediate = true) 
+@Component(immediate = true)
 @Service 
-public class TypeLocationServiceImpl implements TypeLocationService, FileEventListener {
-	// This is left here for verification purposes, but not for long - JTT 24/08/11
-	// private static Logger logger = HandlerUtils.getLogger(TypeLocationServiceImpl.class);
+public class TypeLocationServiceImpl implements TypeLocationService {
 	
 	// Fields
 	@Reference private FileManager fileManager;
@@ -82,15 +80,11 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 
 	public ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface) {
 		// The cached is used so update it
-		updateCache();
-		String metadataIdentificationString = findIdentifier(requiredClassOrInterface);
-		Assert.notNull(metadataIdentificationString, "Unable to locate requested type'" + requiredClassOrInterface.getFullyQualifiedTypeName() + "'");
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeMap.get(metadataIdentificationString);
-		Assert.notNull(classOrInterfaceTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' exists on disk but cannot be parsed");
-		return classOrInterfaceTypeDetails;
+		return findClassOrInterface(requiredClassOrInterface);
 	}
 
 	public ClassOrInterfaceTypeDetails findClassOrInterface(JavaType requiredClassOrInterface) {
+		updateCache();
 		String metadataIdentificationString = findIdentifier(requiredClassOrInterface);
 		if (metadataIdentificationString == null) {
 			return null;
@@ -212,7 +206,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 	}
 
 	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect) {
-		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
+		final List<ClassOrInterfaceTypeDetails> types = new LinkedList<ClassOrInterfaceTypeDetails>();
 		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
 				if (located != null) {
@@ -220,7 +214,14 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 				}
 			}
 		});
-		return Collections.unmodifiableSet(types);
+		Collections.sort(types, new NaturalOrderComparator<ClassOrInterfaceTypeDetails>() {
+			@Override
+			protected String stringify(ClassOrInterfaceTypeDetails object) {
+				return object.getName().getSimpleTypeName();
+			}
+		});
+
+		return Collections.unmodifiableSet(new LinkedHashSet<ClassOrInterfaceTypeDetails>(types));
 	}
 
 	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(Object tag) {
@@ -301,15 +302,16 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 				if (cid == null) {
 					if (!fileManager.exists(fileCanonicalPath)) {
 						typeMap.remove(id);
-						updateChanges(id, true);
+						JavaType type = getCachedClassOrInterfaceTypeDetails(id).getName();
+						updateChanges(type.getFullyQualifiedTypeName(), true);
 					}
 					return;
 				}
 				if (cid.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
 					return;
 				}
-				updateChanges(id, false);
 				typeMap.put(id, cid);
+				updateChanges(cid.getName().getFullyQualifiedTypeName(), false);
 				updateAttributeCache(cid);
 			}
 		}
@@ -338,32 +340,12 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 		for (String change : changes) {
 			if (doesPathIndicateJavaType(change)) {
 				// This is left here for verification purposes, but not for long - JTT 24/08/11
-				//logger.severe("Update cache: " + change);
 				cacheType(change);
 			}
 		}
 	}
 
 	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
-
-	public LinkedHashSet<String> getWhatsDirty(String requestingClass) {
-		updateCache();
-		LinkedHashSet<String> changesSinceLastRequest = changeMap.get(requestingClass);
-		if (changesSinceLastRequest == null) {
-			changesSinceLastRequest = new LinkedHashSet<String>(typeMap.keySet());
-			changeMap.put(requestingClass, new LinkedHashSet<String>());
-		} else {
-			LinkedHashSet<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
-			changesSinceLastRequest.removeAll(copyOfChangesSinceLastRequest);
-			changesSinceLastRequest = copyOfChangesSinceLastRequest;
-		}
-		LinkedHashSet<String> changedTypes = new LinkedHashSet<String>();
-		for (String changedId : changesSinceLastRequest) {
-			changedTypes.add(changedId);
-		}
-		return changedTypes;
-
-	}
 
 	private void updateChanges(String physicalTypeIdentifier, boolean remove) {
 		for (String requestingClass : changeMap.keySet()) {
@@ -375,16 +357,23 @@ public class TypeLocationServiceImpl implements TypeLocationService, FileEventLi
 		}
 	}
 
-	public void onFileEvent(FileEvent fileEvent) {
-		// This is left here for verification purposes, but not for long - JTT 24/08/11
-		/*String change = fileEvent.getFileDetails().getCanonicalPath();
-
-		if (doesPathIndicateJavaType(change)) {
-			String id = findIdentifier(change);
-			if (id != null && PhysicalTypeIdentifier.isValid(id)) {
-				logger.warning("Update cache: " + change);
-				cacheType(change);
+	public boolean hasTypeChanged(String requestingClass, JavaType javaType) {
+		updateCache();
+		LinkedHashSet<String> changesSinceLastRequest = changeMap.get(requestingClass);
+		if (changesSinceLastRequest == null) {
+			changesSinceLastRequest = new LinkedHashSet<String>();
+			for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeMap.values()) {
+				changesSinceLastRequest.add(classOrInterfaceTypeDetails.getName().getFullyQualifiedTypeName());
 			}
-		}*/
+			changeMap.put(requestingClass, changesSinceLastRequest);
+		}
+		for (String changedId : changesSinceLastRequest) {
+			if (changedId.equals(javaType.getFullyQualifiedTypeName())) {
+				changesSinceLastRequest.remove(changedId);
+				return true;
+			}
+		}
+		return false;
+
 	}
 }

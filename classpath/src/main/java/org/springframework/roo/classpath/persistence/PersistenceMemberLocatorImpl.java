@@ -2,14 +2,13 @@ package org.springframework.roo.classpath.persistence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.ItdDiscoveryService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
@@ -33,6 +32,7 @@ import org.springframework.roo.model.JavaType;
 public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	
 	// Fields
+	@Reference private ItdDiscoveryService itdDiscoveryService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private TypeLocationService typeLocationService;
 
@@ -85,34 +85,12 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 		return domainTypeVersionFieldCache.get(domainType);
 	}
 
-	private final Set<String> changeSet = new HashSet<String>();
-
-	private boolean hasRelevantFilesChange(final JavaType javaType) {
-
-		final String mid = typeLocationService.findIdentifier(javaType);
-		if (!PhysicalTypeIdentifier.isValid(mid)) {
-			return false;
-		}
-
-		final Set<String> changes = typeLocationService.getWhatsDirty(getClass().getName());
-		changeSet.addAll(changes);
-		final Set<String> toRemove = new HashSet<String>();
-		boolean updateCache = false;
-		for (final String change : changeSet) {
-			final JavaType changedType = PhysicalTypeIdentifier.getJavaType(change);
-			if (!javaType.equals(changedType)) {
-				continue;
-			}
-			toRemove.add(change);
-			updateCache = true;
-		}
-		changeSet.removeAll(toRemove);
-
-		return updateCache;
+	private boolean haveAssociatedTypesChanged(final JavaType javaType) {
+		return typeLocationService.hasTypeChanged(getClass().getName(), javaType) || itdDiscoveryService.haveItdsChanged(getClass().getName(), javaType);
 	}
 
 	private void updateCache(final JavaType domainType) {
-		if (!hasRelevantFilesChange(domainType)) {
+		if (!haveAssociatedTypesChanged(domainType)) {
 			return;
 		}
 
@@ -183,7 +161,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 			domainTypeIdCache.put(type, idFields.get(0).getFieldType());
 		} else if (!embeddedIdFields.isEmpty()) {
 			domainTypeIdCache.put(type, embeddedIdFields.get(0).getFieldType());
-		} else if (domainTypeIdCache.containsKey(type)) {
+		} else {
 			domainTypeIdCache.remove(type);
 		}
 	}

@@ -42,6 +42,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -384,8 +385,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 				getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString),
 				getControllerPathForType(javaType, metadataIdentificationString));
 	}
+
+	private HashMap<String, String> pathMap = new HashMap<String, String>();
 	
 	private String getControllerPathForType(JavaType type, String metadataIdentificationString) {
+		if (pathMap.containsKey(type.getFullyQualifiedTypeName()) && !typeLocationService.hasTypeChanged(getClass().getName(), type)) {
+			return pathMap.get(type.getFullyQualifiedTypeName());
+		}
 		String webScaffoldMetadataKey = null;
 		WebScaffoldMetadata webScaffoldMetadata = null;
 		for (ClassOrInterfaceTypeDetails coitd: typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_WEB_SCAFFOLD)) {
@@ -395,6 +401,12 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 					if (formBackingObject instanceof ClassAttributeValue) {
 						ClassAttributeValue formBackingObjectValue = (ClassAttributeValue) formBackingObject;
 						if (formBackingObjectValue.getValue().equals(type)) {
+							StringAttributeValue path = (StringAttributeValue) annotation.getAttribute("path");
+							if (path != null) {
+								String pathString = path.getValue();
+								pathMap.put(type.getFullyQualifiedTypeName(), pathString);
+								return pathString;
+							}
 							webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(coitd.getName(), Path.SRC_MAIN_JAVA);
 							webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
 							break;
@@ -405,7 +417,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		}
 		if (webScaffoldMetadata != null) {
 			registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
-			return webScaffoldMetadata.getAnnotationValues().getPath();
+			String path = webScaffoldMetadata.getAnnotationValues().getPath();
+			pathMap.put(type.getFullyQualifiedTypeName(), path);
+			return path;
 		}
 		return getPlural(type, metadataIdentificationString).toLowerCase();
 	}
@@ -417,10 +431,9 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	}
 	
 	public MemberDetails getMemberDetails(final JavaType javaType) {
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
-		ClassOrInterfaceTypeDetails classOrInterfaceDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
-		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceDetails);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(javaType);
+		Assert.notNull(classOrInterfaceTypeDetails, "Unable to obtain physical type metadata for type " + javaType.getFullyQualifiedTypeName());
+		return memberDetailsScanner.getMemberDetails(WebMetadataServiceImpl.class.getName(), classOrInterfaceTypeDetails);
 	}
 	
 	public Map<String, MemberTypeAdditions> getCrudAdditions(final JavaType domainType, String metadataIdentificationString) {
