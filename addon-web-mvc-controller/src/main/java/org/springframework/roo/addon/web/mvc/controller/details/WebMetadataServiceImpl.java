@@ -253,7 +253,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		return MemberFindingUtils.getMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_TYPE).size() > 0;
 	}
 	
-	private boolean isEnumType(JavaType javaType, MetadataService metadataService) {
+	private boolean isEnumType(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		
@@ -380,7 +380,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		return new JavaTypeMetadataDetails(
 				javaType, 
 				getPlural(javaType, metadataIdentificationString),
-				isEnumType(javaType, metadataService), isApplicationType(javaType),
+				isEnumType(javaType), isApplicationType(javaType),
 				getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString),
 				getControllerPathForType(javaType, metadataIdentificationString));
 	}
