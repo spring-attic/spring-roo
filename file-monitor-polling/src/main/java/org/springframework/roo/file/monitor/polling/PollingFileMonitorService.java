@@ -342,6 +342,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			return;
 		}
 		for (FileEvent event : eventsToPublish) {
+			updateChanges(event.getFileDetails().getCanonicalPath(), event.getOperation() == FileOperation.DELETED);
 			for (FileEventListener l : fileEventListeners) {
 				l.onFileEvent(event);
 			}
