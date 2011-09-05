@@ -57,9 +57,10 @@ public class JsfCommands implements CommandMarker {
 	public void webJsfScaffold(
 		@CliOption(key = { "class", "" }, mandatory = true, help = "The path and name of the JSF managed bean to be created") JavaType managedBean, 
 		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The entity which this JSF managed bean class will create and modify as required") JavaType entity, 
-		@CliOption(key = "includeOnMenu", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Include this entity on the generated JSF menu") boolean includeOnMenu) {
+		@CliOption(key = "includeOnMenu", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Include this entity on the generated JSF menu") boolean includeOnMenu, 
+		@CliOption(key = "createConverter", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Create JSF converter for the entity") boolean createConverter) {
 		
-		jsfOperations.createManagedBean(managedBean, entity, includeOnMenu);
+		jsfOperations.createManagedBean(managedBean, entity, includeOnMenu, createConverter);
 	}
 	
 	@CliCommand(value = "web jsf theme", help = "Change the PrimeFaces theme") 

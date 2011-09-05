@@ -22,7 +22,7 @@ public interface JsfOperations {
 
 	void generateAll(JavaPackage destinationPackage);
 
-	void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu);
+	void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu, boolean createConverter);
 
 	void changeTheme(Theme theme);
 

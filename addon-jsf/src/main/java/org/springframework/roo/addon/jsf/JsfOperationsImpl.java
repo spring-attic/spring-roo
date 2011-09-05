@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
@@ -111,13 +112,13 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		generateManagedBeans(destinationPackage);
 	}
 
-	public void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu) {
+	public void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu, boolean createConverter) {
 		installFacesConfig(managedBean.getPackage());
 		installI18n(managedBean.getPackage());
-		installBean("ApplicationBean-template.java", managedBean.getPackage(), "ApplicationBean");
-		installBean("LocaleBean-template.java", managedBean.getPackage(), "LocaleBean");
-		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", managedBean.getPackage(), "ViewExpiredExceptionExceptionHandlerFactory");
-		installBean("ViewExpiredExceptionExceptionHandler-template.java", managedBean.getPackage(), "ViewExpiredExceptionExceptionHandler");
+		installBean("ApplicationBean-template.java", managedBean.getPackage());
+		installBean("LocaleBean-template.java", managedBean.getPackage());
+		installBean("ViewExpiredExceptionExceptionHandlerFactory-template.java", managedBean.getPackage());
+		installBean("ViewExpiredExceptionExceptionHandler-template.java", managedBean.getPackage());
 
 		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
@@ -145,6 +146,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 
 		copyEntityTypePage(entity, pluralMetadata.getPlural());
+
+		if (createConverter) {
+			// Create a javax.faces.convert.Converter class for the entity
+			createConverter(managedBean.getPackage(), entity);
+		}
 	}
 
 	public void changeTheme(Theme theme) {
@@ -216,7 +222,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			
 			// To get here, there is no listening managed bean, so add one
 			JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
-			createManagedBean(managedBean, entity, true);
+			createManagedBean(managedBean, entity, true, true);
 		}
 	}
 
@@ -247,6 +253,21 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 				} catch (IOException ignored) {}
 			}
 		}
+	}
+
+	private void createConverter(JavaPackage javaPackage, JavaType entity) {
+		// Create type annotation for new converter class
+		JavaType converterType = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Converter");
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_CONVERTER);
+		annotationBuilder.addClassAttribute("entity", entity);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(converterType, Path.SRC_MAIN_JAVA);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, converterType, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.addAnnotation(annotationBuilder);
+
+		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+
+		shell.flash(Level.FINE, "Created " + converterType.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
+		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 	}
 
 	private boolean hasWebXml() {
@@ -369,7 +390,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		projectOperations.addRepositories(repositories);
 	}
 
-	private void installBean(String templateName, JavaPackage destinationPackage, String beanName) {
+	private void installBean(final String templateName, final JavaPackage destinationPackage) {
+		String beanName = templateName.substring(0, templateName.indexOf("-template"));
 		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + beanName);
 		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(physicalPath)) {
@@ -387,6 +409,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
 		}
 	}
+	
 	private String getImplementationXPath(List<JsfImplementation> jsfImplementations) {
 		StringBuilder builder = new StringBuilder("/configuration/jsf-implementations/jsf-implementation[");
 		for (int i = 0, n = jsfImplementations.size(); i < n; i++) {
