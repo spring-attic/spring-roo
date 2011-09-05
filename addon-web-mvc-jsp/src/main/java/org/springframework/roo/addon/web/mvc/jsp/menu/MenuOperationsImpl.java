@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.jsp.menu;
 
-import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.addon.web.mvc.controller.XmlFileManager;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
@@ -36,6 +38,7 @@ public class MenuOperationsImpl implements MenuOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
+	@Reference private XmlFileManager xmlFileManager;
 
 	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix) {
 		addMenuItem(menuCategoryName, menuItemId, "", globalMessageCode, link, idPrefix, false);
@@ -58,7 +61,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		Document document;
 		try {
-			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+			document = XmlUtils.getDocumentBuilder().parse(getMenuFileInputStream());
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse menu.jspx" + (!StringUtils.hasText(e.getMessage()) ? "" : " (" + e.getMessage() + ")"), e);
 		}
@@ -93,7 +96,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			properties.put("menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
 			propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", properties, true, false);
 		}
-		writeToDiskIfNecessary(document);
+		xmlFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
 	
 	public void cleanUpFinderMenuItems(JavaSymbolName menuCategoryName, List<String> allowedFinderMenuIds) {
@@ -102,7 +105,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		Document document;
 		try {
-			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+			document = XmlUtils.getDocumentBuilder().parse(getMenuFileInputStream());
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse menu.jspx", e);
 		}
@@ -117,7 +120,7 @@ public class MenuOperationsImpl implements MenuOperations {
 				element.getParentNode().removeChild(element);
 			}
 		}
-		writeToDiskIfNecessary(document);
+		xmlFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
 	
 	/**
@@ -137,7 +140,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		Document document;
 		try {
-			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+			document = XmlUtils.getDocumentBuilder().parse(getMenuFileInputStream());
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
 		}
@@ -151,10 +154,10 @@ public class MenuOperationsImpl implements MenuOperations {
 			element.getParentNode().removeChild(element);
 		}
 		
-		writeToDiskIfNecessary(document);
+		xmlFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
 	
-	private File getMenuFile() {
+	private InputStream getMenuFileInputStream() {
 		String menuFileName = getMenuFileName();
 		if (!fileManager.exists(menuFileName)) {
 			try {
@@ -168,7 +171,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx"))) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx")).getOutputStream());
+				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "menu.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
@@ -176,7 +179,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx"))) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "item.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx")).getOutputStream());
+				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "item.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
@@ -184,30 +187,16 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx"))) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "category.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx")).getOutputStream());
+				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "category.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
 		}
 			
-		return new File(menuFileName);
+		return fileManager.getInputStream(menuFileName);
 	}
 	
 	private String getMenuFileName() {
 		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx");
-	}
-	
-	private void writeToDiskIfNecessary(Document proposed) {
-		Document original = null;
-		String menuFileName = getMenuFileName();
-		if (fileManager.exists(menuFileName)) {
-			original = XmlUtils.readXml(fileManager.getInputStream(menuFileName));
-			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-				XmlUtils.removeTextNodes(original);
-				fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(original), true);
-			}
-		} else {
-			fileManager.createOrUpdateTextFileIfRequired(menuFileName, XmlUtils.nodeToString(proposed), true);
-		}
 	}
 }

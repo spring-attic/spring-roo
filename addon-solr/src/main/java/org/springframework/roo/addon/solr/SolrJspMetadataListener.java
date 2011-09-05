@@ -1,15 +1,15 @@
 package org.springframework.roo.addon.solr;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.web.mvc.controller.XmlFileManager;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
@@ -62,6 +62,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private XmlFileManager xmlFileManager;
 	
 	private WebScaffoldMetadata webScaffoldMetadata;
 	private EntityMetadata entityMetadata;
@@ -99,7 +100,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
 		
-		writeToDiskIfNecessary(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
+		xmlFileManager.writeToDiskIfNecessary(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
 		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
@@ -197,20 +198,6 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		div.appendChild(pageSearch);
 		
 		return document;
-	}
-	
-	/** return indicates if disk was changed (ie updated or created) */
-	private void writeToDiskIfNecessary(String jspFilename, Document proposed) {
-		Document original = null;
-		if (fileManager.exists(jspFilename)) {
-			original = XmlUtils.readXml(fileManager.getInputStream(jspFilename));
-			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-				XmlUtils.removeTextNodes(original);
-				fileManager.createOrUpdateTextFileIfRequired(jspFilename, XmlUtils.nodeToString(original), false);
-			}
-		} else {
-			fileManager.createOrUpdateTextFileIfRequired(jspFilename, XmlUtils.nodeToString(proposed), false);
-		}
 	}
 
 	public String getProvidesType() {
