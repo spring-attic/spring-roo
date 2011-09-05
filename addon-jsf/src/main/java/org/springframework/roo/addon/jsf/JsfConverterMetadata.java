@@ -115,7 +115,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata getGetAsObjectMethod(final String builderString, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
 		List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, JavaType.STRING);
-		final MethodMetadata method = methodExists(methodName, parameterTypes);
+		final MethodMetadata method = getMethodOnGovernor(methodName, parameterTypes);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -152,7 +152,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata getGetAsStringMethod(final String builderString, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
 		List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, OBJECT);
-		final MethodMetadata method = methodExists(methodName, parameterTypes);
+		final MethodMetadata method = getMethodOnGovernor(methodName, parameterTypes);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();

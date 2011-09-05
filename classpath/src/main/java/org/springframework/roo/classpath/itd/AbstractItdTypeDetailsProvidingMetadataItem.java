@@ -106,7 +106,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		return false;
 	}
 	
-	protected MethodMetadata methodExists(final JavaSymbolName methodName, final List<JavaType> parameterTypes) {
+	protected MethodMetadata getMethodOnGovernor(final JavaSymbolName methodName, final List<JavaType> parameterTypes) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, parameterTypes);
 	}
 	
