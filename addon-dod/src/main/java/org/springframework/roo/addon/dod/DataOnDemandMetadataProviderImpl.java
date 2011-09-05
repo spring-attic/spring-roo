@@ -159,7 +159,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
 		
-		if (findEntriesMethod == null || findMethodAdditions == null || flushMethod == null || identifierAccessor == null || persistMethodAdditions == null) {
+		if (findEntriesMethod == null || findMethodAdditions == null || identifierAccessor == null || persistMethodAdditions == null) {
 			return null;
 		}
 		

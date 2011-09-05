@@ -80,7 +80,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		builder.addMethod(getFindMethodTest(findMethod, identifierAccessorMethod));
 		builder.addMethod(getFindAllMethodTest(findAllMethod, countMethod));
 		builder.addMethod(getFindEntriesMethodTest(countMethod, findEntriesMethod));
-		builder.addMethod(getFlushMethodTest(versionAccessorMethod, identifierAccessorMethod, flushMethod, findMethod));
+		if (flushMethod != null) {
+			builder.addMethod(getFlushMethodTest(versionAccessorMethod, identifierAccessorMethod, flushMethod, findMethod));
+		}
 		builder.addMethod(getMergeMethodTest(mergeMethod, findMethod, flushMethod, versionAccessorMethod, identifierAccessorMethod));
 		builder.addMethod(getPersistMethodTest(persistMethod, flushMethod, identifierAccessorMethod));
 		builder.addMethod(getRemoveMethodTest(removeMethod, findMethod, flushMethod, identifierAccessorMethod));
@@ -419,7 +421,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		String castStr = entityHasSuperclass ? "(" + annotationValues.getEntity().getSimpleTypeName() + ")" : "";
 		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " merged = " + castStr + mergeMethod.getMethodCall() + ";");
 
-		bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
+		if (flushMethod != null) {
+			bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
+			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
+		}
+		
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." + identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");
 		if (isDateOrCalendarType(versionTypeName)) {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
@@ -428,7 +434,6 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -438,7 +443,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	private MethodMetadata getPersistMethodTest(MemberTypeAdditions persistMethod, MemberTypeAdditions flushMethod, MethodMetadata identifierAccessorMethod) {
-		if (!annotationValues.isPersist() || persistMethod == null || flushMethod == null || identifierAccessorMethod == null) {
+		if (!annotationValues.isPersist() || persistMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method
 			return null;
 		}
@@ -464,11 +469,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 
 		bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
+		if (flushMethod != null) {
+			bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
+			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
+		}
+		
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
-		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -478,7 +486,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
 	private MethodMetadata getRemoveMethodTest(MemberTypeAdditions removeMethod, MemberTypeAdditions findMethod, MemberTypeAdditions flushMethod, MethodMetadata identifierAccessorMethod) {
-		if (!annotationValues.isRemove() || removeMethod == null || findMethod == null || flushMethod == null || identifierAccessorMethod == null) {
+		if (!annotationValues.isRemove() || removeMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
 		}
@@ -512,12 +520,16 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
 		bodyBuilder.appendFormalLine("obj = " + findMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
-		bodyBuilder.appendFormalLine( flushMethod.getMethodCall() + ";");
+		
+		if (flushMethod != null) {
+			bodyBuilder.appendFormalLine( flushMethod.getMethodCall() + ";");
+			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
+		}
+		
 		bodyBuilder.appendFormalLine("Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + findMethod.getMethodCall() + ");");
 
 		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();

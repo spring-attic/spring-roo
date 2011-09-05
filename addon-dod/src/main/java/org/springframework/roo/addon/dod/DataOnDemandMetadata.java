@@ -112,7 +112,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
-		if (findEntriesMethodAdditions == null || persistMethodAdditions == null || flushMethod == null || findMethodAdditions == null) {
+		if (findEntriesMethodAdditions == null || persistMethodAdditions == null || findMethodAdditions == null) {
 			valid = false;
 			return;
 		}
@@ -921,8 +921,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("throw new RuntimeException(msg.toString(), e);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine(flushAdditions.getMethodCall() + ";");
-		flushAdditions.copyAdditionsTo(builder, governorTypeDetails);
+		if (flushAdditions != null) {
+			bodyBuilder.appendFormalLine(flushAdditions.getMethodCall() + ";");
+			flushAdditions.copyAdditionsTo(builder, governorTypeDetails);
+		}
 		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
