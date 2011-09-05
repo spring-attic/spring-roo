@@ -52,7 +52,8 @@ public interface MongoOperations {
 	 * 
 	 * @param classType (required)
 	 * @param idType (optional, defaults to {@link BigInteger}
+	 * @param testAutomatically
 	 */
-	void createType(JavaType classType, JavaType idType);
+	void createType(JavaType classType, JavaType idType, boolean testAutomatically);
 
 }

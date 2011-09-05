@@ -16,7 +16,9 @@ import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.dod.DataOnDemandOperations;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.addon.test.IntegrationTestOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -60,6 +62,8 @@ public class MongoOperationsImpl implements MongoOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private PropFileOperations propFileOperations;
+	@Reference private IntegrationTestOperations integrationTestOperations;
+	@Reference private DataOnDemandOperations dataOnDemandOperations;
 	
 	public boolean isSetupCommandAvailable() {
 		return projectOperations.isProjectAvailable();
@@ -92,7 +96,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
 	}
 
-	public void createType(JavaType classType, JavaType idType) {
+	public void createType(JavaType classType, JavaType idType, boolean testAutomatically) {
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(idType, "Identifier type required");
 		
@@ -112,6 +116,11 @@ public class MongoOperationsImpl implements MongoOperations {
 		}
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_MONGO_ENTITY, attributes));
 		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
+		
+		if (testAutomatically) {
+			integrationTestOperations.newIntegrationTest(classType, false);
+			dataOnDemandOperations.newDod(classType, new JavaType(classType.getFullyQualifiedTypeName() + "DataOnDemand"), Path.SRC_TEST_JAVA);
+		}
 	}
 
 	public void setup(String username, String password, String name, String port, String host, boolean cloudFoundry) {
