@@ -1,6 +1,6 @@
 package org.springframework.roo.project;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.springframework.roo.metadata.MetadataProvider;
 
@@ -25,7 +25,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param dependencies the dependencies to add (required)
 	 */
-	void addDependencies(List<Dependency> dependencies);
+	void addDependencies(Collection<? extends Dependency> dependencies);
 	
 	/**
 	 * Attempts to add the specified dependency. If the dependency already exists according to
@@ -51,7 +51,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param dependencies the dependencies to remove (required)
 	 */
-	void removeDependencies(List<Dependency> dependencies);
+	void removeDependencies(Collection<? extends Dependency> dependencies);
 
 	/**
 	 * Attempts to remove the specified dependency. If the dependency does not exist according
@@ -91,7 +91,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param plugins the plugins to add (required)
 	 */
-	void addBuildPlugins(List<Plugin> plugins);
+	void addBuildPlugins(Collection<? extends Plugin> plugins);
 
 	/**
 	 * Attempts to add the specified build plugin. If the plugin already exists 
@@ -107,28 +107,25 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	void addBuildPlugin(Plugin plugin);
 	
 	/**
-	 * Attempts to remove the specified plugins. If all the plugins do not exist according
-	 * to {@link ProjectMetadata#isAnyPluginRegistered(Plugin)}, the method silently returns.
-	 * Otherwise each located plugin is removed.
+	 * Removes any plugins with the same groupId and artifactId as any of the
+	 * given plugins.
 	 * 
-	 * <p>
-	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
-	 * available, or if the on-disk representation cannot be modified for any reason.
-	 * 
-	 * @param plugins the plugins to remove (required)
+	 * @param plugins the plugins to remove; can be <code>null</code>, any
+	 * <code>null</code> elements will be quietly ignored
+	 * @throws IllegalArgumentException if this method is called before the
+	 * {@link ProjectMetadata} is available, or if the on-disk representation
+	 * cannot be modified for any reason
 	 */
-	void removeBuildPlugins(List<Plugin> plugins);
+	void removeBuildPlugins(Collection<? extends Plugin> plugins);
 
 	/**
-	 * Attempts to remove the specified build plugin. If the plugin does not 
-	 * exist according to {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.Plugin)},
-	 * the method silently returns. Otherwise the located plugin is removed.
+	 * Removes any plugins with the same groupId and artifactId as the given
+	 * plugin.
 	 * 
-	 * <p>
-	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
-	 * available, or if the on-disk representation cannot be modified for any reason.
-	 * 
-	 * @param plugin the plugin to remove (required)
+	 * @param plugin the plugin to remove (can be <code>null</code>)
+	 * @throws IllegalArgumentException if this method is called before the
+	 * {@link ProjectMetadata} is available, or if the on-disk representation
+	 * cannot be modified for any reason
 	 */
 	void removeBuildPlugin(Plugin plugin);
 	
@@ -143,7 +140,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param repositories a list of repositories to add (required)
 	 */
-	void addRepositories(List<Repository> repositories);
+	void addRepositories(Collection<? extends Repository> repositories);
 	
 	/**
 	 * Attempts to add the specified repository. If the repository already exists according
@@ -182,7 +179,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param repositories a list of plugin repositories to add (required)
 	 */
-	void addPluginRepositories(List<Repository> repositories);
+	void addPluginRepositories(Collection<? extends Repository> repositories);
 
 	/**
 	 * Attempts to add the specified plugin repository. If the plugin repository already exists according

@@ -64,7 +64,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		// Make the root element of the menu the one with the menu identifier allowing for different decorations of menu
-		Element rootElement = XmlUtils.findFirstElement("//*[@id='_menu']", (Element) document.getFirstChild());
+		Element rootElement = XmlUtils.findFirstElement("//*[@id='_menu']", document.getFirstChild());
 		if (rootElement == null) {
 			Element rootMenu = new XmlElementBuilder("menu:menu", document).addAttribute("id", "_menu").build();
 			rootMenu.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(rootMenu));

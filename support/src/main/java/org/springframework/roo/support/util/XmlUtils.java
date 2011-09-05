@@ -105,12 +105,12 @@ public final class XmlUtils {
 				inputStream = new BufferedInputStream(inputStream);
 			}
 			return factory.newDocumentBuilder().parse(inputStream);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalStateException("Could not open input stream", e);
 		} finally {
 			try {
 				inputStream.close();
-			} catch (IOException ignored) {}
+			} catch (final IOException ignored) {}
 		}
 	}
 	
@@ -120,7 +120,7 @@ public final class XmlUtils {
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
 	 */
-	public static final void writeXml(OutputStream outputStream, Document document) {
+	public static final void writeXml(final OutputStream outputStream, final Document document) {
 		writeXml(createIndentingTransformer(), outputStream, document);
 	}
 
@@ -131,7 +131,7 @@ public final class XmlUtils {
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
 	 */
-	public static final void writeXml(Transformer transformer, OutputStream outputStream, Document document) {
+	public static final void writeXml(final Transformer transformer, OutputStream outputStream, final Document document) {
 		Assert.notNull(transformer, "Transformer required");
 		Assert.notNull(outputStream, "OutputStream required");
 		Assert.notNull(document, "Document required");
@@ -141,14 +141,14 @@ public final class XmlUtils {
 			if (!(outputStream instanceof BufferedOutputStream)) {
 				outputStream = new BufferedOutputStream(outputStream);
 			}
-			StreamResult streamResult = createUnixStreamResultForEntry(outputStream);
+			final StreamResult streamResult = createUnixStreamResultForEntry(outputStream);
 			transformer.transform(new DOMSource(document), streamResult);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
 			try {
 				outputStream.close();
-			} catch (IOException ignored) {
+			} catch (final IOException ignored) {
 				// Do nothing
 			}
 		}
@@ -162,19 +162,19 @@ public final class XmlUtils {
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
 	 */
-	public static void writeFormattedXml(OutputStream outputStream, Document document) {
+	public static void writeFormattedXml(final OutputStream outputStream, final Document document) {
 		// Note that the "format-pretty-print" DOM configuration parameter can only be set in JDK 1.6+.
-		DOMImplementation domImplementation = document.getImplementation();
+		final DOMImplementation domImplementation = document.getImplementation();
 		if (domImplementation.hasFeature("LS", "3.0") && domImplementation.hasFeature("Core", "2.0")) {
 			DOMImplementationLS domImplementationLS = null;
 			try {
 				domImplementationLS = (DOMImplementationLS) domImplementation.getFeature("LS", "3.0");
-			} catch (NoSuchMethodError nsme) {
+			} catch (final NoSuchMethodError nsme) {
 				// Fall back to default LS
 				DOMImplementationRegistry registry = null;
 				try {
 					registry = DOMImplementationRegistry.newInstance();
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					// DOMImplementationRegistry not available. Falling back to TrAX.
 					writeXml(outputStream, document);
 					return;
@@ -187,21 +187,21 @@ public final class XmlUtils {
 				}
 			}
 			if (domImplementationLS != null) {
-				LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
-				DOMConfiguration domConfiguration = lsSerializer.getDomConfig();
+				final LSSerializer lsSerializer = domImplementationLS.createLSSerializer();
+				final DOMConfiguration domConfiguration = lsSerializer.getDomConfig();
 				if (domConfiguration.canSetParameter("format-pretty-print", Boolean.TRUE)) {
 					lsSerializer.getDomConfig().setParameter("format-pretty-print", Boolean.TRUE);
-					LSOutput lsOutput = domImplementationLS.createLSOutput();
+					final LSOutput lsOutput = domImplementationLS.createLSOutput();
 					lsOutput.setEncoding("UTF-8");
 					lsOutput.setByteStream(outputStream);
 					try {
 					lsSerializer.write(document, lsOutput);
-					} catch (LSException lse) {
+					} catch (final LSException lse) {
 						throw new IllegalStateException(lse);
 					} finally {
 						try {
 							outputStream.close();
-						} catch (IOException ignored) {
+						} catch (final IOException ignored) {
 							// Do nothing
 						}
 					}
@@ -249,12 +249,12 @@ public final class XmlUtils {
 	 * @param node the first element
 	 * @return the XML String representation of the node, never null
 	 */
-	public static String nodeToString(Node node) {
+	public static String nodeToString(final Node node) {
 		try {
-			StringWriter writer = new StringWriter();
+			final StringWriter writer = new StringWriter();
 			createIndentingTransformer().transform(new DOMSource(node), new StreamResult(writer));
 			return writer.toString();
-		} catch (TransformerException e) {
+		} catch (final TransformerException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -268,11 +268,12 @@ public final class XmlUtils {
 	 * @return StreamResult 
 	 * @throws UnsupportedEncodingException 
 	 */
-	private static StreamResult createUnixStreamResultForEntry(OutputStream outputStream) throws UnsupportedEncodingException {
+	private static StreamResult createUnixStreamResultForEntry(final OutputStream outputStream) throws UnsupportedEncodingException {
 		final Writer writer;
 		if (System.getProperty("line.separator").equals("\r\n")) {
 			writer = new OutputStreamWriter(outputStream, "ISO-8859-1") {
-				public void write(char[] cbuf, int off, int len) throws IOException {
+				@Override
+				public void write(final char[] cbuf, final int off, final int len) throws IOException {
 					for (int i = off; i < off + len; i++) {
 						if (cbuf[i] != '\r' || (i < cbuf.length - 1 && cbuf[i + 1] != '\n')) {
 							super.write(cbuf[i]);
@@ -280,14 +281,16 @@ public final class XmlUtils {
 					}
 				}
 
-				public void write(int c) throws IOException {
+				@Override
+				public void write(final int c) throws IOException {
 					if (c != '\r') super.write(c);
 				}
 				
-				public void write(String str, int off, int len) throws IOException {
-					String orig = str.substring(off, off + len);
-					String filtered = orig.replace("\r\n", "\n");
-					int lengthDiff = orig.length() - filtered.length();
+				@Override
+				public void write(final String str, final int off, final int len) throws IOException {
+					final String orig = str.substring(off, off + len);
+					final String filtered = orig.replace("\r\n", "\n");
+					final int lengthDiff = orig.length() - filtered.length();
 					if (filtered.endsWith("\r")) {
 						super.write(filtered.substring(0, filtered.length() - 1), 0, len - lengthDiff - 1);
 					} else {
@@ -302,21 +305,20 @@ public final class XmlUtils {
 	}
 
 	/**
-	 * Checks in under a given root element whether it can find a child element
-	 * which matches the XPath expression supplied. Returns {@link Element} if
-	 * exists.
+	 * Searches the given parent element for a child element matching the given
+	 * XPath expression.
 	 * 
 	 * Please note that the XPath parser used is NOT namespace aware. So if you
-	 * want to find a element <beans><sec:http> you need to use the following
-	 * XPath expression '/beans/http'.
+	 * want to find an element <code>&lt;beans&gt;&lt;sec:http&gt;</code>, you
+	 * need to use the following XPath expression '/beans/http'.
 	 * 
 	 * @param xPathExpression the xPathExpression (required)
-	 * @param root the parent DOM element (required)
-	 * @return the Element if discovered (null if not found)
+	 * @param parent the parent DOM element (required)
+	 * @return the Element if discovered (null if no such {@link Element} found)
 	 */
-	public static Element findFirstElement(String xPathExpression, Element root) {
-		Node node = findNode(xPathExpression, root);
-		if (node != null && node instanceof Element) {
+	public static Element findFirstElement(final String xPathExpression, final Node parent) {
+		final Node node = findNode(xPathExpression, parent);
+		if (node instanceof Element) {
 			return (Element) node;
 		}
 		return null;
@@ -328,14 +330,14 @@ public final class XmlUtils {
 	 * exists.
 	 * 
 	 * Please note that the XPath parser used is NOT namespace aware. So if you
-	 * want to find a element <beans><sec:http> you need to use the following
-	 * XPath expression '/beans/http'.
+	 * want to find a element <code>&lt;beans&gt;&lt;sec:http&gt;</code>, you
+	 * need to use the XPath expression '<code>/beans/http</code>'.
 	 * 
 	 * @param xPathExpression the XPath expression (required)
 	 * @param root the parent DOM element (required)
 	 * @return the Node if discovered (null if not found)
 	 */
-	public static Node findNode(String xPathExpression, Element root) {
+	public static Node findNode(final String xPathExpression, final Node root) {
 		Assert.hasText(xPathExpression, "XPath expression required");
 		Assert.notNull(root, "Root element required");
 		Node node = null;
@@ -346,8 +348,8 @@ public final class XmlUtils {
 				compiledExpressionCache.put(xPathExpression, expr);
 			}
 			node = (Node) expr.evaluate(root, XPathConstants.NODE);
-		} catch (XPathExpressionException e) {
-			throw new IllegalArgumentException("Unable evaluate XPath expression", e);
+		} catch (final XPathExpressionException e) {
+			throw new IllegalArgumentException("Unable evaluate XPath expression '" + xPathExpression + "'", e);
 		}
 		return node;
 	}
@@ -360,7 +362,7 @@ public final class XmlUtils {
 	 * @param root the parent DOM element (required)
 	 * @return the Element if discovered
 	 */
-	public static Element findFirstElementByName(String name, Element root) {
+	public static Element findFirstElementByName(final String name, final Element root) {
 		Assert.hasText(name, "Element name required");
 		Assert.notNull(root, "Root element required");
 		return (Element) root.getElementsByTagName(name).item(0);
@@ -379,10 +381,10 @@ public final class XmlUtils {
 	 * @param root the parent DOM element (required)
 	 * @return the Element if discovered (never null; an exception is thrown if cannot be found)
 	 */
-	public static Element findRequiredElement(String xPathExpression, Element root) {
+	public static Element findRequiredElement(final String xPathExpression, final Element root) {
 		Assert.hasText(xPathExpression, "XPath expression required");
 		Assert.notNull(root, "Root element required");
-		Element element = findFirstElement(xPathExpression, root);
+		final Element element = findFirstElement(xPathExpression, root);
 		Assert.notNull(element, "Unable to obtain required element '" + xPathExpression + "' from element '" + root + "'");
 		return element;
 	}
@@ -400,8 +402,8 @@ public final class XmlUtils {
 	 * @param root the parent DOM element
 	 * @return a {@link List} of type {@link Element} if discovered, otherwise an empty list (never null)
 	 */
-	public static List<Element> findElements(String xPathExpression, Element root) {
-		List<Element> elements = new ArrayList<Element>();
+	public static List<Element> findElements(final String xPathExpression, final Element root) {
+		final List<Element> elements = new ArrayList<Element>();
 		NodeList nodes = null;
 
 		try {
@@ -411,7 +413,7 @@ public final class XmlUtils {
 				compiledExpressionCache.put(xPathExpression, expr);
 			}
 			nodes = (NodeList) expr.evaluate(root, XPathConstants.NODESET);
-		} catch (XPathExpressionException e) {
+		} catch (final XPathExpressionException e) {
 			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
 		}
 
@@ -429,7 +431,7 @@ public final class XmlUtils {
 	 * @param element (required)
 	 * @return the Node if discovered (null if not found)
 	 */
-	public static Node findFirstAttribute(String xPathExpression, Element element) {
+	public static Node findFirstAttribute(final String xPathExpression, final Element element) {
 		Node attr = null;
 		try {
 			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
@@ -438,7 +440,7 @@ public final class XmlUtils {
 				compiledExpressionCache.put(xPathExpression, expr);
 			}
 			attr = (Node) expr.evaluate(element, XPathConstants.NODE);
-		} catch (XPathExpressionException e) {
+		} catch (final XPathExpressionException e) {
 			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
 		}
 		return attr;
@@ -452,7 +454,7 @@ public final class XmlUtils {
 		try {
 			transformerFactory.setAttribute("indent-number", 4);
 			transformer = transformerFactory.newTransformer();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalStateException(e);
 		}
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -467,7 +469,7 @@ public final class XmlUtils {
 		// factory.setNamespaceAware(true);
 		try {
 			return factory.newDocumentBuilder();
-		} catch (ParserConfigurationException e) {
+		} catch (final ParserConfigurationException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -477,14 +479,14 @@ public final class XmlUtils {
 	 * 
 	 * @param node the element where empty text nodes will be removed
 	 */
-	public static void removeTextNodes(Node node) {
+	public static void removeTextNodes(final Node node) {
 		if (node == null) {
 			return;
 		}
 		
-		NodeList children = node.getChildNodes();
+		final NodeList children = node.getChildNodes();
 		for (int i = children.getLength() - 1; i >= 0; i--) {
-			Node child = children.item(i);
+			final Node child = children.item(i);
 			switch (child.getNodeType()) {
 				case Node.ELEMENT_NODE:
 					removeTextNodes(child);
@@ -506,13 +508,13 @@ public final class XmlUtils {
 	 * @param configurationPath the path of the configuration file.
 	 * @return the configuration root element 
 	 */
-	public static Element getConfiguration(Class<?> clazz, String configurationPath) {
-		InputStream templateInputStream = TemplateUtils.getTemplate(clazz, configurationPath);
+	public static Element getConfiguration(final Class<?> clazz, final String configurationPath) {
+		final InputStream templateInputStream = TemplateUtils.getTemplate(clazz, configurationPath);
 		Assert.notNull(templateInputStream, "Could not acquire " + configurationPath + " file");
 		Document configurationDocument;
 		try {
 			configurationDocument = getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new IllegalStateException(e);
 		}
 		return configurationDocument.getDocumentElement();
@@ -524,7 +526,7 @@ public final class XmlUtils {
 	 * @param clazz which owns the configuration
 	 * @return the configuration root element 
 	 */
-	public static Element getConfiguration(Class<?> clazz) {
+	public static Element getConfiguration(final Class<?> clazz) {
 		return getConfiguration(clazz, "configuration.xml");
 	}
 	
@@ -535,7 +537,7 @@ public final class XmlUtils {
 	 * @param proposed Id
 	 * @return cleaned up Id
 	 */
-	public static String convertId(String proposed) {
+	public static String convertId(final String proposed) {
 		return proposed.replaceAll("[:\\.-]", "_");
 	}
 	
@@ -545,15 +547,15 @@ public final class XmlUtils {
 	 * @param element the content of the XML element
 	 * @throws IllegalArgumentException if the element is null, has no text or contains illegal characters 
 	 */
-	public static void assertElementLegal(String element) {
+	public static void assertElementLegal(final String element) {
 		if (!StringUtils.hasText(element)) {
 			throw new IllegalArgumentException("Element required");
 		}
 		
 		// Note regular expression for legal characters found to be x5 slower in profiling than this approach
-		char[] value = element.toCharArray();
+		final char[] value = element.toCharArray();
 		for (int i = 0; i < value.length; i++) {
-			char c = value[i];
+			final char c = value[i];
 			if (' ' == c || '*' == c || '>' == c || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c ||
 				'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
 				'|' == c || '\\' == c || '\'' == c || '+' == c)  {
@@ -576,6 +578,42 @@ public final class XmlUtils {
 			return defaultValue;
 		}
 		return node.getTextContent();
+	}
+	
+	/**
+	 * Creates a child element with the given name and parent. Avoids the type
+	 * of bug whereby the developer calls {@link Document#createElement(String)}
+	 * but forgets to append it to the relevant parent.
+	 * 
+	 * @param tagName the name of the new child (required)
+	 * @param parent the parent node (required)
+	 * @param document the document to which the parent and child belong (required)
+	 * @return the created element
+	 * @since 1.2.0
+	 */
+	public static Element createChildElement(final String tagName, final Node parent, final Document document) {
+		final Element child = document.createElement(tagName);
+		parent.appendChild(child);
+		return child;
+	}
+	
+	/**
+	 * Returns the child node with the given tag name, creating it if it does
+	 * not exist
+	 * 
+	 * @param tagName the child tag to look for and possibly create (required)
+	 * @param parent the parent in which to look for the child (required)
+	 * @param document the document containing the parent (required)
+	 * @return the existing or created child (never <code>null</code>)
+	 * @since 1.2.0
+	 */
+	public static Element createChildIfNotExists(final String tagName, final Node parent, final Document document) {
+		final Element existingChild = findFirstElement(tagName, parent);
+		if (existingChild != null) {
+			return existingChild;
+		}
+		// No such child; add it
+		return createChildElement(tagName, parent, document);
 	}
 	
 	/**

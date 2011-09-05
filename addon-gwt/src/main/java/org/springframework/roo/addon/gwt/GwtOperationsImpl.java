@@ -372,12 +372,11 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		String xPath = "/configuration/" + (isGaeEnabled ? "gae" : "gwt") + "/plugins/plugin";
 		Element pluginElement = XmlUtils.findFirstElement(xPath, configuration);
 		Assert.notNull(pluginElement, "gwt-maven-plugin required");
-		Plugin defaultPlugin = new Plugin(pluginElement);
+		final Plugin defaultPlugin = new Plugin(pluginElement);
 		for (Plugin plugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
-			if ("gwt-maven-plugin".equals(plugin.getArtifactId())) {
-				if (defaultPlugin.equals(plugin)) {
-					return;
-				}
+			if ("gwt-maven-plugin".equals(plugin.getArtifactId()) && defaultPlugin.equals(plugin)) {
+				// The GWT Maven plugin is already in the POM with the correct configuration
+				return;
 			}
 		}
 

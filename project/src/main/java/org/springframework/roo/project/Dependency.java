@@ -44,7 +44,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param scope the dependency scope (required)
 	 * @param classifier the dependency classifier (required)
 	 */
-	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope, String classifier) {
+	public Dependency(final String groupId, final String artifactId, final String version, final DependencyType type, final DependencyScope scope, final String classifier) {
 		XmlUtils.assertElementLegal(groupId);
 		XmlUtils.assertElementLegal(artifactId);
 		Assert.notNull(version, "Version required");
@@ -67,7 +67,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param type the dependency type (required)
 	 * @param scope the dependency scope (required)
 	 */
-	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope) {
+	public Dependency(final String groupId, final String artifactId, final String version, final DependencyType type, final DependencyScope scope) {
 		this(groupId, artifactId, version, DependencyType.JAR, scope, "");
 	}
 
@@ -78,7 +78,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version (required)
 	 */
-	public Dependency(String groupId, String artifactId, String version) {
+	public Dependency(final String groupId, final String artifactId, final String version) {
 		this(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
 	}
 
@@ -90,7 +90,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param version the version ID (required)
 	 * @param exclusions the exclusions for this dependency
 	 */
-	public Dependency(String groupId, String artifactId, String version, List<Dependency> exclusions) {
+	public Dependency(final String groupId, final String artifactId, final String version, final List<Dependency> exclusions) {
 		this(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
 		this.exclusions = exclusions;
 	}
@@ -100,7 +100,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * 
 	 * @param dependency to parse (required)
 	 */
-	public Dependency(Element dependency) {
+	public Dependency(final Element dependency) {
 		// Test if it has Maven format
 		if (dependency.hasChildNodes() && dependency.getElementsByTagName("artifactId").getLength() > 0) {
 			groupId = "org.apache.maven.plugins";
@@ -110,7 +110,7 @@ public class Dependency implements Comparable<Dependency> {
 
 			this.artifactId = dependency.getElementsByTagName("artifactId").item(0).getTextContent();
 
-			NodeList versionElements = dependency.getElementsByTagName("version");
+			final NodeList versionElements = dependency.getElementsByTagName("version");
 			if (versionElements.getLength() > 0) {
 				version = dependency.getElementsByTagName("version").item(0).getTextContent();
 			} else {
@@ -146,34 +146,34 @@ public class Dependency implements Comparable<Dependency> {
 				}
 				try {
 					scope = DependencyScope.valueOf(s);
-				} catch (IllegalArgumentException e) {
+				} catch (final IllegalArgumentException e) {
 					throw new IllegalArgumentException("Invalid dependency scope: " + s);
 				}
 			}
 			if (scope == DependencyScope.SYSTEM) {
 				if (XmlUtils.findFirstElement("systemPath", dependency) != null) {
-					String path = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
+					final String path = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
 					systemPath = path;
 				} else {
 					throw new IllegalArgumentException("Missing <systemPath> declaraton for system scope");
 				}
 			}
-			NodeList classifierElements = dependency.getElementsByTagName("classifier");
+			final NodeList classifierElements = dependency.getElementsByTagName("classifier");
 			if (classifierElements.getLength() > 0) {
 				classifier = dependency.getElementsByTagName("classifier").item(0).getTextContent();
 			} else {
 				classifier = "";
 			}
 			// Parsing for exclusions
-			List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
+			final List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
 			if (exclusionList.size() > 0) {
-				for (Element exclusion : exclusionList) {
-					Element exclusionE = XmlUtils.findFirstElement("groupId", exclusion);
+				for (final Element exclusion : exclusionList) {
+					final Element exclusionE = XmlUtils.findFirstElement("groupId", exclusion);
 					String exclusionId = "";
 					if (exclusionE != null) {
 						exclusionId = exclusionE.getTextContent();
 					}
-					Element exclusionArtifactE = XmlUtils.findFirstElement("artifactId", exclusion);
+					final Element exclusionArtifactE = XmlUtils.findFirstElement("artifactId", exclusion);
 					String exclusionArtifactId = "";
 					if (exclusionArtifactE != null) {
 						exclusionArtifactId = exclusionArtifactE.getTextContent();
@@ -237,6 +237,7 @@ public class Dependency implements Comparable<Dependency> {
 		return exclusions;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -247,11 +248,12 @@ public class Dependency implements Comparable<Dependency> {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		return obj != null && obj instanceof Dependency && this.compareTo((Dependency) obj) == 0;
 	}
 
-	public int compareTo(Dependency o) {
+	public int compareTo(final Dependency o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}
@@ -275,8 +277,9 @@ public class Dependency implements Comparable<Dependency> {
 		return groupId + ":" + artifactId + ":" + version + (StringUtils.hasText(classifier) ? ":" + classifier : "");
 	}
 
+	@Override
 	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("groupId", groupId);
 		tsc.append("artifactId", artifactId);
 		tsc.append("version", version);
@@ -313,13 +316,10 @@ public class Dependency implements Comparable<Dependency> {
 		dependencyElement.appendChild(XmlUtils.createTextElement(document, "artifactId", this.artifactId));
 		dependencyElement.appendChild(XmlUtils.createTextElement(document, "version", this.version));
 
-		if (this.type != null) {
-			final Element typeElement = document.createElement("type");
-			typeElement.setTextContent(this.type.toString().toLowerCase());
-			if (!DependencyType.JAR.equals(this.type)) {
-				// Keep the XML short, we don't need "JAR" given it's the default
-				dependencyElement.appendChild(typeElement);
-			}
+		if (this.type != null && this.type != DependencyType.JAR) {
+			// Keep the XML short, we don't need "JAR" given it's the default
+			final Element typeElement = XmlUtils.createTextElement(document, "type", this.type.toString().toLowerCase());
+			dependencyElement.appendChild(typeElement);
 		}
 
 		if (this.scope != null) {
@@ -338,14 +338,12 @@ public class Dependency implements Comparable<Dependency> {
 
 		// Add exclusions if any
 		if (!this.exclusions.isEmpty()) {
-			final Element exclusionsElement = document.createElement("exclusions");
+			final Element exclusionsElement = XmlUtils.createChildElement("exclusions", dependencyElement, document);
 			for (final Dependency exclusion : this.exclusions) {
-				final Element exclusionElement = document.createElement("exclusion");
+				final Element exclusionElement = XmlUtils.createChildElement("exclusion", exclusionsElement, document);
 				exclusionElement.appendChild(XmlUtils.createTextElement(document, "groupId", exclusion.getGroupId()));
 				exclusionElement.appendChild(XmlUtils.createTextElement(document, "artifactId", exclusion.getArtifactId()));
-				exclusionsElement.appendChild(exclusionElement);
 			}
-			dependencyElement.appendChild(exclusionsElement);
 		}
 		
 		return dependencyElement;

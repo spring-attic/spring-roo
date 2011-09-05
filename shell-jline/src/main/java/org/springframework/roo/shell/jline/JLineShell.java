@@ -55,7 +55,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
 	private static final boolean APPLE_TERMINAL = Boolean.getBoolean("is.apple.terminal");
-	private static final char ESC = 27;
+	private static final char ESCAPE = 27;
 	private static final String BEL = "\007";
 
 	// Fields
@@ -264,7 +264,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 				}
 
 				ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
-				buff.append(ESC + "]0;").append(message).append(BEL);
+				buff.append(ESCAPE + "]0;").append(message).append(BEL);
 				String stg = buff.toString();
 				try {
 					reader.printString(stg);
@@ -325,7 +325,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	private void doAnsiFlash(int row, Level level, String message) {
 		ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
 		if (APPLE_TERMINAL) {
-			buff.append(ESC + "7");
+			buff.append(ESCAPE + "7");
 		} else {
 			buff.append(ANSICodes.save());
 		}
@@ -364,7 +364,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			rowErasureMap.put(row, startFrom);
 		}
 		if (APPLE_TERMINAL) {
-			buff.append(ESC + "8");
+			buff.append(ESCAPE + "8");
 		} else {
 			buff.append(ANSICodes.restore());
 		}

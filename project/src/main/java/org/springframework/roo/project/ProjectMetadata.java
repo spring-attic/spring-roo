@@ -1,9 +1,9 @@
 package org.springframework.roo.project;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.metadata.AbstractMetadataItem;
@@ -43,18 +43,18 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	// MID:org.springframework.roo.project.ProjectMetadata#the_project
 	public static final String PROJECT_IDENTIFIER = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
 	
-	private JavaPackage topLevelPackage;
-	private String projectName;
-	private Set<Dependency> dependencies;
-	private Set<Plugin> buildPlugins;
-	private Set<Repository> repositories;
-	private Set<Repository> pluginRepositories;
-	private Set<Property> pomProperties;
-	private Set<Filter> filters;
-	private Set<Resource> resources;
-	private PathResolver pathResolver;
+	private final JavaPackage topLevelPackage;
+	private final String projectName;
+	private final Set<Dependency> dependencies;
+	private final Set<Plugin> buildPlugins;
+	private final Set<Repository> repositories;
+	private final Set<Repository> pluginRepositories;
+	private final Set<Property> pomProperties;
+	private final Set<Filter> filters;
+	private final Set<Resource> resources;
+	private final PathResolver pathResolver;
 	
-	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, Set<Repository> pluginRepositories, Set<Property> pomProperties, Set<Filter> filters, Set<Resource> resources, PathResolver pathResolver) {
+	public ProjectMetadata(final JavaPackage topLevelPackage, final String projectName, final Set<Dependency> dependencies, final Set<Plugin> buildPlugins, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final Set<Property> pomProperties, final Set<Filter> filters, final Set<Resource> resources, final PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(projectName, "Project name required");
@@ -88,7 +88,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param dependencies the dependencies to check (required)
 	 * @return whether all the dependencies are currently registered or not
 	 */
-	public boolean isAllDependenciesRegistered(List<Dependency> dependencies) {
+	public boolean isAllDependenciesRegistered(final Collection<? extends Dependency> dependencies) {
 		Assert.notNull(dependencies, "Dependencies to check is required");
 		return this.dependencies.containsAll(dependencies);
 	}
@@ -99,7 +99,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param dependencies the dependencies to check (required)
 	 * @return whether any of the dependencies are currently registered or not
 	 */
-	public boolean isAnyDependenciesRegistered(List<Dependency> dependencies) {
+	public boolean isAnyDependenciesRegistered(final Collection<? extends Dependency> dependencies) {
 		Assert.notNull(dependencies, "Dependencies to check is required");
 		return CollectionUtils.containsAny(this.dependencies, dependencies);
 	}
@@ -110,7 +110,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param dependency the dependency to check (required)
 	 * @return whether the dependency is currently registered or not
 	 */
-	public boolean isDependencyRegistered(Dependency dependency) {
+	public boolean isDependencyRegistered(final Dependency dependency) {
 		Assert.notNull(dependency, "Dependency to check is required");
 		return dependencies.contains(dependency);
 	}
@@ -121,7 +121,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param repositories the repositories to check (required)
 	 * @return whether all the repositories are currently registered or not
 	 */
-	public boolean isAllRepositoriesRegistered(List<Repository> repositories) {
+	public boolean isAllRepositoriesRegistered(final Collection<? extends Repository> repositories) {
 		Assert.notNull(repositories, "Repositories to check is required");
 		return this.repositories.containsAll(repositories);
 	}
@@ -133,7 +133,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param repository to check (required)
 	 * @return whether the repository is currently registered or not
 	 */
-	public boolean isRepositoryRegistered(Repository repository) {
+	public boolean isRepositoryRegistered(final Repository repository) {
 		Assert.notNull(repository, "Repository to check is required");
 		return repositories.contains(repository);
 	}
@@ -144,7 +144,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param repositories the plugin repositories to check (required)
 	 * @return whether all the plugin repositories are currently registered or not
 	 */
-	public boolean isAllPluginRepositoriesRegistered(List<Repository> repositories) {
+	public boolean isAllPluginRepositoriesRegistered(final Collection<? extends Repository> repositories) {
 		Assert.notNull(repositories, "Plugin repositories to check is required");
 		return pluginRepositories.containsAll(repositories);
 	}
@@ -156,7 +156,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param repository repository to check (required)
 	 * @return whether the plugin repository is currently registered or not
 	 */
-	public boolean isPluginRepositoryRegistered(Repository repository) {
+	public boolean isPluginRepositoryRegistered(final Repository repository) {
 		Assert.notNull(repository, "Plugin repository to check is required");
 		return pluginRepositories.contains(repository);
 	}
@@ -168,9 +168,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param plugins the plugins to check (required)
 	 * @return whether all the plugins are currently registered or not
 	 */
-	public boolean isAllPluginsRegistered(List<Plugin> plugins) {
+	public boolean isAllPluginsRegistered(final Collection<? extends Plugin> plugins) {
 		Assert.notNull(plugins, "Plugins to check is required");
-		for (Plugin plugin : plugins) {
+		for (final Plugin plugin : plugins) {
 			if (!isBuildPluginRegistered(plugin)) {
 				return false;
 			}
@@ -185,9 +185,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param plugins the plugins to check (required)
 	 * @return whether any of the plugins are currently registered or not
 	 */
-	public boolean isAnyPluginsRegistered(List<Plugin> plugins) {
+	public boolean isAnyPluginsRegistered(final Collection<? extends Plugin> plugins) {
 		Assert.notNull(plugins, "Plugins to check is required");
-		for (Plugin plugin : plugins) {
+		for (final Plugin plugin : plugins) {
 			if (isBuildPluginRegistered(plugin)) {
 				return true;
 			}
@@ -202,9 +202,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param plugin to check (required)
 	 * @return whether the build plugin is currently registered or not
 	 */
-	public boolean isBuildPluginRegistered(Plugin plugin) {
+	public boolean isBuildPluginRegistered(final Plugin plugin) {
 		Assert.notNull(plugin, "Plugin to check is required");
-		for (Plugin existingPlugin : buildPlugins) {
+		for (final Plugin existingPlugin : buildPlugins) {
 			boolean matchFound = existingPlugin.getGroupId().equals(plugin.getGroupId());
 			matchFound &= existingPlugin.getArtifactId().equals(plugin.getArtifactId());
 			matchFound &= existingPlugin.getVersion().equals(plugin.getVersion());
@@ -222,7 +222,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param property to check (required)
 	 * @return whether the property is currently registered or not
 	 */
-	public boolean isPropertyRegistered(Property property) {
+	public boolean isPropertyRegistered(final Property property) {
 		Assert.notNull(property, "Property to check is required");
 		return pomProperties.contains(property);
 	}
@@ -234,7 +234,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param filter to check (required)
 	 * @return whether the filter is currently registered or not
 	 */
-	public boolean isFilterRegistered(Filter filter) {
+	public boolean isFilterRegistered(final Filter filter) {
 		Assert.notNull(filter, "Filter to check is required");
 		return filters.contains(filter);
 	}
@@ -246,7 +246,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param resource to check (required)
 	 * @return whether the resource is currently registered or not
 	 */
-	public boolean isResourceRegistered(Resource resource) {
+	public boolean isResourceRegistered(final Resource resource) {
 		Assert.notNull(resource, "Resource to check is required");
 		return resources.contains(resource);
 	}
@@ -280,10 +280,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param dependency to locate (required; note the version number is ignored in comparisons)
 	 * @return any matching dependencies (never returns null, but may return an empty {@link Set})
 	 */
-	public Set<Dependency> getDependenciesExcludingVersion(Dependency dependency) {
+	public Set<Dependency> getDependenciesExcludingVersion(final Dependency dependency) {
 		Assert.notNull(dependency, "Dependency to locate is required");
-		Set<Dependency> result = new HashSet<Dependency>();
-		for (Dependency d : dependencies) {
+		final Set<Dependency> result = new HashSet<Dependency>();
+		for (final Dependency d : dependencies) {
 			if (dependency.getArtifactId().equals(d.getArtifactId()) && dependency.getGroupId().equals(d.getGroupId()) && dependency.getType().equals(d.getType())) {
 				result.add(d);
 			}
@@ -299,17 +299,16 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Locates any build plugins which match the presented plugin, excluding the version number.
-	 * This is useful for upgrade use cases, where it is necessary to locate any build plugins with
-	 * the same group and artifact identifications so that they can be removed.
+	 * Returns any build plugins with the same groupId and artifactId as the
+	 * given plugin. This is useful for upgrade cases.
 	 * 
 	 * @param plugin to locate (required; note the version number is ignored in comparisons)
 	 * @return any matching plugins (never returns null, but may return an empty {@link Set})
 	 */
-	public Set<Plugin> getBuildPluginsExcludingVersion(Plugin plugin) {
+	public Set<Plugin> getBuildPluginsExcludingVersion(final Plugin plugin) {
 		Assert.notNull(plugin, "Plugin to locate is required");
-		Set<Plugin> result = new HashSet<Plugin>();
-		for (Plugin p : buildPlugins) {
+		final Set<Plugin> result = new HashSet<Plugin>();
+		for (final Plugin p : buildPlugins) {
 			if (plugin.getArtifactId().equals(p.getArtifactId()) && plugin.getGroupId().equals(p.getGroupId())) {
 				result.add(p);
 			}
@@ -325,10 +324,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param property to locate (required; note the value is ignored in comparisons)
 	 * @return any matching properties (never returns null, but may return an empty {@link Set})
 	 */
-	public Set<Property> getPropertiesExcludingValue(Property property) {
+	public Set<Property> getPropertiesExcludingValue(final Property property) {
 		Assert.notNull(property, "Property to locate is required");
-		Set<Property> result = new HashSet<Property>();
-		for (Property p : pomProperties) {
+		final Set<Property> result = new HashSet<Property>();
+		for (final Property p : pomProperties) {
 			if (property.getName().equals(p.getName())) {
 				result.add(p);
 			}
@@ -342,9 +341,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param name the property name (required)
 	 * @return the property if found otherwise null
 	 */
-	public Property getProperty(String name) {
+	public Property getProperty(final String name) {
 		Assert.hasText(name, "Property name to locate is required");
-		for (Property p : pomProperties) {
+		for (final Property p : pomProperties) {
 			if (name.equals(p.getName())) {
 				return p;
 			}
@@ -373,7 +372,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 */
 	public boolean isGwtEnabled() {
 		boolean gwtEnabled = false;
-		for (Plugin buildPlugin : buildPlugins) {
+		for (final Plugin buildPlugin : buildPlugins) {
 			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
 				gwtEnabled = true;
 				break;
@@ -381,7 +380,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		}
 		// TODO This is hacky - should not rely on pathResolver, the use of java.io.File, and the XML artifact itself being present. Should just be able to detect build plugin
 		if (!gwtEnabled) {
-			String gwtModuleXml = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "ApplicationScaffold.gwt.xml");
+			final String gwtModuleXml = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "ApplicationScaffold.gwt.xml");
 			gwtEnabled = new File(gwtModuleXml).exists();
 		}
 		return gwtEnabled;
@@ -394,7 +393,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isGaeEnabled() {
-		for (Plugin buildPlugin : buildPlugins) {
+		for (final Plugin buildPlugin : buildPlugins) {
 			if ("maven-gae-plugin".equals(buildPlugin.getArtifactId())) {
 				return true;
 			}
@@ -408,7 +407,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isDataNucleusEnabled() {
-		for (Plugin buildPlugin : buildPlugins) {
+		for (final Plugin buildPlugin : buildPlugins) {
 			if ("maven-datanucleus-plugin".equals(buildPlugin.getArtifactId())) {
 				return true;
 			}
@@ -422,7 +421,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
 	 */
 	public boolean isDatabaseDotComEnabled() {
-		for (Dependency dependency : dependencies) {
+		for (final Dependency dependency : dependencies) {
 			if ("com.force.sdk".equals(dependency.getGroupId())) {
 				return true;
 			}
@@ -430,8 +429,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return false;
 	}
 
+	@Override
 	public final String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
 		tsc.append("valid", isValid());
 		tsc.append("topLevelPackage", topLevelPackage);

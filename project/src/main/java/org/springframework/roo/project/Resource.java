@@ -143,14 +143,10 @@ public class Resource implements Comparable<Resource> {
 		}
 
 		if (!this.includes.isEmpty()) {
-			Element includes = XmlUtils.findFirstElement("includes", resourceElement);
-			if (includes == null) {
-				includes = document.createElement("includes");
-			}
+			final Element includes = XmlUtils.createChildElement("includes", resourceElement, document);
 			for (final String include : this.includes) {
 				includes.appendChild(XmlUtils.createTextElement(document, "include", include));
 			}
-			resourceElement.appendChild(includes);
 		}
 		
 		return resourceElement;

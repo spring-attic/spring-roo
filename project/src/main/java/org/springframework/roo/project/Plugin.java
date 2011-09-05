@@ -121,7 +121,7 @@ public class Plugin implements Comparable<Plugin> {
 	 * @param plugin the element to parse (required)
 	 * @return a non-blank groupId
 	 */
-	private static String getGroupId(final Element plugin) {
+	public static String getGroupId(final Element plugin) {
 		if (plugin.getElementsByTagName("groupId").getLength() > 0) {
 			return plugin.getElementsByTagName("groupId").item(0).getTextContent();
 		}
@@ -199,6 +199,11 @@ public class Plugin implements Comparable<Plugin> {
 		}
 	}
 
+	/**
+	 * Returns this plugin's groupId.
+	 * 
+	 * @return
+	 */
 	public String getGroupId() {
 		return groupId;
 	}
@@ -240,8 +245,8 @@ public class Plugin implements Comparable<Plugin> {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Plugin && this.compareTo((Plugin) obj) == 0;
+	public boolean equals(final Object obj) {
+		return obj instanceof Plugin && this.compareTo((Plugin) obj) == 0;
 	}
 
  	public int compareTo(Plugin o) {
@@ -304,20 +309,18 @@ public class Plugin implements Comparable<Plugin> {
 		
 		// Executions
 		if (!this.executions.isEmpty()) {
-			final Element executionsElement = document.createElement("executions");
+			final Element executionsElement = XmlUtils.createChildElement("executions", pluginElement, document);
 			for (final Execution execution : this.executions) {
 				executionsElement.appendChild(execution.getElement(document));
 			}
-			pluginElement.appendChild(executionsElement);
 		}
 		
 		// Dependencies
 		if (!this.dependencies.isEmpty()) {
-			final Element dependenciesElement = document.createElement("dependencies");
+			final Element dependenciesElement = XmlUtils.createChildElement("dependencies", pluginElement, document);
 			for (final Dependency dependency : this.dependencies) {
 				dependenciesElement.appendChild(dependency.getElement(document));
 			}
-			pluginElement.appendChild(dependenciesElement);
 		}
 		
 		return pluginElement;

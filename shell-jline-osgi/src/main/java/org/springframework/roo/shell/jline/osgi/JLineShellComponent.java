@@ -1,5 +1,12 @@
 package org.springframework.roo.shell.jline.osgi;
 
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_GREEN;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_MAGENTA;
+import static org.springframework.roo.support.util.AnsiEscapeCode.REVERSE;
+import static org.springframework.roo.support.util.AnsiEscapeCode.UNDERSCORE;
+import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,8 +15,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import jline.ANSIBuffer;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -34,7 +39,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Component(immediate = true)
 @Service
 public class JLineShellComponent extends JLineShell {
-
+	
 	// Constants
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	
@@ -89,23 +94,23 @@ public class JLineShellComponent extends JLineShell {
 			List<String> words = Arrays.asList(tweet.split(" "));
 			StringBuilder sb = new StringBuilder();
 			// Add in Roo's twitter account to give context to the notification
-			sb.append(ANSIBuffer.ANSICodes.attrib(7)).append("@SpringRoo").append(ANSIBuffer.ANSICodes.attrib(0));
+			sb.append(decorate("@SpringRoo", REVERSE));
 			sb.append(" ");
 			// We want to colourise certain words. The codes used here should be moved to a ShellUtils and include a few helper methods
 			// This is a basic attempt at pattern identification, it should be adequate in most cases although may be incorrect for URLs.
 			// For example url.com/ttym: is valid by may mean "url.com/ttym" + ":"
 			for (String word : words) {
 				if (word.startsWith("http://") || word.startsWith("https://")) {
-					// Green and underlined for URLs
-					sb.append(ANSIBuffer.ANSICodes.attrib(32)).append(ANSIBuffer.ANSICodes.attrib(4)).append(word).append(ANSIBuffer.ANSICodes.attrib(0));
+					// It's a URL
+					sb.append(decorate(word, FG_GREEN, UNDERSCORE));
 				} else if (word.startsWith("@")) {
-					// Magenta for user references
-					sb.append(ANSIBuffer.ANSICodes.attrib(35)).append(word).append(ANSIBuffer.ANSICodes.attrib(0));
+					// It's a Twitter username
+					sb.append(decorate(word, FG_MAGENTA));
 				} else if (word.startsWith("#")) {
-					// Cyan for hash tags
-					sb.append(ANSIBuffer.ANSICodes.attrib(36)).append(word).append(ANSIBuffer.ANSICodes.attrib(0));
+					// It's a Twitter hash tag
+					sb.append(decorate(word, FG_CYAN));
 				} else {
-					// All else default yellow
+					// All else default
 					sb.append(word);
 				}
 				// Add back separator

@@ -375,7 +375,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendPluginRemovalNotifications(plugin);
 	}
 	
-	public void updateBuildPlugin(Plugin plugin) {
+	public void updateBuildPlugin(final Plugin plugin) {
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		Assert.notNull(projectMetadata, "Plugin modification prohibited at this time");
 		Assert.notNull(plugin, "Plugin required");
@@ -387,9 +387,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		}
 		
 		// Delete any existing plugin with a different version
-		for (Plugin existing : projectMetadata.getBuildPluginsExcludingVersion(plugin)) {
-			projectMetadataProvider.removeBuildPlugin(existing);
-		}
+		projectMetadataProvider.removeBuildPlugin(plugin);
 		
 		// Add the plugin
 		projectMetadataProvider.addBuildPlugin(plugin);

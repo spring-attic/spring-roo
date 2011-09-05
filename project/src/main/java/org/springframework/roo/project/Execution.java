@@ -163,11 +163,10 @@ public class Execution implements Comparable<Execution> {
 		}
 		
 		// Goals
-		final Element goalsElement = document.createElement("goals");
+		final Element goalsElement = XmlUtils.createChildElement("goals", executionElement, document);
 		for (final String goal : this.goals) {
 			goalsElement.appendChild(XmlUtils.createTextElement(document, "goal", goal));
 		}
-		executionElement.appendChild(goalsElement);
 		
 		// Configuration
 		if (this.configuration != null) {
