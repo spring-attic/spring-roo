@@ -4,10 +4,6 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.addon.jsf.JsfJavaType.CONVERTER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.UI_COMPONENT;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +13,6 @@ import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -60,17 +55,16 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @param governorPhysicalTypeMetadata
 	 * @param annotationValues
 	 * @param plural
-	 * @param crudAdditions the additions this metadata should make in order to
+	 * @param findAllMethod2 the additions this metadata should make in order to
 	 * invoke the target entity type's CRUD methods (required)
 	 * @param locatedFieldsAndAccessors
 	 * @param enumTypes
 	 * @param identifierAccessor the entity id's accessor (getter) method (can be <code>null</code>)
 	 */
-	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors) {
+	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MemberTypeAdditions findAllMethod, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(crudAdditions, "Crud additions map required");
 		Assert.notNull(locatedFieldsAndAccessors, "Located fields and accessors map required");
 		
 		if (!isValid()) {
@@ -80,11 +74,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.entity = annotationValues.getEntity();
 		this.locatedFieldsAndAccessors = locatedFieldsAndAccessors;
 		
-		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
-		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
-		final MemberTypeAdditions persistMethod = crudAdditions.get(PERSIST_METHOD);
-		final MemberTypeAdditions removeMethod = crudAdditions.get(REMOVE_METHOD);
-		if (findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null) {
+		if (findAllMethod == null) {
 			valid = false;
 			return;
 		}

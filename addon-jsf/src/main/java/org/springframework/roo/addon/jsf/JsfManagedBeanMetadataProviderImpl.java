@@ -44,6 +44,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -93,20 +94,39 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
-		return entityToManagedBeanMidMap.get(itdTypeDetails.getName());
+		JavaType governor = itdTypeDetails.getName();
+		String localMid = entityToManagedBeanMidMap.get(governor);
+		if (localMid != null) {
+			return localMid;
+		}
+
+		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getGovernor().getName());
+		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+			@SuppressWarnings("unchecked")
+			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+			if (domainTypes != null) {
+				for (JavaType type : domainTypes) {
+					String localMidType = entityToManagedBeanMidMap.get(type);
+					if (localMidType != null) {
+						return localMidType;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final JsfManagedBeanAnnotationValues annotationValues = new JsfManagedBeanAnnotationValues(governorPhysicalTypeMetadata);
-		final JavaType entityType = annotationValues.getEntity();
-		if (!annotationValues.isAnnotationFound() || entityType == null) {
+		final JavaType entity = annotationValues.getEntity();
+		if (!annotationValues.isAnnotationFound() || entity == null) {
 			return null;
 		}
 
 		// Lookup the entity's metadata
-		final MemberDetails memberDetails = getMemberDetails(entityType);
+		final MemberDetails memberDetails = getMemberDetails(entity);
 		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
@@ -121,17 +141,17 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		if (oldEntity != null) {
 			entityToManagedBeanMidMap.remove(oldEntity);
 		}
-		entityToManagedBeanMidMap.put(entityType, metadataId);
-		managedBeanMidToEntityMap.put(metadataId, entityType);
+		entityToManagedBeanMidMap.put(entity, metadataId);
+		managedBeanMidToEntityMap.put(metadataId, entity);
 
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entityType));
-		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityType.getSimpleTypeName() + "'");
+		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity));
+		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entity.getSimpleTypeName() + "'");
 		final String plural = pluralMetadata.getPlural();
 
-		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entityType, metadataId);
-		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entityType, memberDetails, metadataId);
+		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entity, metadataId);
+		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entity, memberDetails, metadataId);
 		final Iterable<JavaType> enumTypes = getEnumTypes(locatedFieldsAndAccessors.keySet());
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 
 		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes, identifierAccessor);
 	}
