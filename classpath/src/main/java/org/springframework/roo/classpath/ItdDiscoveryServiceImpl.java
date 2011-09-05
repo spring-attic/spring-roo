@@ -9,6 +9,12 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.model.JavaType;
 
+/**
+ * Implementation of {@link ItdDiscoveryService}.
+ *
+ * @author James Tyrrell
+ * @since 1.2.0
+ */
 @Component(immediate = true)
 @Service
 public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {

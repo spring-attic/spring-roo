@@ -17,6 +17,12 @@ import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 
+/**
+ * Default implementation of {@link XmlRoundTripFileManager}.
+ *
+ * @author James Tyrrell
+ * @since 1.2.0
+ */
 @Component
 @Service
 public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
