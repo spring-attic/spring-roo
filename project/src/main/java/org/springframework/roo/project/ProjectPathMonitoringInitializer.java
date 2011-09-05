@@ -16,9 +16,7 @@ import org.springframework.roo.file.undo.CreateDirectory;
 import org.springframework.roo.file.undo.FilenameResolver;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataNotificationListener;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.support.util.Assert;
 
 @Component(immediate = true)
@@ -26,9 +24,9 @@ import org.springframework.roo.support.util.Assert;
 public class ProjectPathMonitoringInitializer implements MetadataNotificationListener {
 	@Reference private FilenameResolver filenameResolver;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private MetadataService metadataService;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
 	@Reference private UndoManager undoManager;
+	@Reference private PathResolver pathResolver;
 	private boolean pathsRegistered = false;
 
 	protected void activate(ComponentContext context) {
@@ -43,21 +41,6 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 		if (pathsRegistered) {
 			return;
 		}
-
-		Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency), "Upstream dependency is an invalid metadata identification string ('" + upstreamDependency + "')");
-
-		if (!upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-			return;
-		}
-
-		// Acquire the Project Metadata, if available
-		ProjectMetadata md = (ProjectMetadata) metadataService.get(upstreamDependency);
-		if (md == null) {
-			return;
-		}
-
-		PathResolver pathResolver = md.getPathResolver();
-		Assert.notNull(pathResolver, "Path resolver could not be acquired from changed metadata '" + md + "'");
 
 		Set<FileOperation> notifyOn = new LinkedHashSet<FileOperation>();
 		notifyOn.add(FileOperation.MONITORING_START);
@@ -78,12 +61,12 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 					new CreateDirectory(undoManager, filenameResolver, file);
 				}
 				MonitoringRequest request = new DirectoryMonitoringRequest(file, true, notifyOn);
-				new UndoableMonitoringRequest(undoManager, fileMonitorService, request, md.isValid());
+				new UndoableMonitoringRequest(undoManager, fileMonitorService, request, true);
 			}
 		}
 
 		// Avoid doing this operation again unless the validity changes
-		pathsRegistered = md.isValid();
+		pathsRegistered = true;
 
 		// Explicitly perform a scan now that we've added all the directories we wish to monitor
 		fileMonitorService.scanAll();
