@@ -109,7 +109,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		
 		// Add an @Transactional, if the user did not define it on the governor directly
-		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), TRANSACTIONAL) == null) {
+		if (annotationValues.isTransactional() && MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), TRANSACTIONAL) == null) {
 			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(TRANSACTIONAL);
 			if (StringUtils.hasText(transactionManager) && !"transactionManager".equals(transactionManager)) {
 				transactionalBuilder.addStringAttribute("value", transactionManager);

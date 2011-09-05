@@ -26,6 +26,7 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private boolean persist = true; 
 	@AutoPopulate private boolean remove = true; 
 	@AutoPopulate private boolean merge = true; 
+	@AutoPopulate private boolean transactional = true; 
 
 	public IntegrationTestAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_INTEGRATION_TEST);
@@ -70,5 +71,9 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 
 	public boolean isMerge() {
 		return merge;
+	}
+	
+	public boolean isTransactional() {
+		return transactional;
 	}
 }

@@ -26,6 +26,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -58,6 +59,10 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 	}
 
 	public void newIntegrationTest(JavaType entity) {
+		newIntegrationTest(entity, true);
+	}
+	
+	public void newIntegrationTest(JavaType entity, boolean transactional) {
 		Assert.notNull(entity, "Entity to produce an integration test for is required");
 
 		// Verify the requested entity actually exists as a class and is not abstract
@@ -77,6 +82,9 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
+		if (!transactional) {
+			config.add(new BooleanAttributeValue(new JavaSymbolName("transactional"), false));
+		}
 		annotations.add(new AnnotationMetadataBuilder(ROO_INTEGRATION_TEST, config));
 
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();

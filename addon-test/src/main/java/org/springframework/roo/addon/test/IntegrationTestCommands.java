@@ -38,7 +38,8 @@ public class IntegrationTestCommands implements CommandMarker {
 	@CliCommand(value = "test integration", help = "Creates a new integration test for the specified entity")
 	public void newIntegrationTest(
 		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the entity to create an integration test for") JavaType entity, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
+		@CliOption(key = "transactional", mandatory = false, unspecifiedDefaultValue = "true", specifiedDefaultValue = "true", help = "Indicates whether the created test cases should be run withing a Spring transaction") boolean transactional) {
 
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(entity);

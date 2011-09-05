@@ -37,4 +37,6 @@ public @interface RooIntegrationTest {
 	boolean remove() default true; 
 	
 	boolean merge() default true; 
+	
+	boolean transactional() default true; 
 }
