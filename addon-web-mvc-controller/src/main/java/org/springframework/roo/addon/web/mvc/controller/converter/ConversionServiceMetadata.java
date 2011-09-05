@@ -6,8 +6,10 @@ import static org.springframework.roo.model.SpringJavaType.FORMATTER_REGISTRY;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.springframework.roo.addon.json.CustomDataJsonTags;
@@ -71,16 +73,22 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 
 		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
+		Set<String> methodNames = new HashSet<String>();
 		//loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
 		for (final JavaType type : new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
-			JavaSymbolName toIdMethodName = new JavaSymbolName("get" + type.getSimpleTypeName() + "ToStringConverter");
+			String simpleName = type.getSimpleTypeName();
+			while (methodNames.contains(simpleName)) {
+				simpleName = simpleName + "_";
+			}
+			methodNames.add(simpleName);
+			JavaSymbolName toIdMethodName = new JavaSymbolName("get" + simpleName + "ToStringConverter");
 			MethodMetadata toIdMethod = getToStringConverterMethod(type, toIdMethodName, relevantDomainTypes.get(type));
 			if (toIdMethod != null) {
 				builder.addMethod(toIdMethod);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + toIdMethodName.getSymbolName() + "());");
 			}
 			
-			JavaSymbolName toTypeMethodName = new JavaSymbolName("getIdTo" + type.getSimpleTypeName() + "Converter");
+			JavaSymbolName toTypeMethodName = new JavaSymbolName("getIdTo" + simpleName + "Converter");
 			MethodMetadata toTypeMethod = getToTypeConverterMethod(type, toTypeMethodName, findMethods.get(type), idTypes.get(type));
 			if (toTypeMethod != null) {
 				builder.addMethod(toTypeMethod);
@@ -89,7 +97,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			
 			// Only allow conversion if ID type is not String already.
 			if (!idTypes.get(type).equals(JavaType.STRING)) {
-				JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + type.getSimpleTypeName() + "Converter");
+				JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + simpleName + "Converter");
 				MethodMetadata stringToTypeMethod = getStringToTypeConverterMethod(type, stringToTypeMethodName, idTypes.get(type));
 				if (stringToTypeMethod != null) {
 					builder.addMethod(stringToTypeMethod);
