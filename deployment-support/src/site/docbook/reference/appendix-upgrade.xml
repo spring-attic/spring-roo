@@ -237,7 +237,9 @@
         Spring MVC JSON integration any more. The exposeJson attribute in this
         annotation has been depricated and will be removed for subsequent
         releases. To create Spring MVC JSON integration please see the <link
-        linkend="base-json">JSON chapter</link>.</para>
+        linkend="base-json">JSON chapter</link> or simply use the <link
+        linkend="command-index-web-mvc-json-all">web mvc json all</link>
+        command.</para>
       </listitem>
 
       <listitem>
@@ -245,7 +247,9 @@
         Spring MVC Finder integration any more. The exposeFinders attribute in
         this annotation has been depricated and will be removed for subsequent
         releases. To create Spring MVC Finder integration please see <link
-        linkend="base-web">MVC chapter</link>.</para>
+        linkend="base-web">MVC chapter</link> or simply use the <link
+        linkend="command-index-web-mvc-finder-all">web mvc finder all</link>
+        command.</para>
       </listitem>
     </itemizedlist>
   </section>
