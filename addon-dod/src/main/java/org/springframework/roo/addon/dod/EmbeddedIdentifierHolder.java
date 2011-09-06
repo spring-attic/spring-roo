@@ -15,6 +15,8 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1.3
  */
 public class EmbeddedIdentifierHolder {
+	
+	// Fields
 	private FieldMetadata embeddedIdentifierField;
 	private List<FieldMetadata> identifierFields;
 
@@ -36,5 +38,4 @@ public class EmbeddedIdentifierHolder {
 	public List<FieldMetadata> getIdentifierFields() {
 		return identifierFields;
 	}
-
 }

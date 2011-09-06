@@ -7,9 +7,10 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public class UndoEvent {
+	
+	// Fields
 	private UndoOperation operation;
 	
 	public UndoEvent(UndoOperation operation) {

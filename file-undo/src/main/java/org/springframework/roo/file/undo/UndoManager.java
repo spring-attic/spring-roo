@@ -13,7 +13,6 @@ import java.util.Stack;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface UndoManager {
 

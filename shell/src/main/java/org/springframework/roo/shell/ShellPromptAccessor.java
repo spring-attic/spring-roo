@@ -5,7 +5,6 @@ package org.springframework.roo.shell;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface ShellPromptAccessor {
 	

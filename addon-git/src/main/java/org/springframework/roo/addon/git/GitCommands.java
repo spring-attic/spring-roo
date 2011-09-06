@@ -17,21 +17,21 @@ import org.springframework.roo.shell.CommandMarker;
 @Component 
 @Service 
 public class GitCommands implements CommandMarker {
-	@Reference private GitOperations revisionControl;
+	@Reference private GitOperations gitOperations;
 
 	@CliAvailabilityIndicator({ "git config", "git commit all", "git revert last", "git revert commit", "git log" }) 
 	public boolean isCommandAvailable() {
-		return revisionControl.isGitCommandAvailable();
+		return gitOperations.isGitCommandAvailable();
 	}
 
 	@CliAvailabilityIndicator("git setup") 
 	public boolean isSetupCommandAvailable() {
-		return revisionControl.isSetupCommandAvailable();
+		return gitOperations.isSetupCommandAvailable();
 	}
 
 	@CliCommand(value = "git setup", help = "Setup Git revision control") 
 	public void config() {
-		revisionControl.setup();
+		gitOperations.setup();
 	}
 
 	@CliCommand(value = "git config", help = "Git revision control configuration (.git/config)") 
@@ -43,54 +43,59 @@ public class GitCommands implements CommandMarker {
 		@CliOption(key = { "automaticCommit" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Enable automatic commit after successful execution of Roo shell command") Boolean automaticCommit) {
 
 		if (userName != null && userName.length() > 0) {
-			revisionControl.setConfig("user", "name", userName);
+			gitOperations.setConfig("user", "name", userName);
 		}
 		if (email != null && email.length() > 0) {
-			revisionControl.setConfig("user", "email", email);
+			gitOperations.setConfig("user", "email", email);
 		}
 		if (repoUrl != null && repoUrl.length() > 0) {
-			revisionControl.setConfig("remote \"origin\"", "url", repoUrl);
+			gitOperations.setConfig("remote \"origin\"", "url", repoUrl);
 		}
 		if (color) {
-			revisionControl.setConfig("color", "diff", "auto");
-			revisionControl.setConfig("color", "branch", "auto");
-			revisionControl.setConfig("color", "status", "auto");
+			gitOperations.setConfig("color", "diff", "auto");
+			gitOperations.setConfig("color", "branch", "auto");
+			gitOperations.setConfig("color", "status", "auto");
 		}
-		revisionControl.setConfig("roo", "automaticCommit", automaticCommit.toString());
+		gitOperations.setConfig("roo", "automaticCommit", automaticCommit.toString());
 	}
 
 	@CliCommand(value = "git commit all", help = "Trigger a commit manually for the project") 
 	public void config(
 		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		revisionControl.commitAllChanges(message);
+		
+		gitOperations.commitAllChanges(message);
 	}
 	
 	@CliCommand(value = "git reset", help = "Reset (hard) last (x) commit(s)") 
 	public void resetLast(
 		@CliOption(key = { "commitCount" }, mandatory = false, help = "Number of commits to reset") Integer history, 
 		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		revisionControl.reset(history == null ? 0 : history, message);
+		
+		gitOperations.reset(history == null ? 0 : history, message);
 	}
 
 	@CliCommand(value = "git revert last", help = "Revert last commit") 
 	public void revertLast(@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		revisionControl.revertLastCommit(message);
+		gitOperations.revertLastCommit(message);
 	}
 
 	@CliCommand(value = "git revert commit", help = "Roll project back to a specific commit") 
 	public void revertCommit(
 		@CliOption(key = { "revString" }, mandatory = true, help = "Commit id") String revstr, 
 		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		revisionControl.revertCommit(revstr, message);
+		
+		gitOperations.revertCommit(revstr, message);
 	}
 	
 	@CliCommand(value = "git push", help = "Roll project back to a specific commit") 
 	public void push() {
-		revisionControl.push();
+		gitOperations.push();
 	}
 
 	@CliCommand(value = "git log", help = "Commit log") 
-	public void log(@CliOption(key = { "maxMessages" }, mandatory = false, help = "Number of commit messages to display") Integer count) {
-		revisionControl.log(count == null ? Integer.MAX_VALUE : count);
+	public void log(
+		@CliOption(key = { "maxMessages" }, mandatory = false, help = "Number of commit messages to display") Integer count) {
+		
+		gitOperations.log(count == null ? Integer.MAX_VALUE : count);
 	}
 }

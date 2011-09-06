@@ -18,10 +18,11 @@ import org.apache.felix.scr.annotations.Reference;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Component(componentAbstract = true)
 public abstract class AbstractHashCodeTrackingMetadataNotifier {
+	
+	// Fields
 	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference protected MetadataService metadataService;
 
@@ -49,5 +50,4 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
 		
 		metadataDependencyRegistry.notifyDownstream(metadataItem.getId());
 	}
-
 }

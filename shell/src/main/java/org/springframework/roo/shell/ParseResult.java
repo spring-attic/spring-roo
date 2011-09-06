@@ -17,13 +17,14 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class ParseResult {
+
+	// Fields
 	private Method method;
 	private Object instance;
 	private Object[] arguments; // may be null if no arguments needed
-	
+
 	public ParseResult(Method method, Object instance, Object[] arguments) {
 		Assert.notNull(method, "Method required");
 		Assert.notNull(instance, "Instance required");
@@ -51,8 +52,7 @@ public class ParseResult {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(arguments);
-		result = prime * result
-				+ ((instance == null) ? 0 : instance.hashCode());
+		result = prime * result + ((instance == null) ? 0 : instance.hashCode());
 		result = prime * result + ((method == null) ? 0 : method.hashCode());
 		return result;
 	}
@@ -89,5 +89,4 @@ public class ParseResult {
 		tsc.append("arguments", StringUtils.arrayToCommaDelimitedString(arguments));
 		return tsc.toString();
 	}
-
 }

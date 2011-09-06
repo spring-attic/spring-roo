@@ -9,7 +9,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface IdentifiableAnnotatedJavaStructure extends IdentifiableJavaStructure {
 
@@ -17,5 +16,4 @@ public interface IdentifiableAnnotatedJavaStructure extends IdentifiableJavaStru
 	 * @return annotations on this structure (never null, but may be empty)
 	 */
 	List<AnnotationMetadata> getAnnotations();
-
 }

@@ -16,6 +16,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component 
 @Service 
 public class BackupCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private BackupOperations backupOperations;
 
 	@CliAvailabilityIndicator("backup") 

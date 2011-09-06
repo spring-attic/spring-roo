@@ -5,7 +5,6 @@ package org.springframework.roo.shell.event;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface ShellStatusListener {
 	

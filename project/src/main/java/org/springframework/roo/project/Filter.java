@@ -11,6 +11,8 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class Filter implements Comparable<Filter> {
+	
+	// Fields
 	private String value;
 	
 	/**

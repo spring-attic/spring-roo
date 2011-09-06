@@ -8,7 +8,6 @@ import java.util.Set;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface ImportRegistrationResolver {
 	
@@ -75,5 +74,4 @@ public interface ImportRegistrationResolver {
 	 * @return an unmodifiable representation of all registered imports (never null, but may be empty)
 	 */
 	Set<JavaType> getRegisteredImports();
-
 }

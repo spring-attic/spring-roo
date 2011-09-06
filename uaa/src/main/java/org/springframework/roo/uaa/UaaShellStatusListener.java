@@ -22,11 +22,12 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 @Service
 @Component(immediate = true)
 public class UaaShellStatusListener implements ShellStatusListener {
+	
+	// Fields
 	@Reference UaaService uaaService;
 	@Reference Shell shell;
 	private boolean startupMessageConsidered = false;

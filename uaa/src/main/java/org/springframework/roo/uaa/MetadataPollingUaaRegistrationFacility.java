@@ -24,13 +24,17 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
  */
 @Component(enabled = true)
 public class MetadataPollingUaaRegistrationFacility {
+	
+	// Constants
+	private static final String NOT_FOUND = "___NOT_FOUND___";
+
+	// Fields
 	@Reference private MetadataLogger metadataLogger;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	private BundleContext bundleContext;
 	private Timer timer = new Timer();
 	private Set<String> previouslyNotifiedBsns = new HashSet<String>();
 	private Map<String, String> typeToBsnMap = new HashMap<String, String>();
-	private static final String NOT_FOUND = "___NOT_FOUND___";
 	
 	protected void activate(ComponentContext context) {
 		this.bundleContext = context.getBundleContext();

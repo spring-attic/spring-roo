@@ -10,6 +10,7 @@ package org.springframework.roo.model;
  */
 public final class Jsr303JavaType {
 
+	// Constants
 	public static final JavaType ASSERT_FALSE = new JavaType("javax.validation.constraints.AssertFalse");
 	public static final JavaType ASSERT_TRUE = new JavaType("javax.validation.constraints.AssertTrue");
 	public static final JavaType DECIMAL_MIN = new JavaType("javax.validation.constraints.DecimalMin");

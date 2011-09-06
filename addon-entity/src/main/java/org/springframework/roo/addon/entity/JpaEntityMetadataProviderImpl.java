@@ -207,8 +207,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	}
 	
 	/**
-	 * Returns the {@link Identifier} for the entity identified by the given
-	 * metadata ID.
+	 * Returns the {@link Identifier} for the entity identified by the given metadata ID.
 	 * 
 	 * @param metadataId
 	 * @return <code>null</code> if there isn't one

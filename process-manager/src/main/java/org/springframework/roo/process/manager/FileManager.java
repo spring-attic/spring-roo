@@ -20,7 +20,6 @@ import org.springframework.roo.file.undo.UndoManager;
  * 
  * @author Ben Alex
  * @since 1.0
- * 
  */
 public interface FileManager {
 

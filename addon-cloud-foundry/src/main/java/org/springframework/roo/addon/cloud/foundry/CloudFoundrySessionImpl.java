@@ -50,6 +50,8 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Component
 @Service
 public class CloudFoundrySessionImpl implements CloudFoundrySession, TransmissionEventListener {
+	
+	// Constants
 	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
 	private static final String EMPTY_STRING = "";
 	private static final String EMAIL_KEY = "email";
@@ -58,6 +60,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	private static final String ROO_KEY = "Roo == Java + Productivity";
 	private static final String CLOUD_FOUNDRY_KEY = "Cloud Foundry Prefs";
 
+	// Fields
 	@Reference private UaaService uaaService;
 	private Preferences preferences = getPreferencesFor(CloudFoundrySessionImpl.class);
 	UaaClient.Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
@@ -85,7 +88,8 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 
 	protected void activate(ComponentContext context) {
 		// TODO: Replace with call to VersionHelper.getProductFromDictionary(..) available in UAA 1.0.3
-		@SuppressWarnings("rawtypes") Dictionary d = context.getBundleContext().getBundle().getHeaders();
+		@SuppressWarnings("rawtypes")
+		Dictionary d = context.getBundleContext().getBundle().getHeaders();
 		Object bundleVersion = d.get("Bundle-Version");
 		Object gitCommitHash = d.get("Git-Commit-Hash");
 		product = VersionHelper.getProduct("Cloud Foundry Java API", bundleVersion == null ? "0.0.0.RELEASE" : bundleVersion.toString(), gitCommitHash == null ? null : gitCommitHash.toString());

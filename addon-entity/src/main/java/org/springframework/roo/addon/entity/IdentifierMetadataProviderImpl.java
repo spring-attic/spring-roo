@@ -27,7 +27,6 @@ import org.springframework.roo.project.ProjectMetadata;
 @Service
 public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements IdentifierMetadataProvider {
 	
-	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;

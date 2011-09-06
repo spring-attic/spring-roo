@@ -34,7 +34,11 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MavenOperationsImpl extends AbstractProjectOperations implements MavenOperations {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(MavenOperationsImpl.class);
+	
+	// Fields
 	@Reference private ApplicationContextOperations applicationContextOperations;
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
@@ -176,5 +180,5 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 				ActiveProcessManager.clearActiveProcessManager();
 			}
 		}
-	}	
+	}
 }

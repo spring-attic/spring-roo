@@ -34,7 +34,11 @@ import org.springframework.roo.support.util.TemplateUtils;
 @Component 
 @Service 
 public class GitOperationsImpl implements GitOperations {
+	
+	// Constants
 	private static final Logger logger = Logger.getLogger(GitOperationsImpl.class.getName());
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	private PersonIdent person;

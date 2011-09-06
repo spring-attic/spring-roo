@@ -30,7 +30,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface MemberDetailsScanner {
 

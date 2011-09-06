@@ -39,12 +39,12 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata>{
 
 	// TODO: Should parse the throws types from JavaParser source
 
+	// Fields
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();

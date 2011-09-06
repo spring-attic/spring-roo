@@ -12,10 +12,10 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- * 
  */
 public abstract class AbstractShellStatusPublisher implements ShellStatusProvider {
 	
+	// Fields
 	protected Set<ShellStatusListener> shellStatusListeners = new CopyOnWriteArraySet<ShellStatusListener>();
 	protected ShellStatus shellStatus = new ShellStatus(Status.STARTING);
 	
@@ -64,5 +64,4 @@ public abstract class AbstractShellStatusPublisher implements ShellStatusProvide
 			this.shellStatus = st;
 		}
 	}
-	
 }

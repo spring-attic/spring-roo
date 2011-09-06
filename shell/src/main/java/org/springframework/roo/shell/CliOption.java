@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface CliOption {
+
 	/**
 	 * @return if true, the user cannot specify this option and it is provided by the shell infrastructure
 	 * (defaults to false)

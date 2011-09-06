@@ -23,6 +23,7 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 @Service
 public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 
+	// Fields
 	private BundleContext bundleContext;
 	
 	protected void activate(ComponentContext context) {

@@ -13,10 +13,10 @@ import org.springframework.roo.shell.ParseResult;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class ShellStatus {
 	
+	// Fields
 	private Status status;
 	private String message = "";
 	private ParseResult parseResult;
@@ -92,5 +92,4 @@ public class ShellStatus {
 			return false;
 		return true;
 	}
-
 }

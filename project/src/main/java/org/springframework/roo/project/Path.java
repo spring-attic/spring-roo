@@ -19,6 +19,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class Path implements Comparable<Path> {
+	
+	// Constants
 	public static final Path SRC_MAIN_JAVA = new Path("SRC_MAIN_JAVA");
 	public static final Path SRC_MAIN_RESOURCES = new Path("SRC_MAIN_RESOURCES");
 	public static final Path SRC_TEST_JAVA = new Path("SRC_TEST_JAVA");
@@ -27,6 +29,7 @@ public class Path implements Comparable<Path> {
 	public static final Path ROOT = new Path("ROOT");
 	public static final Path SPRING_CONFIG_ROOT = new Path("SPRING_CONFIG_ROOT");
 	
+	// Fields
 	private String name;
 	/**
 	 * Creates a name with the specified string.

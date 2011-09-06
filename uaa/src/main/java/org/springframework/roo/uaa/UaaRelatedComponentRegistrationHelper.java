@@ -18,10 +18,11 @@ import org.springframework.uaa.client.UaaServiceFactory;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 @Component
 public class UaaRelatedComponentRegistrationHelper {
+	
+	// Fields
 	private Set<ServiceRegistration> registrations = new HashSet<ServiceRegistration>();
 	
 	protected void activate(ComponentContext context) {

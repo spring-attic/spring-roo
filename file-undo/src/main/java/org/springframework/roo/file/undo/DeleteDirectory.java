@@ -100,5 +100,4 @@ public class DeleteDirectory implements UndoableOperation {
 		}
 		return success;
 	}
-	
 }

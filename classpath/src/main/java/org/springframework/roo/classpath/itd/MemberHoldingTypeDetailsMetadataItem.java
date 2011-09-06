@@ -30,5 +30,4 @@ public interface MemberHoldingTypeDetailsMetadataItem<T extends MemberHoldingTyp
 	 * @return the details, or null if the details are unavailable or no member details are required
 	 */
 	T getMemberHoldingTypeDetails();
-
 }

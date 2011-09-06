@@ -22,6 +22,8 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service 
 public class TypeManagementServiceImpl implements TypeManagementService {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;

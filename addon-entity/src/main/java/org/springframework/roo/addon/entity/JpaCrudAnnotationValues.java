@@ -37,7 +37,6 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String persistMethod = PERSIST_METHOD_DEFAULT;
 	@AutoPopulate private String removeMethod = REMOVE_METHOD_DEFAULT;
 	@AutoPopulate private String transactionManager = "";
-
 	@AutoPopulate private String[] finders;
 	
 	/**

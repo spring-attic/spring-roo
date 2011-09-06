@@ -33,6 +33,7 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JavaType implements Comparable<JavaType>, Cloneable {
 	
+	// Constants
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character");
 	public static final JavaType STRING = new JavaType("java.lang.String");	// less verbose and just as informative

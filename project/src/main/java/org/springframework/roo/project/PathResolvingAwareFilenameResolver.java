@@ -14,11 +14,12 @@ import org.springframework.roo.support.util.Assert;
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component(immediate = true)
 @Service
 public class PathResolvingAwareFilenameResolver implements FilenameResolver {
+	
+	// Fields
 	@Reference private PathResolver pathResolver;
 
 	public String getMeaningfulName(File file) {

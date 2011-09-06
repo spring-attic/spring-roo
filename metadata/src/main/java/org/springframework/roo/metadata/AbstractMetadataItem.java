@@ -7,7 +7,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class AbstractMetadataItem implements MetadataItem {
 
@@ -36,5 +35,4 @@ public abstract class AbstractMetadataItem implements MetadataItem {
 	public final boolean isValid() {
 		return valid;
 	}
-
 }

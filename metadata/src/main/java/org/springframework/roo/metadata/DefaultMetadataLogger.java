@@ -22,6 +22,8 @@ import org.springframework.roo.support.util.Assert;
 @Service
 @Component
 public class DefaultMetadataLogger implements MetadataLogger {
+	
+	// Fields
 	private int traceLevel = 0;
 	private long eventNumber = 0;
 	private FileWriter fileLog;

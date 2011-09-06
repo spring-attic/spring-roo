@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.git;
 
-
 /**
  * Operations offered by Git addon.
  * 

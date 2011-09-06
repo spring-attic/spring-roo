@@ -21,6 +21,8 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Component
 @Service
 public class MailCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private MailOperations mailOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
 	
@@ -35,6 +37,17 @@ public class MailCommands implements CommandMarker {
 	@CliAvailabilityIndicator("email sender setup")
 	public boolean isInstallEmailAvailable() {
 		return mailOperations.isInstallEmailAvailable();
+	}
+	
+	/**
+	 * Indicates whether the mail template commands are available
+	 * 
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	@CliAvailabilityIndicator({ "field email template", "email template setup" })	
+	public boolean isMailTemplateAvailable() {
+		return mailOperations.isManageEmailAvailable();
 	}
 	
 	@CliCommand(value = "email sender setup", help = "Install a Spring JavaMailSender in your project")
@@ -58,17 +71,6 @@ public class MailCommands implements CommandMarker {
 	@Deprecated
 	public boolean isInsertJmsAvailable() {
 		return isMailTemplateAvailable();
-	}
-	
-	/**
-	 * Indicates whether the mail template commands are available
-	 * 
-	 * @return see above
-	 * @since 1.2.0
-	 */
-	@CliAvailabilityIndicator({ "field email template", "email template setup" })	
-	public boolean isMailTemplateAvailable() {
-		return mailOperations.isManageEmailAvailable();
 	}
 	
 	@CliCommand(value = "field email template", help = "Inserts a MailTemplate field into an existing type")	

@@ -21,6 +21,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class CreatorCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private CreatorOperations creatorOperations;
 		
 	@CliAvailabilityIndicator({ "addon create i18n", "addon create simple", "addon create advanced" })

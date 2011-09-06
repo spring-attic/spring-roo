@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
@@ -25,5 +24,4 @@ public @interface RooDataOnDemand {
 	 * @return the number of entities to create (required; defaults to 10)
 	 */
 	int quantity() default 10;
-
 }

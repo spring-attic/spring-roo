@@ -29,7 +29,18 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Component
 @Service
 public class CloudFoundryCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private CloudFoundryOperations cloudFoundryOperations;
+
+	@CliAvailabilityIndicator({
+		"cloud foundry list apps", "cloud foundry bind service", "cloud foundry view crash logs", "cloud foundry view crashes", "cloud foundry create service", "cloud foundry delete app",
+		"cloud foundry delete service", "cloud foundry files", "cloud foundry info", "cloud foundry list instances", "cloud foundry view logs", "cloud foundry map url", "cloud foundry view app memory",
+		"cloud foundry restart app", "cloud foundry list services", "cloud foundry setup", "cloud foundry start app", "cloud foundry view app stats", "cloud foundry stop app", "cloud foundry unbind service", "cloud foundry unmap url",
+		"cloud foundry deploy", "cloud foundry rename app", "cloud foundry update app memory" })
+	public boolean isCommandAvailable() {
+		return cloudFoundryOperations.isCloudFoundryCommandAvailable();
+	}
 
 	@CliCommand(value = "cloud foundry info", help = "Information")
 	public void info() {
@@ -231,15 +242,6 @@ public class CloudFoundryCommands implements CommandMarker {
 		@CliOption(key = "url", mandatory = true, help = "The URL to unbind the application from") CloudUri url) {
 
 		cloudFoundryOperations.unMap(appName.getName(), url.getUri());
-	}
-
-	@CliAvailabilityIndicator({
-		"cloud foundry list apps", "cloud foundry bind service", "cloud foundry view crash logs", "cloud foundry view crashes", "cloud foundry create service", "cloud foundry delete app",
-		"cloud foundry delete service", "cloud foundry files", "cloud foundry info", "cloud foundry list instances", "cloud foundry view logs", "cloud foundry map url", "cloud foundry view app memory",
-		"cloud foundry restart app", "cloud foundry list services", "cloud foundry setup", "cloud foundry start app", "cloud foundry view app stats", "cloud foundry stop app", "cloud foundry unbind service", "cloud foundry unmap url",
-		"cloud foundry deploy", "cloud foundry rename app", "cloud foundry update app memory" })
-	public boolean isCommandAvailable() {
-		return cloudFoundryOperations.isCloudFoundryCommandAvailable();
 	}
 
 	@CliCommand(value = "cloud foundry clear login details", help = "Clears all stored login information")

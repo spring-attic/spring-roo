@@ -15,6 +15,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class JLineCompletorAdapter implements Completor {
+	
+	// Fields
 	private Parser simpleParser;
 	
 	public JLineCompletorAdapter(Parser simpleParser) {

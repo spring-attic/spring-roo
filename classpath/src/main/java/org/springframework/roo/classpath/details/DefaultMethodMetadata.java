@@ -18,6 +18,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public final class DefaultMethodMetadata extends AbstractInvocableMemberMetadata implements MethodMetadata {
+	
+	// Fields
 	private JavaSymbolName methodName;
 	private JavaType returnType;
 

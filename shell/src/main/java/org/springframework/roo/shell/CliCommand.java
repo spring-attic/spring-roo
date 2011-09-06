@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface CliCommand {
+	
 	/**
 	 * @return one or more strings which must serve as the start of a particular command in order to match this method
 	 * (these must be unique within the entire application; if not unique, behaviour is not specified)

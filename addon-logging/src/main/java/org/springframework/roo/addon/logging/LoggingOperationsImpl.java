@@ -26,6 +26,8 @@ import org.springframework.roo.support.util.TemplateUtils;
 @Component
 @Service
 public class LoggingOperationsImpl implements LoggingOperations {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	
@@ -38,7 +40,6 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		Assert.notNull(loggerPackage, "LoggerPackage required");
 		
 		setupProperties(logLevel, loggerPackage);
-		// setupWebXml();
 	}
 	
 	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {

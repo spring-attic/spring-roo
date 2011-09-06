@@ -11,7 +11,6 @@ package org.springframework.roo.metadata;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface MetadataCache {
 
@@ -55,5 +54,4 @@ public interface MetadataCache {
 	* @param metadataItem an instance-identifying metadata item to insert (required)
 	*/
 	void put(MetadataItem metadataItem);
-
 }

@@ -14,11 +14,12 @@ import org.springframework.roo.shell.Shell;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Component
 @Service
 public class ProcessManagerCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private ProcessManager processManager;
 	@Reference private Shell shell; 
 	

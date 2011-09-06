@@ -27,6 +27,7 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class JavaPackageConverter implements Converter<JavaPackage> {
 	
+	// Fields
 	@Reference private LastUsed lastUsed;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;

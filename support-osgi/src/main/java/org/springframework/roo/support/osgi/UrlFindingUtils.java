@@ -35,21 +35,18 @@ public final class UrlFindingUtils {
 	public static final Set<URL> findUrls(final BundleContext context, final String resourceName) {
 		Assert.hasText(resourceName, "Resource name to locate is required");
 		final Set<URL> results = new HashSet<URL>();
-		OSGiUtils.execute(
-				new BundleCallback() {
-					public void execute(final Bundle bundle) {
-						try {
-							final URL url = bundle.getEntry(resourceName);
-							if (url != null) {
-								results.add(url);
-							}
-						} catch (final IllegalStateException e) {
-							// The bundle has been uninstalled - ignore it
-						}
+		OSGiUtils.execute(new BundleCallback() {
+			public void execute(final Bundle bundle) {
+				try {
+					final URL url = bundle.getEntry(resourceName);
+					if (url != null) {
+						results.add(url);
 					}
-				},
-				context
-		);
+				} catch (final IllegalStateException e) {
+					// The bundle has been uninstalled - ignore it
+				}
+			}
+		}, context);
 		return results;
 	}
 
@@ -70,26 +67,23 @@ public final class UrlFindingUtils {
 	public static final Set<URL> findMatchingClasspathResources(final BundleContext context, final String antPathExpression) {
 		Assert.hasText(antPathExpression, "Ant path expression to match is required");
 		final Set<URL> results = new HashSet<URL>();
-		OSGiUtils.execute(
-				new BundleCallback() {
-					public void execute(final Bundle bundle) {
-						try {
-							final Enumeration<URL> enumeration = bundle.findEntries(ROOT_PATH, "*", true);
-							if (enumeration != null) {
-								while (enumeration.hasMoreElements()) {
-									final URL url = enumeration.nextElement();
-									if (PATH_MATCHER.match(antPathExpression, url.getPath())) {
-										results.add(url);
-									}
-								}
+		OSGiUtils.execute(new BundleCallback() {
+			public void execute(final Bundle bundle) {
+				try {
+					final Enumeration<URL> enumeration = bundle.findEntries(ROOT_PATH, "*", true);
+					if (enumeration != null) {
+						while (enumeration.hasMoreElements()) {
+							final URL url = enumeration.nextElement();
+							if (PATH_MATCHER.match(antPathExpression, url.getPath())) {
+								results.add(url);
 							}
-						} catch (final IllegalStateException e) {
-							// The bundle has been uninstalled - ignore it
 						}
 					}
-				},
-				context
-		);
+				} catch (final IllegalStateException e) {
+					// The bundle has been uninstalled - ignore it
+				}
+			}
+		}, context);
 		return results;
 	}
 	

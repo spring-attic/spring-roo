@@ -23,6 +23,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class ApplicationContextOperationsImpl implements ApplicationContextOperations {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	

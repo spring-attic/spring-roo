@@ -11,7 +11,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface InvocableMemberMetadata extends IdentifiableAnnotatedJavaStructure {
 	
@@ -34,5 +33,4 @@ public interface InvocableMemberMetadata extends IdentifiableAnnotatedJavaStruct
 	  * @return the body of the method, if available (can be null if unavailable)
 	  */
 	 String getBody();
-
 }

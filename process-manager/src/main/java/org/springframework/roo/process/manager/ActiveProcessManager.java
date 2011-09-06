@@ -5,7 +5,6 @@ package org.springframework.roo.process.manager;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class ActiveProcessManager {
 	private static ThreadLocal<ProcessManager> processManager = new ThreadLocal<ProcessManager>();

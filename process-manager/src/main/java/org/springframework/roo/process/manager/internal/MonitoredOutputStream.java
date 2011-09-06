@@ -23,7 +23,6 @@ import org.springframework.roo.support.util.HexUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class MonitoredOutputStream extends ByteArrayOutputStream {
 	

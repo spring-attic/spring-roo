@@ -9,7 +9,8 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @since 1.0
  */
 public enum Fetch {
-	EAGER, LAZY;
+	EAGER, 
+	LAZY;
 
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

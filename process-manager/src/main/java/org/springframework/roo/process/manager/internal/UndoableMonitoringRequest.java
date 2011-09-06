@@ -11,15 +11,14 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class UndoableMonitoringRequest implements UndoableOperation {
 
+	// Fields
 	private UndoManager undoManager;
 	private FileMonitorService fileMonitorService;
 	private MonitoringRequest monitoringRequest;
 	private boolean add;
-
 	private boolean resetRequired;
 	
 	public UndoableMonitoringRequest(UndoManager undoManager, FileMonitorService fileMonitorService, MonitoringRequest monitoringRequest, boolean add) {

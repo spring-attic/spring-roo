@@ -76,30 +76,27 @@ public final class OSGiUtils {
 	public static final Collection<URI> findEntriesByPattern(final BundleContext context, final String antPathExpression) {
 		Assert.hasText(antPathExpression, "Ant path expression to match is required");
 		final Set<URI> results = new HashSet<URI>();
-		OSGiUtils.execute(
-				new BundleCallback() {
-					public void execute(final Bundle bundle) {
-						try {
-							final Enumeration<URL> enumeration = bundle.findEntries(ROOT_PATH, "*", true);
-							if (enumeration != null) {
-								while (enumeration.hasMoreElements()) {
-									final URL url = enumeration.nextElement();
-									if (PATH_MATCHER.match(antPathExpression, url.getPath())) {
-										try {
-											results.add(url.toURI());
-										} catch (URISyntaxException e) {
-											// This URL can't be converted to a URI - ignore it
-										}
-									}
+		OSGiUtils.execute(new BundleCallback() {
+			public void execute(final Bundle bundle) {
+				try {
+					final Enumeration<URL> enumeration = bundle.findEntries(ROOT_PATH, "*", true);
+					if (enumeration != null) {
+						while (enumeration.hasMoreElements()) {
+							final URL url = enumeration.nextElement();
+							if (PATH_MATCHER.match(antPathExpression, url.getPath())) {
+								try {
+									results.add(url.toURI());
+								} catch (URISyntaxException e) {
+									// This URL can't be converted to a URI - ignore it
 								}
 							}
-						} catch (final IllegalStateException e) {
-							// The bundle has been uninstalled - ignore it
 						}
 					}
-				},
-				context
-		);
+				} catch (final IllegalStateException e) {
+					// The bundle has been uninstalled - ignore it
+				}
+			}
+		}, context);
 		return results;
 	}
 	

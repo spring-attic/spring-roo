@@ -35,6 +35,8 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class EntityOperationsImpl implements EntityOperations {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;

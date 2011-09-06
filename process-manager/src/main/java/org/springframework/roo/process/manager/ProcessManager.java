@@ -57,8 +57,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
 public interface ProcessManager extends ProcessManagerStatusProvider {
 	
 	/**
-	 * Execute a user command within a "transaction". This method blocks until
-     * {@link ProcessManagerStatus#AVAILABLE}.
+	 * Execute a user command within a "transaction". This method blocks until {@link ProcessManagerStatus#AVAILABLE}.
 	 * 
 	 * <p>
 	 * This method may throw {@link RuntimeException}s that occurred while executing.

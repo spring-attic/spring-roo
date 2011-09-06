@@ -8,22 +8,22 @@ package org.springframework.roo.shell;
  * way they wish. Callers should not expect an exit request to be completed.
  * 
  * @author Ben Alex
- *
  */
 public final class ExitShellRequest {
 
-	private int exitCode;
-	
+	// Constants
 	public static final ExitShellRequest NORMAL_EXIT = new ExitShellRequest(0);
 	public static final ExitShellRequest FATAL_EXIT = new ExitShellRequest(1);
-	public static final ExitShellRequest JVM_TERMINATED_EXIT = new ExitShellRequest(99);   // Ensure 99 is maintained in o.s.r.bootstrap.Main as it's the default for a null roo.exit code
+	public static final ExitShellRequest JVM_TERMINATED_EXIT = new ExitShellRequest(99); // Ensure 99 is maintained in o.s.r.bootstrap.Main as it's the default for a null roo.exit code
 
+	// Fields
+	private int exitCode;
+	
 	private ExitShellRequest(int exitCode) {
 		this.exitCode = exitCode;
 	}
 
 	public int getExitCode() {
 		return exitCode;
-	}
-	
+	}	
 }

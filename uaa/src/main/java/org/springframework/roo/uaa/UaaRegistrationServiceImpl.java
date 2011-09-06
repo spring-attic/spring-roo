@@ -30,8 +30,11 @@ import org.springframework.uaa.client.protobuf.UaaClient.Product;
 @Service
 @Component
 public class UaaRegistrationServiceImpl implements UaaRegistrationService, TransmissionEventListener {
+	
+	// Fields
 	@Reference private UaaService uaaService;
 	@Reference private PublicFeatureResolver publicFeatureResolver;
+	
 	/** key: bundleSymbolicName, value: customJson */
 	private Map<String, String> bsnBuffer = new HashMap<String, String>();
 	/** key: projectId, value: list of products*/

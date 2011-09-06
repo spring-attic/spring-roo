@@ -36,6 +36,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  */
 public class ProjectMetadata extends AbstractMetadataItem {
 	
+	// Constants
 	/**
 	 * The MID for the project-level metadata. Is a constant because each
 	 * running instance of Roo only ever manages one project at a time.
@@ -43,6 +44,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	// MID:org.springframework.roo.project.ProjectMetadata#the_project
 	public static final String PROJECT_IDENTIFIER = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
 	
+	// Fields
 	private final JavaPackage topLevelPackage;
 	private final String projectName;
 	private final Set<Dependency> dependencies;

@@ -20,6 +20,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class StaticFieldConverterImpl implements StaticFieldConverter {
 
+	// Fields
 	private Map<Class<?>,Map<String,Field>> fields = new HashMap<Class<?>,Map<String,Field>>();
 	
 	public void add(Class<?> clazz) {

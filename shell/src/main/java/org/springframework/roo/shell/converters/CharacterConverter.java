@@ -10,7 +10,6 @@ import org.springframework.roo.shell.MethodTarget;
  *
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class CharacterConverter implements Converter<Character> {
 

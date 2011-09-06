@@ -15,7 +15,6 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @author James Tyrrell
  * @since 1.0
- *
  */
 public interface CompilationUnitServices {
 
@@ -33,5 +32,5 @@ public interface CompilationUnitServices {
 	 */
 	List<TypeDeclaration> getInnerTypes();
 
-    PhysicalTypeCategory getPhysicalTypeCategory();
+	PhysicalTypeCategory getPhysicalTypeCategory();
 }

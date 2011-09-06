@@ -22,6 +22,8 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class DataOnDemandCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
 	
 	@CliAvailabilityIndicator( { "dod" })

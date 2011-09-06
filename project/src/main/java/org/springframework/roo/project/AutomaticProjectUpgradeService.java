@@ -133,6 +133,5 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 		public String toString() {
 			return major + "." + minor+ "." + patch + "." + qualifier;
 		}
-		
 	}
 }

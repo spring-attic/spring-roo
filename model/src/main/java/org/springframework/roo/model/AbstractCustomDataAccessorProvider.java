@@ -2,13 +2,11 @@ package org.springframework.roo.model;
 
 import org.springframework.roo.support.util.Assert;
 
-
 /**
  * Convenience superclass for {@link CustomDataAccessor} implementations.
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public abstract class AbstractCustomDataAccessorProvider implements CustomDataAccessor {
 	private CustomData customData;
@@ -21,5 +19,4 @@ public abstract class AbstractCustomDataAccessorProvider implements CustomDataAc
 	public final CustomData getCustomData() {
 		return customData;
 	}
-
 }

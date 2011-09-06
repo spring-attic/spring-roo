@@ -12,8 +12,9 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
  */
 public final class InitializerMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<InitializerMetadata> {
 
-    private boolean isStatic;
-    private InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+	// Fields
+	private boolean isStatic;
+	private InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 	public InitializerMetadataBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
@@ -21,16 +22,16 @@ public final class InitializerMetadataBuilder extends AbstractIdentifiableJavaSt
 
 	public InitializerMetadataBuilder(InitializerMetadata existing) {
 		super(existing);
-        this.isStatic = existing.getModifier() == Modifier.STATIC || existing.isStatic();
-        this.bodyBuilder.append(existing.getBody());
+		this.isStatic = existing.getModifier() == Modifier.STATIC || existing.isStatic();
+		this.bodyBuilder.append(existing.getBody());
 	}
 
-    public InitializerMetadataBuilder(String declaredbyMetadataId, int modifier, boolean isStatic, InvocableMemberBodyBuilder bodyBuilder) {
+	public InitializerMetadataBuilder(String declaredbyMetadataId, int modifier, boolean isStatic, InvocableMemberBodyBuilder bodyBuilder) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
-        if (modifier == Modifier.STATIC) {
-            isStatic = true;
-        }
+		if (modifier == Modifier.STATIC) {
+			isStatic = true;
+		}
 		this.isStatic = isStatic;
 		this.bodyBuilder = bodyBuilder;
 	}
@@ -39,21 +40,21 @@ public final class InitializerMetadataBuilder extends AbstractIdentifiableJavaSt
 		return new DefaultInitializerMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), isStatic, getBodyBuilder().getOutput());
 	}
 
-    public boolean isStatic() {
-        return isStatic;
-    }
+	public boolean isStatic() {
+		return isStatic;
+	}
 
-    public void setStatic(boolean isStatic) {
-        this.isStatic = isStatic;
-    }
-    
-    public String getBody() {
+	public void setStatic(boolean isStatic) {
+		this.isStatic = isStatic;
+	}
+
+	public String getBody() {
 		if (bodyBuilder != null) {
 			return bodyBuilder.getOutput();
 		}
 		return null;
 	}
-	
+
 	public InvocableMemberBodyBuilder getBodyBuilder() {
 		return bodyBuilder;
 	}
@@ -61,5 +62,4 @@ public final class InitializerMetadataBuilder extends AbstractIdentifiableJavaSt
 	public void setBodyBuilder(InvocableMemberBodyBuilder bodyBuilder) {
 		this.bodyBuilder = bodyBuilder;
 	}
-    
 }

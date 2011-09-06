@@ -13,21 +13,22 @@ import org.springframework.roo.support.style.ToStringCreator;
  */
 public class DefaultInitializerMetadata extends AbstractIdentifiableJavaStructureProvider implements InitializerMetadata {
 
-    private String body;
-    private boolean isStatic;
+	// Fields
+	private String body;
+	private boolean isStatic;
 
 	// Package protected to mandate the use of InitializerMetadataBuilder
-	DefaultInitializerMetadata(CustomData customData, String declaredByMetadataId, int modifier,boolean isStatic, String body) {
-        super(customData, declaredByMetadataId, modifier);
-        this.isStatic = isStatic;
-        this.body = body;
+	DefaultInitializerMetadata(CustomData customData, String declaredByMetadataId, int modifier, boolean isStatic, String body) {
+		super(customData, declaredByMetadataId, modifier);
+		this.isStatic = isStatic;
+		this.body = body;
 	}
 
-    public boolean isStatic() {
-        return isStatic;
-    }
+	public boolean isStatic() {
+		return isStatic;
+	}
 
-    public final String getBody() {
+	public final String getBody() {
 		return body;
 	}
 
@@ -36,8 +37,8 @@ public class DefaultInitializerMetadata extends AbstractIdentifiableJavaStructur
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
 		tsc.append("modifier", Modifier.toString(getModifier()));
 		tsc.append("customData", getCustomData());
-        tsc.append("isStatic", isStatic());
-        tsc.append("body", getBody());
+		tsc.append("isStatic", isStatic());
+		tsc.append("body", getBody());
 		return tsc.toString();
 	}
 }

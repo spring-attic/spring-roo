@@ -38,6 +38,8 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
+	
+	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;

@@ -12,6 +12,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public final class JavaPackage implements Comparable<JavaPackage> {
+	
+	// Fields
 	private String fullyQualifiedPackageName;
 
 	/**

@@ -13,10 +13,13 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public final class CustomDataImpl implements CustomData {
+	
+	// Constants
 	public static final CustomData NONE = new CustomDataImpl(new LinkedHashMap<Object, Object>());
+	
+	// Fields
 	private Map<Object, Object> customData;
 	
 	public CustomDataImpl(Map<Object, Object> customData) {
@@ -40,9 +43,7 @@ public final class CustomDataImpl implements CustomData {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((customData == null) ? 0 : customData.hashCode());
-		return result;
+		return prime * result + ((customData == null) ? 0 : customData.hashCode());
 	}
 
 	@Override

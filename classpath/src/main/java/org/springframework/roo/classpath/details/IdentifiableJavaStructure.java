@@ -9,7 +9,6 @@ import org.springframework.roo.model.CustomDataAccessor;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface IdentifiableJavaStructure extends CustomDataAccessor {
 
@@ -26,5 +25,4 @@ public interface IdentifiableJavaStructure extends CustomDataAccessor {
 	 * @return the modifier, if available (required) 
 	 */
 	int getModifier();
-	
 }

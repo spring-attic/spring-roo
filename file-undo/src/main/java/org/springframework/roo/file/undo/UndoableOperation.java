@@ -11,7 +11,6 @@ import java.util.logging.Logger;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface UndoableOperation {
 
@@ -32,5 +31,4 @@ public interface UndoableOperation {
 	 * No exceptions may be thrown.
 	 */
 	void reset();
-
 }

@@ -22,6 +22,8 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public class ProjectPathMonitoringInitializer implements MetadataNotificationListener {
+	
+	// Fields
 	@Reference private FilenameResolver filenameResolver;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private NotifiableFileMonitorService fileMonitorService;

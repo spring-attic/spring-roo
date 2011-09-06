@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class UpdateFile implements UndoableOperation {
 	
@@ -50,7 +49,7 @@ public class UpdateFile implements UndoableOperation {
 	}
 	
 	public void reset() {
-		// fix for ROO-1555
+		// Fix for ROO-1555
 		try {
 			if (backup.delete()) {
 				logger.finest("Reset manage " + filenameResolver.getMeaningfulName(backup));
@@ -74,5 +73,4 @@ public class UpdateFile implements UndoableOperation {
 			return false;
 		}
 	}
-	
 }

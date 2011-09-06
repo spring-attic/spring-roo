@@ -30,8 +30,12 @@ import org.springframework.roo.shell.AbstractShell;
 @Service
 @Component
 public class HintOperationsImpl implements HintOperations {
+	
+	// Constants
 	private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator + "**" + File.separator;
 	private static ResourceBundle bundle = ResourceBundle.getBundle(HintCommands.class.getName());
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 

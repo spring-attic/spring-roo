@@ -26,5 +26,4 @@ public interface JdbcDriverManager {
 	 * @throws RuntimeException if the driver was located but could not be instantiated
 	 */
 	Driver loadDriver(String driverClassName, boolean displayAddOns) throws RuntimeException;
-
 }

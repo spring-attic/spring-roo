@@ -57,7 +57,6 @@ public final class JavaParserAnnotationMetadataBuilder implements Builder<Annota
 	private JavaType annotationType;
 	private List<AnnotationAttributeValue<?>> attributeValues;
 
-
 	public static JavaParserAnnotationMetadataBuilder getInstance(final AnnotationExpr annotationExpr, final CompilationUnitServices compilationUnitServices) {
 		return new JavaParserAnnotationMetadataBuilder(annotationExpr, compilationUnitServices);
 	}

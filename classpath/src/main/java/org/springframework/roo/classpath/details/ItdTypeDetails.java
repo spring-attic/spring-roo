@@ -16,7 +16,6 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public interface ItdTypeDetails extends MemberHoldingTypeDetails {
 	

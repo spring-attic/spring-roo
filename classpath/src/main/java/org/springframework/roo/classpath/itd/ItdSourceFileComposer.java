@@ -31,6 +31,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class ItdSourceFileComposer {
+	
+	// Fields
 	private int indentLevel = 0;
 	private JavaType introductionTo;
 	private StringBuilder pw = new StringBuilder();

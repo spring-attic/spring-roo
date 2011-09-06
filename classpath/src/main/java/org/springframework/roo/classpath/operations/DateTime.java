@@ -13,9 +13,12 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @since 1.0
  */
 public enum DateTime {
-	SHORT('S'), MEDIUM('M'), NONE('-');
+	SHORT('S'), 
+	MEDIUM('M'), 
+	NONE('-');
 	// Disabled due to incompatibility between Dojo and JDK dateformat handling
 	// LONG('L'), FULL('F');
+	
 	private char shortKey;
 
 	private DateTime(char shortKey) {

@@ -22,6 +22,8 @@ import org.springframework.roo.shell.event.ShellStatusListener;
 @Component(immediate = true)
 @Service
 public class GitShellEventListener implements ShellStatusListener {
+	
+	// Fields
 	@Reference private GitOperations gitOperations;
 	@Reference private Shell shell;
 	@Reference private FileManager fileManager;

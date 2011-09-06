@@ -10,11 +10,8 @@ import org.w3c.dom.Element;
  * @since 1.0
  */
 public enum DependencyType {
-	
 	JAR,
-	
 	ZIP,
-	
 	OTHER;
 	
 	/**

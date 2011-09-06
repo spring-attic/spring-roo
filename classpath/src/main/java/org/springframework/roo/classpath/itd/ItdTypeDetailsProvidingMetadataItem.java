@@ -8,6 +8,5 @@ import org.springframework.roo.metadata.MetadataItem;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface ItdTypeDetailsProvidingMetadataItem extends MemberHoldingTypeDetailsMetadataItem<ItdTypeDetails> {}

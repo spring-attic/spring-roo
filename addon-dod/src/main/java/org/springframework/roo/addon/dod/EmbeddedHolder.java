@@ -13,6 +13,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.2.0
  */
 public class EmbeddedHolder {
+	
+	// Fields
 	private FieldMetadata embeddedField;
 	private List<FieldMetadata> fields;
 

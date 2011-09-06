@@ -31,9 +31,10 @@ package org.springframework.roo.metadata;
  *  
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class MetadataIdentificationUtils {
+	
+	// Constants
 	private static final char[] MID_COLON = {'M', 'I', 'D', ':'};
 
 	/**
@@ -162,5 +163,4 @@ public abstract class MetadataIdentificationUtils {
 		}
 		return "MID:" + fullyQualifiedClassName + "#" + instanceIdentificationKey;
 	}
-
 }

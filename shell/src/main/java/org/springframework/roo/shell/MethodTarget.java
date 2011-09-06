@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import org.springframework.roo.support.style.ToStringCreator;
 
 public class MethodTarget implements Comparable<MethodTarget> {
+
+	// Fields
 	public Object target;
 	public Method method;
 	public String remainingBuffer;
@@ -28,5 +30,4 @@ public class MethodTarget implements Comparable<MethodTarget> {
 		tsc.append("key", key);
 		return tsc.toString();
 	}
-	
 }

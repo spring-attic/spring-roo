@@ -34,7 +34,6 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class MonitoringRequestEditor extends PropertyEditorSupport {
 	
@@ -115,5 +114,4 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 			}
 		}
 	}
-	
 }

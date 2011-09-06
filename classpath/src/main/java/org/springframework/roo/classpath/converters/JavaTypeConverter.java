@@ -39,6 +39,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class JavaTypeConverter implements Converter<JavaType> {
 	
+	// Fields
 	@Reference private LastUsed lastUsed;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;

@@ -16,11 +16,13 @@ import org.springframework.roo.support.util.FileUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class CreateDirectory implements UndoableOperation {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(CreateDirectory.class);
 
+	// Fields
 	private FilenameResolver filenameResolver;
 	private File actual;
 	private File deleteFrom;
@@ -60,5 +62,4 @@ public class CreateDirectory implements UndoableOperation {
 		}
 		return success;
 	}
-	
 }

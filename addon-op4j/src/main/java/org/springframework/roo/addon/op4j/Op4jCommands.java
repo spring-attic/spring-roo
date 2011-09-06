@@ -18,6 +18,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component 
 @Service 
 public class Op4jCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private Op4jOperations operations;
 
 	@CliAvailabilityIndicator({ "op4j setup", "Op4j add" }) 

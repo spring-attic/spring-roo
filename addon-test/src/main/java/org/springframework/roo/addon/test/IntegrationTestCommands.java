@@ -22,6 +22,8 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class IntegrationTestCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private IntegrationTestOperations integrationTestOperations;
 	@Reference private ProjectOperations projectOperations;
 

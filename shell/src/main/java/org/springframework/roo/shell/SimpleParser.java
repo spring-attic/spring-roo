@@ -45,9 +45,11 @@ import org.w3c.dom.Element;
  */
 public class SimpleParser implements Parser {
 	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
 	private static final Comparator<String> comparator = new NaturalOrderComparator<String>();
 	
+	// Fields
 	private final Object mutex = this;
 	private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
 	private Set<CommandMarker> commands = new HashSet<CommandMarker>();

@@ -10,7 +10,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DefaultFilenameResolver implements FilenameResolver {
 
@@ -22,5 +21,4 @@ public class DefaultFilenameResolver implements FilenameResolver {
 			throw new IllegalStateException("Could not resolve filename for '" + file + "'", ioe);
 		}
 	}
-
 }

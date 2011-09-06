@@ -37,8 +37,12 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 import com.vmware.appcloud.client.UploadStatusCallback;
 
 public class UaaAwareAppCloudClient extends AppCloudClient implements TransmissionEventListener {
+	
+	// Constants
 	public final static String CLOUD_FOUNDRY_URL = "http://api.cloudfoundry.com";
 	private final static int HTTP_SUCCESS_CODE = 200;
+	
+	// Fields
 	private UaaService uaaService;
 	private Set<String> discoveredAppNames = new HashSet<String>();
 	private URL cloudControllerUrl;

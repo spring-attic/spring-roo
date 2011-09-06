@@ -13,14 +13,15 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class LastUsedImpl implements LastUsed {
+	
+	// Fields
+	@Reference private Shell shell;
 	private JavaPackage javaPackage;
 	private JavaType javaType;
-	@Reference private Shell shell;
 	private JavaPackage topLevelPackage;
 	
 	public void setPackage(JavaPackage javaPackage) {
@@ -65,5 +66,4 @@ public class LastUsedImpl implements LastUsed {
 	public JavaPackage getJavaPackage() {
 		return javaPackage;
 	}
-	
 }

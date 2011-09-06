@@ -58,6 +58,8 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class FieldCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;

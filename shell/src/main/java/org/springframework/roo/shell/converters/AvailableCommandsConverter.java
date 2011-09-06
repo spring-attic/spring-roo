@@ -7,6 +7,7 @@ import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.shell.SimpleParser;
 
 /**
+ * Available commands converter.
  * 
  * @author Ben Alex
  * @since 1.0

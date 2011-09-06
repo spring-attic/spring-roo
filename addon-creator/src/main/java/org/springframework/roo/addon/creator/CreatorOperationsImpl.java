@@ -42,8 +42,12 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class CreatorOperationsImpl implements CreatorOperations {
+	
+	// Constants
 	private static final char SEPARATOR = File.separatorChar;
 	private static final String ICON_SET_URL = "http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip";
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
@@ -165,8 +169,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
 					br.close();
 					is.close();
 				} catch (Exception ignored) {}
-			}		
-		} 
+			}
+		}
+		
 		String[] langWords = language.split("\\s");
 		StringBuffer b = new StringBuffer();
 		for (String word: langWords) {

@@ -10,6 +10,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.2
  */
 public class CollaboratingDataOnDemandMetadataHolder {
+	
+	// Fields
 	private FieldMetadata field;
 	private DataOnDemandMetadata dataOnDemandMetadata;
 

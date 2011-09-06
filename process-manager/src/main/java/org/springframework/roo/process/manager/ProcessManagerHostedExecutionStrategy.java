@@ -18,13 +18,13 @@ import org.springframework.roo.support.util.ReflectionUtils;
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component(immediate = true)
 @Service
-@Reference(name="processManager", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=ProcessManager.class, cardinality=ReferenceCardinality.MANDATORY_UNARY)
+@Reference(name = "processManager", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = ProcessManager.class, cardinality = ReferenceCardinality.MANDATORY_UNARY)
 public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy {
 
+	// Fields
 	private Class<?> mutex = ProcessManagerHostedExecutionStrategy.class;
 	private ProcessManager processManager;
 
@@ -70,5 +70,4 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
 			}
 		}
 	}
-
 }

@@ -36,7 +36,11 @@ import org.springframework.roo.support.util.Assert;
 @Component 
 @Service 
 public class BackupOperationsImpl implements BackupOperations {
+	
+	// Constants
 	private static Logger logger = HandlerUtils.getLogger(BackupOperationsImpl.class);
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 

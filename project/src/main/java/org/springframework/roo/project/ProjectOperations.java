@@ -1,6 +1,5 @@
 package org.springframework.roo.project;
 
-
 import java.util.List;
 
 import org.springframework.roo.project.listeners.DependencyListener;

@@ -40,6 +40,8 @@ import org.w3c.dom.NodeList;
  * @author Ben Alex
  */
 public class Activator implements BundleActivator {
+	
+	// Fields
 	private ServiceReference startLevelServiceReference;
 	private StartLevel startLevel;
 	/** key: required class, any one of its services interfaces */

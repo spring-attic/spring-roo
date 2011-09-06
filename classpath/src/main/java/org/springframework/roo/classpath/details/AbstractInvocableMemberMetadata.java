@@ -15,10 +15,10 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class AbstractInvocableMemberMetadata extends AbstractIdentifiableAnnotatedJavaStructureProvider implements InvocableMemberMetadata {
 
+	// Fields
 	private List<JavaSymbolName> parameterNames =  new ArrayList<JavaSymbolName>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaType> throwsTypes = new ArrayList<JavaType>();

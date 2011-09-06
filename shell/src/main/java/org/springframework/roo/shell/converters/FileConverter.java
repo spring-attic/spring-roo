@@ -15,12 +15,14 @@ import org.springframework.roo.support.util.FileUtils;
  * @author Roman Kuzmik
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class FileConverter implements Converter<File> {
 
+	// Constants
 	private static final String home = System.getProperty("user.home");
 
+	// Fields
+	
 	/**
 	 * @return the "current working directory" this {@link FileConverter} should use if the user fails to provide
 	 * an explicit directory in their input (required)
@@ -120,5 +122,4 @@ public abstract class FileConverter implements Converter<File> {
 			throw new IllegalStateException(e);
 		}
 	}
-
 }

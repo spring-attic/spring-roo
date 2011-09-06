@@ -17,7 +17,6 @@ import org.springframework.roo.shell.event.ShellStatusProvider;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 
@@ -25,7 +24,7 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	 * The slot name to use with {@link #flash(Level, String, String)} if a caller wishes to modify the window title.
 	 * This may not be supported by all operating system shells. It is provided on a best-effort basis only.
 	 */
-	public static final String WINDOW_TITLE_SLOT = "WINDOW_TITLE_SLOT";
+	String WINDOW_TITLE_SLOT = "WINDOW_TITLE_SLOT";
 
 	/**
 	 * Presents a console prompt and allows the user to interact with the shell. The shell should not return
@@ -90,7 +89,7 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	
 	/**
 	 * Returns the home directory of the current running shell instance 
-     *	
+	 *	
 	 * @return the home directory of the current shell instance
 	 */
 	File getHome();

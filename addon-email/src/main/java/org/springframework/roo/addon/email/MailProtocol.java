@@ -10,10 +10,13 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class MailProtocol implements Comparable<MailProtocol> {
+	
+	// Constants
 	public static final MailProtocol SMTP = new MailProtocol("SMTP", "smtp");
 	public static final MailProtocol POP3 = new MailProtocol("POP3", "pop3");
 	public static final MailProtocol IMAP = new MailProtocol("IMAP", "imap");
 
+	// Fields
 	private String protocolLabel;
 	private String protocol;
 

@@ -19,19 +19,18 @@ public interface ImportMetadata extends IdentifiableJavaStructure {
 	 */
 	JavaPackage getImportPackage();
 
-    /**
+	/**
 	 * @return the import type (null if package import)
 	 */
-    JavaType getImportType();
+	JavaType getImportType();
 
-    /**
-     * @return true if the import used the "static" keyword
-     */
-    boolean isStatic();
+	/**
+	 * @return true if the import used the "static" keyword
+	 */
+	boolean isStatic();
 
-    /**
-     * @return true if the import was a wildcard (eg "import com.foo.*;")
-     */
+	/**
+	 * @return true if the import was a wildcard (eg "import com.foo.*;")
+	 */
 	boolean isAsterisk();
-	
 }

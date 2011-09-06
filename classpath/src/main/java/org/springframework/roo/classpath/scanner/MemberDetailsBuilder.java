@@ -32,6 +32,8 @@ import org.springframework.roo.model.CustomDataKey;
  * @since 1.1.3
  */
 public class MemberDetailsBuilder {
+	
+	// Fields
 	private Map<String, MemberHoldingTypeDetails> memberHoldingTypeDetailsMap = new LinkedHashMap<String, MemberHoldingTypeDetails>();
 	private Map<String, TypeDetailsBuilder> typeDetailsBuilderMap = new LinkedHashMap<String, TypeDetailsBuilder>();
 	private MemberDetails originalMemberDetails;

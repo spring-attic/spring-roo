@@ -20,6 +20,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class MavenCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private MavenOperations mavenOperations;
 
 	@CliAvailabilityIndicator("project")

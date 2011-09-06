@@ -24,6 +24,11 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class MemberTypeAdditions {
 
+	// Fields
+	private final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceDetailsBuilder;
+	private final String methodName;
+	private final String methodCall;
+	
 	/**
 	 * Factory method that builds the method call for you from the given target,
 	 * method, and array of parameter names.
@@ -87,11 +92,6 @@ public class MemberTypeAdditions {
 		methodCall.append(")");
 		return methodCall.toString();
 	}
-	
-	// Fields
-	private final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceDetailsBuilder;
-	private final String methodName;
-	private final String methodCall;
 	
 	/**
 	 * Constructor that accepts a pre-built method call

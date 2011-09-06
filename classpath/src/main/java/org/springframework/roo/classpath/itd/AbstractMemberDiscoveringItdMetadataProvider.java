@@ -90,5 +90,4 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends Abstr
 	 * @return null if the subclass is not interested in the type, or a MID if it is
 	 */
 	protected abstract String getLocalMidToRequest(ItdTypeDetails itdTypeDetails);
-
 }

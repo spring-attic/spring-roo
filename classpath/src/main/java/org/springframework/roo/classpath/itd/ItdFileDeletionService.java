@@ -29,8 +29,12 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class ItdFileDeletionService implements FileEventListener {
+	
+	// Constants
 	private static String ANT_PATH_ALL_ITD_SOURCE = "**" + File.separator + "*_Roo_*.aj";
 	private static String ANT_PATH_ALL_JAVA_SOURCE = "**" + File.separator + "*.java";
+	
+	// Fields
 	@Reference private FileManager fileManager;
 
 	static {

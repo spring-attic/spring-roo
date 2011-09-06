@@ -27,9 +27,11 @@ import org.springframework.roo.support.util.Assert;
 @Reference(name = "layerProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = LayerProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE) 
 public class LayerServiceImpl implements LayerService {
 	
-	private final Object mutex = this;
-
+	// Fields
 	private final Set<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
+	
+	// Mutex
+	private final Object mutex = new Object();
 
 	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition, final Collection<? extends MethodParameter> methodParameters) {
 		final MethodParameter[] methodParametersArray = methodParameters.toArray(new MethodParameter[methodParameters.size()]);
@@ -74,7 +76,6 @@ public class LayerServiceImpl implements LayerService {
 	 * @since 1.2.0
 	 */
 	class DescendingLayerComparator implements Comparator<LayerProvider>, Serializable {
-		
 		private static final long serialVersionUID = 1L;
 		
 		public int compare(final LayerProvider provider1, final LayerProvider provider2) {

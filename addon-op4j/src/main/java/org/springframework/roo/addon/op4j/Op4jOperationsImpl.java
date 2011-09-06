@@ -30,6 +30,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class Op4jOperationsImpl implements Op4jOperations{
+	
+	// Fields
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;

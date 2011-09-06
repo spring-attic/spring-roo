@@ -5,10 +5,8 @@ package org.springframework.roo.project;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface ApplicationContextOperations {
 
 	void createMiddleTierApplicationContext();
-
 }

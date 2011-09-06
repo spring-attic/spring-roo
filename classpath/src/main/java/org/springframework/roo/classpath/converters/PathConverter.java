@@ -15,12 +15,12 @@ import org.springframework.roo.shell.MethodTarget;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class PathConverter implements Converter<Path> {
 
+	// Fields
 	private SortedSet<String> legalValues = new TreeSet<String>();
 	
 	public PathConverter() {
@@ -54,5 +54,4 @@ public class PathConverter implements Converter<Path> {
 		}
 		return true;
 	}
-
 }

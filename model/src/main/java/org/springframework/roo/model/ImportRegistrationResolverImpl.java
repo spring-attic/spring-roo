@@ -17,7 +17,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class ImportRegistrationResolverImpl implements ImportRegistrationResolver {
+	
+	// Constants
 	private static final List<String> javaLangSimpleTypeNames = new LinkedList<String>();
+	
+	// Fields
 	private JavaPackage compilationUnitPackage;
 	private SortedSet<JavaType> registeredImports = new TreeSet<JavaType>(new Comparator<JavaType>() {
 		public int compare(JavaType o1, JavaType o2) {

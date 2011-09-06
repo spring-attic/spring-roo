@@ -18,7 +18,6 @@ import java.lang.annotation.Target;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)

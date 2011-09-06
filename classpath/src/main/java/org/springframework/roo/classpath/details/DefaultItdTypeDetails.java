@@ -27,20 +27,20 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ItdTypeDetails {
 	
+	// Fields
 	private ClassOrInterfaceTypeDetails governor;
 	private JavaType aspect;
 	private boolean privilegedAspect;
-	
+
 	private PhysicalTypeCategory physicalTypeCategory = PhysicalTypeCategory.ITD;
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-    private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
-    private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
+	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+	private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private Set<JavaType> registeredImports = new HashSet<JavaType>();
@@ -48,18 +48,19 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
 	private List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	
-	// package protected to force the use of the corresponding builder
+	// Package protected to force the use of the corresponding builder
 	DefaultItdTypeDetails(CustomData customData, String declaredByMetadataId, int modifier, ClassOrInterfaceTypeDetails governor, JavaType aspect,
-			boolean privilegedAspect, Set<JavaType> registeredImports,
-			List<ConstructorMetadata> declaredConstructors,
-			List<FieldMetadata> declaredFields,
-			List<MethodMetadata> declaredMethods,
-			List<JavaType> extendsTypes,
-			List<JavaType> implementsTypes,
-			List<AnnotationMetadata> typeAnnotations,
-			List<DeclaredFieldAnnotationDetails> fieldAnnotations,
-			List<DeclaredMethodAnnotationDetails> methodAnnotations,
-			List<ClassOrInterfaceTypeDetails> innerTypes) {
+		boolean privilegedAspect, Set<JavaType> registeredImports,
+		List<ConstructorMetadata> declaredConstructors,
+		List<FieldMetadata> declaredFields,
+		List<MethodMetadata> declaredMethods,
+		List<JavaType> extendsTypes,
+		List<JavaType> implementsTypes,
+		List<AnnotationMetadata> typeAnnotations,
+		List<DeclaredFieldAnnotationDetails> fieldAnnotations,
+		List<DeclaredMethodAnnotationDetails> methodAnnotations,
+		List<ClassOrInterfaceTypeDetails> innerTypes) {
+		
 		super(customData, declaredByMetadataId, modifier, typeAnnotations);
 		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
@@ -145,30 +146,30 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 		return Collections.unmodifiableList(declaredMethods);
 	}
 
-    public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
-        return Collections.unmodifiableList(declaredInnerTypes);
-    }
+	public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
+		return Collections.unmodifiableList(declaredInnerTypes);
+	}
 
-    public List<InitializerMetadata> getDeclaredInitializers() {
-        return Collections.unmodifiableList(declaredInitializers);
-    }
-	
+	public List<InitializerMetadata> getDeclaredInitializers() {
+		return Collections.unmodifiableList(declaredInitializers);
+	}
+
 	public List<JavaType> getExtendsTypes() {
 		return Collections.unmodifiableList(extendsTypes);
 	}
-	
+
 	public List<DeclaredFieldAnnotationDetails> getFieldAnnotations() {
 		return Collections.unmodifiableList(fieldAnnotations);
 	}
-	
+
 	public List<DeclaredMethodAnnotationDetails> getMethodAnnotations() {
 		return Collections.unmodifiableList(methodAnnotations);
 	}
-	
+
 	public List<ClassOrInterfaceTypeDetails> getInnerTypes() {
 		return Collections.unmodifiableList(innerTypes);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int hash = aspect.hashCode() * governor.getName().hashCode() * governor.getModifier() * governor.getCustomData().hashCode() * physicalTypeCategory.hashCode() * (privilegedAspect ? 2 : 3);

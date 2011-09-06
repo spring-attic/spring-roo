@@ -12,11 +12,13 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class CreateFile implements UndoableOperation {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(CreateFile.class);
 
+	// Fields
 	private FilenameResolver filenameResolver;
 	private File actual;
 	
@@ -46,5 +48,4 @@ public class CreateFile implements UndoableOperation {
 		}
 		return success;
 	}
-	
 }

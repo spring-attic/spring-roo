@@ -13,6 +13,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class MemberDetailsImpl implements MemberDetails {
+	
+	// Fields
 	private  List<MemberHoldingTypeDetails> details;
 
 	/**

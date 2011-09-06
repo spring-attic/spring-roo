@@ -18,7 +18,6 @@ package org.springframework.roo.metadata;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface MetadataItem {
 	
@@ -42,5 +41,4 @@ public interface MetadataItem {
 	 * @return whether this metadata is fully complete and valid
 	 */
 	boolean isValid();
-	
 }

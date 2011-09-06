@@ -19,6 +19,7 @@ import org.springframework.roo.model.JavaType;
 @Service
 public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 
+	// Fields
 	private HashMap<String, HashMap<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, HashMap<String, MemberHoldingTypeDetails>>();
 
 	public void addItdTypeDetails(ItdTypeDetails itdTypeDetails) {

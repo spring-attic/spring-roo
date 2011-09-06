@@ -11,6 +11,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public final class DeclaredFieldAnnotationDetails {
+	
+	// Fields
 	private FieldMetadata fieldMetadata;
 	private AnnotationMetadata fieldAnnotation;
 	private boolean removeAnnotation;

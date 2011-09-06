@@ -12,6 +12,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class PathInformation {
+	
+	// Fields
 	private Path path;
 	private boolean source;
 	private File location;
@@ -43,5 +45,4 @@ public class PathInformation {
 		tsc.append("location", location);
 		return tsc.toString();
 	}
-
 }

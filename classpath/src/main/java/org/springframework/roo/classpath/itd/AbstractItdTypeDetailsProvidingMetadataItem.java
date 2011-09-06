@@ -26,6 +26,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadataItem implements ItdTypeDetailsProvidingMetadataItem {
+	
+	// Fields
 	protected ClassOrInterfaceTypeDetails governorTypeDetails;
 	protected ItdTypeDetails itdTypeDetails;
 	protected ItdTypeDetailsBuilder builder;

@@ -59,6 +59,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	private final LinkedHashMap<String, ClassOrInterfaceTypeDetails> typeMap = new LinkedHashMap<String, ClassOrInterfaceTypeDetails>();
 	private final HashMap<String, String> pathCacheMap = new HashMap<String, String>();
 	private Map<JavaType, String> javaTypeIdentifierCache = new HashMap<JavaType, String>();
+	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
 
 	public String getPhysicalTypeCanonicalPath(JavaType javaType, Path path) {
 		Assert.notNull(javaType, "Java type required");
@@ -345,8 +346,6 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
-
 	private void updateChanges(String physicalTypeIdentifier, boolean remove) {
 		for (String requestingClass : changeMap.keySet()) {
 			if (remove) {
@@ -374,6 +373,5 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 			}
 		}
 		return false;
-
 	}
 }

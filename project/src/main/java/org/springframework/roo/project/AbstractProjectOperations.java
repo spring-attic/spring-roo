@@ -27,6 +27,8 @@ import org.springframework.roo.support.util.Assert;
 @SuppressWarnings("deprecation")
 @Component(componentAbstract = true)
 public abstract class AbstractProjectOperations implements ProjectOperations {
+	
+	// Fields
 	@Reference protected MetadataService metadataService;
 	@Reference protected ProjectMetadataProvider projectMetadataProvider;
 

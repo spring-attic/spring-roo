@@ -28,5 +28,4 @@ public class PollingFileMonitorComponent extends PollingFileMonitorService {
 	protected void unbindFileEventListener(FileEventListener listener) {
 		remove(listener);
 	}
-
 }

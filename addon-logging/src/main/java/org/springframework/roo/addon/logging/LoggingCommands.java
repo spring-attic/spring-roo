@@ -19,6 +19,8 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Component
 @Service
 public class LoggingCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private LoggingOperations loggingOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
 	

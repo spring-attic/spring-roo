@@ -23,6 +23,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ClassOrInterfaceTypeDetails {
+	
+	// Fields
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
@@ -57,7 +59,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 	 * @param enumConstants
 	 * @param registeredImports
 	 */
-    DefaultClassOrInterfaceTypeDetails(CustomData customData,
+	DefaultClassOrInterfaceTypeDetails(CustomData customData,
 		String declaredByMetadataId,
 		int modifier,
 		List<AnnotationMetadata> annotations,
@@ -74,7 +76,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		List<JavaSymbolName> enumConstants,
 		Collection<ImportMetadata> registeredImports) {
 		
-    	super(customData, declaredByMetadataId, modifier, annotations);
+		super(customData, declaredByMetadataId, modifier, annotations);
 		Assert.notNull(name, "Name required");
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
 
@@ -144,13 +146,13 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		return Collections.unmodifiableList(declaredMethods);
 	}
 
-    public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
-        return Collections.unmodifiableList(declaredInnerTypes);
-    }
+	public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
+		return Collections.unmodifiableList(declaredInnerTypes);
+	}
 
-    public List<InitializerMetadata> getDeclaredInitializers() {
-        return Collections.unmodifiableList(declaredInitializers);
-    }
+	public List<InitializerMetadata> getDeclaredInitializers() {
+		return Collections.unmodifiableList(declaredInitializers);
+	}
 	
 	public List<JavaType> getExtendsTypes() {
 		return Collections.unmodifiableList(extendsTypes);
@@ -164,9 +166,9 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		return superclass;
 	}
 
-    public Set<ImportMetadata> getRegisteredImports() {
-        return Collections.unmodifiableSet(registeredImports);
-    }
+	public Set<ImportMetadata> getRegisteredImports() {
+		return Collections.unmodifiableSet(registeredImports);
+	}
 
 	public boolean extendsType(final JavaType type) {
 		return this.extendsTypes.contains(type);

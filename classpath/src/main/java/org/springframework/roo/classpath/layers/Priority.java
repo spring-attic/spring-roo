@@ -1,12 +1,12 @@
 package org.springframework.roo.classpath.layers;
 
 /**
+ * Priority enum.
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public enum Priority {
-
 	LOW (0),
 	MEDIUM (50),
 	HIGH (100);

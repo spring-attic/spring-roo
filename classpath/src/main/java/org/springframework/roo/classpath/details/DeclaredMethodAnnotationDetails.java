@@ -12,8 +12,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public final class DeclaredMethodAnnotationDetails {
 	
+	// Fields
 	private MethodMetadata methodMetadata;
-	
 	private AnnotationMetadata methodAnnotation;
 
 	/**

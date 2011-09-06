@@ -63,7 +63,7 @@ public class InvocableMemberBodyBuilder {
 		if (indentBefore) {
 			appendIndent();
 		}
-        // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
+		// We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
 		stringBuilder.append("\n");
 		// stringBuilder.append(System.getProperty("line.separator"));
 		return this;

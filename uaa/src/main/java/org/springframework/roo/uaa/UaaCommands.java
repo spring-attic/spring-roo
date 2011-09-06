@@ -23,12 +23,12 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 @Service
 @Component
 public class UaaCommands implements CommandMarker {
 
+	// Fields
 	@Reference private UaaService uaaService;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference private StaticFieldConverter staticFieldConverter;

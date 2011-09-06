@@ -8,7 +8,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface LastUsed {
 
@@ -35,5 +34,4 @@ public interface LastUsed {
 	 * @return the package, either explicitly set or via a type set (may also be null if never set)
 	 */
 	JavaPackage getJavaPackage();
-
 }

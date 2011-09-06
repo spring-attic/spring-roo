@@ -25,11 +25,11 @@ import java.lang.annotation.Target;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface CliAvailabilityIndicator {
+
 	/**
 	 * @return the name of the command or commands that this availability indicator represents
 	 */

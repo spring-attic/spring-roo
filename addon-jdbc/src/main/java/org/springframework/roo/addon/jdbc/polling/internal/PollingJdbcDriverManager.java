@@ -33,9 +33,13 @@ import org.springframework.roo.support.util.Assert;
 @Service
 @Reference(name = "jdbcDriverProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = JdbcDriverProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class PollingJdbcDriverManager implements JdbcDriverManager {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(PollingJdbcDriverManager.class);
-	private Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
+	
+	// Fields
 	@Reference private AddOnSearch addOnSearch;
+	private Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
 	
 	protected void bindJdbcDriverProvider(JdbcDriverProvider listener) {
 		synchronized (providers) {

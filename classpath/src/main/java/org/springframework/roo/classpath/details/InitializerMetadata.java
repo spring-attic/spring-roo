@@ -5,11 +5,10 @@ package org.springframework.roo.classpath.details;
  * 
  * @author James Tyrrell
  * @since 1.1.1
- *
  */
 public interface InitializerMetadata extends IdentifiableJavaStructure {
 
-    boolean isStatic();
+	boolean isStatic();
 
-    String getBody();
+	String getBody();
 }

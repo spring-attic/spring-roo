@@ -19,7 +19,6 @@ public abstract class MonitoringRequest {
 
 	public MonitoringRequest(File resource, Set<FileOperation> notifyOn) {
 		Assert.notNull(resource, "File to monitor is required");
-		//Assert.isTrue(resource.exists(), "File must exist");
 		Assert.notEmpty(notifyOn, "At least one FileOperation to monitor must be specified");
 		this.resource = resource;
 		this.notifyOn = notifyOn;

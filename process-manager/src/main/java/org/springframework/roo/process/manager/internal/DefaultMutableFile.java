@@ -18,9 +18,10 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DefaultMutableFile implements MutableFile {
+	
+	// Fields
 	private File file;
 	private NotifiableFileMonitorService fileMonitorService;
 	private ManagedMessageRenderer managedMessageRenderer;
@@ -72,6 +73,4 @@ public class DefaultMutableFile implements MutableFile {
 		tsc.append("file", getCanonicalPath());
 		return tsc.toString();
 	}
-	
-	
 }

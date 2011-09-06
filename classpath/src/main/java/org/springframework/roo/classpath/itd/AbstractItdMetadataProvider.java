@@ -53,6 +53,8 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(componentAbstract = true)
 public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTrackingMetadataNotifier implements ItdMetadataProvider, MetadataNotificationListener {
+	
+	// Fields
 	@Reference protected FileManager fileManager;
 	@Reference protected ItdDiscoveryService itdDiscoveryService;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;

@@ -11,6 +11,8 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class Property implements Comparable<Property> {
+	
+	// Fields
 	private String name;
 	private String value;
 	

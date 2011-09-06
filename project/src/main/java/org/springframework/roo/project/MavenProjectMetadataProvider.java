@@ -54,12 +54,12 @@ import org.w3c.dom.Element;
 public class MavenProjectMetadataProvider implements ProjectMetadataProvider, FileEventListener {
 	
 	// Constants
+	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier()));
+
 	private static final String ADDED = "added";
 	private static final String CHANGED = "changed";
 	private static final String REMOVED = "removed";
 	private static final String UPDATED = "updated";
-
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier()));
 
 	/**
 	 * Highlights the given text

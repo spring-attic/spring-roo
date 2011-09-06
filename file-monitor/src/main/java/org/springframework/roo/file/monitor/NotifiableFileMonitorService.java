@@ -21,7 +21,6 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface NotifiableFileMonitorService extends FileMonitorService {
 	
@@ -64,5 +63,4 @@ public interface NotifiableFileMonitorService extends FileMonitorService {
 	void notifyDeleted(String fileCanonicalPath);
 	
 	void notifyCreated(String fileCanonicalPath);
-	
 }

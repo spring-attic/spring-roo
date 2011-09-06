@@ -10,7 +10,6 @@ import org.springframework.roo.shell.MethodTarget;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class StringConverter implements Converter<String> {
 

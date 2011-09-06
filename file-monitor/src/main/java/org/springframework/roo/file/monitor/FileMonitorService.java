@@ -23,12 +23,11 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface FileMonitorService {
 	
 	/**
-     * @param request a monitoring request
+	 * @param request a monitoring request
 	 * @return true if the monitor did not already contain the specified request
 	 */
 	boolean add(MonitoringRequest request);

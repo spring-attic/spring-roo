@@ -10,10 +10,10 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class MonitoringRequestCommand implements CommandCallback<Boolean> {
 
+	// Fields
 	private FileMonitorService fileMonitorService;
 	private MonitoringRequest monitoringRequest;
 	private boolean add;
@@ -36,5 +36,4 @@ public class MonitoringRequestCommand implements CommandCallback<Boolean> {
 		this.fileMonitorService.scanAll();
 		return result;
 	}
-
 }

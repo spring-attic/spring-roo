@@ -14,5 +14,4 @@ public final class CliOptionContext {
 	public static void resetOptionContext() {
 		optionContextHolder.remove();
 	}
-	
 }

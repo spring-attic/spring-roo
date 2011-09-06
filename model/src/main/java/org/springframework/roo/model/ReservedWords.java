@@ -10,7 +10,6 @@ import org.springframework.roo.support.util.StringUtils;
  * Provides all reserved words.
  * 
  * @author Ben Alex
- *
  */
 public abstract class ReservedWords {
 

@@ -16,7 +16,6 @@ import java.util.Set;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface CustomData extends Iterable<Object> {
 	
@@ -41,5 +40,4 @@ public interface CustomData extends Iterable<Object> {
 	 * @return the keys (never null, but may be empty)
 	 */
 	Set<Object> keySet();
-	
 }

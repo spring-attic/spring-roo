@@ -10,7 +10,6 @@ import org.springframework.roo.shell.MethodTarget;
  *
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class ShortConverter implements Converter<Short> {
 
@@ -25,5 +24,4 @@ public class ShortConverter implements Converter<Short> {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return Short.class.isAssignableFrom(requiredType) || short.class.isAssignableFrom(requiredType);
 	}
-
 }

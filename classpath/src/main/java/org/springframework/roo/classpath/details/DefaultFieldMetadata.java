@@ -17,6 +17,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class DefaultFieldMetadata extends AbstractIdentifiableAnnotatedJavaStructureProvider implements FieldMetadata {
+	
+	// Fields
 	private String fieldInitializer;
 	private JavaSymbolName fieldName;
 	private JavaType fieldType;

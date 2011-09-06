@@ -26,6 +26,7 @@ import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 @Component(immediate = true)
 public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject implements ProcessManagerStatusListener, CommandMarker {
 
+	// Fields
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
 	private boolean isDebug = false;
 	
@@ -48,5 +49,4 @@ public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject im
 	public void processManagerDebug (@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Activates debug mode") boolean debug) {
 		this.isDebug = debug;
 	}
-
 }

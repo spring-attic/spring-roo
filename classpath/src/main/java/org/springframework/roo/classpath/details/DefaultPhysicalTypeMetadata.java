@@ -9,6 +9,7 @@ import org.springframework.roo.support.util.Assert;
 
 public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
 
+	// Fields
 	private MemberHoldingTypeDetails memberHoldingTypeDetails;
 	private String physicalLocationCanonicalPath;
 	
@@ -43,5 +44,4 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 		Assert.notNull(metadataProvider, "Metadata provider required");
 		return new JavaType(PhysicalTypeIdentifier.getJavaType(getId()).getFullyQualifiedTypeName() + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix());
 	}
-
 }

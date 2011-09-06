@@ -12,7 +12,6 @@ import java.io.File;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface FilenameResolver {
 	/**

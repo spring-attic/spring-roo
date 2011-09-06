@@ -14,10 +14,10 @@ import org.springframework.roo.shell.MethodTarget;
  *
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class DateConverter implements Converter<Date> {
 	
+	// Fields
 	private DateFormat dateFormat;
 	
 	public DateConverter() {

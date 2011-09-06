@@ -15,12 +15,12 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class DefaultUndoManager implements UndoManager {
 
+	// Fields
 	private Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
 	private Set<UndoListener> listeners = new HashSet<UndoListener>();
 	private boolean undoEnabled = true;
@@ -92,5 +92,4 @@ public class DefaultUndoManager implements UndoManager {
 	public void removeUndoListener(UndoListener undoListener) {
 		listeners.remove(undoListener);
 	}
-
 }

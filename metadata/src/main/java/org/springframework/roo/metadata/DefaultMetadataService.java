@@ -32,6 +32,8 @@ import org.springframework.roo.support.util.Assert;
 @Service
 @Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultMetadataService extends AbstractMetadataCache implements MetadataService {
+	
+	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataLogger metadataLogger;
 	private int validGets = 0;

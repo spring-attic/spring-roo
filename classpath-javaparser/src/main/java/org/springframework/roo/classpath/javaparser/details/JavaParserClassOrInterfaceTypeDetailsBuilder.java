@@ -45,6 +45,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 	// Constants
 	static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
 
+	// Fields
 	private MetadataService metadataService;
 	private TypeLocationService typeLocationService;
 

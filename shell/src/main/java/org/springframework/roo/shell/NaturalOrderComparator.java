@@ -1,5 +1,7 @@
 package org.springframework.roo.shell;
 
+import java.util.Comparator;
+
 /*
  * NaturalOrderComparator.java -- Perform natural order comparisons of strings in Java.
  * Copyright (C) 2003 by Pierre-Luc Paour <natorder@paour.com>
@@ -21,10 +23,7 @@ package org.springframework.roo.shell;
  * 2. Altered source versions must be plainly marked as such, and must not be
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
- *
  */
-import java.util.Comparator;
-
 public class NaturalOrderComparator<E> implements Comparator<E> {
 	int compareRight(String a, String b) {
 		int bias = 0;
@@ -39,8 +38,7 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 			char ca = charAt(a, ia);
 			char cb = charAt(b, ib);
 
-			if (!Character.isDigit(ca)
-					&& !Character.isDigit(cb)) {
+			if (!Character.isDigit(ca) && !Character.isDigit(cb)) {
 				return bias;
 			} else if (!Character.isDigit(ca)) {
 				return -1;

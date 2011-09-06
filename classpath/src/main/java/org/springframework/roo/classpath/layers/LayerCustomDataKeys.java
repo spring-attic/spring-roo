@@ -8,7 +8,6 @@ import org.springframework.roo.model.CustomData;
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
- *
  */
 public class LayerCustomDataKeys {
 

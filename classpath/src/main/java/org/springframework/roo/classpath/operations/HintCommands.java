@@ -16,6 +16,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class HintCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private HintOperations hintOperations;
 	
 	@CliCommand(value="hint", help="Provides step-by-step hints and context-sensitive guidance")

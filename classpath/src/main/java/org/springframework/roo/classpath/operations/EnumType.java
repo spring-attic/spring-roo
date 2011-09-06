@@ -9,7 +9,8 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @since 1.0
  */
 public enum EnumType {
-	ORDINAL, STRING;
+	ORDINAL, 
+	STRING;
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

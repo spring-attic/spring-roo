@@ -10,7 +10,6 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class JavaSymbolNameEditor extends PropertyEditorSupport {
 
@@ -32,6 +31,4 @@ public class JavaSymbolNameEditor extends PropertyEditorSupport {
 		text = StringUtils.uncapitalize(text);
 		setValue(new JavaSymbolName(text));
 	}
-
-	
 }
