@@ -1,6 +1,7 @@
 package org.springframework.roo.project;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
@@ -20,19 +21,30 @@ import org.w3c.dom.NodeList;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
+ * @author Andrew Swan
  * @since 1.0
  */
 public class Dependency implements Comparable<Dependency> {
 	
+	/*
+	 * According to the Maven docs, "the minimal set of information for matching
+	 * a dependency reference against a dependencyManagement section is actually
+	 * {groupId, artifactId, type, classifier}"; see
+	 * 
+	 * http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
+	 */
+	
 	// Fields
-	private String groupId;
-	private String artifactId;
-	private String version;
-	private DependencyType type;
-	private DependencyScope scope;
-	private String classifier;
-	private List<Dependency> exclusions = new ArrayList<Dependency>();
-	private String systemPath;
+	// -- Identifying
+	private final String groupId;
+	private final String artifactId;
+	private final DependencyType type;
+	private final String classifier;
+	// -- Non-identifying
+	private final DependencyScope scope;
+	private final List<Dependency> exclusions = new ArrayList<Dependency>();
+	private final String version;
+	private final String systemPath;
 
 	/**
 	 * Creates an immutable {@link Dependency}.
@@ -45,21 +57,22 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param classifier the dependency classifier (required)
 	 */
 	public Dependency(final String groupId, final String artifactId, final String version, final DependencyType type, final DependencyScope scope, final String classifier) {
-		XmlUtils.assertElementLegal(groupId);
 		XmlUtils.assertElementLegal(artifactId);
-		Assert.notNull(version, "Version required");
-		Assert.notNull(type, "Dependency type required");
+		XmlUtils.assertElementLegal(groupId);
 		Assert.notNull(scope, "Dependency scope required");
-		this.groupId = groupId;
+		Assert.notNull(type, "Dependency type required");
+		Assert.notNull(version, "Version required");
 		this.artifactId = artifactId;
-		this.version = version;
-		this.type = type;
-		this.scope = scope;
 		this.classifier = classifier;
+		this.groupId = groupId;
+		this.scope = scope;
+		this.systemPath = null;
+		this.type = type;
+		this.version = version;
 	}
 
 	/**
-	 * Creates an immutable {@link Dependency}.
+	 * Constructs a JAR dependency with the given scope.
 	 * 
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
@@ -72,7 +85,7 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	/**
-	 * Convenience constructor for producing a JAR dependency.
+	 * Constructs a compile-scoped JAR dependency.
 	 * 
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
@@ -83,87 +96,56 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	/**
-	 * Convenience constructor for producing a JAR dependency.
+	 * Constructs a compile-scoped JAR dependency with optional exclusions.
 	 * 
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version ID (required)
-	 * @param exclusions the exclusions for this dependency
+	 * @param exclusions the exclusions for this dependency (can be null)
 	 */
-	public Dependency(final String groupId, final String artifactId, final String version, final List<Dependency> exclusions) {
+	public Dependency(final String groupId, final String artifactId, final String version, final Collection<? extends Dependency> exclusions) {
 		this(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
-		this.exclusions = exclusions;
+		if (exclusions != null) {
+			this.exclusions.addAll(exclusions);
+		}
 	}
 
 	/**
-	 * Convenience constructor when an XML element is available that represents a Maven <dependency>.
+	 * Constructs a {@link Dependency} from a Maven-style &lt;dependency&gt; element.
 	 * 
 	 * @param dependency to parse (required)
 	 */
 	public Dependency(final Element dependency) {
 		// Test if it has Maven format
 		if (dependency.hasChildNodes() && dependency.getElementsByTagName("artifactId").getLength() > 0) {
-			groupId = "org.apache.maven.plugins";
-			if (dependency.getElementsByTagName("groupId").getLength() > 0) {
-				groupId = dependency.getElementsByTagName("groupId").item(0).getTextContent();
-			}
-
-			this.artifactId = dependency.getElementsByTagName("artifactId").item(0).getTextContent();
+			this.groupId = dependency.getElementsByTagName("groupId").item(0).getTextContent().trim();
+			this.artifactId = dependency.getElementsByTagName("artifactId").item(0).getTextContent().trim();
 
 			final NodeList versionElements = dependency.getElementsByTagName("version");
 			if (versionElements.getLength() > 0) {
-				version = dependency.getElementsByTagName("version").item(0).getTextContent();
+				version = versionElements.item(0).getTextContent();
 			} else {
 				version = "";
 			}
 
 			// POM attributes supported in Maven 3.1
-			type = DependencyType.JAR;
-			if (XmlUtils.findFirstElement("type", dependency) != null || dependency.hasAttribute("type")) {
-				String t;
-				if (dependency.hasAttribute("type")) {
-					t = dependency.getAttribute("type");
-				} else {
-					t = XmlUtils.findFirstElement("type", dependency).getTextContent().trim().toUpperCase();
-				}
-				if (t.equals("JAR")) {
-					// Already a JAR, so no need to reassign
-				} else if (t.equals("ZIP")) {
-					type = DependencyType.ZIP;
-				} else {
-					type = DependencyType.OTHER;
-				}
-			}
+			this.type = DependencyType.getType(dependency);
 
 			// POM attributes supported in Maven 3.1
-			scope = DependencyScope.COMPILE;
-			if (XmlUtils.findFirstElement("scope", dependency) != null || dependency.hasAttribute("scope")) {
-				String s;
-				if (dependency.hasAttribute("scope")) {
-					s = dependency.getAttribute("scope");
-				} else {
-					s = XmlUtils.findFirstElement("scope", dependency).getTextContent().trim().toUpperCase();
-				}
-				try {
-					scope = DependencyScope.valueOf(s);
-				} catch (final IllegalArgumentException e) {
-					throw new IllegalArgumentException("Invalid dependency scope: " + s);
-				}
-			}
+			this.scope = DependencyScope.getScope(dependency);
 			if (scope == DependencyScope.SYSTEM) {
 				if (XmlUtils.findFirstElement("systemPath", dependency) != null) {
 					final String path = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
 					systemPath = path;
 				} else {
-					throw new IllegalArgumentException("Missing <systemPath> declaraton for system scope");
+					throw new IllegalArgumentException("Missing <systemPath> declaration for system scope");
 				}
-			}
-			final NodeList classifierElements = dependency.getElementsByTagName("classifier");
-			if (classifierElements.getLength() > 0) {
-				classifier = dependency.getElementsByTagName("classifier").item(0).getTextContent();
 			} else {
-				classifier = "";
+				this.systemPath = null;
 			}
+			
+			this.classifier = XmlUtils.getChildTextContent(dependency, "classifier");
+			
 			// Parsing for exclusions
 			final List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
 			if (exclusionList.size() > 0) {
@@ -186,11 +168,13 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		// Otherwise test for Ivy format
 		else if (dependency.hasAttribute("org") && dependency.hasAttribute("name") && dependency.hasAttribute("rev")) {
-			groupId = dependency.getAttribute("org");
 			artifactId = dependency.getAttribute("name");
-			version = dependency.getAttribute("rev");
-			type = DependencyType.JAR;
+			classifier = dependency.getAttribute("classifier");
+			groupId = dependency.getAttribute("org");
 			scope = DependencyScope.COMPILE;
+			systemPath = null;
+			type = DependencyType.JAR;
+			version = dependency.getAttribute("rev");
 			// TODO: implement exclusions parser for IVY format
 		} else {
 			throw new IllegalStateException("Dependency XML format not supported or is missing a mandatory node ('" + dependency + "')");
@@ -245,12 +229,13 @@ public class Dependency implements Comparable<Dependency> {
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		result = prime * result + ((classifier == null) ? 0 : classifier.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-		return obj != null && obj instanceof Dependency && this.compareTo((Dependency) obj) == 0;
+		return obj instanceof Dependency && this.compareTo((Dependency) obj) == 0;
 	}
 
 	public int compareTo(final Dependency o) {
@@ -266,6 +251,9 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		if (result == 0 && classifier != null) {
 			result = classifier.compareTo(o.classifier);
+		}
+		if (result == 0 && type != null) {
+			result = type.compareTo(o.type);
 		}
 		return result;
 	}
@@ -322,12 +310,10 @@ public class Dependency implements Comparable<Dependency> {
 			dependencyElement.appendChild(typeElement);
 		}
 
-		if (this.scope != null) {
-			// Keep the XML short, we don't need "compile" given it's the default
-			if (!DependencyScope.COMPILE.equals(this.scope)) {
-				dependencyElement.appendChild(XmlUtils.createTextElement(document, "scope", this.scope.toString().toLowerCase()));
-			}
-			if (DependencyScope.SYSTEM.equals(this.scope) && this.systemPath != null) {
+		// Keep the XML short, we don't need "compile" given it's the default
+		if (this.scope != null && this.scope != DependencyScope.COMPILE) {
+			dependencyElement.appendChild(XmlUtils.createTextElement(document, "scope", this.scope.toString().toLowerCase()));
+			if (this.scope == DependencyScope.SYSTEM && StringUtils.hasText(this.systemPath)) {
 				dependencyElement.appendChild(XmlUtils.createTextElement(document, "systemPath", this.systemPath));
 			}
 		}
@@ -347,5 +333,22 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		
 		return dependencyElement;
+	}
+
+	/**
+	 * Indicates whether the given {@link Dependency} has the same Maven
+	 * coordinates as this one; this is not necessarily the same as calling
+	 * {@link #equals(Object)}, which may compare more fields beyond the basic
+	 * coordinates.
+	 * 
+	 * @param dependency the dependency to check (can be <code>null</code>)
+	 * @return <code>false</code> if any coordinates are different
+	 */
+	public boolean hasSameCoordinates(final Dependency dependency) {
+		return dependency != null
+			&& dependency.groupId.equals(groupId)
+			&& dependency.artifactId.equals(artifactId)
+			&& dependency.type == type
+			&& StringUtils.trimToEmpty(dependency.classifier).equals(StringUtils.trimToEmpty(classifier));
 	}
 }

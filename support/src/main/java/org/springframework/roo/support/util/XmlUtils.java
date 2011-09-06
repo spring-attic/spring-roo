@@ -617,6 +617,23 @@ public final class XmlUtils {
 	}
 	
 	/**
+	 * Returns the text content of the first child of the given parent that has
+	 * the given tag name, if any
+	 * 
+	 * @param parent the parent in which to search (required)
+	 * @param child the child name for which to search (required)
+	 * @return <code>null</code> if there is no such child, otherwise the first
+	 * such child's text content
+	 */
+	public static String getChildTextContent(final Element parent, final String child) {
+		final List<Element> children = findElements(child, parent);
+		if (children.isEmpty()) {
+			return null;
+		}
+		return getTextContent(children.get(0), null);
+	}
+	
+	/**
 	 * Constructor is private to prevent instantiation
 	 */
 	private XmlUtils() {}

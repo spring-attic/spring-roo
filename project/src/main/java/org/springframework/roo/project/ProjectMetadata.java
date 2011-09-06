@@ -83,7 +83,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Convenience method for determining whether all of the presented dependencies are registered. 
+	 * Indicates whether all of the given dependencies are registered, using 
+	 * {@link Dependency#equals(Object)} to evaluate each one against the
+	 * existing dependencies.
 	 *
 	 * @param dependencies the dependencies to check (required)
 	 * @return whether all the dependencies are currently registered or not

@@ -1,6 +1,6 @@
 package org.springframework.roo.project;
 
-import static org.springframework.roo.support.util.AnsiEscapeCode.FG_YELLOW;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.util.ArrayList;
@@ -54,10 +54,10 @@ import org.w3c.dom.Element;
 public class MavenProjectMetadataProvider implements ProjectMetadataProvider, FileEventListener {
 	
 	// Constants
-	private static final String ADDED = highlight("added");
-	private static final String CHANGED = highlight("changed");
-	private static final String REMOVED = highlight("removed");
-	private static final String UPDATED = highlight("updated");
+	private static final String ADDED = "added";
+	private static final String CHANGED = "changed";
+	private static final String REMOVED = "removed";
+	private static final String UPDATED = "updated";
 
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier()));
 
@@ -68,7 +68,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	 * @return the highlighted text
 	 */
 	private static String highlight(final String text) {
-		return decorate(text, FG_YELLOW);
+		return decorate(text, FG_CYAN);
 	}
 	
 	// Fields
@@ -233,24 +233,49 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency addition is unavailable");
-		if (projectMetadata.isAllDependenciesRegistered(dependencies)) {
-			return;
-		}
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		final Element root = document.getDocumentElement();
-		final Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
-		Assert.notNull(dependenciesElement, "Dependencies unable to be found");
+		final Element dependenciesElement = XmlUtils.createChildIfNotExists("dependencies", document.getDocumentElement(), document);
+		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
 
 		final List<String> newDependencies = new ArrayList<String>();
-		for (final Dependency dependency : dependencies) {
-			if (dependency != null && !projectMetadata.isDependencyRegistered(dependency)) {
-				dependenciesElement.appendChild(dependency.getElement(document));
-				newDependencies.add(dependency.getSimpleDescription());
+		final List<String> removedDependencies = new ArrayList<String>();
+		for (final Dependency newDependency : dependencies) {
+			if (newDependency != null) {
+				// Look for any existing instances of this dependency
+				boolean inserted = false;
+				for (final Element existingDependencyElement : existingDependencyElements) {
+					final Dependency existingDependency = new Dependency(existingDependencyElement);
+					if (existingDependency.hasSameCoordinates(newDependency)) {
+						// It's the same artifact, but might have a different version, exclusions, etc.
+						if (!inserted) {
+							// We haven't added the new one yet; do so now
+							dependenciesElement.insertBefore(newDependency.getElement(document), existingDependencyElement);
+							inserted = true;
+							if (!newDependency.getVersion().equals(existingDependency.getVersion())) {
+								// It's a genuine version change => mention the old and new versions in the message
+								newDependencies.add(newDependency.getSimpleDescription());
+								removedDependencies.add(existingDependency.getSimpleDescription());
+							}
+						}
+						// Either way, we remove the previous one in case it was different in any way
+						dependenciesElement.removeChild(existingDependencyElement);
+					}
+					// Keep looping in case it's present more than once
+				}
+				if (!inserted) {
+					// We didn't encounter any existing dependencies with the same coordinates; add it now
+					dependenciesElement.appendChild(newDependency.getElement(document));
+					newDependencies.add(newDependency.getSimpleDescription());
+				}
 			}
 		}
-		final String message = getDescriptionOfChange(ADDED, newDependencies, "dependency", "dependencies");
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
+		if (!newDependencies.isEmpty()) {
+			final String addMessage = getDescriptionOfChange(ADDED, newDependencies, "dependency", "dependencies");
+			final String removeMessage = getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies");
+			final String message = StringUtils.hasText(removeMessage) ? addMessage + "; " + removeMessage : addMessage;
+			fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
+		}
 	}
 
 	public void addDependency(final Dependency dependency) {
@@ -312,7 +337,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (scopeElement == null) {
 			if (dependencyScope != null) {
 				dependencyElement.appendChild(new XmlElementBuilder("scope", document).setText(dependencyScope.name().toLowerCase()).build());
-				descriptionOfChange = ADDED + " <scope>" + dependencyScope.name().toLowerCase() + "</scope> to dependency " + dependency.getSimpleDescription();
+				descriptionOfChange = highlight(ADDED + " scope") + " " + dependencyScope.name().toLowerCase() + " to dependency " + dependency.getSimpleDescription();
 			} else {
 				// Nothing to do
 				descriptionOfChange = null;
@@ -320,10 +345,10 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		} else {
 			if (dependencyScope != null) {
 				scopeElement.setTextContent(dependencyScope.name().toLowerCase());
-				descriptionOfChange = CHANGED + " <scope> to " + dependencyScope.name().toLowerCase() + " in dependency " + dependency.getSimpleDescription();
+				descriptionOfChange = highlight(CHANGED + " scope") + " to " + dependencyScope.name().toLowerCase() + " in dependency " + dependency.getSimpleDescription();
 			} else {
 				dependencyElement.removeChild(scopeElement);
-				descriptionOfChange = REMOVED + " <scope> from dependency " + dependency.getSimpleDescription();
+				descriptionOfChange = highlight(REMOVED + " scope") + " from dependency " + dependency.getSimpleDescription();
 			}
 		}
 
@@ -365,11 +390,14 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	 * @param items the items that were acted upon (required, can be empty)
 	 * @param singular the singular of this type of item (required)
 	 * @param plural the plural of this type of item (required)
-	 * @return a non-blank message
+	 * @return a non-<code>null</code> message
 	 * @since 1.2.0
 	 */
 	private String getDescriptionOfChange(final String action, final Collection<String> items, final String singular, final String plural) {
-		return action + " " + (items.size() == 1 ? singular : plural) + " " + StringUtils.collectionToDelimitedString(items, ", "); 
+		if (items.isEmpty()) {
+			return "";
+		}
+		return highlight(action + " " + (items.size() == 1 ? singular : plural)) + " " + StringUtils.collectionToDelimitedString(items, ", "); 
 	}
 
 	public void addBuildPlugin(final Plugin plugin) {
@@ -390,7 +418,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final List<String> removedPlugins = new ArrayList<String>();
 		for (final Plugin plugin : plugins) {
 			if (plugin != null) {
-				// Can't filter the XPath on groupId, as it's optional in the POM for Apache-brand plugins
+				// Can't filter the XPath on groupId, as it's optional in the POM for Apache-owned plugins
 				for (final Element candidate : XmlUtils.findElements("plugin[artifactId = '" + plugin.getArtifactId() + "']", pluginsElement)) {
 					if (Plugin.getGroupId(candidate).equals(plugin.getGroupId())) {
 						// This element has the same groupId and artifactId as the plugin to be removed; remove it
@@ -449,7 +477,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 
 		packaging.setTextContent(projectType.getType());
-		final String descriptionOfChange = UPDATED + " project type to " + projectType.getType();
+		final String descriptionOfChange = highlight(UPDATED + " project type") + " to " + projectType.getType();
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
@@ -487,7 +515,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				addedRepositories.add(repository.getUrl());
 			}
 		}
-		final String message = getDescriptionOfChange(ADDED, addedRepositories, path, containingPath);	// TODO check
+		final String message = getDescriptionOfChange(ADDED, addedRepositories, path, containingPath);
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
 
@@ -516,7 +544,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		for (final Element candidate : XmlUtils.findElements(path, root)) {
 			if (repository.equals(new Repository(candidate))) {
 				candidate.getParentNode().removeChild(candidate);
-				descriptionOfChange = REMOVED + " repository " + repository.getUrl();
+				descriptionOfChange = highlight(REMOVED + " repository") + " " + repository.getUrl();
 				// We stay in the loop just in case it was in the POM more than once
 			}
 		}
@@ -541,11 +569,11 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			// No existing property of this name; add it
 			final Element properties = XmlUtils.createChildIfNotExists("properties", document.getDocumentElement(), document);
 			properties.appendChild(XmlUtils.createTextElement(document, property.getName(), property.getValue()));
-			descriptionOfChange = ADDED + " property '" + property.getName() + "' = '" + property.getValue() + "'";
+			descriptionOfChange = highlight(ADDED + " property") + " '" + property.getName() + "' = '" + property.getValue() + "'";
 		} else {
 			// A property of this name exists; update it
 			existing.setTextContent(property.getValue());
-			descriptionOfChange = UPDATED + " property '" + property.getName() + "' to '" + property.getValue() + "'";
+			descriptionOfChange = highlight(UPDATED + " property") + " '" + property.getName() + "' to '" + property.getValue() + "'";
 		}
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
@@ -567,7 +595,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		for (final Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
 			if (property.equals(new Property(candidate))) {
 				propertiesElement.removeChild(candidate);
-				descriptionOfChange = REMOVED + " property " + property.getName();
+				descriptionOfChange = highlight(REMOVED + " property") + " " + property.getName();
 				// Stay in the loop just in case it was in the POM more than once
 			}
 		}
@@ -594,10 +622,10 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			// No such filter; add it
 			final Element filtersElement = XmlUtils.createChildIfNotExists("filters", buildElement, document);
 			filtersElement.appendChild(XmlUtils.createTextElement(document, "filter", filter.getValue()));
-			descriptionOfChange = ADDED + " filter '" + filter.getValue() + "'";
+			descriptionOfChange = highlight(ADDED + " filter") + " '" + filter.getValue() + "'";
 		} else {
 			existingFilter.setTextContent(filter.getValue());
-			descriptionOfChange = UPDATED + " filter '" + filter.getValue() + "'";
+			descriptionOfChange = highlight(UPDATED + " filter") + " '" + filter.getValue() + "'";
 		}
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
@@ -622,7 +650,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		for (final Element candidate : XmlUtils.findElements("filter", filtersElement)) {
 			if (filter.equals(new Filter(candidate))) {
 				filtersElement.removeChild(candidate);
-				descriptionOfChange = REMOVED + " filter '" + filter.getValue() + "'";
+				descriptionOfChange = highlight(REMOVED + " filter") + " '" + filter.getValue() + "'";
 				// We will not break the loop (even though we could theoretically), just in case it was in the POM more than once
 			}
 		}
@@ -649,7 +677,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Element buildElement = XmlUtils.findFirstElement("/project/build", document.getDocumentElement());
 		final Element resourcesElement = XmlUtils.createChildIfNotExists("resources", buildElement, document);
 		resourcesElement.appendChild(resource.getElement(document));
-		final String descriptionOfChange = ADDED + " resource with " + resource.getSimpleDescription();
+		final String descriptionOfChange = highlight(ADDED + " resource") + " " + resource.getSimpleDescription();
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
@@ -673,7 +701,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		for (final Element candidate : XmlUtils.findElements("resource[directory = '" + resource.getDirectory().getName() + "']", resourcesElement)) {
 			if (resource.equals(new Resource(candidate))) {
 				resourcesElement.removeChild(candidate);
-				descriptionOfChange = REMOVED + " resource with " + resource.getSimpleDescription();
+				descriptionOfChange = highlight(REMOVED + " resource") + " " + resource.getSimpleDescription();
 				// Stay in the loop just in case it was in the POM more than once
 			}
 		}
@@ -711,7 +739,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		for (final Element candidate : XmlUtils.findElements(path, root)) {
 			if (dependency.equals(new Dependency(candidate))) {
 				dependenciesElement.removeChild(candidate);
-				descriptionOfChange = REMOVED + " dependency " + dependency.getSimpleDescription();
+				descriptionOfChange = highlight(REMOVED + " dependency") + " " + dependency.getSimpleDescription();
 				// Stay in the loop, just in case it was in the POM more than once
 			}
 		}
