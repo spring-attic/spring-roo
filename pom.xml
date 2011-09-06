@@ -784,7 +784,17 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.layers.repository</artifactId>
+                <artifactId>org.springframework.roo.addon.layers.repository.jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.layers.repository.mongo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.oscommands</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
