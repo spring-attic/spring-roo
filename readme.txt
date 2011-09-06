@@ -21,7 +21,7 @@ We'll assume you typed the following to checkout Roo (if not, adjust
 the paths in the following instructions accordingly):
 
   cd ~
-  git clone git://git.springsource.org/roo/roo.git
+  git clone git@github.com:SpringSource/spring-roo.git
 
 In the instructions below, $ROO_HOME refers to the location where you
 checked out Roo (in this case it would be ROO_HOME="~/roo"). You do NOT
@@ -189,7 +189,7 @@ Setup Git correctly before you do anything else:
 
 Perform the initial checkout with this:
 
-  git clone git@git.springsource.org:roo/roo.git
+  git clone git@github.com:SpringSource/spring-roo.git
 
 Let's take the simple case where you just want to make a minor change
 against master. You don't want a new branch etc, and you only want a
