@@ -35,6 +35,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MenuOperationsImpl implements MenuOperations {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;

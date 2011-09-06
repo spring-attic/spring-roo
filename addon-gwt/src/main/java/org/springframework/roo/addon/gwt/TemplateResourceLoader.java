@@ -22,8 +22,12 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * @since 1.1
  */
 public class TemplateResourceLoader implements TemplateLoader {
+	
+	// Constants
 	private static final String TEMPLATE_DIR = "org/springframework/roo/addon/gwt/templates/";
 	private static final Map<String, Template> cache = new HashMap<String, Template>();
+	
+	// Fields
 	protected final String baseDir;
 	protected final TemplateParser parser;
 

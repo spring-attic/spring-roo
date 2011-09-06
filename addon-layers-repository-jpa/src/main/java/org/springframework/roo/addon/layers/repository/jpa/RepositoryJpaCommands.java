@@ -10,7 +10,7 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 
 /**
- * 
+ * Commands for the JPA repository add-on.
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -26,14 +26,14 @@ public class RepositoryJpaCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value = "repository jpa", help = "Adds @RooRepositoryJpa annotation to target type") 
-	public void repository(@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") JavaType interfaceType,
-			@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-			@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this repository should expose") JavaType domainType) {
+	public void repository(
+		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") JavaType interfaceType,
+		@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
+		@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this repository should expose") JavaType domainType) {
 		
 		if (classType == null) {
 			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
 		}
 		repositoryJpaOperations.setupRepository(interfaceType, classType, domainType);
 	}
-
 }

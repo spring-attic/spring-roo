@@ -43,7 +43,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true) 
 @Service 
 public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvider implements WebJsonMetadataProvider {
-	
+
 	// Fields
 	@Reference private WebMetadataService webMetadataService;
 	@Reference private TypeLocationService typeLocationService;

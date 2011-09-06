@@ -38,8 +38,12 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = SolrMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	
+	// Fields
 	private SolrSearchAnnotationValues annotationValues;
 	private String beanPlural;
 	private String javaBeanFieldName;

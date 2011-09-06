@@ -73,7 +73,11 @@ import org.xml.sax.SAXException;
 @Component
 @Service
 public class GwtTypeServiceImpl implements GwtTypeService {
+	
+	// Constants
 	private static Logger logger = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplateService gwtTemplateService;
@@ -81,7 +85,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
-
 	private Set<String> warnings = new LinkedHashSet<String>();
 	private Timer warningTimer = new Timer();
 

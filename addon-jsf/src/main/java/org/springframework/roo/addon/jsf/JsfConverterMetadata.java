@@ -42,20 +42,6 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Fields
 	private JavaType entity;
 
-	/**
-	 * Constructor
-	 *
-	 * @param identifier
-	 * @param aspectName
-	 * @param governorPhysicalTypeMetadata
-	 * @param annotationValues
-	 * @param plural
-	 * @param findAllMethod2 the additions this metadata should make in order to
-	 * invoke the target entity type's CRUD methods (required)
-	 * @param converterMethods
-	 * @param enumTypes
-	 * @param identifierAccessor the entity id's accessor (getter) method (can be <code>null</code>)
-	 */
 	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MemberTypeAdditions findAllMethod, final List<MethodMetadata> converterMethods) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");

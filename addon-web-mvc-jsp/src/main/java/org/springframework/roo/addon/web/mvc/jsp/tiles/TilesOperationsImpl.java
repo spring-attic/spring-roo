@@ -35,6 +35,8 @@ import org.xml.sax.SAXException;
 @Component
 @Service
 public class TilesOperationsImpl implements TilesOperations {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	

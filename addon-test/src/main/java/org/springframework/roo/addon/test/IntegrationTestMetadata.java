@@ -40,10 +40,13 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = IntegrationTestMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType TEST = new JavaType("org.junit.Test");
 
+	// Fields
 	private IntegrationTestAnnotationValues annotationValues;
 	private DataOnDemandMetadata dataOnDemandMetadata;
 	private boolean isGaeSupported = false;

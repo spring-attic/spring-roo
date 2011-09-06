@@ -23,31 +23,32 @@ import org.springframework.roo.support.util.Assert;
 /**
  * A method provided by the {@link LayerType#REPOSITORY} layer.
  *
+ * <p>
+ * A Spring Data JPA repository provides the following methods out of the
+ * box, of which those marked * are not implemented below:
+ * <pre>
+ *     long         count()
+ *     *void        delete(ID)
+ *     *void        delete(Iterable<? extends T>)
+ *     void         delete(T)
+ *     *void        deleteAll()
+ *     *void        deleteInBatch(Iterable<T>)
+ *     *boolean     exists(ID)
+ *     List<T>      findAll()
+ *     *org.springframework.data.domain.Page<T> findAll(org.springframework.data.domain.Pageable)
+ *     *List<T>     findAll(org.springframework.data.domain.Sort)
+ *     *T           findOne(ID) TODO
+ *     void         flush()
+ *     *List<T>     save(Iterable<? extends T>)
+ *     T            save(T)
+ *     *T           saveAndFlush(T)
+ * </pre>
+ * 
  * @author Andrew Swan
  * @since 1.2.0
  */
 public enum RepositoryJpaLayerMethod {
-	
-	/* 
-	    A Spring Data JPA repository provides the following methods out of the
-	    box, of which those marked * are not implemented below:
-			long        count()
-			*void        delete(ID)
-			*void        delete(Iterable<? extends T>)
-			void        delete(T)
-			*void        deleteAll()
-			*void        deleteInBatch(Iterable<T>)
-			*boolean     exists(ID)
-			List<T>     findAll()
-			*org.springframework.data.domain.Page<T> findAll(org.springframework.data.domain.Pageable)
-			*List<T>     findAll(org.springframework.data.domain.Sort)
-			*T           findOne(ID) TODO
-			void        flush()
-	        *List<T>     save(Iterable<? extends T>)
-			T           save(T)
-			*T           saveAndFlush(T)
-	 */
-	
+
 	COUNT ("count", COUNT_ALL_METHOD) {
 
 		@Override

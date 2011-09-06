@@ -18,6 +18,11 @@ import org.w3c.dom.NodeList;
  * <p>
  * Structured after the model used by Maven and Ivy. This may be replaced in a future release with a more OSGi-centric model.
  * 
+ * <p>
+ * According to the Maven docs, "the minimal set of information for matching a dependency reference 
+ * against a dependencyManagement section is actually {groupId, artifactId, type, classifier}"; see
+ * http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
+ * 
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
@@ -25,15 +30,7 @@ import org.w3c.dom.NodeList;
  * @since 1.0
  */
 public class Dependency implements Comparable<Dependency> {
-	
-	/*
-	 * According to the Maven docs, "the minimal set of information for matching
-	 * a dependency reference against a dependencyManagement section is actually
-	 * {groupId, artifactId, type, classifier}"; see
-	 * 
-	 * http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
-	 */
-	
+
 	// Fields
 	// -- Identifying
 	private final String groupId;
@@ -175,7 +172,7 @@ public class Dependency implements Comparable<Dependency> {
 			systemPath = null;
 			type = DependencyType.JAR;
 			version = dependency.getAttribute("rev");
-			// TODO: implement exclusions parser for IVY format
+			// TODO: Implement exclusions parser for IVY format
 		} else {
 			throw new IllegalStateException("Dependency XML format not supported or is missing a mandatory node ('" + dependency + "')");
 		}

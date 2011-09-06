@@ -9,7 +9,5 @@ import org.springframework.roo.model.CustomData;
  * @since 1.1.3
  */
 public enum CustomDataSerializableTags {
-	
 	SERIAL_VERSION_UUID_FIELD;
-
 }

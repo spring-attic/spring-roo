@@ -24,7 +24,7 @@ public @interface RooRepositoryJpa {
 	 * The name of this annotation's attribute that specifies the managed domain
 	 * type.
 	 */
-	public static final String DOMAIN_TYPE_ATTRIBUTE = "domainType";
+	String DOMAIN_TYPE_ATTRIBUTE = "domainType";
 	
 	/**
 	 * The domain type managed by the annotated repository

@@ -28,6 +28,8 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String SPRING_JPA_REPOSITORY = "org.springframework.data.jpa.repository.JpaRepository";
 	private static final String SPRING_JPA_SPECIFICATION_EXECUTOR = "org.springframework.data.jpa.repository.JpaSpecificationExecutor";
+	
+	// Fields
 	private final RepositoryJpaAnnotationValues annotationValues;
 	
 	/**

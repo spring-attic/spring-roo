@@ -28,10 +28,11 @@ public class ServiceCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value = "service", help = "Adds @RooService annotation to target type") 
-	public void service(@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") JavaType interfaceType,
-			@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-			@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this service should expose") JavaType domainType)
-	{
+	public void service(
+		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") JavaType interfaceType,
+		@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
+		@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this service should expose") JavaType domainType) {
+		
 		if (classType == null) {
 			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
 		}

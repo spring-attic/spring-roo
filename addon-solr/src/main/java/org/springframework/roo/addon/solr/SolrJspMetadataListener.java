@@ -1,8 +1,9 @@
 package org.springframework.roo.addon.solr;
 
-import javax.xml.parsers.DocumentBuilder;
 import java.io.IOException;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -54,6 +55,8 @@ import org.w3c.dom.Element;
 @Component(immediate = true)
 @Service
 public final class SolrJspMetadataListener implements MetadataProvider, MetadataNotificationListener {
+	
+	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;

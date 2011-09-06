@@ -68,8 +68,10 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
+	// Constants
 	private static Logger logger = HandlerUtils.getLogger(GwtMetadataProviderImpl.class);
 
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private GwtFileManager gwtFileManager;
 	@Reference private GwtTemplateService gwtTemplateService;

@@ -14,6 +14,8 @@ import java.util.TreeSet;
  * @since 1.0;
  */
 public abstract class ReservedTokenHolder {
+	
+	// Constants
 	public static final SortedSet<ReservedToken> NUMERIC_TOKENS;
 	public static final SortedSet<ReservedToken> BOOLEAN_TOKENS;
 	public static final SortedSet<ReservedToken> STRING_TOKENS;

@@ -60,9 +60,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	// Constants
 	public static final String ADDON_UPGRADE_STABILITY_LEVEL = "ADDON_UPGRADE_STABILITY_LEVEL";
-	
 	private static final Logger LOGGER = HandlerUtils.getLogger(AddOnRooBotOperationsImpl.class);
-	
 	private static final List<String> NO_UPGRADE_BSN_LIST = Arrays.asList(
 			"org.springframework.uaa.client", 
 			"org.springframework.roo.url.stream.jdk", 
@@ -93,19 +91,17 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			"org.springframework.roo.uaa");
 	
 	// Fields
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-	private final Object mutex = new Object();
-	
 	@Reference private PgpService pgpService;
 	@Reference private Shell shell;
 	@Reference private UrlInputStreamService urlInputStreamService;
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	private final Object mutex = new Object();
 	private boolean rooBotIndexDownload = true;
 	private ComponentContext context;
 	private Map<String, Bundle> bundleCache;
 	private Map<String, Bundle> searchResultCache;
 	private Preferences prefs;
 	private String rooBotXmlUrl = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
-
 	private volatile Thread rooBotEagerDownload;
 	
 	protected void activate(ComponentContext context) {

@@ -22,8 +22,11 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class OsCommands implements CommandMarker {
-	
+
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(OsCommands.class);
+
+	// Fields
 	@Reference private OsOperations osOperations;
 
 	@CliAvailabilityIndicator("!")
@@ -31,8 +34,10 @@ public class OsCommands implements CommandMarker {
 		return true; // This command is always available!
 	}
 
-	@CliCommand(value = "!", help = "Allows execution of OS commands.")
-	public void command(@CliOption(key = {"", "command"}, mandatory=false, specifiedDefaultValue="*", unspecifiedDefaultValue="*", help = "the command to execute") String command) {
+	@CliCommand(value = "!", help = "Allows execution of operating system (OS) commands.")
+	public void command(
+		@CliOption(key = { "", "command" }, mandatory = false, specifiedDefaultValue = "*", unspecifiedDefaultValue = "*", help = "The command to execute") String command) {
+
 		if (StringUtils.hasText(command)) {
 			try {
 				osOperations.executeCommand(command);

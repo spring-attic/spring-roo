@@ -38,6 +38,6 @@ public interface WebMetadataService {
 	JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString);
 
 	MemberDetails getMemberDetails(JavaType javaType);
-	
+
 	Map<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString);
 }

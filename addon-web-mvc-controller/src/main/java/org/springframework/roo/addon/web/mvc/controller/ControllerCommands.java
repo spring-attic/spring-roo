@@ -32,7 +32,11 @@ import org.springframework.roo.support.util.StringUtils;
 @Component 
 @Service
 public class ControllerCommands implements CommandMarker {
+	
+	// Constants 
 	private static Logger logger = HandlerUtils.getLogger(ControllerCommands.class);
+	
+	// Fields
 	@Reference private ControllerOperations controllerOperations;
 	@Reference private MetadataService metadataService;
 	

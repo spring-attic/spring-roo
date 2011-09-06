@@ -15,6 +15,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 
 public enum GwtType {
+	
 	// Represents mirror types classes. There are one of these for each entity mirrored by Roo.
 	PROXY(GwtPath.MANAGED_REQUEST, true, "Proxy", "proxy", null, false, false, true),
 	REQUEST(GwtPath.MANAGED_REQUEST, true, "Request", "request", null, false, false, true),

@@ -19,42 +19,42 @@ public @interface RooService {
 	/**
 	 * The name of this annotation's "domain types" attribute
 	 */
-	public static final String DOMAIN_TYPES_ATTRIBUTE = "domainTypes";
+	String DOMAIN_TYPES_ATTRIBUTE = "domainTypes";
 
 	/**
 	 * The default prefix of the "count all" method
 	 */
-	public static final String COUNT_ALL_METHOD = "countAll";
+	String COUNT_ALL_METHOD = "countAll";
 	
 	/**
 	 * The default name of the "delete" method
 	 */
-	public static final String DELETE_METHOD = "delete";
+	String DELETE_METHOD = "delete";
 	
 	/**
 	 * The default prefix of the "find" method
 	 */
-	public static final String FIND_METHOD = "find";
+	String FIND_METHOD = "find";
 	
 	/**
 	 * The default prefix of the "find all" method
 	 */
-	public static final String FIND_ALL_METHOD = "findAll";
+	String FIND_ALL_METHOD = "findAll";
 	
 	/**
 	 * The default prefix of the "find entries" method
 	 */
-	public static final String FIND_ENTRIES_METHOD = "find";
+	String FIND_ENTRIES_METHOD = "find";
 	
 	/**
 	 * The default name of the "save" method
 	 */
-	public static final String SAVE_METHOD = "save";
+	String SAVE_METHOD = "save";
 	
 	/**
 	 * The default name of the "update" method
 	 */
-	public static final String UPDATE_METHOD = "update";
+	String UPDATE_METHOD = "update";
 	
 	/**
 	 * Returns the domain type(s) managed by this service

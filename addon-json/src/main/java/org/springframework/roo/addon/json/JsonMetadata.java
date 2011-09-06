@@ -28,8 +28,12 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = JsonMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	
+	// Fields
 	private JsonAnnotationValues annotationValues;
 	private String typeNamePlural;
 

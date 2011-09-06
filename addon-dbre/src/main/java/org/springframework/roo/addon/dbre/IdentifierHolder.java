@@ -12,6 +12,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.2.0
  */
 public class IdentifierHolder {
+	
+	// Fields
 	private FieldMetadata identifierField;
 	private boolean embeddedIdField;
 	private List<FieldMetadata> embeddedIdentifierFields;

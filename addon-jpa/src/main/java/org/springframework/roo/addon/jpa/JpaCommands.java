@@ -27,7 +27,11 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Service
 public class JpaCommands implements CommandMarker {
+	
+	// Constants
 	private static Logger logger = HandlerUtils.getLogger(JpaCommands.class);
+	
+	// Fields
 	@Reference private JpaOperations jpaOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;

@@ -4,7 +4,7 @@ package org.springframework.roo.addon.web.flow;
  * Interface for {@link WebFlowOperationsImpl}.
  * 
  * @author Ben Alex
- *
+ * @since 1.0
  */
 public interface WebFlowOperations {
 
@@ -26,5 +26,4 @@ public interface WebFlowOperations {
 	 * @throws IllegalStateException if the directory for the flow already exists.
 	 */
 	void installWebFlow(String flowName);
-
 }

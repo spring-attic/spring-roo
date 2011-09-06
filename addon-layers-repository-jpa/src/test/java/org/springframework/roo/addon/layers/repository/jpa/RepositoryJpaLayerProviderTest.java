@@ -21,7 +21,6 @@ import org.springframework.roo.classpath.layers.MethodParameter;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaType;
 
-
 /**
  * Unit test of {@link RepositoryJpaLayerProvider}
  *

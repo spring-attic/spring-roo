@@ -14,6 +14,5 @@ public interface WebFinderOperations {
 	
 	void annotateAll();
 	
-	void annotateType(JavaType controllerType, JavaType entityType);
-	
+	void annotateType(JavaType controllerType, JavaType entityType);	
 }

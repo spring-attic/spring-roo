@@ -35,7 +35,11 @@ import org.w3c.dom.Element;
 @Component 
 @Service 
 public class SecurityOperationsImpl implements SecurityOperations {
+	
+	// Constants
 	private static final String SECURITY_VERSION = "3.0.5.RELEASE";
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TilesOperations tilesOperations;

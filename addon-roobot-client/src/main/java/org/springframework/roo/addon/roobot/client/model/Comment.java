@@ -3,7 +3,6 @@ package org.springframework.roo.addon.roobot.client.model;
 import java.util.Date;
 
 public class Comment {
-	
 	private Rating rating;
 	private String comment;
 	private Date date;

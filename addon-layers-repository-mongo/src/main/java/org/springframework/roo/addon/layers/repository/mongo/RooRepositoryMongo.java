@@ -23,12 +23,12 @@ public @interface RooRepositoryMongo {
 	 * The name of this annotation's attribute that specifies the managed domain
 	 * type.
 	 */
-	public static final String DOMAIN_TYPE_ATTRIBUTE = "domainType";
+	String DOMAIN_TYPE_ATTRIBUTE = "domainType";
 	
 	/**
 	 * The domain type managed by the annotated repository
 	 * 
 	 * @return a non-<code>null</code> entity type
 	 */
-	Class<?> domainType();	// no default => mandatory
+	Class<?> domainType();	// No default => mandatory
 }

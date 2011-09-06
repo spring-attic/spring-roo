@@ -33,6 +33,7 @@ import org.springframework.uaa.client.util.Assert;
 @Service
 public class ServiceOperationsImpl implements ServiceOperations {
 	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;

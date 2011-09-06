@@ -100,5 +100,4 @@ public @interface RooWebScaffold {
 	 * @return indicates if the populateXXX() methods should be provided (defaults to "true"; optional)
 	 */
 	boolean populateMethods() default true;
-	
 }

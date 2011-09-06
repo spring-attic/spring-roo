@@ -28,8 +28,9 @@ public class WebFinderCommands implements CommandMarker {
 
 	@CliCommand(value = "web mvc finder add", help = "Adds @RooWebFinder annotation to MVC controller type") 
 	public void add(
-			@CliOption(key = "formBackingType", mandatory = true, help = "The finder-enabled type") JavaType finderType,
-			@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller java type to apply this annotation to") JavaType controllerType) {		
+		@CliOption(key = "formBackingType", mandatory = true, help = "The finder-enabled type") JavaType finderType,
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller java type to apply this annotation to") JavaType controllerType) {		
+		
 		operations.annotateType(controllerType, finderType);
 	}
 	

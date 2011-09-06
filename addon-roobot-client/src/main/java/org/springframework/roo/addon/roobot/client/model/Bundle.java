@@ -8,12 +8,12 @@ import java.util.List;
 import org.springframework.roo.support.util.Assert;
 
 public class Bundle {
-    private String symbolicName;
-    private float ranking;
-    private float searchRelevance;
-    private List<BundleVersion> versions;
-    private List<Comment> comments;
-    
+	private String symbolicName;
+	private float ranking;
+	private float searchRelevance;
+	private List<BundleVersion> versions;
+	private List<Comment> comments;
+
 	public Bundle(String symbolicName, float ranking, List<Comment> inComments) {
 		super();
 		this.symbolicName = symbolicName;
@@ -50,23 +50,23 @@ public class Bundle {
 	public List<Comment> getComments() {
 		return comments;
 	}
-    
-    public void addComment(Comment comment) {
-    	comments.add(comment);
-    }
-    
-    public void addVersion(BundleVersion bundleVersion) {
-    	versions.add(bundleVersion);    
-    }
-    
-    public BundleVersion getLatestVersion() {
-    	List<BundleVersion> versions = BundleVersion.orderByVersion(getVersions());
-    	if (versions.size() > 0) {
-    		return versions.get(versions.size()-1);
-    	}
-    	return null;
-    }
-    
+
+	public void addComment(Comment comment) {
+		comments.add(comment);
+	}
+
+	public void addVersion(BundleVersion bundleVersion) {
+		versions.add(bundleVersion);
+	}
+
+	public BundleVersion getLatestVersion() {
+		List<BundleVersion> versions = BundleVersion.orderByVersion(getVersions());
+		if (versions.size() > 0) {
+			return versions.get(versions.size() - 1);
+		}
+		return null;
+	}
+
 	public BundleVersion getBundleVersion(String bundleKey) {
 		Assert.hasText(bundleKey, "Bundle key required");
 		if (bundleKey.contains(";")) {

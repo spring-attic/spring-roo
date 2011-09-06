@@ -58,7 +58,11 @@ import org.w3c.dom.Node;
 @Component
 @Service
 public class SeleniumOperationsImpl implements SeleniumOperations {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MenuOperations menuOperations;

@@ -49,6 +49,8 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class GwtTemplateServiceImpl implements GwtTemplateService {
+	
+	// Fiels
 	@Reference private FileManager fileManager;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataService metadataService;

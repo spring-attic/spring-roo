@@ -86,20 +86,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		CREATE, EDIT, VIEW;
 	};
 
-	/**
-	 * Constructor
-	 *
-	 * @param identifier
-	 * @param aspectName
-	 * @param governorPhysicalTypeMetadata
-	 * @param annotationValues
-	 * @param plural
-	 * @param crudAdditions the additions this metadata should make in order to
-	 * invoke the target entity type's CRUD methods (required)
-	 * @param locatedFieldsAndAccessors
-	 * @param enumTypes
-	 * @param identifierAccessor the entity id's accessor (getter) method (can be <code>null</code>)
-	 */
 	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final Iterable<JavaType> enumTypes, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");

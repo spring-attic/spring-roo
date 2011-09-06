@@ -48,7 +48,7 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class FinderOperationsImpl implements FinderOperations {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(FinderOperationsImpl.class);
 

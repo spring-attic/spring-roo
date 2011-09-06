@@ -8,7 +8,6 @@ import java.util.Locale;
  *
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public abstract class AbstractLanguage implements I18n {
 

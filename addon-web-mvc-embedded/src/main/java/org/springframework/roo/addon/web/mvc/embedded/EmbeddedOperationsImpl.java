@@ -26,9 +26,13 @@ import org.springframework.roo.support.logging.HandlerUtils;
 @Component
 @Reference(name = "embeddedProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = EmbeddedProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) 
 public class EmbeddedOperationsImpl implements EmbeddedOperations {
+	
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(EmbeddedOperationsImpl.class);
+	
+	// Fields
 	@Reference private MetadataService metadataService;
-	private Object mutex = this;
+	private Object mutex = new Object();
 	private Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
 	
 	public boolean isCommandAvailable() {

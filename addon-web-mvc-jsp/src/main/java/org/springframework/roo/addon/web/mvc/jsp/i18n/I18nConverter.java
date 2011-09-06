@@ -20,15 +20,16 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class I18nConverter implements Converter<I18n> {
 	
+	// Fields
 	@Reference private I18nSupport i18nSupport;
 
 	public I18n convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value.length() == 2) {
 			return i18nSupport.getLanguage(new Locale(value,"","")); 
-			// disabled due to ROO-1584
-//		} else if (value.length() == 5) {
-//			String[] split = value.split("_");
-//			return i18nSupport.getLanguage(new Locale(split[0], split[1].toUpperCase(), ""));
+			// Disabled due to ROO-1584
+			// } else if (value.length() == 5) {
+			// String[] split = value.split("_");
+			// return i18nSupport.getLanguage(new Locale(split[0], split[1].toUpperCase(), ""));
 		}
 		return null;
 	}
@@ -48,5 +49,4 @@ public class I18nConverter implements Converter<I18n> {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return I18n.class.isAssignableFrom(requiredType);
 	}
-
 }

@@ -71,6 +71,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class WebMetadataServiceImpl implements WebMetadataService {
 	
 	// Constants
+	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	private static final String COUNT_ALL_METHOD = PersistenceCustomDataKeys.COUNT_ALL_METHOD.name();
 	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
 	private static final String FIND_METHOD = PersistenceCustomDataKeys.FIND_METHOD.name();
@@ -79,9 +80,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
 	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-	
-	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
-	
+
 	// Fields
 	@Reference private LayerService layerService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;

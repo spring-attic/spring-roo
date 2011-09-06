@@ -25,10 +25,9 @@ import org.springframework.roo.model.RooJavaType;
 @Component
 @Service
 public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator{
-	
+
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
-
 	private HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>>();
 
 	public Collection<ClassOrInterfaceTypeDetails> getRepositories(JavaType domainType) {

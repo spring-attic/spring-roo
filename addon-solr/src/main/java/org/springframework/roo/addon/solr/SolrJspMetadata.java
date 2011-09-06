@@ -19,16 +19,17 @@ import org.springframework.roo.support.util.Assert;
  */
 public class SolrJspMetadata extends AbstractMetadataItem {
 
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = SolrJspMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	
+	// Fields
 	private SolrWebSearchMetadata solrWebSearchMetadata;
 
 	public SolrJspMetadata(String identifier, SolrWebSearchMetadata solrWebSearchMetadata) {
 		super(identifier);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(solrWebSearchMetadata, "Solr web search metadata required");
-		
 		this.solrWebSearchMetadata = solrWebSearchMetadata;		
 	}
 	

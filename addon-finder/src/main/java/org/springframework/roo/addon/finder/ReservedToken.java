@@ -10,6 +10,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class ReservedToken implements Token, Comparable<ReservedToken> {
+	
+	// Fields
 	private String value;
 	
 	/**

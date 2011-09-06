@@ -55,5 +55,4 @@ public interface MongoOperations {
 	 * @param testAutomatically
 	 */
 	void createType(JavaType classType, JavaType idType, boolean testAutomatically);
-
 }

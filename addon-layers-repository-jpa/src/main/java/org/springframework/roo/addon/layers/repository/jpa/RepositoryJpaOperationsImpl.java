@@ -42,6 +42,7 @@ import org.w3c.dom.Element;
 @Service
 public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
@@ -108,5 +109,4 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 			}
 		}
 	}
-
 }

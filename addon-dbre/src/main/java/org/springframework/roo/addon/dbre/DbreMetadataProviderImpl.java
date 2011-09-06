@@ -33,7 +33,7 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
-	
+
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;

@@ -7,7 +7,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public abstract class SolrUtils {
 	

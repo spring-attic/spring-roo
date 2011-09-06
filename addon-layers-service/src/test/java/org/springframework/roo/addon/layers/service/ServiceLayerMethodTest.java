@@ -40,10 +40,10 @@ public class ServiceLayerMethodTest {
 		assertNull(valueOf("x", Arrays.<JavaType>asList(), TARGET_ENTITY, ID_TYPE));
 	}
 
-//	@Test
-//	public void testValueOfMethodUsingWrongParameterTypes() {
-//		assertNull(valueOf(FIND_ALL.getKey(), Arrays.asList(JavaType.BYTE_OBJECT), TARGET_ENTITY, ID_TYPE));
-//	}
+	@Test
+	public void testValueOfMethodUsingWrongParameterTypes() {
+		assertNull(valueOf(FIND_ALL.getKey(), Arrays.asList(JavaType.BYTE_OBJECT), TARGET_ENTITY, ID_TYPE));
+	}
 
 	@Test
 	public void testValueOfMethodUsingCorrectDetails() {

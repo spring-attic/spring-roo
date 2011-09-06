@@ -24,6 +24,7 @@ import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
 /**
  * {@link MetadataProvider} providing {@link ServiceInterfaceMetadata}
  * 

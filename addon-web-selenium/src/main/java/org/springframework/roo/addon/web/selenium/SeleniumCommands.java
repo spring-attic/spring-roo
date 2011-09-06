@@ -18,6 +18,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class SeleniumCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private SeleniumOperations seleniumOperations;
 	
 	@CliAvailabilityIndicator({ "selenium test" })

@@ -26,6 +26,8 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class FinderCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private FinderOperations finderOperations;
 
 	@CliAvailabilityIndicator({ "finder list", "finder add" })
@@ -73,5 +75,5 @@ public class FinderCommands implements CommandMarker {
 		@CliOption(key = { "finderName", "" }, mandatory = true, help = "The finder string as generated with the 'finder list' command") JavaSymbolName finderName) {
 		
 		finderOperations.installFinder(typeName, finderName);
-	}	
+	}
 }

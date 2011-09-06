@@ -41,7 +41,11 @@ import org.w3c.dom.Element;
 @Component 
 @Service 
 public class SolrOperationsImpl implements SolrOperations {
+	
+	// Constants
 	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.1");
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;

@@ -32,6 +32,7 @@ import org.springframework.uaa.client.util.Assert;
 @Service
 public class WebFinderOperationsImpl implements WebFinderOperations {
 	
+	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;

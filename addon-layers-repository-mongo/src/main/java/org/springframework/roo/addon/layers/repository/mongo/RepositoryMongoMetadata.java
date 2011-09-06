@@ -16,8 +16,8 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
 /**
-  * Creates metadata for repository ITDs (annotated with {@link RooRepositoryMongo}.
-  * 
+ * Creates metadata for repository ITDs (annotated with {@link RooRepositoryMongo}.
+ * 
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -28,6 +28,7 @@ public class RepositoryMongoMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String SPRING_DATA_REPOSITORY = "org.springframework.data.repository.PagingAndSortingRepository";
 	
+	// Fields
 	private final RepositoryMongoAnnotationValues annotationValues;
 	
 	/**

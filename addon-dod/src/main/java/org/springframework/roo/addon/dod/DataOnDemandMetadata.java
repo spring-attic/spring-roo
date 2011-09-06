@@ -63,11 +63,10 @@ import org.springframework.roo.support.util.StringUtils;
 public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	
 	// Constants
-	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
-	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
-	
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
+	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 
 	// Fields
 	private DataOnDemandAnnotationValues annotationValues;

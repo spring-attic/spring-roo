@@ -14,42 +14,42 @@ public @interface RooWebJson {
 	/**
 	 * The default prefix of the "show" method
 	 */
-	public static final String SHOW_JSON = "showJson";
+	String SHOW_JSON = "showJson";
 	
 	/**
 	 * The default prefix of the "find all" method
 	 */
-	public static final String LIST_JSON = "listJson";
+	String LIST_JSON = "listJson";
 	
 	/**
 	 * The default prefix of the "create" method
 	 */
-	public static final String CREATE_FROM_JSON = "createFromJson";
+	String CREATE_FROM_JSON = "createFromJson";
 	
 	/**
 	 * The default prefix of the "create from array" method
 	 */
-	public static final String CREATE_FROM_JSON_ARRAY = "createFromJsonArray";
+	String CREATE_FROM_JSON_ARRAY = "createFromJsonArray";
 	
 	/**
 	 * The default prefix of the "update" method
 	 */
-	public static final String UPDATE_FROM_JSON = "updateFromJson";
+	String UPDATE_FROM_JSON = "updateFromJson";
 	
 	/**
 	 * The default prefix of the "update from array" method
 	 */
-	public static final String UPDATE_FROM_JSON_ARRAY = "updateFromJsonArray";
+	String UPDATE_FROM_JSON_ARRAY = "updateFromJsonArray";
 	
 	/**
 	 * The default prefix of the "delete" method
 	 */
-	public static final String DELETE_FROM_JSON_ARRAY = "deleteFromJson";
+	String DELETE_FROM_JSON_ARRAY = "deleteFromJson";
 	
 	/**
 	 * Expose finders by default
 	 */
-	public static final boolean EXPOSE_FINDERS = true;
+	boolean EXPOSE_FINDERS = true;
 	
 	/**
 	 * Every controller is responsible for a single JSON-enabled object. The backing object defined 

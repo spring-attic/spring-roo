@@ -20,7 +20,7 @@ public @interface RooMongoEntity {
 	 * The name of this annotation's attribute that specifies the managed domain
 	 * type.
 	 */
-	public static final String ID_TYPE_ATTRIBUTE = "identifierType";
+	String ID_TYPE_ATTRIBUTE = "identifierType";
 	
 	/**
 	 * 

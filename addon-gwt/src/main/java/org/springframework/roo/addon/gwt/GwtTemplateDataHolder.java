@@ -12,6 +12,8 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
  * @since 1.1.2
  */
 public class GwtTemplateDataHolder {
+	
+	// Fields
 	private final Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap;
 	private final Map<GwtType, String> xmlTemplates;
 	private final List<ClassOrInterfaceTypeDetails> typeList;

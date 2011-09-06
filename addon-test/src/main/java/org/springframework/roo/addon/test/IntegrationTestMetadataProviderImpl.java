@@ -204,7 +204,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
 		producedMids.add(metadataIdentificationString);
 		
-		// maintain a list of entities that are being tested
+		// Maintain a list of entities that are being tested
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethodAdditions, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethodAdditions, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);

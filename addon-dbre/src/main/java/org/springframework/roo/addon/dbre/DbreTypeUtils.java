@@ -33,7 +33,6 @@ public abstract class DbreTypeUtils {
 	
 	// Constants
 	private static final JavaType JPA_TABLE_ANNOTATION = new JavaType("javax.persistence.Table");
-
 	private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName("name");
 	private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName("schema");
 	private static final JavaSymbolName TABLE_ATTRIBUTE = new JavaSymbolName("table");

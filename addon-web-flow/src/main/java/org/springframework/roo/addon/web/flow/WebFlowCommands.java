@@ -13,11 +13,12 @@ import org.springframework.roo.shell.CommandMarker;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 @Component
 @Service
 public class WebFlowCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private WebFlowOperations webFlowOperations;
 	
 	@CliAvailabilityIndicator("web flow")

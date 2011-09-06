@@ -11,6 +11,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JavaTypeMetadataDetails {
 
+	// Fields
 	private JavaType javaType;
 	private String plural;
 	private boolean isEnumType;

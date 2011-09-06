@@ -31,9 +31,13 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = FinderMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
+	
+	// Fields
 	private MethodMetadata entityManagerMethod;
 	private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
 	private boolean isDataNucleusEnabled;

@@ -34,7 +34,7 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements FinderMetadataProvider {
-	
+
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
 
@@ -52,24 +52,24 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
-		
+
 		// Work out the MIDs of the other metadata we depend on
 		JavaType javaType = FinderMetadata.getJavaType(metadataIdentificationString);
 		Path path = FinderMetadata.getPath(metadataIdentificationString);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
-		
+
 		// We need to lookup the metadata we depend on
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 		if (projectMetadata == null || !projectMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid() || entityMetadata.getEntityManagerMethod() == null) {
 			return null;
-		}		
-				
+		}
+
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.notNull(classOrInterfaceTypeDetails, "Governor failed to provide class type details, in violation of superclass contract");
-		
+
 		MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-		
+
 		// Using SortedMap to ensure that the ITD emits finders in the same order each time
 		SortedMap<JavaSymbolName, QueryHolder> queryHolders = new TreeMap<JavaSymbolName, QueryHolder>();
 		for (String methodName : entityMetadata.getDynamicFinders()) {
@@ -79,7 +79,7 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 				queryHolders.put(finderName, queryHolder);
 			}
 		}
-		
+
 		// Now determine all the ITDs we're relying on to ensure we are notified if they change
 		for (QueryHolder queryHolder : queryHolders.values()) {
 			for (Token token : queryHolder.getTokens()) {
@@ -97,11 +97,11 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 		// We make the queryHolders immutable in case FinderMetadata in the future makes it available through an accessor etc
 		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata.isDataNucleusEnabled(), entityMetadata.getEntityManagerMethod(), Collections.unmodifiableSortedMap(queryHolders));
 	}
-	
+
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
 		return getLocalMid(itdTypeDetails);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Finder";
 	}

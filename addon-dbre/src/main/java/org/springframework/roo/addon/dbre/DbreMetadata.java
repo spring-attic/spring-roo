@@ -71,6 +71,8 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
@@ -83,6 +85,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String VALUE = "value";
 	private static final String MAPPED_BY = "mappedBy";
 
+	// Fields
 	private DbManagedAnnotationValues annotationValues;
 	private IdentifierHolder identifierHolder;
 	private FieldMetadata versionField;

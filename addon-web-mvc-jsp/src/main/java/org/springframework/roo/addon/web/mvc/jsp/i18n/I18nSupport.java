@@ -9,7 +9,6 @@ import java.util.Set;
  *
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public interface I18nSupport {
 

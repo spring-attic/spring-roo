@@ -20,6 +20,7 @@ import org.springframework.roo.uaa.PublicFeatureResolver;
 @Service
 public class AddOnIndexPublicFeatureResolver implements PublicFeatureResolver {
 	
+	// Fields
 	@Reference AddOnRooBotOperations rooBotOperations;
 	
 	public boolean isPublic(String bundleSymbolicNameOrTypeName) {
@@ -33,5 +34,4 @@ public class AddOnIndexPublicFeatureResolver implements PublicFeatureResolver {
 		}
 		return false;
 	}
-
 }

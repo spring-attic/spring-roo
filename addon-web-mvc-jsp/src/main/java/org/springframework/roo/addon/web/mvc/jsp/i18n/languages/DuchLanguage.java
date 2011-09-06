@@ -13,7 +13,6 @@ import org.springframework.roo.support.util.TemplateUtils;
  *
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 @Component(immediate = true)
 @Service

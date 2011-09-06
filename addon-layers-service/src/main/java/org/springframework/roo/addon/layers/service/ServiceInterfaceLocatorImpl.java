@@ -31,7 +31,7 @@ public class ServiceInterfaceLocatorImpl implements ServiceInterfaceLocator {
 
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
-	
+
 	public Collection<ClassOrInterfaceTypeDetails> getServiceInterfaces(JavaType domainType) {
 		Set<ClassOrInterfaceTypeDetails> located = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
 		Map<String, ClassOrInterfaceTypeDetails> toReturn = new HashMap<String, ClassOrInterfaceTypeDetails>();

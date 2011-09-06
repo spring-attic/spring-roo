@@ -36,8 +36,12 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = JavaBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	
+	// Fields
 	private JavaBeanAnnotationValues annotationValues;
 	private Map<FieldMetadata, JavaSymbolName> declaredFields;
 

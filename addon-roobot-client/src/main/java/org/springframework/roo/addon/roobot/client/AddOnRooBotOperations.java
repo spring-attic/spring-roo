@@ -16,7 +16,7 @@ import org.springframework.roo.support.api.AddOnSearch;
  */
 public interface AddOnRooBotOperations extends AddOnSearch {
 
-	public enum InstallOrUpgradeStatus {
+	enum InstallOrUpgradeStatus {
 		SUCCESS, FAILED, INVALID_OBR_URL, PGP_VERIFICATION_NEEDED, SHELL_RESTART_NEEDED;
 	}
 	

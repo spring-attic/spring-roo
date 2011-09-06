@@ -21,5 +21,4 @@ public interface XmlRoundTripFileManager {
 	 * @param proposed the proposed contents of the file
 	 */
 	void writeToDiskIfNecessary(String filename, Document proposed);
-
 }

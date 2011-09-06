@@ -9,7 +9,6 @@ import org.springframework.roo.model.JavaType;
  * @since 1.2.0
  */
 public class MongoIdType {
-	
 	private JavaType javaType;
 
 	public MongoIdType(String type) {

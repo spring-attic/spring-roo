@@ -27,10 +27,9 @@ import org.w3c.dom.Document;
 @Service
 public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 
+	// Fields
 	@Reference private FileManager fileManager;
-
 	private HashMap<String, String> fileContentsMap = new HashMap<String, String>();
-
 	private static MessageDigest sha = null;
 
 	static {

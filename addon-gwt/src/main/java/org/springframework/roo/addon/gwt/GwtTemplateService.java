@@ -17,5 +17,4 @@ public interface GwtTemplateService {
 	GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap);
 
 	List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(GwtType type);
-
 }

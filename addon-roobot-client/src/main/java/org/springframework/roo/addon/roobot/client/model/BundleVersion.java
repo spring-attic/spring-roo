@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 public class BundleVersion {
-
 	private String uri;
 	private String obrUrl;
 	private String version;

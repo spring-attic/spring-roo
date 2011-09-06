@@ -16,6 +16,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class GwtCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private GwtOperations gwtOperations;
 
 	@CliAvailabilityIndicator({ "web gwt setup", "gwt setup" })

@@ -36,6 +36,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class WebFlowOperationsImpl implements WebFlowOperations {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MenuOperations menuOperations;

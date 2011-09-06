@@ -20,6 +20,8 @@ import org.springframework.roo.shell.CommandMarker;
 @Component 
 @Service
 public class PropFileCommands implements CommandMarker {
+	
+	// Fields
 	@Reference private PropFileOperations propFileOperations;
 
 	@CliAvailabilityIndicator({ "properties list", "properties set", "properties remove" }) 
@@ -53,5 +55,4 @@ public class PropFileCommands implements CommandMarker {
 		
 		propFileOperations.removeProperty(path, name, key);
 	}
-
 }

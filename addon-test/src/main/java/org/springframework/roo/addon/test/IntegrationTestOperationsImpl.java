@@ -48,6 +48,8 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class IntegrationTestOperationsImpl implements IntegrationTestOperations {
+	
+	// Fields
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;

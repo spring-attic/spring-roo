@@ -28,10 +28,13 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 
+	// Constants
+	private static final Logger logger = Logger.getLogger(AddOnFeedbackOperationsImpl.class.getName());
+
+	// Fields
 	@Reference private UaaRegistrationService registrationService;
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private BundleContext bundleContext;
-	private static final Logger log = Logger.getLogger(AddOnFeedbackOperationsImpl.class.getName());
 	
 	protected void activate(ComponentContext context) {
 		this.bundleContext = context.getBundleContext();
@@ -61,7 +64,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		// Fail early if we're not allowed GET this URL due to UAA restrictions
 		String failureMessage = urlInputStreamService.getUrlCannotBeOpenedMessage(httpUrl);
 		if (failureMessage != null) {
-			log.warning(failureMessage);
+			logger.warning(failureMessage);
 			return;
 		}
 		
@@ -81,7 +84,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		// Push the feedback up to the server now if possible
 		registrationService.requestTransmission();
 		
-		log.info("Thanks for sharing your feedback.");
+		logger.info("Thanks for sharing your feedback.");
 	}
 
 }

@@ -18,6 +18,7 @@ import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
 /**
  * Provides the metadata for an ITD that implements a Spring Data Mongo repository
  * 

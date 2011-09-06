@@ -28,6 +28,7 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
 /**
  * Provides {@link SolrMetadata}.
  * 

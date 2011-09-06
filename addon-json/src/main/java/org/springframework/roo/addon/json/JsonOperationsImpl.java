@@ -26,7 +26,8 @@ import org.springframework.roo.support.util.Assert;
 @Component 
 @Service 
 public class JsonOperationsImpl implements JsonOperations {
-	
+
+	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;

@@ -32,6 +32,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = EditorMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 

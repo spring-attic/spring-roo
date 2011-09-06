@@ -18,6 +18,8 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 class GwtProxyProperty {
+	
+	// Fields
 	private ProjectMetadata projectMetadata;
 	private PhysicalTypeMetadata ptmd;
 	private JavaType type;

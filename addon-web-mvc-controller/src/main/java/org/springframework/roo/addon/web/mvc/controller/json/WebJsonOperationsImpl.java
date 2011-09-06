@@ -51,6 +51,7 @@ import org.w3c.dom.Element;
 @Service
 public class WebJsonOperationsImpl implements WebJsonOperations {
 	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;

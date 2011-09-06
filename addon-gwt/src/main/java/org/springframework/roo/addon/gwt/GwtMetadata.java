@@ -62,8 +62,12 @@ import org.xml.sax.SAXException;
  * @since 1.1
  */
 public class GwtMetadata extends AbstractMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = GwtMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	
+	// Fields
 	private ClassOrInterfaceTypeDetails governorTypeDetails;
 	private ProjectMetadata projectMetadata;
 	private List<MethodMetadata> proxyMethods;

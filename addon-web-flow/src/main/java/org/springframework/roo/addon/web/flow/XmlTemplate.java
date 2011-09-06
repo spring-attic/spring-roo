@@ -13,6 +13,8 @@ import org.w3c.dom.Element;
  * @author Rossen Stoyanchev
  */
 public class XmlTemplate {
+	
+	// Fields
 	private FileManager fileManager;
 
 	public XmlTemplate(FileManager fileManager) {

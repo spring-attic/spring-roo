@@ -8,6 +8,7 @@ package org.springframework.roo.addon.jms;
  */
 public enum JmsProvider {
 	ACTIVEMQ_IN_MEMORY("org.apache.activemq.store.memory.MemoryPersistenceAdapter");
+	
 	private String adapter;
 
 	private JmsProvider(String adapter) {

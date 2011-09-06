@@ -27,6 +27,8 @@ import org.springframework.roo.support.util.TemplateUtils;
 @Component 
 @Service
 public class ConversionServiceOperationsImpl implements ConversionServiceOperations {
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMvcOperations webMvcOperations;

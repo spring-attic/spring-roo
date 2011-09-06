@@ -34,8 +34,12 @@ import org.springframework.roo.support.util.Assert;
 @Component 
 @Service 
 public class PropFileOperationsImpl implements PropFileOperations {
+	
+	// Constants
 	private static final boolean SORTED = true;
 	private static final boolean CHANGE_EXISTING = true;
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 

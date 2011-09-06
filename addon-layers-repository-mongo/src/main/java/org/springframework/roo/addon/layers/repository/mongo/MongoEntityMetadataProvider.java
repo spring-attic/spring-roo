@@ -26,6 +26,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.Path;
+
 /**
  * Provides the metadata for an ITD that implements a Spring Data Mongo domain entity
  * 
@@ -35,14 +36,15 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service
 public class MongoEntityMetadataProvider extends AbstractItdMetadataProvider {
-	
-	// Fields
-	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	
+
+	// Constants
 	private static final FieldMatcher ID_FIELD_MATCHER = new FieldMatcher(IDENTIFIER_FIELD, AnnotationMetadataBuilder.getInstance(SpringJavaType.DATA_ID.getFullyQualifiedTypeName()));
 	private static final AnnotatedTypeMatcher PERSISTENT_TYPE_MATCHER = new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_MONGO_ENTITY);
 	private static final MethodMatcher ID_ACCESSOR_MATCHER = new MethodMatcher(Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_ACCESSOR_METHOD, true);
 	private static final MethodMatcher ID_MUTATOR_MATCHER = new MethodMatcher(Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_MUTATOR_METHOD, false);
+	
+	// Fields
+	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	
 	@SuppressWarnings("unchecked")
 	protected void activate(final ComponentContext context) {

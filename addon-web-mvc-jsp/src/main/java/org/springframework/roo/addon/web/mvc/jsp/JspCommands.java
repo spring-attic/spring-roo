@@ -75,6 +75,7 @@ public class JspCommands implements CommandMarker {
 	@CliCommand(value = "web mvc install language", help = "Install new internationalization bundle for MVC scaffolded UI.") 
 	public void lang(
 		@CliOption(key = { "", "code" }, mandatory = true, help = "The language code for the desired bundle") I18n i18n) {
+		
 		if (i18n == null) {
 			log.warning("Could not parse language code");
 			return;

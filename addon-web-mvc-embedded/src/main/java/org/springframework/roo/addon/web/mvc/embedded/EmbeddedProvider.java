@@ -9,7 +9,6 @@ import java.util.Map;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public interface EmbeddedProvider {
 

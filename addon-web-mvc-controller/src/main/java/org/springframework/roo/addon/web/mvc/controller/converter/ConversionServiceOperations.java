@@ -31,5 +31,4 @@ public interface ConversionServiceOperations {
 	 */
 	@Deprecated
 	void installConversionService(JavaPackage thePackage);
-
 }

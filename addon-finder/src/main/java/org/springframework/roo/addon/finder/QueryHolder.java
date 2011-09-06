@@ -17,6 +17,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.2
  */
 public class QueryHolder {
+	
+	// Fields
 	private String jpaQuery;
 	private List<JavaType> parameterTypes;
 	private List<JavaSymbolName> parameterNames;

@@ -26,7 +26,11 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class OsOperationsImpl implements OsOperations {
+
+	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(OsOperationsImpl.class);
+
+	// Fields
 	@Reference private PathResolver pathResolver;
 	@Reference private ProcessManager processManager;
 
@@ -90,12 +94,10 @@ public class OsOperationsImpl implements OsOperations {
 				if (reader != null) {
 					try {
 						reader.close();
-					} catch (IOException ignored) {
-					}
+					} catch (IOException ignored) {}
 				}
 				ActiveProcessManager.clearActiveProcessManager();
 			}
 		}
 	}	
-	
 }

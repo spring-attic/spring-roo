@@ -70,5 +70,4 @@ public interface JspOperations {
 	 * @param backup indicates wether your application should be backed up prior to replacing the tagx library
 	 */
 	void updateTags(boolean backup);
-	
 }

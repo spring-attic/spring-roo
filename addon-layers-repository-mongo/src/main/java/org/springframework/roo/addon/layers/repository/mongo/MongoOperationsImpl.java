@@ -56,7 +56,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MongoOperationsImpl implements MongoOperations {
-	
+
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
@@ -125,9 +126,7 @@ public class MongoOperationsImpl implements MongoOperations {
 
 	public void setup(String username, String password, String name, String port, String host, boolean cloudFoundry) {
 		writeProperties(username, password, name, port, host);
-		
 		manageDependencies();
-		
 		manageAppCtx(username, password, name, cloudFoundry);
 	}
 
@@ -219,5 +218,4 @@ public class MongoOperationsImpl implements MongoOperations {
 		properties.put("mongo.host", host);
 		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "database.properties", properties, true, false);
 	}
-
 }

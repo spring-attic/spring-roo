@@ -16,8 +16,7 @@ public interface OsOperations {
 	 * to the standard logger.
 	 * 
 	 * @param command the command to execute
-	 * @throws IOException
+	 * @throws IOException if an error occurs
 	 */
 	void executeCommand(String command) throws IOException;
-
 }

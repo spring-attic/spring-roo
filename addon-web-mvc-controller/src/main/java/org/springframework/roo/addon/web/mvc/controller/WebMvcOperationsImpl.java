@@ -42,9 +42,13 @@ import org.w3c.dom.NodeList;
 @Component(immediate = true)
 @Service
 public class WebMvcOperationsImpl implements WebMvcOperations {
+	
+	// Constants
 	private static final String CONVERSION_SERVICE_SIMPLE_TYPE = "ApplicationConversionServiceFactoryBean";
 	private static final String CONVERSION_SERVICE_BEAN_NAME = "applicationConversionService";
 	private static final String CONVERSION_SERVICE_EXPOSING_INTERCEPTOR_NAME = "conversionServiceExposingInterceptor";
+	
+	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;

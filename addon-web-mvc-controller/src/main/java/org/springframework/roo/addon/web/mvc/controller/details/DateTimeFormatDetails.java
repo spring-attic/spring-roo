@@ -21,5 +21,4 @@ public class DateTimeFormatDetails {
 		d.pattern = pattern;
 		return d;
 	}
-	
 }
