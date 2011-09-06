@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.project.MavenOperationsImpl;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -24,7 +23,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class OsCommands implements CommandMarker {
 	
-	private static final Logger logger = HandlerUtils.getLogger(MavenOperationsImpl.class);
+	private static final Logger logger = HandlerUtils.getLogger(OsCommands.class);
 	@Reference private OsOperations osOperations;
 
 	@CliAvailabilityIndicator("!")

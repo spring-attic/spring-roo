@@ -12,7 +12,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.project.MavenOperationsImpl;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.logging.HandlerUtils;
@@ -27,7 +26,7 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class OsOperationsImpl implements OsOperations {
-	private static final Logger logger = HandlerUtils.getLogger(MavenOperationsImpl.class);
+	private static final Logger logger = HandlerUtils.getLogger(OsOperationsImpl.class);
 	@Reference private PathResolver pathResolver;
 	@Reference private ProcessManager processManager;
 
