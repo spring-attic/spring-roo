@@ -27,6 +27,7 @@ import org.springframework.roo.support.util.StringUtils;
 import org.springframework.uaa.client.util.Assert;
 
 /**
+ * Creates metadata for domain entity ITDs (annotated with {@link RooMongoEntity}.
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
