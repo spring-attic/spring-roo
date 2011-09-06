@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
@@ -64,7 +63,7 @@ public abstract class AbstractOperations {
 		}
 
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
-		final Set<URI> uris = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
+		final Iterable<URI> uris = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
 		Assert.notNull(uris, "Could not search bundles for resources for Ant Path '" + path + "'");
 		for (final URI uri : uris) {
 			final URL url = UrlUtils.toURL(uri);

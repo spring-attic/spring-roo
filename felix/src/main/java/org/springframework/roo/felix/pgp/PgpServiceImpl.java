@@ -11,7 +11,6 @@ import java.net.URI;
 import java.net.URL;
 import java.security.Security;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -38,7 +37,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.UrlUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -91,20 +89,21 @@ public class PgpServiceImpl implements PgpService {
     
     private void trustDefaultKeys() {
     	// Get the URIs of all PGP keystore files within installed OSGi bundles
-		final Collection<URI> uris = OSGiUtils.findEntriesByPattern(context, "/org/springframework/roo/felix/pgp/*.asc");
-		
-		// Sort them by the external form of their URLs
-		final Collection<URI> sortedUris = new TreeSet<URI>(new Comparator<URI>() {
+		final List<URI> uris = new ArrayList<URI>(OSGiUtils.findEntriesByPattern(context, "/org/springframework/roo/felix/pgp/*.asc"));
+		Collections.sort(uris, new Comparator<URI>() {
 			public int compare(final URI uri1, final URI uri2) {
-				return UrlUtils.toURL(uri1).toExternalForm().compareTo(UrlUtils.toURL(uri2).toExternalForm());
+				try {
+					return uri1.toURL().toExternalForm().compareTo(uri2.toURL().toExternalForm());
+				} catch (final MalformedURLException e) {
+					return 0;
+				}
 			}
 		});
-		sortedUris.addAll(uris);
 		
 		// Trust each one
-		for (final URI uri : sortedUris) {
+		for (final URI uri : uris) {
 			try {
-				trust(getPublicKey(UrlUtils.toURL(uri).openStream()));
+				trust(getPublicKey(uri.toURL().openStream()));
 			} catch (final IOException ignore) {}
 		}
     }

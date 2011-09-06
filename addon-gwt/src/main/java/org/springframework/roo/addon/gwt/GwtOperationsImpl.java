@@ -325,7 +325,7 @@ public class GwtOperationsImpl implements GwtOperations, MetadataNotificationLis
 		}
 
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
-		final Set<URI> uris = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
+		final Iterable<URI> uris = OSGiUtils.findEntriesByPattern(context.getBundleContext(), path);
 		Assert.notNull(uris, "Could not search bundles for resources for Ant Path '" + path + "'");
 
 		for (final URI uri : uris) {
