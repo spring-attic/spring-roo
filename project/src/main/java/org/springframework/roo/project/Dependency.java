@@ -227,7 +227,6 @@ public class Dependency implements Comparable<Dependency> {
 		int result = 1;
 		result = prime * result + ((artifactId == null) ? 0 : artifactId.hashCode());
 		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		result = prime * result + ((classifier == null) ? 0 : classifier.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
@@ -242,15 +241,13 @@ public class Dependency implements Comparable<Dependency> {
 		if (o == null) {
 			throw new NullPointerException();
 		}
+		// We omit the version field as it's not part of a Dependency's identity
 		int result = groupId.compareTo(o.groupId);
 		if (result == 0) {
 			result = artifactId.compareTo(o.artifactId);
 		}
 		if (result == 0) {
-			result = version.compareTo(o.version);
-		}
-		if (result == 0 && classifier != null) {
-			result = classifier.compareTo(o.classifier);
+			result = StringUtils.trimToEmpty(classifier).compareTo(StringUtils.trimToEmpty(o.classifier));
 		}
 		if (result == 0 && type != null) {
 			result = type.compareTo(o.type);

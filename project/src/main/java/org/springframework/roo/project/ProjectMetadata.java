@@ -109,12 +109,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Convenience method for determining whether a particular dependency is registered. 
 	 *
-	 * @param dependency the dependency to check (required)
-	 * @return whether the dependency is currently registered or not
+	 * @param dependency the dependency to check (can be <code>null</code>)
+	 * @return <code>false</code> if a <code>null</code> dependency is given
 	 */
 	public boolean isDependencyRegistered(final Dependency dependency) {
-		Assert.notNull(dependency, "Dependency to check is required");
-		return dependencies.contains(dependency);
+		return dependency != null && dependencies.contains(dependency);
 	}
 	
 	/**

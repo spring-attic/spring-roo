@@ -233,6 +233,10 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency addition is unavailable");
+		if (projectMetadata.isAllDependenciesRegistered(dependencies)) {
+			// No need to spend time parsing pom.xml
+			return;
+		}
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element dependenciesElement = XmlUtils.createChildIfNotExists("dependencies", document.getDocumentElement(), document);
@@ -241,7 +245,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final List<String> newDependencies = new ArrayList<String>();
 		final List<String> removedDependencies = new ArrayList<String>();
 		for (final Dependency newDependency : dependencies) {
-			if (newDependency != null) {
+			if (newDependency != null && !projectMetadata.isDependencyRegistered(newDependency)) {
 				// Look for any existing instances of this dependency
 				boolean inserted = false;
 				for (final Element existingDependencyElement : existingDependencyElements) {
@@ -295,13 +299,22 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
 		final Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
-		Assert.notNull(dependencies, "dependencies element not found");
+		if (dependenciesElement == null) {
+			return;	// nothing to remove
+		}
 
+		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
 		final List<String> removedDependencies = new ArrayList<String>();
 		for (final Dependency dependency : dependencies) {
-			for (final Element candidate : XmlUtils.findElements("dependency[artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersion() + "']", dependenciesElement)) {
-				dependenciesElement.removeChild(candidate);
-				removedDependencies.add(dependency.getSimpleDescription());
+			if (projectMetadata.isDependencyRegistered(dependency)) {
+				for (final Element candidate : existingDependencyElements) {
+					if (new Dependency(candidate).equals(dependency)) {
+						// The identifying coordinates match; remove this element
+						dependenciesElement.removeChild(candidate);
+						removedDependencies.add(dependency.getSimpleDescription());
+					}
+					// Keep looping in case it's in the POM more than once
+				}
 			}
 		}
 		if (removedDependencies.isEmpty()) {
