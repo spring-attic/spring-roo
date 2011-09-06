@@ -228,7 +228,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				listViewFields++;
 				// Flag this field as being displayable in the entity's list view
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-				customDataBuilder.put(JsfManagedBeanMetadata.CONVERTER_FIELD_CUSTOM_DATA_KEY, "true");
+				customDataBuilder.put(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY, "true");
 				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
 				fieldBuilder.append(customDataBuilder.build());
 				field = fieldBuilder.build();

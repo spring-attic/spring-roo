@@ -9,6 +9,7 @@ import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -34,7 +34,6 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.CustomDataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
@@ -127,9 +126,9 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 		converterMidToEntityMap.put(metadataId, entity);
 
 		final MemberTypeAdditions findAllMethod = getFindAllMethod(entity, metadataId);
-		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entity, memberDetails, metadataId);
+		final List<MethodMetadata> converterMethods = getConverterMethods(entity, memberDetails, metadataId);
 
-		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod, locatedFieldsAndAccessors);
+		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod, converterMethods);
 	}
 
 	private MemberTypeAdditions getFindAllMethod(final JavaType entity, final String metadataId) {
@@ -148,24 +147,13 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 		return layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
 	}
 	
-	/**
-	 * Returns a map of the given entity's fields to their accessor methods,
-	 * excluding any ID or version field; along the way, flags the first
-	 * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable in
-	 * the list view for this entity type.
-	 * 
-	 * @param entityType the entity for which to find the fields and accessors (required)
-	 * @param memberDetails the entity's members (required)
-	 * @param metadataIdentificationString the ID of the metadata being generated (required)
-	 * @return a non-<code>null</code> map
-	 */
-	private Map<FieldMetadata, MethodMetadata> locateFieldsAndAccessors(final JavaType entityType, final MemberDetails memberDetails, final String metadataIdentificationString) {
-		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = new LinkedHashMap<FieldMetadata, MethodMetadata>();
+	private List<MethodMetadata> getConverterMethods(final JavaType entityType, final MemberDetails memberDetails, final String metadataIdentificationString) {
+		final List<MethodMetadata> converterMethods = new LinkedList<MethodMetadata>();
 		
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entityType);
 
-		int listViewFields = 0;
+		int converterMethodCount = 0;
 		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
@@ -178,19 +166,13 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 				continue;
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
-			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
-				listViewFields++;
-				// Flag this field as being displayable in the entity's list view
-				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-				customDataBuilder.put(JsfConverterMetadata.CONVERTER_FIELD_CUSTOM_DATA_KEY, "true");
-				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-				fieldBuilder.append(customDataBuilder.build());
-				field = fieldBuilder.build();
+			if (converterMethodCount <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
+				converterMethodCount++;
+				converterMethods.add(method);
 			}
 			
-			locatedFieldsAndAccessors.put(field, method);
 		}
-		return locatedFieldsAndAccessors;
+		return converterMethods;
 	}
 
 	/**

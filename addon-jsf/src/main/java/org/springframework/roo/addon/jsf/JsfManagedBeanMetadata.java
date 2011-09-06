@@ -70,7 +70,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	
 	// Constants
-	static final String CONVERTER_FIELD_CUSTOM_DATA_KEY = "converterField";
 	private static final String PROVIDES_TYPE_STRING = JsfManagedBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String CREATE_DIALOG_VISIBLE = "createDialogVisible";
@@ -514,7 +513,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelVar + " = " + getComponentCreationStr("HtmlOutputText"));
 			bodyBuilder.appendFormalLine(fieldLabelVar + ".setId(\"" + fieldLabelVar + "\");");
 			bodyBuilder.appendFormalLine(fieldLabelVar + ".setValue(\"" + fieldName + ": \");");
-			bodyBuilder.appendFormalLine(fieldLabelVar + ".setStyle(\"font-weight:bold\");");
+			// bodyBuilder.appendFormalLine(fieldLabelVar + ".setStyle(\"font-weight:bold\");");
 			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldLabelVar + ");");
 			bodyBuilder.appendFormalLine("");
 			
@@ -566,7 +565,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "String"));
 			}
 			bodyBuilder.appendFormalLine(fieldValueVar + ".setId(\"" + fieldValueVar + "\");");
-			bodyBuilder.appendFormalLine(fieldValueVar + ".setStyle(\"font-weight:normal\");");
+			// bodyBuilder.appendFormalLine(fieldValueVar + ".setStyle(\"font-weight:normal\");");
 			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");	
 			bodyBuilder.appendFormalLine("");
 		}
@@ -849,7 +848,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private List<MethodMetadata> getListViewMethods() {
 		final List<MethodMetadata> listViewMethod = new LinkedList<MethodMetadata>();
 		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
-			if (field.getCustomData() != null && field.getCustomData().keySet().contains(CONVERTER_FIELD_CUSTOM_DATA_KEY)) {
+			if (field.getCustomData() != null && field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY)) {
 				listViewMethod.add(locatedFieldsAndAccessors.get(field));
 			}
 		}
