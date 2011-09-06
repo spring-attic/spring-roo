@@ -61,7 +61,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			final Map<ServiceLayerMethod, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 				final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, domainTypePlurals.get(domainType));
-				if (methodName != null && MemberFindingUtils.isMethodDeclaredBy(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
+				if (methodName != null && !MemberFindingUtils.isMethodDeclaredByAnother(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
 					// The method is desired and the service class' Java file doesn't contain it, so generate it
 					final MemberTypeAdditions lowerLayerCallAdditions = crudAdditions.get(method);
 					if (lowerLayerCallAdditions != null) {

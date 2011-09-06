@@ -82,7 +82,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 */
 	private MethodMetadata getMethod(final ServiceLayerMethod method, final JavaType domainType, final JavaType idType, final String plural) {
 		final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, plural);
-		if (methodName != null && !MemberFindingUtils.isMethodDeclaredBy(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
+		if (methodName != null && MemberFindingUtils.isMethodDeclaredByAnother(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
 			// We don't want this method, or the governor already declares it
 			return null;
 		}

@@ -555,19 +555,19 @@ public final class MemberFindingUtils {
 	}
 
 	/**
-	 * Indicates whether the requesting MID is annotated with the specified annotation.
+	 * Indicates whether a method specified by the method attributes is present and isn't declared by the passed in MID.
 	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @param methodName the name of the method being searched for
 	 * @param parameterTypes the parameters of the method being searched for
-	 * @param declaredByMetadataId the MID that the found method should belong to
+	 * @param declaredByMetadataId the MID to be used to see if a found method is declared by the MID
 	 * @return see above
 	 * @since 1.2.0
 	 */
-	public static boolean isMethodDeclaredBy(MemberDetails memberDetails,  JavaSymbolName methodName, List<JavaType> parameterTypes, String declaredByMetadataId) {
+	public static boolean isMethodDeclaredByAnother(MemberDetails memberDetails,  JavaSymbolName methodName, List<JavaType> parameterTypes, String declaredByMetadataId) {
 		Assert.notNull(memberDetails, "Member details required");
 		MethodMetadata methodMetadata = MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes);
-		return methodMetadata != null && methodMetadata.getDeclaredByMetadataId().equals(declaredByMetadataId);
+		return methodMetadata != null && !methodMetadata.getDeclaredByMetadataId().equals(declaredByMetadataId);
 	}
 	
 	/**
