@@ -71,6 +71,7 @@
         <module>addon-layers-service</module>
         <module>addon-layers-repository-jpa</module>
 		<module>addon-layers-repository-mongo</module>
+		<module>addon-oscommands</module>
         <module>annotations</module>
     </modules>
     <organization>
