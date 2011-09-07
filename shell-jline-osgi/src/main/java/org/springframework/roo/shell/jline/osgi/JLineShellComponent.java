@@ -8,6 +8,7 @@ import static org.springframework.roo.support.util.AnsiEscapeCode.UNDERSCORE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -84,72 +85,86 @@ public class JLineShellComponent extends JLineShell {
 	private String getLatestFavouriteTweet() {
 		// Access Twitter's REST API
 		String string = sendGetRequest("http://api.twitter.com/1/favorites.json", "id=SpringRoo&count=5");
-		if (StringUtils.hasText(string)) {
-			// Parse the returned JSON. This is a once off operation so we can used JSONValue.parse without penalty
-			JSONArray object = (JSONArray) JSONValue.parse(string);
-			int index = 0;
-			if (object.size() > 4) {
-				index = new Random().nextInt(5);
-			}
-			JSONObject jsonObject = (JSONObject) object.get(index);
-			String screenName = (String) ((JSONObject) jsonObject.get("user")).get("screen_name");
-			String tweet = (String) jsonObject.get("text");
-			// We only want one line
-			tweet = tweet.replaceAll(LINE_SEPARATOR, " ");
-			List<String> words = Arrays.asList(tweet.split(" "));
-			StringBuilder sb = new StringBuilder();
-			// Add in Roo's twitter account to give context to the notification
-			sb.append(decorate("@" + screenName + ":", REVERSE));
-			sb.append(" ");
-			// We want to colourise certain words. The codes used here should be moved to a ShellUtils and include a few helper methods
-			// This is a basic attempt at pattern identification, it should be adequate in most cases although may be incorrect for URLs.
-			// For example url.com/ttym: is valid by may mean "url.com/ttym" + ":"
-			for (String word : words) {
-				if (word.startsWith("http://") || word.startsWith("https://")) {
-					// It's a URL
-					sb.append(decorate(word, FG_GREEN, UNDERSCORE));
-				} else if (word.startsWith("@")) {
-					// It's a Twitter username
-					sb.append(decorate(word, FG_MAGENTA));
-				} else if (word.startsWith("#")) {
-					// It's a Twitter hash tag
-					sb.append(decorate(word, FG_CYAN));
-				} else {
-					// All else default
-					sb.append(word);
-				}
-				// Add back separator
-				sb.append(" ");
-			}
-			return sb.toString();
+		if (!StringUtils.hasText(string)) {
+			return null;
 		}
-		return null;
+		// Parse the returned JSON. This is a once off operation so we can used JSONValue.parse without penalty
+		JSONArray object = (JSONArray) JSONValue.parse(string);
+		int index = 0;
+		if (object.size() > 4) {
+			index = new Random().nextInt(5);
+		}
+		JSONObject jsonObject = (JSONObject) object.get(index);
+		String screenName = (String) ((JSONObject) jsonObject.get("user")).get("screen_name");
+		String tweet = (String) jsonObject.get("text");
+		// We only want one line
+		tweet = tweet.replaceAll(LINE_SEPARATOR, " ");
+		List<String> words = Arrays.asList(tweet.split(" "));
+		StringBuilder sb = new StringBuilder();
+		// Add in Roo's twitter account to give context to the notification
+		sb.append(decorate("@" + screenName + ":", REVERSE));
+		sb.append(" ");
+		// We want to colourise certain words. The codes used here should be moved to a ShellUtils and include a few helper methods
+		// This is a basic attempt at pattern identification, it should be adequate in most cases although may be incorrect for URLs.
+		// For example url.com/ttym: is valid by may mean "url.com/ttym" + ":"
+		for (String word : words) {
+			if (word.startsWith("http://") || word.startsWith("https://")) {
+				// It's a URL
+				sb.append(decorate(word, FG_GREEN, UNDERSCORE));
+			} else if (word.startsWith("@")) {
+				// It's a Twitter username
+				sb.append(decorate(word, FG_MAGENTA));
+			} else if (word.startsWith("#")) {
+				// It's a Twitter hash tag
+				sb.append(decorate(word, FG_CYAN));
+			} else {
+				// All else default
+				sb.append(word);
+			}
+			// Add back separator
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 
 	// TODO: This should probably be moved to a HTTP service of some sort - JTT 29/08/11
 	private String sendGetRequest(String endpoint, String requestParameters) {
-		String result = null;
-		if (endpoint.startsWith("http://") || endpoint.startsWith("https://")) {
-			// Send a GET request to the servlet
-			try {
-				// Send data
-				String urlStr = endpoint;
-				if (requestParameters != null && requestParameters.length() > 0) {
-					urlStr += "?" + requestParameters;
-				}
-				URL url = new URL(urlStr);
-				InputStream inputStream = urlInputStreamService.openConnection(url);
-				// Get the response
-				BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
-				StringBuilder sb = new StringBuilder();
-				String line;
-				while ((line = rd.readLine()) != null) {
-					sb.append(line);
-				}
-				rd.close();
-				result = sb.toString();
-			} catch (Exception ignored) {}
+		if (!(endpoint.startsWith("http://") || endpoint.startsWith("https://"))) {
+			return null;
 		}
-		return result;
+		
+		// Send a GET request to the servlet
+		InputStream inputStream = null;
+		BufferedReader reader = null;
+		try {
+			// Send data
+			String urlStr = endpoint;
+			if (StringUtils.hasText(requestParameters)) {
+				urlStr += "?" + requestParameters;
+			}
+			URL url = new URL(urlStr);
+			inputStream = urlInputStreamService.openConnection(url);
+			// Get the response
+			reader = new BufferedReader(new InputStreamReader(inputStream));
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line);
+			}
+			return sb.toString();
+		} catch (Exception e) {
+			return null;
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException ignored) {}
+			}
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException ignored) {}
+			}
+		}
 	}
 }
