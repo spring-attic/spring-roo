@@ -4,7 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -26,7 +25,6 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -43,9 +41,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	private static final JavaType JPA_COLUMN = new JavaType("javax.persistence.Column");
 	private static final JavaType JPA_EMBEDDED_ID = new JavaType("javax.persistence.EmbeddedId");
 	private static final JavaType JPA_ID = new JavaType("javax.persistence.Id");
-	
-	// Constants
-	private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();
 	
 	// Fields
 	private final Identifier identifier;
@@ -212,7 +207,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @param identifier can be <code>null</code> 
 	 * @return the identifier (never returns null)
 	 */
-	protected FieldMetadata getIdentifierField() {
+	private FieldMetadata getIdentifierField() {
 		if (parentEntity != null) {
 			final FieldMetadata idField = parentEntity.getIdentifierField();
 			if (idField != null) {
@@ -678,9 +673,5 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
-	}
-	
-	public static final String createIdentifier(JavaType javaType, Path path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 }
