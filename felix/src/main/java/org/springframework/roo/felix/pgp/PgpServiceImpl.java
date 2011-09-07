@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.security.Security;
 import java.util.ArrayList;
@@ -89,21 +88,17 @@ public class PgpServiceImpl implements PgpService {
     
     private void trustDefaultKeys() {
     	// Get the URIs of all PGP keystore files within installed OSGi bundles
-		final List<URI> uris = new ArrayList<URI>(OSGiUtils.findEntriesByPattern(context, "/org/springframework/roo/felix/pgp/*.asc"));
-		Collections.sort(uris, new Comparator<URI>() {
-			public int compare(final URI uri1, final URI uri2) {
-				try {
-					return uri1.toURL().toExternalForm().compareTo(uri2.toURL().toExternalForm());
-				} catch (final MalformedURLException e) {
-					return 0;
-				}
+		final List<URL> urls = new ArrayList<URL>(OSGiUtils.findEntriesByPattern(context, "/org/springframework/roo/felix/pgp/*.asc"));
+		Collections.sort(urls, new Comparator<URL>() {
+			public int compare(final URL url1, final URL url2) {
+				return url1.toExternalForm().compareTo(url2.toExternalForm());
 			}
 		});
 		
 		// Trust each one
-		for (final URI uri : uris) {
+		for (final URL url : urls) {
 			try {
-				trust(getPublicKey(uri.toURL().openStream()));
+				trust(getPublicKey(url.openStream()));
 			} catch (final IOException ignore) {}
 		}
     }

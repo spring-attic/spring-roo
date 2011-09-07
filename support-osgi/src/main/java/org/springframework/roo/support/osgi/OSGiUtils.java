@@ -3,10 +3,9 @@ package org.springframework.roo.support.osgi;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -38,16 +37,24 @@ public final class OSGiUtils {
 	 * @return null if there was a failure or a set containing zero or more entries (zero entries
 	 * means the search was successful but the resource was simply not found)
 	 */
-	public static final Collection<URI> findEntriesByPath(final BundleContext context, final String path) {
+	public static final Collection<URL> findEntriesByPath(final BundleContext context, final String path) {
 		Assert.hasText(path, "Path to locate is required");
-		final Set<URI> results = new HashSet<URI>();
+		final Collection<URL> urls = new ArrayList<URL>();
+		// We use a collection of URIs to avoid duplication in the collection of
+		// URLs; we can't simply use a Set of URLs because URL#equals is broken.
+		final Collection<URI> uris = new ArrayList<URI>();
 		OSGiUtils.execute(
 				new BundleCallback() {
 					public void execute(final Bundle bundle) {
 						try {
 							final URL url = bundle.getEntry(path);
 							if (url != null) {
-								results.add(url.toURI());
+								final URI uri = url.toURI();
+								if (!uris.contains(uri)) {
+									// We haven't seen this URL before; add it
+									urls.add(url);
+									uris.add(uri);
+								}
 							}
 						} catch (final IllegalStateException e) {
 							// The bundle has been uninstalled - ignore it
@@ -59,7 +66,7 @@ public final class OSGiUtils {
 				context
 		);
 		
-		return results;
+		return urls;
 	}
 
 	/**
@@ -73,9 +80,12 @@ public final class OSGiUtils {
 	 * @see AntPathMatcher#match(String, String)
 	 */
 	@SuppressWarnings("unchecked")
-	public static final Collection<URI> findEntriesByPattern(final BundleContext context, final String antPathExpression) {
+	public static final Collection<URL> findEntriesByPattern(final BundleContext context, final String antPathExpression) {
 		Assert.hasText(antPathExpression, "Ant path expression to match is required");
-		final Set<URI> results = new HashSet<URI>();
+		final Collection<URL> urls = new ArrayList<URL>();
+		// We use a collection of URIs to avoid duplication in the collection of
+		// URLs; we can't simply use a Set of URLs because URL#equals is broken.
+		final Collection<URI> uris = new ArrayList<URI>();
 		OSGiUtils.execute(new BundleCallback() {
 			public void execute(final Bundle bundle) {
 				try {
@@ -85,7 +95,11 @@ public final class OSGiUtils {
 							final URL url = enumeration.nextElement();
 							if (PATH_MATCHER.match(antPathExpression, url.getPath())) {
 								try {
-									results.add(url.toURI());
+									final URI uri = url.toURI();
+									if (!uris.contains(uri)) {
+										urls.add(url);
+										uris.add(uri);
+									}
 								} catch (URISyntaxException e) {
 									// This URL can't be converted to a URI - ignore it
 								}
@@ -97,7 +111,7 @@ public final class OSGiUtils {
 				}
 			}
 		}, context);
-		return results;
+		return urls;
 	}
 	
 	/**

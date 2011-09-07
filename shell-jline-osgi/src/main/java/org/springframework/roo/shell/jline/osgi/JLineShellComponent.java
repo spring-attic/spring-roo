@@ -10,7 +10,6 @@ import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,7 +60,7 @@ public class JLineShellComponent extends JLineShell {
 	}
 	
 	@Override
-	protected Collection<URI> findResources(final String path) {
+	protected Collection<URL> findResources(final String path) {
 		// For an OSGi bundle search, we add the root prefix to the given path
 		return OSGiUtils.findEntriesByPath(context.getBundleContext(), OSGiUtils.ROOT_PATH + path);
 	}

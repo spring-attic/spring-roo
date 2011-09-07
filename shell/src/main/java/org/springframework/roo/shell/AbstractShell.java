@@ -8,7 +8,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Collection;
@@ -56,7 +55,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
      * @return <code>null</code> if the search can't be performed
      * @since 1.2.0
      */
-	protected abstract Collection<URI> findResources(String path);
+	protected abstract Collection<URL> findResources(String path);
 	
 	protected abstract String getHomeAsString();
 	
@@ -121,28 +120,24 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	 * @return a non-<code>null</code> input stream
 	 */
 	private InputStream openScript(final File script) {
-		InputStream inputStream = null;
 		try {
-			inputStream = new BufferedInputStream(new FileInputStream(script));
-		} catch (FileNotFoundException tryTheClassLoaderInstead) {}
-		
-		if (inputStream == null) {
+			return new BufferedInputStream(new FileInputStream(script));
+		} catch (final FileNotFoundException fnfe) {
 			// Try to find the script via the classloader
-			final Collection<URI> uris = findResources(script.getName());
+			final Collection<URL> urls = findResources(script.getName());
 			
 			// Handle search failure
-			Assert.notNull(uris, "Unexpected error looking for '" + script.getName() + "'");
+			Assert.notNull(urls, "Unexpected error looking for '" + script.getName() + "'");
 			
 			// Handle the search being OK but the file simply not being present
-			Assert.notEmpty(uris, "Script '" + script + "' not found on disk or in classpath");
-			Assert.isTrue(uris.size() == 1, "More than one '" + script + "' was found in the classpath; unable to continue");
+			Assert.notEmpty(urls, "Script '" + script + "' not found on disk or in classpath");
+			Assert.isTrue(urls.size() == 1, "More than one '" + script + "' was found in the classpath; unable to continue");
 			try {
-				inputStream = uris.iterator().next().toURL().openStream();
+				return urls.iterator().next().openStream();
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
-		return inputStream;
 	}
 	
 	/**
