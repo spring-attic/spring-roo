@@ -20,8 +20,6 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -39,7 +37,6 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -60,7 +57,6 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 
 	protected void activate(ComponentContext context) {
@@ -115,9 +111,17 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 				return null;
 			}
 		}
-		// We also need the plural
+		// We also need the plural and the id field
 		final JavaType entityType = EntityMetadata.getJavaType(metadataId);
 		final Path path = EntityMetadata.getPath(metadataId);
+		JpaEntityMetadata jpaEntityMetadata = (JpaEntityMetadata) metadataService.get(JpaEntityMetadata.createIdentifier(entityType, Path.SRC_MAIN_JAVA));
+		if (jpaEntityMetadata == null) {
+			return null;
+		}
+		FieldMetadata idField = jpaEntityMetadata.getIdentifierField();
+		if (idField == null) {
+			return null;
+		}
 		final String pluralMID = PluralMetadata.createIdentifier(entityType, path);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMID);
 		if (pluralMetadata == null) {
@@ -130,13 +134,8 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataId);
 		
 		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entityType);
-		if (idFields.size() != 1) {
-			// The ID field metadata is either unavailable or not stable yet
-			return null;
-		}
 		final String entityName = StringUtils.defaultIfEmpty(jpaEntityAnnotationValues.getEntityName(), entityType.getSimpleTypeName());
-		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, projectMetadata, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName);
+		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, projectMetadata, crudAnnotationValues, pluralMetadata.getPlural(), idField, entityName);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

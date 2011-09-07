@@ -95,8 +95,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 		}
 
 		final MemberDetails details = getMemberDetails(domainType);
-		
-		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, PersistenceCustomDataKeys.PERSISTENT_TYPE) == null) {
+		if (details == null || MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, PersistenceCustomDataKeys.PERSISTENT_TYPE) == null) {
 			return;
 		}
 
