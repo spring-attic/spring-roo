@@ -3,6 +3,7 @@ package org.springframework.roo.addon.layers.service;
 import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -12,9 +13,12 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
@@ -33,23 +37,53 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvider {
+public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private TypeLocationService typeLocationService;
+	
+	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 	
 	@SuppressWarnings("unchecked")
 	protected void activate(ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
+		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_SERVICE);
 		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE), ROO_SERVICE));
 	}
 
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_SERVICE);
+	}
+	
+	@Override
+	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
+		JavaType governor = itdTypeDetails.getName();
+		String localMid = managedEntityTypes.get(governor);
+		if (localMid != null) {
+			return localMid;
+		}
+		
+		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(governor);
+		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+			@SuppressWarnings("unchecked")
+			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+			if (domainTypes != null) {
+				for (JavaType type : domainTypes) {
+					String localMidType = managedEntityTypes.get(type);
+					if (localMidType != null) {
+						return localMidType;
+					}
+				}
+			}
+		}
+		return null;	
 	}
 	
 	@Override
@@ -78,6 +112,8 @@ public class ServiceInterfaceMetadataProvider extends AbstractItdMetadataProvide
 			if (pluralMetadata == null) {
 				return null;
 			}
+			// maintain a list of entities that are being handled by this layer
+			managedEntityTypes.put(type, metadataIdentificationString);
 			metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
 			domainTypePlurals.put(type, pluralMetadata.getPlural());
 		}

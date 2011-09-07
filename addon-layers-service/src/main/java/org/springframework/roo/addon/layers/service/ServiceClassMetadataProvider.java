@@ -71,7 +71,6 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 			return localMid;
 		}
 		
-
 		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(governor);
 		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
 			@SuppressWarnings("unchecked")
