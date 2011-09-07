@@ -14,6 +14,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -82,18 +83,23 @@ public class JLineShellComponent extends JLineShell {
 
 	private String getLatestFavouriteTweet() {
 		// Access Twitter's REST API
-		String string = sendGetRequest("http://api.twitter.com/1/favorites.json", "id=SpringRoo&count=1");
+		String string = sendGetRequest("http://api.twitter.com/1/favorites.json", "id=SpringRoo&count=5");
 		if (StringUtils.hasText(string)) {
 			// Parse the returned JSON. This is a once off operation so we can used JSONValue.parse without penalty
 			JSONArray object = (JSONArray) JSONValue.parse(string);
-			JSONObject jsonObject = (JSONObject) object.get(0);
+			int index = 0;
+			if (object.size() > 4) {
+				index = new Random().nextInt(5);
+			}
+			JSONObject jsonObject = (JSONObject) object.get(index);
+			String screenName = (String) ((JSONObject) jsonObject.get("user")).get("screen_name");
 			String tweet = (String) jsonObject.get("text");
 			// We only want one line
 			tweet = tweet.replaceAll(LINE_SEPARATOR, " ");
 			List<String> words = Arrays.asList(tweet.split(" "));
 			StringBuilder sb = new StringBuilder();
 			// Add in Roo's twitter account to give context to the notification
-			sb.append(decorate("@SpringRoo", REVERSE));
+			sb.append(decorate("@" + screenName + ":", REVERSE));
 			sb.append(" ");
 			// We want to colourise certain words. The codes used here should be moved to a ShellUtils and include a few helper methods
 			// This is a basic attempt at pattern identification, it should be adequate in most cases although may be incorrect for URLs.
