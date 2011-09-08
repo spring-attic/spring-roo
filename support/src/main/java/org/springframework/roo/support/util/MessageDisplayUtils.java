@@ -41,15 +41,17 @@ public abstract class MessageDisplayUtils {
 		}
 		String owningPackage = owner.getPackage().getName().replace('.', '/');
 		String fullResourceName = "/" + owningPackage + "/" + fileName;
-		InputStream stream = owner.getClassLoader().getResourceAsStream(fullResourceName);
-		if (stream == null) {
+		InputStream inputStream = owner.getClassLoader().getResourceAsStream(fullResourceName);
+		if (inputStream == null) {
 			throw new IllegalStateException("Could not locate '" + fileName + "'");
 		}
 		try {
-			String message = FileCopyUtils.copyToString(new InputStreamReader(new BufferedInputStream(stream)));
+			String message = FileCopyUtils.copyToString(new InputStreamReader(new BufferedInputStream(inputStream)));
 			logger.log(level, message);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 

@@ -22,6 +22,8 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class SchemaConverter implements Converter<Set<Schema>> {
+	
+	// Fields
 	@Reference private DbreModelService dbreModelService;
 
 	public boolean supports(Class<?> requiredType, String optionContext) {

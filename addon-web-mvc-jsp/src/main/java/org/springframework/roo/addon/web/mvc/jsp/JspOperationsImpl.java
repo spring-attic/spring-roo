@@ -196,7 +196,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		if (registerStaticController && fileManager.exists(mvcConfig)) {
 			Document document = XmlUtils.readXml(fileManager.getInputStream(mvcConfig));
 
-			if (null == XmlUtils.findFirstElement("/beans/view-controller[@path='" + folderName + "/" + lcViewName + "']", document.getDocumentElement())) {
+			if (XmlUtils.findFirstElement("/beans/view-controller[@path='" + folderName + "/" + lcViewName + "']", document.getDocumentElement()) == null) {
 				Element sibling = XmlUtils.findFirstElement("/beans/view-controller", document.getDocumentElement());
 				Element view = new XmlElementBuilder("mvc:view-controller", document).addAttribute("path", folderName + "/" + lcViewName).build();
 				if (sibling != null) {
@@ -368,9 +368,10 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		Document mvcConfigDocument = XmlUtils.readXml(fileManager.getInputStream(mvcConfig));
 		Element beans = mvcConfigDocument.getDocumentElement();
 
-		if (null != XmlUtils.findFirstElement("/beans/bean[@id = 'tilesViewResolver']", beans) || null != XmlUtils.findFirstElement("/beans/bean[@id = 'tilesConfigurer']", beans)) {
+		if (XmlUtils.findFirstElement("/beans/bean[@id = 'tilesViewResolver']", beans) != null || XmlUtils.findFirstElement("/beans/bean[@id = 'tilesConfigurer']", beans) != null) {
 			return; // Tiles is already configured, nothing to do
 		}
+		
 		Document configDoc = getDocumentTemplate("tiles/tiles-mvc-config-template.xml");
 		Element configElement = configDoc.getDocumentElement();
 		List<Element> tilesConfig = XmlUtils.findElements("/config/bean", configElement);
@@ -419,7 +420,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		String footerFileLocation = targetDirectory + "/WEB-INF/views/footer.jspx";
 		Document footer = XmlUtils.readXml(fileManager.getInputStream(footerFileLocation));
 
-		if (null == XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().getLanguage() + "']", footer.getDocumentElement())) {
+		if (XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().getLanguage() + "']", footer.getDocumentElement()) == null) {
 			Element span = XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
 			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().getLanguage()).addAttribute("label", i18n.getLanguage()).build());
 			fileManager.createOrUpdateTextFileIfRequired(footerFileLocation, XmlUtils.nodeToString(footer), false);

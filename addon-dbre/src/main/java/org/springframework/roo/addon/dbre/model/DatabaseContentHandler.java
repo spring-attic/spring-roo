@@ -21,7 +21,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @since 1.1
  */
 public class DatabaseContentHandler extends DefaultHandler {
-	
+
 	// Fields
 	private final Set<Table> tables = new LinkedHashSet<Table>();
 	private final Stack<Object> stack = new Stack<Object>();

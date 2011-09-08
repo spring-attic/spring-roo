@@ -35,57 +35,47 @@ import org.xml.sax.SAXException;
 @Component
 @Service
 public class TilesOperationsImpl implements TilesOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
-	
-	/* (non-Javadoc)
-	 * @see org.springframework.roo.addon.mvc.jsp.TilesOperationsI#addViewDefinition(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-	 */
+
 	public void addViewDefinition(String folderName, String tilesViewName, String tilesTemplateName, String viewLocation) {
 		Assert.hasText(tilesViewName, "View name required");
 		Assert.hasText(tilesTemplateName, "Template name required");
 		Assert.hasText(viewLocation, "View location required");
-		
+
 		folderName = (folderName.length() > 0 && !folderName.startsWith("/")) ? "/" + folderName : folderName;
-		
 		tilesViewName = tilesViewName.startsWith("/") ? tilesViewName.replaceFirst("/", "") : tilesViewName;
-		
 		Element root = getRootElement(folderName);
-		
 		Element definition = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + tilesViewName + "']", root);
-		
-		if(definition != null) {
-			//a definition with this name does already exist - nothing to do
+		if (definition != null) {
+			// A definition with this name does already exist - nothing to do
 			return;
 		}
-		
+
 		definition = root.getOwnerDocument().createElement("definition");
 		definition.setAttribute("name", tilesViewName);
 		definition.setAttribute("extends", tilesTemplateName);
-		
+
 		Element putAttribute = root.getOwnerDocument().createElement("put-attribute");
 		putAttribute.setAttribute("name", "body");
 		putAttribute.setAttribute("value", viewLocation);
-	
+
 		definition.appendChild(putAttribute);
 		root.appendChild(definition);
-		
+
 		writeToDiskIfNecessary(folderName, root);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.springframework.roo.addon.mvc.jsp.TilesOperationsI#removeViewDefinition(java.lang.String)
-	 */
 	public void removeViewDefinition(String name, String folderName) {
 		Assert.hasText(name, "View name required");
 		
 		Element root = getRootElement(folderName);
 		
-		//find menu item under this category if exists 
+		// Find menu item under this category if exists 
 		Element element = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + name + "']", root);
-		if(element==null) {
+		if (element == null) {
 			return;
 		}
 		element.getParentNode().removeChild(element);
@@ -93,9 +83,6 @@ public class TilesOperationsImpl implements TilesOperations {
 		writeToDiskIfNecessary(folderName, root);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.springframework.roo.addon.mvc.jsp.TilesOperationsI#writeToDiskIfNecessary()
-	 */
 	private boolean writeToDiskIfNecessary(String folderName, Element body) {
 		// Build a string representation of the JSP
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -114,11 +101,11 @@ public class TilesOperationsImpl implements TilesOperations {
 			String existing = null;
 			try {
 				existing = FileCopyUtils.copyToString(f);
-			} catch (IOException ignoreAndJustOverwriteIt) {}
+			} catch (IOException ignored) {}
 			
 			if (!viewContent.equals(existing)) {
 				mutableFile = fileManager.updateFile(tilesDefinition);
-			}			
+			}
 		} else {
 			mutableFile = fileManager.createFile(tilesDefinition);
 			Assert.notNull(mutableFile, "Could not create tiles view definition '" + tilesDefinition + "'");
@@ -140,11 +127,11 @@ public class TilesOperationsImpl implements TilesOperations {
 	}
 	
 	private Element getRootElement(String folderName) {
-		Document tilesView;	
+		Document tilesView;
 		String viewFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views" + folderName + "/views.xml");
-		if (!fileManager.exists(viewFile)) {			
+		if (!fileManager.exists(viewFile)) {
 			tilesView = XmlUtils.getDocumentBuilder().newDocument();
-			tilesView.appendChild(tilesView.createElement("tiles-definitions"));			
+			tilesView.appendChild(tilesView.createElement("tiles-definitions"));
 		} else {
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new TilesDtdResolver());
@@ -156,12 +143,12 @@ public class TilesOperationsImpl implements TilesOperations {
 				throw new IllegalStateException("Unable to read the tiles " + viewFile + " file (reason: " + ioe.getMessage() + ")", ioe);
 			}
 		}
-		return tilesView.getDocumentElement();	
+		return tilesView.getDocumentElement();
 	}
-	
-	private static class TilesDtdResolver implements EntityResolver {		
+
+	private static class TilesDtdResolver implements EntityResolver {
 		public InputSource resolveEntity(String publicId, String systemId) {
-			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {				
+			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
 				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
 			}
 			// Use the default behaviour

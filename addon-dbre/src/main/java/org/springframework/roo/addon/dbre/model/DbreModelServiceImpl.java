@@ -39,6 +39,8 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class DbreModelServiceImpl implements DbreModelService {
+
+	// Fields
 	@Reference private ConnectionProvider connectionProvider;
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;

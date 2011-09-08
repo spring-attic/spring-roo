@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class DatabaseIntrospector extends AbstractIntrospector {
-	
+
 	// Fields
 	private Set<Schema> schemas;
 	private boolean view;

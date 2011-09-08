@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.Date;
@@ -97,13 +98,18 @@ public class SolrOperationsImpl implements SolrOperations {
 	private void updateSolrProperties(String solrServerUrl) {
 		String solrPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties");
 		boolean solrExists = fileManager.exists(solrPath);
+		
 		Properties props = new Properties();
+		InputStream inputStream = null;
 		try {
 			if (fileManager.exists(solrPath)) {
-				props.load(fileManager.getInputStream(solrPath));
+				inputStream = fileManager.getInputStream(solrPath);
+				props.load(inputStream);
 			}
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
+		} finally {
+			IOUtils.closeQuietly(inputStream);
 		}
 
 		props.put("solr.serverUrl", solrServerUrl);

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.gwt;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +55,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -193,11 +195,16 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 				return null;
 			}
 		});
+		
 		Document gwtXmlDoc;
+		InputStream inputStream = null;
 		try {
-			gwtXmlDoc = builder.parse(fileManager.getInputStream(gwtModuleCanonicalPath));
+			inputStream = fileManager.getInputStream(gwtModuleCanonicalPath);
+			gwtXmlDoc = builder.parse(inputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(inputStream);
 		}
 
 		Element gwtXmlRoot = gwtXmlDoc.getDocumentElement();

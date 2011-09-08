@@ -19,6 +19,7 @@ import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -34,7 +35,7 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MavenOperationsImpl extends AbstractProjectOperations implements MavenOperations {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(MavenOperationsImpl.class);
 	
@@ -143,7 +144,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	}
 	
 	private static class LoggingInputStream extends Thread {
-		
+
 		// Fields
 		private final BufferedReader reader;
 		private final ProcessManager processManager;
@@ -179,12 +180,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 					logger.severe("Could not locate Maven executable; please ensure mvn command is in your path");
 				}
 			} finally {
-				if (reader != null) {
-					try {
-						reader.close();
-					} catch (IOException ignored) {
-					}
-				}
+				IOUtils.closeQuietly(reader);
 				ActiveProcessManager.clearActiveProcessManager();
 			}
 		}

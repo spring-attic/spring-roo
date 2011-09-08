@@ -48,18 +48,22 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		MutableFile log4jMutableFile = null;
 		Properties props = new Properties();
 		
+		InputStream inputStream = null;
 		try {
 			if (fileManager.exists(filePath)) {
 				log4jMutableFile = fileManager.updateFile(filePath);
-				props.load(log4jMutableFile.getInputStream());
+				inputStream = log4jMutableFile.getInputStream();
+				props.load(inputStream);
 			} else {
 				log4jMutableFile = fileManager.createFile(filePath);
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "log4j-template.properties");
-				Assert.notNull(templateInputStream, "Could not acquire log4j configuration template");
-				props.load(templateInputStream);
+				inputStream = TemplateUtils.getTemplate(getClass(), "log4j-template.properties");
+				Assert.notNull(inputStream, "Could not acquire log4j configuration template");
+				props.load(inputStream);
 			}
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
+		} finally {
+			IOUtils.closeQuietly(inputStream);
 		}
 
 		JavaPackage topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage();

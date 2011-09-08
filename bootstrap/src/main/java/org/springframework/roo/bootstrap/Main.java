@@ -276,7 +276,9 @@ public class Main {
 		} catch (Exception ex) {
 			System.err.println("Could not create framework: " + ex);
 			ex.printStackTrace();
-			System.exit(-1); // **** CHANGE FROM ORIGINAL FELIX VERSION ****
+			// **** CHANGE FROM ORIGINAL FELIX VERSION ****
+			System.exit(-1); 
+			// **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
 		}
 	}
 

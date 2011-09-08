@@ -23,6 +23,8 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public abstract class DatabaseXmlUtils {
+	
+	// Constants
 	public static final String NAME = "name";
 	public static final String LOCAL = "local";
 	public static final String FOREIGN = "foreign";

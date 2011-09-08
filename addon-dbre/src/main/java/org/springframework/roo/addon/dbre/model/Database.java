@@ -32,6 +32,7 @@ public class Database {
 	/** Whether or not to included non-portable JPA attributes in the @Column annotation */
 	private boolean includeNonPortableAttributes;
 	
+	/** Whether or not this database has multiple schemas */
 	private boolean multipleSchemas;
 
 	// Whether to generate active record CRUD methods for each entity

@@ -15,6 +15,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 
 /**
@@ -53,14 +54,17 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}
+		InputStream template = null;
 		try {
-			InputStream template = TemplateUtils.getTemplate(getClass(), CONVERSION_SERVICE_SIMPLE_TYPE + "-template._java");
+			template = TemplateUtils.getTemplate(getClass(), CONVERSION_SERVICE_SIMPLE_TYPE + "-template._java");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
 			input = input.replace("__PACKAGE__", thePackage.getFullyQualifiedPackageName());
 			MutableFile mutableFile = fileManager.createFile(physicalPath);
 			FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
+		} finally {
+			IOUtils.closeQuietly(template);
 		}
 	}
 }

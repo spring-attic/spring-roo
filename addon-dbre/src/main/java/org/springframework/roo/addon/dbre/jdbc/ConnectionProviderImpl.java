@@ -21,8 +21,12 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class ConnectionProviderImpl implements ConnectionProvider {
+
+	// Constants
 	private static final String USER = "user";
 	private static final String PASSWORD = "password";
+	
+	// Fields
 	@Reference private JdbcDriverManager jdbcDriverManager;
 
 	public Connection getConnection(Properties props, boolean displayAddOns) throws RuntimeException {

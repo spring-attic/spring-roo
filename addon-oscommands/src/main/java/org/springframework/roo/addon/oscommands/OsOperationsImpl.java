@@ -16,6 +16,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Implementation of {@link OsOperations} interface.
@@ -61,7 +62,7 @@ public class OsOperationsImpl implements OsOperations {
 		return pathResolver.getRoot(Path.ROOT);
 	}
 	
-	private class LoggingInputStream extends Thread {
+	private static class LoggingInputStream extends Thread {
 		private BufferedReader reader;
 		private ProcessManager processManager;
 
@@ -91,13 +92,9 @@ public class OsOperationsImpl implements OsOperations {
 					logger.severe("Could not locate executable; please ensure command is in your path");
 				}
 			} finally {
-				if (reader != null) {
-					try {
-						reader.close();
-					} catch (IOException ignored) {}
-				}
+				IOUtils.closeQuietly(reader);
 				ActiveProcessManager.clearActiveProcessManager();
 			}
 		}
-	}	
+	}
 }
