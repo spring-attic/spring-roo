@@ -1,41 +1,54 @@
 package org.springframework.roo.addon.gwt;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import hapax.Template;
 import hapax.TemplateDataDictionary;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeParsingService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Provides a basic implementation of {@link GwtTemplateService} which
@@ -50,16 +63,20 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class GwtTemplateServiceImpl implements GwtTemplateService {
 	
-	// Fiels
-	@Reference private FileManager fileManager;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private MetadataService metadataService;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private TypeParsingService typeParsingService;
+	// Fields
+	@Reference protected MetadataService metadataService;
+	@Reference protected ProjectOperations projectOperations;
+	@Reference protected TypeParsingService typeParsingService;
+	@Reference protected TypeLocationService typeLocationService;
+	@Reference protected GwtTypeService gwtTypeService;
 
-	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
+	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails mirroredType, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeDetails.getName());
+		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
+		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(mirroredType);
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, mirroredType.getName());
+		mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
+		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
 		Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap = new HashMap<GwtType, ClassOrInterfaceTypeDetails>();
 		Map<GwtType, String> xmlTemplates = new HashMap<GwtType, String>();
@@ -67,13 +84,13 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			if (gwtType.getTemplate() == null) {
 				continue;
 			}
-			TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(gwtType, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
+			TemplateDataDictionary dataDictionary = buildMirrorDataDictionary(gwtType, mirroredType, proxy, mirrorTypeMap, clientSideTypeMap);
 			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
-			gwtType.dynamicallyResolveMethodsToWatch(mirrorTypeMap.get(GwtType.PROXY), clientSideTypeMap, projectMetadata);
+			gwtType.dynamicallyResolveMethodsToWatch(mirroredType.getName(), clientSideTypeMap, projectMetadata);
 			templateTypeDetailsMap.put(gwtType, getTemplateDetails(dataDictionary, gwtType.getTemplate(), mirrorTypeMap.get(gwtType)));
 
 			if (gwtType.isCreateUiXml()) {
-				dataDictionary = buildMirrorDataDictionary(gwtType, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
+				dataDictionary = buildMirrorDataDictionary(gwtType, mirroredType, proxy, mirrorTypeMap, clientSideTypeMap);
 				String contents = getTemplateContents(gwtType.getTemplate() + "UiXml", dataDictionary);
 				xmlTemplates.put(gwtType, contents);
 			}
@@ -123,6 +140,122 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		return templateTypeDetails;
 	}
 
+	public String buildUiXml(String templateContents, String destFile, List<MethodMetadata> proxyMethods) {
+		try {
+			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+			builder.setEntityResolver(new EntityResolver() {
+				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+					if (systemId.equals("http://dl.google.com/gwt/DTD/xhtml.ent")) {
+						return new InputSource(TemplateUtils.getTemplate(GwtScaffoldMetadata.class, "templates/xhtml.ent"));
+					}
+
+					// Use the default behaviour
+					return null;
+				}
+			});
+
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(templateContents));
+
+			Document templateDocument = builder.parse(is);
+
+			if (!new File(destFile).exists()) {
+				return transformXml(templateDocument);
+			}
+
+			is = new InputSource();
+			FileReader fileReader = new FileReader(destFile);
+			is.setCharacterStream(fileReader);
+			Document existingDocument = builder.parse(is);
+			fileReader.close();
+
+			//Look for the element holder denoted by the 'debugId' attribute first
+			Element existingHoldingElement = XmlUtils.findFirstElement("//*[@debugId='" + "boundElementHolder" + "']", existingDocument.getDocumentElement());
+			Element templateHoldingElement = XmlUtils.findFirstElement("//*[@debugId='" + "boundElementHolder" + "']", templateDocument.getDocumentElement());
+
+			//If holding element isn't found then the holding element is either not widget based or using the old convention of 'id' so look for the element holder with an 'id' attribute
+			if (existingHoldingElement == null) {
+				existingHoldingElement = XmlUtils.findFirstElement("//*[@id='" + "boundElementHolder" + "']", existingDocument.getDocumentElement());
+			}
+			if (templateHoldingElement == null) {
+				templateHoldingElement = XmlUtils.findFirstElement("//*[@id='" + "boundElementHolder" + "']", templateDocument.getDocumentElement());
+			}
+
+			if (existingHoldingElement != null) {
+				HashMap<String, Element> templateElementMap = new LinkedHashMap<String, Element>();
+				for (Element element : XmlUtils.findElements("//*[@id]", templateHoldingElement)) {
+					templateElementMap.put(element.getAttribute("id"), element);
+				}
+
+				HashMap<String, Element> existingElementMap = new LinkedHashMap<String, Element>();
+				for (Element element : XmlUtils.findElements("//*[@id]", existingHoldingElement)) {
+					existingElementMap.put(element.getAttribute("id"), element);
+				}
+
+				if (existingElementMap.keySet().containsAll(templateElementMap.values())) {
+					return transformXml(existingDocument);
+				}
+
+				ArrayList<Element> elementsToAdd = new ArrayList<Element>();
+				for (Map.Entry<String, Element> entry : templateElementMap.entrySet()) {
+					if (!existingElementMap.keySet().contains(entry.getKey())) {
+						elementsToAdd.add(entry.getValue());
+					}
+				}
+
+				ArrayList<Element> elementsToRemove = new ArrayList<Element>();
+				for (Map.Entry<String, Element> entry : existingElementMap.entrySet()) {
+					if (!templateElementMap.keySet().contains(entry.getKey())) {
+						elementsToRemove.add(entry.getValue());
+					}
+				}
+
+				for (Element element : elementsToAdd) {
+					Node importedNode = existingDocument.importNode(element, true);
+					existingHoldingElement.appendChild(importedNode);
+				}
+
+				for (Element element : elementsToRemove) {
+					existingHoldingElement.removeChild(element);
+				}
+
+				if (elementsToAdd.size() > 0) {
+					List<Element> sortedElements = new ArrayList<Element>();
+					for (MethodMetadata method : proxyMethods) {
+						String propertyName = StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(method).getSymbolName());
+						Element element = XmlUtils.findFirstElement("//*[@id='" + propertyName + "']", existingHoldingElement);
+						if (element != null) {
+							sortedElements.add(element);
+						}
+					}
+					for (Element el : sortedElements) {
+						if (el.getParentNode() != null && el.getParentNode().equals(existingHoldingElement)) {
+							existingHoldingElement.removeChild(el);
+						}
+					}
+
+					for (Element el : sortedElements) {
+						existingHoldingElement.appendChild(el);
+					}
+				}
+
+				return transformXml(existingDocument);
+			}
+
+			return transformXml(templateDocument);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private String transformXml(Document document) throws TransformerException {
+		Transformer transformer = XmlUtils.createIndentingTransformer();
+		StreamResult result = new StreamResult(new StringWriter());
+		DOMSource source = new DOMSource(document);
+		transformer.transform(source, result);
+		return result.getWriter().toString();
+	}
+
 	private String getTemplateContents(String templateName, TemplateDataDictionary dataDictionary) {
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
@@ -148,54 +281,52 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 	private TemplateDataDictionary buildDictionary(GwtType type) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		TemplateDataDictionary dataDictionary = null;
-		GwtType locate = GwtType.PROXY;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		
+
+		Set<ClassOrInterfaceTypeDetails> proxies = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(GwtUtils.PROXY_ANNOTATIONS);
+		TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
 		switch (type) {
 			case APP_ENTITY_TYPES_PROCESSOR: 
-				dataDictionary = buildStandardDataDictionary(type);
+
 				
-				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+				for (ClassOrInterfaceTypeDetails proxy : proxies) {
+					String proxySimpleName = proxy.getName().getSimpleTypeName();
+				   	String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
 
-					dataDictionary.addSection("proxys").setVariable("proxy", fullPath);
+					dataDictionary.addSection("proxys").setVariable("proxy", proxySimpleName);
 
-					String entity1 = new StringBuilder("\t\tif (").append(fullPath).append(".class.equals(clazz)) {\n\t\t\tprocessor.handle").append(simpleName).append("((").append(fullPath).append(") null);\n\t\t\treturn;\n\t\t}").toString();
+					String entity1 = new StringBuilder("\t\tif (").append(proxySimpleName).append(".class.equals(clazz)) {\n\t\t\tprocessor.handle").append(entitySimpleName).append("((").append(proxySimpleName).append(") null);\n\t\t\treturn;\n\t\t}").toString();
 					dataDictionary.addSection("entities1").setVariable("entity", entity1);
 
-					String entity2 = new StringBuilder("\t\tif (proxy instanceof ").append(fullPath).append(") {\n\t\t\tprocessor.handle").append(simpleName).append("((").append(fullPath).append(") proxy);\n\t\t\treturn;\n\t\t}").toString();
+					String entity2 = new StringBuilder("\t\tif (proxy instanceof ").append(proxySimpleName).append(") {\n\t\t\tprocessor.handle").append(entitySimpleName).append("((").append(proxySimpleName).append(") proxy);\n\t\t\treturn;\n\t\t}").toString();
 					dataDictionary.addSection("entities2").setVariable("entity", entity2);
 
-					String entity3 = new StringBuilder("\tpublic abstract void handle").append(simpleName).append("(").append(fullPath).append(" proxy);").toString();
+					String entity3 = new StringBuilder("\tpublic abstract void handle").append(entitySimpleName).append("(").append(proxySimpleName).append(" proxy);").toString();
 					dataDictionary.addSection("entities3").setVariable("entity", entity3);
+					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
 				}
 				break;
-			case MASTER_ACTIVITIES: 
-				dataDictionary = buildStandardDataDictionary(type);
-				
-				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+			case MASTER_ACTIVITIES:
+				for (ClassOrInterfaceTypeDetails proxy : proxies) {
+					String proxySimpleName = proxy.getName().getSimpleTypeName();
+					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
 					TemplateDataDictionary section = dataDictionary.addSection("entities");
-					section.setVariable("entitySimpleName", simpleName);
-					section.setVariable("entityFullPath", fullPath);
-					addImport(dataDictionary, simpleName, GwtType.LIST_ACTIVITY, projectMetadata);
-					addImport(dataDictionary, simpleName, GwtType.PROXY, projectMetadata);
-					addImport(dataDictionary, simpleName, GwtType.LIST_VIEW, projectMetadata);
-					addImport(dataDictionary, simpleName, GwtType.MOBILE_LIST_VIEW, projectMetadata);
+					section.setVariable("entitySimpleName", entitySimpleName);
+					section.setVariable("entityFullPath", proxySimpleName);
+					addImport(dataDictionary, entitySimpleName, GwtType.LIST_ACTIVITY, projectMetadata);
+					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+					addImport(dataDictionary, entitySimpleName, GwtType.LIST_VIEW, projectMetadata);
+					addImport(dataDictionary, entitySimpleName, GwtType.MOBILE_LIST_VIEW, projectMetadata);
 				}
 				break;
 			case APP_REQUEST_FACTORY: 
-				dataDictionary = buildStandardDataDictionary(type);
 				dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
 
-				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-					String entity = new StringBuilder("\t").append(simpleName).append("Request ").append(StringUtils.uncapitalize(simpleName)).append("Request();").toString();
+				for (ClassOrInterfaceTypeDetails proxy : proxies) {
+					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
+					ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
+					String entity = new StringBuilder("\t").append(request.getName().getSimpleTypeName()).append(" ").append(StringUtils.uncapitalize(entitySimpleName)).append("Request();").toString();
 					dataDictionary.addSection("entities").setVariable("entity", entity);
+					addImport(dataDictionary, request.getName().getFullyQualifiedTypeName());
 				}
 
 				if (projectMetadata.isGaeEnabled()) {
@@ -203,31 +334,29 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				}
 				break;
 			case LIST_PLACE_RENDERER:
-				dataDictionary = buildStandardDataDictionary(type);
 
-				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+				for (ClassOrInterfaceTypeDetails proxy : proxies) {
+					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
+					String proxySimpleName = proxy.getName().getSimpleTypeName();
 					TemplateDataDictionary section = dataDictionary.addSection("entities");
-					section.setVariable("entitySimpleName", simpleName);
-					section.setVariable("entityFullPath", fullPath);
-					addImport(dataDictionary, GwtType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + GwtType.PROXY.getSuffix());
+					section.setVariable("entitySimpleName", entitySimpleName);
+					section.setVariable("entityFullPath", proxySimpleName);
+					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
 				}
 				break;
 			case DETAILS_ACTIVITIES:
-				dataDictionary = buildStandardDataDictionary(type);
 
-				for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-					String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-					String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-					String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" proxy) {\n").append("\t\t\t\tsetResult(new ").append(simpleName).append("ActivitiesMapper(requests, placeController).getActivity(proxyPlace));\n\t\t\t}").toString();
+				for (ClassOrInterfaceTypeDetails proxy : proxies) {
+					String proxySimpleName = proxy.getName().getSimpleTypeName();
+					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
+					String entity = new StringBuilder("\t\t\tpublic void handle").append(entitySimpleName).append("(").append(proxySimpleName).append(" proxy) {\n").append("\t\t\t\tsetResult(new ").append(entitySimpleName).append("ActivitiesMapper(requests, placeController).getActivity(proxyPlace));\n\t\t\t}").toString();
 					dataDictionary.addSection("entities").setVariable("entity", entity);
-					addImport(dataDictionary, GwtType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + GwtType.PROXY.getSuffix());
-					addImport(dataDictionary, GwtType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + GwtType.ACTIVITIES_MAPPER.getSuffix());
+					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+					addImport(dataDictionary, GwtType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + entitySimpleName + GwtType.ACTIVITIES_MAPPER.getSuffix());
 				}
 				break;
 			case MOBILE_ACTIVITIES:
-				dataDictionary = buildStandardDataDictionary(type);
+				//Do nothing
 				break;
 		}
 		
@@ -254,9 +383,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		addImport(dataDictionary, gwtType.getPath().packageName(projectMetadata) + "." + simpleName + gwtType.getSuffix());
 	}
 
-	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type, ClassOrInterfaceTypeDetails governorTypeDetails, Map<GwtType, JavaType> mirrorTypeMap, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
+	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type, ClassOrInterfaceTypeDetails mirroredType, ClassOrInterfaceTypeDetails proxy, Map<GwtType, JavaType> mirrorTypeMap, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		JavaType proxyType = mirrorTypeMap.get(GwtType.PROXY);
+		JavaType proxyType = proxy.getName();
 		JavaType javaType = mirrorTypeMap.get(type);
 
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
@@ -267,11 +396,11 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 		addImport(dataDictionary, proxyType.getFullyQualifiedTypeName());
 
-		String pluralMetadataKey = PluralMetadata.createIdentifier(governorTypeDetails.getName(), Path.SRC_MAIN_JAVA);
+		String pluralMetadataKey = PluralMetadata.createIdentifier(mirroredType.getName(), Path.SRC_MAIN_JAVA);
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
 		String plural = pluralMetadata.getPlural();
 		
-		String simpleTypeName = governorTypeDetails.getName().getSimpleTypeName();
+		String simpleTypeName = mirroredType.getName().getSimpleTypeName();
 
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
@@ -290,9 +419,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		GwtProxyProperty secondaryProperty = null;
 		GwtProxyProperty dateProperty = null;
 		Set<String> importSet = new HashSet<String>();
-		
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), governorTypeDetails);
-		 
+
 		for (GwtProxyProperty gwtProxyProperty : clientSideTypeMap.values()) {
 			// Determine if this is the primary property.
 			if (primaryProperty == null) {
@@ -325,7 +452,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			}
 
 			dataDictionary.addSection("fields").setVariable("field", gwtProxyProperty.getName());
-			if (!isReadOnly(gwtProxyProperty.getName(), governorTypeDetails, memberDetails)) {
+			if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
 				dataDictionary.addSection("editViewProps").setVariable("prop", gwtProxyProperty.forEditView());
 			}
 
@@ -338,7 +465,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			propertiesSection.setVariable("propRenderer", gwtProxyProperty.getRenderer());
 			propertiesSection.setVariable("propReadable", gwtProxyProperty.getReadableName());
 
-			if (!isReadOnly(gwtProxyProperty.getName(), governorTypeDetails, memberDetails)) {
+			if (!isReadOnly(gwtProxyProperty.getName(), mirroredType)) {
 				TemplateDataDictionary editableSection = dataDictionary.addSection("editableProperties");
 				editableSection.setVariable("prop", gwtProxyProperty.getName());
 				editableSection.setVariable("propId", proxyType.getSimpleTypeName() + "_" + gwtProxyProperty.getName());
@@ -430,18 +557,14 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
-	private boolean isReadOnly(String name, ClassOrInterfaceTypeDetails governorTypeDetails, MemberDetails memberDetails) {
-		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
-		Assert.isTrue(!idFields.isEmpty(), "Id unavailable for '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' - required for GWT support");
-		FieldMetadata idField = idFields.get(0);
-		JavaSymbolName idPropertyName = idField.getFieldName();
+	private boolean isReadOnly(String name, ClassOrInterfaceTypeDetails governorTypeDetails) {
+		List<String> readOnly = new ArrayList<String>();
+		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(governorTypeDetails);
+		if (proxy != null) {
+			readOnly.addAll(GwtUtils.getAnnotationValues(proxy, RooJavaType.ROO_GWT_PROXY, "readOnly"));
+		}
 		
-		List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_FIELD);
-		Assert.isTrue(!versionFields.isEmpty(), "Version unavailable for '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' - required for GWT support");
-		FieldMetadata versionField = versionFields.get(0);
-		JavaSymbolName versionPropertyName = versionField.getFieldName();
-		
-		return name.equals(idPropertyName.getSymbolName()) || name.equals(versionPropertyName.getSymbolName());
+		return readOnly.contains(name);
 	}
 
 	private void addImport(TemplateDataDictionary dataDictionary, String importDeclaration) {

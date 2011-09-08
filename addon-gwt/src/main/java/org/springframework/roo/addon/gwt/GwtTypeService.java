@@ -25,7 +25,7 @@ public interface GwtTypeService {
 
 	List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes);
 
-	void buildType(GwtType destType);
+	void buildType(GwtType destType, List<ClassOrInterfaceTypeDetails> templateTypeDetails);
 
 	List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails);
 
@@ -36,4 +36,16 @@ public interface GwtTypeService {
 	boolean isMethodReturnTypesInSourcePath(MethodMetadata method, MemberHoldingTypeDetails memberHoldingTypeDetail, Set<String> sourcePaths);
 
 	Set<String> getSourcePaths();
+
+	ClassOrInterfaceTypeDetails lookupRequestFromProxy(ClassOrInterfaceTypeDetails proxy);
+
+	ClassOrInterfaceTypeDetails lookupProxyFromRequest(ClassOrInterfaceTypeDetails request);
+
+	ClassOrInterfaceTypeDetails lookupRequestFromEntity(ClassOrInterfaceTypeDetails entity);
+
+	ClassOrInterfaceTypeDetails lookupProxyFromEntity(ClassOrInterfaceTypeDetails entity);
+
+	ClassOrInterfaceTypeDetails lookupEntityFromProxy(ClassOrInterfaceTypeDetails proxy);
+
+	ClassOrInterfaceTypeDetails lookupEntityFromRequest(ClassOrInterfaceTypeDetails request);
 }

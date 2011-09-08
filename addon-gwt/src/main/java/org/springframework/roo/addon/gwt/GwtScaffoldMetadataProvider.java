@@ -4,10 +4,10 @@ import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataProvider;
 
 /**
- * Interface for {@link GwtMetadataProviderImpl}.
+ * Interface for {@link GwtScaffoldMetadataProviderImpl}.
  *
  * @author James Tyrrell
  * @since 1.1.2
  */
-public interface GwtMetadataProvider extends MetadataProvider, MetadataNotificationListener {
+public interface GwtScaffoldMetadataProvider extends MetadataProvider, MetadataNotificationListener {
 }

@@ -31,6 +31,9 @@ field string --fieldName category
 field date --fieldName created --type java.util.Date
 field string --fieldName reasonDenied
 
-gwt setup
+web gwt setup
+web gwt proxy all --package ~.client.proxy
+web gwt request all --package ~.client.request
+web gwt scaffold all
 
 logging setup --level INFO

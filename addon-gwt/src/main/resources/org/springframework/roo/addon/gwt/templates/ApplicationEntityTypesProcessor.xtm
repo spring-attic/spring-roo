@@ -6,6 +6,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+{{#imports}}import {{=import}};
+{{/imports}}
+
+
 /**
  * A helper class for dealing with proxy types. Subclass it and override the
  * various handle methods for type specific handling of proxy objects or

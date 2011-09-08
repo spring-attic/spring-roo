@@ -20,9 +20,9 @@ import org.springframework.roo.support.util.StringUtils;
 class GwtProxyProperty {
 	
 	// Fields
-	private ProjectMetadata projectMetadata;
-	private PhysicalTypeMetadata ptmd;
-	private JavaType type;
+	private final ProjectMetadata projectMetadata;
+	private final PhysicalTypeMetadata ptmd;
+	private final JavaType type;
 	private String name;
 	private List<AnnotationMetadata> annotations;
 	private String getter;

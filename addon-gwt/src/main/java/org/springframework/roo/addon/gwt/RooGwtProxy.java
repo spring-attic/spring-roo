@@ -7,19 +7,14 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooGwtMirroredFrom {
+public @interface RooGwtProxy {
 
-	String value() default "";
-
-	String[] exclude() default {};
-
+	/**
+	 * @return the fully-qualified type name this key instance was mirrored from
+	 */
 	String[] readOnly() default {};
 
-	boolean ignoreProxyExclusions() default false;
-
-	boolean ignoreProxyReadOnly() default false;
-
-	boolean dontIncludeProxyMethods() default true;
+	String[] exclude() default {};
 
 	boolean scaffold() default false;
 }

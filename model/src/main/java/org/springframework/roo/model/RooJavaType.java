@@ -19,6 +19,8 @@ public final class RooJavaType {
 	public static final JavaType ROO_EDITOR = new JavaType("org.springframework.roo.addon.property.editor.RooEditor");
 	public static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");
 	public static final JavaType ROO_GWT_MIRRORED_FROM = new JavaType("org.springframework.roo.addon.gwt.RooGwtMirroredFrom");
+	public static final JavaType ROO_GWT_PROXY = new JavaType("org.springframework.roo.addon.gwt.RooGwtProxy");
+	public static final JavaType ROO_GWT_REQUEST = new JavaType("org.springframework.roo.addon.gwt.RooGwtRequest");
 	public static final JavaType ROO_IDENTIFIER = new JavaType("org.springframework.roo.addon.entity.RooIdentifier");
 	public static final JavaType ROO_INTEGRATION_TEST = new JavaType("org.springframework.roo.addon.test.RooIntegrationTest");
 	public static final JavaType ROO_JAVA_BEAN = new JavaType("org.springframework.roo.addon.javabean.RooJavaBean");

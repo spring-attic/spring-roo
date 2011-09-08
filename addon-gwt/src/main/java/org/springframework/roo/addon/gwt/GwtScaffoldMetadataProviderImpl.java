@@ -1,0 +1,254 @@
+package org.springframework.roo.addon.gwt;
+
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataItem;
+import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
+
+/**
+ * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
+ * You can find a list of mirror-compatible objects in {@link GwtType}.
+ * <p/>
+ * <p/>
+ * For now only @RooEntity instances will be mirror-compatible.
+ * <p/>
+ * <p/>
+ * Like all Roo add-ons, this provider aims to expose potentially-useful contents of the above files via {@link GwtScaffoldMetadata}.
+ * It also attempts to avoiding writing to disk unless actually necessary.
+ * <p/>
+ * <p/>
+ * A separate type monitors the creation/deletion of the aforementioned files to maintain "global indexes".
+ *
+ * @author Ben Alex
+ * @author Alan Stewart
+ * @author Ray Cromwell
+ * @author Amit Manjhi
+ * @since 1.1
+ */
+@Component(immediate = true)
+@Service
+public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvider {
+
+	// Fields
+	@Reference protected GwtFileManager gwtFileManager;
+	@Reference protected GwtTemplateService gwtTemplateService;
+	@Reference protected GwtTypeService gwtTypeService;
+	@Reference protected MetadataService metadataService;
+	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference protected ProjectOperations projectOperations;
+	@Reference protected TypeLocationService typeLocationService;
+
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		metadataDependencyRegistry.registerDependency(GwtProxyMetadata.getMetadataIdentifierType(), getProvidesType());
+		metadataDependencyRegistry.registerDependency(GwtRequestMetadata.getMetadataIdentifierType(), getProvidesType());
+	}
+
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		metadataDependencyRegistry.deregisterDependency(GwtProxyMetadata.getMetadataIdentifierType(), getProvidesType());
+		metadataDependencyRegistry.deregisterDependency(GwtRequestMetadata.getMetadataIdentifierType(), getProvidesType());
+	}
+
+	public MetadataItem get(String metadataIdentificationString) {
+		// Abort early if we can't continue
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		if (projectMetadata == null) {
+			return null;
+		}
+
+		// Obtain the governor's information
+		ClassOrInterfaceTypeDetails mirroredType = getGovernor(metadataIdentificationString);
+		if (mirroredType == null || Modifier.isAbstract(mirroredType.getModifier())) {
+			return null;
+		}
+
+		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
+		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(mirroredType);
+		if (proxy == null || request == null) {
+			return null;
+		}
+
+		if (proxy.getDeclaredMethods().size() == 0) {
+			return null;
+		}
+
+		Boolean scaffold = GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_PROXY, "scaffold", false);
+		if (!scaffold) {
+			return null;
+		}
+
+		GwtScaffoldMetadata gwtScaffoldMetadata = new GwtScaffoldMetadata(metadataIdentificationString);
+
+		buildType(GwtType.APP_ENTITY_TYPES_PROCESSOR);
+		buildType(GwtType.APP_REQUEST_FACTORY);
+		buildType(GwtType.LIST_PLACE_RENDERER);
+		buildType(GwtType.MASTER_ACTIVITIES);
+		buildType(GwtType.LIST_PLACE_RENDERER);
+		buildType(GwtType.DETAILS_ACTIVITIES);
+		buildType(GwtType.MOBILE_ACTIVITIES);
+
+		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
+		for (MethodMetadata proxyMethod : proxy.getDeclaredMethods()) {
+			if (!proxyMethod.getMethodName().getSymbolName().startsWith("get")){
+				continue;
+			}
+			JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(proxyMethod).getSymbolName()));
+			JavaType propertyType = proxyMethod.getReturnType();
+			PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(propertyType, Path.SRC_MAIN_JAVA));
+			if (propertyType.isCommonCollectionType() && !propertyType.getParameters().isEmpty()) {
+				ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(propertyType.getParameters().get(0), Path.SRC_MAIN_JAVA));
+			}
+			
+			FieldMetadata field = MemberFindingUtils.getDeclaredField(proxy, propertyName);
+			List<AnnotationMetadata> annotations = field != null ? field.getAnnotations() : Collections.<AnnotationMetadata> emptyList();
+
+			GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(projectMetadata, ptmd, propertyType, propertyName.getSymbolName(), annotations, proxyMethod.getMethodName().getSymbolName());
+			clientSideTypeMap.put(propertyName, gwtProxyProperty);
+		}
+
+		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(mirroredType, clientSideTypeMap);
+		Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new HashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
+		Map<String, String> xmlToBeWritten = new HashMap<String, String>();
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, mirroredType.getName());
+	   	mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
+		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
+
+		for (Map.Entry<GwtType, JavaType> entry : mirrorTypeMap.entrySet()) {
+			GwtType gwtType = entry.getKey();
+			JavaType javaType = entry.getValue();
+			if (!gwtType.isMirrorType() || gwtType.equals(GwtType.PROXY) || gwtType.equals(GwtType.REQUEST)) {
+				continue;
+			}
+			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
+			gwtType.dynamicallyResolveMethodsToWatch(proxy.getName(), clientSideTypeMap, projectMetadata);
+
+			List<MemberHoldingTypeDetails> extendsTypes = gwtTypeService.getExtendsTypes(templateDataHolder.getTemplateTypeDetailsMap().get(gwtType));
+
+			typesToBeWritten.put(gwtType, gwtTypeService.buildType(gwtType, templateDataHolder.getTemplateTypeDetailsMap().get(gwtType), extendsTypes));
+
+			if (gwtType.isCreateUiXml()) {
+				String destFile = gwtType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + javaType.getSimpleTypeName() + ".ui.xml";
+				String contents = gwtTemplateService.buildUiXml(templateDataHolder.getXmlTemplates().get(gwtType), destFile, new ArrayList<MethodMetadata>(proxy.getDeclaredMethods()));
+				xmlToBeWritten.put(destFile, contents);
+			}
+		}
+
+		// Our general strategy is to instantiate GwtScaffoldMetadata, which offers a conceptual representation of what should go into the 4 key-specific types; after that we do comparisons and write to disk if needed
+		for (Map.Entry<GwtType, List<ClassOrInterfaceTypeDetails>> entry : typesToBeWritten.entrySet()) {
+			gwtFileManager.write(typesToBeWritten.get(entry.getKey()), entry.getKey().isOverwriteConcrete());
+		}
+		for (ClassOrInterfaceTypeDetails type : templateDataHolder.getTypeList()) {
+			gwtFileManager.write(type, false);
+		}
+		for (Map.Entry<String, String> entry : xmlToBeWritten.entrySet()) {
+			gwtFileManager.write(entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<String, String> entry : templateDataHolder.getXmlMap().entrySet()) {
+			gwtFileManager.write(entry.getKey(), entry.getValue());
+		}
+
+		return gwtScaffoldMetadata;
+	}
+
+	private ClassOrInterfaceTypeDetails getGovernor(String metadataIdentificationString) {
+		JavaType governorTypeName = GwtScaffoldMetadata.getJavaType(metadataIdentificationString);
+		Path governorTypePath = GwtScaffoldMetadata.getPath(metadataIdentificationString);
+
+		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
+		return typeLocationService.getTypeForIdentifier(physicalTypeId);
+	}
+
+	private void buildType(GwtType type) {
+		gwtTypeService.buildType(type, gwtTemplateService.getStaticTemplateTypeDetails(type));
+	}
+
+	public void notify(String upstreamDependency, String downstreamDependency) {
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		if (projectMetadata == null) {
+			return;
+		}
+
+		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
+
+			if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(GwtRequestMetadata.getMetadataIdentifierType()))) {
+				ClassOrInterfaceTypeDetails request = typeLocationService.getClassOrInterface(GwtRequestMetadata.getJavaType(upstreamDependency));
+				if (request != null) {
+					ClassOrInterfaceTypeDetails mirroredType = gwtTypeService.lookupEntityFromRequest(request);
+					if (mirroredType != null) {
+						JavaType typeName = PhysicalTypeIdentifier.getJavaType(mirroredType.getDeclaredByMetadataId());
+						Path typePath = PhysicalTypeIdentifier.getPath(mirroredType.getDeclaredByMetadataId());
+						downstreamDependency = createLocalIdentifier(typeName, typePath);
+					}
+				}
+			} else if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(GwtProxyMetadata.getMetadataIdentifierType()))) {
+				ClassOrInterfaceTypeDetails proxy = typeLocationService.getClassOrInterface(GwtProxyMetadata.getJavaType(upstreamDependency));
+				if (proxy != null) {
+					ClassOrInterfaceTypeDetails mirroredType = gwtTypeService.lookupEntityFromProxy(proxy);
+					if (mirroredType != null) {
+						JavaType typeName = PhysicalTypeIdentifier.getJavaType(mirroredType.getDeclaredByMetadataId());
+						Path typePath = PhysicalTypeIdentifier.getPath(mirroredType.getDeclaredByMetadataId());
+						downstreamDependency = createLocalIdentifier(typeName, typePath);
+					}
+				}
+			} else {
+				Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
+
+				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
+				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
+				Path typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+				downstreamDependency = createLocalIdentifier(typeName, typePath);
+			}
+
+			// We only need to proceed if the downstream dependency relationship is not already registered
+			// (if it's already registered, the event will be delivered directly later on)
+			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
+				return;
+			}
+		}
+
+		// We should now have an instance-specific "downstream dependency" that can be processed by this class
+		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
+
+		metadataService.get(downstreamDependency, true);
+	}
+
+	private String createLocalIdentifier(JavaType javaType, Path path) {
+		return GwtScaffoldMetadata.createIdentifier(javaType, path);
+	}
+
+	public String getProvidesType() {
+		return GwtScaffoldMetadata.getMetadataIdentifierType();
+	}
+}

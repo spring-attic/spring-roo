@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -17,14 +19,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.AbstractIdentifiableAnnotatedJavaStructureBuilder;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -39,6 +40,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
@@ -76,18 +78,19 @@ import org.xml.sax.SAXException;
 public class GwtTypeServiceImpl implements GwtTypeService {
 	
 	// Constants
-	private static Logger logger = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
+	private static final Logger logger = HandlerUtils.getLogger(GwtTypeServiceImpl.class);
 	
 	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private GwtFileManager gwtFileManager;
-	@Reference private GwtTemplateService gwtTemplateService;
-	@Reference private MetadataService metadataService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-	@Reference private ProjectOperations projectOperations;
-	private Set<String> warnings = new LinkedHashSet<String>();
-	private Timer warningTimer = new Timer();
+	@Reference protected FileManager fileManager;
+	@Reference protected GwtFileManager gwtFileManager;
+	@Reference protected MetadataService metadataService;
+	@Reference protected MemberDetailsScanner memberDetailsScanner;
+	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
+	@Reference protected ProjectOperations projectOperations;
+	@Reference protected TypeLocationService typeLocationService;
+
+	private final Set<String> warnings = new LinkedHashSet<String>();
+	private final Timer warningTimer = new Timer();
 
 	/**
 	 * Return the type arg for the client side method, given the domain method return type. If domain method return type is List<Integer> or Set<Integer>, returns the same. If domain method return
@@ -114,7 +117,11 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			List<JavaType> args = type.getParameters();
 			if (args != null && args.size() == 1) {
 				JavaType elementType = args.get(0);
-				return new JavaType(type.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(getGwtSideLeafType(elementType, projectMetadata, governorType, requestType)));
+				JavaType convertedJavaType = getGwtSideLeafType(elementType, projectMetadata, governorType, requestType);
+				if (convertedJavaType == null) {
+					return null;
+				}
+				return new JavaType(type.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(convertedJavaType));
 			}
 			return type;
 		}
@@ -124,9 +131,69 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			if (isEmbeddable(ptmd)) {
 				throw new IllegalStateException("GWT does not currently support embedding objects in entities, such as '" + type.getSimpleTypeName() + "' in '" + governorType.getSimpleTypeName() + "'.");
 			}
-			return getDestinationJavaType(type, GwtType.PROXY, projectMetadata);
+			ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getClassOrInterface(type);
+			if (typeDetails == null) {
+				return null;
+			}
+			ClassOrInterfaceTypeDetails proxy = lookupProxyFromEntity(typeDetails);
+			if (proxy == null) {
+				return null;
+			}
+			return proxy.getName();
 		}
 		return type;
+	}
+
+	public ClassOrInterfaceTypeDetails lookupRequestFromProxy(ClassOrInterfaceTypeDetails proxy) {
+		AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(proxy, GwtUtils.PROXY_ANNOTATIONS);
+		AnnotationAttributeValue<?> attributeValue = annotation.getAttribute("value");
+		JavaType serviceNameType = new JavaType(GwtUtils.getStringValue(attributeValue));
+		return lookupRequestFromEntity(typeLocationService.getClassOrInterface(serviceNameType));
+	}
+
+	public ClassOrInterfaceTypeDetails lookupProxyFromRequest(ClassOrInterfaceTypeDetails request) {
+		AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(request, GwtUtils.REQUEST_ANNOTATIONS);
+		AnnotationAttributeValue<?> attributeValue = annotation.getAttribute("value");
+		JavaType proxyType = new JavaType(GwtUtils.getStringValue(attributeValue));
+		return lookupProxyFromEntity(typeLocationService.getClassOrInterface(proxyType));
+	}
+
+	public ClassOrInterfaceTypeDetails lookupEntityFromProxy(ClassOrInterfaceTypeDetails proxy) {
+		return lookupEntityFromX(proxy, GwtUtils.PROXY_ANNOTATIONS);
+	}
+
+	public ClassOrInterfaceTypeDetails lookupEntityFromRequest(ClassOrInterfaceTypeDetails request) {
+		return lookupEntityFromX(request, GwtUtils.REQUEST_ANNOTATIONS);
+	}
+
+	public ClassOrInterfaceTypeDetails lookupEntityFromX(ClassOrInterfaceTypeDetails typeDetails, JavaType[] annotations) {
+		AnnotationMetadata annotation = GwtUtils.getFirstAnnotation(typeDetails, annotations);
+		AnnotationAttributeValue<?> attributeValue = annotation.getAttribute("value");
+		JavaType serviceNameType = new JavaType(GwtUtils.getStringValue(attributeValue));
+		return typeLocationService.getClassOrInterface(serviceNameType);
+	}
+
+	public ClassOrInterfaceTypeDetails lookupRequestFromEntity(ClassOrInterfaceTypeDetails entity) {
+		return lookupXFromEntity(entity, GwtUtils.REQUEST_ANNOTATIONS);
+	}
+
+	public ClassOrInterfaceTypeDetails lookupProxyFromEntity(ClassOrInterfaceTypeDetails entity) {
+		return lookupXFromEntity(entity, GwtUtils.PROXY_ANNOTATIONS);
+	}
+
+	public ClassOrInterfaceTypeDetails lookupXFromEntity(ClassOrInterfaceTypeDetails entity, JavaType[] annotations) {
+		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(annotations);
+		for (ClassOrInterfaceTypeDetails cid : cids) {
+			AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(cid, annotations);
+			if (annotationMetadata != null) {
+				AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
+				String value = GwtUtils.getStringValue(attributeValue);
+				if (entity.getName().getFullyQualifiedTypeName().equals(value)) {
+					return cid;
+				}
+			}
+		}
+		return null;
 	}
 
 	public List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType) {
@@ -154,10 +221,10 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return paths;
 	}
 
-	public void buildType(GwtType type) {
+	public void buildType(GwtType type, List<ClassOrInterfaceTypeDetails> templateTypeDetails) {
 		if (GwtType.LIST_PLACE_RENDERER.equals(type)) {
-			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-			Map<JavaSymbolName, List<JavaType>> watchedMethods = new LinkedHashMap<JavaSymbolName, List<JavaType>>();
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
 			watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
 			type.setWatchedMethods(watchedMethods);
 		} else {
@@ -165,7 +232,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		}
 
 		type.resolveWatchedFieldNames(type);
-		List<ClassOrInterfaceTypeDetails> templateTypeDetails = gwtTemplateService.getStaticTemplateTypeDetails(type);
 		List<ClassOrInterfaceTypeDetails> typesToBeWritten = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (ClassOrInterfaceTypeDetails templateTypeDetail : templateTypeDetails) {
 			typesToBeWritten.addAll(buildType(type, templateTypeDetail, getExtendsTypes(templateTypeDetail)));
@@ -188,7 +254,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		builder.setEntityResolver(new EntityResolver() {
 			public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 				if (systemId.endsWith("gwt-module.dtd")) {
-					return new InputSource(TemplateUtils.getTemplate(GwtMetadata.class, "templates/gwt-module.dtd"));
+					return new InputSource(TemplateUtils.getTemplate(GwtScaffoldMetadata.class, "templates/gwt-module.dtd"));
 				}
 
 				// Use the default behaviour
@@ -223,7 +289,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetails.getDetails();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
+			for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 				if (isPublicAccessor(method)) {
 					if (isValidMethodReturnType(method, memberHoldingTypeDetail)) {
 						proxyMethods.remove(method.getMethodName());

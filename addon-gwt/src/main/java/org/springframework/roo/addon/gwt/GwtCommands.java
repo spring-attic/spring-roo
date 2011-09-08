@@ -3,8 +3,11 @@ package org.springframework.roo.addon.gwt;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
+import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 
 /**
@@ -25,6 +28,13 @@ public class GwtCommands implements CommandMarker {
 		return gwtOperations.isSetupAvailable();
 	}
 
+	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request type",
+								"web gwt scaffold all", "web gwt scaffold type", "web gwt proxy request all",
+								"web gwt proxy request type", "web gwt update gae"})
+	public boolean isGwtEnabled() {
+		return gwtOperations.isGwtEnabled();
+	}
+
 	@CliCommand(value = "web gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
 	public void webGwtSetup() {
 		gwtOperations.setup();
@@ -34,5 +44,53 @@ public class GwtCommands implements CommandMarker {
 	@CliCommand(value = "gwt setup", help = "Install Google Web Toolkit (GWT) into your project - deprecated, use 'web gwt setup' instead")
 	public void installGwt() {
 		gwtOperations.setup();
+	}
+
+	@CliCommand(value = "web gwt proxy all")
+	public void proxyAll(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") JavaPackage javaPackage) {
+		gwtOperations.proxyAll(javaPackage);
+	}
+
+	@CliCommand(value = "web gwt proxy type")
+	public void proxyType(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") JavaPackage javaPackage,
+						  @CliOption(key = "type", mandatory = true, help = "The type to base the created request on") JavaType type) {
+		gwtOperations.proxyType(javaPackage, type);
+	}
+
+	@CliCommand(value = "web gwt request all")
+	public void requestAll(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") JavaPackage javaPackage) {
+		gwtOperations.requestAll(javaPackage);
+	}
+
+	@CliCommand(value = "web gwt request type")
+	public void requestType(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") JavaPackage javaPackage,
+						   @CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created request on") JavaType type) {
+		gwtOperations.requestType(javaPackage, type);
+	}
+
+	@CliCommand(value = "web gwt proxy request all")
+	public void proxyAndRequestAll(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage) {
+		gwtOperations.proxyAndRequestAll(javaPackage);
+	}
+
+	@CliCommand(value = "web gwt proxy request type")
+	public void proxyAndRequestType(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage,
+									@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created proxy and request on") JavaType type) {
+		gwtOperations.proxyAndRequestType(javaPackage, type);
+	}
+
+	@CliCommand(value = "web gwt scaffold all")
+	public void scaffoldAll() {
+		gwtOperations.scaffoldAll();
+	}
+
+	@CliCommand(value = "web gwt scaffold type")
+	public void scaffoldType(@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created scaffold on") JavaType type) {
+		gwtOperations.scaffoldType(type);
+	}
+
+	@CliCommand(value = "web gwt update gae")
+	public void updateGae() {
+		gwtOperations.updateGaeConfiguration();
 	}
 }

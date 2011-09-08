@@ -52,7 +52,7 @@ public enum GwtType {
 	private Map<JavaSymbolName, List<JavaType>> watchedMethods = new LinkedHashMap<JavaSymbolName, List<JavaType>>();
 	private boolean createAbstract = false;
 	private boolean overwriteConcrete = false;
-	private boolean createUiXml;
+	private final boolean createUiXml;
 	private boolean mirrorType = false;
 
 	private GwtType(GwtPath path, boolean mirrorType, String suffix, String name, String template, boolean createUiXml, boolean createAbstract, boolean overwriteConcrete) {
@@ -133,7 +133,7 @@ public enum GwtType {
 				watchedMethods.put(new JavaSymbolName("start"), params);
 				break;
 			case DETAIL_ACTIVITY:
-				params = Arrays.asList(new JavaType("com.google.web.bindery.requestfactory.shared.Receiver", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy"))));
+				params = Arrays.asList(new JavaType("com.google.web.bindery.requestfactory.shared.Receiver", 0, DataType.TYPE, null, Collections.singletonList(GwtUtils.ENTITY_PROXY)));
 				watchedMethods.put(new JavaSymbolName("find"), params);
 				break;
 			case MOBILE_LIST_VIEW:

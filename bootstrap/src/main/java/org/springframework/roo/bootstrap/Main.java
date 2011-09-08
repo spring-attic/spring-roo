@@ -264,8 +264,8 @@ public class Main {
 			m_fwk.waitForStop(0);
 
 			// **** CHANGE FROM ORIGINAL FELIX VERSION ****
-			int exitCode = System.getProperty("roo.exit") == null ? 99 : new Integer(System.getProperty("roo.exit")).intValue();
-			boolean devModeAtShutdown = System.getProperty("developmentMode") == null ? false : System.getProperty("developmentMode").equals(Boolean.TRUE.toString());
+			int exitCode = System.getProperty("roo.exit") == null ? 99 : new Integer(System.getProperty("roo.exit"));
+			boolean devModeAtShutdown = System.getProperty("developmentMode") != null && System.getProperty("developmentMode").equals(Boolean.TRUE.toString());
 			if (devModeAtShutdown) {
 				double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds);
 				System.out.println("Total execution time " + round(executionDurationInSeconds/1000000000D, 3) + " seconds");
