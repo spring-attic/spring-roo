@@ -136,7 +136,6 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		final List<JavaType> getAsStringParameterTypes = new ArrayList<JavaType>(parameterTypes);
 		getAsStringParameterTypes.add(OBJECT);
-		bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " = (" + simpleTypeName + ") value;" );
 		bodyBuilder.appendFormalLine(new StringBuilder("return ").append(builderString).toString());

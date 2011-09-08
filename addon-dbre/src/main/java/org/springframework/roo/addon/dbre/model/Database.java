@@ -150,7 +150,7 @@ public class Database {
 				}
 				foreignKey.setForeignTable(targetTable);
 				if (table.getImportedKeyCountByForeignTableName(foreignTableName) > 1) {
-					keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
+					keySequenceMap.put(foreignTableName, Short.valueOf((short) (keySequence.shortValue() + 1)));
 				}
 				foreignKey.setKeySequence(keySequence);
 			}
@@ -207,7 +207,7 @@ public class Database {
 					keySequenceMap.put(foreignTableName, keySequence);
 				}
 				if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
-					keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
+					keySequenceMap.put(foreignTableName, Short.valueOf((short) (keySequence.shortValue() + 1)));
 				}
 				exportedKey.setKeySequence(keySequence);
 			}
