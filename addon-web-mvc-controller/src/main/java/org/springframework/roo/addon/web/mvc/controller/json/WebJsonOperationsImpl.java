@@ -129,18 +129,18 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	}
 	
 	private void appendToExistingType(JavaType type, JavaType jsonEntity) {
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(jsonEntity);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(type);
 		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + type.getFullyQualifiedTypeName() + "'");
 		}
 
-		if (MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_WEB_JSON) == null) {
+		if (MemberFindingUtils.getAnnotationOfType(classOrInterfaceTypeDetails.getAnnotations(), RooJavaType.ROO_WEB_JSON) != null) {
 			return;
 		}
 
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
-		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
+		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 	
 	private void createNewType(JavaType type, JavaType jsonEntity) {
