@@ -14,6 +14,7 @@ import org.springframework.roo.shell.CommandMarker;
  * Commands for the GWT add-on to be used by the Roo shell.
  *
  * @author Ben Alex
+ * @author James Tyrrell
  * @since 1.1
  */
 @Component
@@ -28,9 +29,7 @@ public class GwtCommands implements CommandMarker {
 		return gwtOperations.isSetupAvailable();
 	}
 
-	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request type",
-								"web gwt scaffold all", "web gwt scaffold type", "web gwt proxy request all",
-								"web gwt proxy request type", "web gwt update gae"})
+	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request type", "web gwt scaffold all", "web gwt scaffold type", "web gwt proxy request all", "web gwt proxy request type", "web gwt update gae" })
 	public boolean isGwtEnabled() {
 		return gwtOperations.isGwtEnabled();
 	}
@@ -52,30 +51,40 @@ public class GwtCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "web gwt proxy type")
-	public void proxyType(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") JavaPackage javaPackage,
-						  @CliOption(key = "type", mandatory = true, help = "The type to base the created request on") JavaType type) {
+	public void proxyType(
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") JavaPackage javaPackage,
+		@CliOption(key = "type", mandatory = true, help = "The type to base the created request on") JavaType type) {
+		
 		gwtOperations.proxyType(javaPackage, type);
 	}
 
 	@CliCommand(value = "web gwt request all")
-	public void requestAll(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") JavaPackage javaPackage) {
+	public void requestAll(
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") JavaPackage javaPackage) {
+		
 		gwtOperations.requestAll(javaPackage);
 	}
 
 	@CliCommand(value = "web gwt request type")
-	public void requestType(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") JavaPackage javaPackage,
-						   @CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created request on") JavaType type) {
+	public void requestType(
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") JavaPackage javaPackage,
+		@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created request on") JavaType type) {
+		
 		gwtOperations.requestType(javaPackage, type);
 	}
 
 	@CliCommand(value = "web gwt proxy request all")
-	public void proxyAndRequestAll(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage) {
+	public void proxyAndRequestAll(
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage) {
+		
 		gwtOperations.proxyAndRequestAll(javaPackage);
 	}
 
 	@CliCommand(value = "web gwt proxy request type")
-	public void proxyAndRequestType(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage,
-									@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created proxy and request on") JavaType type) {
+	public void proxyAndRequestType(
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage,
+		@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created proxy and request on") JavaType type) {
+		
 		gwtOperations.proxyAndRequestType(javaPackage, type);
 	}
 

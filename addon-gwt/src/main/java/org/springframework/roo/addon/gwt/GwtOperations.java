@@ -7,6 +7,7 @@ import org.springframework.roo.model.JavaType;
  * Provides GWT installation services.
  *
  * @author Ben Alex
+ * @author James Tyrrell
  * @since 1.1
  */
 public interface GwtOperations {
