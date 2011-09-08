@@ -80,6 +80,14 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		setAnnotations(annotationMetadataBuilders);
 	}
 
+	public boolean updateTypeAnnotation(AnnotationMetadataBuilder annotationBuilder) {
+		return updateTypeAnnotation(annotationBuilder.build());
+	}
+
+	public boolean updateTypeAnnotation(AnnotationMetadata annotation) {
+		return updateTypeAnnotation(annotation, null);
+	}
+
 	public boolean updateTypeAnnotation(AnnotationMetadata annotation, Set<JavaSymbolName> attributesToDeleteIfPresent) {
 		boolean hasChanged = false;
 
@@ -88,8 +96,8 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new LinkedHashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
 
 		AnnotationMetadataBuilder existingBuilder = MemberFindingUtils.getDeclaredTypeAnnotation(this, annotation.getAnnotationType());
-		AnnotationMetadata existing = existingBuilder.build();
-		if (existing == null) {
+
+		if (existingBuilder == null) {
 			// Not already present, so just go and add it
 			for (JavaSymbolName incomingAttributeName : annotation.getAttributeNames()) {
 				// Do not copy incoming attributes which exist in the attributesToDeleteIfPresent Set
@@ -103,6 +111,8 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 			addAnnotation(replacement);
 			return true;
 		}
+
+		AnnotationMetadata existing = existingBuilder.build();
 
 		// Copy the existing attributes into the new attributes
 		for (JavaSymbolName existingAttributeName : existing.getAttributeNames()) {
@@ -127,13 +137,12 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 					replacementAttributeValues.put(incomingAttributeName, incomingValue);
 					hasChanged = true;
 				}
-			} else if (attributesToDeleteIfPresent != null && !attributesToDeleteIfPresent.contains(incomingAttributeName)) {
+			} else if (attributesToDeleteIfPresent == null || !attributesToDeleteIfPresent.contains(incomingAttributeName)) {
 				// This is a new attribute that does not already exist, so add it to the end of the replacement attributes
 				replacementAttributeValues.put(incomingAttributeName, incomingValue);
 				hasChanged = true;
 			}
 		}
-
 		// Were there any material changes?
 		if (!hasChanged) {
 			return false;
