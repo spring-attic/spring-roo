@@ -73,37 +73,37 @@ public class JavaParserUtils  {
 	public static final int getJdkModifier(int modifiers) {
 		int result = 0;
 		if (ModifierSet.isAbstract(modifiers)) {
-			result = result |= Modifier.ABSTRACT;
+			result |= Modifier.ABSTRACT;
 		}
 		if (ModifierSet.isFinal(modifiers)) {
-			result = result |= Modifier.FINAL;
+			result |= Modifier.FINAL;
 		}
 		if (ModifierSet.isNative(modifiers)) {
-			result = result |= Modifier.NATIVE;
+			result |= Modifier.NATIVE;
 		}
 		if (ModifierSet.isPrivate(modifiers)) {
-			result = result |= Modifier.PRIVATE;
+			result |= Modifier.PRIVATE;
 		}
 		if (ModifierSet.isProtected(modifiers)) {
-			result = result |= Modifier.PROTECTED;
+			result |= Modifier.PROTECTED;
 		}
 		if (ModifierSet.isPublic(modifiers)) {
-			result = result |= Modifier.PUBLIC;
+			result |= Modifier.PUBLIC;
 		}
 		if (ModifierSet.isStatic(modifiers)) {
-			result = result |= Modifier.STATIC;
+			result |= Modifier.STATIC;
 		}
 		if (ModifierSet.isStrictfp(modifiers)) {
-			result = result |= Modifier.STRICT;
+			result |= Modifier.STRICT;
 		}
 		if (ModifierSet.isSynchronized(modifiers)) {
-			result = result |= Modifier.SYNCHRONIZED;
+			result |= Modifier.SYNCHRONIZED;
 		}
 		if (ModifierSet.isTransient(modifiers)) {
-			result = result |= Modifier.TRANSIENT;
+			result |= Modifier.TRANSIENT;
 		}
 		if (ModifierSet.isVolatile(modifiers)) {
-			result = result |= Modifier.VOLATILE;
+			result |= Modifier.VOLATILE;
 		}
 		return result;
 	}
@@ -367,9 +367,7 @@ public class JavaParserUtils  {
 			}
 		}
 
-		String symbolName = nameToFind.getName();
-		if (symbolName.equals("?")) {
-			symbolName = JavaType.WILDCARD_NEITHER.getSymbolName();
+		if ("?".equals(nameToFind.getName())) {
 			return new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
 		}
 

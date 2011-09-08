@@ -46,7 +46,7 @@ public final class JavaPackage implements Comparable<JavaPackage> {
 	}
 
 	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof JavaPackage && this.compareTo((JavaPackage) obj) == 0;
+		return obj instanceof JavaPackage && this.compareTo((JavaPackage) obj) == 0;
 	}
 
 	public final int compareTo(JavaPackage o) {

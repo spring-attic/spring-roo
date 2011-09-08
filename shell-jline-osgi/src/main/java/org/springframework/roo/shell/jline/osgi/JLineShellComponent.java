@@ -8,6 +8,7 @@ import static org.springframework.roo.support.util.AnsiEscapeCode.UNDERSCORE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -152,7 +153,7 @@ public class JLineShellComponent extends JLineShell {
 				sb.append(line);
 			}
 			return sb.toString();
-		} catch (Exception e) {
+		} catch (IOException e) {
 			return null;
 		} finally {
 			IOUtils.closeQuietly(reader, inputStream);

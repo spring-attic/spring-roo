@@ -14,7 +14,7 @@ import org.springframework.roo.shell.MethodTarget;
 public class CharacterConverter implements Converter<Character> {
 
 	public Character convertFromText(String value, Class<?> requiredType, String optionContext) {
-		return new Character(value.charAt(0));
+		return value.charAt(0);
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {

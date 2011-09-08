@@ -2,7 +2,7 @@ package org.springframework.roo.shell;
 
 import java.util.Comparator;
 
-/*
+/**
  * NaturalOrderComparator.java -- Perform natural order comparisons of strings in Java.
  * Copyright (C) 2003 by Pierre-Luc Paour <natorder@paour.com>
  * Based on the C version by Martin Pool, of which this is more or less a straight conversion.
@@ -18,13 +18,53 @@ import java.util.Comparator;
  *
  * 1. The origin of this software must not be misrepresented; you must not
  *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
+ *    in a product, an acknowledgement in the product documentation would be
  *    appreciated but is not required.
  * 2. Altered source versions must be plainly marked as such, and must not be
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  */
 public class NaturalOrderComparator<E> implements Comparator<E> {
+	
+	/**
+	 * Returns the character at the given position of the given string;
+	 * equivalent to {@link String#charAt(int)}, but handles overly large
+	 * indices.
+	 * 
+	 * @param s the string to read (can't be <code>null</code>)
+	 * @param i the index at which to read (zero-based)
+	 * @return 0 if the given index is beyond the end of the string
+	 */
+	static char charAt(String s, int i) {
+		if (i >= s.length()) {
+			return 0;
+		}
+		return s.charAt(i);
+	}
+
+	/**
+	 * Indicates whether the given character is whitespace
+	 * 
+	 * @param c the character to check
+	 * @return see above
+	 */
+	public static boolean isSpace(char c) {
+		switch (c) {
+			case ' ':
+				return true;
+			case '\n':
+				return true;
+			case '\t':
+				return true;
+			case '\f':
+				return true;
+			case '\r':
+				return true;
+			default:
+				return false;
+		}
+	}
+	
 	int compareRight(String a, String b) {
 		int bias = 0;
 		int ia = 0;
@@ -133,30 +173,6 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 
 			++ia;
 			++ib;
-		}
-	}
-
-	static char charAt(String s, int i) {
-		if (i >= s.length()) {
-			return 0;
-		}
-		return s.charAt(i);
-	}
-
-	public static boolean isSpace(char c) {
-		switch (c) {
-			case ' ':
-				return true;
-			case '\n':
-				return true;
-			case '\t':
-				return true;
-			case '\f':
-				return true;
-			case '\r':
-				return true;
-			default:
-				return false;
 		}
 	}
 }

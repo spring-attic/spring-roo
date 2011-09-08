@@ -90,7 +90,7 @@ public class ClasspathCommands implements CommandMarker {
 
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
-			modifier = modifier |= Modifier.ABSTRACT;
+			modifier |= Modifier.ABSTRACT;
 		}
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);

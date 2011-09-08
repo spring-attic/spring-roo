@@ -12,9 +12,16 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class FieldToken implements Token, Comparable<FieldToken> {
-	private FieldMetadata field;	
+	
+	// Fields
+	private final FieldMetadata field;	
 	private JavaSymbolName fieldName;
 
+	/**
+	 * Constructor
+	 *
+	 * @param field
+	 */
 	public FieldToken(FieldMetadata field) {
 		Assert.notNull(field, "FieldMetadata required");
 		this.field = field;

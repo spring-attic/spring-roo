@@ -16,7 +16,7 @@ public class MethodTarget implements Comparable<MethodTarget> {
 		if (o == null) {
 			throw new NullPointerException();
 		}
-		if (this.equals(o)) {
+		if (this == o) {
 			return 0;
 		}
 		return this.remainingBuffer.compareTo(o.remainingBuffer);

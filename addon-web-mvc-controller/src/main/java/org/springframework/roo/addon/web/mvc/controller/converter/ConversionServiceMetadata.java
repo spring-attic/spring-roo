@@ -78,7 +78,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		for (final JavaType type : new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
 			String simpleName = type.getSimpleTypeName();
 			while (methodNames.contains(simpleName)) {
-				simpleName = simpleName + "_";
+				simpleName += "_";
 			}
 			methodNames.add(simpleName);
 			JavaSymbolName toIdMethodName = new JavaSymbolName("get" + simpleName + "ToStringConverter");

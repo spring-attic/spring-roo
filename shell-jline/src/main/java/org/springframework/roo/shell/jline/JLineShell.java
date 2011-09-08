@@ -470,7 +470,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		}
 	}
 
-	private class FlashInfo {
+	private static class FlashInfo {
 		String flashMessage;
 		long flashMessageUntil;
 		Level flashLevel;

@@ -119,7 +119,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 					sb.append(line);
 				}
 				result = sb.toString();
-			} catch (Exception e) {
+			} catch (IOException e) {
 				logger.warning("Unable to connect to " + urlStr);
 			} finally {
 				IOUtils.closeQuietly(rd);

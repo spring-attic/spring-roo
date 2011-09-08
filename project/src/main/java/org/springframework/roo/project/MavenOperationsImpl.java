@@ -142,10 +142,18 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		}
 	}
 	
-	private class LoggingInputStream extends Thread {
-		private BufferedReader reader;
-		private ProcessManager processManager;
+	private static class LoggingInputStream extends Thread {
+		
+		// Fields
+		private final BufferedReader reader;
+		private final ProcessManager processManager;
 
+		/**
+		 * Constructor
+		 *
+		 * @param inputStream
+		 * @param processManager
+		 */
 		public LoggingInputStream(InputStream inputStream, ProcessManager processManager) {
 			this.reader = new BufferedReader(new InputStreamReader(inputStream));
 			this.processManager = processManager;

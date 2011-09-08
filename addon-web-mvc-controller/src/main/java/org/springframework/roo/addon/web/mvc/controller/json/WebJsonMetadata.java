@@ -70,12 +70,26 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	private WebJsonAnnotationValues annotationValues;
 	private boolean servicesInjected;
 
+	/**
+	 * Constructor
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 * @param annotationValues
+	 * @param persistenceAdditions
+	 * @param identifierField
+	 * @param plural
+	 * @param finderDetails (required)
+	 * @param jsonMetadata
+	 * @param servicesInjected
+	 */
 	public WebJsonMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebJsonAnnotationValues annotationValues, final Map<String, MemberTypeAdditions> persistenceAdditions, final FieldMetadata identifierField, final String plural, final Set<FinderMetadataDetails> finderDetails, JsonMetadata jsonMetadata, boolean servicesInjected) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(persistenceAdditions, "Persistence additions required");
-		Assert.notNull(finderDetails, "Array of dynamic finder methods cannot be null");
+		Assert.notNull(finderDetails, "Set of dynamic finder methods cannot be null");
 		Assert.notNull(jsonMetadata, "Json metadata required");
 		if (!isValid()) {
 			return;
@@ -104,7 +118,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		MemberTypeAdditions removeMethod = persistenceAdditions.get(PersistenceCustomDataKeys.REMOVE_METHOD.name());
 			builder.addMethod(getJsonDeleteMethod(removeMethod, identifierField, findMethod));
 
-		if (annotationValues.isExposeFinders() && !finderDetails.isEmpty()) {
+		if (annotationValues.isExposeFinders()) {
 			for (FinderMetadataDetails finder : finderDetails) {
 				builder.addMethod(getFinderJsonMethod(finder, plural));
 			}
@@ -439,8 +453,11 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 	
 	private MethodMetadata getFinderJsonMethod(FinderMetadataDetails finderDetails, String plural) {
+		if (finderDetails == null || jsonMetadata.getToJsonArrayMethodName() == null) {
+			return null;
+		}
 		JavaSymbolName finderMethodName = new JavaSymbolName("json" + StringUtils.capitalize(finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName()));
-		if (finderDetails == null || jsonMetadata.getToJsonArrayMethodName() == null || methodExists(finderMethodName)) {
+		if (methodExists(finderMethodName)) {
 			return null;
 		}
 		

@@ -312,17 +312,17 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			}
 
 		} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
-			initializer = new Boolean(false).toString();
+			initializer = Boolean.valueOf(false).toString();
 		} else if (fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.INT_PRIMITIVE)) {
-			initializer = new Integer(index).toString();
+			initializer = Integer.valueOf(index).toString();
 		} else if (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
 			initializer = new Double(index).toString();
 		} else if (fieldType.equals(JavaType.FLOAT_OBJECT) || fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 			initializer = new Float(index).toString();
 		} else if (fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
-			initializer = new Long(index).toString();
+			initializer = Long.valueOf(index).toString();
 		} else if (fieldType.equals(JavaType.SHORT_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE)) {
-			initializer = new Short(index).toString();
+			initializer = Short.valueOf(index).toString();
 		} else if (fieldType.equals(new JavaType("java.math.BigDecimal"))) {
 			initializer = new BigDecimal(index).toString();
 		}

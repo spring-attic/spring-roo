@@ -34,15 +34,16 @@ public class ToStringCreator {
 	 */
 	private static final ToStringStyler DEFAULT_TO_STRING_STYLER = new DefaultToStringStyler(StylerUtils.DEFAULT_VALUE_STYLER);
 
-
-	private StringBuilder buffer = new StringBuilder(512);
-	private ToStringStyler styler;
-	private Object object;
+	// Fields
+	private final StringBuilder buffer = new StringBuilder(512);
+	private final ToStringStyler styler;
+	private final Object object;
+	
 	private boolean styledFirstField;
-
 
 	/**
 	 * Create a ToStringCreator for the given object.
+	 * 
 	 * @param obj the object to be stringified
 	 */
 	public ToStringCreator(Object obj) {
@@ -51,6 +52,7 @@ public class ToStringCreator {
 
 	/**
 	 * Create a ToStringCreator for the given object, using the provided style.
+	 * 
 	 * @param obj the object to be stringified
 	 * @param styler the ValueStyler encapsulating pretty-print instructions
 	 */
@@ -60,6 +62,7 @@ public class ToStringCreator {
 
 	/**
 	 * Create a ToStringCreator for the given object, using the provided style.
+	 * 
 	 * @param obj the object to be stringified
 	 * @param styler the ToStringStyler encapsulating pretty-print instructions
 	 */
@@ -70,49 +73,53 @@ public class ToStringCreator {
 		this.styler.styleStart(this.buffer, this.object);
 	}
 
-
 	/**
 	 * Append a byte field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, byte value) {
-		return append(fieldName, new Byte(value));
+		return append(fieldName, Byte.valueOf(value));
 	}
 
 	/**
 	 * Append a short field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, short value) {
-		return append(fieldName, new Short(value));
+		return append(fieldName, Short.valueOf(value));
 	}
 
 	/**
 	 * Append a integer field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, int value) {
-		return append(fieldName, new Integer(value));
+		return append(fieldName, Integer.valueOf(value));
 	}
 
 	/**
 	 * Append a long field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
 	public ToStringCreator append(String fieldName, long value) {
-		return append(fieldName, new Long(value));
+		return append(fieldName, Long.valueOf(value));
 	}
 
 	/**
 	 * Append a float field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
@@ -123,6 +130,7 @@ public class ToStringCreator {
 
 	/**
 	 * Append a double field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
@@ -133,6 +141,7 @@ public class ToStringCreator {
 
 	/**
 	 * Append a boolean field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
@@ -143,6 +152,7 @@ public class ToStringCreator {
 
 	/**
 	 * Append a field value.
+	 * 
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value; can be <code>null</code>
 	 * @return this, to support call-chaining
@@ -164,6 +174,7 @@ public class ToStringCreator {
 
 	/**
 	 * Append the provided value.
+	 * 
 	 * @param value The value to append
 	 * @return this, to support call-chaining.
 	 */

@@ -139,7 +139,7 @@ public class MemberDetailsBuilder {
 		return typeDetailsBuilder;
 	}
 
-	class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
+	static class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
 		private MemberHoldingTypeDetails existing;
 
 		protected TypeDetailsBuilder(MemberHoldingTypeDetails existing) {

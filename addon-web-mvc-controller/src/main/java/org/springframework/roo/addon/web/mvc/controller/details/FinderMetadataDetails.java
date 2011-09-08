@@ -12,7 +12,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @since 1.1.2
  */
-public class FinderMetadataDetails implements Comparable<FinderMetadataDetails>, Cloneable {
+public class FinderMetadataDetails implements Comparable<FinderMetadataDetails> {
 	
 	// Fields
 	private String finderName;
@@ -48,7 +48,7 @@ public class FinderMetadataDetails implements Comparable<FinderMetadataDetails>,
 
 	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof FinderMetadataDetails && finderName.equals(((FinderMetadataDetails) obj).finderName);
+		return obj instanceof FinderMetadataDetails && finderName.equals(((FinderMetadataDetails) obj).finderName);
 	}
 
 	public final int compareTo(FinderMetadataDetails o) {

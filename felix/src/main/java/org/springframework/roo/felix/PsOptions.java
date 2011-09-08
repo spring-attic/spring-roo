@@ -40,7 +40,7 @@ public class PsOptions implements Comparable<PsOptions> {
 	}
 
 	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof PsOptions && this.compareTo((PsOptions)obj) == 0;
+		return obj instanceof PsOptions && this.compareTo((PsOptions)obj) == 0;
 	}
 
 	public final int compareTo(PsOptions o) {

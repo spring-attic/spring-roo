@@ -137,7 +137,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 	@Override
 	public boolean equals(final Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName) obj).symbolName);
+		return obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName) obj).symbolName);
 	}
 	
 	/**

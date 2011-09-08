@@ -53,7 +53,7 @@ public class Filter implements Comparable<Filter> {
 	}
 
 	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Filter && this.compareTo((Filter) obj) == 0;
+		return obj instanceof Filter && this.compareTo((Filter) obj) == 0;
 	}
 
 	public int compareTo(Filter o) {

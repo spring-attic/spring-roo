@@ -112,7 +112,7 @@ public class Repository implements Comparable<Repository> {
 
 	@Override
 	public boolean equals(final Object obj) {
-		return obj != null && obj instanceof Repository && this.compareTo((Repository) obj) == 0;
+		return obj instanceof Repository && this.compareTo((Repository) obj) == 0;
 	}
 
 	public int compareTo(final Repository o) {

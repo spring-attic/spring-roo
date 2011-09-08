@@ -37,7 +37,7 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 	public int compareTo(MetadataTimingStatistic o) {
 		int result = new Long(time).compareTo(o.getTime());
 		if (result == 0) {
-			result = new Long(invocations).compareTo(o.getInvocations());
+			result = Long.valueOf(invocations).compareTo(o.getInvocations());
 		}
 		if (result == 0) {
 			result = name.compareTo(o.getName());
@@ -47,12 +47,12 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj != null && obj instanceof MetadataTimingStatistic && this.compareTo((MetadataTimingStatistic)obj) == 0;
+		return obj instanceof MetadataTimingStatistic && this.compareTo((MetadataTimingStatistic) obj) == 0;
 	}
 
 	@Override
 	public int hashCode() {
-		return new Long(time).hashCode() * new Long(invocations).hashCode() * name.hashCode();
+		return Long.valueOf(time).hashCode() * Long.valueOf(invocations).hashCode() * name.hashCode();
 	}
 
 	@Override

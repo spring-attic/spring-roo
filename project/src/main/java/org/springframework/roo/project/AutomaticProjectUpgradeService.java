@@ -101,7 +101,9 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 		}
 	}
 	
-	private class VersionInfo implements Comparable<VersionInfo> {
+	private static class VersionInfo implements Comparable<VersionInfo> {
+		
+		// Fields
 		private Integer major = 0;
 		private Integer minor = 0;
 		private Integer patch = 0;

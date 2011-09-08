@@ -159,8 +159,8 @@ public class TilesOperationsImpl implements TilesOperations {
 		return tilesView.getDocumentElement();	
 	}
 	
-	private class TilesDtdResolver implements EntityResolver {		
-		public InputSource resolveEntity (String publicId, String systemId) {
+	private static class TilesDtdResolver implements EntityResolver {		
+		public InputSource resolveEntity(String publicId, String systemId) {
 			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {				
 				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
 			}

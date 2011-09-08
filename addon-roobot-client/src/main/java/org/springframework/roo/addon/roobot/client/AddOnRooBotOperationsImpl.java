@@ -115,7 +115,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			if (roobot != null && roobot.length() > 0) {
 				rooBotXmlUrl = roobot;
 			}
-			rooBotIndexDownload = new Boolean(bundleContext.getProperty("roobot.index.dowload"));
+			rooBotIndexDownload = Boolean.valueOf(bundleContext.getProperty("roobot.index.dowload"));
 		}
 		if (rooBotIndexDownload) {
 			rooBotEagerDownload = new Thread(new Runnable() {
@@ -449,7 +449,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	public void upgradeSettings(AddOnStabilityLevel addOnStabilityLevel) {
 		if (addOnStabilityLevel == null) {
-			addOnStabilityLevel = checkAddOnStabilityLevel(addOnStabilityLevel);
+			addOnStabilityLevel = checkAddOnStabilityLevel(null);
 			LOGGER.info("Current Add-on Stability Level: " + addOnStabilityLevel.name());
 		} else {
 			boolean success = true;
@@ -773,20 +773,27 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			obrUrl = new URL(repoUrl);
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			if (obrUrl.toExternalForm().endsWith(".zip")) {
-				ZipInputStream zip = new ZipInputStream(obrUrl.openStream());
-				zip.getNextEntry();
-
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				byte[] buffer = new byte[8192];
-				int length = -1;
-				while (zip.available() > 0) {
-					length = zip.read(buffer, 0, 8192);
-					if (length > 0) {
-						baos.write(buffer, 0, length);
+				ByteArrayInputStream bais = null;
+				ByteArrayOutputStream baos = null;
+				ZipInputStream zip = null;
+				try {
+					zip = new ZipInputStream(obrUrl.openStream());
+					zip.getNextEntry();
+					
+					baos = new ByteArrayOutputStream();
+					byte[] buffer = new byte[8192];
+					int length = -1;
+					while (zip.available() > 0) {
+						length = zip.read(buffer, 0, 8192);
+						if (length > 0) {
+							baos.write(buffer, 0, length);
+						}
 					}
+					bais = new ByteArrayInputStream(baos.toByteArray());
+					doc = db.parse(bais);
+				} finally {
+					IOUtils.closeQuietly(zip, bais, baos);
 				}
-				ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-				doc = db.parse(bais);
 			} else {
 				doc = db.parse(obrUrl.openStream());
 			}

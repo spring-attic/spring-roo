@@ -57,9 +57,16 @@ public abstract class AbstractProcessManagerStatusPublisher implements ProcessMa
 	 * Used so a single object instance contains the changing {@link ProcessManagerStatus} enum. This
 	 * is needed so there is a single object instance for synchronization purposes.
 	 */
-	private class StatusHolder {
+	private static class StatusHolder {
+		
+		// Fields
 		private ProcessManagerStatus status;
 		
+		/**
+		 * Constructor
+		 *
+		 * @param initialStatus
+		 */
 		private StatusHolder(ProcessManagerStatus initialStatus) {
 			status = initialStatus;
 		}

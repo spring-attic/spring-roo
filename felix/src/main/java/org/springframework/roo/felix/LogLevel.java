@@ -40,7 +40,7 @@ public class LogLevel implements Comparable<LogLevel> {
 	}
 
 	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof LogLevel && this.compareTo((LogLevel)obj) == 0;
+		return obj instanceof LogLevel && this.compareTo((LogLevel)obj) == 0;
 	}
 
 	public final int compareTo(LogLevel o) {

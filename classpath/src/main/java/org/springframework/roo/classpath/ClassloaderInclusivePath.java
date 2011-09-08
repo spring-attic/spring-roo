@@ -11,7 +11,9 @@ import org.springframework.roo.project.Path;
  * @since 1.0
  */
 public class ClassloaderInclusivePath extends Path {
-	private String classpath;
+	
+	// Fields
+	private final String classpath;
 	
 	/**
 	 * Creates an {@link ClassloaderInclusivePath} instance.

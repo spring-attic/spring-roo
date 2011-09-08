@@ -15,9 +15,9 @@ public class BooleanConverter implements Converter<Boolean> {
 
 	public Boolean convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if ("true".equalsIgnoreCase(value) || "1".equals(value) || "yes".equalsIgnoreCase(value)) {
-			return new Boolean(true);
+			return true;
 		} else if ("false".equalsIgnoreCase(value) || "0".equals(value) || "no".equalsIgnoreCase(value)) {
-			return new Boolean(false);
+			return false;
 		} else {
 			throw new IllegalArgumentException("Cannot convert " + value + " to type Boolean.");
 		}

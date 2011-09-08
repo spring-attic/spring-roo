@@ -75,7 +75,9 @@ public class LayerServiceImpl implements LayerService {
 	 * @author Stefan Schmidt
 	 * @since 1.2.0
 	 */
-	class DescendingLayerComparator implements Comparator<LayerProvider>, Serializable {
+	static class DescendingLayerComparator implements Comparator<LayerProvider>, Serializable {
+		
+		// Constants
 		private static final long serialVersionUID = 1L;
 		
 		public int compare(final LayerProvider provider1, final LayerProvider provider2) {

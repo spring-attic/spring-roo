@@ -10,8 +10,16 @@ import org.springframework.roo.model.JavaSymbolName;
  * @since 1.0
  */
 public class IntegerAttributeValue extends AbstractAnnotationAttributeValue<Integer> {
-	private int value;
 	
+	// Fields
+	private final int value;
+	
+	/**
+	 * Constructor
+	 *
+	 * @param name
+	 * @param value
+	 */
 	public IntegerAttributeValue(JavaSymbolName name, int value) {
 		super(name);
 		this.value = value;
@@ -22,6 +30,6 @@ public class IntegerAttributeValue extends AbstractAnnotationAttributeValue<Inte
 	}
 	
 	public String toString() {
-		return getName() + " -> " + new Integer(value).toString();
+		return getName() + " -> " + value;
 	}
 }

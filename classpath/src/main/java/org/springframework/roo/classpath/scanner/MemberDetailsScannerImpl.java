@@ -97,7 +97,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 	}
 
 	protected void deactivate(ComponentContext componentContext) {
-		synchronized (lock) {}
+		// Empty
 	}
 
 	public final MemberDetails getMemberDetails(final String requestingClass, ClassOrInterfaceTypeDetails cid) {

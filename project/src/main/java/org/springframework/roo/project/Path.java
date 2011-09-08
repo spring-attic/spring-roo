@@ -55,7 +55,7 @@ public class Path implements Comparable<Path> {
 	}
 
 	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Path && this.compareTo((Path) obj) == 0;
+		return obj instanceof Path && this.compareTo((Path) obj) == 0;
 	}
 
 	public int compareTo(Path o) {

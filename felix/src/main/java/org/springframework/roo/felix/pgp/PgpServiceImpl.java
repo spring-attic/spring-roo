@@ -58,24 +58,29 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class PgpServiceImpl implements PgpService {
 	
-	@Reference private UrlInputStreamService urlInputStreamService;
-	private boolean automaticTrust = false;
-	private BundleContext context;
+	// Constants
+	private static final int BUFFER_SIZE = 1024;
 	private static final File ROO_PGP_FILE = new File(System.getProperty("user.home") + File.separatorChar + ".spring_roo_pgp.bpg");
-	private static String DEFAULT_KEYSERVER_URL = "http://keyserver.ubuntu.com/pks/lookup?op=get&search=";
-	// private static final String DEFAULT_KEYSERVER_URL = "http://pgp.mit.edu/pks/lookup?op=get&search=";
-    private static final int BUFFER_SIZE = 1024;
-    private SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();	
-    
-    static {
+
+	// Class (static) fields
+	private static String defaultKeyServerUrl = "http://keyserver.ubuntu.com/pks/lookup?op=get&search=";
+	// private static String defaultKeyServerUrl = "http://pgp.mit.edu/pks/lookup?op=get&search=";
+	
+	static {
 		Security.addProvider(new BouncyCastleProvider());
-    }
+	}
+	
+	// Instance fields
+	@Reference private UrlInputStreamService urlInputStreamService;
+	private boolean automaticTrust;
+	private BundleContext context;
+    private final SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();	
     
     protected void activate(ComponentContext context) {
     	this.context = context.getBundleContext();
     	String keyserver = context.getBundleContext().getProperty("pgp.keyserver.url");
     	if (keyserver != null && keyserver.length() > 0) {
-    		DEFAULT_KEYSERVER_URL = keyserver;
+    		defaultKeyServerUrl = keyserver;
     	}
     	trustDefaultKeysIfRequired();
     	// Seed the discovered keys database
@@ -287,7 +292,7 @@ public class PgpServiceImpl implements PgpService {
 			throw new IllegalStateException(e);
 		}
 		
-		if (obj != null && obj instanceof PGPPublicKeyRing) {
+		if (obj instanceof PGPPublicKeyRing) {
 			PGPPublicKeyRing keyRing = (PGPPublicKeyRing) obj;
 			rememberKey(keyRing);
 			return keyRing;
@@ -307,7 +312,7 @@ public class PgpServiceImpl implements PgpService {
 	 */
 	private URL getKeyServerUrlToRetrieveKeyId(PgpKeyId keyId) {
 		try {
-			return new URL(DEFAULT_KEYSERVER_URL + keyId);
+			return new URL(defaultKeyServerUrl + keyId);
 		} catch (MalformedURLException e) {
 			throw new IllegalStateException(e);
 		}

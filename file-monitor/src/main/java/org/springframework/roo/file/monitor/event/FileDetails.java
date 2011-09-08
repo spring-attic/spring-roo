@@ -42,7 +42,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	}
 
 	public boolean equals(Object obj) {
-		return obj != null && obj instanceof FileDetails && this.compareTo((FileDetails)obj) == 0;
+		return obj instanceof FileDetails && this.compareTo((FileDetails)obj) == 0;
 	}
 
 	public int compareTo(FileDetails o) {

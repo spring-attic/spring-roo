@@ -123,7 +123,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
 			// Update the invocation count
 			Long existingInvocations = invocations.get(responsibleClass);
 			if (existingInvocations == null) {
-				existingInvocations = new Long(0);
+				existingInvocations = 0L;
 			}
 			existingInvocations++;
 			invocations.put(responsibleClass, existingInvocations);
@@ -146,9 +146,9 @@ public class DefaultMetadataLogger implements MetadataLogger {
 		} catch (IOException ignoreIt) {}
 	}
 	
-	private class TimerEntry {
+	private static class TimerEntry {
 		String responsibleClass;
-		long clockStartedOrResumed = 0; // nanos
-		long duration = 0; // nanos
+		long clockStartedOrResumed; // nanos
+		long duration; // nanos
 	}
 }

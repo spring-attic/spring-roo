@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Collection;
@@ -144,7 +145,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		// Another command was attempted
     	setShellStatus(ShellStatus.Status.PARSING);
 
-    	ExecutionStrategy executionStrategy = getExecutionStrategy();
+    	final ExecutionStrategy executionStrategy = getExecutionStrategy();
     	boolean flashedMessage = false;
     	while (executionStrategy == null || !executionStrategy.isReadyForCommands()) {
     		// Wait
@@ -403,14 +404,10 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				bundleVersion = manifest.getMainAttributes().getValue("Bundle-Version");
 				gitCommitHash = manifest.getMainAttributes().getValue("Git-Commit-Hash");
 			}
-		} catch (Exception ignoreAndMoveOn) { }
-		finally {
-			if (jarFile != null) {
-				try {
-					jarFile.close();
-				}
-				catch (IOException ignored) {}
-			}
+		} catch (IOException ignoreAndMoveOn) {
+		} catch (URISyntaxException ignoreAndMoveOn) {
+		} finally {
+			IOUtils.closeQuietly(jarFile);
 		}
 		
 		StringBuilder sb = new StringBuilder();

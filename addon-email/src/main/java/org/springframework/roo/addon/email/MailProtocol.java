@@ -32,7 +32,7 @@ public class MailProtocol implements Comparable<MailProtocol> {
 	}
 
 	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof MailProtocol && this.compareTo((MailProtocol) obj) == 0;
+		return obj instanceof MailProtocol && this.compareTo((MailProtocol) obj) == 0;
 	}
 
 	public int hashCode() {
