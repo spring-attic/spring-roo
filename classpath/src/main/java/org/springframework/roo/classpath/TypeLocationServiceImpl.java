@@ -307,9 +307,6 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 					}
 					return;
 				}
-				if (cid.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
-					return;
-				}
 				typeMap.put(id, cid);
 				updateChanges(cid.getName().getFullyQualifiedTypeName(), false);
 				updateAttributeCache(cid);
@@ -333,13 +330,15 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	}
 
 	private void updateCache() {
+		if (typeMap.isEmpty()) {
+			initTypeMap();
+			return;
+		}
 		// Retrieve a list of paths that have been discovered or modified since the last invocation by this class
 		HashSet<String> changes = fileMonitorService.getWhatsDirty(TypeLocationServiceImpl.class.getName());
-
 		// Update the type cache
 		for (String change : changes) {
 			if (doesPathIndicateJavaType(change)) {
-				// This is left here for verification purposes, but not for long - JTT 24/08/11
 				cacheType(change);
 			}
 		}
@@ -372,5 +371,14 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 			}
 		}
 		return false;
+	}
+
+	private void initTypeMap() {
+		for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
+			PathResolver pathResolver = projectOperations.getPathResolver();
+			for (FileDetails file : fileManager.findMatchingAntPath(pathResolver.getRoot(path) + File.separatorChar + "**" + File.separatorChar + "*.java")) {
+				cacheType(file.getCanonicalPath());
+			}
+		}
 	}
 }

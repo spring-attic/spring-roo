@@ -548,8 +548,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	
 	public void notifyChanged(String fileCanonicalPath) {
 		synchronized (lock) {
+			updateChanges(fileCanonicalPath, false);
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
-				updateChanges(fileCanonicalPath, false);
 				notifyChanged.add(fileCanonicalPath);
 			}
 		}
@@ -557,8 +557,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public void notifyCreated(String fileCanonicalPath) {
 		synchronized (lock) {
+			updateChanges(fileCanonicalPath, false);
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
-				updateChanges(fileCanonicalPath, false);
 				notifyCreated.add(fileCanonicalPath);
 			}
 		}
@@ -566,8 +566,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	public void notifyDeleted(String fileCanonicalPath) {
 		synchronized (lock) {
+			updateChanges(fileCanonicalPath, true);
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
-				updateChanges(fileCanonicalPath, true);
 				notifyDeleted.add(fileCanonicalPath);
 			}
 		}
