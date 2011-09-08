@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +75,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private List<EmbeddedHolder> embeddedHolders;
 	private Map<MethodMetadata, String> fieldInitializers = new LinkedHashMap<MethodMetadata, String>();
 	private Map<FieldMetadata, Map<FieldMetadata, String>> embeddedFieldInitializers = new LinkedHashMap<FieldMetadata, Map<FieldMetadata, String>>();
-	private List<JavaType> requiredDataOnDemandCollaborators = new LinkedList<JavaType>();
+	private List<JavaType> requiredDataOnDemandCollaborators = new ArrayList<JavaType>();
 	private MemberTypeAdditions findMethod;
 	private MethodMetadata identifierAccessor;
 	private JavaType idType;
@@ -455,7 +454,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private List<MethodMetadata> getFieldMutatorMethods() {
-		List<MethodMetadata> fieldMutatorMethods = new LinkedList<MethodMetadata>();
+		List<MethodMetadata> fieldMutatorMethods = new ArrayList<MethodMetadata>();
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));

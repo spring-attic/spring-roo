@@ -20,7 +20,6 @@ import japa.parser.ast.expr.StringLiteralExpr;
 import japa.parser.ast.type.Type;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -364,7 +363,7 @@ public final class JavaParserAnnotationMetadataBuilder implements Builder<Annota
 			} else if (castValue.getValue().getAttributeNames().size() == 1) {
 				annotationExpr = new SingleMemberAnnotationExpr(JavaParserUtils.getNameExpr(nestedAnnotation.getAnnotationType().getFullyQualifiedTypeName()), convert(nestedAnnotation.getAttribute(nestedAnnotation.getAttributeNames().get(0))).getValue());
 			} else {
-				List<MemberValuePair> memberValuePairs = new LinkedList<MemberValuePair>();
+				List<MemberValuePair> memberValuePairs = new ArrayList<MemberValuePair>();
 				for (JavaSymbolName attributeName : nestedAnnotation.getAttributeNames()) {
 					memberValuePairs.add(convert(nestedAnnotation.getAttribute(attributeName)));
 				}

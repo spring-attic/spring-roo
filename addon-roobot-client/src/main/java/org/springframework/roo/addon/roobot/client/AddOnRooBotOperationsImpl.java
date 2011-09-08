@@ -8,10 +8,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -320,7 +320,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 					}
 				}
 				List<Bundle> bundles = Bundle.orderBySearchRelevance(new ArrayList<Bundle>(bundleCache.values()));
-				LinkedList<Bundle> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, communityOnly, requiresCommand, onlyRelevantBundles);
+				List<Bundle> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, communityOnly, requiresCommand, onlyRelevantBundles);
 				if (showFeedback) {
 					printResultList(filteredSearchResults, maxResults, linesPerResult);
 				}
@@ -347,7 +347,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			}
 			if (bundleCache.size() != 0) {
 				List<Bundle> bundles = Bundle.orderByRanking(new ArrayList<Bundle>(bundleCache.values()));
-				LinkedList<Bundle> filteredList = filterList(bundles, trustedOnly, compatibleOnly, communityOnly, requiresCommand, false);
+				List<Bundle> filteredList = filterList(bundles, trustedOnly, compatibleOnly, communityOnly, requiresCommand, false);
 				printResultList(filteredList, maxResults, linesPerResult);
 			} else {
 				LOGGER.info("No add-ons known. Are you online? Try the 'download status' command");
@@ -476,8 +476,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	private LinkedList<Bundle> filterList(List<Bundle> bundles, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand, boolean onlyRelevantBundles) {
-		LinkedList<Bundle> filteredList = new LinkedList<Bundle>();
+	private List<Bundle> filterList(List<Bundle> bundles, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand, boolean onlyRelevantBundles) {
+		List<Bundle> filteredList = new ArrayList<Bundle>();
 		List<PGPPublicKeyRing> keys = null;
 		if (trustedOnly) {
 			keys = pgpService.getTrustedKeys();
@@ -516,7 +516,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return filteredList;
 	}
 
-	private void printResultList(LinkedList<Bundle> bundles, int maxResults, int linesPerResult) {
+	private void printResultList(Collection<Bundle> bundles, int maxResults, int linesPerResult) {
 		int bundleId = 1;
 		searchResultCache.clear();
 		StringBuilder sb = new StringBuilder();
@@ -535,7 +535,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			sb.append(isCompatible(latest.getRooVersion()) ? "Y " : "- ");
 			sb.append(latest.getVersion());
 			sb.append(" ");
-			ArrayList<String> split = new ArrayList<String>(Arrays.asList(latest.getDescription().split("\\s")));
+			List<String> split = new ArrayList<String>(Arrays.asList(latest.getDescription().split("\\s")));
 			int lpr = linesPerResult;
 			while (split.size() > 0 && --lpr >= 0) {
 				while (!(split.isEmpty()) && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77 : 80))) {
@@ -630,7 +630,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 						// List only add-ons which are not core (see ROO-2190)
 						continue;
 					}
-					List<Comment> comments = new LinkedList<Comment>();
+					List<Comment> comments = new ArrayList<Comment>();
 					for (Element commentElement : XmlUtils.findElements("comments/comment", bundleElement)) {
 						comments.add(new Comment(Rating.fromInt(new Integer(commentElement.getAttribute("rating"))), commentElement.getAttribute("comment"), dateFormat.parse(commentElement.getAttribute("date"))));
 					}
@@ -739,7 +739,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			sb.append(content);
 			LOGGER.info(sb.toString());
 		} else {
-			ArrayList<String> split = new ArrayList<String>(Arrays.asList(content.split("\\s")));
+			List<String> split = new ArrayList<String>(Arrays.asList(content.split("\\s")));
 			if (split.size() == 1) {
 				while (content.length() > 65) {
 					sb.append(content.substring(0, 65));

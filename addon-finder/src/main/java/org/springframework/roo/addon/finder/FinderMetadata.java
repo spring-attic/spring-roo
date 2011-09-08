@@ -3,7 +3,6 @@ package org.springframework.roo.addon.finder;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -41,7 +40,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private MethodMetadata entityManagerMethod;
 	private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
 	private boolean isDataNucleusEnabled;
-	private List<MethodMetadata> dynamicFinderMethods =  new LinkedList<MethodMetadata>();
+	private List<MethodMetadata> dynamicFinderMethods =  new ArrayList<MethodMetadata>();
 	
 	public FinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, boolean isDataNucleusEnabled, MethodMetadata entityManagerMethod, SortedMap<JavaSymbolName, QueryHolder> queryHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);

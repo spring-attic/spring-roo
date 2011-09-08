@@ -31,7 +31,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -832,7 +831,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 	
 	private List<MethodMetadata> getListViewMethods() {
-		final List<MethodMetadata> listViewMethod = new LinkedList<MethodMetadata>();
+		final List<MethodMetadata> listViewMethod = new ArrayList<MethodMetadata>();
 		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
 			if (field.getCustomData() != null && field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY)) {
 				listViewMethod.add(locatedFieldsAndAccessors.get(field));

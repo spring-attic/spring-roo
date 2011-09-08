@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +48,7 @@ public enum GwtType {
 	private final String suffix;
 	private final String name;
 	private final String template;
-	private List<JavaSymbolName> watchedFieldNames = new LinkedList<JavaSymbolName>();
+	private List<JavaSymbolName> watchedFieldNames = new ArrayList<JavaSymbolName>();
 	private Map<JavaSymbolName, List<JavaType>> watchedMethods = new LinkedHashMap<JavaSymbolName, List<JavaType>>();
 	private boolean createAbstract = false;
 	private boolean overwriteConcrete = false;

@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -230,7 +229,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
-		List<MethodMetadata> requestMethods = new LinkedList<MethodMetadata>();
+		List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
 		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);

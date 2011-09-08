@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -583,7 +582,7 @@ public final class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		List<String> pathElements = new LinkedList<String>();
+		List<String> pathElements = new ArrayList<String>();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {

@@ -3,7 +3,6 @@ package org.springframework.roo.classpath.details;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,7 +73,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 	}
 
 	public final void setAnnotations(Collection<AnnotationMetadata> annotations) {
-		List<AnnotationMetadataBuilder> annotationMetadataBuilders = new LinkedList<AnnotationMetadataBuilder>();
+		List<AnnotationMetadataBuilder> annotationMetadataBuilders = new ArrayList<AnnotationMetadataBuilder>();
 		for (AnnotationMetadata annotationMetadata : annotations) {
 			annotationMetadataBuilders.add(new AnnotationMetadataBuilder(annotationMetadata));
 		}

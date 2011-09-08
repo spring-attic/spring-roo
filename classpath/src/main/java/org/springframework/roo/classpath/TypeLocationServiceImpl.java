@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -207,7 +206,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	}
 
 	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect) {
-		final List<ClassOrInterfaceTypeDetails> types = new LinkedList<ClassOrInterfaceTypeDetails>();
+		final List<ClassOrInterfaceTypeDetails> types = new ArrayList<ClassOrInterfaceTypeDetails>();
 		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
 				if (located != null) {

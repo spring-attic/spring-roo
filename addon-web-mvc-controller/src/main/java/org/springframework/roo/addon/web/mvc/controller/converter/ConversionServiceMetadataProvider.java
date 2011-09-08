@@ -3,11 +3,11 @@ package org.springframework.roo.addon.web.mvc.controller.converter;
 import static org.springframework.roo.model.RooJavaType.ROO_CONVERSION_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,7 +175,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		}
 		
 		Map<JavaType, List<MethodMetadata>> types = new LinkedHashMap<JavaType, List<MethodMetadata>>();
-		List<MethodMetadata> locatedAccessors = new LinkedList<MethodMetadata>();
+		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
 		
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		int counter = 0;

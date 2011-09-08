@@ -2,8 +2,8 @@ package org.springframework.roo.addon.tostring;
 
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -73,7 +73,7 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 			}
 		}
 		
-		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, new LinkedList<MethodMetadata>(locatedAccessors));
+		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, new ArrayList<MethodMetadata>(locatedAccessors));
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {

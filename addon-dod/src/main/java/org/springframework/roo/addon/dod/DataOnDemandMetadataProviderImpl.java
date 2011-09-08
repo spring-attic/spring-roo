@@ -6,7 +6,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -228,7 +227,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	}
 
 	private EmbeddedIdentifierHolder getEmbeddedIdentifierHolder(MemberDetails memberDetails, String metadataIdentificationString) {
-		final List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
+		final List<FieldMetadata> identifierFields = new ArrayList<FieldMetadata>();
 		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
 		if (fields.isEmpty()) {
 			return null;
@@ -263,7 +262,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 				continue;
 			}
 
-			final List<FieldMetadata> fields = new LinkedList<FieldMetadata>();
+			final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 
 			for (FieldMetadata field : MemberFindingUtils.getFields(embeddedMemberDetails)) {
 				if (!(Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier()) || Modifier.isTransient(field.getModifier()))) {

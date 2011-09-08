@@ -13,7 +13,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,7 +68,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	private List<String> provisionedServices = new ArrayList<String>();
 	private List<String> serviceTypes = new ArrayList<String>();
 	private Map<String, List<String>> boundUrlMap = new HashMap<String, List<String>>();
-	private List<Integer> memoryOptions = new LinkedList<Integer>();
+	private List<Integer> memoryOptions = new ArrayList<Integer>();
 
 	protected void deactivate(ComponentContext cc) {
 		if (uaaService instanceof TransmissionAwareUaaService) {

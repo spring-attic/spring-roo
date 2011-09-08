@@ -8,8 +8,8 @@ import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -148,7 +148,7 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 	}
 	
 	private List<MethodMetadata> getConverterMethods(final JavaType entityType, final MemberDetails memberDetails, final String metadataIdentificationString) {
-		final List<MethodMetadata> converterMethods = new LinkedList<MethodMetadata>();
+		final List<MethodMetadata> converterMethods = new ArrayList<MethodMetadata>();
 		
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entityType);

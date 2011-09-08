@@ -1,8 +1,8 @@
 package org.springframework.roo.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -19,7 +19,7 @@ import org.springframework.roo.support.util.Assert;
 public class ImportRegistrationResolverImpl implements ImportRegistrationResolver {
 	
 	// Constants
-	private static final List<String> javaLangSimpleTypeNames = new LinkedList<String>();
+	private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
 	
 	// Fields
 	private JavaPackage compilationUnitPackage;

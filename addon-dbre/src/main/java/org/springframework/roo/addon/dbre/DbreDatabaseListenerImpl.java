@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -160,7 +159,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Notify
-		final List<ClassOrInterfaceTypeDetails> allEntities = new LinkedList<ClassOrInterfaceTypeDetails>();
+		final List<ClassOrInterfaceTypeDetails> allEntities = new ArrayList<ClassOrInterfaceTypeDetails>();
 		allEntities.addAll(newEntities);
 		allEntities.addAll(managedEntities);
 		notify(allEntities);

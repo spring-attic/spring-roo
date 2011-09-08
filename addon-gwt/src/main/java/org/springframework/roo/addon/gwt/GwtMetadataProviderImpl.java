@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -148,7 +147,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		cannotMap.remove(persistenceMemberHoldingTypeDetails.getName().getFullyQualifiedTypeName());
 
 		Map<JavaSymbolName, MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(governorTypeDetails);
-		List<MethodMetadata> convertedProxyMethods = new LinkedList<MethodMetadata>();
+		List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
 		boolean dependsOnSomething = false;
 		for (MethodMetadata method : proxyMethods.values()) {
 			JavaType returnType = method.getReturnType().isCommonCollectionType() && method.getReturnType().getParameters().size() != 0 ? method.getReturnType().getParameters().get(0) : method.getReturnType();

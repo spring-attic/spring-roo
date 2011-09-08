@@ -5,7 +5,6 @@ import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -247,7 +246,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 */
 	public List<MethodMetadata> getAccessors() {
 		Assert.notNull(fields, "Fields required");
-		List<MethodMetadata> accessors = new LinkedList<MethodMetadata>();
+		List<MethodMetadata> accessors = new ArrayList<MethodMetadata>();
 
 		// Compute the names of the accessors that will be produced
 		for (FieldMetadata field : fields) {
@@ -287,7 +286,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 */
 	public List<MethodMetadata> getMutators() {
 		Assert.notNull(fields, "Fields required");
-		List<MethodMetadata> mutators = new LinkedList<MethodMetadata>();
+		List<MethodMetadata> mutators = new ArrayList<MethodMetadata>();
 
 		// Compute the names of the mutators that will be produced
 		for (FieldMetadata field : fields) {
@@ -334,7 +333,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public ConstructorMetadata getParameterizedConstructor() {
 		Assert.notNull(fields, "Fields required");
 		// Search for an existing constructor
-		List<JavaType> paramTypes = new LinkedList<JavaType>();
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		for (FieldMetadata field : fields) {
 			paramTypes.add(field.getFieldType());
 		}
@@ -347,7 +346,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 
 		// Create the constructor
-		List<JavaSymbolName> paramNames = new LinkedList<JavaSymbolName>();
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
 		for (FieldMetadata field : fields) {

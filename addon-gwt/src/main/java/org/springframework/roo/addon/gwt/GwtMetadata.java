@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -131,7 +130,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			typeDetailsBuilder.addExtendsTypes(new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy"));
 		}
 
-		List<MethodMetadataBuilder> methods = new LinkedList<MethodMetadataBuilder>();
+		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		for (MethodMetadata method : proxyMethods) {
 			MethodMetadataBuilder abstractAccessorMethodBuilder = new MethodMetadataBuilder(destinationMetadataId, method);
 			abstractAccessorMethodBuilder.setBodyBuilder(new InvocableMemberBodyBuilder());
@@ -162,7 +161,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		// @Service(Employee.class)
 		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.web.bindery.requestfactory.shared.ServiceName")));
 
-		List<MethodMetadataBuilder> methods = new LinkedList<MethodMetadataBuilder>();
+		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		for (MethodMetadata method : requestMethods) {
 			methods.add(getRequestMethod(destinationMetadataId, method));
 		}
