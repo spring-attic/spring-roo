@@ -340,7 +340,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 				// Exterminate it.
 				deleteItdFile = true;
 				// And remove if from memberDetailsScanner
-				itdDiscoveryService.removeItdTypeDetails(itdTypeDetails);
+				itdDiscoveryService.removeItdTypeDetails(metadataIdentificationString);
 			}
 
 			if (!deleteItdFile) {

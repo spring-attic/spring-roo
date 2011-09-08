@@ -20,11 +20,11 @@ public interface ItdDiscoveryService {
 	void addItdTypeDetails(ItdTypeDetails itdTypeDetails);
 
 	/**
-	 * Removes the presented {@link ItdTypeDetails} to the management service.
+	 * Removes the {@link ItdTypeDetails} associated with the presented String.
 	 *
-	 * @param itdTypeDetails to be added (required)
+	 * @param mid the ID of the {@link ItdTypeDetails} be removed (required)
 	 */
-	void removeItdTypeDetails(ItdTypeDetails itdTypeDetails);
+	void removeItdTypeDetails(String mid);
 
 	/**
 	 * Indicates whether ITDs associate with the passed in type has changed since last invocation by the requesting class.

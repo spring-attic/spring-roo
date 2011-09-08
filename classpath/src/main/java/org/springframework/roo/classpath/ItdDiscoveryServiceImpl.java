@@ -8,6 +8,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link ItdDiscoveryService}.
@@ -21,6 +22,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 
 	// Fields
 	private HashMap<String, HashMap<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, HashMap<String, MemberHoldingTypeDetails>>();
+	private HashMap<String, String> itdIdToTypeMap = new HashMap<String, String>();
 
 	public void addItdTypeDetails(ItdTypeDetails itdTypeDetails) {
 		if (itdTypeDetails == null || itdTypeDetails.getGovernor() == null) {
@@ -29,18 +31,23 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 		if (typeMap.get(itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName()) == null) {
 			typeMap.put(itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName(), new HashMap<String, MemberHoldingTypeDetails>());
 		}
-
+		itdIdToTypeMap.put(itdTypeDetails.getDeclaredByMetadataId(), itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName());
 		typeMap.get(itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName()).put(itdTypeDetails.getDeclaredByMetadataId(), itdTypeDetails);
 		updateChanges(itdTypeDetails.getGovernor().getName(), false);
 	}
 
-	public void removeItdTypeDetails(ItdTypeDetails itdTypeDetails) {
-		if (itdTypeDetails == null || itdTypeDetails.getGovernor() == null) {
+	public void removeItdTypeDetails(String itdTypeDetailsId) {
+		if (!StringUtils.hasText(itdTypeDetailsId)) {
 			return;
 		}
-
-		typeMap.remove(itdTypeDetails.getGovernor().getName().getFullyQualifiedTypeName());
-		updateChanges(itdTypeDetails.getGovernor().getName(), true);
+		String type = itdIdToTypeMap.get(itdTypeDetailsId);
+		if (type != null) {
+			HashMap<String, MemberHoldingTypeDetails> typeDetailsHashMap = typeMap.get(type);
+			if (typeDetailsHashMap != null) {
+				typeDetailsHashMap.remove(itdTypeDetailsId);
+			}
+			updateChanges(new JavaType(type), true);
+		}
 	}
 
 	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
