@@ -30,6 +30,7 @@ import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -236,7 +237,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		root.appendChild(entityManagerFactory);
 
-		XmlUtils.removeTextNodes(root);
+		DomUtils.removeTextNodes(root);
 
 		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appCtx), false);
 	}
@@ -464,7 +465,6 @@ public class JpaOperationsImpl implements JpaOperations {
 				throw new IllegalStateException(e);
 			}
 		}
-		
 	}
 
 	private void updateDatabaseProperties(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password) {

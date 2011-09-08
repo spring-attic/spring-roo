@@ -16,6 +16,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
@@ -95,7 +96,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		String webConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Document webConfigDocument = XmlUtils.readXml(fileManager.getInputStream(webConfigPath));
 		Element webConfig = webConfigDocument.getDocumentElement();
-		Element viewController = XmlUtils.findFirstElementByName("mvc:view-controller", webConfig);
+		Element viewController = DomUtils.findFirstElementByName("mvc:view-controller", webConfig);
 		Assert.notNull(viewController, "Could not find mvc:view-controller in " + webConfig);
 		viewController.getParentNode().insertBefore(new XmlElementBuilder("mvc:view-controller", webConfigDocument).addAttribute("path", "/login").build(), viewController);
 		fileManager.createOrUpdateTextFileIfRequired(webConfigPath, XmlUtils.nodeToString(webConfigDocument), false);

@@ -21,7 +21,7 @@ public class XmlUtilsTest {
 
 	@Test
 	public void testGetTextContentOfNullNode() {
-		assertEquals(DEFAULT_TEXT, XmlUtils.getTextContent(null, DEFAULT_TEXT));
+		assertEquals(DEFAULT_TEXT, DomUtils.getTextContent(null, DEFAULT_TEXT));
 	}
 
 	@Test
@@ -30,6 +30,6 @@ public class XmlUtilsTest {
 		final Node mockNode = mock(Node.class);
 		when(mockNode.getTextContent()).thenReturn(NODE_TEXT);
 		
-		assertEquals(NODE_TEXT, XmlUtils.getTextContent(mockNode, DEFAULT_TEXT));
+		assertEquals(NODE_TEXT, DomUtils.getTextContent(mockNode, DEFAULT_TEXT));
 	}
 }

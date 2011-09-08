@@ -21,6 +21,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -139,7 +140,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		configurationElement.appendChild(webResourcesElement);
 		
 		warPluginElement.appendChild(configurationElement);
-		XmlUtils.removeTextNodes(warPluginElement);
+		DomUtils.removeTextNodes(warPluginElement);
 		
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}

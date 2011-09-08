@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -60,15 +61,15 @@ public class Plugin implements Comparable<Plugin> {
 		for (final Element dependencyElement : XmlUtils.findElements("dependencies/dependency", plugin)) {
 			// groupId
 			final Element groupIdElement = XmlUtils.findFirstElement("groupId", dependencyElement);
-			final String groupId = XmlUtils.getTextContent(groupIdElement, "");
+			final String groupId = DomUtils.getTextContent(groupIdElement, "");
 			
 			// artifactId
 			final Element artifactIdElement = XmlUtils.findFirstElement("artifactId", dependencyElement);
-			final String artifactId = XmlUtils.getTextContent(artifactIdElement, "");
+			final String artifactId = DomUtils.getTextContent(artifactIdElement, "");
 
 			// version
 			final Element versionElement = XmlUtils.findFirstElement("version", dependencyElement);
-			final String version = XmlUtils.getTextContent(versionElement, "");
+			final String version = DomUtils.getTextContent(versionElement, "");
 
 			final Dependency dependency = new Dependency(groupId, artifactId, version);
 
@@ -76,11 +77,11 @@ public class Plugin implements Comparable<Plugin> {
 			for (final Element exclusion : XmlUtils.findElements("exclusions/exclusion", dependencyElement)) {
 				// groupId
 				final Element exclusionGroupIdElement = XmlUtils.findFirstElement("groupId", exclusion);
-				final String exclusionGroupId = XmlUtils.getTextContent(exclusionGroupIdElement, "");
+				final String exclusionGroupId = DomUtils.getTextContent(exclusionGroupIdElement, "");
 				
 				// artifactId
 				final Element exclusionArtifactIdElement = XmlUtils.findFirstElement("artifactId", exclusion);
-				final String exclusionArtifactId = XmlUtils.getTextContent(exclusionArtifactIdElement , "");
+				final String exclusionArtifactId = DomUtils.getTextContent(exclusionArtifactIdElement , "");
 				
 				if (StringUtils.hasText(exclusionGroupId) && StringUtils.hasText(exclusionArtifactId)) {
 					dependency.addExclusion(exclusionGroupId, exclusionArtifactId);
@@ -102,9 +103,9 @@ public class Plugin implements Comparable<Plugin> {
 		// Loop through the "execution" elements in the plugin element
 		for (final Element execution : XmlUtils.findElements("executions/execution", plugin)) {
 			final Element idElement = XmlUtils.findFirstElement("id", execution);
-			final String id = XmlUtils.getTextContent(idElement, "");
+			final String id = DomUtils.getTextContent(idElement, "");
 			final Element phaseElement = XmlUtils.findFirstElement("phase", execution);
-			final String phase = XmlUtils.getTextContent(phaseElement, "");
+			final String phase = DomUtils.getTextContent(phaseElement, "");
 			final List<String> goals = new ArrayList<String>();
 			for (final Element goalElement : XmlUtils.findElements("goals/goal", execution)) {
 				goals.add(goalElement.getTextContent());
@@ -309,7 +310,7 @@ public class Plugin implements Comparable<Plugin> {
 		
 		// Executions
 		if (!this.executions.isEmpty()) {
-			final Element executionsElement = XmlUtils.createChildElement("executions", pluginElement, document);
+			final Element executionsElement = DomUtils.createChildElement("executions", pluginElement, document);
 			for (final Execution execution : this.executions) {
 				executionsElement.appendChild(execution.getElement(document));
 			}
@@ -317,7 +318,7 @@ public class Plugin implements Comparable<Plugin> {
 		
 		// Dependencies
 		if (!this.dependencies.isEmpty()) {
-			final Element dependenciesElement = XmlUtils.createChildElement("dependencies", pluginElement, document);
+			final Element dependenciesElement = DomUtils.createChildElement("dependencies", pluginElement, document);
 			for (final Dependency dependency : this.dependencies) {
 				dependenciesElement.appendChild(dependency.getElement(document));
 			}

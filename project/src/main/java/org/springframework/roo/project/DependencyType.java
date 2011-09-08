@@ -1,5 +1,6 @@
 package org.springframework.roo.project;
 
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
@@ -28,7 +29,7 @@ public enum DependencyType {
 			type = dependency.getAttribute("type");
 		} else {
 			// Read it from the "type" child element, if any
-			type = XmlUtils.getTextContent(XmlUtils.findFirstElement("type", dependency), "").trim();
+			type = DomUtils.getTextContent(XmlUtils.findFirstElement("type", dependency), "").trim();
 		}
 		
 		// Resolve this to a DependencyType

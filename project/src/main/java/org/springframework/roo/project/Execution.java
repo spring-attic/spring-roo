@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.roo.support.style.DefaultValueStyler;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.ObjectUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -163,7 +164,7 @@ public class Execution implements Comparable<Execution> {
 		}
 		
 		// Goals
-		final Element goalsElement = XmlUtils.createChildElement("goals", executionElement, document);
+		final Element goalsElement = DomUtils.createChildElement("goals", executionElement, document);
 		for (final String goal : this.goals) {
 			goalsElement.appendChild(XmlUtils.createTextElement(document, "goal", goal));
 		}

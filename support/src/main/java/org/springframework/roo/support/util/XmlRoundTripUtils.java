@@ -18,7 +18,6 @@ import org.w3c.dom.NodeList;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- * 
  */
 public abstract class XmlRoundTripUtils {
 	private static MessageDigest digest;
@@ -104,7 +103,7 @@ public abstract class XmlRoundTripUtils {
 				if (proposedId.length() != 0) { // Only proposed elements with an id will be considered
 					Element originalElement = XmlUtils.findFirstElement("//*[@id='" + proposedId + "']", original);
 					if (null == originalElement) { // Insert proposed element given the original document has no element with a matching id
-						Element placeHolder = XmlUtils.findFirstElementByName("util:placeholder", original);
+						Element placeHolder = DomUtils.findFirstElementByName("util:placeholder", original);
 						if (placeHolder != null) { // Insert right before place holder if we can find it
 							placeHolder.getParentNode().insertBefore(original.getOwnerDocument().importNode(proposedElement, false), placeHolder);
 						} else { // Find the best place to insert the element

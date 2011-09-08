@@ -12,9 +12,9 @@ package org.springframework.roo.support.util;
  * @author Luke Taylor
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public abstract class HexUtils {
+	
 	public static String toHex(byte[] bytes) {
 		return new String(encode(bytes));
 	}

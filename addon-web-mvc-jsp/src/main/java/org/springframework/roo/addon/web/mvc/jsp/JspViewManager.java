@@ -34,6 +34,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
@@ -330,7 +331,7 @@ public class JspViewManager {
 			formFind.appendChild(fieldElement);
 		}
 		
-		XmlUtils.removeTextNodes(document);
+		DomUtils.removeTextNodes(document);
 		return document;
 	}
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -143,7 +144,7 @@ public class Resource implements Comparable<Resource> {
 		}
 
 		if (!this.includes.isEmpty()) {
-			final Element includes = XmlUtils.createChildElement("includes", resourceElement, document);
+			final Element includes = DomUtils.createChildElement("includes", resourceElement, document);
 			for (final String include : this.includes) {
 				includes.appendChild(XmlUtils.createTextElement(document, "include", include));
 			}

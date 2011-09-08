@@ -27,6 +27,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -73,7 +74,7 @@ public class SolrOperationsImpl implements SolrOperations {
 		Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		Element root = appCtx.getDocumentElement();
 
-		if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
+		if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 			if (root.getAttribute("xmlns:task").length() == 0) {
 				root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
 				root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
@@ -88,7 +89,7 @@ public class SolrOperationsImpl implements SolrOperations {
 		}
 
 		root.appendChild(new XmlElementBuilder("bean", appCtx).addAttribute("id", "solrServer").addAttribute("class", "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer").addChild(new XmlElementBuilder("constructor-arg", appCtx).addAttribute("value", "${solr.serverUrl}").build()).build());
-		XmlUtils.removeTextNodes(root);
+		DomUtils.removeTextNodes(root);
 		
 		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appCtx), false);
 	}

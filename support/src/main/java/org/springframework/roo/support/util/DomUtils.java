@@ -1,21 +1,5 @@
 package org.springframework.roo.support.util;
 
-/*
- * Copyright 2002-2008 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +7,7 @@ import java.util.List;
 
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
 import org.w3c.dom.Node;
@@ -35,11 +20,12 @@ import org.w3c.dom.NodeList;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Costin Leau
+ * @author Alan Stewart
  * @since 1.2.0
  * @see org.w3c.dom.Node
  * @see org.w3c.dom.Element
  */
-public abstract class DomUtils {
+public final class DomUtils {
 
 	/**
 	 * Retrieve all child elements of the given DOM element that match any of
@@ -162,4 +148,119 @@ public abstract class DomUtils {
 		return (desiredNames.contains(node.getNodeName()) || desiredNames.contains(node.getLocalName()));
 	}
 
+	/**
+	 * Removes empty text nodes from the specified node
+	 * 
+	 * @param node the element where empty text nodes will be removed
+	 */
+	public static void removeTextNodes(final Node node) {
+		if (node == null) {
+			return;
+		}
+		
+		final NodeList children = node.getChildNodes();
+		for (int i = children.getLength() - 1; i >= 0; i--) {
+			final Node child = children.item(i);
+			switch (child.getNodeType()) {
+				case Node.ELEMENT_NODE:
+					removeTextNodes(child);
+					break;
+				case Node.CDATA_SECTION_NODE:
+				case Node.TEXT_NODE:
+					if (!StringUtils.hasText(child.getNodeValue())) {
+						node.removeChild(child);
+					}
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Returns the text content of the given {@link Node}, null safe
+	 * 
+	 * @param node can be <code>null</code>
+	 * @param defaultValue the value to return if the node is <code>null</code>
+	 * @return the given default value if the node is <code>null</code>
+	 * @see Node#getTextContent()
+	 * @since 1.2.0
+	 */
+	public static String getTextContent(final Node node, final String defaultValue) {
+		if (node == null) {
+			return defaultValue;
+		}
+		return node.getTextContent();
+	}
+
+	/**
+	 * Creates a child element with the given name and parent. Avoids the type
+	 * of bug whereby the developer calls {@link Document#createElement(String)}
+	 * but forgets to append it to the relevant parent.
+	 * 
+	 * @param tagName the name of the new child (required)
+	 * @param parent the parent node (required)
+	 * @param document the document to which the parent and child belong (required)
+	 * @return the created element
+	 * @since 1.2.0
+	 */
+	public static Element createChildElement(final String tagName, final Node parent, final Document document) {
+		final Element child = document.createElement(tagName);
+		parent.appendChild(child);
+		return child;
+	}
+
+	/**
+	 * Returns the child node with the given tag name, creating it if it does
+	 * not exist
+	 * 
+	 * @param tagName the child tag to look for and possibly create (required)
+	 * @param parent the parent in which to look for the child (required)
+	 * @param document the document containing the parent (required)
+	 * @return the existing or created child (never <code>null</code>)
+	 * @since 1.2.0
+	 */
+	public static Element createChildIfNotExists(final String tagName, final Node parent, final Document document) {
+		final Element existingChild = XmlUtils.findFirstElement(tagName, parent);
+		if (existingChild != null) {
+			return existingChild;
+		}
+		// No such child; add it
+		return createChildElement(tagName, parent, document);
+	}
+
+	/**
+	 * Returns the text content of the first child of the given parent that has
+	 * the given tag name, if any
+	 * 
+	 * @param parent the parent in which to search (required)
+	 * @param child the child name for which to search (required)
+	 * @return <code>null</code> if there is no such child, otherwise the first
+	 * such child's text content
+	 */
+	public static String getChildTextContent(final Element parent, final String child) {
+		final List<Element> children = XmlUtils.findElements(child, parent);
+		if (children.isEmpty()) {
+			return null;
+		}
+		return getTextContent(children.get(0), null);
+	}
+
+	/**
+	 * Checks in under a given root element whether it can find a child element
+	 * which matches the name supplied. Returns {@link Element} if exists.
+	 * 
+	 * @param name the Element name (required)
+	 * @param root the parent DOM element (required)
+	 * @return the Element if discovered
+	 */
+	public static Element findFirstElementByName(final String name, final Element root) {
+		Assert.hasText(name, "Element name required");
+		Assert.notNull(root, "Root element required");
+		return (Element) root.getElementsByTagName(name).item(0);
+	}
+
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private DomUtils() {
+	}
 }

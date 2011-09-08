@@ -27,6 +27,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -239,7 +240,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		final Element dependenciesElement = XmlUtils.createChildIfNotExists("dependencies", document.getDocumentElement(), document);
+		final Element dependenciesElement = DomUtils.createChildIfNotExists("dependencies", document.getDocumentElement(), document);
 		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
 
 		final List<String> newDependencies = new ArrayList<String>();
@@ -320,7 +321,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (removedDependencies.isEmpty()) {
 			return;
 		}
-		XmlUtils.removeTextNodes(dependenciesElement);
+		DomUtils.removeTextNodes(dependenciesElement);
 		final String message = getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies");
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
@@ -445,7 +446,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (removedPlugins.isEmpty()) {
 			return;
 		}
-		XmlUtils.removeTextNodes(pluginsElement);
+		DomUtils.removeTextNodes(pluginsElement);
 		final String message = getDescriptionOfChange(REMOVED, removedPlugins, "plugin", "plugins");
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
@@ -484,7 +485,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency addition is unavailable");
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		final Element packaging = XmlUtils.createChildIfNotExists("packaging", document.getDocumentElement(), document);
+		final Element packaging = DomUtils.createChildIfNotExists("packaging", document.getDocumentElement(), document);
 		if (packaging.getTextContent().equals(projectType.getType())) {
 			return;	// Nothing to do
 		}
@@ -510,7 +511,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		final Element repositoriesElement = XmlUtils.createChildIfNotExists(containingPath, document.getDocumentElement(), document);
+		final Element repositoriesElement = DomUtils.createChildIfNotExists(containingPath, document.getDocumentElement(), document);
 
 		final List<String> addedRepositories = new ArrayList<String>();
 		for (final Repository repository : repositories) {
@@ -580,7 +581,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Element existing = XmlUtils.findFirstElement("/project/properties/" + property.getName(), root);
 		if (existing == null) {
 			// No existing property of this name; add it
-			final Element properties = XmlUtils.createChildIfNotExists("properties", document.getDocumentElement(), document);
+			final Element properties = DomUtils.createChildIfNotExists("properties", document.getDocumentElement(), document);
 			properties.appendChild(XmlUtils.createTextElement(document, property.getName(), property.getValue()));
 			descriptionOfChange = highlight(ADDED + " property") + " '" + property.getName() + "' = '" + property.getValue() + "'";
 		} else {
@@ -613,7 +614,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 		}
 
-		XmlUtils.removeTextNodes(propertiesElement);
+		DomUtils.removeTextNodes(propertiesElement);
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
@@ -633,7 +634,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Element existingFilter = XmlUtils.findFirstElement("filters/filter['" + filter.getValue() + "']", buildElement);
 		if (existingFilter == null) {
 			// No such filter; add it
-			final Element filtersElement = XmlUtils.createChildIfNotExists("filters", buildElement, document);
+			final Element filtersElement = DomUtils.createChildIfNotExists("filters", buildElement, document);
 			filtersElement.appendChild(XmlUtils.createTextElement(document, "filter", filter.getValue()));
 			descriptionOfChange = highlight(ADDED + " filter") + " '" + filter.getValue() + "'";
 		} else {
@@ -673,7 +674,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			filtersElement.getParentNode().removeChild(filtersElement);
 		}
 
-		XmlUtils.removeTextNodes(root);
+		DomUtils.removeTextNodes(root);
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
@@ -688,7 +689,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element buildElement = XmlUtils.findFirstElement("/project/build", document.getDocumentElement());
-		final Element resourcesElement = XmlUtils.createChildIfNotExists("resources", buildElement, document);
+		final Element resourcesElement = DomUtils.createChildIfNotExists("resources", buildElement, document);
 		resourcesElement.appendChild(resource.getElement(document));
 		final String descriptionOfChange = highlight(ADDED + " resource") + " " + resource.getSimpleDescription();
 
@@ -724,7 +725,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			resourcesElement.getParentNode().removeChild(resourcesElement);
 		}
 
-		XmlUtils.removeTextNodes(root);
+		DomUtils.removeTextNodes(root);
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
@@ -757,7 +758,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 		}
 
-		XmlUtils.removeTextNodes(dependenciesElement);
+		DomUtils.removeTextNodes(dependenciesElement);
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}

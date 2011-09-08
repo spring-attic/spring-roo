@@ -33,6 +33,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.PairList;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -165,7 +166,7 @@ public class MailOperationsImpl implements MailOperations {
 			}
 		}
 
-		XmlUtils.removeTextNodes(root);
+		DomUtils.removeTextNodes(root);
 
 		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 		
@@ -217,7 +218,7 @@ public class MailOperationsImpl implements MailOperations {
 
 			root.appendChild(smmBean);
 			
-			XmlUtils.removeTextNodes(root);
+			DomUtils.removeTextNodes(root);
 			
 			fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 		}
@@ -310,7 +311,7 @@ public class MailOperationsImpl implements MailOperations {
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(targetClassMID, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, parameters.getKeys(), parameters.getValues(), bodyBuilder);
 		
 		if (async) {
-			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
+			if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 				// Add asynchronous email support to the application
 				if (!StringUtils.hasText(root.getAttribute("xmlns:task"))) {
 					// Add the "task" namespace to the Spring config file

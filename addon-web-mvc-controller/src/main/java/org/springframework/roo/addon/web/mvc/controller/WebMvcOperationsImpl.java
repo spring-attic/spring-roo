@@ -22,6 +22,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -72,7 +73,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webMvcConfigPath));
 		Element root = document.getDocumentElement();
 		
-		Element annotationDriven = XmlUtils.findFirstElementByName("mvc:annotation-driven", root);
+		Element annotationDriven = DomUtils.findFirstElementByName("mvc:annotation-driven", root);
 		if (isConversionServiceConfigured(root, annotationDriven)) {
 			// Conversion service already defined, moving on.
 			return;
@@ -194,7 +195,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 		
 		Element root = (Element) document.getFirstChild();
-		XmlUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
+		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
 		
 		fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(document), true);
 	}
@@ -246,7 +247,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Document document = XmlUtils.readXml(mutableFile.getInputStream());
 		Element root = document.getDocumentElement();
 		
-		Element annotationDrivenElement = XmlUtils.findFirstElementByName("mvc:annotation-driven", root);
+		Element annotationDrivenElement = DomUtils.findFirstElementByName("mvc:annotation-driven", root);
 		return isConversionServiceConfigured(root, annotationDrivenElement);
 	}
 	

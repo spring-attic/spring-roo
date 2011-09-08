@@ -577,7 +577,6 @@ public final class WebXmlUtils {
      * @since 1.1.1
      */
     public static class WebResourceCollection {
-
         private final String webResourceName;
         private final String description;
         private final List<String> urlPatterns;

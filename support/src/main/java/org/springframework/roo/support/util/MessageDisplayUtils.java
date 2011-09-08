@@ -17,7 +17,6 @@ import org.springframework.roo.support.logging.HandlerUtils;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public abstract class MessageDisplayUtils {
 	private static Logger logger = HandlerUtils.getLogger(MessageDisplayUtils.class);

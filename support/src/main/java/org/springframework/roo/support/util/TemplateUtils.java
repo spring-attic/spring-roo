@@ -7,7 +7,6 @@ import java.io.InputStream;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class TemplateUtils {
 	
@@ -39,5 +38,4 @@ public abstract class TemplateUtils {
 		Assert.notNull(result, "Could not locate '" + templatePath + "' in classloader");
 		return result;
 	}
-	
 }

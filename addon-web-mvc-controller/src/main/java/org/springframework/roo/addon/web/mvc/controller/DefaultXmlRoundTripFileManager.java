@@ -11,6 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.HexUtils;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
@@ -58,7 +59,7 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 			} catch (IOException ignored) {}
 		   	original = XmlUtils.readXml(fileManager.getInputStream(filename));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-				XmlUtils.removeTextNodes(original);
+				DomUtils.removeTextNodes(original);
 				fileManager.createOrUpdateTextFileIfRequired(filename, proposedContents, false);
 			}
 		} else {

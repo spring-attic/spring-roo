@@ -32,6 +32,7 @@ import org.springframework.roo.support.util.ObjectUtils;
  */
 public class DefaultToStringStyler implements ToStringStyler {
 
+	// Fields
 	private final ValueStyler valueStyler;
 
 	/**

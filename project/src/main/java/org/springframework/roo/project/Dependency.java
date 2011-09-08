@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -141,7 +142,7 @@ public class Dependency implements Comparable<Dependency> {
 				this.systemPath = null;
 			}
 			
-			this.classifier = XmlUtils.getChildTextContent(dependency, "classifier");
+			this.classifier = DomUtils.getChildTextContent(dependency, "classifier");
 			
 			// Parsing for exclusions
 			final List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
@@ -318,9 +319,9 @@ public class Dependency implements Comparable<Dependency> {
 
 		// Add exclusions if any
 		if (!this.exclusions.isEmpty()) {
-			final Element exclusionsElement = XmlUtils.createChildElement("exclusions", dependencyElement, document);
+			final Element exclusionsElement = DomUtils.createChildElement("exclusions", dependencyElement, document);
 			for (final Dependency exclusion : this.exclusions) {
-				final Element exclusionElement = XmlUtils.createChildElement("exclusion", exclusionsElement, document);
+				final Element exclusionElement = DomUtils.createChildElement("exclusion", exclusionsElement, document);
 				exclusionElement.appendChild(XmlUtils.createTextElement(document, "groupId", exclusion.getGroupId()));
 				exclusionElement.appendChild(XmlUtils.createTextElement(document, "artifactId", exclusion.getArtifactId()));
 			}

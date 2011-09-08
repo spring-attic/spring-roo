@@ -380,7 +380,6 @@ public abstract class ReflectionUtils {
 				method.getParameterTypes().length == 0);
 	}
 
-
 	/**
 	 * Make the given field accessible, explicitly setting it accessible if necessary.
 	 * The <code>setAccessible(true)</code> method is only called when actually necessary,
@@ -423,7 +422,6 @@ public abstract class ReflectionUtils {
 		}
 	}
 
-
 	/**
 	 * Perform the given callback operation on all matching methods of the
 	 * given class and superclasses.
@@ -446,9 +444,7 @@ public abstract class ReflectionUtils {
 	 * @param mc the callback to invoke for each method
 	 * @param mf the filter that determines the methods to apply the callback to
 	 */
-	public static void doWithMethods(Class<?> targetClass, MethodCallback mc, MethodFilter mf)
-			throws IllegalArgumentException {
-
+	public static void doWithMethods(Class<?> targetClass, MethodCallback mc, MethodFilter mf) throws IllegalArgumentException {
 		// Keep backing up the inheritance hierarchy.
 		do {
 			Method[] methods = targetClass.getDeclaredMethods();
@@ -483,7 +479,6 @@ public abstract class ReflectionUtils {
 		return methods.toArray(new Method[methods.size()]);
 	}
 
-
 	/**
 	 * Invoke the given callback on all fields in the target class,
 	 * going up the class hierarchy to get all declared fields.
@@ -501,9 +496,7 @@ public abstract class ReflectionUtils {
 	 * @param fc the callback to invoke for each field
 	 * @param ff the filter that determines the fields to apply the callback to
 	 */
-	public static void doWithFields(Class<?> targetClass, FieldCallback fc, FieldFilter ff)
-			throws IllegalArgumentException {
-
+	public static void doWithFields(Class<?> targetClass, FieldCallback fc, FieldFilter ff) throws IllegalArgumentException {
 		// Keep backing up the inheritance hierarchy.
 		do {
 			// Copy each field declared on this class unless it's static or file.
@@ -552,7 +545,6 @@ public abstract class ReflectionUtils {
 		}, COPYABLE_FIELDS);
 	}
 
-
 	/**
 	 * Action to take on each method.
 	 */
@@ -564,7 +556,6 @@ public abstract class ReflectionUtils {
 		 */
 		void doWith(Method method) throws IllegalArgumentException, IllegalAccessException;
 	}
-
 
 	/**
 	 * Callback optionally used to method fields to be operated on by a method callback.
@@ -578,7 +569,6 @@ public abstract class ReflectionUtils {
 		boolean matches(Method method);
 	}
 
-
 	/**
 	 * Callback interface invoked on each field in the hierarchy.
 	 */
@@ -590,7 +580,6 @@ public abstract class ReflectionUtils {
 		 */
 		void doWith(Field field) throws IllegalArgumentException, IllegalAccessException;
 	}
-
 
 	/**
 	 * Callback optionally used to filter fields to be operated on by a field callback.
@@ -604,7 +593,6 @@ public abstract class ReflectionUtils {
 		boolean matches(Field field);
 	}
 
-
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
@@ -614,5 +602,4 @@ public abstract class ReflectionUtils {
 					Modifier.isFinal(field.getModifiers()));
 		}
 	};
-
 }

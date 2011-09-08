@@ -5,7 +5,6 @@ package org.springframework.roo.support.util;
  *
  * @author James Tyrrell
  * @since 1.2.0
- *
  */
 public class MathUtils {
 

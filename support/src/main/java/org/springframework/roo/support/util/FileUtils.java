@@ -9,10 +9,10 @@ import java.util.regex.Pattern;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class FileUtils {
-	// doesn't check for backslash after the colon, since Java has no issues with paths like c:/Windows
+	
+	// Doesn't check for backslash after the colon, since Java has no issues with paths like c:/Windows
 	private static final Pattern WINDOWS_DRIVE_PATH= Pattern.compile("^[A-Za-z]:.*");
 
 	/**

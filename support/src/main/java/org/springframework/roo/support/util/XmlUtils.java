@@ -44,7 +44,7 @@ import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.SAXException;
 
 /**
- * Utilities related to DOM and XML usage.
+ * Utilities related to XML usage.
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
@@ -346,20 +346,6 @@ public final class XmlUtils {
 
 	/**
 	 * Checks in under a given root element whether it can find a child element
-	 * which matches the name supplied. Returns {@link Element} if exists.
-	 * 
-	 * @param name the Element name (required)
-	 * @param root the parent DOM element (required)
-	 * @return the Element if discovered
-	 */
-	public static Element findFirstElementByName(final String name, final Element root) {
-		Assert.hasText(name, "Element name required");
-		Assert.notNull(root, "Root element required");
-		return (Element) root.getElementsByTagName(name).item(0);
-	}
-
-	/**
-	 * Checks in under a given root element whether it can find a child element
 	 * which matches the XPath expression supplied. The {@link Element} must
 	 * exist. Returns {@link Element} if exists.
 	 * 
@@ -465,33 +451,6 @@ public final class XmlUtils {
 	}
 	
 	/**
-	 * Removes empty text nodes from the specified node
-	 * 
-	 * @param node the element where empty text nodes will be removed
-	 */
-	public static void removeTextNodes(final Node node) {
-		if (node == null) {
-			return;
-		}
-		
-		final NodeList children = node.getChildNodes();
-		for (int i = children.getLength() - 1; i >= 0; i--) {
-			final Node child = children.item(i);
-			switch (child.getNodeType()) {
-				case Node.ELEMENT_NODE:
-					removeTextNodes(child);
-					break;
-				case Node.CDATA_SECTION_NODE:
-				case Node.TEXT_NODE:
-					if (!StringUtils.hasText(child.getNodeValue())) {
-						node.removeChild(child);
-					}
-					break;
-			}
-		}
-	}
-	
-	/**
 	 * Returns the root element of an addon's configuration file.
 	 * 
 	 * @param clazz which owns the configuration
@@ -552,75 +511,6 @@ public final class XmlUtils {
 				throw new IllegalArgumentException("Illegal name '" + element + "' (illegal character)");
 			}
 		}
-	}
-	
-	/**
-	 * Returns the text content of the given {@link Node}, null safe
-	 * 
-	 * @param node can be <code>null</code>
-	 * @param defaultValue the value to return if the node is <code>null</code>
-	 * @return the given default value if the node is <code>null</code>
-	 * @see Node#getTextContent()
-	 * @since 1.2.0
-	 */
-	public static String getTextContent(final Node node, final String defaultValue) {
-		if (node == null) {
-			return defaultValue;
-		}
-		return node.getTextContent();
-	}
-	
-	/**
-	 * Creates a child element with the given name and parent. Avoids the type
-	 * of bug whereby the developer calls {@link Document#createElement(String)}
-	 * but forgets to append it to the relevant parent.
-	 * 
-	 * @param tagName the name of the new child (required)
-	 * @param parent the parent node (required)
-	 * @param document the document to which the parent and child belong (required)
-	 * @return the created element
-	 * @since 1.2.0
-	 */
-	public static Element createChildElement(final String tagName, final Node parent, final Document document) {
-		final Element child = document.createElement(tagName);
-		parent.appendChild(child);
-		return child;
-	}
-	
-	/**
-	 * Returns the child node with the given tag name, creating it if it does
-	 * not exist
-	 * 
-	 * @param tagName the child tag to look for and possibly create (required)
-	 * @param parent the parent in which to look for the child (required)
-	 * @param document the document containing the parent (required)
-	 * @return the existing or created child (never <code>null</code>)
-	 * @since 1.2.0
-	 */
-	public static Element createChildIfNotExists(final String tagName, final Node parent, final Document document) {
-		final Element existingChild = findFirstElement(tagName, parent);
-		if (existingChild != null) {
-			return existingChild;
-		}
-		// No such child; add it
-		return createChildElement(tagName, parent, document);
-	}
-	
-	/**
-	 * Returns the text content of the first child of the given parent that has
-	 * the given tag name, if any
-	 * 
-	 * @param parent the parent in which to search (required)
-	 * @param child the child name for which to search (required)
-	 * @return <code>null</code> if there is no such child, otherwise the first
-	 * such child's text content
-	 */
-	public static String getChildTextContent(final Element parent, final String child) {
-		final List<Element> children = findElements(child, parent);
-		if (children.isEmpty()) {
-			return null;
-		}
-		return getTextContent(children.get(0), null);
 	}
 	
 	/**

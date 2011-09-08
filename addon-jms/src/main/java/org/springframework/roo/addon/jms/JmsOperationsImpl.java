@@ -33,6 +33,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -106,7 +107,7 @@ public class JmsOperationsImpl implements JmsOperations {
 			root.appendChild(listenerContainer);
 		}
 
-		XmlUtils.removeTextNodes(root);
+		DomUtils.removeTextNodes(root);
 		
 		fileManager.createOrUpdateTextFileIfRequired(jmsContextPath, XmlUtils.nodeToString(document), false);
 
@@ -145,7 +146,7 @@ public class JmsOperationsImpl implements JmsOperations {
 			Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 			Element root = appCtx.getDocumentElement();
 			
-			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
+			if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 				if (root.getAttribute("xmlns:task").length() == 0) {
 					root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
 					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
@@ -195,7 +196,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		Document document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));
 		Element root = document.getDocumentElement();
 		
-		Element listenerContainer = XmlUtils.findFirstElementByName("jms:listener-container", root);
+		Element listenerContainer = DomUtils.findFirstElementByName("jms:listener-container", root);
 		if (listenerContainer != null && destinationType.name().toLowerCase().equals(listenerContainer.getAttribute("destination-type"))) {
 			listenerContainer = document.createElement("jms:listener-container");
 			listenerContainer.setAttribute("connection-factory", "jmsFactory");
