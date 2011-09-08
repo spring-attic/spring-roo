@@ -77,7 +77,7 @@ public class GwtUtils {
 		}
 		AnnotationMetadata serviceNameAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), stringBasedAnnotation);
 		if (serviceNameAnnotation != null) {
-			StringAttributeValue serviceNameAttributeValue = (StringAttributeValue) serviceNameAnnotation.getAttribute("value");
+			AnnotationAttributeValue<String> serviceNameAttributeValue = serviceNameAnnotation.getAttribute("value");
 			if (serviceNameAttributeValue != null) {
 				return new JavaType(serviceNameAttributeValue.getValue());
 			}
@@ -85,7 +85,7 @@ public class GwtUtils {
 
 		serviceNameAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), classBasedAnnotation);
 		if (serviceNameAnnotation != null) {
-			ClassAttributeValue serviceAttributeValue = (ClassAttributeValue) serviceNameAnnotation.getAttribute("value");
+			AnnotationAttributeValue<JavaType> serviceAttributeValue = serviceNameAnnotation.getAttribute("value");
 			if (serviceAttributeValue != null) {
 				return serviceAttributeValue.getValue();
 			}
@@ -102,6 +102,7 @@ public class GwtUtils {
 		}
 		AnnotationAttributeValue<?> attributeValue = annotation.getAttribute(attributeName);
 		if (attributeValue != null && attributeValue instanceof ArrayAttributeValue) {
+			@SuppressWarnings("unchecked")
 			ArrayAttributeValue<StringAttributeValue> arrayAttributeValue = (ArrayAttributeValue<StringAttributeValue>) attributeValue;
 			for (StringAttributeValue value : arrayAttributeValue.getValue()) {
 				values.add(value.getValue());

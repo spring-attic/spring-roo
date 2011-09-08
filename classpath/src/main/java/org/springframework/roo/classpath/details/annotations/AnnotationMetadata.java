@@ -39,5 +39,5 @@ public interface AnnotationMetadata {
 	 * @return the requested attribute (or null if not found)
 	 * @since 1.2.0
 	 */
-	AnnotationAttributeValue<?> getAttribute(String attributeName);
+	<T> AnnotationAttributeValue<T> getAttribute(String attributeName);
 }

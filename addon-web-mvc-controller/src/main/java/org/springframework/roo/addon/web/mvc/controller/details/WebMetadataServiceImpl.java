@@ -42,7 +42,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -400,7 +399,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 					if (formBackingObject instanceof ClassAttributeValue) {
 						ClassAttributeValue formBackingObjectValue = (ClassAttributeValue) formBackingObject;
 						if (formBackingObjectValue.getValue().equals(type)) {
-							StringAttributeValue path = (StringAttributeValue) annotation.getAttribute("path");
+							AnnotationAttributeValue<String> path = annotation.getAttribute("path");
 							if (path != null) {
 								String pathString = path.getValue();
 								pathMap.put(type.getFullyQualifiedTypeName(), pathString);

@@ -48,6 +48,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 		return attributeMap.get(attributeName);
 	}
 
+	@SuppressWarnings("unchecked")
 	public AnnotationAttributeValue<?> getAttribute(final String attributeName) {
 		return getAttribute(new JavaSymbolName(attributeName));
 	}

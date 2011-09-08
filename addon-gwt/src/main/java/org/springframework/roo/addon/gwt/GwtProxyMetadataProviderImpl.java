@@ -79,6 +79,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		List<String> exclusionList = new ArrayList<String>();
 		AnnotationAttributeValue<?> excludeAttribute = mirrorAnnotation.getAttribute("exclude");
 		if (excludeAttribute != null && excludeAttribute instanceof ArrayAttributeValue) {
+			@SuppressWarnings("unchecked")
 			ArrayAttributeValue<StringAttributeValue> excludeArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) excludeAttribute;
 			for (StringAttributeValue attributeValue : excludeArrayAttribute.getValue()) {
 				exclusionList.add(attributeValue.getValue());
@@ -91,6 +92,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		List<String> readOnlyList = new ArrayList<String>();
 		AnnotationAttributeValue<?> readOnlyAttribute = mirrorAnnotation.getAttribute("readOnly");
 		if (readOnlyAttribute != null && readOnlyAttribute instanceof ArrayAttributeValue) {
+			@SuppressWarnings("unchecked")
 			ArrayAttributeValue<StringAttributeValue> readOnlyArrayAttribute = (ArrayAttributeValue<StringAttributeValue>) readOnlyAttribute;
 			for (StringAttributeValue attributeValue : readOnlyArrayAttribute.getValue()) {
 				readOnlyList.add(attributeValue.getValue());
