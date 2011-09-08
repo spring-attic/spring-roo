@@ -86,6 +86,9 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 	}
 	
 	public InvocableMemberBodyBuilder getBodyBuilder() {
+		if (bodyBuilder == null) {
+			bodyBuilder = new InvocableMemberBodyBuilder();
+		}
 		return bodyBuilder;
 	}
 
