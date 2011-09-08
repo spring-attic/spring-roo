@@ -8,12 +8,12 @@ import org.junit.Test;
 import org.w3c.dom.Node;
 
 /**
- * Unit test of {@link XmlUtils}
+ * Unit test of {@link DomUtils}
  *
  * @author Andrew Swan
  * @since 1.2.0
  */
-public class XmlUtilsTest {
+public class DomUtilsTest {
 
 	// Constants
 	private static final String DEFAULT_TEXT = "foo";
