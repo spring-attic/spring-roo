@@ -106,34 +106,24 @@ public abstract class FileCopyUtils {
 			out.flush();
 			return byteCount;
 		} finally {
-			try {
-				in.close();
-			} catch (IOException ignored) {
-			}
-			try {
-				out.close();
-			} catch (IOException ignored) {
-			}
+			IOUtils.closeQuietly(in, out);
 		}
 	}
 
 	/**
 	 * Copy the contents of the given byte array to the given OutputStream. Closes the stream when done.
 	 * 
-	 * @param in the byte array to copy from
+	 * @param bytes the byte array to copy from
 	 * @param out the OutputStream to copy to
 	 * @throws IOException in case of I/O errors
 	 */
-	public static void copy(byte[] in, OutputStream out) throws IOException {
-		Assert.notNull(in, "No input byte array specified");
+	public static void copy(byte[] bytes, OutputStream out) throws IOException {
+		Assert.notNull(bytes, "No input byte array specified");
 		Assert.notNull(out, "No OutputStream specified");
 		try {
-			out.write(in);
+			out.write(bytes);
 		} finally {
-			try {
-				out.close();
-			} catch (IOException ignored) {
-			}
+			IOUtils.closeQuietly(out);
 		}
 	}
 
@@ -182,19 +172,12 @@ public abstract class FileCopyUtils {
 			out.flush();
 			return byteCount;
 		} finally {
-			try {
-				in.close();
-			} catch (IOException ignored) {
-			}
-			try {
-				out.close();
-			} catch (IOException ignored) {
-			}
+			IOUtils.closeQuietly(in, out);
 		}
 	}
 
 	/**
-	 * Copy the contents of the given String to the given output Writer. Closes the write when done.
+	 * Copy the contents of the given String to the given output Writer. Closes the writer when done.
 	 * 
 	 * @param in the String to copy from
 	 * @param out the Writer to copy to
@@ -209,9 +192,7 @@ public abstract class FileCopyUtils {
 		try {
 			out.write(in);
 		} finally {
-			try {
-				out.close();
-			} catch (IOException ignored) {}
+			IOUtils.closeQuietly(out);
 		}
 	}
 

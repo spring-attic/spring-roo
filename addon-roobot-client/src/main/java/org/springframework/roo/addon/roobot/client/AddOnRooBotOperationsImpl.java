@@ -2,7 +2,6 @@ package org.springframework.roo.addon.roobot.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.DateFormat;
@@ -40,6 +39,7 @@ import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
@@ -578,6 +578,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private boolean populateBundleCache(boolean startupTime) {
 		boolean success = false;
 		InputStream is = null;
+		ByteArrayInputStream bais = null;
+		ByteArrayOutputStream baos = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -596,7 +598,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				// It appears we can acquire the URL, so let's do it
 				is = urlInputStreamService.openConnection(httpUrl);
 			} else {
-				// Fallback to normal protocol handler (likely in local development testing etc)
+				// Fall back to normal protocol handler (likely in local development testing etc)
 				is = new URL(rooBotXmlUrl).openStream();
 			}
 			if (is == null) {
@@ -607,7 +609,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			ZipInputStream zip = new ZipInputStream(is);
 			zip.getNextEntry();
 
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			baos = new ByteArrayOutputStream();
 			byte[] buffer = new byte[8192];
 			int length = -1;
 			while (zip.available() > 0) {
@@ -617,7 +619,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				}
 			}
 
-			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+			bais = new ByteArrayInputStream(baos.toByteArray());
 			Document roobotXml = db.parse(bais);
 
 			if (roobotXml != null) {
@@ -683,14 +685,10 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				success = true;
 			}
 			zip.close();
-			baos.close();
-			bais.close();
-		} catch (Throwable ignore) {} finally {
-			try {
-				if (is != null) {
-					is.close();
-				}
-			} catch (IOException ignored) {}
+		} catch (Throwable ignore) {
+			// Ignore
+		} finally {
+			IOUtils.closeQuietly(is, baos, bais);
 		}
 		if (success && startupTime) {
 			printAddonStats();

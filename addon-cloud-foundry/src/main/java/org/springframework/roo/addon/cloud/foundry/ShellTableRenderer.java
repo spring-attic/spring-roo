@@ -11,12 +11,21 @@ import java.util.Map;
  * @author James Tyrrell
  * @since 1.1.3
  */
-
 public class ShellTableRenderer {
-	private Map<Integer, List<String>> columnMap = new HashMap<Integer, List<String>>();
-	private String title;
+	
+	// Constants
 	private static final int COLUMN_PADDING = 5;
+	
+	// Fields
+	private final Map<Integer, List<String>> columnMap = new HashMap<Integer, List<String>>();
+	private final String title;
 
+	/**
+	 * Constructor
+	 *
+	 * @param title
+	 * @param headings
+	 */
 	public ShellTableRenderer(String title, String... headings) {
 		this.title = title;
 		for (String heading : headings) {
@@ -91,7 +100,7 @@ public class ShellTableRenderer {
 			String padding = " ";
 			String emphasis = getRepeatingChars('=', (longestRow - titleLengthPlusPadding) / 2);
 			String extra = "";
-			if (titleLengthPlusPadding % 2 == 1) {
+			if (titleLengthPlusPadding % 2 != 0) {
 				extra = "=";
 			}
 			titleBuilder.append(emphasis).append(padding).append(title).append(padding).append(emphasis).append(extra).append("\n\n");

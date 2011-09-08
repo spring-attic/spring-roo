@@ -36,6 +36,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -121,29 +122,26 @@ public class PgpServiceImpl implements PgpService {
 	
 	@SuppressWarnings("unchecked")
 	public List<PGPPublicKeyRing> getTrustedKeys() {
-		List<PGPPublicKeyRing> result = new ArrayList<PGPPublicKeyRing>();
 		if (!ROO_PGP_FILE.exists()) {
-			return result;
+			return Collections.emptyList();
 		}
 		FileInputStream fis = null;
 		try {
 			fis = new FileInputStream(ROO_PGP_FILE);
 			PGPPublicKeyRingCollection pubRings = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(fis));
 	        Iterator<PGPPublicKeyRing> rIt = pubRings.getKeyRings();
+	        final List<PGPPublicKeyRing> result = new ArrayList<PGPPublicKeyRing>();
 	        while (rIt.hasNext()) {
 	            PGPPublicKeyRing pgpPub = rIt.next();
 	            rememberKey(pgpPub);
 	            result.add(pgpPub);
 	        }
+	        return result;
 		} catch (Exception e) {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException ignore) {}
-			}
 			throw new IllegalArgumentException(e);
+		} finally {
+			IOUtils.closeQuietly(fis);
 		}
-		return result;
 	}
 
 	public PGPPublicKeyRing trust(PgpKeyId keyId) {
@@ -168,14 +166,10 @@ public class PgpServiceImpl implements PgpService {
 			PGPPublicKeyRingCollection newCollection = new PGPPublicKeyRingCollection(trusted);
 			fos = new FileOutputStream(ROO_PGP_FILE);
 			newCollection.encode(fos);
-			fos.close();
 		} catch (Exception e) {
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException ignore) {}
-			}
 			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(fos);
 		}
 		return keyRing;
 	}
@@ -216,14 +210,10 @@ public class PgpServiceImpl implements PgpService {
 			PGPPublicKeyRingCollection newCollection = new PGPPublicKeyRingCollection(stillTrusted);
 			fos = new FileOutputStream(ROO_PGP_FILE);
 			newCollection.encode(fos);
-			fos.close();
 		} catch (Exception e) {
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException ignore) {}
-			}
 			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(fos);
 		}
 		return removed;
 	}
@@ -265,14 +255,10 @@ public class PgpServiceImpl implements PgpService {
 			PGPPublicKeyRingCollection newCollection = new PGPPublicKeyRingCollection(stillTrusted);
 			fos = new FileOutputStream(ROO_PGP_FILE);
 			newCollection.encode(fos);
-			fos.close();
 		} catch (Exception e) {
-			if (fos != null) {
-				try {
-					fos.close();
-				} catch (IOException ignore) {}
-			}
 			throw new IllegalStateException(e);
+		} finally {
+			IOUtils.closeQuietly(fos);
 		}
 		
 		return result;
@@ -288,11 +274,7 @@ public class PgpServiceImpl implements PgpService {
 		} catch (Exception e) {
 			throw new IllegalStateException("Public key ID '" + keyId + "' not available from key server", e);
 		} finally {
-			try {
-				if (in != null) {
-					in.close();
-				}
-			} catch (IOException ignored) {}
+			IOUtils.closeQuietly(in);
 		}
 	}
 

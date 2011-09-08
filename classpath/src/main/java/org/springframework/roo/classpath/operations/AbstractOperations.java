@@ -14,6 +14,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -80,11 +81,7 @@ public abstract class AbstractOperations {
 				} catch (Exception e) {
 					throw new IllegalStateException(e);
 				} finally {
-					if (in != null) {
-						try {
-							in.close();
-						} catch (IOException ignored) {}
-					}
+					IOUtils.closeQuietly(in);
 				}
 				fileManager.createOrUpdateTextFileIfRequired(targetDirectory + fileName, sb.toString(), false);
 			} else {

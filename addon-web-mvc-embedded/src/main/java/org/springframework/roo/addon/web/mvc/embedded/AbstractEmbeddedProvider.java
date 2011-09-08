@@ -14,6 +14,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -108,18 +109,20 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		
 		String result = null;
 		if (urlStr.startsWith("http://")) {
+			BufferedReader rd = null;
 			try {				
 				URL url = new URL(urlStr);
-				BufferedReader rd = new BufferedReader(new InputStreamReader(httpService.openConnection(url)));
+				rd = new BufferedReader(new InputStreamReader(httpService.openConnection(url)));
 				StringBuffer sb = new StringBuffer();
 				String line;
 				while ((line = rd.readLine()) != null) {
 					sb.append(line);
 				}
-				rd.close();
 				result = sb.toString();
 			} catch (Exception e) {
 				logger.warning("Unable to connect to " + urlStr);
+			} finally {
+				IOUtils.closeQuietly(rd);
 			}
 		}
 		return result;

@@ -51,6 +51,8 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 	}
 
 	private class ProgressIndicatingInputStream extends InputStream {
+		
+		// Fields
 		private InputStream delegate;
 		private float totalSize;
 		private float readSoFar;
@@ -58,13 +60,19 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 		private long lastNotified;
 		private String text;
 		
+		/**
+		 * Constructor
+		 *
+		 * @param connection
+		 * @throws IOException
+		 */
 		public ProgressIndicatingInputStream(HttpURLConnection connection) throws IOException {
 			Assert.notNull(connection, "URL Connection required");
 			this.totalSize = connection.getContentLength();
 			this.delegate = connection.getInputStream();
 			this.text = connection.getURL().getPath();
 			if ("".equals(this.text)) {
-				// Fallback to the host name
+				// Fall back to the host name
 				this.text = connection.getURL().getHost();
 			} else {
 				// We only want the filename

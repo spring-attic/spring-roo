@@ -12,6 +12,7 @@ import jline.ConsoleReader;
 
 import org.springframework.roo.shell.ShellPromptAccessor;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
 
 /**
@@ -50,13 +51,15 @@ public class JLineLogHandler extends Handler {
 					sb.append(record.getMessage()).append(System.getProperty("line.separator"));
 				}
 				if (record.getThrown() != null) {
+					PrintWriter pw = null;
 					try {
 						StringWriter sw = new StringWriter();
-						PrintWriter pw = new PrintWriter(sw);
+						pw = new PrintWriter(sw);
 						record.getThrown().printStackTrace(pw);
-						pw.close();
 						sb.append(sw.toString());
 					} catch (Exception ex) {
+					} finally {
+						IOUtils.closeQuietly(pw);
 					}
 				}
 				return sb.toString();

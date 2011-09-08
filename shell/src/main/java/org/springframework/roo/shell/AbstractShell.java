@@ -26,6 +26,7 @@ import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.MathUtils;
 
 /**
@@ -97,17 +98,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException ignored) {}
-			}
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException ignored) {}
-			}
-
+			IOUtils.closeQuietly(inputStream, in);
 			double executionDurationInSeconds = (System.nanoTime() - startedNanoseconds)/1000000000D;
 			logger.fine("Script required " + MathUtils.round(executionDurationInSeconds, 3)  + " seconds to execute");
 		}

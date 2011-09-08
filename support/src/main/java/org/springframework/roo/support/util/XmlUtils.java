@@ -108,9 +108,7 @@ public final class XmlUtils {
 		} catch (final Exception e) {
 			throw new IllegalStateException("Could not open input stream", e);
 		} finally {
-			try {
-				inputStream.close();
-			} catch (final IOException ignored) {}
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 	
@@ -146,11 +144,7 @@ public final class XmlUtils {
 		} catch (final Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
-			try {
-				outputStream.close();
-			} catch (final IOException ignored) {
-				// Do nothing
-			}
+			IOUtils.closeQuietly(outputStream);
 		}
 	}
 	
@@ -195,15 +189,11 @@ public final class XmlUtils {
 					lsOutput.setEncoding("UTF-8");
 					lsOutput.setByteStream(outputStream);
 					try {
-					lsSerializer.write(document, lsOutput);
+						lsSerializer.write(document, lsOutput);
 					} catch (final LSException lse) {
 						throw new IllegalStateException(lse);
 					} finally {
-						try {
-							outputStream.close();
-						} catch (final IOException ignored) {
-							// Do nothing
-						}
+						IOUtils.closeQuietly(outputStream);
 					}
 				} else {
 					// DOMConfiguration 'format-pretty-print' parameter not available. Falling back to TrAX.

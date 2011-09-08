@@ -15,6 +15,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 
 /**
@@ -88,11 +89,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		} finally {
-			if (outputStream != null) {
-				try {
-					outputStream.close();
-				} catch (IOException ignored) {}
-			}
+			IOUtils.closeQuietly(outputStream);
 		}
 	}
 }

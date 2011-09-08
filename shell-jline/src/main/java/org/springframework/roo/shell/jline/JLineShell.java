@@ -34,6 +34,7 @@ import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -433,8 +434,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			if (getExitShellRequest() != null) {
 				// Shutting down, so close our file (we can always reopen it later if needed)
 				fileLog.write("// Spring Roo " + versionInfo() + " log closed at " + df.format(new Date()) + "\n");
-				fileLog.flush();
-				fileLog.close();
+				IOUtils.closeQuietly(fileLog);
 				fileLog = null;
 			}
 		} catch (IOException ignoreIt) {

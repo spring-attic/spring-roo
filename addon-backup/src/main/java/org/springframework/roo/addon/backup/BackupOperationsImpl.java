@@ -24,6 +24,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Operations for the 'backup' add-on.
@@ -38,7 +39,7 @@ import org.springframework.roo.support.util.Assert;
 public class BackupOperationsImpl implements BackupOperations {
 	
 	// Constants
-	private static Logger logger = HandlerUtils.getLogger(BackupOperationsImpl.class);
+	private static final Logger LOGGER = HandlerUtils.getLogger(BackupOperationsImpl.class);
 	
 	// Fields
 	@Reference private FileManager fileManager;
@@ -67,15 +68,11 @@ public class BackupOperationsImpl implements BackupOperations {
 			zos = new ZipOutputStream(file.getOutputStream());
 			zip(projectDirectory, projectDirectory, zos);
 		} catch (FileNotFoundException e) {
-			logger.fine("Could not determine project directory");
+			LOGGER.fine("Could not determine project directory");
 		} catch (IOException e) {
-			logger.fine("Could not create backup archive");
+			LOGGER.fine("Could not create backup archive");
 		} finally {
-			if (zos != null) {
-				try {
-					zos.close();
-				} catch (IOException ignored) {}
-			}
+			IOUtils.closeQuietly(zos);
 		}
 		
 		long milliseconds = (System.nanoTime() - start) / 1000000;
@@ -110,13 +107,17 @@ public class BackupOperationsImpl implements BackupOperations {
 				}
 				zip(files[i], base, zos);
 			} else {
-				InputStream in = new BufferedInputStream(new FileInputStream(files[i]));
-				ZipEntry entry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1));
-				zos.putNextEntry(entry);
-				while (-1 != (read = in.read(buffer))) {
-					zos.write(buffer, 0, read);
+				InputStream in = null;
+				try {
+					in = new BufferedInputStream(new FileInputStream(files[i]));
+					ZipEntry entry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1));
+					zos.putNextEntry(entry);
+					while (-1 != (read = in.read(buffer))) {
+						zos.write(buffer, 0, read);
+					}
+				} finally {
+					IOUtils.closeQuietly(in);
 				}
-				in.close();
 			}
 		}
 	}

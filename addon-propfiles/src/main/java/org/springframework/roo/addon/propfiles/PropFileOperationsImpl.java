@@ -23,6 +23,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Provides property file configuration operations.
@@ -223,10 +224,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not load properties", e);
 		} finally {
-			try {
-				is.close();
-			} catch (IOException ignore) {
-			}
+			IOUtils.closeQuietly(is);
 		}
 	}
 	
@@ -243,9 +241,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not store properties", e);
 		} finally {
-			try {
-				os.close();
-			} catch (IOException ignored) {}
+			IOUtils.closeQuietly(os);
 		}
 	}
 }

@@ -43,6 +43,7 @@ import org.springframework.roo.project.Repository;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
@@ -247,11 +248,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create '" + domainTypeFile + "'", e);
 		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException ignored) {}
-			}
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 
@@ -307,11 +304,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create 'faces.config.xml'", e);
 		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException ignored) {}
-			}
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 	

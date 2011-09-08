@@ -27,6 +27,7 @@ import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -115,11 +116,7 @@ public class SolrOperationsImpl implements SolrOperations {
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			if (outputStream != null) {
-				try {
-					outputStream.close();
-				} catch (IOException ignored) {}
-			}
+			IOUtils.closeQuietly(outputStream);
 		}
 	}
 

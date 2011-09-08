@@ -31,6 +31,7 @@ import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -507,11 +508,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			if (outputStream != null) {
-				try {
-					outputStream.close();
-				} catch (final IOException ignored) {}
-			}
+			IOUtils.closeQuietly(outputStream);
 		}
 
 		// Log message to console
@@ -561,12 +558,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			if (outputStream != null) {
-				try {
-					outputStream.close();
-				} catch (final IOException ignored) {
-				}
-			}
+			IOUtils.closeQuietly(outputStream);
 		}
 
 		logger.warning("Please update your database details in src/main/resources/" + persistenceUnit + ".properties.");
@@ -586,37 +578,34 @@ public class JpaOperationsImpl implements JpaOperations {
 		} catch (final IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (final IOException ignored) {}
-			}
+			IOUtils.closeQuietly(inputStream);
 		}
 		return props;
 	}
 
 	private void updateLog4j(final OrmProvider ormProvider) {
-		try {
-			final String log4jPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
-			if (fileManager.exists(log4jPath)) {
-				final MutableFile log4jMutableFile = fileManager.updateFile(log4jPath);
-				final Properties props = new Properties();
+		final String log4jPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+		if (fileManager.exists(log4jPath)) {
+			final MutableFile log4jMutableFile = fileManager.updateFile(log4jPath);
+			final Properties props = new Properties();
+			OutputStream outputStream = null;
+			try {
 				props.load(log4jMutableFile.getInputStream());
 				final String dnKey = "log4j.category.DataNucleus";
 				if (ormProvider == OrmProvider.DATANUCLEUS && !props.containsKey(dnKey)) {
-					final OutputStream outputStream = log4jMutableFile.getOutputStream();
+					outputStream = log4jMutableFile.getOutputStream();
 					props.put(dnKey, "WARN");
 					props.store(outputStream, "Updated at " + new Date());
-					outputStream.close();
 				} else if (ormProvider != OrmProvider.DATANUCLEUS && props.containsKey(dnKey)) {
-					final OutputStream outputStream = log4jMutableFile.getOutputStream();
+					outputStream = log4jMutableFile.getOutputStream();
 					props.remove(dnKey);
 					props.store(outputStream, "Updated at " + new Date());
-					outputStream.close();
 				}
+			} catch (final IOException e) {
+				throw new IllegalStateException(e);
+			} finally {
+				IOUtils.closeQuietly(outputStream);
 			}
-		} catch (final IOException e) {
-			throw new IllegalStateException(e);
 		}
 	}
 

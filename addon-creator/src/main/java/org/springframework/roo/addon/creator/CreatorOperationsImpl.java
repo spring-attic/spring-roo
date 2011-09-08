@@ -25,6 +25,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -165,10 +166,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			} catch (IOException e) {
 				throw new IllegalStateException("Could not parse ISO 3166 language list, please use --language option in command");
 			} finally {
-				try {
-					br.close();
-					is.close();
-				} catch (Exception ignored) {}
+				IOUtils.closeQuietly(br, is);
 			}
 		}
 		
@@ -329,22 +327,22 @@ public class CreatorOperationsImpl implements CreatorOperations {
 					int size;
 					byte[] buffer = new byte[2048];
 					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
-					BufferedOutputStream bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);
-					while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
-						bos.write(buffer, 0, size);
+					BufferedOutputStream bos = null;
+					try {
+						bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);
+						while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
+							bos.write(buffer, 0, size);
+						}
+						success = true;
+					} finally {
+						IOUtils.closeQuietly(bos);
 					}
-					bos.flush();
-					bos.close();
-					success = true;
 				}
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new IllegalStateException(getErrorMsg(locale.getCountry()), e);
 		} finally {
-			try {
-				if (zis != null) zis.close();
-				if (bis != null) bis.close();
-			} catch (Exception ignored) {}
+			IOUtils.closeQuietly(zis, bis);
 		}
 		
 		if (!success) {

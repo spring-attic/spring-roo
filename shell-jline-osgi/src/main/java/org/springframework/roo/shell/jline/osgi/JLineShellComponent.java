@@ -8,7 +8,6 @@ import static org.springframework.roo.support.util.AnsiEscapeCode.UNDERSCORE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -28,6 +27,7 @@ import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
@@ -155,16 +155,7 @@ public class JLineShellComponent extends JLineShell {
 		} catch (Exception e) {
 			return null;
 		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException ignored) {}
-			}
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException ignored) {}
-			}
+			IOUtils.closeQuietly(reader, inputStream);
 		}
 	}
 }

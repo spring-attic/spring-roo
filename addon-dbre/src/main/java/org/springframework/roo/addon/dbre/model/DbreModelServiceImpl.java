@@ -2,7 +2,6 @@ package org.springframework.roo.addon.dbre.model;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -25,6 +24,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -101,11 +101,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException ignored) {}
-			}
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 
