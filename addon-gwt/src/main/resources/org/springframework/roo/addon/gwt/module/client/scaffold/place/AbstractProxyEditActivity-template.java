@@ -1,5 +1,7 @@
 package __TOP_LEVEL_PACKAGE__.client.scaffold.place;
 
+import javax.validation.ConstraintViolation;
+
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
@@ -96,10 +98,10 @@ public abstract class AbstractProxyEditActivity<P extends EntityProxy> implement
 			}
 
 			@Override
-			public void onViolation(Set<Violation> errors) {
+			public void onConstraintViolation(Set<ConstraintViolation<?>> violations) {
 				if (editorDriver != null) {
 					setWaiting(false);
-					editorDriver.setViolations(errors);
+					editorDriver.setConstraintViolations(violations);
 				}
 			}
 		});
