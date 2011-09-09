@@ -55,10 +55,10 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 	private final Map<JavaType, Set<String>> annotationToMidMap = new HashMap<JavaType, Set<String>>();
 	private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
-	private final LinkedHashMap<String, ClassOrInterfaceTypeDetails> typeMap = new LinkedHashMap<String, ClassOrInterfaceTypeDetails>();
-	private final HashMap<String, String> pathCacheMap = new HashMap<String, String>();
+	private final Map<String, ClassOrInterfaceTypeDetails> typeMap = new LinkedHashMap<String, ClassOrInterfaceTypeDetails>();
+	private final Map<String, String> pathCacheMap = new HashMap<String, String>();
 	private Map<JavaType, String> javaTypeIdentifierCache = new HashMap<JavaType, String>();
-	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
+	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
 
 	public String getPhysicalTypeCanonicalPath(JavaType javaType, Path path) {
 		Assert.notNull(javaType, "Java type required");
@@ -335,7 +335,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 			return;
 		}
 		// Retrieve a list of paths that have been discovered or modified since the last invocation by this class
-		HashSet<String> changes = fileMonitorService.getWhatsDirty(TypeLocationServiceImpl.class.getName());
+		Set<String> changes = fileMonitorService.getDirtyFiles(TypeLocationServiceImpl.class.getName());
 		// Update the type cache
 		for (String change : changes) {
 			if (doesPathIndicateJavaType(change)) {
@@ -356,7 +356,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 	public boolean hasTypeChanged(String requestingClass, JavaType javaType) {
 		updateCache();
-		LinkedHashSet<String> changesSinceLastRequest = changeMap.get(requestingClass);
+		Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
 		if (changesSinceLastRequest == null) {
 			changesSinceLastRequest = new LinkedHashSet<String>();
 			for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeMap.values()) {

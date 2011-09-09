@@ -1,7 +1,7 @@
 package org.springframework.roo.file.monitor;
 
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.springframework.roo.file.monitor.event.FileDetails;
@@ -84,5 +84,5 @@ public interface FileMonitorService {
 	 * @param requestingClass the invoking class (required)
 	 * @return file system changes that occurred since the last invocation by the requesting class (may be empty, but never null)
 	 */
-	LinkedHashSet<String> getWhatsDirty(String requestingClass);
+	Set<String> getDirtyFiles(String requestingClass);
 }

@@ -53,8 +53,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	private final Set<String> notifyChanged = new HashSet<String>();
 	private final Set<String> notifyCreated = new HashSet<String>();
 	private final Set<String> notifyDeleted = new HashSet<String>();
-	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
-	private final HashSet<String> allFiles = new HashSet<String>();
+	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
+	private final Set<String> allFiles = new HashSet<String>();
 
 	// Mutex
 	private final Object lock = new Object();
@@ -97,14 +97,14 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public LinkedHashSet<String> getWhatsDirty(String requestingClass) {
+	public Set<String> getDirtyFiles(String requestingClass) {
 		synchronized (lock) {
-			LinkedHashSet<String> changesSinceLastRequest = changeMap.get(requestingClass);
+			Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
 			if (changesSinceLastRequest == null) {
 				changesSinceLastRequest = new LinkedHashSet<String>(allFiles);
 				changeMap.put(requestingClass, new LinkedHashSet<String>());
 			} else {
-				LinkedHashSet<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
+				Set<String> copyOfChangesSinceLastRequest = new LinkedHashSet<String>(changesSinceLastRequest);
 				changesSinceLastRequest.removeAll(copyOfChangesSinceLastRequest);
 				changesSinceLastRequest = copyOfChangesSinceLastRequest;
 			}
