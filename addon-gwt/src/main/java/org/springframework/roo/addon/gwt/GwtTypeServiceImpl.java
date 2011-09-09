@@ -590,10 +590,6 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return isCommonType(type) || isCollectionType(type);
 	}
 
-	private JavaType getDestinationJavaType(JavaType physicalType, GwtType mirrorType, ProjectMetadata projectMetadata) {
-		return GwtUtils.convertGovernorTypeNameIntoKeyTypeName(physicalType, mirrorType, projectMetadata);
-	}
-
 	private boolean isPublicAccessor(MethodMetadata method) {
 		return Modifier.isPublic(method.getModifier()) && !method.getReturnType().equals(JavaType.VOID_PRIMITIVE) && method.getParameterTypes().isEmpty() && (method.getMethodName().getSymbolName().startsWith("get"));
 	}

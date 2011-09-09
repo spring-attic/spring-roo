@@ -267,7 +267,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	}
 
 	public ClassOrInterfaceTypeDetails getTemplateDetails(TemplateDataDictionary dataDictionary, String templateFile, JavaType templateType) {
-		String templateContents = null;
+		String templateContents;
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
 			Template template = templateLoader.getTemplate(templateFile);
