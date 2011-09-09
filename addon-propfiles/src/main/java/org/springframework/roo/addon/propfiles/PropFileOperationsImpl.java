@@ -244,4 +244,12 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			IOUtils.closeQuietly(os);
 		}
 	}
+
+	public Properties loadProperties(final InputStream input) {
+		final Properties properties = new Properties();
+		if (input != null) {
+			loadProps(properties, input);
+		}
+		return properties;
+	}
 }

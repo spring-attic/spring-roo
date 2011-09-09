@@ -91,7 +91,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		String xml = sendHttpGetRequest("http://screenr.com/api/oembed.xml?url=" + url);
 		if (xml != null) {
 			try {
-				Document doc = XmlUtils.getDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes()));
+				Document doc = XmlUtils.readXml(new ByteArrayInputStream(xml.getBytes()));
 				Element movie = XmlUtils.findRequiredElement("//html", doc.getDocumentElement());
 				String movieId = movie.getTextContent();
 				movieId = movieId.substring(movieId.indexOf("value=\"i=") + 7);
@@ -107,7 +107,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		String xml = sendHttpGetRequest("http://lab.viddler.com/services/oembed/?url=" + url + "&type=simple&format=xml");
 		if (xml != null) {
 			try {
-				Document doc = XmlUtils.getDocumentBuilder().parse(new ByteArrayInputStream(xml.getBytes()));
+				Document doc = XmlUtils.readXml(new ByteArrayInputStream(xml.getBytes()));
 				Element movie = XmlUtils.findRequiredElement("//param[@name='movie']", doc.getDocumentElement());
 				String movieUrl = movie.getAttribute("value");
 				return movieUrl.substring(movieUrl.indexOf("simple/") + 7);

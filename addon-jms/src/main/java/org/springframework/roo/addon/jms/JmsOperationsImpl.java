@@ -76,18 +76,14 @@ public class JmsOperationsImpl implements JmsOperations {
 		Assert.notNull(jmsProvider, "JMS provider required");
 
 		String jmsContextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
-		Document document;
-		try {
-			if (fileManager.exists(jmsContextPath)) {
-				document = XmlUtils.readXml(fileManager.getInputStream(jmsContextPath));
-			} else {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-jms-template.xml");
-				Assert.notNull(templateInputStream, "Could not acquire applicationContext-jms.xml template");
-				document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+		final InputStream in;
+		if (fileManager.exists(jmsContextPath)) {
+			in = fileManager.getInputStream(jmsContextPath);
+		} else {
+			in = TemplateUtils.getTemplate(getClass(), "applicationContext-jms-template.xml");
+			Assert.notNull(in, "Could not acquire applicationContext-jms.xml template");
 		}
+		final Document document = XmlUtils.readXml(in);
 
 		Element root = document.getDocumentElement();
 

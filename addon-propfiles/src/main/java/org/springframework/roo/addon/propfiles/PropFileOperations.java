@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.propfiles;
 
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Properties;
 import java.util.SortedSet;
 
 import org.springframework.roo.project.Path;
@@ -106,4 +108,12 @@ public interface PropFileOperations {
 	 * @return the key/value pairs (may return null if the property file does not exist)
 	 */
 	Map<String, String> getProperties(Path propertyFilePath, String propertyFilename);
+	
+	/**
+	 * Loads the properties from the given stream, closing it on completion
+	 * 
+	 * @param input the stream from which to read (can be <code>null</code>)
+	 * @return an empty {@link Properties} if a null stream is given
+	 */
+	Properties loadProperties(InputStream input);
 }

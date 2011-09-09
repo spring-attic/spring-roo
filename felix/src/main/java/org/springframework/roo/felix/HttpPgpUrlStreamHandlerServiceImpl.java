@@ -50,9 +50,13 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Component(immediate = true)
 @Service
 public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandlerService implements HttpPgpUrlStreamHandlerService {
+
+	// Constants
+	private static final Logger LOGGER = HandlerUtils.getLogger(HttpPgpUrlStreamHandlerServiceImpl.class);
+	
+	// Fields
 	@Reference private UrlInputStreamService urlInputStreamService;
 	@Reference private PgpService pgpService;
-	private static final Logger logger = HandlerUtils.getLogger(HttpPgpUrlStreamHandlerServiceImpl.class);
 
 	protected void activate(ComponentContext context) {
 		Hashtable<String,String> dict = new Hashtable<String,String>();
@@ -84,14 +88,12 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 		// Decide if this signature file is well-formed and of a key ID that is trusted by the user
 		SignatureDecision decision = pgpService.isSignatureAcceptable(new FileInputStream(ascUrlFile));
 		if (!decision.isSignatureAcceptable()) {
-			logger.log(Level.SEVERE, "Download URL '" + resourceUrl.toExternalForm() + "' failed");
-			logger.log(Level.SEVERE, "This resource was signed with PGP key ID '" + decision.getSignatureAsHex() + "', which is not currently trusted");
-			logger.log(Level.SEVERE, "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
+			LOGGER.log(Level.SEVERE, "Download URL '" + resourceUrl.toExternalForm() + "' failed");
+			LOGGER.log(Level.SEVERE, "This resource was signed with PGP key ID '" + decision.getSignatureAsHex() + "', which is not currently trusted");
+			LOGGER.log(Level.SEVERE, "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
 			throw new IOException("Download URL '" + resourceUrl.toExternalForm() + "' has untrusted PGP signature " + JdkDelegatingLogListener.DO_NOT_LOG);
 		}
 		
-		// logger.log(Level.FINE, "Download URL '" + resourceUrl.toExternalForm() + "' signature uses acceptable PGP key ID '" + decision.getSignatureAsHex() + "'");
-
 		// So far so good. Next we need the actual resource to ensure the ASC file really did sign it
 		File resourceFile = File.createTempFile("roo_resource", null);
 		resourceFile.deleteOnExit();
@@ -101,8 +103,6 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 
 		// Excellent it worked! We don't need the ASC file anymore, so get rid of it
 		ascUrlFile.delete();
-
-		// logger.log(Level.FINE, "Download URL '" + resourceUrl.toExternalForm() + "' was correctly signed by key");
 
 		return resourceFile.toURI().toURL().openConnection();
 	}

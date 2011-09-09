@@ -80,12 +80,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			}
 		}
 
-		Document pom;
-		try {
-			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "standard-project-template.xml"));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		final Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "standard-project-template.xml"));
 
 		Element root = pom.getDocumentElement();
 		

@@ -104,12 +104,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
-		Document pom;
-		try {
-			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
+		Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
 		Element root = pom.getDocumentElement();
 		
 		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
@@ -231,13 +226,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		
-		Document pom;
-		try {
-			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml"));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
+		Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml"));
 		Element root = pom.getDocumentElement();
 		
 		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());

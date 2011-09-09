@@ -354,7 +354,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 */
 	private void updateConfiguration() {
 		// Add tiles dependencies to pom
-		Element configuration = XmlUtils.getConfiguration(getClass(), "tiles/configuration.xml");
+		Element configuration = XmlUtils.getRootElement(getClass(), "tiles/configuration.xml");
 
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/tiles/dependencies/dependency", configuration);

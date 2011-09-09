@@ -244,27 +244,18 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updatePersistenceXml(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password, final String persistenceUnit) {
 		final String persistencePath = getPersistencePath();
-		Document persistence;
-		try {
-			if (fileManager.exists(persistencePath)) {
-				persistence = XmlUtils.readXml(fileManager.getInputStream(persistencePath));
-			} else {
-				final InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
-				Assert.notNull(templateInputStream, "Could not acquire persistence.xml template");
-				persistence = XmlUtils.readXml(templateInputStream);
-			}
-		} catch (final Exception e) {
-			throw new IllegalStateException(e);
+		final InputStream in;
+		if (fileManager.exists(persistencePath)) {
+			in = fileManager.getInputStream(persistencePath);
+		} else {
+			in = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
+			Assert.notNull(in, "Could not acquire persistence.xml template");
 		}
+		final Document persistence = XmlUtils.readXml(in);
 
-		final Properties dialects = new Properties();
-		try {
-			final InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
-			Assert.notNull(dialectsInputStream, "Could not acquire jpa-dialects.properties");
-			dialects.load(dialectsInputStream);
-		} catch (final Exception e) {
-			throw new IllegalStateException(e);
-		}
+		final InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
+		Assert.notNull(dialectsInputStream, "Could not acquire jpa-dialects.properties");
+		final Properties dialects = propFileOperations.loadProperties(dialectsInputStream);
 
 		final Element root = persistence.getDocumentElement();
 		final Element persistenceElement = XmlUtils.findFirstElement("/persistence", root);
@@ -435,18 +426,14 @@ public class JpaOperationsImpl implements JpaOperations {
 			return;
 		}
 
-		Document appengine;
-		try {
-			if (appenginePathExists) {
-				appengine = XmlUtils.readXml(fileManager.getInputStream(appenginePath));
-			} else {
-				final InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
-				Assert.notNull(templateInputStream, "Could not acquire appengine-web.xml template");
-				appengine = XmlUtils.readXml(templateInputStream);
-			}
-		} catch (final Exception e) {
-			throw new IllegalStateException(e);
+		final InputStream in;
+		if (appenginePathExists) {
+			in = fileManager.getInputStream(appenginePath);
+		} else {
+			in = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
+			Assert.notNull(in, "Could not acquire appengine-web.xml template");
 		}
+		final Document appengine = XmlUtils.readXml(in);
 
 		final Element root = appengine.getDocumentElement();
 		final Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", root);

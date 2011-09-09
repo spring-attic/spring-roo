@@ -103,14 +103,9 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
-		Document document;
-		try {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-template.xhtml");
-			Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
-			document = XmlUtils.readXml(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-template.xhtml");
+		Assert.notNull(templateInputStream, "Could not acquire selenium.xhtml template");
+		final Document document = XmlUtils.readXml(templateInputStream);
 
 		Element root = (Element) document.getLastChild();
 		if (root == null || !"html".equals(root.getNodeName())) {
@@ -168,18 +163,14 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		String relativeTestFilePath = "selenium/test-suite.xhtml";
 		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
-		Document suite;
-		try {
-			if (fileManager.exists(seleniumPath)) {
-				suite = XmlUtils.readXml(fileManager.getInputStream(seleniumPath));
-			} else {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "selenium-test-suite-template.xhtml");
-				Assert.notNull(templateInputStream, "Could not acquire selenium test suite template");
-				suite = XmlUtils.readXml(templateInputStream);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+		final InputStream in;
+		if (fileManager.exists(seleniumPath)) {
+			in = fileManager.getInputStream(seleniumPath);
+		} else {
+			in = TemplateUtils.getTemplate(getClass(), "selenium-test-suite-template.xhtml");
+			Assert.notNull(in, "Could not acquire selenium test suite template");
 		}
+		final Document suite = XmlUtils.readXml(in);
 
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");

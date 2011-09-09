@@ -418,8 +418,6 @@ public class SimpleParser implements Parser {
 			Set<MethodTarget> targets = locateTargets(translated, false, true);
 			SortedSet<String> results = new TreeSet<String>(comparator);
 
-			// logger.info("RESULTS: '" + translated + "' " + StringUtils.collectionToCommaDelimitedString(targets));
-
 			if (targets.isEmpty()) {
 				// Nothing matches the buffer they've presented
 				return cursor;

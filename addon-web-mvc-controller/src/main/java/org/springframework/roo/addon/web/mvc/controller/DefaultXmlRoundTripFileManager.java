@@ -42,7 +42,6 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 	public void writeToDiskIfNecessary(String filename, Document proposed) {
 		Assert.notNull(filename, "The file name is required");
 		Assert.notNull(proposed, "The proposed document is required");
-		Document original = null;
 		if (fileManager.exists(filename)) {
 			String proposedContents = XmlUtils.nodeToString(proposed);
 			try {
@@ -57,7 +56,7 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 					fileContentsMap.put(filename, contentsSha);
 				}
 			} catch (IOException ignored) {}
-		   	original = XmlUtils.readXml(fileManager.getInputStream(filename));
+			final Document original = XmlUtils.readXml(fileManager.getInputStream(filename));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
 				DomUtils.removeTextNodes(original);
 				fileManager.createOrUpdateTextFileIfRequired(filename, proposedContents, false);

@@ -8,6 +8,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Wraps an {@link OutputStream} and automatically passes each line to the {@link Logger}
@@ -17,12 +18,21 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class LoggingOutputStream extends OutputStream {
-	protected static final Logger logger = HandlerUtils.getLogger(LoggingOutputStream.class);
-	private Level level;
-	private String sourceClassName = LoggingOutputStream.class.getName();
-	private int count = 0;
-	ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	
+	// Constants
+	protected static final Logger LOGGER = HandlerUtils.getLogger(LoggingOutputStream.class);
+	
+	// Fields
+	private final Level level;
+	private String sourceClassName = LoggingOutputStream.class.getName();
+	private int count;
+	private ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	
+	/**
+	 * Constructor
+	 *
+	 * @param level the level at which to log (required)
+	 */
 	public LoggingOutputStream(Level level) {
 		Assert.notNull(level, "A logging level is required");
 		this.level = level;
@@ -41,9 +51,10 @@ public class LoggingOutputStream extends OutputStream {
 			LogRecord record = new LogRecord(level, msg);
 			record.setSourceClassName(sourceClassName);
 			try {
-				logger.log(record);
+				LOGGER.log(record);
 			} finally {
 				count = 0;
+				IOUtils.closeQuietly(baos);
 				baos = new ByteArrayOutputStream();
 			}
 		}

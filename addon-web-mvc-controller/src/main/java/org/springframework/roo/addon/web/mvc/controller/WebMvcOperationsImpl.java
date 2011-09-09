@@ -134,14 +134,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			return;
 		}
 
-		Document document;
-		try {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
-			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
-			document = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		final InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
+		Assert.notNull(templateInputStream, "Could not acquire web.xml template");
+		final Document document = XmlUtils.readXml(templateInputStream);
 
 		String projectName = projectOperations.getProjectMetadata().getProjectName();
 		WebXmlUtils.setDisplayName(projectName, document, null);
@@ -183,16 +178,15 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		// Verify the middle tier application context already exists
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
-		Document document;
-		
 		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		final InputStream in;
 		if (!fileManager.exists(webConfigFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
-			Assert.notNull(templateInputStream, "Could not acquire web.xml template");
-			document = XmlUtils.readXml(templateInputStream);
+			in = TemplateUtils.getTemplate(getClass(), "webmvc-config.xml");
+			Assert.notNull(in, "Could not acquire web.xml template");
 		} else {
-			document = XmlUtils.readXml(fileManager.getInputStream(webConfigFile));
+			in = fileManager.getInputStream(webConfigFile);
 		}
+		final Document document = XmlUtils.readXml(in);
 		
 		Element root = (Element) document.getFirstChild();
 		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
@@ -214,7 +208,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			Document webMvcConfigAdditions = XmlUtils.readXml(templateInputStream);
 			Element root = webMvcConfig.getDocumentElement();
 			NodeList nodes = webMvcConfigAdditions.getDocumentElement().getChildNodes();
-			for(int i = 0; i < nodes.getLength(); i++) {
+			for (int i = 0; i < nodes.getLength(); i++) {
 				root.appendChild(webMvcConfig.importNode(nodes.item(i), true));
 			}
 		}

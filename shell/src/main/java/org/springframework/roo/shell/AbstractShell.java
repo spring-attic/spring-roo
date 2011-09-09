@@ -220,8 +220,6 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		} catch (RuntimeException e) {
 	    	setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
 			// We rely on execution strategy to log it
-			// Throwable root = ExceptionUtils.extractRootCause(ex);
-			// logger.log(Level.FINE, root.getMessage());
 	    	try {
 	    		logCommandIfRequired(line, false);
 	    	} catch (Exception ignored) {}
@@ -266,9 +264,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	 * 
 	 * @param processedLine the line that should be appended to some type of output (excluding the \n character)
 	 */
-	protected void logCommandToOutput(String processedLine) {
-		// logger.severe(processedLine);
-	}
+	protected void logCommandToOutput(String processedLine) {}
 
 	/**
 	 * Base implementation of the {@link Shell#setPromptPath(String)} method, designed for simple shell

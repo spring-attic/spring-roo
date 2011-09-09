@@ -18,7 +18,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -144,14 +143,10 @@ public class MenuOperationsImpl implements MenuOperations {
 	}
 
 	private Document getMenuDocument() {
-		InputStream inputStream = null;
 		try {
-			inputStream = getMenuFileInputStream();
-			return XmlUtils.getDocumentBuilder().parse(inputStream);
+			return XmlUtils.readXml(getMenuFileInputStream());
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse menu.jspx" + (!StringUtils.hasText(e.getMessage()) ? "" : " (" + e.getMessage() + ")"), e);
-		} finally {
-			IOUtils.closeQuietly(inputStream);
 		}
 	}
 

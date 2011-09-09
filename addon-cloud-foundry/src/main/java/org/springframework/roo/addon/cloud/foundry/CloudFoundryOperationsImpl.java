@@ -29,18 +29,8 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 
 /**
  * Operations for Cloud Foundry add-on.
- * <p/>
- * TODO:
- * - Move the table rendering stuff out to a separate class in org.sfw.shell so can be used elsewhere; feel free to try using it in AddOnOperationsImpl (talk to him)
- * <p/>
- * DONE:
- * - Syso must become logger calls (limited debugging for your own use is OK, but nothing that will ship in a release)
- * - Get rid of execute method, replace with more obvious try...catch.
- * - Make all failures via a throw new illegalstateexception(theText) (and with a second argument containing the root exception if possible)
- * - Make CloudFoundryoperationsImpl extend AbstractFlashingObject (see JdkUrlInputStreamService)
- * - Login should take a Cloud Controller URL, defaulting to the main URL
- * - Make an effort to encrypt the username and password in the preferences API
- * - Ensure the preferences API understands which cloud controller URL the particular username + password applies to
+ * 
+ * TODO Move the table rendering stuff out to a separate class in org.sfw.shell so can be used elsewhere; feel free to try using it in AddOnOperationsImpl (talk to him)
  *
  * @author James Tyrrell
  * @since 1.1.3

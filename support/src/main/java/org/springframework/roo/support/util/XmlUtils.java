@@ -86,7 +86,7 @@ public final class XmlUtils {
 	 * @return a non-<code>null</code> element
 	 * @since 1.2.0
 	 */
-	public static final Element createTextElement(final Document document, final String tagName, final String text) {
+	public static Element createTextElement(final Document document, final String tagName, final String text) {
 		final Element element = document.createElement(tagName);
 		element.setTextContent(text);
 		return element;
@@ -98,7 +98,7 @@ public final class XmlUtils {
 	 * @param inputStream the input stream to read from (required).  The stream is closed upon completion.
 	 * @return a document.
 	 */
-	public static final Document readXml(InputStream inputStream) {
+	public static Document readXml(InputStream inputStream) {
 		Assert.notNull(inputStream, "InputStream required");
 		try {
 			if (!(inputStream instanceof BufferedInputStream)) {
@@ -118,7 +118,7 @@ public final class XmlUtils {
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
 	 */
-	public static final void writeXml(final OutputStream outputStream, final Document document) {
+	public static void writeXml(final OutputStream outputStream, final Document document) {
 		writeXml(createIndentingTransformer(), outputStream, document);
 	}
 
@@ -129,7 +129,7 @@ public final class XmlUtils {
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
 	 */
-	public static final void writeXml(final Transformer transformer, OutputStream outputStream, final Document document) {
+	public static void writeXml(final Transformer transformer, OutputStream outputStream, final Document document) {
 		Assert.notNull(transformer, "Transformer required");
 		Assert.notNull(outputStream, "OutputStream required");
 		Assert.notNull(document, "Document required");
@@ -425,7 +425,7 @@ public final class XmlUtils {
 	/**
 	 * @return a transformer that indents entries by 4 characters (never null)
 	 */
-	public static final Transformer createIndentingTransformer() {
+	public static Transformer createIndentingTransformer() {
 		Transformer transformer;
 		try {
 			transformerFactory.setAttribute("indent-number", 4);
@@ -441,7 +441,7 @@ public final class XmlUtils {
 	/**
 	 * @return a new document builder (never null)
 	 */
-	public static final DocumentBuilder getDocumentBuilder() {
+	public static DocumentBuilder getDocumentBuilder() {
 		// factory.setNamespaceAware(true);
 		try {
 			return factory.newDocumentBuilder();
@@ -451,22 +451,18 @@ public final class XmlUtils {
 	}
 	
 	/**
-	 * Returns the root element of an addon's configuration file.
+	 * Returns the root element of the given XML file.
 	 * 
-	 * @param clazz which owns the configuration
-	 * @param configurationPath the path of the configuration file.
-	 * @return the configuration root element 
+	 * @param clazz the class from whose package to open the file (required)
+	 * @param xmlFilePath the path of the XML file relative to the given class'
+	 * package (required)
+	 * @return a non-<code>null</code> element
+	 * @see Document#getDocumentElement()
 	 */
-	public static Element getConfiguration(final Class<?> clazz, final String configurationPath) {
-		final InputStream templateInputStream = TemplateUtils.getTemplate(clazz, configurationPath);
-		Assert.notNull(templateInputStream, "Could not acquire " + configurationPath + " file");
-		Document configurationDocument;
-		try {
-			configurationDocument = getDocumentBuilder().parse(templateInputStream);
-		} catch (final Exception e) {
-			throw new IllegalStateException(e);
-		}
-		return configurationDocument.getDocumentElement();
+	public static Element getRootElement(final Class<?> clazz, final String xmlFilePath) {
+		final InputStream inputStream = TemplateUtils.getTemplate(clazz, xmlFilePath);
+		Assert.notNull(inputStream, "Could not open the file '" + xmlFilePath + "'");
+		return readXml(inputStream).getDocumentElement();
 	}
 	
 	/**
@@ -476,7 +472,7 @@ public final class XmlUtils {
 	 * @return the configuration root element 
 	 */
 	public static Element getConfiguration(final Class<?> clazz) {
-		return getConfiguration(clazz, "configuration.xml");
+		return getRootElement(clazz, "configuration.xml");
 	}
 	
 	/**

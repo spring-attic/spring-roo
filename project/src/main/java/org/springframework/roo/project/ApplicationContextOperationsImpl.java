@@ -1,7 +1,5 @@
 package org.springframework.roo.project;
 
-import java.io.InputStream;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -32,20 +30,10 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 	public void createMiddleTierApplicationContext() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
-		
-		Document document;
-		try {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml");
-			document = XmlUtils.readXml(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		
-		Element root = document.getDocumentElement();
+		final Document document = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml"));
+		final Element root = document.getDocumentElement();
 		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-
 		fileManager.createOrUpdateTextFileIfRequired(projectMetadata.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"), XmlUtils.nodeToString(document), false);
-
 		fileManager.scan();
 	}
 }
