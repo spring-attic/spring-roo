@@ -156,6 +156,124 @@ tomcat_stop_start_get_stop() {
     popd &>/dev/null
 }
 
+pizzashop_tests() {
+	type -P curl &>/dev/null || { l_error "curl not found. Aborting." >&2; exit 1; }
+	log "Performing MVC REST testing;"
+	pushd /tmp/rootest &>/dev/null
+	if [ "$TERM_PROGRAM" = "Apple_Terminal" ]; then
+        MVN_TOMCAT_PID=`ps -e | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    else  
+        MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    fi
+    if [ ! "$MVN_TOMCAT_PID" = "" ]; then
+        # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
+        log "kill -9 of old mvn tomcat:run with PID $MVN_TOMCAT_PID"
+        kill -9 $MVN_TOMCAT_PID
+        sleep 5
+    fi
+    log "Invoking mvn tomcat:run in background"
+    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat:run &>/dev/null 2>&1 &
+
+    wget --retry-connrefused --tries=30 --header 'Accept: application/json' --quiet http://localhost:8888/pizzashop/bases 2>&1
+	
+	log "Testing RESTful POST to PizzaShop application"
+	curl -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -i -s -X POST -d "{name: \"Thin Crust\"}" http://localhost:8888/pizzashop/bases
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head -n 1 /tmp/rootest/curl.txt | grep "201 Created"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful POST to PizzaShop application failed" >&2; exit 1;
+    fi
+	
+	log "Testing RESTful array data POST to PizzaShop application"
+	curl -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -i -s -X POST -d "[{name: \"Cheesy Crust\"},{name: \"Thick Crust\"}]" http://localhost:8888/pizzashop/bases/jsonArray	
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head -n 1 /tmp/rootest/curl.txt | grep "201 Created"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful array data POST to PizzaShop application failed" >&2; exit 1;
+    fi
+	
+	log "Testing RESTful array data POST to PizzaShop application"
+	curl -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -i -s -X POST -d "[{name: \"Fresh Tomato\"},{name: \"Prawns\"},{name: \"Mozarella\"},{name: \"Bogus\"}]" http://localhost:8888/pizzashop/toppings/jsonArray
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head -n 1 /tmp/rootest/curl.txt | grep "201 Created"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful array data POST to PizzaShop application failed" >&2; exit 1;
+    fi
+
+	log "Testing RESTful PUT to PizzaShop application"
+	curl -i -s -X PUT -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -d "{id:6,name:\"Mozzarella\",version:1}" http://localhost:8888/pizzashop/toppings
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head -n 1 /tmp/rootest/curl.txt | grep "200 OK"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful PUT to PizzaShop application failed" >&2; exit 1;
+    fi
+	
+	log "Testing RESTful GET to PizzaShop application"
+	curl -i -s -H "Accept: application/json" -o /tmp/rootest/curl.txt http://localhost:8888/pizzashop/toppings
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head /tmp/rootest/curl.txt | grep "Tomato" | grep "Prawns" | grep "Mozzarella"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful GET to PizzaShop application failed" >&2; exit 1;
+    fi
+	
+	log "Testing RESTful GET to PizzaShop application"
+	curl -i -s -H "Accept: application/json" -o /tmp/rootest/curl.txt http://localhost:8888/pizzashop/toppings/6
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head /tmp/rootest/curl.txt | grep "Mozzarella"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful GET to PizzaShop application failed" >&2; exit 1;
+    fi
+	
+	log "Testing RESTful complex POST to PizzaShop application"
+	curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json"  -o /tmp/rootest/curl.txt -d "{name:\"Napolitana\",price:7.5,base:{id:1},toppings:[{name: \"Anchovy fillets\"},{name: \"Mozzarella\"}]}" http://localhost:8888/pizzashop/pizzas
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head /tmp/rootest/curl.txt | grep "201 Created"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
+    fi
+	
+	log "Testing RESTful complex POST to PizzaShop application"
+	curl -i -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -o /tmp/rootest/curl.txt -d "{name:\"Stefan\",total:7.5,address:\"Sydney, AU\",deliveryDate:1314595427866,id:{shopCountry:\"AU\",shopCity:\"Sydney\",shopName:\"Pizza Pan 1\"},pizzas:[{id:8,version:1}]}" http://localhost:8888/pizzashop/pizzaorders	
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "curl failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+	head /tmp/rootest/curl.txt | grep "201 Created"
+	EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "RESTful complex POST to PizzaShop application failed" >&2; exit 1;
+    fi
+
+	popd &>/dev/null
+}
 
 COMMAND=
 NEXT=
@@ -406,7 +524,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
         load_roo_build_and_test script wedding.roo
         tomcat_stop_start_get_stop http://localhost:8888/wedding
 
-        load_roo_build_and_test script expenses.roo
+		load_roo_build_and_test script pizzashop.roo
+		pizzashop_tests
+
+        load_roo_build_and_test script expenses.roo	
 
         log "Removing Roo distribution from test area"
         rm -rf /tmp/$RELEASE_IDENTIFIER
