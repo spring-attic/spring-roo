@@ -155,7 +155,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare setUp method signature
 		JavaSymbolName setUpMethodName = new JavaSymbolName("setUp");
-		MethodMetadata setUpMethod = MemberFindingUtils.getMethod(governorTypeDetails, setUpMethodName, parameters);
+		MethodMetadata setUpMethod = getMethodOnGovernor(setUpMethodName, parameters);
 		if (setUpMethod != null) {
 			Assert.notNull(MemberFindingUtils.getAnnotationOfType(setUpMethod.getAnnotations(), new JavaType("org.junit.BeforeClass")), "Method 'setUp' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @BeforeClass");
 		} else {
@@ -173,7 +173,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare tearDown method signature
 		JavaSymbolName tearDownMethodName = new JavaSymbolName("tearDown");
-		MethodMetadata tearDownMethod = MemberFindingUtils.getMethod(governorTypeDetails, tearDownMethodName, parameters);
+		MethodMetadata tearDownMethod = getMethodOnGovernor(tearDownMethodName, parameters);
 		if (tearDownMethod != null) {
 			Assert.notNull(MemberFindingUtils.getAnnotationOfType(tearDownMethod.getAnnotations(), new JavaType("org.junit.AfterClass")), "Method 'tearDown' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @AfterClass");
 		} else {
@@ -203,7 +203,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(countMethod.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
 
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}
@@ -234,7 +234,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findMethod.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}
@@ -272,7 +272,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findAllMethod.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}
@@ -310,7 +310,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(findEntriesMethod.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}
@@ -350,7 +350,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(flushMethod.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}
@@ -398,7 +398,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethod.getMethodName()) + "Update");
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}
@@ -454,7 +454,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethod.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}
@@ -497,7 +497,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(removeMethod.getMethodName()));
 		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameters);
 		if (method != null) {
 			return method;
 		}

@@ -113,11 +113,10 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 		
 		MethodMetadata installMethod = installMethodBuilder.build();
-		if (MemberFindingUtils.getMethod(governorTypeDetails, installMethod.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(installMethod.getParameterTypes())) == null) {
+		if (getMethodOnGovernor(installMethod.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(installMethod.getParameterTypes())) == null) {
 			builder.addMethod(installMethod);
 		}
 		builder.addMethod(getAfterPropertiesSetMethod(installMethod));
-		
 
 		AnnotationMetadata configurable = AnnotationMetadataBuilder.getInstance(CONFIGURABLE, new ArrayList<AnnotationAttributeValue<?>>()).build();
 		boolean configurablePresent = false;

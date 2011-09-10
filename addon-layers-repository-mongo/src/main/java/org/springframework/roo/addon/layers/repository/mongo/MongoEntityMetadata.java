@@ -77,7 +77,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getIdAccessor(FieldMetadata idField) {
 		JavaSymbolName idAccessorName = new JavaSymbolName("get" + StringUtils.capitalize(idField.getFieldName().getSymbolName()));
-		if (MemberFindingUtils.getMethod(governorTypeDetails, idAccessorName, new ArrayList<JavaType>()) != null) {
+		if (getMethodOnGovernor(idAccessorName, new ArrayList<JavaType>()) != null) {
 			return null;
 		}
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -88,7 +88,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private MethodMetadata getIdMutator(FieldMetadata idField) {
 		JavaSymbolName idMutatorName = new JavaSymbolName("set" + StringUtils.capitalize(idField.getFieldName().getSymbolName()));
 		List<JavaType> paramTypes = Arrays.asList(idField.getFieldType());
-		if (MemberFindingUtils.getMethod(governorTypeDetails, idMutatorName, paramTypes) != null) {
+		if (getMethodOnGovernor(idMutatorName, paramTypes) != null) {
 			return null;
 		}
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

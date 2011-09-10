@@ -783,7 +783,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		String requiredAccessorName = getRequiredAccessorName(field);
 
 		// Check governor for accessor method
-		return MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null;
+		return getMethodOnGovernor(new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null;
 
 	}
 
@@ -815,7 +815,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		String requiredMutatorName = getRequiredMutatorName(field);
 
 		// Check governor for mutator method
-		return MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), new ArrayList<JavaType>()) != null;
+		return getMethodOnGovernor(new JavaSymbolName(requiredMutatorName), new ArrayList<JavaType>()) != null;
 
 	}
 

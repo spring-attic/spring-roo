@@ -287,7 +287,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final List<JavaType> paramTypes = new ArrayList<JavaType>();
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			return userMethod; 
 		}
@@ -372,7 +372,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaType returnType = ENTITY_MANAGER;
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -434,7 +434,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final List<JavaSymbolName> paramNames = Collections.emptyList();
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(COUNT_RETURN_TYPE), "Method '" + methodName + "' on '" + destination + "' must return '" + COUNT_RETURN_TYPE.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -476,7 +476,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -519,7 +519,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaType returnType = destination;
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + returnType + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -586,7 +586,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;

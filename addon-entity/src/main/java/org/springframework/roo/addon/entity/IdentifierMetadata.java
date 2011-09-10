@@ -251,7 +251,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Compute the names of the accessors that will be produced
 		for (FieldMetadata field : fields) {
 			String requiredAccessorName = getRequiredAccessorName(field);
-			MethodMetadata accessor = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
+			MethodMetadata accessor = getMethodOnGovernor(new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
 			if (accessor != null) {
 				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
@@ -294,7 +294,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 			List<JavaType> paramTypes = new ArrayList<JavaType>();
 			paramTypes.add(field.getFieldType());
-			MethodMetadata mutator = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
+			MethodMetadata mutator = getMethodOnGovernor(new JavaSymbolName(requiredMutatorName), paramTypes);
 			if (mutator != null) {
 				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
@@ -345,15 +345,17 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			return result;
 		}
 
-		// Create the constructor
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
 		for (FieldMetadata field : fields) {
-			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
+			String fieldName = field.getFieldName().getSymbolName();
+			bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
 			paramNames.add(field.getFieldName());
 		}
 
+		// Create the constructor
 		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
 		constructorBuilder.setModifier(Modifier.PUBLIC);
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
@@ -406,7 +408,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// See if the user provided the equals method
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(new JavaType("java.lang.Object"));
-		MethodMetadata equalsMethod = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName("equals"), paramTypes);
+		MethodMetadata equalsMethod = getMethodOnGovernor(new JavaSymbolName("equals"), paramTypes);
 		if (equalsMethod != null) {
 			return equalsMethod;
 		}
@@ -453,7 +455,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public MethodMetadata getHashCodeMethod() {
 		Assert.notNull(fields, "Fields required");
 		// See if the user provided the hashCode method
-		MethodMetadata hashCodeMethod = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName("hashCode"), new ArrayList<JavaType>());
+		MethodMetadata hashCodeMethod = getMethodOnGovernor(new JavaSymbolName("hashCode"), new ArrayList<JavaType>());
 		if (hashCodeMethod != null) {
 			return hashCodeMethod;
 		}

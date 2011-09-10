@@ -91,7 +91,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 
 		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -121,7 +121,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 
 		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
