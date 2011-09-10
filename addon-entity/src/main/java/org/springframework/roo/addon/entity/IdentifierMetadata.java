@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
@@ -404,7 +405,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public MethodMetadata getEqualsMethod() {
 		Assert.notNull(fields, "Fields required");
 		// See if the user provided the equals method
-		List<JavaType> parameterTypes = Arrays.asList(new JavaType("java.lang.Object"));
+		List<JavaType> parameterTypes = Arrays.asList(OBJECT);
 		MethodMetadata equalsMethod = getMethodOnGovernor(new JavaSymbolName("equals"), parameterTypes);
 		if (equalsMethod != null) {
 			return equalsMethod;

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
 
@@ -159,7 +160,7 @@ class GwtProxyProperty {
 	}
 
 	public String getCollectionRenderer() {
-		JavaType arg = new JavaType("java.lang.Object");
+		JavaType arg = OBJECT;
 		if (type.getParameters().size() > 0) {
 			arg = type.getParameters().get(0);
 		}
@@ -234,7 +235,7 @@ class GwtProxyProperty {
 	}
 
 	public String getRenderer() {
-		return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(" + getDateTimeFormat() + ")" : isPrimitive() || isEnum() || isEmbeddable() || type.equals(new JavaType("java.lang.Object")) ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
+		return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(" + getDateTimeFormat() + ")" : isPrimitive() || isEnum() || isEmbeddable() || type.equals(OBJECT) ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
 	}
 
 	String getProxyRendererType() {

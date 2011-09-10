@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jms;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.SpringJavaType.ASYNC;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.JMS_TEMPLATE;
@@ -167,7 +168,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
 
 		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		final List<JavaType> parameterTypes = Arrays.asList(new JavaType("java.lang.Object"));
+		final List<JavaType> parameterTypes = Arrays.asList(OBJECT);
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("message"));
 
 		// create some method content to get people started

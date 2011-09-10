@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dbre.model;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
+
 import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.Blob;
@@ -159,7 +161,7 @@ public class Column {
 				break;
 			case Types.JAVA_OBJECT:
 				jdbcType = "JAVA_OBJECT";
-				javaType = new JavaType("java.lang.Object");
+				javaType = OBJECT;
 				break;
 			case Types.OTHER:
 				jdbcType = "OTHER";

@@ -33,14 +33,10 @@ import org.springframework.roo.support.util.StringUtils;
 public class JavaType implements Comparable<JavaType> {
 	
 	// Constants
+	public static final JavaType OBJECT = new JavaType("java.lang.Object"); 
+	public static final JavaType STRING = new JavaType("java.lang.String"); 
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character");
-	public static final JavaType STRING = new JavaType("java.lang.String");	// less verbose and just as informative
-	/**
-	 * @deprecated use {@link #STRING} instead
-	 */
-	@Deprecated
-	public static final JavaType STRING_OBJECT = STRING;
 	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte");
 	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short");
 	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer");
@@ -58,6 +54,12 @@ public class JavaType implements Comparable<JavaType> {
 	public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
+	
+	/**
+	 * @deprecated use {@link #STRING} instead
+	 */
+	@Deprecated
+	public static final JavaType STRING_OBJECT = STRING;
 	
 	// Used for wildcard type parameters; it must be one or the other
 	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>

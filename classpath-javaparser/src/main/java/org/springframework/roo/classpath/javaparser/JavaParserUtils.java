@@ -523,18 +523,18 @@ public class JavaParserUtils  {
 
 		// Populate JavaType with type parameters
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
-		List<TypeParameter> params = cid.getTypeParameters();
-		if (params != null) {
-			Set<JavaSymbolName> locatedTypeParams = new HashSet<JavaSymbolName>();
-			for (TypeParameter candidate : params) {
+		List<TypeParameter> typeParameters = cid.getTypeParameters();
+		if (typeParameters != null) {
+			Set<JavaSymbolName> locatedTypeParameters = new HashSet<JavaSymbolName>();
+			for (TypeParameter candidate : typeParameters) {
 				JavaSymbolName currentTypeParam = new JavaSymbolName(candidate.getName());
-				locatedTypeParams.add(currentTypeParam);
+				locatedTypeParameters.add(currentTypeParam);
 				JavaType javaType = null;
 				if (candidate.getTypeBound() == null) {
 					javaType = new JavaType("java.lang.Object", 0, DataType.TYPE, currentTypeParam, null);
 				} else {
 					ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
-					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, cit, locatedTypeParams);
+					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, cit, locatedTypeParameters);
 					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), currentTypeParam, javaType.getParameters());
 				}
 				parameterTypes.add(javaType);

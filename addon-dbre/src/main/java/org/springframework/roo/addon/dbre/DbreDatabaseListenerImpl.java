@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
 import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
@@ -334,7 +335,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Add @RooDbManaged
 		annotations.add(getRooDbManagedAnnotation());
 
-		final JavaType superclass = new JavaType("java.lang.Object");
+		final JavaType superclass = OBJECT;
 		final List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 

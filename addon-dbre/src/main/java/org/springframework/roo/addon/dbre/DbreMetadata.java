@@ -785,7 +785,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Check governor for accessor method
 		return getMethodOnGovernor(new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null;
-
 	}
 
 	private MethodMetadata getAccessor(FieldMetadata field) {

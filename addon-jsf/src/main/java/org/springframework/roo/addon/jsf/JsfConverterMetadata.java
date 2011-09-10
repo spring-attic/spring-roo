@@ -4,8 +4,8 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.addon.jsf.JsfJavaType.CONVERTER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.UI_COMPONENT;
+import static org.springframework.roo.model.JavaType.OBJECT;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +37,6 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = JsfConverterMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType OBJECT = new JavaType("java.lang.Object");
 	
 	// Fields
 	private JavaType entity;
@@ -93,13 +92,9 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		imports.addImport(UI_COMPONENT);
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
-
 		String simpleTypeName = entity.getSimpleTypeName();
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		// Create getAsObject method
-		final List<JavaType> getAsObjectParameterTypes = new ArrayList<JavaType>(parameterTypes);
-		getAsObjectParameterTypes.add(JavaType.STRING);
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.indent();
 		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
@@ -115,6 +110,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("return null;");
 		bodyBuilder.indentRemove();
 		
+		// Create getAsObject method
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, OBJECT, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -131,16 +127,15 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		imports.addImport(UI_COMPONENT);
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
-
 		String simpleTypeName = entity.getSimpleTypeName();
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		final List<JavaType> getAsStringParameterTypes = new ArrayList<JavaType>(parameterTypes);
-		getAsStringParameterTypes.add(OBJECT);
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " = (" + simpleTypeName + ") value;" );
 		bodyBuilder.appendFormalLine(new StringBuilder("return ").append(builderString).toString());
 		bodyBuilder.indentRemove();
 		
+		// Create getAsString method
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}

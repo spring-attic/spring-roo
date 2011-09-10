@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
 import static org.springframework.roo.model.SpringJavaType.TRANSACTIONAL;
 
@@ -571,7 +572,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindEntriesMethod() + destination.getSimpleTypeName() + "Entries");
-		final List<JavaType> parameterTypes = Arrays.asList(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null), new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
+		final List<JavaType> parameterTypes = Arrays.asList(INT_PRIMITIVE, INT_PRIMITIVE);
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
 		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(destination));
 		

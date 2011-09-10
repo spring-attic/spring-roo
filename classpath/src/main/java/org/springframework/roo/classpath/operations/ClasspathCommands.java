@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.operations;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
@@ -95,7 +96,7 @@ public class ClasspathCommands implements CommandMarker {
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
-		if (!superclass.equals(new JavaType("java.lang.Object"))) {
+		if (!superclass.equals(OBJECT)) {
 			ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(superclass);
 			if (superclassClassOrInterfaceTypeDetails != null) {
 				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
