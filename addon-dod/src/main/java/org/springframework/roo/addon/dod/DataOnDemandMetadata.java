@@ -14,6 +14,7 @@ import static org.springframework.roo.model.SpringJavaType.COMPONENT;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -66,6 +67,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
+	private static final JavaType RANDOM = new JavaType("java.util.Random");
 
 	// Fields
 	private DataOnDemandAnnotationValues annotationValues;
@@ -189,7 +191,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					continue;
 				}
 
-				if (!candidate.getFieldType().equals(new JavaType("java.util.Random"))) {
+				if (!candidate.getFieldType().equals(RANDOM)) {
 					// Candidate isn't a java.util.Random, so it isn't suitable
 					continue;
 				}
@@ -201,13 +203,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			// Candidate not found, so let's create one
 			ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-			imports.addImport(new JavaType("java.util.Random"));
+			imports.addImport(RANDOM);
 			imports.addImport(new JavaType("java.security.SecureRandom"));
 
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId());
 			fieldBuilder.setModifier(Modifier.PRIVATE);
 			fieldBuilder.setFieldName(fieldSymbolName);
-			fieldBuilder.setFieldType(new JavaType("java.util.Random"));
+			fieldBuilder.setFieldType(RANDOM);
 			fieldBuilder.setFieldInitializer("new SecureRandom()");
 			return fieldBuilder.build();
 		}
@@ -297,14 +299,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getNewTransient" + entityType.getSimpleTypeName());
 
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(JavaType.INT_PRIMITIVE);
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("index"));
+		List<JavaType> paramTypes = Arrays.asList(JavaType.INT_PRIMITIVE);
+		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("index"));
 
 		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -345,12 +344,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		JavaSymbolName embeddedIdentifierMutator = embeddedIdentifierHolder.getEmbeddedIdentifierMutator();
 		JavaSymbolName methodName = getEmbeddedIdMutatorMethodName();
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(entityType);
-		paramTypes.add(JavaType.INT_PRIMITIVE);
+		List<JavaType> paramTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
 
 		// Locate user-defined method
-		if (MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes) != null) {
+		if (getMethodOnGovernor(methodName, paramTypes) != null) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
@@ -366,17 +363,21 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<FieldMetadata> identifierFields = embeddedIdentifierHolder.getIdentifierFields();
 		for (int i = 0, n = identifierFields.size(); i < n; i++) {
 			FieldMetadata field = identifierFields.get(i);
-			sb.append(getFieldInitializer(field, null));
+			String fieldName = field.getFieldName().getSymbolName();
+			JavaType fieldType = field.getFieldType();
+			imports.addImport(fieldType);
+			String initializer =  getFieldInitializer(field, null);
+			bodyBuilder.append(getFieldValidationBody(field, initializer, null, true));
+			sb.append(fieldName);
 			if (i < n - 1) {
 				sb.append(", ");
 			}
 		}
+		bodyBuilder.appendFormalLine("");
 		bodyBuilder.appendFormalLine(embeddedIdentifierFieldType.getSimpleTypeName() + " embeddedIdClass = new " + embeddedIdentifierFieldType.getSimpleTypeName() + "(" + sb.toString() + ");");
 		bodyBuilder.appendFormalLine("obj." + embeddedIdentifierMutator + "(embeddedIdClass);");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("obj"));
-		paramNames.add(new JavaSymbolName("index"));
+		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
@@ -384,12 +385,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	private MethodMetadata getEmbeddedClassMutatorMethod(EmbeddedHolder embeddedHolder) {
 		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField());
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(entityType);
-		paramTypes.add(JavaType.INT_PRIMITIVE);
+		List<JavaType> paramTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
 
 		// Locate user-defined method
-		if (MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes) != null) {
+		if (getMethodOnGovernor(methodName, paramTypes) != null) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
@@ -406,9 +405,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("obj"));
-		paramNames.add(new JavaSymbolName("index"));
+		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
@@ -419,26 +416,22 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private void addEmbeddedClassFieldMutatorMethodsToBuilder(EmbeddedHolder embeddedHolder) {
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("obj"));
-		paramNames.add(new JavaSymbolName("index"));
+		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
-		paramTypes.add(embeddedFieldType);
-		paramTypes.add(JavaType.INT_PRIMITIVE);
+		List<JavaType> paramTypes = Arrays.asList(embeddedFieldType, JavaType.INT_PRIMITIVE);
 
 		for (FieldMetadata field : embeddedHolder.getFields()) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			
 			String initializer = getFieldInitializer(field, null);
 			JavaSymbolName fieldMutatorMethodName = new JavaSymbolName(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
-			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName));
+			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName, false));
 
 			JavaSymbolName embeddedClassMethodName = new JavaSymbolName(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 			MethodMetadata fieldInitializerMethod = methodBuilder.build();
-			if (MemberFindingUtils.getMethod(governorTypeDetails, embeddedClassMethodName, paramTypes) != null) {
+			if (getMethodOnGovernor(embeddedClassMethodName, paramTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -456,19 +449,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private List<MethodMetadata> getFieldMutatorMethods() {
 		List<MethodMetadata> fieldMutatorMethods = new ArrayList<MethodMetadata>();
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("obj"));
-		paramNames.add(new JavaSymbolName("index"));
-
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(entityType);
-		paramTypes.add(JavaType.INT_PRIMITIVE);
+		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaType> paramTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
 
 		Set<String> existingMutators = new HashSet<String>();
 
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
 			// Locate user-defined method
-			if (MemberFindingUtils.getMethod(governorTypeDetails, mutator.getMethodName(), paramTypes) != null) {
+			if (getMethodOnGovernor(mutator.getMethodName(), paramTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -485,7 +473,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutator.getMethodName().getSymbolName());
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.append(getFieldValidationBody(locatedMutators.get(mutator).getField(), initializer, mutator.getMethodName()));
+			bodyBuilder.append(getFieldValidationBody(locatedMutators.get(mutator).getField(), initializer, mutator.getMethodName(), false));
 
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, mutator.getMethodName(), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 			fieldMutatorMethods.add(methodBuilder.build());
@@ -494,7 +482,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return fieldMutatorMethods;
 	}
 
-	private String getFieldValidationBody(FieldMetadata field, String initializer, JavaSymbolName mutatorName) {
+	private String getFieldValidationBody(FieldMetadata field, String initializer, JavaSymbolName mutatorName, boolean isFieldOfEmbeddableType) {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		String fieldName = field.getFieldName().getSymbolName();
@@ -512,9 +500,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(getTypeStr(fieldType) + " " + fieldName + " = " + initializer + ";");
 
 		if (fieldType.equals(JavaType.STRING)) {
-			boolean isUnique = false;
+			boolean isUnique = isFieldOfEmbeddableType;
 			@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
-			if (values != null && values.containsKey("unique")) {
+			if (!isUnique && values != null && values.containsKey("unique")) {
 				isUnique = (Boolean) values.get("unique");
 			}
 
@@ -564,7 +552,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.append(getMinAndMaxBody(field, suffix));
 		}
 
-		bodyBuilder.appendFormalLine("obj." + mutatorName.getSymbolName() + "(" + fieldName + ");");
+		if (mutatorName != null) {
+			bodyBuilder.appendFormalLine("obj." + mutatorName.getSymbolName() + "(" + fieldName + ");");
+		}
 
 		return bodyBuilder.getOutput();
 	}
@@ -782,7 +772,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaType returnType = JavaType.BOOLEAN_PRIMITIVE;
 
 		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -806,7 +796,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 
 		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -830,13 +820,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public MethodMetadata getSpecificPersistentEntityMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getSpecific" + entityType.getSimpleTypeName());
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(JavaType.INT_PRIMITIVE);
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("index"));
+		List<JavaType> paramTypes = Arrays.asList(JavaType.INT_PRIMITIVE);
+		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("index"));
 
 		// Locate user-defined method
-		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -872,7 +860,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		final JavaType returnType = JavaType.VOID_PRIMITIVE;
 
 		// Locate user-defined method
-		final MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -961,7 +949,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
 		// Date fields included for DataNucleus (
-		if (fieldType.equals(new JavaType(Date.class.getName()))) {			
+		if (fieldType.equals(new JavaType(Date.class.getName()))) {
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
 				imports.addImport(new JavaType("java.util.Date"));
 				initializer = "new Date(new Date().getTime() - 10000000L)";
