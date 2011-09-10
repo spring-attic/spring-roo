@@ -91,9 +91,11 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		Assert.notNull(persistenceAdditions, "Persistence additions required");
 		Assert.notNull(finderDetails, "Set of dynamic finder methods cannot be null");
 		Assert.notNull(jsonMetadata, "Json metadata required");
+
 		if (!isValid()) {
 			return;
 		}
+		
 		this.annotationValues = annotationValues;
 		this.jsonEnabledType = annotationValues.getJsonObject();
 		this.entityName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType).getSymbolName();
@@ -142,18 +144,16 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), identifierField.getFieldName().getSymbolName()));
 		AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(PATH_VARIABLE, attributes);
 		
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(identifierField.getFieldType(), pathVariableAnnotation.build()));
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(identifierField.getFieldName().getSymbolName()));
-
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(identifierField.getFieldType(), pathVariableAnnotation.build()));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(identifierField.getFieldName().getSymbolName()));
+	
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + identifierField.getFieldName().getSymbolName() + "}"));
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
+		
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
-
 		annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 
 		String beanShortName = getShortName(jsonEnabledType);
@@ -174,7 +174,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (!servicesInjected) {
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -190,10 +190,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		JavaSymbolName fromJsonMethodName = jsonMetadata.getFromJsonMethodName();
 		
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("json"));
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("json"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("POST"))));
@@ -214,7 +212,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (!servicesInjected) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -230,11 +228,9 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		JavaSymbolName fromJsonArrayMethodName = jsonMetadata.getFromJsonArrayMethodName();
 		
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("json"));
 		
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("json"));
-
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/jsonArray"));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("POST"))));
@@ -261,7 +257,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (!servicesInjected) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -315,10 +311,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
 		
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
-		
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("json"));
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("json"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("PUT"))));
@@ -344,7 +338,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (!servicesInjected) {
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -361,10 +355,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		AnnotationMetadataBuilder requestBodyAnnotation = new AnnotationMetadataBuilder(REQUEST_BODY);
 		
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
-		
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("json"));
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(JavaType.STRING, requestBodyAnnotation.build()));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("json"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/jsonArray"));
@@ -396,7 +388,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		if (!servicesInjected) {
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -414,10 +406,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), identifierField.getFieldName().getSymbolName()));
 		AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(PATH_VARIABLE, attributes);
 
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(identifierField.getFieldType(), pathVariableAnnotation.build()));
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(identifierField.getFieldName().getSymbolName()));
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(identifierField.getFieldType(), pathVariableAnnotation.build()));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(identifierField.getFieldName());
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + identifierField.getFieldName().getSymbolName() + "}"));
@@ -447,7 +437,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -461,8 +451,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			return null;
 		}
 		
-		List<AnnotatedJavaType> annotatedParamTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		final List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
+		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		StringBuilder methodParams = new StringBuilder();
@@ -483,8 +473,8 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 					annotations.add(annotation);
 				}
 			}
-			paramNames.add(fieldName);
-			annotatedParamTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
+			parameterNames.add(fieldName);
+			annotatedParameterTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
 			
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				methodParams.append(field.getFieldName() + " == null ? new Boolean(false) : " + field.getFieldName() + ", ");
@@ -498,7 +488,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		}
 		
 		List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
-		newParamNames.addAll(paramNames);
+		newParamNames.addAll(parameterNames);
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "find=" + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + plural, "")));
@@ -515,7 +505,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text; charset=utf-8\");");
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + shortBeanName + "." + jsonMetadata.getToJsonArrayMethodName().getSymbolName().toString() + "(" + shortBeanName + "." + finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList()), headers, " +  httpStatusShortName + ".OK);");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, RESPONSE_ENTITY_STRING, annotatedParamTypes, newParamNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, RESPONSE_ENTITY_STRING, annotatedParameterTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}

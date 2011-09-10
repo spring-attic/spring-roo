@@ -87,13 +87,16 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getIdMutator(FieldMetadata idField) {
 		JavaSymbolName idMutatorName = new JavaSymbolName("set" + StringUtils.capitalize(idField.getFieldName().getSymbolName()));
-		List<JavaType> paramTypes = Arrays.asList(idField.getFieldType());
-		if (getMethodOnGovernor(idMutatorName, paramTypes) != null) {
+		List<JavaType> parameterTypes = Arrays.asList(idField.getFieldType());
+		if (getMethodOnGovernor(idMutatorName, parameterTypes) != null) {
 			return null;
 		}
+		
+		List<JavaSymbolName> parameterNames = Arrays.asList(idField.getFieldName());
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + idField.getFieldName().getSymbolName() + " = " + idField.getFieldName().getSymbolName() + ";");
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, idMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), Arrays.asList(idField.getFieldName()), bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, idMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	public static String getMetadataIdentiferType() {

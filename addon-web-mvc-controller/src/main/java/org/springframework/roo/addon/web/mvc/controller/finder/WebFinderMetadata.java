@@ -85,7 +85,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(dynamicFinderMethods, "Dynamoic finder methods required");
 		Assert.notNull(memberDetails, "Member details required");
-	
+
 		if (!isValid()) {
 			return;
 		}
@@ -120,8 +120,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		Assert.notNull(finder, "Method metadata required for finder");
 		JavaSymbolName finderFormMethodName = new JavaSymbolName(finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "Form");
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(finder.getFinderMethodMetadata().getParameterTypes());
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -142,7 +142,6 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			}
 			if (typeMd != null && javaTypePersistenceMetadataHolder != null && javaTypePersistenceMetadataHolder.getFindAllMethod() != null) {
 				bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + typeMd.getPlural().toLowerCase() + "\", " + javaTypePersistenceMetadataHolder.getFindAllMethod().getMethodCall() + ");");
-//				javaTypePersistenceMetadataHolder.getFindAllMethod().copyAdditionsTo(builder, governorTypeDetails);
 			}
 			needmodel = true;
 		}
@@ -152,11 +151,11 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "\";");
 
 		if (needmodel) {
-			paramTypes.add(new AnnotatedJavaType(MODEL));
-			paramNames.add(new JavaSymbolName("uiModel"));
+			parameterTypes.add(MODEL);
+			parameterNames.add(new JavaSymbolName("uiModel"));
 		}
 		
-		MethodMetadata existingMethod = methodExists(finderFormMethodName, paramTypes);
+		MethodMetadata existingMethod = methodExists(finderFormMethodName, parameterTypes);
 		if (existingMethod != null) return existingMethod;
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -169,7 +168,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderFormMethodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderFormMethodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -178,8 +177,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		Assert.notNull(finderMetadataDetails, "Method metadata required for finder");
 		JavaSymbolName finderMethodName = new JavaSymbolName(finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName());
 
-		List<AnnotatedJavaType> annotatedParamTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		StringBuilder methodParams = new StringBuilder();
@@ -203,8 +202,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 					annotations.add(annotation);
 				}
 			}
-			paramNames.add(fieldName);
-			annotatedParamTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
+			parameterNames.add(fieldName);
+			annotatedParameterTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
 
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				methodParams.append(fieldName + " == null ? new Boolean(false) : " + fieldName + ", ");
@@ -217,14 +216,14 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			methodParams.delete(methodParams.length() - 2, methodParams.length());
 		}
 
-		annotatedParamTypes.add(new AnnotatedJavaType(MODEL));
+		annotatedParameterTypes.add(new AnnotatedJavaType(MODEL));
 		
-		MethodMetadata existingMethod = methodExists(finderMethodName, annotatedParamTypes);
+		MethodMetadata existingMethod = methodExists(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(annotatedParameterTypes));
 		if (existingMethod != null) {
 			return existingMethod;
 		}
 		List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
-		newParamNames.addAll(paramNames);
+		newParamNames.addAll(parameterNames);
 		newParamNames.add(new JavaSymbolName("uiModel"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -240,13 +239,13 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING, annotatedParamTypes, newParamNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING, annotatedParameterTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		return MemberFindingUtils.getMethod(memberDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters), getId());
+	private MethodMetadata methodExists(JavaSymbolName methodName, List<JavaType> parameterTypes) {
+		return MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes, getId());
 	}
 	
 	private String uncapitalize(String term) {

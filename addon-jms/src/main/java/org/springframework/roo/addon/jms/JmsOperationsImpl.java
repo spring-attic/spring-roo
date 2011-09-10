@@ -126,8 +126,8 @@ public class JmsOperationsImpl implements JmsOperations {
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 
 		// Create some method content to get people started
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(new JavaType(Object.class)));
-		final List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("messageObject"));
+		final List<JavaType> parameterTypes = Arrays.asList(new JavaType(Object.class));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("messageObject"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(fieldName + ".convertAndSend(messageObject);");
@@ -135,7 +135,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, Modifier.PRIVATE | Modifier.TRANSIENT, annotations, fieldName, JMS_TEMPLATE);
 		classOrInterfaceTypeDetailsBuilder.addField(fieldBuilder);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		
 		if (async) {
 			String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
@@ -166,16 +166,14 @@ public class JmsOperationsImpl implements JmsOperations {
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
 
-		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Object")));
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("message"));
+		final List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+		final List<JavaType> parameterTypes = Arrays.asList(new JavaType("java.lang.Object"));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("message"));
 
 		// create some method content to get people started
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("System.out.println(\"JMS message received: \" + message);");
-		methods.add(new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder));
+		methods.add(new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder));
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, targetType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setDeclaredMethods(methods);

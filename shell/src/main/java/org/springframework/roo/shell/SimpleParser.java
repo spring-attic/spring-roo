@@ -643,10 +643,10 @@ public class SimpleParser implements Parser {
 			if (lastOptionKey != null && !"".equals(lastOptionKey)) {
 				// Lookup the relevant CliOption that applies to this lastOptionKey
 				// We do this via the parameter type
-				Class<?>[] paramTypes = methodTarget.method.getParameterTypes();
-				for (int i = 0; i < paramTypes.length; i++) {
+				Class<?>[] parameterTypes = methodTarget.method.getParameterTypes();
+				for (int i = 0; i < parameterTypes.length; i++) {
 					CliOption option = cliOptions.get(i);
-					Class<?> paramType = paramTypes[i];
+					Class<?> parameterType = parameterTypes[i];
 
 					for (String key : option.key()) {
 						if (key.equals(lastOptionKey)) {
@@ -655,9 +655,9 @@ public class SimpleParser implements Parser {
 
 							// Let's use a Converter if one is available
 							for (Converter<?> candidate : converters) {
-								if (candidate.supports(paramType, option.optionContext())) {
+								if (candidate.supports(parameterType, option.optionContext())) {
 									// Found a usable converter
-									boolean addSpace = candidate.getAllPossibleValues(allValues, paramType, lastOptionValue, option.optionContext(), methodTarget);
+									boolean addSpace = candidate.getAllPossibleValues(allValues, parameterType, lastOptionValue, option.optionContext(), methodTarget);
 									if (!addSpace) {
 										suffix = "";
 									}
@@ -669,12 +669,12 @@ public class SimpleParser implements Parser {
 								// Doesn't appear to be a custom Converter, so let's go and provide defaults for simple types
 
 								// Provide some simple options for common types
-								if (Boolean.class.isAssignableFrom(paramType) || Boolean.TYPE.isAssignableFrom(paramType)) {
+								if (Boolean.class.isAssignableFrom(parameterType) || Boolean.TYPE.isAssignableFrom(parameterType)) {
 									allValues.add("true");
 									allValues.add("false");
 								}
 
-								if (Number.class.isAssignableFrom(paramType)) {
+								if (Number.class.isAssignableFrom(parameterType)) {
 									allValues.add("0");
 									allValues.add("1");
 									allValues.add("2");

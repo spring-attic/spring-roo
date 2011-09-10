@@ -1,9 +1,11 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -184,7 +186,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		columnBuilder.addBooleanAttribute("nullable", false);
 		annotations.add(columnBuilder);
 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("id"), new JavaType(Long.class.getName()));
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("id"), LONG_OBJECT);
 		fields.add(fieldBuilder.build());
 		
 		return fields;
@@ -291,10 +293,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Compute the names of the mutators that will be produced
 		for (FieldMetadata field : fields) {
 			String requiredMutatorName = getRequiredMutatorName(field);
-
-			List<JavaType> paramTypes = new ArrayList<JavaType>();
-			paramTypes.add(field.getFieldType());
-			MethodMetadata mutator = getMethodOnGovernor(new JavaSymbolName(requiredMutatorName), paramTypes);
+			List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
+			MethodMetadata mutator = getMethodOnGovernor(new JavaSymbolName(requiredMutatorName), parameterTypes);
 			if (mutator != null) {
 				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
@@ -313,15 +313,13 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private MethodMetadata getMutator(FieldMetadata field) {
 		String requiredMutatorName = getRequiredMutatorName(field);
 
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(field.getFieldType());
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(field.getFieldName());
+		List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
+		List<JavaSymbolName> parameterNames = Arrays.asList(field.getFieldName());
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
@@ -333,33 +331,33 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public ConstructorMetadata getParameterizedConstructor() {
 		Assert.notNull(fields, "Fields required");
 		// Search for an existing constructor
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		for (FieldMetadata field : fields) {
-			paramTypes.add(field.getFieldType());
+			parameterTypes.add(field.getFieldType());
 		}
 		
-		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, paramTypes);
+		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, parameterTypes);
 		if (result != null) {
 			// Found an existing no-arg constructor on this class, so return it
 			publicNoArgConstructor = true;
 			return result;
 		}
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
 		for (FieldMetadata field : fields) {
 			String fieldName = field.getFieldName().getSymbolName();
 			bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
-			paramNames.add(field.getFieldName());
+			parameterNames.add(field.getFieldName());
 		}
 
 		// Create the constructor
 		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
 		constructorBuilder.setModifier(Modifier.PUBLIC);
-		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
-		constructorBuilder.setParameterNames(paramNames);
+		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(parameterTypes));
+		constructorBuilder.setParameterNames(parameterNames);
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		return constructorBuilder.build();
 	}
@@ -378,8 +376,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 */
 	public ConstructorMetadata getNoArgConstructor() {
 		// Search for an existing constructor
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, paramTypes);
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, parameterTypes);
 		if (result != null) {
 			// Found an existing no-arg constructor on this class, so return it
 			return result;
@@ -398,7 +396,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
 		constructorBuilder.setModifier(publicNoArgConstructor ? Modifier.PUBLIC : Modifier.PRIVATE);
-		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
+		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(parameterTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		return constructorBuilder.build();
 	}
@@ -406,9 +404,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public MethodMetadata getEqualsMethod() {
 		Assert.notNull(fields, "Fields required");
 		// See if the user provided the equals method
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(new JavaType("java.lang.Object"));
-		MethodMetadata equalsMethod = getMethodOnGovernor(new JavaSymbolName("equals"), paramTypes);
+		List<JavaType> parameterTypes = Arrays.asList(new JavaType("java.lang.Object"));
+		MethodMetadata equalsMethod = getMethodOnGovernor(new JavaSymbolName("equals"), parameterTypes);
 		if (equalsMethod != null) {
 			return equalsMethod;
 		}
@@ -445,10 +442,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 		bodyBuilder.appendFormalLine("return true;");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("obj"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.property.editor;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -87,15 +88,16 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private MethodMetadata getGetAsTextMethod(JavaType javaType, MethodMetadata identifierAccessorMethod) {
 		JavaType returnType = JavaType.STRING;
 		JavaSymbolName methodName = new JavaSymbolName("getAsText");
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
+		
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("Object obj = getValue();");
@@ -106,22 +108,19 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + identifierAccessorMethod.getMethodName() + "(), String.class);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
 	private MethodMetadata getSetAsTextMethod(JavaType javaType, JavaType idType, MethodMetadata findMethod) {
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING));
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("text"));
-
+		List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING);
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("text"));
+	
 		JavaSymbolName methodName = new JavaSymbolName("setAsText");
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -147,7 +146,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine("setValue(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + findMethod.getMethodName() + "(identifier));");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 

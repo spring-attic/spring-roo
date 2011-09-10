@@ -6,6 +6,7 @@ import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -822,15 +823,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private MethodMetadata getMutator(FieldMetadata field) {
 		String requiredMutatorName = getRequiredMutatorName(field);
 
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(field.getFieldType());
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(field.getFieldName());
+		List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
+		List<JavaSymbolName> parameterNames = Arrays.asList(field.getFieldName());
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 

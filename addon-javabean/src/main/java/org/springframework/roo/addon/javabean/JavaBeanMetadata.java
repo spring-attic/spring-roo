@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.javabean;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +117,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 
 		// See if the type itself declared the accessor
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
+		MethodMetadata result = getMethodOnGovernor(methodName, null);
 		if (result != null) {
 			return result;
 		}
@@ -147,25 +147,23 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
 
 		// Compute the mutator method parameters
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(field.getFieldType());
+		List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
 
 		// See if the type itself declared the mutator
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
+		MethodMetadata result = getMethodOnGovernor(methodName, parameterTypes);
 		if (result != null) {
 			return result;
 		}
 
 		// Compute the mutator method parameter names
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(field.getFieldName());
+		List<JavaSymbolName> parameterNames = Arrays.asList(field.getFieldName());
 
 		// Decide whether we need to produce the mutator method (disallowed for final fields as per ROO-36)
 		if (annotationValues.isSettersByDefault() && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier()) && !Modifier.isFinal(field.getModifier())) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 			result = methodBuilder.build();
 		}
 

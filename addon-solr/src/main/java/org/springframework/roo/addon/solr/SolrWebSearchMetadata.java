@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.JavaType.INT_OBJECT;
 import static org.springframework.roo.model.SpringJavaType.MODEL_MAP;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
@@ -71,23 +72,23 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		
-		paramTypes.add(new AnnotatedJavaType(new JavaType("String"), getRequestParamAnnotation("q", false)));
-		paramNames.add(new JavaSymbolName("q"));
+		parameterTypes.add(new AnnotatedJavaType(new JavaType("String"), getRequestParamAnnotation("q", false)));
+		parameterNames.add(new JavaSymbolName("q"));
 		
-		paramTypes.add(new AnnotatedJavaType(new JavaType("String"), getRequestParamAnnotation("fq", false)));
-		paramNames.add(new JavaSymbolName("facetQuery"));
+		parameterTypes.add(new AnnotatedJavaType(new JavaType("String"), getRequestParamAnnotation("fq", false)));
+		parameterNames.add(new JavaSymbolName("facetQuery"));
 		
-		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), getRequestParamAnnotation("page", false)));
-		paramNames.add(new JavaSymbolName("page"));
+		parameterTypes.add(new AnnotatedJavaType(new JavaType("Integer"), getRequestParamAnnotation("page", false)));
+		parameterNames.add(new JavaSymbolName("page"));
 		
-		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), getRequestParamAnnotation("size", false)));
-		paramNames.add(new JavaSymbolName("size"));
+		parameterTypes.add(new AnnotatedJavaType(new JavaType("Integer"), getRequestParamAnnotation("size", false)));
+		parameterNames.add(new JavaSymbolName("size"));
 		
-		paramTypes.add(new AnnotatedJavaType(MODEL_MAP));	
-		paramNames.add(new JavaSymbolName("modelMap"));
+		parameterTypes.add(new AnnotatedJavaType(MODEL_MAP));	
+		parameterNames.add(new JavaSymbolName("modelMap"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "search"));
@@ -109,7 +110,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return \"" + webScaffoldAnnotationValues.getPath() + "/search\";");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -127,17 +128,17 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, reqMapAttributes));
 		annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 		
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("q", true)));
-		paramNames.add(new JavaSymbolName("q"));
+		annotatedParameterTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("q", true)));
+		parameterNames.add(new JavaSymbolName("q"));
 		
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("facetFields", true)));
-		paramNames.add(new JavaSymbolName("facetFields"));
+		annotatedParameterTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("facetFields", true)));
+		parameterNames.add(new JavaSymbolName("facetFields"));
 		
-		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), getRequestParamAnnotation("rows", false)));
-		paramNames.add(new JavaSymbolName("rows"));
+		annotatedParameterTypes.add(new AnnotatedJavaType(INT_OBJECT, getRequestParamAnnotation("rows", false)));
+		parameterNames.add(new JavaSymbolName("rows"));
 	
 		String solrQuerySimpleName = new JavaType("org.apache.solr.client.solrj.SolrQuery").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String facetFieldSimpleName = new JavaType("org.apache.solr.client.solrj.response.FacetField").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
@@ -168,7 +169,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("dojo.append(\"]}\");");
 		bodyBuilder.appendFormalLine("return dojo.toString();");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}

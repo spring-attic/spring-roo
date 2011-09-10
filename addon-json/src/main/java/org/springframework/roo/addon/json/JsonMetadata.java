@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.json;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,6 +46,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (!isValid()) {
 			return;
 		}
+		
 		this.annotationValues = annotationValues;
 		this.typeNamePlural = typeNamePlural;
 
@@ -69,7 +70,6 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private MethodMetadata getToJsonMethod() {
 		// Compute the relevant method name
 		JavaSymbolName methodName = getToJsonMethodName();
-
 		if (methodName == null) {
 			return null;
 		}
@@ -101,31 +101,27 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private MethodMetadata getToJsonArrayMethod() {
 		// Compute the relevant method name
 		JavaSymbolName methodName = getToJsonArrayMethodName();
-
 		if (methodName == null) {
 			return null;
 		}
 
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(destination);
-		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, typeParams)));
+		final List<JavaType> typeParams = Arrays.asList(destination);
+		final List<JavaType> parameterTypes = Arrays.asList(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, typeParams));
 
 		// See if the type itself declared the method
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+		MethodMetadata result = getMethodOnGovernor(methodName, parameterTypes);
 		if (result != null) {
 			return result;
 		}
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("collection"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("collection"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String serializer = new JavaType("flexjson.JSONSerializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\")" + (annotationValues.isDeepSerialize() ? ".deepSerialize(collection)" : ".serialize(collection)") + ";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, new JavaType("java.lang.String"), parameters, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, new JavaType("java.lang.String"), AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_ARRAY_METHOD, null);
 		return methodBuilder.build();
 	}
@@ -142,16 +138,12 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private MethodMetadata getFromJsonArrayMethod() {
 		// Compute the relevant method name
 		JavaSymbolName methodName = getFromJsonArrayMethodName();
-
 		if (methodName == null) {
 			return null;
 		}
-
-		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(JavaType.STRING));
-
-		// See if the type itself declared the method
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+		
+		List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING);
+		MethodMetadata result = getMethodOnGovernor(methodName, parameterTypes);
 		if (result != null) {
 			return result;
 		}
@@ -164,14 +156,12 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		String deserializer = new JavaType("flexjson.JSONDeserializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		bodyBuilder.appendFormalLine("return new " + deserializer + "<" + list + "<" + bean + ">>().use(null, " + arrayList + ".class).use(\"values\", " + bean + ".class).deserialize(json);");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("json"));
+		List<JavaSymbolName> parameterNames =  Arrays.asList(new JavaSymbolName("json"));
 
-		List<JavaType> params = new ArrayList<JavaType>();
-		params.add(destination);
-		JavaType collection = new JavaType("java.util.Collection", 0, DataType.TYPE, null, params);
+		List<JavaType> paramTypes = Arrays.asList(destination);
+		JavaType collection = new JavaType("java.util.Collection", 0, DataType.TYPE, null, paramTypes);
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, collection, parameters, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, collection, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.FROM_JSON_ARRAY_METHOD, null);
 		return methodBuilder.build();
 	}
@@ -192,11 +182,8 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			return null;
 		}
 
-		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(JavaType.STRING));
-
-		// See if the type itself declared the method
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+		List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING);
+		MethodMetadata result = getMethodOnGovernor(methodName, parameterTypes);
 		if (result != null) {
 			return result;
 		}
@@ -205,10 +192,9 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		String deserializer = new JavaType("flexjson.JSONDeserializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		bodyBuilder.appendFormalLine("return new " + deserializer + "<" + destination.getSimpleTypeName() + ">().use(null, " + destination.getSimpleTypeName() + ".class).deserialize(json);");
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("json"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("json"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, destination, parameters, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, destination,  AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.FROM_JSON_METHOD, null);
 		return methodBuilder.build();
 	}

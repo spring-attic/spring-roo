@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
+import static org.springframework.roo.model.JavaType.INT_OBJECT;
 import static org.springframework.roo.model.Jsr303JavaType.VALID;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.BINDING_RESULT;
@@ -101,7 +102,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Assert.notNull(specialDomainTypes, "Special domain type map required");
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(dependentTypes, "Dependent types list required");
-	
+
 		if (!isValid()) {
 			return;
 		}
@@ -202,8 +203,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				return constructor;
 			}
 		}
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this.conversionService = conversionService;");
+		
 		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
 		AnnotationMetadataBuilder autowired = new AnnotationMetadataBuilder(AUTOWIRED);
 		constructorBuilder.addAnnotation(autowired.build());
@@ -237,19 +240,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		maxResultsAttributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 		AnnotationMetadataBuilder maxResultAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM, maxResultsAttributes);
 
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(
-				new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()),
-				new AnnotatedJavaType(new JavaType(Integer.class.getName()), firstResultAnnotation.build()),
-				new AnnotatedJavaType(new JavaType(Integer.class.getName()), maxResultAnnotation.build()),
-				new AnnotatedJavaType(MODEL)
-		);
-		
-		final List<JavaSymbolName> paramNames = Arrays.asList(
-				new JavaSymbolName("id"),
-				new JavaSymbolName("page"),
-				new JavaSymbolName("size"),
-				new JavaSymbolName("uiModel")
-		);
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()), new AnnotatedJavaType(new JavaType(Integer.class.getName()), firstResultAnnotation.build()), new AnnotatedJavaType(new JavaType(Integer.class.getName()), maxResultAnnotation.build()), new AnnotatedJavaType(MODEL));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"), new JavaSymbolName("page"), new JavaSymbolName("size"), new JavaSymbolName("uiModel"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{id}"));
@@ -269,7 +261,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"size\", (size == null) ? \"10\" : size.toString());");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -298,17 +290,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		maxResultsAttributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 		AnnotationMetadataBuilder maxResultAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM, maxResultsAttributes);
 
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(
-				new AnnotatedJavaType(new JavaType(Integer.class.getName()), firstResultAnnotation.build()),
-				new AnnotatedJavaType(new JavaType(Integer.class.getName()), maxResultAnnotation.build()),
-				new AnnotatedJavaType(MODEL)
-		);
-
-		final List<JavaSymbolName> paramNames = Arrays.asList(
-				new JavaSymbolName("page"),
-				new JavaSymbolName("size"),
-				new JavaSymbolName("uiModel")
-		);
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(INT_OBJECT, firstResultAnnotation.build()), new AnnotatedJavaType(INT_OBJECT, maxResultAnnotation.build()), new AnnotatedJavaType(MODEL));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("page"), new JavaSymbolName("size"), new JavaSymbolName("uiModel"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
@@ -336,7 +319,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -355,15 +338,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "id"));
 		AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(PATH_VARIABLE, attributes);
 
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(
-				new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()),
-				new AnnotatedJavaType(MODEL)
-		);
-		
-		final List<JavaSymbolName> paramNames = Arrays.asList(
-				new JavaSymbolName("id"),
-				new JavaSymbolName("uiModel")
-		);
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()), new AnnotatedJavaType(MODEL));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"), new JavaSymbolName("uiModel"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{id}"));
@@ -380,7 +356,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("uiModel.addAttribute(\"itemId\", " + (compositePk ? "conversionService.convert(" : "") + "id" + (compositePk ? ", String.class)" : "") + ");");
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -397,18 +373,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(VALID);
 
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(
-			new AnnotatedJavaType(formBackingType, validAnnotation.build()),
-			new AnnotatedJavaType(BINDING_RESULT),
-			new AnnotatedJavaType(MODEL),
-			new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"))
-		);
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(entityName));
-		paramNames.add(new JavaSymbolName("bindingResult"));
-		paramNames.add(new JavaSymbolName("uiModel"));
-		paramNames.add(new JavaSymbolName("httpServletRequest"));
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(formBackingType, validAnnotation.build()), new AnnotatedJavaType(BINDING_RESULT), new AnnotatedJavaType(MODEL), new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(entityName), new JavaSymbolName("bindingResult"), new JavaSymbolName("uiModel"), new JavaSymbolName("httpServletRequest")); 
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("POST"))));
@@ -430,7 +396,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine(persistMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." + javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -440,11 +406,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(MODEL));
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("uiModel"));
+		final List<JavaType> parameterTypes = Arrays.asList(MODEL);
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("uiModel"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "form"));
@@ -481,7 +444,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/create\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -497,19 +460,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(VALID);
 
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(
-				new AnnotatedJavaType(formBackingType, validAnnotation.build()),
-				new AnnotatedJavaType(BINDING_RESULT),
-				new AnnotatedJavaType(MODEL),
-				new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"))
-		);
-
-		final List<JavaSymbolName> paramNames = Arrays.asList(
-				new JavaSymbolName(entityName),
-				new JavaSymbolName("bindingResult"),
-				new JavaSymbolName("uiModel"),
-				new JavaSymbolName("httpServletRequest")
-		);
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(formBackingType, validAnnotation.build()), new AnnotatedJavaType(BINDING_RESULT), new AnnotatedJavaType(MODEL), new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(entityName), new JavaSymbolName("bindingResult"), new JavaSymbolName("uiModel"), new JavaSymbolName("httpServletRequest"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("PUT"))));
@@ -531,7 +483,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine(updateMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + (compositePk ? "conversionService.convert(" : "") + entityName + "." +  javaTypePersistenceMetadataHolder.getIdentifierAccessorMethod().getMethodName() + "()" + (compositePk ? ", String.class)" : ".toString()") + ", httpServletRequest);");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -549,13 +501,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "id"));
 		AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(PATH_VARIABLE, attributes);
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()));
-		paramTypes.add(new AnnotatedJavaType(MODEL));
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("id"));
-		paramNames.add(new JavaSymbolName("uiModel"));
+		final List<AnnotatedJavaType> annotatedParameterTypes = Arrays.asList(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()), new AnnotatedJavaType(MODEL)); 
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"), new JavaSymbolName("uiModel"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{id}"));
@@ -572,7 +519,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/update\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -618,17 +565,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getEncodeUrlPathSegmentMethod() {
 		JavaSymbolName encodeUrlPathSegment = new JavaSymbolName("encodeUrlPathSegment");
-		
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
-		
 		MethodMetadata encodeUrlPathSegmentMethod = methodExists(encodeUrlPathSegment);
 		if (encodeUrlPathSegmentMethod != null) return encodeUrlPathSegmentMethod;
 		
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("pathSegment"));
-		paramNames.add(new JavaSymbolName("httpServletRequest"));
+		final List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING, new JavaType("javax.servlet.http.HttpServletRequest"));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("pathSegment"), new JavaSymbolName("httpServletRequest"));
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("String enc = httpServletRequest.getCharacterEncoding();");
@@ -645,19 +586,16 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("catch (" + new JavaType("java.io.UnsupportedEncodingException").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " uee) {}");
 		bodyBuilder.appendFormalLine("return pathSegment;");
 		
-		return new MethodMetadataBuilder(getId(), 0, encodeUrlPathSegment, JavaType.STRING, paramTypes, paramNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), 0, encodeUrlPathSegment, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 	
 	private MethodMetadata getDateTimeFormatHelperMethod() {
 		JavaSymbolName addDateTimeFormatPatterns = new JavaSymbolName("addDateTimeFormatPatterns");
-
-		final List<AnnotatedJavaType> paramTypes = Arrays.asList(new AnnotatedJavaType(MODEL));
-		
 		MethodMetadata addDateTimeFormatPatternsMethod = methodExists(addDateTimeFormatPatterns);
 		if (addDateTimeFormatPatternsMethod != null) return addDateTimeFormatPatternsMethod;
 
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("uiModel"));
+		final List<JavaType> parameterTypes = Arrays.asList(MODEL);
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("uiModel"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		for (Entry<JavaSymbolName, DateTimeFormatDetails> javaSymbolNameDateTimeFormatDetailsEntry : dateTypes.entrySet()) {
@@ -673,7 +611,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("uiModel.addAttribute(\"" + entityName + "_" + javaSymbolNameDateTimeFormatDetailsEntry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + pattern + ");");
 		}
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, addDateTimeFormatPatterns, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, addDateTimeFormatPatterns, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	

@@ -299,11 +299,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getNewTransient" + entityType.getSimpleTypeName());
 
-		List<JavaType> paramTypes = Arrays.asList(JavaType.INT_PRIMITIVE);
-		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("index"));
+		List<JavaType> parameterTypes = Arrays.asList(JavaType.INT_PRIMITIVE);
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("index"));
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -333,7 +333,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		bodyBuilder.appendFormalLine("return obj;");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
@@ -344,10 +344,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		JavaSymbolName embeddedIdentifierMutator = embeddedIdentifierHolder.getEmbeddedIdentifierMutator();
 		JavaSymbolName methodName = getEmbeddedIdMutatorMethodName();
-		List<JavaType> paramTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
+		List<JavaType> parameterTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
 
 		// Locate user-defined method
-		if (getMethodOnGovernor(methodName, paramTypes) != null) {
+		if (getMethodOnGovernor(methodName, parameterTypes) != null) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
@@ -377,18 +377,18 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(embeddedIdentifierFieldType.getSimpleTypeName() + " embeddedIdClass = new " + embeddedIdentifierFieldType.getSimpleTypeName() + "(" + sb.toString() + ");");
 		bodyBuilder.appendFormalLine("obj." + embeddedIdentifierMutator + "(embeddedIdClass);");
 
-		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
 	private MethodMetadata getEmbeddedClassMutatorMethod(EmbeddedHolder embeddedHolder) {
 		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField());
-		List<JavaType> paramTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
+		List<JavaType> parameterTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
 
 		// Locate user-defined method
-		if (getMethodOnGovernor(methodName, paramTypes) != null) {
+		if (getMethodOnGovernor(methodName, parameterTypes) != null) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
@@ -405,9 +405,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		bodyBuilder.appendFormalLine("obj." + embeddedHolder.getEmbeddedMutatorMethodName() + "(embeddedClass);");
 
-		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -416,10 +416,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private void addEmbeddedClassFieldMutatorMethodsToBuilder(EmbeddedHolder embeddedHolder) {
-		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
 		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
-		List<JavaType> paramTypes = Arrays.asList(embeddedFieldType, JavaType.INT_PRIMITIVE);
+		List<JavaType> parameterTypes = Arrays.asList(embeddedFieldType, JavaType.INT_PRIMITIVE);
 
 		for (FieldMetadata field : embeddedHolder.getFields()) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -429,9 +429,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			bodyBuilder.append(getFieldValidationBody(field, initializer, fieldMutatorMethodName, false));
 
 			JavaSymbolName embeddedClassMethodName = new JavaSymbolName(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 			MethodMetadata fieldInitializerMethod = methodBuilder.build();
-			if (getMethodOnGovernor(embeddedClassMethodName, paramTypes) != null) {
+			if (getMethodOnGovernor(embeddedClassMethodName, parameterTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -449,14 +449,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private List<MethodMetadata> getFieldMutatorMethods() {
 		List<MethodMetadata> fieldMutatorMethods = new ArrayList<MethodMetadata>();
 
-		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
-		List<JavaType> paramTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
+		List<JavaType> parameterTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
 
 		Set<String> existingMutators = new HashSet<String>();
 
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
 			// Locate user-defined method
-			if (getMethodOnGovernor(mutator.getMethodName(), paramTypes) != null) {
+			if (getMethodOnGovernor(mutator.getMethodName(), parameterTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -475,7 +475,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.append(getFieldValidationBody(locatedMutators.get(mutator).getField(), initializer, mutator.getMethodName(), false));
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, mutator.getMethodName(), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, mutator.getMethodName(), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 			fieldMutatorMethods.add(methodBuilder.build());
 		}
 
@@ -765,14 +765,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public MethodMetadata getModifyMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("modify" + entityType.getSimpleTypeName());
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(entityType);
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("obj"));
+		List<JavaType> parameterTypes = Arrays.asList(entityType);
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"));
 		JavaType returnType = JavaType.BOOLEAN_PRIMITIVE;
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -782,7 +780,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return false;");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
@@ -792,11 +790,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public MethodMetadata getRandomPersistentEntityMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getRandom" + entityType.getSimpleTypeName());
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -810,7 +808,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
@@ -820,11 +818,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public MethodMetadata getSpecificPersistentEntityMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getSpecific" + entityType.getSimpleTypeName());
-		List<JavaType> paramTypes = Arrays.asList(JavaType.INT_PRIMITIVE);
-		List<JavaSymbolName> paramNames = Arrays.asList(new JavaSymbolName("index"));
+		List<JavaType> parameterTypes = Arrays.asList(JavaType.INT_PRIMITIVE);
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("index"));
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -840,7 +838,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("return " + findMethod.getMethodCall() + ";");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, entityType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
@@ -855,12 +853,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MethodMetadata getInitMethod(final MemberTypeAdditions findEntriesMethodAdditions, final MemberTypeAdditions persistMethodAdditions, final MemberTypeAdditions flushAdditions) {
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName("init");
-		final List<JavaType> paramTypes = Collections.emptyList();
-		final List<JavaSymbolName> paramNames = Collections.<JavaSymbolName>emptyList();
+		final List<JavaType> parameterTypes = Collections.<JavaType> emptyList();
+		final List<JavaSymbolName> parameterNames = Collections.<JavaSymbolName> emptyList();
 		final JavaType returnType = JavaType.VOID_PRIMITIVE;
 
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -916,7 +914,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("}");
 		
 		// Create the method
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 
 	public boolean hasEmbeddedIdentifier() {

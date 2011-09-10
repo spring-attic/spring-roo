@@ -284,10 +284,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	
 	private MethodMetadata getDelegateMethod(final JavaSymbolName methodName, final String methodDelegateName) {
 		// Method definition to find or build
-		final List<JavaType> paramTypes = new ArrayList<JavaType>();
+		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			return userMethod; 
 		}
@@ -336,7 +336,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine("this." + entityManagerFieldName + "." + methodDelegateName  + "(this);");
 		}
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -368,11 +368,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(ENTITY_MANAGER_METHOD_NAME);
-		final List<JavaType> paramTypes = new ArrayList<JavaType>();
+		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		final JavaType returnType = ENTITY_MANAGER;
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -418,7 +418,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return em;");
 		final int modifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -430,11 +430,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private MethodMetadata getCountMethod() {
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getCountMethod() + plural);
-		final List<JavaType> paramTypes = Collections.emptyList();
-		final List<JavaSymbolName> paramNames = Collections.emptyList();
+		final List<JavaType> parameterTypes = Collections.<JavaType> emptyList();
+		final List<JavaSymbolName> parameterNames = Collections.<JavaSymbolName> emptyList();
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(COUNT_RETURN_TYPE), "Method '" + methodName + "' on '" + destination + "' must return '" + COUNT_RETURN_TYPE.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -454,7 +454,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		final int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, COUNT_RETURN_TYPE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, COUNT_RETURN_TYPE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -469,14 +469,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindAllMethod() + plural);
-		final List<JavaType> paramTypes = new ArrayList<JavaType>();
-		final List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		final List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(destination);
+		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+		final List<JavaType> typeParams = Arrays.asList(destination);
 		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -496,7 +495,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -512,14 +511,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Method definition to find or build
 		final String idFieldName = identifierField.getFieldName().getSymbolName();
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindMethod() + destination.getSimpleTypeName());
-		final List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(identifierField.getFieldType());
-		final List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(idFieldName));
+		final List<JavaType> parameterTypes = Arrays.asList(identifierField.getFieldType());
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(idFieldName));
 		final JavaType returnType = destination;
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + returnType + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -560,7 +557,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		final int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -575,18 +572,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindEntriesMethod() + destination.getSimpleTypeName() + "Entries");
-		final List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
-		paramTypes.add(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
-		final List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("firstResult"));
-		paramNames.add(new JavaSymbolName("maxResults"));
-		final List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(destination);
+		final List<JavaType> parameterTypes = Arrays.asList(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null), new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
+		final List<JavaType> typeParams = Arrays.asList(destination);
 		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, paramTypes);
+		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -606,7 +598,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}

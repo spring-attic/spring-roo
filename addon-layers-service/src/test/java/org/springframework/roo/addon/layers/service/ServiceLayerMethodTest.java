@@ -10,6 +10,7 @@ import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.FI
 import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.SAVE;
 import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.UPDATE;
 import static org.springframework.roo.addon.layers.service.ServiceLayerMethod.valueOf;
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,7 +33,7 @@ public class ServiceLayerMethodTest {
 
 	// Constants
 	private static final JavaType TARGET_ENTITY = new JavaType("com.example.Person");
-	private static final JavaType ID_TYPE = new JavaType(Long.class.getName());
+	private static final JavaType ID_TYPE = LONG_OBJECT;
 	private static final String PLURAL = "People";
 	
 	@Test

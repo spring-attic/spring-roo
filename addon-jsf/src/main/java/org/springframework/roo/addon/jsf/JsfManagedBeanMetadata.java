@@ -757,8 +757,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(PRIMEFACES_CLOSE_EVENT);
 		
-		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		parameterNames.add(new JavaSymbolName("event"));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("event"));
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("reset();");
@@ -801,8 +800,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MethodMetadata method = getMethodOnGovernor(methodName, parameterTypes);
 		if (method != null) return method;
 
-		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		parameterNames.add(new JavaSymbolName(fieldName));
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(fieldName));
 		
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");

@@ -288,11 +288,11 @@ public class ItdSourceFileComposer {
 
 			// Append parameter types and names
 			this.append("(");
-			List<AnnotatedJavaType> paramTypes = constructor.getParameterTypes();
-			List<JavaSymbolName> paramNames = constructor.getParameterNames();
-			for (int i = 0 ; i < paramTypes.size(); i++) {
-				AnnotatedJavaType paramType = paramTypes.get(i);
-				JavaSymbolName paramName = paramNames.get(i);
+			List<AnnotatedJavaType> parameterTypes = constructor.getParameterTypes();
+			List<JavaSymbolName> parameterNames = constructor.getParameterNames();
+			for (int i = 0 ; i < parameterTypes.size(); i++) {
+				AnnotatedJavaType paramType = parameterTypes.get(i);
+				JavaSymbolName paramName = parameterNames.get(i);
 				for (AnnotationMetadata methodParameterAnnotation : paramType.getAnnotations()) {
 					this.append(AnnotationMetadataUtils.toSourceForm(methodParameterAnnotation));
 					this.append(" ");
@@ -300,7 +300,7 @@ public class ItdSourceFileComposer {
 				this.append(paramType.getJavaType().getNameIncludingTypeParameters(false, resolver));
 				this.append(" ");
 				this.append(paramName.getSymbolName());
-				if (i < paramTypes.size() - 1) {
+				if (i < parameterTypes.size() - 1) {
 					this.append(", ");
 				}
 			}
@@ -461,7 +461,7 @@ public class ItdSourceFileComposer {
 
 	private void writeMethods(List<? extends MethodMetadata> methods, boolean defineTarget, boolean isInterfaceMethod) {
 		for (MethodMetadata method : methods) {
-			Assert.isTrue(method.getParameterTypes().size() == method.getParameterNames().size(), "Mismatched parameter names against parameter types");
+			Assert.isTrue(method.getParameterTypes().size() == method.getParameterNames().size(), ("Method " + method.getMethodName().getSymbolName() + " has mismatched parameter names against parameter types"));
 			
 			// Append annotations
 			for (AnnotationMetadata annotation : method.getAnnotations()) {
@@ -489,11 +489,11 @@ public class ItdSourceFileComposer {
 
 			// Append parameter types and names
 			this.append("(");
-			List<AnnotatedJavaType> paramTypes = method.getParameterTypes();
-			List<JavaSymbolName> paramNames = method.getParameterNames();
-			for (int i = 0 ; i < paramTypes.size(); i++) {
-				AnnotatedJavaType paramType = paramTypes.get(i);
-				JavaSymbolName paramName = paramNames.get(i);
+			List<AnnotatedJavaType> parameterTypes = method.getParameterTypes();
+			List<JavaSymbolName> parameterNames = method.getParameterNames();
+			for (int i = 0 ; i < parameterTypes.size(); i++) {
+				AnnotatedJavaType paramType = parameterTypes.get(i);
+				JavaSymbolName paramName = parameterNames.get(i);
 				for (AnnotationMetadata methodParameterAnnotation : paramType.getAnnotations()) {
 					outputAnnotation(methodParameterAnnotation);
 					this.append(" ");
@@ -501,7 +501,7 @@ public class ItdSourceFileComposer {
 				this.append(paramType.getJavaType().getNameIncludingTypeParameters(false, resolver));
 				this.append(" ");
 				this.append(paramName.getSymbolName());
-				if (i < paramTypes.size() - 1) {
+				if (i < parameterTypes.size() - 1) {
 					this.append(", ");
 				}
 			}

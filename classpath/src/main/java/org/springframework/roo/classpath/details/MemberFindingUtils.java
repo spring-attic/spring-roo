@@ -59,8 +59,8 @@ public final class MemberFindingUtils {
 		}
 		for (MethodMetadata method : memberHoldingTypeDetails.getDeclaredMethods()) {
 			if (method.getMethodName().equals(methodName)) {
-				List<JavaType> paramTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
-				if (paramTypes.equals(parameters)) {
+				List<JavaType> parameterTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
+				if (parameterTypes.equals(parameters)) {
 					return method;
 				}
 			}

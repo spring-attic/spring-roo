@@ -5,6 +5,7 @@ import static org.springframework.roo.model.SpringJavaType.FORMATTER_REGISTRY;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -240,6 +241,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			return null;
 		}
 		final JavaType converterJavaType = SpringJavaType.getConverterType(idType, targetType);
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
@@ -256,38 +258,31 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	
 	private MethodMetadataBuilder getInstallMethodBuilder() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
-		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
-		parameters.add(new AnnotatedJavaType(FORMATTER_REGISTRY));
-		
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
-		if (getGovernorMethod(methodName, parameters) != null) {
+		List<JavaType> parameterTypes = Arrays.asList(FORMATTER_REGISTRY);
+		MethodMetadata method = getMethodOnGovernor(methodName, parameterTypes);
+		if (method != null) {
 			return new MethodMetadataBuilder(method);
 		}
 		
-		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		parameterNames.add(new JavaSymbolName("registry"));
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameters, parameterNames, new InvocableMemberBodyBuilder());
+		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("registry"));
+
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, new InvocableMemberBodyBuilder());
 	}
 
 	private MethodMetadataBuilder getAfterPropertiesSetMethod(MethodMetadata installConvertersMethod) {
 		JavaSymbolName methodName = new JavaSymbolName("afterPropertiesSet");
-		
-		List<AnnotatedJavaType> parameters = Collections.emptyList();
-		List<JavaSymbolName> parameterNames = Collections.emptyList();
-
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
+		List<JavaType> parameterTypes = Collections.<JavaType> emptyList();
+		MethodMetadata method = getMethodOnGovernor(methodName, parameterTypes);
 		if (method != null) {
 			return new MethodMetadataBuilder(method);
 		}
+
+		List<JavaSymbolName> parameterNames = Collections.emptyList();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super.afterPropertiesSet();");
 		bodyBuilder.appendFormalLine(installConvertersMethod.getMethodName().getSymbolName() + "(getObject());");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameters, parameterNames, bodyBuilder);
-	}
-
-	private MethodMetadata getGovernorMethod(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 	}
 }

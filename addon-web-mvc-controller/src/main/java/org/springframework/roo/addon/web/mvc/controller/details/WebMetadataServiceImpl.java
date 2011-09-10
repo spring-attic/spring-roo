@@ -343,20 +343,20 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {
 			for (MethodMetadata method: finderMetadata.getAllDynamicFinders()) {
-				List<JavaSymbolName> paramNames = method.getParameterNames();
-				List<JavaType> paramTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
+				List<JavaSymbolName> parameterNames = method.getParameterNames();
+				List<JavaType> parameterTypes = AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes());
 				List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-				for (int i = 0; i < paramTypes.size(); i++) {
+				for (int i = 0; i < parameterTypes.size(); i++) {
 					JavaSymbolName fieldName = null;
-					if (paramNames.get(i).getSymbolName().startsWith("max") || paramNames.get(i).getSymbolName().startsWith("min")) {
-						fieldName = new JavaSymbolName(Introspector.decapitalize(StringUtils.capitalize(paramNames.get(i).getSymbolName().substring(3))));
+					if (parameterNames.get(i).getSymbolName().startsWith("max") || parameterNames.get(i).getSymbolName().startsWith("min")) {
+						fieldName = new JavaSymbolName(Introspector.decapitalize(StringUtils.capitalize(parameterNames.get(i).getSymbolName().substring(3))));
 					} else {
-						fieldName = paramNames.get(i);
+						fieldName = parameterNames.get(i);
 					}
 					FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
 					if (field != null) {
 						FieldMetadataBuilder fieldMd = new FieldMetadataBuilder(field);
-						fieldMd.setFieldName(paramNames.get(i));
+						fieldMd.setFieldName(parameterNames.get(i));
 						fields.add(fieldMd.build());
 					}
 				}

@@ -141,11 +141,11 @@ public abstract class ReflectionUtils {
 	 * <p>Returns <code>null</code> if no {@link Method} can be found.
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
-	 * @param paramTypes the parameter types of the method
+	 * @param parameterTypes the parameter types of the method
 	 * (may be <code>null</code> to indicate any signature)
 	 * @return the Method object, or <code>null</code> if none found
 	 */
-	public static Method findMethod(Class<?> clazz, String name, Class<?>[] paramTypes) {
+	public static Method findMethod(Class<?> clazz, String name, Class<?>[] parameterTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(name, "Method name must not be null");
 		Class<?> searchType = clazz;
@@ -153,7 +153,7 @@ public abstract class ReflectionUtils {
 			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
 			for (Method method : methods) {
 				if (name.equals(method.getName()) &&
-						(paramTypes == null || Arrays.equals(paramTypes, method.getParameterTypes()))) {
+						(parameterTypes == null || Arrays.equals(parameterTypes, method.getParameterTypes()))) {
 					return method;
 				}
 			}
@@ -358,8 +358,8 @@ public abstract class ReflectionUtils {
 		if (method == null || !method.getName().equals("equals")) {
 			return false;
 		}
-		Class<?>[] paramTypes = method.getParameterTypes();
-		return (paramTypes.length == 1 && paramTypes[0] == Object.class);
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		return (parameterTypes.length == 1 && parameterTypes[0] == Object.class);
 	}
 
 	/**

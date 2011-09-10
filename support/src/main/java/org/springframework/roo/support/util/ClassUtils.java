@@ -563,12 +563,12 @@ public abstract class ClassUtils {
 	 * Determine whether the given class has a public constructor with the given signature.
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to "false".
 	 * @param clazz	the clazz to analyze
-	 * @param paramTypes the parameter types of the method
+	 * @param parameterTypes the parameter types of the method
 	 * @return whether the class has a corresponding constructor
 	 * @see java.lang.Class#getMethod
 	 */
-	public static boolean hasConstructor(Class<?> clazz, Class<?>... paramTypes) {
-		return (getConstructorIfAvailable(clazz, paramTypes) != null);
+	public static boolean hasConstructor(Class<?> clazz, Class<?>... parameterTypes) {
+		return (getConstructorIfAvailable(clazz, parameterTypes) != null);
 	}
 
 	/**
@@ -576,14 +576,14 @@ public abstract class ClassUtils {
 	 * and return it if available (else return <code>null</code>).
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>null</code>.
 	 * @param clazz	the clazz to analyze
-	 * @param paramTypes the parameter types of the method
+	 * @param parameterTypes the parameter types of the method
 	 * @return the constructor, or <code>null</code> if not found
 	 * @see java.lang.Class#getConstructor
 	 */
-	public static <T> Constructor<T> getConstructorIfAvailable(Class<T> clazz, Class<?>... paramTypes) {
+	public static <T> Constructor<T> getConstructorIfAvailable(Class<T> clazz, Class<?>... parameterTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
-			return clazz.getConstructor(paramTypes);
+			return clazz.getConstructor(parameterTypes);
 		}
 		catch (NoSuchMethodException ex) {
 			return null;
@@ -595,12 +595,12 @@ public abstract class ClassUtils {
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to "false".
 	 * @param clazz	the clazz to analyze
 	 * @param methodName the name of the method
-	 * @param paramTypes the parameter types of the method
+	 * @param parameterTypes the parameter types of the method
 	 * @return whether the class has a corresponding method
 	 * @see java.lang.Class#getMethod
 	 */
-	public static boolean hasMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
-		return (getMethodIfAvailable(clazz, methodName, paramTypes) != null);
+	public static boolean hasMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+		return (getMethodIfAvailable(clazz, methodName, parameterTypes) != null);
 	}
 
 	/**
@@ -609,15 +609,15 @@ public abstract class ClassUtils {
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>null</code>.
 	 * @param clazz	the clazz to analyze
 	 * @param methodName the name of the method
-	 * @param paramTypes the parameter types of the method
+	 * @param parameterTypes the parameter types of the method
 	 * @return the method, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethod
 	 */
-	public static Method getMethodIfAvailable(Class<?> clazz, String methodName, Class<?>... paramTypes) {
+	public static Method getMethodIfAvailable(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
-			return clazz.getMethod(methodName, paramTypes);
+			return clazz.getMethod(methodName, parameterTypes);
 		}
 		catch (NoSuchMethodException ex) {
 			return null;

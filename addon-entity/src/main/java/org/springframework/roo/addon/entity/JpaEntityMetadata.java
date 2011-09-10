@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -353,15 +354,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final FieldMetadata id = getIdentifierField();
 		String requiredMutatorName = "set" + StringUtils.capitalize(id.getFieldName().getSymbolName());
 		
-		final List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(id.getFieldType());
-		final List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("id"));
+		final List<JavaType> parameterTypes = Arrays.asList(id.getFieldType());
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"));
 		
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredMutatorName), parameterTypes);
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -377,7 +376,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + id.getFieldName().getSymbolName() + " = id;");
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -647,15 +646,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		String requiredMutatorName = "set" + StringUtils.capitalize(version.getFieldName().getSymbolName());
 		
-		final List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(version.getFieldType());
-		final List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("version"));
+		final List<JavaType> parameterTypes =  Arrays.asList(version.getFieldType());
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("version"));
 		
 		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredMutatorName), paramTypes, getId());
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredMutatorName), parameterTypes, getId());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -671,7 +668,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + version.getFieldName().getSymbolName() + " = version;");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 }

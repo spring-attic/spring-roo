@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
+import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JavaType.SHORT_OBJECT;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
 import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
@@ -441,7 +444,7 @@ public class JspViewManager {
 
 	private void addCommonAttributes(FieldMetadata field, Element fieldElement) {
 		AnnotationMetadata annotationMetadata;
-		if (field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName()) || field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName()) || field.getFieldType().equals(new JavaType(Long.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
+		if (field.getFieldType().equals(INT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName()) || field.getFieldType().equals(SHORT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName()) || field.getFieldType().equals(LONG_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_integer");
 		} else if (uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_email");
