@@ -177,7 +177,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		Assert.notNull(finderMetadataDetails, "Method metadata required for finder");
 		JavaSymbolName finderMethodName = new JavaSymbolName(finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName());
 
-		List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
+		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -203,7 +203,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				}
 			}
 			parameterNames.add(fieldName);
-			annotatedParameterTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
+			parameterTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
 
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				methodParams.append(fieldName + " == null ? new Boolean(false) : " + fieldName + ", ");
@@ -216,9 +216,9 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			methodParams.delete(methodParams.length() - 2, methodParams.length());
 		}
 
-		annotatedParameterTypes.add(new AnnotatedJavaType(MODEL));
+		parameterTypes.add(new AnnotatedJavaType(MODEL));
 		
-		MethodMetadata existingMethod = methodExists(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(annotatedParameterTypes));
+		MethodMetadata existingMethod = methodExists(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
 		if (existingMethod != null) {
 			return existingMethod;
 		}
@@ -239,7 +239,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING, annotatedParameterTypes, newParamNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, finderMethodName, JavaType.STRING, parameterTypes, newParamNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}

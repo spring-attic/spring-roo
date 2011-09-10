@@ -128,16 +128,16 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, reqMapAttributes));
 		annotations.add(new AnnotationMetadataBuilder(RESPONSE_BODY));
 		
-		List<AnnotatedJavaType> annotatedParameterTypes = new ArrayList<AnnotatedJavaType>();
+		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		
-		annotatedParameterTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("q", true)));
+		parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("q", true)));
 		parameterNames.add(new JavaSymbolName("q"));
 		
-		annotatedParameterTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("facetFields", true)));
+		parameterTypes.add(new AnnotatedJavaType(JavaType.STRING, getRequestParamAnnotation("facetFields", true)));
 		parameterNames.add(new JavaSymbolName("facetFields"));
 		
-		annotatedParameterTypes.add(new AnnotatedJavaType(INT_OBJECT, getRequestParamAnnotation("rows", false)));
+		parameterTypes.add(new AnnotatedJavaType(INT_OBJECT, getRequestParamAnnotation("rows", false)));
 		parameterNames.add(new JavaSymbolName("rows"));
 	
 		String solrQuerySimpleName = new JavaType("org.apache.solr.client.solrj.SolrQuery").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
@@ -169,7 +169,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("dojo.append(\"]}\");");
 		bodyBuilder.appendFormalLine("return dojo.toString();");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, annotatedParameterTypes, parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}

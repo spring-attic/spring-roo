@@ -105,8 +105,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			return null;
 		}
 
-		final List<JavaType> typeParams = Arrays.asList(destination);
-		final List<JavaType> parameterTypes = Arrays.asList(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, typeParams));
+		final List<JavaType> parameterTypes = Arrays.asList(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays.asList(destination)));
 
 		// See if the type itself declared the method
 		MethodMetadata result = getMethodOnGovernor(methodName, parameterTypes);
@@ -158,8 +157,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		List<JavaSymbolName> parameterNames =  Arrays.asList(new JavaSymbolName("json"));
 
-		List<JavaType> paramTypes = Arrays.asList(destination);
-		JavaType collection = new JavaType("java.util.Collection", 0, DataType.TYPE, null, paramTypes);
+		JavaType collection = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Arrays.asList(destination));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, collection, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.FROM_JSON_ARRAY_METHOD, null);

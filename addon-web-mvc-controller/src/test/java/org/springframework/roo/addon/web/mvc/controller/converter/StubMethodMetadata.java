@@ -17,6 +17,7 @@ import org.springframework.roo.model.JavaType;
  */
 public class StubMethodMetadata implements MethodMetadata {
 
+	// Fields
 	private JavaSymbolName methodName;
 	private JavaType returnType;
 	private List<AnnotatedJavaType> parameterTypes;

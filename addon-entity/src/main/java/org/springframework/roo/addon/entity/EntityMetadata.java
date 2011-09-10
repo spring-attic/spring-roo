@@ -471,8 +471,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindAllMethod() + plural);
 		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		final List<JavaType> typeParams = Arrays.asList(destination);
-		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
+		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(destination));
 		
 		// Locate user-defined method
 		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
@@ -574,8 +573,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindEntriesMethod() + destination.getSimpleTypeName() + "Entries");
 		final List<JavaType> parameterTypes = Arrays.asList(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null), new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
-		final List<JavaType> typeParams = Arrays.asList(destination);
-		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
+		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(destination));
 		
 		// Locate user-defined method
 		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);

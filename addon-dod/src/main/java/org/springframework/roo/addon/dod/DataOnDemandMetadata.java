@@ -230,8 +230,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			fieldName = fieldName + "data";
 
 			// The type parameters to be used by the field type
-			List<JavaType> typeParams = new ArrayList<JavaType>();
-			typeParams.add(annotationValues.getEntity());
+			List<JavaType> parameterTypes = Arrays.asList(annotationValues.getEntity());
 
 			JavaSymbolName fieldSymbolName = new JavaSymbolName(fieldName);
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
@@ -242,7 +241,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					continue;
 				}
 
-				if (!candidate.getFieldType().equals(new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams))) {
+				if (!candidate.getFieldType().equals(new JavaType("java.util.List", 0, DataType.TYPE, null, parameterTypes))) {
 					// Candidate isn't a java.util.List<theEntity>, so it isn't suitable
 					// The equals method also verifies type params are present
 					continue;
@@ -257,7 +256,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId());
 			fieldBuilder.setModifier(Modifier.PRIVATE);
 			fieldBuilder.setFieldName(fieldSymbolName);
-			fieldBuilder.setFieldType(new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams));
+			fieldBuilder.setFieldType(new JavaType("java.util.List", 0, DataType.TYPE, null, parameterTypes));
 			return fieldBuilder.build();
 		}
 	}

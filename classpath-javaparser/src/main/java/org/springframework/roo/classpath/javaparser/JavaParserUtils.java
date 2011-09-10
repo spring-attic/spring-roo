@@ -495,14 +495,14 @@ public class JavaParserUtils  {
 		JavaType effectiveType = getJavaType(compilationUnitServices, nameExpr, typeParameters);
 
 		// Handle any type arguments
-		List<JavaType> typeParams = new ArrayList<JavaType>();
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		if (cit.getTypeArgs() != null) {
 			for (Type ta : cit.getTypeArgs()) {
-				typeParams.add(getJavaType(compilationUnitServices, ta, typeParameters));
+				parameterTypes.add(getJavaType(compilationUnitServices, ta, typeParameters));
 			}
 		}
 
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.getDataType(), null, typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.getDataType(), null, parameterTypes);
 	}
 
 	/**
@@ -522,7 +522,7 @@ public class JavaParserUtils  {
 		JavaType effectiveType = getJavaType(compilationUnitServices, nameExpr, null);
 
 		// Populate JavaType with type parameters
-		List<JavaType> typeParams = new ArrayList<JavaType>();
+		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 		List<TypeParameter> params = cid.getTypeParameters();
 		if (params != null) {
 			Set<JavaSymbolName> locatedTypeParams = new HashSet<JavaSymbolName>();
@@ -537,11 +537,11 @@ public class JavaParserUtils  {
 					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, cit, locatedTypeParams);
 					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), currentTypeParam, javaType.getParameters());
 				}
-				typeParams.add(javaType);
+				parameterTypes.add(javaType);
 			}
 		}
 
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.getDataType(), null, typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.getDataType(), null, parameterTypes);
 	}
 
 	/**
