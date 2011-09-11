@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -19,7 +18,7 @@ import org.springframework.uaa.client.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails> {
+public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails, ClassOrInterfaceTypeDetailsBuilder> {
 	
 	// Fields
 	private JavaType name;
@@ -141,6 +140,10 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		return new DefaultClassOrInterfaceTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getName(), getPhysicalTypeCategory(), buildConstructors(), buildFields(), buildMethods(), buildInnerTypes(), buildInitializers(), superclass, getExtendsTypes(), getImplementsTypes(), getEnumConstants(), getRegisteredImports());
 	}
 
+	public ClassOrInterfaceTypeDetailsBuilder getThis() {
+		return this;
+	}
+
 	/**
 	 * Returns this builder's imports
 	 * 
@@ -195,7 +198,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	 * @param targetBuilder the ITD builder to receive the additions (required)
 	 * @param governorDetails the {@link ClassOrInterfaceTypeDetails} of the governor (required)
 	 */
-	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, ClassOrInterfaceTypeDetails governorDetails) {
+	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?, ?> targetBuilder, ClassOrInterfaceTypeDetails governorDetails) {
 		Assert.notNull(targetBuilder, "Target builder required");
 		Assert.notNull(governorDetails, "Governor member holding types required");
 		// Copy fields
@@ -206,18 +209,12 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 					continue fieldAdditions;
 				}
 			}
-			for(FieldMetadata targetField : governorDetails.getDeclaredFields()) {
-				if (targetField.getFieldType().equals(field.getFieldType()) && targetField.getFieldName().equals(field.getFieldName())) {
-					// The field already exists, so move on
-					continue fieldAdditions;
-				}
-			}
 			targetBuilder.addField(field.build());
 		}
 		
 		// Copy methods
 		methodAdditions: for (MethodMetadataBuilder method : getDeclaredMethods()) {
-			for(MethodMetadata targetMethod : governorDetails.getDeclaredMethods()) {
+			for(MethodMetadataBuilder targetMethod : targetBuilder.getDeclaredMethods()) {
 				if (targetMethod.getMethodName().equals(method.getMethodName()) && targetMethod.getParameterTypes().equals(method.getParameterTypes())) {
 					continue methodAdditions;
 				}
@@ -227,7 +224,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		
 		// Copy annotations
 		annotationAdditions: for (AnnotationMetadataBuilder annotation : getAnnotations()) {
-			for(AnnotationMetadata targetAnnotation : governorDetails.getAnnotations()) {
+			for(AnnotationMetadataBuilder targetAnnotation : targetBuilder.getAnnotations()) {
 				if (targetAnnotation.getAnnotationType().equals(annotation.getAnnotationType())) {
 					continue annotationAdditions;
 				}
@@ -242,7 +239,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		
 		// Copy constructors
 		constructorAdditions: for (ConstructorMetadataBuilder constructor : getDeclaredConstructors()) {
-			for(ConstructorMetadata targetConstructor : governorDetails.getDeclaredConstructors()) {
+			for(ConstructorMetadataBuilder targetConstructor : targetBuilder.getDeclaredConstructors()) {
 				if (targetConstructor.getParameterTypes().equals(constructor.getParameterTypes())) {
 					continue constructorAdditions;
 				}
@@ -257,7 +254,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		
 		// Copy inner types
 		innerTypeAdditions: for (ClassOrInterfaceTypeDetailsBuilder innerType : getDeclaredInnerTypes()) {
-			for(ClassOrInterfaceTypeDetails targetInnerType : governorDetails.getDeclaredInnerTypes()) {
+			for(ClassOrInterfaceTypeDetailsBuilder targetInnerType : targetBuilder.getDeclaredInnerTypes()) {
 				if (targetInnerType.getName().equals(innerType.getName())) {
 					continue innerTypeAdditions;
 				}
@@ -267,14 +264,14 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		
 		// Copy extends types
 		for (JavaType type : getExtendsTypes()) {
-			if (!governorDetails.getExtendsTypes().contains(type)) {
+			if (!targetBuilder.getExtendsTypes().contains(type)) {
 				targetBuilder.addExtendsTypes(type);
 			}
 		}
 		
 		// Copy implements types
 		for (JavaType type : getImplementsTypes()) {
-			if (!governorDetails.getImplementsTypes().contains(type)) {
+			if (!targetBuilder.getImplementsTypes().contains(type)) {
 				targetBuilder.addImplementsType(type);
 			}
 		}

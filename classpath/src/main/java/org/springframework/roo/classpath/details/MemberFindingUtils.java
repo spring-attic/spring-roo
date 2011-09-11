@@ -69,6 +69,26 @@ public final class MemberFindingUtils {
 	}
 
 	/**
+	 * Locates a method on the specified {@link MemberHoldingTypeDetails} based on the method name.
+	 *
+	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search; can be <code>null</code>
+	 * @param methodName to locate; can be <code>null</code>
+	 * @return the method, or <code>null</code> if the given name was
+	 * <code>null</code> or it was simply not found
+	 */
+	public static MethodMetadata getDeclaredMethod(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName methodName) {
+		if (memberHoldingTypeDetails == null) {
+			return null;
+		}
+		for (MethodMetadata method : memberHoldingTypeDetails.getDeclaredMethods()) {
+			if (method.getMethodName().equals(methodName)) {
+				return method;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Locates the specified constructor.
 	 * 
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
@@ -113,7 +133,7 @@ public final class MemberFindingUtils {
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure> memberHoldingTypeDetails, JavaType type) {
+	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure, ?> memberHoldingTypeDetails, JavaType type) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(type, "Annotation type to locate required");
 		for (AnnotationMetadataBuilder md : memberHoldingTypeDetails.getAnnotations()) {
@@ -163,6 +183,39 @@ public final class MemberFindingUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Locates a method with the name presented. Searches all {@link MemberDetails} until the first such method is located
+	 * or none can be found.
+	 *
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param methodName the method name to locate (can be <code>null</code>)
+	 * @return the first located method, or <code>null</code> if the method name
+	 * is <code>null</code> or such a method cannot be found
+	 */
+	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName) {
+		Assert.notNull(memberDetails, "Member details required");
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			MethodMetadata md = getDeclaredMethod(memberHoldingTypeDetails, methodName);
+			if (md != null) {
+				return md;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Convenience method which converts a String method name to a {@link JavaSymbolName} for use by the standard
+	 * {@link #getMethod(MemberDetails, org.springframework.roo.model.JavaSymbolName)}.
+	 *
+	 * @param memberHoldingTypeDetails to search (required)
+	 * @param methodName to locate (required)
+	 * @return the method, or null if not found
+	 */
+	public static MethodMetadata getMethod(final MemberDetails memberDetails, final String methodName) {
+		Assert.notNull(methodName, "Method name required");
+		return getMethod(memberDetails, new JavaSymbolName(methodName));
 	}
 
 	/**
@@ -368,6 +421,47 @@ public final class MemberFindingUtils {
 			}
 		}
 		return null;
+	}
+
+
+	/**
+	 * Searches up the inheritance hierarchy until the first method with the specified name is located, method parameters
+	 * are not taken into account.
+	 *
+	 * @param memberHoldingTypeDetails to search (required)
+	 * @param methodName to locate (required)
+	 * @return the method, or null if not found
+	 */
+	public static MethodMetadata getMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName) {
+		Assert.notNull(memberHoldingTypeDetails, "Class or interface type details required");
+		Assert.notNull(methodName, "Method name required");
+
+		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
+		while (current != null) {
+			MethodMetadata result = getDeclaredMethod(current, methodName);
+			if (result != null) {
+				return result;
+			}
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
+			} else {
+				current = null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Convenience method which converts a String method name to a {@link JavaSymbolName} for use by the standard
+	 * {@link #getMethod(MemberHoldingTypeDetails, org.springframework.roo.model.JavaSymbolName)}.
+	 *
+	 * @param memberHoldingTypeDetails to search (required)
+	 * @param methodName to locate (required)
+	 * @return the method, or null if not found
+	 */
+	public static MethodMetadata getMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, String methodName) {
+		Assert.notNull(methodName, "Method name required");
+		return getMethod(memberHoldingTypeDetails, new JavaSymbolName(methodName));
 	}
 	
 	/**

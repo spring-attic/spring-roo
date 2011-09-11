@@ -6,7 +6,7 @@ package org.springframework.roo.classpath.details;
  * @author Ben Alex
  * @since 1.1
  */
-public final class ConstructorMetadataBuilder extends AbstractInvocableMemberMetadataBuilder<ConstructorMetadata> {
+public final class ConstructorMetadataBuilder extends AbstractInvocableMemberMetadataBuilder<ConstructorMetadata, ConstructorMetadataBuilder> {
 
 	public ConstructorMetadataBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
@@ -22,5 +22,9 @@ public final class ConstructorMetadataBuilder extends AbstractInvocableMemberMet
 
 	public ConstructorMetadata build() {
 		return new DefaultConstructorMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getParameterTypes(), getParameterNames(), getThrowsTypes(), getBodyBuilder().getOutput());
+	}
+
+	public ConstructorMetadataBuilder getThis() {
+		return this;
 	}
 }

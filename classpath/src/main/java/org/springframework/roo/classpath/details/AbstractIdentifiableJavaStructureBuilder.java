@@ -11,7 +11,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public abstract class AbstractIdentifiableJavaStructureBuilder<T extends IdentifiableJavaStructure> extends AbstractCustomDataAccessorBuilder<T> {
+public abstract class AbstractIdentifiableJavaStructureBuilder<T extends IdentifiableJavaStructure, R extends AbstractIdentifiableJavaStructureBuilder<T, R>> extends AbstractCustomDataAccessorBuilder<T, R> {
 	private String declaredByMetadataId;
 	private int modifier;
 

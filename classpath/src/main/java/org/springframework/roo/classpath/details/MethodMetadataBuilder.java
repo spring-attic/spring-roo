@@ -15,7 +15,7 @@ import org.springframework.roo.support.style.ToStringCreator;
  * @author Ben Alex
  * @since 1.1
  */
-public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilder<MethodMetadata> {
+public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilder<MethodMetadata, MethodMetadataBuilder> {
 	
 	// Fields
 	private JavaSymbolName methodName;
@@ -71,7 +71,11 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 	public MethodMetadata build() {
 		return new DefaultMethodMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getMethodName(), getReturnType(), getParameterTypes(), getParameterNames(), getThrowsTypes(), getBodyBuilder().getOutput());
 	}
-	
+
+	public MethodMetadataBuilder getThis() {
+		return this;
+	}
+
 	private void init(final JavaSymbolName methodName, final JavaType returnType) {
 		this.methodName = methodName;
 		this.returnType = returnType;

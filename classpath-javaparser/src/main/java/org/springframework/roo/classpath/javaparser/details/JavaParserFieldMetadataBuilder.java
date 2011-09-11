@@ -1,5 +1,10 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import japa.parser.ASTHelper;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
@@ -14,12 +19,6 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
-
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -38,7 +37,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  *
  */
-public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
+public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata, JavaParserFieldMetadataBuilder> {
 	
 	// Fields
 	private JavaType fieldType;
@@ -97,7 +96,11 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 		fieldMetadataBuilder.setModifier(modifier);
 		return fieldMetadataBuilder.build();
 	}
-	
+
+	public JavaParserFieldMetadataBuilder getThis() {
+		return this;
+	}
+
 	public static void addField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, FieldMetadata field) {
 		Assert.notNull(compilationUnitServices, "Flushable compilation unit services required");
 		Assert.notNull(members, "Members required");

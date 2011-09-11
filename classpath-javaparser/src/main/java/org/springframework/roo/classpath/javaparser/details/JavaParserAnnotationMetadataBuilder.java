@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.ArrayInitializerExpr;
 import japa.parser.ast.expr.BinaryExpr;
@@ -18,10 +21,6 @@ import japa.parser.ast.expr.NormalAnnotationExpr;
 import japa.parser.ast.expr.SingleMemberAnnotationExpr;
 import japa.parser.ast.expr.StringLiteralExpr;
 import japa.parser.ast.type.Type;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -50,7 +49,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Andrew Swan
  * @since 1.0
  */
-public final class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata>{
+public final class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata, JavaParserAnnotationMetadataBuilder>{
 
 	// Fields
 	private JavaType annotationType;
@@ -109,6 +108,10 @@ public final class JavaParserAnnotationMetadataBuilder implements Builder<Annota
 	public AnnotationMetadata build() {
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationType, attributeValues);
 		return annotationMetadataBuilder.build();
+	}
+
+	public JavaParserAnnotationMetadataBuilder getThis() {
+		return this;
 	}
 
 	private AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, Expression expression, final CompilationUnitServices compilationUnitServices) {

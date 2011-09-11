@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -20,7 +21,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extends IdentifiableAnnotatedJavaStructure> extends AbstractIdentifiableJavaStructureBuilder<T> {
+public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extends IdentifiableAnnotatedJavaStructure, R extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T, R>> extends AbstractIdentifiableJavaStructureBuilder<T, R> {
 	private List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(String declaredbyMetadataId) {
@@ -78,6 +79,15 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 			annotationMetadataBuilders.add(new AnnotationMetadataBuilder(annotationMetadata));
 		}
 		setAnnotations(annotationMetadataBuilders);
+	}
+
+	public void removeAnnotation(JavaType annotationType) {
+		for (AnnotationMetadataBuilder annotationMetadataBuilder : annotations) {
+			if (annotationMetadataBuilder.getAnnotationType().equals(annotationType)) {
+				annotations.remove(annotationMetadataBuilder);
+				break;
+			}
+		}
 	}
 
 	public boolean updateTypeAnnotation(AnnotationMetadataBuilder annotationBuilder) {

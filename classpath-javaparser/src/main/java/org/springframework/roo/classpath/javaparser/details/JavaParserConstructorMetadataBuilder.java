@@ -1,5 +1,11 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
@@ -14,13 +20,6 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
-
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -40,7 +39,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata>{
+public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata, JavaParserConstructorMetadataBuilder>{
 
 	// TODO: Should parse the throws types from JavaParser source
 
@@ -126,7 +125,11 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 		constructorMetadataBuilder.setThrowsTypes(throwsTypes);
 		return constructorMetadataBuilder.build();
 	}
-	
+
+	public JavaParserConstructorMetadataBuilder getThis() {
+		return this;
+	}
+
 	public static void addConstructor(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, ConstructorMetadata constructor, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(members, "Members required");

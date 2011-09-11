@@ -2,7 +2,8 @@ package org.springframework.roo.classpath.details.annotations;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.roo.model.Builder;
 import org.springframework.roo.model.EnumDetails;
@@ -21,7 +22,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Andrew Swan
  * @since 1.1
  */
-public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
+public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata, AnnotationMetadataBuilder> {
 	
 	// Constants for valueless JPA annotations (using literal class names so as not to make Roo depend on JPA)
 	public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance("javax.persistence.Column");
@@ -67,7 +68,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	
 	// Fields
 	private JavaType annotationType;
-	private final List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
+	private final Map<String, AnnotationAttributeValue<?>> attributeValues = new LinkedHashMap<String, AnnotationAttributeValue<?>>();
 	
 	/**
 	 * Constructor. The caller must set the annotation type via
@@ -86,7 +87,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 		Assert.notNull(existing);
 		this.annotationType = existing.getAnnotationType();
 		for (JavaSymbolName attributeName : existing.getAttributeNames()) {
-			attributeValues.add(existing.getAttribute(attributeName));
+			attributeValues.put(attributeName.getSymbolName(), existing.getAttribute(attributeName));
 		}
 	}
 
@@ -126,9 +127,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	 */
 	public AnnotationMetadataBuilder(JavaType annotationType, Collection<AnnotationAttributeValue<?>> attributeValues) {
 		this.annotationType = annotationType;
-		if (attributeValues != null) {
-			this.attributeValues.addAll(attributeValues);
-		}
+		setAttributes(attributeValues);
 	}
 
 	public void addBooleanAttribute(String key, boolean value) {
@@ -190,26 +189,12 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	
 	public void addAttribute(AnnotationAttributeValue<?> value) {
 		// Locate existing attribute with this key and replace it
-		int foundAt = -1;
-		int index = -1;
-		for (AnnotationAttributeValue<?> element : attributeValues) {
-			index++;
-			if (element.getName().equals(value.getName())) {
-				// Match found
-				foundAt = index;
-				break;
-			}
-		}
-		if (foundAt == -1) {
-			// Not found
-			attributeValues.add(value);
-		} else {
-			// Found
-			// Remove the existing element
-			attributeValues.remove(foundAt);
-			// Put this element in its place
-			attributeValues.add(foundAt, value);
-		}
+		attributeValues.put(value.getName().getSymbolName(), value);
+	}
+
+	public void removeAttribute(String key) {
+		// Locate existing attribute with this key and replace it
+		attributeValues.remove(key);
 	}
 
 	public JavaType getAnnotationType() {
@@ -220,7 +205,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 		this.annotationType = annotationType;
 	}
 
-	public List<AnnotationAttributeValue<?>> getAttributes() {
+	public Map<String, AnnotationAttributeValue<?>> getAttributes() {
 		return attributeValues;
 	}
 
@@ -232,11 +217,17 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	public void setAttributes(final Collection<AnnotationAttributeValue<?>> attributeValues) {
 		this.attributeValues.clear();
 		if (attributeValues != null) {
-			this.attributeValues.addAll(attributeValues);
+			for (AnnotationAttributeValue attributeValue : attributeValues) {
+				addAttribute(attributeValue);
+			}
 		}
 	}
 
 	public AnnotationMetadata build() {
-		return new DefaultAnnotationMetadata(getAnnotationType(), getAttributes());
+		return new DefaultAnnotationMetadata(getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(getAttributes().values()));
+	}
+
+	public AnnotationMetadataBuilder getThis() {
+		return this;
 	}
 }

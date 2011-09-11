@@ -139,7 +139,7 @@ public class MemberDetailsBuilder {
 		return typeDetailsBuilder;
 	}
 
-	static class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
+	static class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails, TypeDetailsBuilder> {
 		private MemberHoldingTypeDetails existing;
 
 		protected TypeDetailsBuilder(MemberHoldingTypeDetails existing) {
@@ -179,6 +179,10 @@ public class MemberDetailsBuilder {
 			} else {
 				throw new IllegalStateException("Unknown instance of MemberHoldingTypeDetails");
 			}
+		}
+
+		public TypeDetailsBuilder getThis() {
+			return this;
 		}
 
 		public void addDataToField(FieldMetadata replacement, CustomData customData) {

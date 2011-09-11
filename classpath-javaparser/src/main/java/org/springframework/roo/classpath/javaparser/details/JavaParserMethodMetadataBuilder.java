@@ -1,5 +1,13 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import java.io.ByteArrayInputStream;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
@@ -15,15 +23,6 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
-
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -44,7 +43,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
+public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata, JavaParserMethodMetadataBuilder>{
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -141,6 +140,10 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 		methodMetadataBuilder.setParameterTypes(parameterTypes);
 		methodMetadataBuilder.setThrowsTypes(throwsTypes);
 		return methodMetadataBuilder.build();
+	}
+
+	public JavaParserMethodMetadataBuilder getThis() {
+		return this;
 	}
 
 	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, Set<JavaSymbolName> typeParameters) {

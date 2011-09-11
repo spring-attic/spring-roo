@@ -12,7 +12,7 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.1
  */
-public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJavaStructureBuilder<FieldMetadata> {
+public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJavaStructureBuilder<FieldMetadata, FieldMetadataBuilder> {
 
 	// Fields
 	private JavaSymbolName fieldName;
@@ -59,6 +59,10 @@ public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJav
 	
 	public FieldMetadata build() {
 		return new DefaultFieldMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getFieldName(), getFieldType(), getFieldInitializer());
+	}
+
+	public FieldMetadataBuilder getThis() {
+		return this;
 	}
 
 	private void init(JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer) {
