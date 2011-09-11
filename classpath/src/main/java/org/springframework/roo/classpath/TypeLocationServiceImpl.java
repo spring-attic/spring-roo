@@ -59,6 +59,8 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	private final Map<String, String> pathCacheMap = new HashMap<String, String>();
 	private Map<JavaType, String> javaTypeIdentifierCache = new HashMap<JavaType, String>();
 	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
+	private Map<String, Set<JavaType>> typeAnnotationMap = new HashMap<String, Set<JavaType>>();
+	private Map<String, Set<Object>> typeCustomDataMap = new HashMap<String, Set<Object>>();
 
 	public String getPhysicalTypeCanonicalPath(JavaType javaType, Path path) {
 		Assert.notNull(javaType, "Java type required");
@@ -308,23 +310,47 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 					return;
 				}
 				typeMap.put(id, cid);
-				updateChanges(cid.getName().getFullyQualifiedTypeName(), false);
 				updateAttributeCache(cid);
+				updateChanges(cid.getName().getFullyQualifiedTypeName(), false);
 			}
 		}
 	}
 
 	private void updateAttributeCache(MemberHoldingTypeDetails cid) {
+		if (!typeAnnotationMap.containsKey(cid.getDeclaredByMetadataId())) {
+			typeAnnotationMap.put(cid.getDeclaredByMetadataId(), new HashSet<JavaType>());
+		}
+		if (!typeCustomDataMap.containsKey(cid.getDeclaredByMetadataId())) {
+			typeCustomDataMap.put(cid.getDeclaredByMetadataId(), new HashSet<Object>());
+		}
+		Set<JavaType> previousAnnotations = typeAnnotationMap.get(cid.getDeclaredByMetadataId());
+		for (JavaType previousAnnotation : previousAnnotations) {
+			Set<String> midSet = annotationToMidMap.get(previousAnnotation);
+			if (midSet != null) {
+				midSet.remove(cid.getDeclaredByMetadataId());
+			}
+		}
+		previousAnnotations.clear();
 		for (AnnotationMetadata annotationMetadata : cid.getAnnotations()) {
 			if (!annotationToMidMap.containsKey(annotationMetadata.getAnnotationType())) {
 				annotationToMidMap.put(annotationMetadata.getAnnotationType(), new HashSet<String>());
 			}
+			previousAnnotations.add(annotationMetadata.getAnnotationType());
 			annotationToMidMap.get(annotationMetadata.getAnnotationType()).add(cid.getDeclaredByMetadataId());
 		}
+		Set<Object> previousCustomDataSet = typeCustomDataMap.get(cid.getDeclaredByMetadataId());
+		for (Object previousCustomData : previousCustomDataSet) {
+			Set<String> midSet = tagToMidMap.get(previousCustomData);
+			if (midSet != null) {
+				midSet.remove(cid.getDeclaredByMetadataId());
+			}
+		}
+		previousCustomDataSet.clear();
 		for (Object customData : cid.getCustomData().keySet()) {
 			if (!tagToMidMap.containsKey(customData)) {
 				tagToMidMap.put(customData, new HashSet<String>());
 			}
+			previousCustomDataSet.add(customData);
 			tagToMidMap.get(customData).add(cid.getDeclaredByMetadataId());
 		}
 	}
