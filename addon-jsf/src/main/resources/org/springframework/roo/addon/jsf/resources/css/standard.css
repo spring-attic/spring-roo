@@ -16,6 +16,21 @@ a img {
     vertical-align: middle;
 
 }
+a {
+	text-decoration: underline;
+}
+
+a:hover {
+	color: #456314;
+}
+
+a:active {
+	color: #7db223;
+}
+
+a:visited {
+	color: #7db223;
+}
 
 .wrapper {
     width: 1024px;

@@ -63,7 +63,7 @@
             <p:ajax event="close" update="messages" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="editForm" enctype="multipart/form-data">
                 <h:panelGrid id="editPanelGrid" columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.editPanelGrid}" />
-                <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" oncomplete="editDialog.hide()" styleClass="form_button" update="list messages" />
+                <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="Save" oncomplete="editDialog.hide()" update="list messages" />
             </h:form>
         </p:dialog>
         <p:confirmDialog id="deleteDialog" widgetVar="deleteDialog" message="Are you sure you want to delete this record?" showEffect="fade" hideEffect="explode" header="Confirm Deletion" severity="alarm">
