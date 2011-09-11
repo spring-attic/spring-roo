@@ -9,6 +9,9 @@
       xmlns:p="http://primefaces.prime.com.tr/ui">
 <ui:composition template="../templates/layout.xhtml">
     <ui:define name="content">
+        <p:inputText value="" rendered="false"/>
+        <p:calendar rendered="false"/>
+        <p:autoComplete rendered="false"/>
         <p:growl id="messages" showDetail="true" />
         <h:form prependId="false">
             <p:panel id="data" toggleable="true" toggleSpeed="250">
