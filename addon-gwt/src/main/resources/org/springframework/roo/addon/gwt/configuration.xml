@@ -87,31 +87,31 @@
                     </execution>
                 </executions>
             </plugin>
-			<!-- Run the RequestFactory ValidationTool -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2</version>
-        <executions>
-          <execution>
-            <phase>process-classes</phase>
-            <configuration>
-              <id>VerifyRequestFactoryInterfaces</id>
-              <executable>java</executable>
-              <arguments>
-                <argument>-cp</argument>
-                <classpath />
-                <argument>com.google.web.bindery.requestfactory.apt.ValidationTool</argument>
-                <argument>${project.build.outputDirectory}</argument>
-                <argument>org.springsource.roo.extrack.client.managed.request.ApplicationRequestFactory</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+            <!-- Run the RequestFactory ValidationTool -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <id>VerifyRequestFactoryInterfaces</id>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-cp</argument>
+                                <classpath />
+                                <argument>com.google.web.bindery.requestfactory.apt.ValidationTool</argument>
+                                <argument>${project.build.outputDirectory}</argument>
+                                <argument>org.springsource.roo.extrack.client.managed.request.ApplicationRequestFactory</argument>
+                            </arguments>
+                        </configuration>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </gwt>
     <gae>
@@ -119,7 +119,7 @@
             <dependency>
                 <groupId>com.google.appengine</groupId>
                 <artifactId>appengine-api-1.0-sdk</artifactId>
-                <version>1.5.2</version>
+                <version>1.5.3</version>
             </dependency>
         </dependencies>
         <plugins>
@@ -154,7 +154,7 @@
                     <server>com.google.appengine.tools.development.gwt.AppEngineLauncher</server>
                     <extraJvmArgs>"-javaagent:${gae.home}/lib/agent/appengine-agent.jar" -Xmx1024m</extraJvmArgs>
                     <copyWebapp>true</copyWebapp>
-                    <appEngineVersion>1.5.2</appEngineVersion>
+                    <appEngineVersion>1.5.3</appEngineVersion>
                 </configuration>
                 <executions>
                     <execution>
@@ -166,31 +166,31 @@
                     </execution>
                 </executions>
             </plugin>
-			<!-- Run the RequestFactory ValidationTool -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2</version>
-        <executions>
-          <execution>
-            <phase>process-classes</phase>
-            <configuration>
-              <id>VerifyRequestFactoryInterfaces</id>
-              <executable>java</executable>
-              <arguments>
-                <argument>-cp</argument>
-                <classpath />
-                <argument>com.google.web.bindery.requestfactory.apt.ValidationTool</argument>
-                <argument>${project.build.outputDirectory}</argument>
-                <argument>org.springsource.roo.extrack.client.managed.request.ApplicationRequestFactory</argument>
-              </arguments>
-            </configuration>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+             <!-- Run the RequestFactory ValidationTool -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <id>VerifyRequestFactoryInterfaces</id>
+                            <executable>java</executable>
+                            <arguments>
+                                <argument>-cp</argument>
+                                <classpath />
+                                <argument>com.google.web.bindery.requestfactory.apt.ValidationTool</argument>
+                                <argument>${project.build.outputDirectory}</argument>
+                                <argument>org.springsource.roo.extrack.client.managed.request.ApplicationRequestFactory</argument>
+                            </arguments>
+                        </configuration>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </gae>
 </configuration>
