@@ -18,7 +18,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
-class GwtProxyProperty {
+public class GwtProxyProperty {
 	
 	// Fields
 	private final ProjectMetadata projectMetadata;

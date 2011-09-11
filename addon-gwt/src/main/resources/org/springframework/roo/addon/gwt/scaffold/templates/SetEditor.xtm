@@ -172,7 +172,7 @@ public class {{=className}} extends Composite implements ValueAwareEditor<Set<{{
 		return;
 	}
 	for ({{=proxy}} proxy : displayedList) {
-		if (proxy.getId().equals(picker.getValue().getId())) {
+		if (proxy.{{=primaryPropGetter}}().equals(picker.getValue().{{=primaryPropGetter}}())) {
 			return;
 		}
 	}

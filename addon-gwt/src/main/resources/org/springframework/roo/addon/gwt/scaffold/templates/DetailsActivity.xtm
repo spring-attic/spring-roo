@@ -43,7 +43,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 			return;
 		}
    		
-		requests.{{=nameUncapitalized}}Request().remove().using(view.getValue()).fire(new Receiver<Void>() {
+		requests.{{=nameUncapitalized}}Request().{{=removeMethodSignature}}(view.getValue()).fire(new Receiver<Void>() {
 			public void onSuccess(Void ignore) {
 				if (display == null) {
 					// This activity is dead

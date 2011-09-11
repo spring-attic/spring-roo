@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.gwt;
+package org.springframework.roo.addon.gwt.locator;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
@@ -6,21 +6,20 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
-public class GwtRequestMetadata extends AbstractMetadataItem{
-
-	private static final String PROVIDES_TYPE_STRING = GwtRequestMetadata.class.getName();
+public class GwtLocatorMetadata extends AbstractMetadataItem {
+	private static final String PROVIDES_TYPE_STRING = GwtLocatorMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	private final String requestTypeContents;
+	private final String proxyTypeContents;
 
-	public GwtRequestMetadata(String id, String requestTypeContents) {
+	public GwtLocatorMetadata(String id, String proxyTypeContents) {
 		super(id);
-		this.requestTypeContents = requestTypeContents;
+		this.proxyTypeContents = proxyTypeContents;
 	}
 
-	public GwtRequestMetadata(JavaType javaType, String requestTypeContents) {
+	public GwtLocatorMetadata(JavaType javaType, String proxyTypeContents) {
 		super(createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		this.requestTypeContents = requestTypeContents;
+		this.proxyTypeContents = proxyTypeContents;
 	}
 
 	public static String getMetadataIdentifierType() {
@@ -43,12 +42,12 @@ public class GwtRequestMetadata extends AbstractMetadataItem{
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		GwtRequestMetadata that = (GwtRequestMetadata) o;
-		return !(requestTypeContents != null ? !requestTypeContents.equals(that.requestTypeContents) : that.requestTypeContents != null);
+		GwtLocatorMetadata that = (GwtLocatorMetadata) o;
+		return !(proxyTypeContents != null ? !proxyTypeContents.equals(that.proxyTypeContents) : that.proxyTypeContents != null);
 	}
 
 	@Override
 	public int hashCode() {
-		return requestTypeContents != null ? requestTypeContents.hashCode() : 0;
+		return proxyTypeContents != null ? proxyTypeContents.hashCode() : 0;
 	}
 }

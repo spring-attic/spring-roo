@@ -51,6 +51,6 @@ public class {{=className}} extends AbstractProxyListActivity<{{=proxy}}> implem
 	}
 
 	protected void fireCountRequest(Receiver<Long> callback) {
-		requests.{{=nameUncapitalized}}Request().count{{=pluralName}}().fire(callback);
+		requests.{{=nameUncapitalized}}Request().{{=countEntitiesMethod}}().fire(callback);
 	}
 }

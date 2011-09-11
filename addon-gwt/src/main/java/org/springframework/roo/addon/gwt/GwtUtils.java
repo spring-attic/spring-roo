@@ -14,6 +14,7 @@ import org.springframework.roo.classpath.details.annotations.BooleanAttributeVal
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.ProjectMetadata;
 
 /**
@@ -25,6 +26,7 @@ import org.springframework.roo.project.ProjectMetadata;
 public class GwtUtils {
 
 	public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
+	public static final JavaType LOCATOR = new JavaType("com.google.web.bindery.requestfactory.shared.Locator");
 	public static final JavaType ENTITY_PROXY = new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy");
 	public static final JavaType REQUEST_CONTEXT = new JavaType("com.google.web.bindery.requestfactory.shared.RequestContext");
 	public static final JavaType REQUEST = new JavaType("com.google.web.bindery.requestfactory.shared.Request");
@@ -33,10 +35,10 @@ public class GwtUtils {
 	public static final JavaType PROXY_FOR = new JavaType("com.google.web.bindery.requestfactory.shared.ProxyFor");
 	public static final JavaType SERVICE_NAME = new JavaType("com.google.web.bindery.requestfactory.shared.ServiceName");
 	public static final JavaType SERVICE = new JavaType("com.google.web.bindery.requestfactory.shared.Service");
-	static final JavaType[] PROXY_ANNOTATIONS = {PROXY_FOR, PROXY_FOR_NAME};
-	static final JavaType[] REQUEST_ANNOTATIONS = {SERVICE, SERVICE_NAME};
-	static final JavaType[] PROXY_REQUEST_ANNOTATIONS = {PROXY_FOR, PROXY_FOR_NAME, SERVICE, SERVICE_NAME};
-
+	public static final JavaType[] PROXY_ANNOTATIONS = {PROXY_FOR, PROXY_FOR_NAME};
+	public static final JavaType[] REQUEST_ANNOTATIONS = {SERVICE, SERVICE_NAME};
+	public static final JavaType[] PROXY_REQUEST_ANNOTATIONS = {PROXY_FOR, PROXY_FOR_NAME, SERVICE, SERVICE_NAME};
+	public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = {RooJavaType.ROO_GWT_PROXY, RooJavaType.ROO_GWT_REQUEST};
 	private GwtUtils() {
 	}
 
@@ -144,5 +146,15 @@ public class GwtUtils {
 			return ((ClassAttributeValue)attributeValue).getValue().getFullyQualifiedTypeName();
 		}
 		return null;
+	}
+
+	public static JavaType convertPrimitiveType(JavaType type, boolean convertVoid) {
+		if (!convertVoid && JavaType.VOID_PRIMITIVE.equals(type)) {
+			return type;
+		}
+		if (type != null && type.isPrimitive()) {
+			return new JavaType(type.getFullyQualifiedTypeName());
+		}
+		return type;
 	}
 }

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.gwt;
+package org.springframework.roo.addon.gwt.proxy;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -11,6 +11,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.gwt.GwtFileManager;
+import org.springframework.roo.addon.gwt.GwtTypeService;
+import org.springframework.roo.addon.gwt.GwtUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -111,7 +114,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		Map<JavaSymbolName, MethodMetadata> proxyMethods = gwtTypeService.getProxyMethods(mirroredDetails);
 		List<MethodMetadata> convertedProxyMethods = new ArrayList<MethodMetadata>();
 		for (MethodMetadata method : proxyMethods.values()) {
-			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), projectMetadata, mirroredDetails.getName(), false);
+			JavaType gwtType = gwtTypeService.getGwtSideLeafType(method.getReturnType(), projectMetadata, mirroredDetails.getName(), false, true);
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(method);
 			methodBuilder.setReturnType(gwtType);
 			MethodMetadata convertedMethod = methodBuilder.build();
@@ -189,7 +192,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) == null) {
 				boolean found = false;
 				for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
-					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.PROXY_REQUEST_ANNOTATIONS);
+					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.ROO_PROXY_REQUEST_ANNOTATIONS);
 					if (annotationMetadata != null) {
 						AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");
 						if (attributeValue != null) {

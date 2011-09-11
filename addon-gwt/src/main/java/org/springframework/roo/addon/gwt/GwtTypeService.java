@@ -19,7 +19,7 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 public interface GwtTypeService {
 
-	JavaType getGwtSideLeafType(JavaType type, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType);
+	JavaType getGwtSideLeafType(JavaType type, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType, boolean convertPrimitive);
 
 	List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType);
 
@@ -48,4 +48,8 @@ public interface GwtTypeService {
 	ClassOrInterfaceTypeDetails lookupEntityFromProxy(ClassOrInterfaceTypeDetails proxy);
 
 	ClassOrInterfaceTypeDetails lookupEntityFromRequest(ClassOrInterfaceTypeDetails request);
+
+	ClassOrInterfaceTypeDetails lookupEntityFromLocator(ClassOrInterfaceTypeDetails request);
+
+	ClassOrInterfaceTypeDetails lookupTargetServiceFromRequest(ClassOrInterfaceTypeDetails request);
 }

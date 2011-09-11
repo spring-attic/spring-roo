@@ -12,6 +12,8 @@ public @interface RooGwtRequest {
 	/**
 	 * @return the fully-qualified type name this key instance was mirrored from
 	 */
+	String value();
+
 	String[] exclude() default {};
 
 	boolean ignoreProxyExclusions() default false;

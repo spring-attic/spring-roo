@@ -33,6 +33,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class JavaType implements Comparable<JavaType> {
 	
 	// Constants
+	public static final JavaType CLASS = new JavaType("java.lang.Class");
 	public static final JavaType OBJECT = new JavaType("java.lang.Object"); 
 	public static final JavaType STRING = new JavaType("java.lang.String"); 
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");

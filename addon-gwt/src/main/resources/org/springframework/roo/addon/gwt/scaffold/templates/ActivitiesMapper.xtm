@@ -54,7 +54,7 @@ public class {{=className}} {
       
       @Override
       protected RequestContext createSaveRequest({{=proxy}} proxy) {
-        request.persist().using(proxy);
+        request.{{=persistMethodSignature}}(proxy);
         return request;
       }
     };
@@ -75,7 +75,7 @@ public class {{=className}} {
       @Override
       protected RequestContext createSaveRequest({{=proxy}} proxy) {
         {{=request}} request = requests.{{=nameUncapitalized}}Request();
-        request.persist().using(proxy);
+        request.{{=persistMethodSignature}}(proxy);
         return request;
       }
     };

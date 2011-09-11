@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.gwt;
+package org.springframework.roo.addon.gwt.scaffold;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -13,6 +13,15 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.gwt.GwtFileManager;
+import org.springframework.roo.addon.gwt.GwtProxyProperty;
+import org.springframework.roo.addon.gwt.GwtTemplateDataHolder;
+import org.springframework.roo.addon.gwt.GwtTemplateService;
+import org.springframework.roo.addon.gwt.GwtType;
+import org.springframework.roo.addon.gwt.GwtTypeService;
+import org.springframework.roo.addon.gwt.GwtUtils;
+import org.springframework.roo.addon.gwt.proxy.GwtProxyMetadata;
+import org.springframework.roo.addon.gwt.request.GwtRequestMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -38,7 +47,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
- * You can find a list of mirror-compatible objects in {@link GwtType}.
+ * You can find a list of mirror-compatible objects in {@link org.springframework.roo.addon.gwt.GwtType}.
  * <p/>
  * <p/>
  * For now only @RooEntity instances will be mirror-compatible.

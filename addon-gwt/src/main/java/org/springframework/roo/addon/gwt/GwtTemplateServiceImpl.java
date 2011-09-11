@@ -26,13 +26,23 @@ import hapax.TemplateLoader;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.gwt.scaffold.GwtScaffoldMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeParsingService;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.layers.LayerService;
+import org.springframework.roo.classpath.layers.LayerType;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
+import org.springframework.roo.classpath.layers.MethodParameter;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -62,6 +72,9 @@ import org.xml.sax.SAXException;
 @Component
 @Service
 public class GwtTemplateServiceImpl implements GwtTemplateService {
+
+	// Constants
+	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 	
 	// Fields
 	@Reference protected MetadataService metadataService;
@@ -69,6 +82,9 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	@Reference protected TypeParsingService typeParsingService;
 	@Reference protected TypeLocationService typeLocationService;
 	@Reference protected GwtTypeService gwtTypeService;
+	@Reference protected LayerService layerService;
+	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
+	@Reference protected MemberDetailsScanner memberDetailsScanner;
 
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails mirroredType, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
@@ -383,12 +399,54 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		addImport(dataDictionary, gwtType.getPath().packageName(projectMetadata) + "." + simpleName + gwtType.getSuffix());
 	}
 
+	private String getRequestMethodCall(ClassOrInterfaceTypeDetails request, MemberTypeAdditions memberTypeAdditions) {
+		String methodName = memberTypeAdditions.getMethodName();
+		MethodMetadata requestMethod = MemberFindingUtils.getMethod(request, methodName);
+		String requestMethodCall = memberTypeAdditions.getMethodName();
+		if (requestMethod != null) {
+			if (GwtUtils.INSTANCE_REQUEST.getFullyQualifiedTypeName().equals(requestMethod.getReturnType().getFullyQualifiedTypeName())) {
+				requestMethodCall = requestMethodCall + "().using";
+			}
+		}
+		return requestMethodCall;
+	}
+
 	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type, ClassOrInterfaceTypeDetails mirroredType, ClassOrInterfaceTypeDetails proxy, Map<GwtType, JavaType> mirrorTypeMap, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		JavaType proxyType = proxy.getName();
 		JavaType javaType = mirrorTypeMap.get(type);
 
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
+
+		// Get my locator and
+		JavaType entity = mirroredType.getName();
+		String metadataIdentificationString = mirroredType.getDeclaredByMetadataId();
+		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
+		if (idType == null) {
+			return null;
+		}
+
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), mirroredType);
+		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
+
+		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		final MethodMetadata versionAccessorMethod = persistenceMemberLocator.getVersionAccessor(entity);
+		MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
+		MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
+		final MethodParameter firstResultParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "firstResult");
+		final MethodParameter maxResultsParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "maxResults");
+		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name(), entity, idType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
+		final MethodParameter entityParameter = new MethodParameter(entity, "proxy");
+		MemberTypeAdditions flushMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FLUSH_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.MERGE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		String persistMethodSignature = getRequestMethodCall(request, persistMethodAdditions);
+		String removeMethodSignature = getRequestMethodCall(request, removeMethodAdditions);
+		dataDictionary.setVariable("persistMethodSignature", persistMethodSignature);
+		dataDictionary.setVariable("removeMethodSignature", removeMethodSignature);
+		dataDictionary.setVariable("countEntitiesMethod", countMethodAdditions.getMethodName());
 
 		for (GwtType reference : type.getReferences()) {
 			addReference(dataDictionary, reference, mirrorTypeMap);

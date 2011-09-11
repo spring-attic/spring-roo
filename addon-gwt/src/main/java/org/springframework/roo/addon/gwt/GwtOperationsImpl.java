@@ -21,11 +21,13 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -65,6 +67,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference protected FileManager fileManager;
 	@Reference protected GwtTypeService gwtTypeService;
 	@Reference protected WebMvcOperations mvcOperations;
+	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
 	@Reference protected ProjectOperations projectOperations;
 	@Reference protected TypeLocationService typeLocationService;
 	@Reference protected TypeManagementService typeManagementService;
@@ -89,6 +92,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (ClassOrInterfaceTypeDetails entity : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY, RooJavaType.ROO_ENTITY)) {
 			createProxy(entity, proxyPackage);
 		}
+		copyDirectoryContents(GwtPath.LOCATOR);
 	}
 
 	public void proxyType(JavaPackage proxyPackage, JavaType type) {
@@ -96,6 +100,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (typeDetails != null) {
 			createProxy(typeDetails, proxyPackage);
 		}
+		copyDirectoryContents(GwtPath.LOCATOR);
 	}
 
 	public void requestAll(JavaPackage proxyPackage) {
@@ -150,6 +155,10 @@ public class GwtOperationsImpl implements GwtOperations {
 			updateScaffoldBoilerPlate();
 			createScaffold(proxy);
 		}
+	}
+
+	public void createLocator(JavaType proxy) {
+		//String locatorType = topLevelPackageName + "." + "server.locator" + "." + entity.getName().getSimpleTypeName() + "Locator";
 	}
 
 	public void setup() {
@@ -208,11 +217,20 @@ public class GwtOperationsImpl implements GwtOperations {
 		List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		StringAttributeValue stringAttributeValue = new StringAttributeValue(new JavaSymbolName("value"), entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
+		String locator = projectOperations.getProjectMetadata().getTopLevelPackage()  + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
+		StringAttributeValue locatorAttributeValue = new StringAttributeValue(new JavaSymbolName("locator"), locator);
+		attributeValues.add(locatorAttributeValue);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(GwtUtils.PROXY_FOR_NAME, attributeValues));
-		attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
+		attributeValues.remove(locatorAttributeValue);
 		List<StringAttributeValue> readOnlyValues = new ArrayList<StringAttributeValue>();
-		readOnlyValues.add(new StringAttributeValue(new JavaSymbolName("value"), "version"));
-		readOnlyValues.add(new StringAttributeValue(new JavaSymbolName("value"), "id"));
+		FieldMetadata versionField = persistenceMemberLocator.getVersionField(entity.getName());
+		if (versionField != null) {
+			readOnlyValues.add(new StringAttributeValue(new JavaSymbolName("value"), versionField.getFieldName().getSymbolName()));
+		}
+		List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity.getName());
+		if (idFields != null && !idFields.isEmpty()) {
+			readOnlyValues.add(new StringAttributeValue(new JavaSymbolName("value"), idFields.get(0).getFieldName().getSymbolName()));
+		}
 		ArrayAttributeValue<StringAttributeValue> readOnlyAttribute = new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("readOnly"), readOnlyValues);
 		attributeValues.add(readOnlyAttribute);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_PROXY, attributeValues));
@@ -234,7 +252,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		StringAttributeValue stringAttributeValue = new StringAttributeValue(new JavaSymbolName("value"), entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(GwtUtils.SERVICE_NAME, attributeValues));
-		attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		List<StringAttributeValue> toExclude = new ArrayList<StringAttributeValue>();
 		toExclude.add(new StringAttributeValue(new JavaSymbolName("value"), "entityManager"));
 		toExclude.add(new StringAttributeValue(new JavaSymbolName("value"), "toString"));
@@ -382,7 +399,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		Document webXml = XmlUtils.readXml(fileManager.getInputStream(webXmlpath));
 		Element root = webXml.getDocumentElement();
 
-		WebXmlUtils.addServlet("requestFactory", "com.google.web.bindery.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXml, null);
+		WebXmlUtils.addServlet("requestFactory", projectOperations.getProjectMetadata().getTopLevelPackage() + ".server.CustomRequestFactoryServlet", "/gwtRequest", null, webXml, null);
 		if (projectOperations.getProjectMetadata().isGaeEnabled()) {
 			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectOperations.getProjectMetadata()) + ".GaeAuthFilter", "/gwtRequest/*", webXml, "This filter makes GAE authentication services visible to a RequestFactory client.");
 			String displayName = "Redirect to the login page if needed before showing any html pages";
@@ -539,16 +556,17 @@ public class GwtOperationsImpl implements GwtOperations {
 	private void updateBuildPlugins(boolean isGaeEnabled) {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 		String xPath = "/configuration/" + (isGaeEnabled ? "gae" : "gwt") + "/plugins/plugin";
-		Element pluginElement = XmlUtils.findFirstElement(xPath, configuration);
-		Assert.notNull(pluginElement, "gwt-maven-plugin required");
-		final Plugin defaultPlugin = new Plugin(pluginElement);
-		for (Plugin plugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
-			if ("gwt-maven-plugin".equals(plugin.getArtifactId()) && defaultPlugin.equals(plugin)) {
-				// The GWT Maven plugin is already in the POM with the correct configuration
-				return;
+		List<Element> pluginElements = XmlUtils.findElements(xPath, configuration);
+		for (Element pluginElement : pluginElements) {
+			final Plugin defaultPlugin = new Plugin(pluginElement);
+			for (Plugin plugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
+				if ("gwt-maven-plugin".equals(plugin.getArtifactId()) && defaultPlugin.equals(plugin)) {
+					// The GWT Maven plugin is already in the POM with the correct configuration
+					return;
+				}
 			}
+			projectOperations.updateBuildPlugin(defaultPlugin);
 		}
-		projectOperations.updateBuildPlugin(defaultPlugin);
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {

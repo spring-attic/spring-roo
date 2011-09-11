@@ -18,10 +18,10 @@ public enum GwtType {
 	// Represents mirror types classes. There are one of these for each entity mirrored by Roo.
 	PROXY(GwtPath.MANAGED_REQUEST, true, "Proxy", "proxy", null, false, false, true),
 	REQUEST(GwtPath.MANAGED_REQUEST, true, "Request", "request", null, false, false, true),
-	ACTIVITIES_MAPPER(GwtPath.MANAGED_ACTIVITY, true, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper", false, false, false),
+	ACTIVITIES_MAPPER(GwtPath.MANAGED_ACTIVITY, true, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper", false, true, false),
 	DETAIL_ACTIVITY(GwtPath.MANAGED_ACTIVITY, true, "DetailsActivity", "detailsActivity", "DetailsActivity", false, true, false),
 	EDIT_ACTIVITY_WRAPPER(GwtPath.MANAGED_ACTIVITY, true, "EditActivityWrapper", "editActivityWrapper", "EditActivityWrapper", false, true, false),
-	LIST_ACTIVITY(GwtPath.MANAGED_ACTIVITY, true, "ListActivity", "listActivity", "ListActivity", false, false, false),
+	LIST_ACTIVITY(GwtPath.MANAGED_ACTIVITY, true, "ListActivity", "listActivity", "ListActivity", false, true, false),
 	LIST_VIEW(GwtPath.MANAGED_UI, true, "ListView", "listView", "ListView", true, true, false),
 	MOBILE_LIST_VIEW(GwtPath.MANAGED_UI, true, "MobileListView", "mobileListView", "MobileListView", false, true, false),
 	DETAILS_VIEW(GwtPath.MANAGED_UI, true, "DetailsView", "detailsView", "DetailsView", true, true, false),
@@ -99,11 +99,17 @@ public enum GwtType {
 	public List<JavaSymbolName> resolveWatchedFieldNames(GwtType type) {
 		watchedFieldNames = new ArrayList<JavaSymbolName>();
 		switch (type) {
+			case ACTIVITIES_MAPPER:
+				watchedFieldNames = convertToJavaSymbolNames("requests", "placeController");
+				break;
 			case EDIT_ACTIVITY_WRAPPER:
 				watchedFieldNames = convertToJavaSymbolNames("wrapped", "view", "requests");
 				break;
 			case DETAIL_ACTIVITY:
-				watchedFieldNames = convertToJavaSymbolNames("requests", "proxyId");
+				watchedFieldNames = convertToJavaSymbolNames("requests", "proxyId", "placeController", "display", "view");
+				break;
+			case LIST_ACTIVITY:
+				watchedFieldNames = convertToJavaSymbolNames("requests");
 				break;
 			case MOBILE_LIST_VIEW:
 				watchedFieldNames = convertToJavaSymbolNames("paths");
@@ -135,6 +141,7 @@ public enum GwtType {
 			case DETAIL_ACTIVITY:
 				params = Arrays.asList(new JavaType("com.google.web.bindery.requestfactory.shared.Receiver", 0, DataType.TYPE, null, Collections.singletonList(GwtUtils.ENTITY_PROXY)));
 				watchedMethods.put(new JavaSymbolName("find"), params);
+				watchedMethods.put(new JavaSymbolName("deleteClicked"), new ArrayList<JavaType>());
 				break;
 			case MOBILE_LIST_VIEW:
 				watchedMethods.put(new JavaSymbolName("init"), new ArrayList<JavaType>());
@@ -147,6 +154,10 @@ public enum GwtType {
 				break;
 			case DETAILS_ACTIVITIES:
 				watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(new JavaType("com.google.gwt.place.shared.Place")));
+				break;
+			case LIST_ACTIVITY:
+				params = Arrays.asList(new JavaType("com.google.web.bindery.requestfactory.shared.Receiver"));
+				watchedMethods.put(new JavaSymbolName("fireCountRequest"), params);
 				break;
 		}
 		return watchedMethods;
@@ -181,7 +192,7 @@ public enum GwtType {
 					}
 				}
 				break;
-			case EDIT_RENDERER:
+			case LIST_PLACE_RENDERER:
 				for (GwtProxyProperty property : proxyFieldTypeMap.values()) {
 					if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
 						List<JavaType> params = new ArrayList<JavaType>();
@@ -191,6 +202,16 @@ public enum GwtType {
 					}
 				}
 				watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
+				break;
+			case ACTIVITIES_MAPPER:
+				List<JavaType> params = new ArrayList<JavaType>();
+				params.add(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyPlace"));
+				watchedMethods.put(new JavaSymbolName("makeEditActivity"), params);
+				watchedMethods.put(new JavaSymbolName("coerceId"), params);
+				watchedMethods.put(new JavaSymbolName("makeCreateActivity"), new ArrayList<JavaType>());
+				break;
+			case EDIT_RENDERER:
+				watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(proxy));
 				break;
 		}
 	}
@@ -227,7 +248,9 @@ public enum GwtType {
 	private List<JavaSymbolName> convertToJavaSymbolNames(String... names) {
 		List<JavaSymbolName> javaSymbolNames = new ArrayList<JavaSymbolName>();
 		for (String name : names) {
-			javaSymbolNames.add(new JavaSymbolName(name));
+			if (!javaSymbolNames.contains(new JavaSymbolName(name))) {
+				javaSymbolNames.add(new JavaSymbolName(name));
+			}
 		}
 		return javaSymbolNames;
 	}

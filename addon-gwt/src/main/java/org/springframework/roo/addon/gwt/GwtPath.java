@@ -8,6 +8,7 @@ import org.springframework.roo.project.ProjectMetadata;
 public enum GwtPath {
 	CLIENT("/client", "module/client/" + GwtPath.templateSelector),
 	GWT_ROOT("/", "module/" + GwtPath.templateSelector),
+	LOCATOR("/server/locator", "module/server/locator/" + GwtPath.templateSelector),
 	MANAGED_REQUEST("/client/managed/request", "module/client/request/" + GwtPath.templateSelector), // GWT_REQUEST
 	SCAFFOLD_REQUEST("/client/scaffold/request", "module/client/scaffold/request/" + GwtPath.templateSelector),
 	SCAFFOLD("/client/scaffold", "module/client/scaffold/" + GwtPath.templateSelector), // GWT_SCAFFOLD

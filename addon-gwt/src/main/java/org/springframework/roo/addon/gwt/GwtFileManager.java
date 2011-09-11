@@ -6,7 +6,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 
 /**
  * Provides a basic implementation of {@link GwtFileManager} which encapsulates
- * the file management functionality required by {@link GwtScaffoldMetadataProviderImpl}.
+ * the file management functionality required by {@link org.springframework.roo.addon.gwt.scaffold.GwtScaffoldMetadataProviderImpl}.
  *
  * @author James Tyrrell
  * @since 1.1.1
