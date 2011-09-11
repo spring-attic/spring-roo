@@ -1,6 +1,8 @@
 package org.springframework.roo.support.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -30,5 +32,15 @@ public class StringUtilsTest {
 	@Test
 	public void testPadLeft2() {
 		assertEquals("99Foo", StringUtils.padLeft("Foo", 5, '9'));
+	}
+	
+	@Test
+	public void testHasText1() {
+		assertTrue(StringUtils.hasText("11111"));
+	}
+	
+	@Test
+	public void testHasText2() {
+		assertFalse(StringUtils.hasText("     "));
 	}
 }
