@@ -163,18 +163,22 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	public ClassOrInterfaceTypeDetails lookupEntityFromProxy(ClassOrInterfaceTypeDetails proxy) {
+		Assert.notNull(proxy, "Proxy is required");
 		return lookupTargetFromX(proxy, RooJavaType.ROO_GWT_PROXY);
 	}
 
 	public ClassOrInterfaceTypeDetails lookupEntityFromRequest(ClassOrInterfaceTypeDetails request) {
+		Assert.notNull(request, "Request is required");
 		return lookupTargetFromX(request, RooJavaType.ROO_GWT_REQUEST);
 	}
 
-	public ClassOrInterfaceTypeDetails lookupEntityFromLocator(ClassOrInterfaceTypeDetails request) {
-		return lookupTargetFromX(request, RooJavaType.ROO_GWT_LOCATOR);
+	public ClassOrInterfaceTypeDetails lookupEntityFromLocator(ClassOrInterfaceTypeDetails locator) {
+		Assert.notNull(locator, "Locator is required");
+		return lookupTargetFromX(locator, RooJavaType.ROO_GWT_LOCATOR);
 	}
 
 	public ClassOrInterfaceTypeDetails lookupTargetServiceFromRequest(ClassOrInterfaceTypeDetails request) {
+		Assert.notNull(request, "Request is required");
 		return lookupTargetFromX(request, GwtUtils.REQUEST_ANNOTATIONS);
 	}
 

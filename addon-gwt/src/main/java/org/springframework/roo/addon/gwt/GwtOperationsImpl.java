@@ -133,7 +133,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		requestType(proxyAndRequestPackage, type);
 	}
 
-	public void scaffoldAll() {
+	public void scaffoldAll(JavaPackage proxyPackage, JavaPackage requestPackage) {
+		proxyAll(proxyPackage);
+		requestAll(requestPackage);
 		updateScaffoldBoilerPlate();
 		for (ClassOrInterfaceTypeDetails proxy : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
 			ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
@@ -151,7 +153,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 	}
 
-	public void scaffoldType(JavaType type) {
+	public void scaffoldType(JavaPackage proxyPackage, JavaPackage requestPackage, JavaType type) {
+		proxyType(proxyPackage, type);
+		requestType(requestPackage, type);
 		ClassOrInterfaceTypeDetails entity = typeLocationService.getClassOrInterface(type);
 		if (entity != null) {
 			ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(entity);

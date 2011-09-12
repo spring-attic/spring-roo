@@ -30,9 +30,9 @@ public interface GwtOperations {
 
 	void proxyAndRequestType(JavaPackage proxyAndRequestPackage, JavaType type);
 
-	void scaffoldAll();
+	void scaffoldAll(JavaPackage proxyPackage, JavaPackage requestPackage);
 
-	void scaffoldType(JavaType type);
+	void scaffoldType(JavaPackage proxyPackage, JavaPackage requestPackage, JavaType type);
 
 	void updateGaeConfiguration();
 

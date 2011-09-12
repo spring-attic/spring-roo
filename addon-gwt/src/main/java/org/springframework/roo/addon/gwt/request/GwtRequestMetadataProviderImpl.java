@@ -193,10 +193,10 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
 		ClassOrInterfaceTypeDetails service = gwtTypeService.lookupTargetServiceFromRequest(request);
-		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
 		if (proxy == null || service == null) {
 			return null;
 		}
+		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
 
 		if (entity.getName().equals(service.getName()) && !Modifier.isStatic(methodMetadata.getModifier())) {
 			List<JavaType> methodReturnTypeArgs = Arrays.asList(proxy.getName(), methodMetadata.getReturnType());
