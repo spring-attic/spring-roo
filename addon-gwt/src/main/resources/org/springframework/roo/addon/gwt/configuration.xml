@@ -103,7 +103,7 @@
                                 <classpath />
                                 <argument>com.google.web.bindery.requestfactory.apt.ValidationTool</argument>
                                 <argument>${project.build.outputDirectory}</argument>
-                                <argument>org.springsource.roo.extrack.client.managed.request.ApplicationRequestFactory</argument>
+                                <argument>${project.groupId}.client.managed.request.ApplicationRequestFactory</argument>
                             </arguments>
                         </configuration>
                         <goals>
@@ -182,7 +182,7 @@
                                 <classpath />
                                 <argument>com.google.web.bindery.requestfactory.apt.ValidationTool</argument>
                                 <argument>${project.build.outputDirectory}</argument>
-                                <argument>org.springsource.roo.extrack.client.managed.request.ApplicationRequestFactory</argument>
+                                <argument>${project.groupId}.client.managed.request.ApplicationRequestFactory</argument>
                             </arguments>
                         </configuration>
                         <goals>
