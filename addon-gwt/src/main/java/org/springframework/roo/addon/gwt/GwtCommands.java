@@ -29,14 +29,9 @@ public class GwtCommands implements CommandMarker {
 		return gwtOperations.isSetupAvailable();
 	}
 
-	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request", "web gwt all", "web gwt scaffold ", "web gwt proxy request all", "web gwt proxy request type" })
+	@CliAvailabilityIndicator({ "web gwt proxy all", "web gwt proxy type", "web gwt request all", "web gwt request", "web gwt all", "web gwt scaffold ", "web gwt proxy request all", "web gwt proxy request type", "web gwt gae update" })
 	public boolean isGwtEnabled() {
 		return gwtOperations.isGwtEnabled();
-	}
-
-	@CliAvailabilityIndicator({ "web gwt gae update" })
-	public boolean isGaeEnabled() {
-		return gwtOperations.isGaeEnabled();
 	}
 
 	@CliCommand(value = "web gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
