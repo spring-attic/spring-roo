@@ -58,8 +58,9 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 			} catch (IOException ignored) {}
 			final Document original = XmlUtils.readXml(fileManager.getInputStream(filename));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
+				String updateContents = XmlUtils.nodeToString(original);
 				DomUtils.removeTextNodes(original);
-				fileManager.createOrUpdateTextFileIfRequired(filename, proposedContents, false);
+				fileManager.createOrUpdateTextFileIfRequired(filename, updateContents, false);
 			}
 		} else {
 			String contents = XmlUtils.nodeToString(proposed);
