@@ -92,6 +92,25 @@ public class JavaType implements Comparable<JavaType> {
 		return new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
 	}
 	
+	/**
+	 * Factory method for a {@link JavaType} with full details. Recall that
+	 * {@link JavaType} is immutable and therefore this is the only way of
+	 * setting these non-default values.
+	 * 
+	 * This is a factory method rather than a constructor so as not to cause
+	 * ambiguity problems for existing callers of {@link #JavaType(String, int, DataType, JavaSymbolName, List)}
+	 * 
+	 * @param fullyQualifiedTypeName the name (as per the rules above)
+	 * @param arrayDimensions the number of array dimensions (0 = not an array, 1 = one-dimensional array, etc.)
+	 * @param dataType the {@link DataType} (required)
+	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
+	 * @param parameters the type parameters applicable (can be null if there aren't any)
+	 * @since 1.2.0
+	 */
+	public static JavaType getInstance(final String fullyQualifiedTypeName, final int arrayDimensions, final DataType dataType, final JavaSymbolName argName, final JavaType... parameters) {
+		return new JavaType(fullyQualifiedTypeName, arrayDimensions, dataType, argName, Arrays.asList(parameters));
+	}
+	
 	// Fields
 	private final boolean defaultPackage;
 	private final int arrayDimensions;

@@ -114,7 +114,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 		
 		MethodMetadata installMethod = installMethodBuilder.build();
-		if (getMethodOnGovernor(installMethod.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(installMethod.getParameterTypes())) == null) {
+		if (getGovernorMethod(installMethod.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(installMethod.getParameterTypes())) == null) {
 			builder.addMethod(installMethod);
 		}
 		builder.addMethod(getAfterPropertiesSetMethod(installMethod));
@@ -259,7 +259,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	private MethodMetadataBuilder getInstallMethodBuilder() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
 		List<JavaType> parameterTypes = Arrays.asList(FORMATTER_REGISTRY);
-		MethodMetadata method = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) {
 			return new MethodMetadataBuilder(method);
 		}
@@ -271,8 +271,8 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 	private MethodMetadataBuilder getAfterPropertiesSetMethod(MethodMetadata installConvertersMethod) {
 		JavaSymbolName methodName = new JavaSymbolName("afterPropertiesSet");
-		List<JavaType> parameterTypes = Collections.<JavaType> emptyList();
-		MethodMetadata method = getMethodOnGovernor(methodName, parameterTypes);
+		final JavaType[] parameterTypes = {};
+		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) {
 			return new MethodMetadataBuilder(method);
 		}

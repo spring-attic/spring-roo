@@ -88,10 +88,10 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private MethodMetadata getGetAsTextMethod(JavaType javaType, MethodMetadata identifierAccessorMethod) {
 		JavaType returnType = JavaType.STRING;
 		JavaSymbolName methodName = new JavaSymbolName("getAsText");
-		List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		final JavaType[] parameterTypes = {};
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -120,7 +120,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;

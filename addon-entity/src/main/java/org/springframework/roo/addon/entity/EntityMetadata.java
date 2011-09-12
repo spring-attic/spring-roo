@@ -285,10 +285,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	
 	private MethodMetadata getDelegateMethod(final JavaSymbolName methodName, final String methodDelegateName) {
 		// Method definition to find or build
-		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		final JavaType[] parameterTypes = {};
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			return userMethod; 
 		}
@@ -369,11 +369,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(ENTITY_MANAGER_METHOD_NAME);
-		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		final JavaType[] parameterTypes = {};
 		final JavaType returnType = ENTITY_MANAGER;
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -431,11 +431,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private MethodMetadata getCountMethod() {
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getCountMethod() + plural);
-		final List<JavaType> parameterTypes = Collections.<JavaType> emptyList();
+		final JavaType[] parameterTypes = {};
 		final List<JavaSymbolName> parameterNames = Collections.<JavaSymbolName> emptyList();
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(COUNT_RETURN_TYPE), "Method '" + methodName + "' on '" + destination + "' must return '" + COUNT_RETURN_TYPE.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -470,12 +470,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindAllMethod() + plural);
-		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
+		final JavaType[] parameterTypes = {};
 		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(destination));
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -511,12 +511,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Method definition to find or build
 		final String idFieldName = identifierField.getFieldName().getSymbolName();
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindMethod() + destination.getSimpleTypeName());
-		final List<JavaType> parameterTypes = Arrays.asList(identifierField.getFieldType());
+		final JavaType parameterType = identifierField.getFieldType();
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(idFieldName));
 		final JavaType returnType = destination;
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + returnType + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -557,7 +557,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		final int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -572,12 +572,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindEntriesMethod() + destination.getSimpleTypeName() + "Entries");
-		final List<JavaType> parameterTypes = Arrays.asList(INT_PRIMITIVE, INT_PRIMITIVE);
+		final JavaType[] parameterTypes = {INT_PRIMITIVE, INT_PRIMITIVE};
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
 		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(destination));
 		
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;

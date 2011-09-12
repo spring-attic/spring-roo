@@ -302,7 +302,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("index"));
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -343,10 +343,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		JavaSymbolName embeddedIdentifierMutator = embeddedIdentifierHolder.getEmbeddedIdentifierMutator();
 		JavaSymbolName methodName = getEmbeddedIdMutatorMethodName();
-		List<JavaType> parameterTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
+		final JavaType[] parameterTypes = {entityType, JavaType.INT_PRIMITIVE};
 
 		// Locate user-defined method
-		if (getMethodOnGovernor(methodName, parameterTypes) != null) {
+		if (getGovernorMethod(methodName, parameterTypes) != null) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
@@ -384,10 +384,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	private MethodMetadata getEmbeddedClassMutatorMethod(EmbeddedHolder embeddedHolder) {
 		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField());
-		List<JavaType> parameterTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
+		final JavaType[] parameterTypes = {entityType, JavaType.INT_PRIMITIVE};
 
 		// Locate user-defined method
-		if (getMethodOnGovernor(methodName, parameterTypes) != null) {
+		if (getGovernorMethod(methodName, parameterTypes) != null) {
 			// Method found in governor so do not create method in ITD
 			return null;
 		}
@@ -418,7 +418,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
 		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
-		List<JavaType> parameterTypes = Arrays.asList(embeddedFieldType, JavaType.INT_PRIMITIVE);
+		final JavaType[] parameterTypes = {embeddedFieldType, JavaType.INT_PRIMITIVE};
 
 		for (FieldMetadata field : embeddedHolder.getFields()) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -430,7 +430,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			JavaSymbolName embeddedClassMethodName = new JavaSymbolName(field.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, embeddedClassMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 			MethodMetadata fieldInitializerMethod = methodBuilder.build();
-			if (getMethodOnGovernor(embeddedClassMethodName, parameterTypes) != null) {
+			if (getGovernorMethod(embeddedClassMethodName, parameterTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -449,13 +449,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<MethodMetadata> fieldMutatorMethods = new ArrayList<MethodMetadata>();
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
-		List<JavaType> parameterTypes = Arrays.asList(entityType, JavaType.INT_PRIMITIVE);
+		final JavaType[] parameterTypes = {entityType, JavaType.INT_PRIMITIVE};
 
 		Set<String> existingMutators = new HashSet<String>();
 
 		for (MethodMetadata mutator : fieldInitializers.keySet()) {
 			// Locate user-defined method
-			if (getMethodOnGovernor(mutator.getMethodName(), parameterTypes) != null) {
+			if (getGovernorMethod(mutator.getMethodName(), parameterTypes) != null) {
 				// Method found in governor so do not create method in ITD
 				continue;
 			}
@@ -769,7 +769,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaType returnType = JavaType.BOOLEAN_PRIMITIVE;
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -793,7 +793,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -821,7 +821,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("index"));
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(entityType), "Method '" + methodName + "' on '" + destination + "' must return '" + entityType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -857,7 +857,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		final JavaType returnType = JavaType.VOID_PRIMITIVE;
 
 		// Locate user-defined method
-		final MethodMetadata userMethod = getMethodOnGovernor(methodName, parameterTypes);
+		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;

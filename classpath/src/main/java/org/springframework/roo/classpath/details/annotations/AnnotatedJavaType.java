@@ -18,20 +18,34 @@ import org.springframework.roo.support.util.Assert;
 public class AnnotatedJavaType {
 
 	/**
-	 * Converts a non-null {@link List} of {@link JavaType}s into a {@link List} of equivalent {@link AnnotatedJavaType}s.
+	 * Converts a non-null bag of {@link JavaType}s into a {@link List} of equivalent {@link AnnotatedJavaType}s.
 	 * Note that each returned {@link AnnotatedJavaType} will have no annotation metadata, as the input {@link JavaType}s
 	 * cannot store any such metadata.
 	 * 
-	 * @param javaTypes to convert (required)
+	 * @param javaTypes to convert (can be <code>null</code> for none)
 	 * @return the equivalent {@link AnnotatedJavaType}s (never returns null)
 	 */
-	public static List<AnnotatedJavaType> convertFromJavaTypes(final List<JavaType> javaTypes) {
-		Assert.notNull(javaTypes, "Java types required");
+	public static List<AnnotatedJavaType> convertFromJavaTypes(final Iterable<? extends JavaType> javaTypes) {
 		final List<AnnotatedJavaType> result = new ArrayList<AnnotatedJavaType>();
-		for (final JavaType javaType : javaTypes) {
-			result.add(convertFromJavaType(javaType));
+		if (javaTypes != null) {
+			for (final JavaType javaType : javaTypes) {
+				result.add(convertFromJavaType(javaType));
+			}
 		}
 		return result;
+	}
+
+	/**
+	 * Converts a non-null bag of {@link JavaType}s into a {@link List} of equivalent {@link AnnotatedJavaType}s.
+	 * Note that each returned {@link AnnotatedJavaType} will have no annotation metadata, as the input {@link JavaType}s
+	 * cannot store any such metadata.
+	 * 
+	 * @param javaTypes to convert
+	 * @return the equivalent {@link AnnotatedJavaType}s (never returns null)
+	 * @since 1.2.0
+	 */
+	public static List<AnnotatedJavaType> convertFromJavaTypes(final JavaType... javaTypes) {
+		return convertFromJavaTypes(Arrays.asList(javaTypes));
 	}
 
 	/**

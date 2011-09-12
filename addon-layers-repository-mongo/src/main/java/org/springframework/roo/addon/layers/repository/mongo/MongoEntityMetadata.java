@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -77,7 +76,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getIdAccessor(FieldMetadata idField) {
 		JavaSymbolName idAccessorName = new JavaSymbolName("get" + StringUtils.capitalize(idField.getFieldName().getSymbolName()));
-		if (getMethodOnGovernor(idAccessorName, new ArrayList<JavaType>()) != null) {
+		if (getGovernorMethod(idAccessorName) != null) {
 			return null;
 		}
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -87,8 +86,8 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getIdMutator(FieldMetadata idField) {
 		JavaSymbolName idMutatorName = new JavaSymbolName("set" + StringUtils.capitalize(idField.getFieldName().getSymbolName()));
-		List<JavaType> parameterTypes = Arrays.asList(idField.getFieldType());
-		if (getMethodOnGovernor(idMutatorName, parameterTypes) != null) {
+		final JavaType parameterType = idField.getFieldType();
+		if (getGovernorMethod(idMutatorName, parameterType) != null) {
 			return null;
 		}
 		
@@ -96,7 +95,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + idField.getFieldName().getSymbolName() + " = " + idField.getFieldName().getSymbolName() + ";");
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, idMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, idMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder).build();
 	}
 
 	public static String getMetadataIdentiferType() {

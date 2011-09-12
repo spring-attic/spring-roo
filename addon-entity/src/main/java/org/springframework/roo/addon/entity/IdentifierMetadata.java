@@ -254,7 +254,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Compute the names of the accessors that will be produced
 		for (FieldMetadata field : fields) {
 			String requiredAccessorName = getRequiredAccessorName(field);
-			MethodMetadata accessor = getMethodOnGovernor(new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
+			MethodMetadata accessor = getGovernorMethod(new JavaSymbolName(requiredAccessorName));
 			if (accessor != null) {
 				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
@@ -295,7 +295,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		for (FieldMetadata field : fields) {
 			String requiredMutatorName = getRequiredMutatorName(field);
 			List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
-			MethodMetadata mutator = getMethodOnGovernor(new JavaSymbolName(requiredMutatorName), parameterTypes);
+			MethodMetadata mutator = getGovernorMethod(new JavaSymbolName(requiredMutatorName), parameterTypes);
 			if (mutator != null) {
 				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
@@ -405,8 +405,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public MethodMetadata getEqualsMethod() {
 		Assert.notNull(fields, "Fields required");
 		// See if the user provided the equals method
-		List<JavaType> parameterTypes = Arrays.asList(OBJECT);
-		MethodMetadata equalsMethod = getMethodOnGovernor(new JavaSymbolName("equals"), parameterTypes);
+		final JavaType parameterType = OBJECT;
+		MethodMetadata equalsMethod = getGovernorMethod(new JavaSymbolName("equals"), parameterType);
 		if (equalsMethod != null) {
 			return equalsMethod;
 		}
@@ -445,14 +445,14 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
 	public MethodMetadata getHashCodeMethod() {
 		Assert.notNull(fields, "Fields required");
 		// See if the user provided the hashCode method
-		MethodMetadata hashCodeMethod = getMethodOnGovernor(new JavaSymbolName("hashCode"), new ArrayList<JavaType>());
+		MethodMetadata hashCodeMethod = getGovernorMethod(new JavaSymbolName("hashCode"));
 		if (hashCodeMethod != null) {
 			return hashCodeMethod;
 		}

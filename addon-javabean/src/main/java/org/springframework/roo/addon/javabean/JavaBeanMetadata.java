@@ -117,7 +117,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 
 		// See if the type itself declared the accessor
-		MethodMetadata result = getMethodOnGovernor(methodName, null);
+		MethodMetadata result = getGovernorMethod(methodName);
 		if (result != null) {
 			return result;
 		}
@@ -147,10 +147,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
 
 		// Compute the mutator method parameters
-		List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
+		final JavaType parameterType = field.getFieldType();
 
 		// See if the type itself declared the mutator
-		MethodMetadata result = getMethodOnGovernor(methodName, parameterTypes);
+		MethodMetadata result = getGovernorMethod(methodName, parameterType);
 		if (result != null) {
 			return result;
 		}
@@ -163,7 +163,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 			result = methodBuilder.build();
 		}
 

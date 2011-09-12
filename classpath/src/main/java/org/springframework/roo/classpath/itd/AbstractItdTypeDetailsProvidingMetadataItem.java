@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.itd;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
@@ -108,7 +109,29 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		return false;
 	}
 	
-	protected MethodMetadata getMethodOnGovernor(final JavaSymbolName methodName, final List<JavaType> parameterTypes) {
+	/**
+	 * Returns the given method of the governor
+	 * 
+	 * @param methodName the name of the method for which to search
+	 * @param parameterTypes the method's parameter types
+	 * @return null if there was no such method
+	 * @see MemberFindingUtils#getDeclaredMethod(org.springframework.roo.classpath.details.MemberHoldingTypeDetails, JavaSymbolName, List)
+	 * @since 1.2.0
+	 */
+	protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName, final JavaType... parameterTypes) {
+		return getGovernorMethod(methodName, Arrays.asList(parameterTypes));
+	}
+	
+	/**
+	 * Returns the given method of the governor
+	 * 
+	 * @param methodName the name of the method for which to search
+	 * @param parameterTypes the method's parameter types
+	 * @return null if there was no such method
+	 * @see MemberFindingUtils#getDeclaredMethod(org.springframework.roo.classpath.details.MemberHoldingTypeDetails, JavaSymbolName, List)
+	 * @since 1.2.0 (previously called methodExists)
+	 */
+	protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName, final List<JavaType> parameterTypes) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, parameterTypes);
 	}
 	
