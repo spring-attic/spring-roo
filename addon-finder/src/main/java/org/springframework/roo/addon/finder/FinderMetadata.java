@@ -129,7 +129,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				bodyBuilder.appendFormalLine("if (" + name + " == null" + length.toString() + ") throw new IllegalArgumentException(\"The " + name + " argument is required\");");
 			}
 			
-			if (length.length() > 0 && methodName.substring(methodName.indexOf(parameterNames.get(i).getSymbolNameCapitalisedFirstLetter()) + name.length()).startsWith("Like")){
+			if (length.length() > 0 && methodName.substring(methodName.indexOf(parameterNames.get(i).getSymbolNameCapitalisedFirstLetter()) + name.length()).startsWith("Like")) {
 				bodyBuilder.appendFormalLine(name + " = " + name + ".replace('*', '%');");
 				bodyBuilder.appendFormalLine("if (" + name + ".charAt(0) != '%') {");
 				bodyBuilder.indent();

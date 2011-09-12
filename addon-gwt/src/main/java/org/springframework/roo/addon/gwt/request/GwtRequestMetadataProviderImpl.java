@@ -25,7 +25,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
@@ -171,9 +170,8 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			Set<ClassOrInterfaceTypeDetails> services = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
 			for (ClassOrInterfaceTypeDetails serviceLayer : services) {
 				AnnotationMetadata serviceAnnotation = MemberFindingUtils.getTypeAnnotation(serviceLayer, RooJavaType.ROO_SERVICE);
-				ArrayAttributeValue domainTypes = (ArrayAttributeValue) serviceAnnotation.getAttribute("domainTypes");
-				for (Object attributeValue : domainTypes.getValue()) {
-					ClassAttributeValue classAttributeValue = (ClassAttributeValue) attributeValue;
+				AnnotationAttributeValue<List<ClassAttributeValue>> domainTypesAnnotation = serviceAnnotation.getAttribute("domainTypes");
+				for (ClassAttributeValue classAttributeValue : domainTypesAnnotation.getValue()) {
 					if (classAttributeValue.getValue().equals(entity.getName())) {
 						annotationMetadataBuilder.addStringAttribute("value", serviceLayer.getName().getFullyQualifiedTypeName());
 						annotationMetadataBuilder.addStringAttribute("locator", projectOperations.getProjectMetadata().getTopLevelPackage() + ".server.locator.GwtServiceLocator");
@@ -183,7 +181,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			typeDetailsBuilder.removeAnnotation(annotationMetadata.getAnnotationType());
 			typeDetailsBuilder.updateTypeAnnotation(annotationMetadataBuilder);
 		}
-	// Only inherit from RequestContext if extension is not already defined
+		// Only inherit from RequestContext if extension is not already defined
 		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.REQUEST_CONTEXT)) {
 			typeDetailsBuilder.addExtendsTypes(GwtUtils.REQUEST_CONTEXT);
 		}
@@ -230,10 +228,11 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
-
+			
 			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
 			boolean processed = false;
 			if (cid.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+				@SuppressWarnings("unchecked")
 				List<JavaType> layerTypes = (List<JavaType>) cid.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
 				for (ClassOrInterfaceTypeDetails request : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_REQUEST)) {
 					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
@@ -245,7 +244,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 						break;
 					}
 				}
-
 			}
 			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) == null) {
 				boolean found = false;
@@ -265,7 +263,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 						}
 					}
 				}
-				if (!found){
+				if (!found) {
 					return;
 				}
 			} else if (!processed) {

@@ -217,7 +217,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	public void setAttributes(final Collection<AnnotationAttributeValue<?>> attributeValues) {
 		this.attributeValues.clear();
 		if (attributeValues != null) {
-			for (AnnotationAttributeValue attributeValue : attributeValues) {
+			for (AnnotationAttributeValue<?> attributeValue : attributeValues) {
 				addAttribute(attributeValue);
 			}
 		}

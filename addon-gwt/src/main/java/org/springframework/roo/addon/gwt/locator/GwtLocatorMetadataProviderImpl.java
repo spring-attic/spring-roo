@@ -209,7 +209,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 						}
 					}
 				}
-				if (!found){
+				if (!found) {
 					return;
 				}
 			} else if (!processed) {

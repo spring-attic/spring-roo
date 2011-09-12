@@ -511,7 +511,7 @@ public final class WebXmlUtils {
 		parent.appendChild(child);
 	}
 	
-	private static void addLineBreakBefore(final Element element, final Document doc){
+	private static void addLineBreakBefore(final Element element, final Document doc) {
 		doc.getDocumentElement().insertBefore(doc.createTextNode("\n    "), element);
 	}
 	

@@ -101,7 +101,7 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 		result.append(NEW_LINE);
 		result.append(throwable.toString().replace(DO_NOT_LOG, ""));
 		result.append(NEW_LINE);
-		for (StackTraceElement ste : throwable.getStackTrace()){
+		for (StackTraceElement ste : throwable.getStackTrace()) {
 			result.append(ste);
 			result.append(NEW_LINE);
 		}

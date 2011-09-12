@@ -130,7 +130,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
 		for (MethodMetadata proxyMethod : proxy.getDeclaredMethods()) {
-			if (!proxyMethod.getMethodName().getSymbolName().startsWith("get")){
+			if (!proxyMethod.getMethodName().getSymbolName().startsWith("get")) {
 				continue;
 			}
 			JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(proxyMethod).getSymbolName()));

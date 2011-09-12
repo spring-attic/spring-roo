@@ -75,7 +75,7 @@ public abstract class AnnotationMetadataUtils {
 			}
 
 			// Compute the value
-			AnnotationAttributeValue<? extends Object> value = annotation.getAttribute(attributeName);
+			AnnotationAttributeValue<?> value = annotation.getAttribute(attributeName);
 
 			String attributeValue = computeAttributeValue(value, resolver);
 
@@ -93,7 +93,7 @@ public abstract class AnnotationMetadataUtils {
 		return sb.toString();
 	}
 
-	private static String computeAttributeValue(AnnotationAttributeValue<? extends Object> value, ImportRegistrationResolver resolver) {
+	private static String computeAttributeValue(AnnotationAttributeValue<?> value, ImportRegistrationResolver resolver) {
 		String attributeValue = null;
 		if (value instanceof BooleanAttributeValue) {
 			attributeValue = ((BooleanAttributeValue) value).getValue().toString();
@@ -154,7 +154,7 @@ public abstract class AnnotationMetadataUtils {
 			ArrayAttributeValue<?> array = (ArrayAttributeValue<?>) value;
 			StringBuilder data = new StringBuilder("{ ");
 			int i = 0;
-			for (AnnotationAttributeValue<? extends Object> val : array.getValue()) {
+			for (AnnotationAttributeValue<?> val : array.getValue()) {
 				i++;
 				if (i > 1) {
 					data.append(", ");

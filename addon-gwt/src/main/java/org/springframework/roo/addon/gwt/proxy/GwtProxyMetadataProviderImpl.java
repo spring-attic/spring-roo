@@ -207,7 +207,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 						}
 					}
 				}
-				if (!found){
+				if (!found) {
 					return;
 				}
 			} else {

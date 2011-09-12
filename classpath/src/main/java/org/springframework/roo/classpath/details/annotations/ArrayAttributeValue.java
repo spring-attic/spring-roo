@@ -13,9 +13,9 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  *
- * @param <Y> the type of each array element
+ * @param <Y> the type of each {@link AnnotationAttributeValue}
  */
-public class ArrayAttributeValue<Y extends AnnotationAttributeValue<? extends Object>> extends AbstractAnnotationAttributeValue<List<Y>> {
+public class ArrayAttributeValue<Y extends AnnotationAttributeValue<?>> extends AbstractAnnotationAttributeValue<List<Y>> {
 	
 	// Fields
 	private final List<Y> value;

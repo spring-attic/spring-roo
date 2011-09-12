@@ -184,7 +184,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	private String getIdentifierColumn() {
 		if (StringUtils.hasText(annotationValues.getIdentifierColumn())) {
 			return annotationValues.getIdentifierColumn();
-		} else if (identifier != null && StringUtils.hasText(identifier.getColumnName())){
+		} else if (identifier != null && StringUtils.hasText(identifier.getColumnName())) {
 			return identifier.getColumnName();
 		}
 		return "";
