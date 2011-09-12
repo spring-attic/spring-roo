@@ -34,6 +34,6 @@ field string --fieldName reasonDenied
 web gwt setup
 web gwt proxy all --package ~.client.proxy
 web gwt request all --package ~.client.request
-web gwt scaffold all
+web gwt all
 
 logging setup --level INFO

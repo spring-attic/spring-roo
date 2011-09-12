@@ -35,4 +35,6 @@ public interface GwtOperations {
 	void scaffoldType(JavaType type);
 
 	void updateGaeConfiguration();
+
+	boolean isGaeEnabled();
 }

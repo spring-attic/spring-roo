@@ -88,6 +88,10 @@ public class GwtOperationsImpl implements GwtOperations {
 		return projectOperations.isProjectAvailable() && projectOperations.getProjectMetadata().isGwtEnabled();
 	}
 
+	public boolean isGaeEnabled() {
+		return projectOperations.isProjectAvailable() && projectOperations.getProjectMetadata().isGaeEnabled();
+	}
+
 	public void proxyAll(JavaPackage proxyPackage) {
 		for (ClassOrInterfaceTypeDetails entity : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JPA_ENTITY, RooJavaType.ROO_ENTITY)) {
 			createProxy(entity, proxyPackage);
