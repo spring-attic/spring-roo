@@ -301,7 +301,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Element root = document.getDocumentElement();
 		final Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
 		if (dependenciesElement == null) {
-			return;	// nothing to remove
+			return;
 		}
 
 		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
@@ -345,7 +345,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
-	
 		final Element dependencyElement = XmlUtils.findFirstElement("/project/dependencies/dependency[groupId = '" + dependency.getGroupId() + "' and artifactId = '" + dependency.getArtifactId() + "' and version = '" + dependency.getVersion() + "']", root);
 		if (dependencyElement == null) {
 			return;
@@ -358,7 +357,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				dependencyElement.appendChild(new XmlElementBuilder("scope", document).setText(dependencyScope.name().toLowerCase()).build());
 				descriptionOfChange = highlight(ADDED + " scope") + " " + dependencyScope.name().toLowerCase() + " to dependency " + dependency.getSimpleDescription();
 			} else {
-				// Nothing to do
 				descriptionOfChange = null;
 			}
 		} else {
@@ -389,7 +387,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
 		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
-		Assert.notNull(pluginsElement, "Plugins unable to be found");
 
 		final List<String> newPlugins = new ArrayList<String>();
 		for (final Plugin plugin : plugins) {
@@ -432,19 +429,16 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", document.getDocumentElement());
-		Assert.notNull(pluginsElement, "plugins element not found");
 
 		final List<String> removedPlugins = new ArrayList<String>();
 		for (final Plugin plugin : plugins) {
-			if (plugin != null) {
-				// Can't filter the XPath on groupId, as it's optional in the POM for Apache-owned plugins
-				for (final Element candidate : XmlUtils.findElements("plugin[artifactId = '" + plugin.getArtifactId() + "']", pluginsElement)) {
-					if (Plugin.getGroupId(candidate).equals(plugin.getGroupId())) {
-						// This element has the same groupId and artifactId as the plugin to be removed; remove it
-						pluginsElement.removeChild(candidate);
-						removedPlugins.add(plugin.getSimpleDescription());
-						// Keep looping in case this plugin is in the POM more than once
-					}
+			// Can't filter the XPath on groupId, as it's optional in the POM for Apache-owned plugins
+			for (final Element candidate : XmlUtils.findElements("plugin[artifactId = '" + plugin.getArtifactId() + "']", pluginsElement)) {
+				if (Plugin.getGroupId(candidate).equals(plugin.getGroupId())) {
+					// This element has the same groupId and artifactId as the plugin to be removed; remove it
+					pluginsElement.removeChild(candidate);
+					removedPlugins.add(plugin.getSimpleDescription());
+					// Keep looping in case this plugin is in the POM more than once
 				}
 			}
 		}
@@ -492,7 +486,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element packaging = DomUtils.createChildIfNotExists("packaging", document.getDocumentElement(), document);
 		if (packaging.getTextContent().equals(projectType.getType())) {
-			return;	// Nothing to do
+			return;
 		}
 
 		packaging.setTextContent(projectType.getType());

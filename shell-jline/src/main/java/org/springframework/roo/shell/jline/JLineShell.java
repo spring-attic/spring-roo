@@ -270,8 +270,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 				try {
 					reader.printString(stg);
 					reader.flushConsole();
-				} catch (IOException ignore) {
-				}
+				} catch (IOException ignored) {}
 			}
 
 			return;

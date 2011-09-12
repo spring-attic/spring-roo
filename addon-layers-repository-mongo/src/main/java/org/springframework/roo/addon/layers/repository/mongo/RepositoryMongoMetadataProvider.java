@@ -52,14 +52,12 @@ public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider
 		final RepositoryMongoAnnotationValues annotationValues = new RepositoryMongoAnnotationValues(governorPhysicalTypeMetadata);
 		final ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		final JavaType domainType = annotationValues.getDomainType();
-		if(!annotationValues.isAnnotationFound() || coitd == null || domainType == null) {
-			System.out.println("null found for " + domainType);
+		if (!annotationValues.isAnnotationFound() || coitd == null || domainType == null) {
 			return null;
 		}
+		
 		JavaType idType = persistenceMemberLocator.getIdentifierType(domainType);
-		if(idType == null) {
-			
-			System.out.println("no id found for " + domainType);
+		if (idType == null) {
 			return null;
 		}
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);

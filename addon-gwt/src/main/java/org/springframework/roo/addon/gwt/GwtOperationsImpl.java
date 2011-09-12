@@ -581,7 +581,6 @@ public class GwtOperationsImpl implements GwtOperations {
 					break;
 				}
 			}
-			System.out.println("add plugin: " + defaultPlugin.getArtifactId());
 			projectOperations.addBuildPlugin(defaultPlugin);
 		}
 	}
