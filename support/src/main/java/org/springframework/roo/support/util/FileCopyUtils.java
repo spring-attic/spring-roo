@@ -50,16 +50,16 @@ public abstract class FileCopyUtils {
 	/**
 	 * Copy the contents of the given byte array to the given output File.
 	 * 
-	 * @param in the byte array to copy from
-	 * @param out the file to copy to
+	 * @param bytes the byte array to copy from
+	 * @param file the file to copy to
 	 * @throws IOException in case of I/O errors
 	 */
-	public static void copy(byte[] in, File out) throws IOException {
-		Assert.notNull(in, "No input byte array specified");
-		Assert.notNull(out, "No output File specified");
-		ByteArrayInputStream inStream = new ByteArrayInputStream(in);
-		OutputStream outStream = new BufferedOutputStream(new FileOutputStream(out));
-		copy(inStream, outStream);
+	public static void copy(byte[] bytes, File file) throws IOException {
+		Assert.notNull(bytes, "No input byte array specified");
+		Assert.notNull(file, "No output File specified");
+		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+		OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+		copy(in, out);
 	}
 
 	/**
