@@ -328,6 +328,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		DomUtils.removeTextNodes(dependenciesElement);
 		final String message = getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies");
+		
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
 
@@ -386,7 +387,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
-		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
+		final Element pluginsElement = DomUtils.createChildIfNotExists("/project/build/plugins", root, document);
 
 		final List<String> newPlugins = new ArrayList<String>();
 		for (final Plugin plugin : plugins) {
@@ -429,6 +430,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", document.getDocumentElement());
+		if (pluginsElement == null) {
+			return;
+		}
 
 		final List<String> removedPlugins = new ArrayList<String>();
 		for (final Plugin plugin : plugins) {
@@ -447,6 +451,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		DomUtils.removeTextNodes(pluginsElement);
 		final String message = getDescriptionOfChange(REMOVED, removedPlugins, "plugin", "plugins");
+		
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
 
@@ -529,6 +534,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 		}
 		final String message = getDescriptionOfChange(ADDED, addedRepositories, path, containingPath);
+		
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
 
