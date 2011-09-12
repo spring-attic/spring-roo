@@ -3,6 +3,7 @@ package org.springframework.roo.shell.jline.osgi;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_CYAN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_GREEN;
 import static org.springframework.roo.support.util.AnsiEscapeCode.FG_MAGENTA;
+import static org.springframework.roo.support.util.AnsiEscapeCode.FG_YELLOW;
 import static org.springframework.roo.support.util.AnsiEscapeCode.REVERSE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.UNDERSCORE;
 import static org.springframework.roo.support.util.AnsiEscapeCode.decorate;
@@ -29,6 +30,7 @@ import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.jline.JLineShell;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.IOUtils;
+import org.springframework.roo.support.util.OsUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
@@ -103,7 +105,7 @@ public class JLineShellComponent extends JLineShell {
 		List<String> words = Arrays.asList(tweet.split(" "));
 		StringBuilder sb = new StringBuilder();
 		// Add in Roo's twitter account to give context to the notification
-		sb.append(decorate("@" + screenName + ":", REVERSE));
+		sb.append(decorate("@" + screenName + ":", (OsUtils.isWindows() ? FG_YELLOW : REVERSE)));
 		sb.append(" ");
 		// We want to colourise certain words. The codes used here should be moved to a ShellUtils and include a few helper methods
 		// This is a basic attempt at pattern identification, it should be adequate in most cases although may be incorrect for URLs.
@@ -111,7 +113,11 @@ public class JLineShellComponent extends JLineShell {
 		for (String word : words) {
 			if (word.startsWith("http://") || word.startsWith("https://")) {
 				// It's a URL
-				sb.append(decorate(word, FG_GREEN, UNDERSCORE));
+				if (OsUtils.isWindows()) {
+					sb.append(decorate(word, FG_GREEN));
+				} else {
+					sb.append(decorate(word, FG_GREEN, UNDERSCORE));
+				}
 			} else if (word.startsWith("@")) {
 				// It's a Twitter username
 				sb.append(decorate(word, FG_MAGENTA));

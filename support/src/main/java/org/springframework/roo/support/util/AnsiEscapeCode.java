@@ -9,20 +9,20 @@ package org.springframework.roo.support.util;
 public enum AnsiEscapeCode {
 
 	// These int literals are non-public constants in ANSIBuffer.ANSICodes
-	BLINK (5),
-	BOLD (1),
-	CONCEALED (8),
-	FG_BLACK (30),
-	FG_BLUE (34),
-	FG_CYAN (36),
-	FG_GREEN (32),
-	FG_MAGENTA (35),
-	FG_RED (31),
-	FG_YELLOW (33),
-	FG_WHITE (37),
-	OFF (0),
-	REVERSE (7),
-	UNDERSCORE (4);
+	BLINK(5), 
+	BOLD(1), 
+	CONCEALED(8), 
+	FG_BLACK(30), 
+	FG_BLUE(34), 
+	FG_CYAN(36), 
+	FG_GREEN(32), 
+	FG_MAGENTA(35), 
+	FG_RED(31), 
+	FG_YELLOW(33), 
+	FG_WHITE(37), 
+	OFF(0), 
+	REVERSE(7), 
+	UNDERSCORE(4);
 	
 	// Constant for the escape character
 	private static final char ESC = 27;

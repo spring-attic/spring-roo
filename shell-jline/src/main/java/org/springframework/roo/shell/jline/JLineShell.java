@@ -129,7 +129,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 
 		String startupNotifications = getStartupNotifications();
 		if (StringUtils.hasText(startupNotifications)) {
-			System.out.println(startupNotifications);
+			logger.info(startupNotifications);
 		}
 
 		setShellStatus(Status.STARTED);
