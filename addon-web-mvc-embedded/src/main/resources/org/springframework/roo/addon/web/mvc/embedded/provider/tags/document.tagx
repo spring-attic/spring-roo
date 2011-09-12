@@ -19,7 +19,7 @@
     </c:when>
 
     <c:when test="${provider eq 'scribd'}">
-      <spring:url value="http://d1.scribdassets.com/ScribdViewer.swf" var="base_url" htmlEncoding="false" javascriptEncoding="false"/>
+      <spring:url value="http://d1.scribdassets.com/ScribdViewer.swf" var="base_url" htmlEscape="false" javaScriptEscape="false"/>
       <spring:url value="${base_url}" var="document">
         <spring:param name="document_id" value="${documentId}" />
         <spring:param name="access_key" value="key-y6ef708fmsw0acnmpjn" />
