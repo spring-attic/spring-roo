@@ -381,11 +381,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 				break;
 			}
 		}
-		// TODO This is hacky - should not rely on pathResolver, the use of java.io.File, and the XML artifact itself being present. Should just be able to detect build plugin
-		if (!gwtEnabled) {
-			final String gwtModuleXml = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml");
-			gwtEnabled = new File(gwtModuleXml).exists();
-		}
 		return gwtEnabled;
 	}
 
