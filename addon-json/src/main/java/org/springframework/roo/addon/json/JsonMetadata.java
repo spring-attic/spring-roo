@@ -105,10 +105,10 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			return null;
 		}
 
-		final List<JavaType> parameterTypes = Arrays.asList(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays.asList(destination)));
+		final JavaType parameterType = new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays.asList(destination));
 
 		// See if the type itself declared the method
-		MethodMetadata result = getGovernorMethod(methodName, parameterTypes);
+		MethodMetadata result = getGovernorMethod(methodName, parameterType);
 		if (result != null) {
 			return result;
 		}
@@ -120,7 +120,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\")" + (annotationValues.isDeepSerialize() ? ".deepSerialize(collection)" : ".serialize(collection)") + ";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, new JavaType("java.lang.String"), AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, new JavaType("java.lang.String"), AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		methodBuilder.putCustomData(CustomDataJsonTags.TO_JSON_ARRAY_METHOD, null);
 		return methodBuilder.build();
 	}

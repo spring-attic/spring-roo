@@ -113,14 +113,14 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	private MethodMetadata getSetAsTextMethod(JavaType javaType, JavaType idType, MethodMetadata findMethod) {
-		List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING);
+		final JavaType parameterType = JavaType.STRING;
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("text"));
 	
 		JavaSymbolName methodName = new JavaSymbolName("setAsText");
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 
 		// Locate user-defined method
-		MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
+		MethodMetadata userMethod = getGovernorMethod(methodName, parameterType);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
@@ -146,7 +146,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine("setValue(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + findMethod.getMethodName() + "(identifier));");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 

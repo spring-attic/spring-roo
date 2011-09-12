@@ -123,7 +123,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	
 	private MethodMetadata getInitMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("init");
-		MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -192,7 +192,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 	private MethodMetadata getModelAccessorMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("getMenuModel");
-		MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();

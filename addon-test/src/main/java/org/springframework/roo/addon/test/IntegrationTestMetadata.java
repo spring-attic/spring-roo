@@ -396,8 +396,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(mergeMethod.getMethodName()) + "Update");
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
+		final JavaType[] parameterTypes = {};
+		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) {
 			return method;
 		}
@@ -436,7 +436,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -452,8 +452,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(persistMethod.getMethodName()));
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
+		final JavaType[] parameterTypes = {};
+		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) {
 			return method;
 		}
@@ -479,7 +479,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
@@ -495,8 +495,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		// Prepare method signature
 		JavaSymbolName methodName = new JavaSymbolName("test" + StringUtils.capitalize(removeMethod.getMethodName()));
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		MethodMetadata method = getGovernorMethod(methodName, parameters);
+		final JavaType[] parameterTypes = {};
+		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) {
 			return method;
 		}
@@ -532,7 +532,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}

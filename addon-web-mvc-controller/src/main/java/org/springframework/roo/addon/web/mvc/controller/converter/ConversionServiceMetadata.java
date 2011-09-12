@@ -258,15 +258,15 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	
 	private MethodMetadataBuilder getInstallMethodBuilder() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
-		List<JavaType> parameterTypes = Arrays.asList(FORMATTER_REGISTRY);
-		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
+		final JavaType parameterType = FORMATTER_REGISTRY;
+		MethodMetadata method = getGovernorMethod(methodName, parameterType);
 		if (method != null) {
 			return new MethodMetadataBuilder(method);
 		}
 		
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("registry"));
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, new InvocableMemberBodyBuilder());
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, new InvocableMemberBodyBuilder());
 	}
 
 	private MethodMetadataBuilder getAfterPropertiesSetMethod(MethodMetadata installConvertersMethod) {

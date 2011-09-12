@@ -268,7 +268,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getInitMethod(final MemberTypeAdditions findAllAdditions) {
 		final JavaSymbolName methodName = new JavaSymbolName("init");
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -303,7 +303,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getSelectedEntityAccessorMethod() {
 		final String fieldName = getEntityName();
 		final JavaSymbolName methodName = new JavaSymbolName("get" + StringUtils.capitalize(fieldName));
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -321,8 +321,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getSelectedEntityMutatorMethod() {
 		final String fieldName = getEntityName();
 		final JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(fieldName));
-		final List<JavaType> parameterTypes = Arrays.asList(entity);
-		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
+		final JavaType parameterType = entity;
+		final MethodMetadata method = getGovernorMethod(methodName, parameterType);
 		if (method != null) return method;
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(fieldName));
@@ -330,7 +330,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -385,7 +385,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getNameAccessorMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("getName");
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -398,7 +398,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getPanelGridAccessorMethod(final Action action) {
 		final String fieldName = StringUtils.toLowerCase(action.name()) + "PanelGrid";
 		final JavaSymbolName methodName = new JavaSymbolName("get" + StringUtils.capitalize(fieldName));
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -429,8 +429,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getPanelGridMutatorMethod(final Action action) {
 		final String fieldName = StringUtils.toLowerCase(action.name()) + "PanelGrid";
 		final JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(fieldName));
-		final List<JavaType> parameterTypes = Arrays.asList(HTML_PANEL_GRID);
-		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
+		final JavaType parameterType = HTML_PANEL_GRID;
+		final MethodMetadata method = getGovernorMethod(methodName, parameterType);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -441,7 +441,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -466,7 +466,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				methodName = new JavaSymbolName("populateViewPanel");
 				break;
 		}
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 		
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -599,7 +599,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getUploadedFileAccessorMethod(final FieldMetadata rooUploadedFileField) {
 		final JavaSymbolName methodName = new JavaSymbolName("get" + StringUtils.capitalize(rooUploadedFileField.getFieldName().getSymbolName()));
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -614,8 +614,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getUploadedFileMutatorMethod(final FieldMetadata rooUploadedFileField) {
 		final JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(rooUploadedFileField.getFieldName().getSymbolName()));
-		final List<JavaType> parameterTypes = Arrays.asList(PRIMEFACES_UPLOADED_FILE);
-		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
+		final JavaType parameterType = PRIMEFACES_UPLOADED_FILE;
+		final MethodMetadata method = getGovernorMethod(methodName, parameterType);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -626,7 +626,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + rooUploadedFileField.getFieldName().getSymbolName() + " = " + rooUploadedFileField.getFieldName().getSymbolName() + ";");
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -673,7 +673,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getDisplayListMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName(DISPLAY_LIST);
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -686,7 +686,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getPersistMethod(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod, final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("persist");
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -736,7 +736,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getResetMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("reset");
-		final MethodMetadata method = getGovernorMethod(methodName,  new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -783,7 +783,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getBooleanAccessorMethod(final String fieldName) {
 		final JavaSymbolName methodName = new JavaSymbolName("is" + StringUtils.capitalize(fieldName));
-		final MethodMetadata method = getGovernorMethod(methodName, new ArrayList<JavaType>());
+		final MethodMetadata method = getGovernorMethod(methodName);
 		if (method != null) return method;
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -795,8 +795,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getBooleanMutatorMethod(final String fieldName) {
 		final JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(fieldName));
-		final List<JavaType> parameterTypes = Arrays.asList(JavaType.BOOLEAN_PRIMITIVE);
-		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
+		final JavaType parameterType = JavaType.BOOLEAN_PRIMITIVE;
+		final MethodMetadata method = getGovernorMethod(methodName, parameterType);
 		if (method != null) return method;
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(fieldName));
@@ -804,7 +804,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 

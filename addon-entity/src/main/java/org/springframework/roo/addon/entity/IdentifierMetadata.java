@@ -294,12 +294,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Compute the names of the mutators that will be produced
 		for (FieldMetadata field : fields) {
 			String requiredMutatorName = getRequiredMutatorName(field);
-			List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
-			MethodMetadata mutator = getGovernorMethod(new JavaSymbolName(requiredMutatorName), parameterTypes);
-			if (mutator != null) {
-				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
-			} else {
+			final JavaType parameterType = field.getFieldType();
+			MethodMetadata mutator = getGovernorMethod(new JavaSymbolName(requiredMutatorName), parameterType);
+			if (mutator == null) {
 				mutator = getMutator(field);
+			} else {
+				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			}
 			mutators.add(mutator);
 		}
