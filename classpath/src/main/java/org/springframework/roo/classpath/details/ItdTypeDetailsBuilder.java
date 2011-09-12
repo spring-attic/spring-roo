@@ -31,7 +31,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @since 1.0
  */
-public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ItdTypeDetails, ItdTypeDetailsBuilder> {
+public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ItdTypeDetails> {
 	
 	// Fields
 	private final boolean privilegedAspect;
@@ -74,10 +74,6 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 
 	public ItdTypeDetails build() {
 		return new DefaultItdTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), buildConstructors(), buildFields(), buildMethods(), getExtendsTypes(), getImplementsTypes(), buildAnnotations(), fieldAnnotations, methodAnnotations, buildInnerTypes());
-	}
-
-	public ItdTypeDetailsBuilder getThis() {
-		return this;
 	}
 
 	public ImportRegistrationResolver getImportRegistrationResolver() {

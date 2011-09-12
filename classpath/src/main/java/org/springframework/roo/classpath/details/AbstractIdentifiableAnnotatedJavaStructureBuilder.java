@@ -21,7 +21,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extends IdentifiableAnnotatedJavaStructure, R extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T, R>> extends AbstractIdentifiableJavaStructureBuilder<T, R> {
+public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extends IdentifiableAnnotatedJavaStructure> extends AbstractIdentifiableJavaStructureBuilder<T> {
 	private List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(String declaredbyMetadataId) {

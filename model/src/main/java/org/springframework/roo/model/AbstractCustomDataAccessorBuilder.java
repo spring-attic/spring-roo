@@ -8,7 +8,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAccessor, R extends AbstractCustomDataAccessorBuilder<T, R>> implements Builder<T, R> {
+public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAccessor> implements Builder<T> {
 	
 	// Fields
 	private CustomDataBuilder customDataBuilder;

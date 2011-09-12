@@ -621,7 +621,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		return typeMap;
 	}
 
-	private <T extends AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure, ?>> T convertModifier(T builder) {
+	private <T extends AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure>> T convertModifier(T builder) {
 		if (Modifier.isPrivate(builder.getModifier())) {
 			builder.setModifier(Modifier.PROTECTED);
 		}

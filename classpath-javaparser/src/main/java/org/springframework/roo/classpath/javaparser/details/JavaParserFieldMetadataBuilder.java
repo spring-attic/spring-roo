@@ -37,7 +37,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  *
  */
-public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata, JavaParserFieldMetadataBuilder> {
+public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 	
 	// Fields
 	private JavaType fieldType;
@@ -95,10 +95,6 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata, Ja
 		fieldMetadataBuilder.setFieldType(fieldType);
 		fieldMetadataBuilder.setModifier(modifier);
 		return fieldMetadataBuilder.build();
-	}
-
-	public JavaParserFieldMetadataBuilder getThis() {
-		return this;
 	}
 
 	public static void addField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, FieldMetadata field) {

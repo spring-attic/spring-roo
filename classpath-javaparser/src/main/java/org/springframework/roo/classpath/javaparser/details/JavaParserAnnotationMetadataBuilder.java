@@ -49,7 +49,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Andrew Swan
  * @since 1.0
  */
-public final class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata, JavaParserAnnotationMetadataBuilder>{
+public final class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata>{
 
 	// Fields
 	private JavaType annotationType;
@@ -108,10 +108,6 @@ public final class JavaParserAnnotationMetadataBuilder implements Builder<Annota
 	public AnnotationMetadata build() {
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationType, attributeValues);
 		return annotationMetadataBuilder.build();
-	}
-
-	public JavaParserAnnotationMetadataBuilder getThis() {
-		return this;
 	}
 
 	private AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, Expression expression, final CompilationUnitServices compilationUnitServices) {

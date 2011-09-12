@@ -39,7 +39,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata, JavaParserConstructorMetadataBuilder>{
+public class JavaParserConstructorMetadataBuilder implements Builder<ConstructorMetadata>{
 
 	// TODO: Should parse the throws types from JavaParser source
 
@@ -124,10 +124,6 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 		constructorMetadataBuilder.setParameterTypes(parameterTypes);
 		constructorMetadataBuilder.setThrowsTypes(throwsTypes);
 		return constructorMetadataBuilder.build();
-	}
-
-	public JavaParserConstructorMetadataBuilder getThis() {
-		return this;
 	}
 
 	public static void addConstructor(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, ConstructorMetadata constructor, Set<JavaSymbolName> typeParameters) {

@@ -10,7 +10,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
  * @author Ben Alex
  * @since 1.1.1
  */
-public final class InitializerMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<InitializerMetadata, InitializerMetadataBuilder> {
+public final class InitializerMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<InitializerMetadata> {
 
 	// Fields
 	private boolean isStatic;
@@ -38,10 +38,6 @@ public final class InitializerMetadataBuilder extends AbstractIdentifiableJavaSt
 
 	public InitializerMetadata build() {
 		return new DefaultInitializerMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), isStatic, getBodyBuilder().getOutput());
-	}
-
-	public InitializerMetadataBuilder getThis() {
-		return this;
 	}
 
 	public boolean isStatic() {

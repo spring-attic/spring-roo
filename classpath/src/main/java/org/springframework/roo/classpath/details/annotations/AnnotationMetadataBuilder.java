@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Andrew Swan
  * @since 1.1
  */
-public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata, AnnotationMetadataBuilder> {
+public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 	
 	// Constants for valueless JPA annotations (using literal class names so as not to make Roo depend on JPA)
 	public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance("javax.persistence.Column");
@@ -225,9 +225,5 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 
 	public AnnotationMetadata build() {
 		return new DefaultAnnotationMetadata(getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(getAttributes().values()));
-	}
-
-	public AnnotationMetadataBuilder getThis() {
-		return this;
 	}
 }

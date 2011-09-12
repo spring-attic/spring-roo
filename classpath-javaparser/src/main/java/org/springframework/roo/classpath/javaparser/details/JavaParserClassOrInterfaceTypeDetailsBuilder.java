@@ -39,7 +39,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
-public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<ClassOrInterfaceTypeDetails, JavaParserClassOrInterfaceTypeDetailsBuilder>{
+public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<ClassOrInterfaceTypeDetails>{
 
 	// Constants
 	static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
@@ -279,9 +279,5 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 		}
 
 		return classOrInterfaceTypeDetailsBuilder.build();
-	}
-
-	public JavaParserClassOrInterfaceTypeDetailsBuilder getThis() {
-		return this;
 	}
 }

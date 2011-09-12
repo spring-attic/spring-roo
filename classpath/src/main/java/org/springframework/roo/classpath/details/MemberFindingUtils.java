@@ -133,7 +133,7 @@ public final class MemberFindingUtils {
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 */
-	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure, ?> memberHoldingTypeDetails, JavaType type) {
+	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure> memberHoldingTypeDetails, JavaType type) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(type, "Annotation type to locate required");
 		for (AnnotationMetadataBuilder md : memberHoldingTypeDetails.getAnnotations()) {

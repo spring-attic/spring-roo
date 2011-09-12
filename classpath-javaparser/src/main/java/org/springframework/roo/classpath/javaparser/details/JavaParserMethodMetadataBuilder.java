@@ -43,7 +43,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata, JavaParserMethodMetadataBuilder>{
+public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -140,10 +140,6 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata, 
 		methodMetadataBuilder.setParameterTypes(parameterTypes);
 		methodMetadataBuilder.setThrowsTypes(throwsTypes);
 		return methodMetadataBuilder.build();
-	}
-
-	public JavaParserMethodMetadataBuilder getThis() {
-		return this;
 	}
 
 	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, Set<JavaSymbolName> typeParameters) {

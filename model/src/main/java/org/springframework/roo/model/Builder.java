@@ -11,15 +11,10 @@ package org.springframework.roo.model;
  * @author Ben Alex
  * @since 1.1
  */
-public interface Builder<T, R extends Builder<T, R>> {
+public interface Builder<T> {
 
 	/**
 	 * @return the immutable object this builder creates (never returns null, but may throw an exception)
 	 */
 	T build();
-
-	/**
-	 * @return this instance cast to the correct concrete implementation (never returns null)
-	 */
-	R getThis();
 }

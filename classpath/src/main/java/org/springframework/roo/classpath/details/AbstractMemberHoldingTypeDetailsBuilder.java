@@ -15,7 +15,7 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1
  * @param <T> the type of {@link MemberHoldingTypeDetails} being built
  */
-public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails, R extends AbstractMemberHoldingTypeDetailsBuilder<T, R>> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T, R> {
+public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
 	
 	// Fields
 	private final List<MethodMetadataBuilder> declaredMethods = new ArrayList<MethodMetadataBuilder>();

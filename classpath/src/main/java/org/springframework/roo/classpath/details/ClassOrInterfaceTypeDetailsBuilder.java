@@ -18,7 +18,7 @@ import org.springframework.uaa.client.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails, ClassOrInterfaceTypeDetailsBuilder> {
+public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails> {
 	
 	// Fields
 	private JavaType name;
@@ -140,10 +140,6 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		return new DefaultClassOrInterfaceTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getName(), getPhysicalTypeCategory(), buildConstructors(), buildFields(), buildMethods(), buildInnerTypes(), buildInitializers(), superclass, getExtendsTypes(), getImplementsTypes(), getEnumConstants(), getRegisteredImports());
 	}
 
-	public ClassOrInterfaceTypeDetailsBuilder getThis() {
-		return this;
-	}
-
 	/**
 	 * Returns this builder's imports
 	 * 
@@ -198,7 +194,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	 * @param targetBuilder the ITD builder to receive the additions (required)
 	 * @param governorDetails the {@link ClassOrInterfaceTypeDetails} of the governor (required)
 	 */
-	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?, ?> targetBuilder, ClassOrInterfaceTypeDetails governorDetails) {
+	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, ClassOrInterfaceTypeDetails governorDetails) {
 		Assert.notNull(targetBuilder, "Target builder required");
 		Assert.notNull(governorDetails, "Governor member holding types required");
 		// Copy fields

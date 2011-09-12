@@ -14,7 +14,7 @@ import java.util.Set;
  * @author Ben Alex
  * @since 1.1
  */
-public final class CustomDataBuilder implements Builder<CustomData, CustomDataBuilder> {
+public final class CustomDataBuilder implements Builder<CustomData> {
 
 	// Fields
 	private Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
@@ -35,10 +35,6 @@ public final class CustomDataBuilder implements Builder<CustomData, CustomDataBu
 	
 	public CustomData build() {
 		return new CustomDataImpl(customData);
-	}
-
-	public CustomDataBuilder getThis() {
-		return this;
 	}
 
 	public void clear() {

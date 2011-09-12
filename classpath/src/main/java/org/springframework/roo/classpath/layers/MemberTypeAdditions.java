@@ -119,7 +119,7 @@ public class MemberTypeAdditions {
 	 * @param targetBuilder the ITD builder to receive the additions (required)
 	 * @param governorClassOrInterfaceTypeDetails the {@link ClassOrInterfaceTypeDetails} of the governor (required)
 	 */
-	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?, ?> targetBuilder, ClassOrInterfaceTypeDetails governorClassOrInterfaceTypeDetails) {
+	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, ClassOrInterfaceTypeDetails governorClassOrInterfaceTypeDetails) {
 		if (this.classOrInterfaceDetailsBuilder != null) {
 			this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder, governorClassOrInterfaceTypeDetails);
 		}
