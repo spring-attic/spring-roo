@@ -29,6 +29,7 @@ import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -65,7 +66,9 @@ public class GwtOperationsImpl implements GwtOperations {
 	
 	// Fields
 	@Reference protected FileManager fileManager;
+	@Reference protected GwtTemplateService gwtTemplateService;
 	@Reference protected GwtTypeService gwtTypeService;
+	@Reference protected MetadataService metadataService;
 	@Reference protected WebMvcOperations mvcOperations;
 	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
 	@Reference protected ProjectOperations projectOperations;
@@ -171,18 +174,23 @@ public class GwtOperationsImpl implements GwtOperations {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
-		String sourceAntPath = "setup/*";
-		if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
-			return;
-		}
-		String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar));
-		updateFile(sourceAntPath, targetDirectory, "", false);
+		final String gwtModuleXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml");
+		boolean gwtAlreadySetup = new File(gwtModuleXml).exists();
 
-		sourceAntPath = "setup/client/*";
-		if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
-			return;
+		if (!gwtAlreadySetup) {
+			String sourceAntPath = "setup/*";
+			if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
+				return;
+			}
+			String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar));
+			updateFile(sourceAntPath, targetDirectory, "", false);
+
+			sourceAntPath = "setup/client/*";
+			if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
+				return;
+			}
+			updateFile(sourceAntPath, targetDirectory + "/client", "", false);
 		}
-		updateFile(sourceAntPath, targetDirectory + "/client", "", false);
 
 		// Add GWT natures and builder names to maven eclipse plugin
 		updateEclipsePlugin();
@@ -301,6 +309,8 @@ public class GwtOperationsImpl implements GwtOperations {
 
 			// Update the GaeHelper type
 			updateGaeHelper();
+
+			gwtTypeService.buildType(GwtType.APP_REQUEST_FACTORY, gwtTemplateService.getStaticTemplateTypeDetails(GwtType.APP_REQUEST_FACTORY));
 
 			// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated
 			updateBuildPlugins(isGaeEnabled);
@@ -564,12 +574,15 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (Element pluginElement : pluginElements) {
 			final Plugin defaultPlugin = new Plugin(pluginElement);
 			for (Plugin plugin : projectOperations.getProjectMetadata().getBuildPlugins()) {
-				if ("gwt-maven-plugin".equals(plugin.getArtifactId()) && defaultPlugin.equals(plugin)) {
+				if ("gwt-maven-plugin".equals(plugin.getArtifactId())) {
 					// The GWT Maven plugin is already in the POM with the correct configuration
-					return;
+					projectOperations.removeBuildPlugin(plugin);
+					metadataService.evict(projectOperations.getProjectMetadata().getId());
+					break;
 				}
 			}
-			projectOperations.updateBuildPlugin(defaultPlugin);
+			System.out.println("add plugin: " + defaultPlugin.getArtifactId());
+			projectOperations.addBuildPlugin(defaultPlugin);
 		}
 	}
 

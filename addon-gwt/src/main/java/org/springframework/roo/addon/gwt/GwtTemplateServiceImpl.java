@@ -299,7 +299,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	private TemplateDataDictionary buildDictionary(GwtType type) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 
-		Set<ClassOrInterfaceTypeDetails> proxies = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(GwtUtils.PROXY_ANNOTATIONS);
+		Set<ClassOrInterfaceTypeDetails> proxies = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY);
 		TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
 		switch (type) {
 			case APP_ENTITY_TYPES_PROCESSOR: 

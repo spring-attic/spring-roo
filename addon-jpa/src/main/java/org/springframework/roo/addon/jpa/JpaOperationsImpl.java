@@ -795,7 +795,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		String descriptionOfChange = "";
 		Element mappingExcludesElement = XmlUtils.findFirstElement("mappingExcludes", configurationElement);
 		if (addToPlugin && mappingExcludesElement == null) {
-			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", document).setText("**/GaeAuthFilter.class").build();
+			mappingExcludesElement = new XmlElementBuilder("mappingExcludes", document).setText("**/CustomRequestFactoryServlet.class, **/GaeAuthFilter.class").build();
 			configurationElement.appendChild(mappingExcludesElement);
 			descriptionOfChange = "added GAEAuthFilter mappingExcludes to maven-datanuclueus-plugin";
 		} else if (!addToPlugin && mappingExcludesElement != null) {
