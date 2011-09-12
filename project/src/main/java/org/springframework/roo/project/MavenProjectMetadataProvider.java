@@ -306,17 +306,22 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
 		final List<String> removedDependencies = new ArrayList<String>();
+		final Set<Element> toRemove = new HashSet<Element>();
 		for (final Dependency dependency : dependencies) {
 			if (projectMetadata.isDependencyRegistered(dependency)) {
 				for (final Element candidate : existingDependencyElements) {
-					if (new Dependency(candidate).equals(dependency)) {
+					Dependency candidateDependency = new Dependency(candidate);
+					if (candidateDependency.equals(dependency)) {
 						// The identifying coordinates match; remove this element
-						dependenciesElement.removeChild(candidate);
+						toRemove.add(candidate);
 						removedDependencies.add(dependency.getSimpleDescription());
 					}
 					// Keep looping in case it's in the POM more than once
 				}
 			}
+		}
+		for (Element dependency : toRemove) {
+			dependenciesElement.removeChild(dependency);
 		}
 		if (removedDependencies.isEmpty()) {
 			return;
