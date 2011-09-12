@@ -11,9 +11,9 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaType;
 
-
 public class AnnotatedTypeMatcher extends TypeMatcher {
 
+	// Fields
 	private List<JavaType> annotationTypesToMatchOn;
 	private CustomDataKey<MemberHoldingTypeDetails> customDataKey;
 

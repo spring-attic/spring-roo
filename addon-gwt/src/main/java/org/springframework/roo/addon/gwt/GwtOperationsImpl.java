@@ -140,7 +140,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (ClassOrInterfaceTypeDetails proxy : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY)) {
 			ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
 			if (request == null) {
-				throw new IllegalStateException("In order to scaffold and entity must have a request");
+				throw new IllegalStateException("In order to scaffold, an entity must have a request");
 			}
 			AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(proxy, RooJavaType.ROO_GWT_PROXY);
 			if (annotationMetadata != null) {
@@ -161,7 +161,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(entity);
 			ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(entity);
 			if (proxy == null || request == null) {
-				throw new IllegalStateException("In order to scaffold and entity must have an associated proxy and request");
+				throw new IllegalStateException("In order to scaffold, an entity must have an associated proxy and request");
 			}
 			updateScaffoldBoilerPlate();
 			createScaffold(proxy);
@@ -220,7 +220,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (existingProxy != null) {
 			return;
 		}
-		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName()  + "." + entity.getName().getSimpleTypeName() + "Proxy");
+		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Proxy");
 		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyName));
 		builder.setName(proxyName);
 		builder.setExtendsTypes(Collections.singletonList(GwtUtils.ENTITY_PROXY));
@@ -229,7 +229,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		List<AnnotationAttributeValue<?>> attributeValues = new ArrayList<AnnotationAttributeValue<?>>();
 		StringAttributeValue stringAttributeValue = new StringAttributeValue(new JavaSymbolName("value"), entity.getName().getFullyQualifiedTypeName());
 		attributeValues.add(stringAttributeValue);
-		String locator = projectOperations.getProjectMetadata().getTopLevelPackage()  + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
+		String locator = projectOperations.getProjectMetadata().getTopLevelPackage() + ".server.locator." + entity.getName().getSimpleTypeName() + "Locator";
 		StringAttributeValue locatorAttributeValue = new StringAttributeValue(new JavaSymbolName("locator"), locator);
 		attributeValues.add(locatorAttributeValue);
 		builder.updateTypeAnnotation(new AnnotationMetadataBuilder(GwtUtils.PROXY_FOR_NAME, attributeValues));
@@ -254,7 +254,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (existingProxy != null) {
 			return;
 		}
-		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName()  + "." + entity.getName().getSimpleTypeName() + "Request");
+		JavaType proxyName = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getName().getSimpleTypeName() + "Request");
 		ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(PhysicalTypeIdentifier.createIdentifier(proxyName));
 		builder.setName(proxyName);
 		builder.setExtendsTypes(Collections.singletonList(GwtUtils.REQUEST_CONTEXT));
@@ -315,7 +315,8 @@ public class GwtOperationsImpl implements GwtOperations {
 			// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated
 			updateBuildPlugins(isGaeEnabled);
 
-			//If there is a class that could possibly import from the appengine sdk, denoted here as having Gae in the type name, then we need to add the appengine-api-1.0-sdk dependency to the pom.xml file
+			// If there is a class that could possibly import from the appengine sdk, denoted here as having Gae in the type name, then we need to add the appengine-api-1.0-sdk dependency to the
+			// pom.xml file
 			String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
 			Set<FileDetails> files = fileManager.findMatchingAntPath(rootPath + "/**/*Gae*.java");
 			if (!files.isEmpty()) {
@@ -330,7 +331,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			}
 		}
 	}
-	
+
 	private void updateEclipsePlugin() {
 		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
@@ -438,7 +439,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 
 		removeIfFound("/web-app/error-page", root);
-		
+
 		fileManager.createOrUpdateTextFileIfRequired(webXmlpath, XmlUtils.nodeToString(webXml), false);
 	}
 
@@ -505,7 +506,8 @@ public class GwtOperationsImpl implements GwtOperations {
 				if (existing.equals(input)) {
 					fileManager.delete(targetFilename);
 				}
-			} catch (IOException ignored) {}
+			} catch (IOException ignored) {
+			}
 		}
 	}
 

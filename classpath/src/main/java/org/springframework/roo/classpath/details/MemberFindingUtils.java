@@ -423,7 +423,6 @@ public final class MemberFindingUtils {
 		return null;
 	}
 
-
 	/**
 	 * Searches up the inheritance hierarchy until the first method with the specified name is located, method parameters
 	 * are not taken into account.

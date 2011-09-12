@@ -340,7 +340,6 @@ public abstract class ReflectionUtils {
 		return false;
 	}
 
-
 	/**
 	 * Determine whether the given field is a "public static final" constant.
 	 * @param field the field to check

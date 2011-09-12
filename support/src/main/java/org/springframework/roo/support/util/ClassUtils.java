@@ -70,7 +70,6 @@ public abstract class ClassUtils {
 	/** The ".class" file suffix */
 	public static final String CLASS_FILE_SUFFIX = ".class";
 
-
 	/**
 	 * Map with primitive wrapper type as key and corresponding primitive
 	 * type as value, for example: Integer.class -> int.class.
@@ -94,7 +93,6 @@ public abstract class ClassUtils {
 	 * Primarily for efficient deserialization of remote invocations.
 	 */
 	private static final Map<String, Class<?>> commonClassCache = new HashMap<String, Class<?>>(32);
-
 
 	static {
 		primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
@@ -126,7 +124,6 @@ public abstract class ClassUtils {
 		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class,
 				Error.class, StackTraceElement.class, StackTraceElement[].class);
 	}
-
 
 	/**
 	 * Register the given common classes with the ClassUtils cache.
@@ -403,7 +400,6 @@ public abstract class ClassUtils {
 		return false;
 	}
 
-
 	/**
 	 * Get the class name without the qualified package name.
 	 * @param className the className to get the short name for
@@ -557,7 +553,6 @@ public abstract class ClassUtils {
 				(typeName.equals(clazz.getName()) || typeName.equals(clazz.getSimpleName()) ||
 				(clazz.isArray() && typeName.equals(getQualifiedNameForArray(clazz)))));
 	}
-
 
 	/**
 	 * Determine whether the given class has a public constructor with the given signature.
@@ -823,7 +818,6 @@ public abstract class ClassUtils {
 		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
 
-
 	/**
 	 * Convert a "/"-based resource path to a "."-based fully qualified class name.
 	 * @param resourcePath the resource path pointing to a class
@@ -932,7 +926,6 @@ public abstract class ClassUtils {
 		sb.append("]");
 		return sb.toString();
 	}
-
 
 	/**
 	 * Return all interfaces that the given instance implements as array,

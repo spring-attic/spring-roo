@@ -50,6 +50,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
+	// Fields
 	@Reference GwtTypeService gwtTypeService;
 	@Reference LayerService layerService;
 	@Reference MetadataDependencyRegistry metadataDependencyRegistry;
@@ -85,7 +86,6 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		}
 
 		String locatorType = GwtUtils.getStringValue(proxyAnnotation.getAttribute("locator"));
-
 		if (!StringUtils.hasText(locatorType)) {
 			return null;
 		}
@@ -143,7 +143,6 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	}
 
 	private MethodMetadataBuilder getIdTypeMethod(String declaredById, JavaType targetType, JavaType idType) {
-
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return " + idType.getSimpleTypeName() + ".class;");
 		JavaType returnType = new JavaType(JavaType.CLASS.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(idType));
@@ -236,12 +235,11 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		return GwtLocatorMetadata.getMetadataIdentifierType();
 	}
 
-private ClassOrInterfaceTypeDetails getGovernor(String metadataIdentificationString) {
+	private ClassOrInterfaceTypeDetails getGovernor(String metadataIdentificationString) {
 		JavaType governorTypeName = GwtLocatorMetadata.getJavaType(metadataIdentificationString);
 		Path governorTypePath = GwtLocatorMetadata.getPath(metadataIdentificationString);
 
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeForIdentifier(physicalTypeId);
 	}
-
 }

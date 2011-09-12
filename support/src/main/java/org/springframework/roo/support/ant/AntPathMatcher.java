@@ -22,7 +22,6 @@ public class AntPathMatcher implements PathMatcher {
 
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
 
-
 	/**
 	 * Set the path separator to use for pattern parsing.
 	 * Default is "/", as in Ant.

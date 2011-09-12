@@ -8,9 +8,11 @@ import org.springframework.roo.project.Path;
 
 public class GwtRequestMetadata extends AbstractMetadataItem{
 
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = GwtRequestMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
+	// Fields
 	private final String requestTypeContents;
 
 	public GwtRequestMetadata(String id, String requestTypeContents) {

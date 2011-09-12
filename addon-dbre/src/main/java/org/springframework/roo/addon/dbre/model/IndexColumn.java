@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-
 /**
  * Represents a column of an index in the database model.
  * 

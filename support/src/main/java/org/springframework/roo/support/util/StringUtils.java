@@ -268,7 +268,6 @@ public final class StringUtils {
 		return sb.toString();
 	}
 
-
 	/**
 	 * Test if the given String starts with the specified prefix,
 	 * ignoring upper/lower case.
@@ -406,7 +405,6 @@ public final class StringUtils {
 		}
 		return sb.toString();
 	}
-
 
 	//---------------------------------------------------------------------
 	// Convenience methods for working with formatted Strings

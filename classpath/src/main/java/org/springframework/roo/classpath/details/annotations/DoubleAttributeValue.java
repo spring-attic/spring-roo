@@ -2,7 +2,6 @@ package org.springframework.roo.classpath.details.annotations;
 
 import org.springframework.roo.model.JavaSymbolName;
 
-
 /**
  * Represents a double annotation attribute value.
  * 
@@ -10,6 +9,8 @@ import org.springframework.roo.model.JavaSymbolName;
  * @since 1.0
  */
 public class DoubleAttributeValue extends AbstractAnnotationAttributeValue<Double> {
+	
+	// Fields
 	private double value;
 	private boolean floatingPrecisionOnly = false;
 	

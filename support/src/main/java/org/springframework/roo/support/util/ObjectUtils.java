@@ -149,7 +149,6 @@ public abstract class ObjectUtils {
 		return newArray;
 	}
 
-
 	//---------------------------------------------------------------------
 	// Convenience methods for content-based equality/hash-code handling
 	//---------------------------------------------------------------------
@@ -435,7 +434,6 @@ public abstract class ObjectUtils {
 	public static int hashCode(long lng) {
 		return (int) (lng ^ (lng >>> 32));
 	}
-
 
 	//---------------------------------------------------------------------
 	// Convenience methods for toString output

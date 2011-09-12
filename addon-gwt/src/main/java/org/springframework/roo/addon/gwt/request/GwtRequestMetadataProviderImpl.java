@@ -207,8 +207,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		List<JavaType> methodReturnTypeArgs = Collections.singletonList(methodMetadata.getReturnType());
 		JavaType methodReturnType = new JavaType(GwtUtils.REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
 		return getRequestMethod(request, methodMetadata, methodReturnType);
-
-
 	}
 
 	private MethodMetadataBuilder getRequestMethod(ClassOrInterfaceTypeDetails request, MethodMetadata methodMetaData, JavaType methodReturnType) {

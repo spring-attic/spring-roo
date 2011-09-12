@@ -10,10 +10,10 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 
+	// Fields
 	private String key;
 
 	public BundleSymbolicName(String key) {
@@ -63,6 +63,4 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 		tsc.append("key", key);
 		return tsc.toString();
 	}
-
-
 }

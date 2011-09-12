@@ -20,5 +20,4 @@ public interface GwtFileManager {
 	void write(List<ClassOrInterfaceTypeDetails> typeDetails, boolean includeWarning);
 
 	String write(ClassOrInterfaceTypeDetails typeDetails, String warning);
-
 }

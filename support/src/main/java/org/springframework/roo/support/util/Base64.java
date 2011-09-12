@@ -398,8 +398,7 @@ public class Base64 {
     };
 
 	
-/* ********  D E T E R M I N E   W H I C H   A L P H A B E T  ******** */
-
+    /* ********  D E T E R M I N E   W H I C H   A L P H A B E T  ******** */
 
     /**
      * Returns one of the _SOMETHING_ALPHABET byte arrays depending on
@@ -435,7 +434,7 @@ public class Base64 {
         }
     }
     
-/* ********  E N C O D I N G   M E T H O D S  ******** */    
+    /* ********  E N C O D I N G   M E T H O D S  ******** */    
     
     /**
      * Encodes up to the first three bytes of array <var>threeBytes</var>
@@ -883,7 +882,6 @@ public class Base64 {
             }
             byte[] outBuff = new byte[encLen];
 
-
             int d = 0;
             int e = 0;
             int len2 = len - 2;
@@ -904,7 +902,6 @@ public class Base64 {
                 encode3to4(source, d+off, len - d, outBuff, e, options);
                 e += 4;
             }   // end if: some padding needed
-
 
             // Only resize array if we didn't guess it right.
             if (e <= outBuff.length - 1) {
@@ -1190,8 +1187,6 @@ public class Base64 {
         
         return bytes;
     }   // end decode
-
-
 
     /**
      * Attempts to decode Base64 data and deserialize a Java

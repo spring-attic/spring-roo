@@ -200,7 +200,6 @@ public abstract class Assert {
 				"[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
 	}
 
-
 	/**
 	 * Assert that an array has elements; that is, it must not be
 	 * <code>null</code> and must have at least one element.
@@ -306,7 +305,6 @@ public abstract class Assert {
 		notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
 	}
 
-
 	/**
 	 * Assert that the provided object is an instance of the provided class.
 	 * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
@@ -368,7 +366,6 @@ public abstract class Assert {
 			throw new IllegalArgumentException(message + subType + " is not assignable to " + superType);
 		}
 	}
-
 
 	/**
 	 * Assert a boolean expression, throwing <code>IllegalStateException</code>

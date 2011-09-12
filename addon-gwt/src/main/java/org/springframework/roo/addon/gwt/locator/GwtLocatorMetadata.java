@@ -7,9 +7,12 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 public class GwtLocatorMetadata extends AbstractMetadataItem {
+	
+	// Constants
 	private static final String PROVIDES_TYPE_STRING = GwtLocatorMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
+	// Fields
 	private final String proxyTypeContents;
 
 	public GwtLocatorMetadata(String id, String proxyTypeContents) {

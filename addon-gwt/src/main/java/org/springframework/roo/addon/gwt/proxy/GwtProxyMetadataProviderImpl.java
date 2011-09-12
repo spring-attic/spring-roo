@@ -44,6 +44,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtProxyMetadataProvider{
 
+	// Fields
 	@Reference protected GwtTypeService gwtTypeService;
 	@Reference protected ProjectOperations projectOperations;
 	@Reference protected TypeLocationService typeLocationService;
@@ -105,7 +106,6 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 			readOnlyList.add(readOnlyStringAttribute.getValue());
 		}
 
-
 		ClassOrInterfaceTypeDetails mirroredDetails = typeLocationService.findClassOrInterface(mirroredType);
 		if (mirroredDetails == null || Modifier.isAbstract(mirroredDetails.getModifier())) {
 			return null;
@@ -137,7 +137,6 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 	}
 
 	private String updateProxy(ClassOrInterfaceTypeDetails proxy, List<MethodMetadata> proxyMethods, List<String> exclusionList, List<String> readOnlyList) {
-
 		// Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will be overridden if the Proxy has already been created
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
 

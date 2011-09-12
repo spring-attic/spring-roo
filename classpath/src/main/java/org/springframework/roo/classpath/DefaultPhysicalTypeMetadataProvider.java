@@ -88,7 +88,6 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 		return PhysicalTypeIdentifier.getMetadataIdentiferType();
 	}
 
-
 	public void onFileEvent(FileEvent fileEvent) {
 		String fileIdentifier = fileEvent.getFileDetails().getCanonicalPath();
 

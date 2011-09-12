@@ -467,7 +467,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			ignoreFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), fieldName));
 		}
 
-
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), ignoreFields));
 		AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(ROO_TO_STRING, attributes);
 		updatedGovernorBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) ptd);

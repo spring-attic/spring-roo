@@ -23,7 +23,7 @@ import org.springframework.roo.project.ProjectMetadata;
  * @author James Tyrrell
  * @since 1.1.2
  */
-public class GwtUtils {
+public final class GwtUtils {
 
 	public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
 	public static final JavaType LOCATOR = new JavaType("com.google.web.bindery.requestfactory.shared.Locator");
@@ -39,6 +39,7 @@ public class GwtUtils {
 	public static final JavaType[] REQUEST_ANNOTATIONS = {SERVICE, SERVICE_NAME};
 	public static final JavaType[] PROXY_REQUEST_ANNOTATIONS = {PROXY_FOR, PROXY_FOR_NAME, SERVICE, SERVICE_NAME};
 	public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = {RooJavaType.ROO_GWT_PROXY, RooJavaType.ROO_GWT_REQUEST};
+	
 	private GwtUtils() {
 	}
 
@@ -132,7 +133,6 @@ public class GwtUtils {
 	public static boolean scaffoldProxy(ClassOrInterfaceTypeDetails proxy) {
 		return GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_PROXY, "scaffold", false);
 	}
-
 
 	public static AnnotationMetadata getFirstAnnotation(ClassOrInterfaceTypeDetails cid, JavaType... annotationTypes) {
 		for (JavaType annotationType : annotationTypes) {

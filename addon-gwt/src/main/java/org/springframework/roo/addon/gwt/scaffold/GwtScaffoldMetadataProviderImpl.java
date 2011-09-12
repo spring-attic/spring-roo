@@ -107,7 +107,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			return null;
 		}
 
-		if (proxy.getDeclaredMethods().size() == 0) {
+		if (proxy.getDeclaredMethods().isEmpty()) {
 			return null;
 		}
 
@@ -208,29 +208,28 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		}
 
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
-
-				Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
-			   ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
-				if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) != null) {
-					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(cid);
-					if (entity != null) {
-						upstreamDependency = entity.getDeclaredByMetadataId();
-					}
-				} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
-					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(cid);
-					if (entity != null) {
-						upstreamDependency = entity.getDeclaredByMetadataId();
-					}
-				} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_LOCATOR) != null) {
-					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromLocator(cid);
-					if (entity != null) {
-						upstreamDependency = entity.getDeclaredByMetadataId();
-					}
+			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
+			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
+			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) != null) {
+				ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(cid);
+				if (entity != null) {
+					upstreamDependency = entity.getDeclaredByMetadataId();
 				}
-				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
-				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-				Path typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
-				downstreamDependency = createLocalIdentifier(typeName, typePath);
+			} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
+				ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(cid);
+				if (entity != null) {
+					upstreamDependency = entity.getDeclaredByMetadataId();
+				}
+			} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_LOCATOR) != null) {
+				ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromLocator(cid);
+				if (entity != null) {
+					upstreamDependency = entity.getDeclaredByMetadataId();
+				}
+			}
+			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
+			JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
+			Path typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
+			downstreamDependency = createLocalIdentifier(typeName, typePath);
 		}
 
 		// We only need to proceed if the downstream dependency relationship is not already registered
@@ -238,7 +237,6 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
 			return;
 		}
-
 
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");

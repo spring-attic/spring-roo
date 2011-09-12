@@ -51,7 +51,6 @@ public class DefaultToStringStyler implements ToStringStyler {
 		return this.valueStyler;
 	}
 
-
 	public void styleStart(StringBuilder buffer, Object obj) {
 		if (!obj.getClass().isArray()) {
 			buffer.append('[').append(ClassUtils.getShortName(obj.getClass()));

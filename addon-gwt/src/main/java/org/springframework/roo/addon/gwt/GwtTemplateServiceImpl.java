@@ -1,10 +1,11 @@
 package org.springframework.roo.addon.gwt;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import hapax.Template;
+import hapax.TemplateDataDictionary;
+import hapax.TemplateDictionary;
+import hapax.TemplateException;
+import hapax.TemplateLoader;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,11 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import hapax.Template;
-import hapax.TemplateDataDictionary;
-import hapax.TemplateDictionary;
-import hapax.TemplateException;
-import hapax.TemplateLoader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -248,7 +250,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 							existingHoldingElement.removeChild(el);
 						}
 					}
-
 					for (Element el : sortedElements) {
 						existingHoldingElement.appendChild(el);
 					}
@@ -366,7 +367,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				}
 				break;
 			case LIST_PLACE_RENDERER:
-
 				for (ClassOrInterfaceTypeDetails proxy : proxies) {
 					if (!GwtUtils.scaffoldProxy(proxy)) {
 						continue;
@@ -383,7 +383,6 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				}
 				break;
 			case DETAILS_ACTIVITIES:
-
 				for (ClassOrInterfaceTypeDetails proxy : proxies) {
 					if (!GwtUtils.scaffoldProxy(proxy)) {
 						continue;
@@ -400,7 +399,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				}
 				break;
 			case MOBILE_ACTIVITIES:
-				//Do nothing
+				// Do nothing
 				break;
 		}
 		
