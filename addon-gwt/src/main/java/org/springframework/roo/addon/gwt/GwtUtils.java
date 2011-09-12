@@ -129,6 +129,11 @@ public class GwtUtils {
 		return valueIfNull;
 	}
 
+	public static boolean scaffoldProxy(ClassOrInterfaceTypeDetails proxy) {
+		return GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_PROXY, "scaffold", false);
+	}
+
+
 	public static AnnotationMetadata getFirstAnnotation(ClassOrInterfaceTypeDetails cid, JavaType... annotationTypes) {
 		for (JavaType annotationType : annotationTypes) {
 			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);

@@ -20,8 +20,6 @@ import org.springframework.roo.addon.gwt.GwtTemplateService;
 import org.springframework.roo.addon.gwt.GwtType;
 import org.springframework.roo.addon.gwt.GwtTypeService;
 import org.springframework.roo.addon.gwt.GwtUtils;
-import org.springframework.roo.addon.gwt.proxy.GwtProxyMetadata;
-import org.springframework.roo.addon.gwt.request.GwtRequestMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -80,14 +78,10 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		metadataDependencyRegistry.registerDependency(GwtProxyMetadata.getMetadataIdentifierType(), getProvidesType());
-		metadataDependencyRegistry.registerDependency(GwtRequestMetadata.getMetadataIdentifierType(), getProvidesType());
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		metadataDependencyRegistry.deregisterDependency(GwtProxyMetadata.getMetadataIdentifierType(), getProvidesType());
-		metadataDependencyRegistry.deregisterDependency(GwtRequestMetadata.getMetadataIdentifierType(), getProvidesType());
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {
@@ -104,8 +98,12 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		}
 
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
+		if (proxy == null ) {
+			return null;
+		}
+
 		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(mirroredType);
-		if (proxy == null || request == null) {
+		if (request == null) {
 			return null;
 		}
 
@@ -118,8 +116,6 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			return null;
 		}
 
-		GwtScaffoldMetadata gwtScaffoldMetadata = new GwtScaffoldMetadata(metadataIdentificationString);
-
 		buildType(GwtType.APP_ENTITY_TYPES_PROCESSOR);
 		buildType(GwtType.APP_REQUEST_FACTORY);
 		buildType(GwtType.LIST_PLACE_RENDERER);
@@ -127,6 +123,8 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		buildType(GwtType.LIST_PLACE_RENDERER);
 		buildType(GwtType.DETAILS_ACTIVITIES);
 		buildType(GwtType.MOBILE_ACTIVITIES);
+
+		GwtScaffoldMetadata gwtScaffoldMetadata = new GwtScaffoldMetadata(metadataIdentificationString);
 
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
 		for (MethodMetadata proxyMethod : proxy.getDeclaredMethods()) {
@@ -211,41 +209,36 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 
-			if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(GwtRequestMetadata.getMetadataIdentifierType()))) {
-				ClassOrInterfaceTypeDetails request = typeLocationService.getClassOrInterface(GwtRequestMetadata.getJavaType(upstreamDependency));
-				if (request != null) {
-					ClassOrInterfaceTypeDetails mirroredType = gwtTypeService.lookupEntityFromRequest(request);
-					if (mirroredType != null) {
-						JavaType typeName = PhysicalTypeIdentifier.getJavaType(mirroredType.getDeclaredByMetadataId());
-						Path typePath = PhysicalTypeIdentifier.getPath(mirroredType.getDeclaredByMetadataId());
-						downstreamDependency = createLocalIdentifier(typeName, typePath);
-					}
-				}
-			} else if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(GwtProxyMetadata.getMetadataIdentifierType()))) {
-				ClassOrInterfaceTypeDetails proxy = typeLocationService.getClassOrInterface(GwtProxyMetadata.getJavaType(upstreamDependency));
-				if (proxy != null) {
-					ClassOrInterfaceTypeDetails mirroredType = gwtTypeService.lookupEntityFromProxy(proxy);
-					if (mirroredType != null) {
-						JavaType typeName = PhysicalTypeIdentifier.getJavaType(mirroredType.getDeclaredByMetadataId());
-						Path typePath = PhysicalTypeIdentifier.getPath(mirroredType.getDeclaredByMetadataId());
-						downstreamDependency = createLocalIdentifier(typeName, typePath);
-					}
-				}
-			} else {
 				Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
-
+			   ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
+				if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) != null) {
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(cid);
+					if (entity != null) {
+						upstreamDependency = entity.getDeclaredByMetadataId();
+					}
+				} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(cid);
+					if (entity != null) {
+						upstreamDependency = entity.getDeclaredByMetadataId();
+					}
+				} else if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_LOCATOR) != null) {
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromLocator(cid);
+					if (entity != null) {
+						upstreamDependency = entity.getDeclaredByMetadataId();
+					}
+				}
 				// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 				JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
 				Path typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 				downstreamDependency = createLocalIdentifier(typeName, typePath);
-			}
-
-			// We only need to proceed if the downstream dependency relationship is not already registered
-			// (if it's already registered, the event will be delivered directly later on)
-			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
-				return;
-			}
 		}
+
+		// We only need to proceed if the downstream dependency relationship is not already registered
+		// (if it's already registered, the event will be delivered directly later on)
+		if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
+			return;
+		}
+
 
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");

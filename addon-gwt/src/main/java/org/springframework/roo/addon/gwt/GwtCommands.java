@@ -71,21 +71,20 @@ public class GwtCommands implements CommandMarker {
 	@CliCommand(value = "web gwt request type")
 	public void requestType(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created requests will be placed") JavaPackage javaPackage,
-		@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created request on") JavaType type) {
+		@CliOption(key = "type", mandatory = true, help = "The type to base the created request on") JavaType type) {
 		gwtOperations.requestType(javaPackage, type);
 	}
 
 	@CliCommand(value = "web gwt proxy request all")
 	public void proxyAndRequestAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage) {
-		
 		gwtOperations.proxyAndRequestAll(javaPackage);
 	}
 
 	@CliCommand(value = "web gwt proxy request type")
 	public void proxyAndRequestType(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies and requests will be placed") JavaPackage javaPackage,
-		@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created proxy and request on") JavaType type) {
+		@CliOption(key = "type", mandatory = true, help = "The type to base the created proxy and request on") JavaType type) {
 		gwtOperations.proxyAndRequestType(javaPackage, type);
 	}
 
@@ -95,7 +94,7 @@ public class GwtCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "web gwt scaffold")
-	public void scaffoldType(@CliOption(key = "type", mandatory = true, optionContext = "update", help = "The type to base the created scaffold on") JavaType type) {
+	public void scaffoldType(@CliOption(key = "type", mandatory = true, help = "The type to base the created scaffold on") JavaType type) {
 		gwtOperations.scaffoldType(type);
 	}
 

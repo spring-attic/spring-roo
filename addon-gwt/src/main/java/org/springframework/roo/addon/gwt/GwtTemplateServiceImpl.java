@@ -1,11 +1,10 @@
 package org.springframework.roo.addon.gwt;
 
-import hapax.Template;
-import hapax.TemplateDataDictionary;
-import hapax.TemplateDictionary;
-import hapax.TemplateException;
-import hapax.TemplateLoader;
-
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,12 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
+import hapax.Template;
+import hapax.TemplateDataDictionary;
+import hapax.TemplateDictionary;
+import hapax.TemplateException;
+import hapax.TemplateLoader;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -302,48 +300,65 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		Set<ClassOrInterfaceTypeDetails> proxies = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY);
 		TemplateDataDictionary dataDictionary = buildStandardDataDictionary(type);
 		switch (type) {
-			case APP_ENTITY_TYPES_PROCESSOR: 
-
-				
+			case APP_ENTITY_TYPES_PROCESSOR:
 				for (ClassOrInterfaceTypeDetails proxy : proxies) {
+					if (!GwtUtils.scaffoldProxy(proxy)) {
+						continue;
+					}
 					String proxySimpleName = proxy.getName().getSimpleTypeName();
-				   	String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+					if (entity != null) {
+						String entitySimpleName = entity.getName().getSimpleTypeName();
 
-					dataDictionary.addSection("proxys").setVariable("proxy", proxySimpleName);
+						dataDictionary.addSection("proxys").setVariable("proxy", proxySimpleName);
 
-					String entity1 = new StringBuilder("\t\tif (").append(proxySimpleName).append(".class.equals(clazz)) {\n\t\t\tprocessor.handle").append(entitySimpleName).append("((").append(proxySimpleName).append(") null);\n\t\t\treturn;\n\t\t}").toString();
-					dataDictionary.addSection("entities1").setVariable("entity", entity1);
+						String entity1 = new StringBuilder("\t\tif (").append(proxySimpleName).append(".class.equals(clazz)) {\n\t\t\tprocessor.handle").append(entitySimpleName).append("((").append(proxySimpleName).append(") null);\n\t\t\treturn;\n\t\t}").toString();
+						dataDictionary.addSection("entities1").setVariable("entity", entity1);
 
-					String entity2 = new StringBuilder("\t\tif (proxy instanceof ").append(proxySimpleName).append(") {\n\t\t\tprocessor.handle").append(entitySimpleName).append("((").append(proxySimpleName).append(") proxy);\n\t\t\treturn;\n\t\t}").toString();
-					dataDictionary.addSection("entities2").setVariable("entity", entity2);
+						String entity2 = new StringBuilder("\t\tif (proxy instanceof ").append(proxySimpleName).append(") {\n\t\t\tprocessor.handle").append(entitySimpleName).append("((").append(proxySimpleName).append(") proxy);\n\t\t\treturn;\n\t\t}").toString();
+						dataDictionary.addSection("entities2").setVariable("entity", entity2);
 
-					String entity3 = new StringBuilder("\tpublic abstract void handle").append(entitySimpleName).append("(").append(proxySimpleName).append(" proxy);").toString();
-					dataDictionary.addSection("entities3").setVariable("entity", entity3);
-					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+						String entity3 = new StringBuilder("\tpublic abstract void handle").append(entitySimpleName).append("(").append(proxySimpleName).append(" proxy);").toString();
+						dataDictionary.addSection("entities3").setVariable("entity", entity3);
+						addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+					}
 				}
 				break;
 			case MASTER_ACTIVITIES:
 				for (ClassOrInterfaceTypeDetails proxy : proxies) {
+					if (!GwtUtils.scaffoldProxy(proxy)) {
+						continue;
+					}
 					String proxySimpleName = proxy.getName().getSimpleTypeName();
-					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
-					TemplateDataDictionary section = dataDictionary.addSection("entities");
-					section.setVariable("entitySimpleName", entitySimpleName);
-					section.setVariable("entityFullPath", proxySimpleName);
-					addImport(dataDictionary, entitySimpleName, GwtType.LIST_ACTIVITY, projectMetadata);
-					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
-					addImport(dataDictionary, entitySimpleName, GwtType.LIST_VIEW, projectMetadata);
-					addImport(dataDictionary, entitySimpleName, GwtType.MOBILE_LIST_VIEW, projectMetadata);
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+					if (entity != null) {
+						String entitySimpleName = entity.getName().getSimpleTypeName();
+						TemplateDataDictionary section = dataDictionary.addSection("entities");
+						section.setVariable("entitySimpleName", entitySimpleName);
+						section.setVariable("entityFullPath", proxySimpleName);
+						addImport(dataDictionary, entitySimpleName, GwtType.LIST_ACTIVITY, projectMetadata);
+						addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+						addImport(dataDictionary, entitySimpleName, GwtType.LIST_VIEW, projectMetadata);
+						addImport(dataDictionary, entitySimpleName, GwtType.MOBILE_LIST_VIEW, projectMetadata);
+					}
 				}
 				break;
-			case APP_REQUEST_FACTORY: 
-				dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
-
+			case APP_REQUEST_FACTORY:
 				for (ClassOrInterfaceTypeDetails proxy : proxies) {
-					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
-					ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
-					String entity = new StringBuilder("\t").append(request.getName().getSimpleTypeName()).append(" ").append(StringUtils.uncapitalize(entitySimpleName)).append("Request();").toString();
-					dataDictionary.addSection("entities").setVariable("entity", entity);
-					addImport(dataDictionary, request.getName().getFullyQualifiedTypeName());
+					if (!GwtUtils.scaffoldProxy(proxy)) {
+						continue;
+					}
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+					if (entity != null) {
+						String entitySimpleName = entity.getName().getSimpleTypeName();
+						ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromProxy(proxy);
+						if (request != null) {
+							String requestExpression = new StringBuilder("\t").append(request.getName().getSimpleTypeName()).append(" ").append(StringUtils.uncapitalize(entitySimpleName)).append("Request();").toString();
+							dataDictionary.addSection("entities").setVariable("entity", requestExpression);
+							addImport(dataDictionary, request.getName().getFullyQualifiedTypeName());
+						}
+					}
+					dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
 				}
 
 				if (projectMetadata.isGaeEnabled()) {
@@ -353,23 +368,35 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 			case LIST_PLACE_RENDERER:
 
 				for (ClassOrInterfaceTypeDetails proxy : proxies) {
-					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
-					String proxySimpleName = proxy.getName().getSimpleTypeName();
-					TemplateDataDictionary section = dataDictionary.addSection("entities");
-					section.setVariable("entitySimpleName", entitySimpleName);
-					section.setVariable("entityFullPath", proxySimpleName);
-					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+					if (!GwtUtils.scaffoldProxy(proxy)) {
+						continue;
+					}
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+					if (entity != null) {
+						String entitySimpleName = entity.getName().getSimpleTypeName();
+						String proxySimpleName = proxy.getName().getSimpleTypeName();
+						TemplateDataDictionary section = dataDictionary.addSection("entities");
+						section.setVariable("entitySimpleName", entitySimpleName);
+						section.setVariable("entityFullPath", proxySimpleName);
+						addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+					}
 				}
 				break;
 			case DETAILS_ACTIVITIES:
 
 				for (ClassOrInterfaceTypeDetails proxy : proxies) {
-					String proxySimpleName = proxy.getName().getSimpleTypeName();
-					String entitySimpleName = gwtTypeService.lookupEntityFromProxy(proxy).getName().getSimpleTypeName();
-					String entity = new StringBuilder("\t\t\tpublic void handle").append(entitySimpleName).append("(").append(proxySimpleName).append(" proxy) {\n").append("\t\t\t\tsetResult(new ").append(entitySimpleName).append("ActivitiesMapper(requests, placeController).getActivity(proxyPlace));\n\t\t\t}").toString();
-					dataDictionary.addSection("entities").setVariable("entity", entity);
-					addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
-					addImport(dataDictionary, GwtType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + entitySimpleName + GwtType.ACTIVITIES_MAPPER.getSuffix());
+					if (!GwtUtils.scaffoldProxy(proxy)) {
+						continue;
+					}
+					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+					if (entity != null) {
+						String proxySimpleName = proxy.getName().getSimpleTypeName();
+						String entitySimpleName = entity.getName().getSimpleTypeName();
+						String entityExpression = new StringBuilder("\t\t\tpublic void handle").append(entitySimpleName).append("(").append(proxySimpleName).append(" proxy) {\n").append("\t\t\t\tsetResult(new ").append(entitySimpleName).append("ActivitiesMapper(requests, placeController).getActivity(proxyPlace));\n\t\t\t}").toString();
+						dataDictionary.addSection("entities").setVariable("entity", entityExpression);
+						addImport(dataDictionary, proxy.getName().getFullyQualifiedTypeName());
+						addImport(dataDictionary, GwtType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + entitySimpleName + GwtType.ACTIVITIES_MAPPER.getSuffix());
+					}
 				}
 				break;
 			case MOBILE_ACTIVITIES:
