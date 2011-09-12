@@ -1,6 +1,5 @@
 package org.springframework.roo.project;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -369,19 +368,17 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Determines whether GWT is enabled in the project.
+	 * Determines whether the GWT Maven plugin exists in the pom.
 	 * 
-	 * @return true if the gwt-maven-plugin is present in the pom.xml or the GWT module XML file exists, otherwise false
+	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isGwtEnabled() {
-		boolean gwtEnabled = false;
 		for (final Plugin buildPlugin : buildPlugins) {
 			if ("gwt-maven-plugin".equals(buildPlugin.getArtifactId())) {
-				gwtEnabled = true;
-				break;
+				return true;
 			}
 		}
-		return gwtEnabled;
+		return false;
 	}
 
 	

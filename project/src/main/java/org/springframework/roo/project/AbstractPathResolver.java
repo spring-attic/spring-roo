@@ -127,8 +127,8 @@ public abstract class AbstractPathResolver implements PathResolver {
 		if (parent == null) {
 			return null;
 		}
-		FileDetails parentFi = new FileDetails(parent.getLocation(), null);
-		return parentFi.getRelativeSegment(identifier);
+		FileDetails parentFileDetails = new FileDetails(parent.getLocation(), null);
+		return parentFileDetails.getRelativeSegment(identifier);
 	}
 
 	public String getIdentifier(Path path, String relativePath) {
@@ -136,8 +136,7 @@ public abstract class AbstractPathResolver implements PathResolver {
 		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
 		PathInformation pi = pathCache.get(path);
 		Assert.notNull(pi, "Path '" + path + "' is unknown to the path resolver");
-		File newPath;
-		newPath = new File(pi.getLocation(), relativePath);
+		File newPath = new File(pi.getLocation(), relativePath);
 		return FileDetails.getCanonicalPath(newPath);
 	}
 }
