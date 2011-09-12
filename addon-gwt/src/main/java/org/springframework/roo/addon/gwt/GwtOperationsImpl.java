@@ -168,18 +168,14 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 	}
 
-	public void createLocator(JavaType proxy) {
-		//String locatorType = topLevelPackageName + "." + "server.locator" + "." + entity.getName().getSimpleTypeName() + "Locator";
-	}
-
 	public void setup() {
 		// Install web pieces if not already installed
 		if (!fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
-		final String gwtModuleXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml");
-		boolean gwtAlreadySetup = new File(gwtModuleXml).exists();
+		Set<FileDetails> gwtConfigs = fileManager.findMatchingAntPath(projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml");
+		boolean gwtAlreadySetup = !gwtConfigs.isEmpty();
 
 		if (!gwtAlreadySetup) {
 			String sourceAntPath = "setup/*";
