@@ -69,7 +69,6 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {
-
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return null;
@@ -97,6 +96,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		if (idAccessor == null || versionAccessor == null) {
 			return null;
 		}
+		
 		final JavaType idType = GwtUtils.convertPrimitiveType(idAccessor.getReturnType(), true);
 		String locatorIdentifier = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType));
 		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorIdentifier);
@@ -115,6 +115,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity.getName(), idAccessor));
 		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity.getName(), idType));
 		locatorBuilder.addMethod(getVersionMethod(locatorIdentifier, entity.getName(), versionAccessor));
+		
 		typeManagementService.createOrUpdateTypeOnDisk(locatorBuilder.build());
 		return null;
 	}
