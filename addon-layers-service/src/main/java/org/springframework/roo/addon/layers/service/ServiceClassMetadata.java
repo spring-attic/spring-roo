@@ -5,6 +5,7 @@ import static org.springframework.roo.model.SpringJavaType.TRANSACTIONAL;
 
 import java.lang.reflect.Modifier;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -56,8 +57,9 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Assert.notNull(governorDetails, "Governor details required");
 		Assert.notNull(domainTypePlurals, "Domain type plurals required");
 		
-		for (final JavaType domainType : domainTypeToIdTypeMap.keySet()) {
-			JavaType idType = domainTypeToIdTypeMap.get(domainType);
+		for (final Entry<JavaType, JavaType> entry : domainTypeToIdTypeMap.entrySet()) {
+			final JavaType domainType = entry.getKey();
+			final JavaType idType = entry.getValue();
 			final Map<ServiceLayerMethod, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 				final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, domainTypePlurals.get(domainType));

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -106,8 +107,9 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 				}
 			}
 		}
-		for (JavaType type: compositePrimaryKeyTypes.keySet()) {
-			for (MethodMetadata converterMethod: getCompositePkConverters(type, compositePrimaryKeyTypes.get(type))) {
+		for (final Entry<JavaType, Map<Object, JavaSymbolName>> entry : compositePrimaryKeyTypes.entrySet()) {
+			final JavaType type = entry.getKey();
+			for (final MethodMetadata converterMethod : getCompositePkConverters(type, entry.getValue())) {
 				builder.addMethod(converterMethod);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + converterMethod.getMethodName().getSymbolName() + "());");
 			}

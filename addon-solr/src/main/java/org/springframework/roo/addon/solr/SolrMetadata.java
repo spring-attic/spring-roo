@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -162,8 +163,8 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + destination.getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + identifierAccessor.getMethodName() + "());");
 		StringBuilder textField = new StringBuilder("new StringBuilder()");
 
-		for (MethodMetadata method : accessorDetails.keySet()) {
-			FieldMetadata field = accessorDetails.get(method);
+		for (final Entry<MethodMetadata, FieldMetadata> entry : accessorDetails.entrySet()) {
+			final FieldMetadata field = entry.getValue();
 			if (versionField != null && field.getFieldName().equals(versionField.getFieldName())) {
 				continue;
 			}
@@ -173,10 +174,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			if (!textField.toString().endsWith("StringBuilder()")) {
 				textField.append(".append(\" \")");
 			}
+			final JavaSymbolName accessorMethod = entry.getKey().getMethodName();
 			if (field.getFieldType().equals(new JavaType("java.util.Calendar"))) {
-				textField.append(".append(").append(javaBeanFieldName).append(".").append(method.getMethodName()).append("().getTime()").append(")");
+				textField.append(".append(").append(javaBeanFieldName).append(".").append(accessorMethod).append("().getTime()").append(")");
 			} else {
-				textField.append(".append(").append(javaBeanFieldName).append(".").append(method.getMethodName()).append("()").append(")");
+				textField.append(".append(").append(javaBeanFieldName).append(".").append(accessorMethod).append("()").append(")");
 			}
 			String fieldName = javaBeanFieldName + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType());
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
@@ -188,9 +190,9 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				}
 			}
 			if (field.getFieldType().equals(new JavaType("java.util.Calendar"))) {
-				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "().getTime());");
+				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + accessorMethod.getSymbolName() + "().getTime());");
 			} else {
-				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "());");
+				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + accessorMethod.getSymbolName() + "());");
 			}
 		}
 		bodyBuilder.appendFormalLine("// Add summary field to allow searching documents for objects of this type");

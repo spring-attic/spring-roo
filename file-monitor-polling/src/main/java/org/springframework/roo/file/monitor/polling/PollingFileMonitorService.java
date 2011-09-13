@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -80,9 +81,9 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 			for (MonitoringRequest request : requests) {
 				if (priorExecution.containsKey(request)) {
-					Map<File,Long> priorFiles = priorExecution.get(request);
-					for (File priorFile : priorFiles.keySet()) {
-						monitored.add(new FileDetails(priorFile, priorFiles.get(priorFile)));
+					final Map<File, Long> priorFiles = priorExecution.get(request);
+					for (final Entry<File, Long> entry : priorFiles.entrySet()) {
+						monitored.add(new FileDetails(entry.getKey(), entry.getValue()));
 					}
 				}
 			}
@@ -299,8 +300,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					}
 				} else {
 					// No data from previous execution, so it's a newly-monitored location
-					for (File thisFile : currentExecution.keySet()) {
-						eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentExecution.get(thisFile)), FileOperation.MONITORING_START, null));
+					for (final Entry<File, Long> entry : currentExecution.entrySet()) {
+						eventsToPublish.add(new FileEvent(new FileDetails(entry.getKey(), entry.getValue()), FileOperation.MONITORING_START, null));
 					}
 				}
 				

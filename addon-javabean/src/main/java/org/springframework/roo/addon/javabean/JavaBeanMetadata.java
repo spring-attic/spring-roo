@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -63,12 +64,13 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		this.declaredFields = declaredFields;
 
 		// Add getters and setters
-		for (FieldMetadata field : declaredFields.keySet()) {
+		for (final Entry<FieldMetadata, JavaSymbolName> entry : declaredFields.entrySet()) {
+			final FieldMetadata field = entry.getKey();
 			MethodMetadata accessorMethod = getDeclaredGetter(field);
 			MethodMetadata mutatorMethod = getDeclaredSetter(field);
 
 			// Check to see if GAE is interested
-			if (declaredFields.get(field) != null) {
+			if (entry.getValue() != null) {
 				JavaSymbolName hiddenIdFieldName;
 				if (field.getFieldType().isCommonCollectionType()) {
 					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Keys");

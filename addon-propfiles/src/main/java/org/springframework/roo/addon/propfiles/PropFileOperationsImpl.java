@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -112,9 +113,10 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		}
 
 		boolean saveNeeded = false;
-		for (String key: properties.keySet()) {
-			String existingValue = props.getProperty(key);
-			String newValue = properties.get(key);
+		for (final Entry<String, String> entry : properties.entrySet()) {
+			final String key = entry.getKey();
+			final String newValue = entry.getValue();
+			final String existingValue = props.getProperty(key);
 			if (existingValue == null || (!existingValue.equals(newValue) && changeExisting)) {
 				props.setProperty(key, newValue);
 				saveNeeded = true;

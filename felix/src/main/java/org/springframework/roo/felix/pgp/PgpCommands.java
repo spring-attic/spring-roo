@@ -3,7 +3,7 @@ package org.springframework.roo.felix.pgp;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedMap;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 
 import org.apache.felix.scr.annotations.Component;
@@ -57,12 +57,12 @@ public class PgpCommands implements CommandMarker {
 	
 	@CliCommand(value="pgp refresh all", help="Refreshes all keys from public key servers")
 	public String refreshKeysFromServer() {
-		StringBuilder sb = new StringBuilder();
-		SortedMap<PgpKeyId,String> refreshOutcome = pgpService.refresh();
-		for (PgpKeyId key : refreshOutcome.keySet()) {
-			String outcome = refreshOutcome.get(key);
+		final StringBuilder sb = new StringBuilder();
+		for (final Entry<PgpKeyId, String> entry : pgpService.refresh().entrySet()) {
+			final PgpKeyId key = entry.getKey();
+			final String outcome = entry.getValue();
 			appendLine(sb, key + " : " + outcome);
-		}
+		} 
 		return sb.toString();
 	}
 	

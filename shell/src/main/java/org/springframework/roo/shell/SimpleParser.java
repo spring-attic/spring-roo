@@ -896,8 +896,7 @@ public class SimpleParser implements Parser {
 				topSection.appendChild(new XmlElementBuilder("title", document).setText(section).build());
 				topSection.appendChild(new XmlElementBuilder("para", document).setText(section + " are contained in " + target.getClass().getName() + ".").build());
 
-				for (String cmd : individualCommands.keySet()) {
-					Element value = individualCommands.get(cmd);
+				for (final Element value : individualCommands.values()) {
 					topSection.appendChild(value);
 				}
 

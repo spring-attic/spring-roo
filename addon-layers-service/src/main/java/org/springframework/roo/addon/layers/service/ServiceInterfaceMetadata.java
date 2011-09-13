@@ -2,6 +2,7 @@ package org.springframework.roo.addon.layers.service;
 
 import java.lang.reflect.Modifier;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -59,10 +60,11 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
 
-		for (final JavaType domainType : domainTypeToIdTypeMap.keySet()) {
+		for (final Entry<JavaType, JavaType> entry : domainTypeToIdTypeMap.entrySet()) {
+			final JavaType domainType = entry.getKey();
 			final String plural = domainTypePlurals.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
-				builder.addMethod(getMethod(method, domainType, domainTypeToIdTypeMap.get(domainType), plural));
+				builder.addMethod(getMethod(method, domainType, entry.getValue(), plural));
 			}
 		}
 

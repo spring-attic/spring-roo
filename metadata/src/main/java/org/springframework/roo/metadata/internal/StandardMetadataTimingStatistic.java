@@ -35,7 +35,7 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 	}
 
 	public int compareTo(MetadataTimingStatistic o) {
-		int result = new Long(time).compareTo(o.getTime());
+		int result = Long.valueOf(time).compareTo(o.getTime());
 		if (result == 0) {
 			result = Long.valueOf(invocations).compareTo(o.getInvocations());
 		}
