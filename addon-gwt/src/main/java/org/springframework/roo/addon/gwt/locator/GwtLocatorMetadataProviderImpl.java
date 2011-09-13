@@ -185,10 +185,12 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 			boolean processed = false;
 			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
 				ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(cid);
-				JavaType typeName = PhysicalTypeIdentifier.getJavaType(proxy.getDeclaredByMetadataId());
-				Path typePath = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId());
-				downstreamDependency = GwtLocatorMetadata.createIdentifier(typeName, typePath);
-				processed = true;
+				if (proxy != null) {
+					JavaType typeName = PhysicalTypeIdentifier.getJavaType(proxy.getDeclaredByMetadataId());
+					Path typePath = PhysicalTypeIdentifier.getPath(proxy.getDeclaredByMetadataId());
+					downstreamDependency = GwtLocatorMetadata.createIdentifier(typeName, typePath);
+					processed = true;
+				}
 			}
 			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) == null) {
 				boolean found = false;
