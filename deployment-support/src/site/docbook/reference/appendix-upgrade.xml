@@ -251,6 +251,12 @@
         linkend="command-index-web-mvc-finder-all">web mvc finder all</link>
         command.</para>
       </listitem>
+
+		<listitem>
+        <para>To update a Roo GWT project please run
+		<link linkend="command-index-web-gwt-setup">web gwt setup</link>
+		</para>
+      </listitem>
     </itemizedlist>
   </section>
 
