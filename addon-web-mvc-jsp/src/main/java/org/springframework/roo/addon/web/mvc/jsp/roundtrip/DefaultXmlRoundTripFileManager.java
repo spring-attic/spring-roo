@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller;
+package org.springframework.roo.addon.web.mvc.jsp.roundtrip;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,9 +58,9 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 			} catch (IOException ignored) {}
 			final Document original = XmlUtils.readXml(fileManager.getInputStream(filename));
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
-				String updateContents = XmlUtils.nodeToString(original);
 				DomUtils.removeTextNodes(original);
-				fileManager.createOrUpdateTextFileIfRequired(filename, updateContents, false);
+				String updateContents = XmlUtils.nodeToString(original);
+				fileManager.createOrUpdateTextFileIfRequired(filename, updateContents, true);
 			}
 		} else {
 			String contents = XmlUtils.nodeToString(proposed);
@@ -69,7 +69,7 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 				String contentsSha = HexUtils.toHex(digest);
 				fileContentsMap.put(filename, contentsSha);
 			}
-			fileManager.createOrUpdateTextFileIfRequired(filename, contents, false);
+			fileManager.createOrUpdateTextFileIfRequired(filename, contents, true);
 		}
 	}
 }
