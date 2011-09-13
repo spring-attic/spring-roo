@@ -41,7 +41,6 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 
 	public JavaType getItdJavaType(ItdMetadataProvider metadataProvider) {
 		Assert.notNull(metadataProvider, "Metadata provider required");
-		Assert.notNull(metadataProvider, "Metadata provider required");
 		return new JavaType(PhysicalTypeIdentifier.getJavaType(getId()).getFullyQualifiedTypeName() + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix());
 	}
 }
