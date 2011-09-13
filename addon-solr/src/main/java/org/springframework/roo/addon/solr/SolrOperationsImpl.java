@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.solr;
 
-import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
-import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_SOLR_SEARCHABLE;
 
 import java.io.IOException;
@@ -17,6 +15,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -128,7 +127,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	public void addAll() {
-		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_ENTITY, ROO_JPA_ENTITY);
+		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithTag(PersistenceCustomDataKeys.PERSISTENT_TYPE);
 		for (ClassOrInterfaceTypeDetails cid : cids) {
 			if (!Modifier.isAbstract(cid.getModifier())) {
 				addSolrSearchableAnnotation(cid);
@@ -155,7 +154,7 @@ public class SolrOperationsImpl implements SolrOperations {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);
-			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
+			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		}
 	}
 }
