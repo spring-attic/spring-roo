@@ -28,7 +28,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
-import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
@@ -48,7 +47,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtRequestMetadataProvider{
 
 	@Reference protected GwtTypeService gwtTypeService;
-	@Reference protected LayerService layerService;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;
 	@Reference protected ProjectOperations projectOperations;
 	@Reference protected TypeLocationService typeLocationService;

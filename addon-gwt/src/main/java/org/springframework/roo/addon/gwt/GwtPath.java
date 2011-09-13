@@ -62,10 +62,6 @@ public enum GwtPath {
 		return getSegmentName().substring(1).replace('/', '.');
 	}
 
-	public String canonicalFileSystemPath(ProjectMetadata projectMetadata, String filename) {
-		return canonicalFileSystemPath(projectMetadata) + File.separatorChar + filename;
-	}
-
 	public String packageName(ProjectMetadata projectMetadata) {
 		if (WEB.equals(this)) {
 			return "";
