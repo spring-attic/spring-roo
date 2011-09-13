@@ -110,7 +110,7 @@ public class ControllerCommands implements CommandMarker {
 	@CliCommand(value = "controller all", help = "Scaffold controllers for all project entities without an existing controller - deprecated, use 'web mvc setup' + 'web mvc all' instead") 
 	public void generateAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new controllers will be placed") JavaPackage javaPackage) {
-		
+		logger.warning("This command has been depricated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc all --package ' instead.");
 		controllerOperations.setup();
 		webMvcAll(javaPackage);
 	}
@@ -122,7 +122,7 @@ public class ControllerCommands implements CommandMarker {
 		@CliOption(key = "entity", mandatory = false, optionContext = "update,project", unspecifiedDefaultValue = "*", help = "The name of the entity object which the controller exposes to the web tier") JavaType entity, 
 		@CliOption(key = "path", mandatory = false, help = "The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path, 
 		@CliOption(key = "disallowedOperations", mandatory = false, help = "A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") String disallowedOperations) {
-		
+		logger.warning("This command has been depricated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc scaffold' instead.");
 		controllerOperations.setup();
 		webMvcScaffold(controller, entity, path, disallowedOperations);
 	}

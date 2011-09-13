@@ -11,6 +11,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Commands for Web-related add-on to be used by the Roo shell.
@@ -21,7 +22,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Component 
 @Service 
 public class JspCommands implements CommandMarker {
-	private Logger log = Logger.getLogger(getClass().getName());
+	private Logger log =  HandlerUtils.getLogger(JspCommands.class);
 	@Reference private JspOperations jspOperations;
 
 	@CliAvailabilityIndicator({ "web mvc controller", "controller class", "web mvc install view", "web mvc view", "web mvc update tags" }) 
@@ -97,7 +98,7 @@ public class JspCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = true, help = "The path the static view to create in (required, ie '/foo/blah')") String path, 
 		@CliOption(key = "viewName", mandatory = true, help = "The view name the mapping this view should adopt (required, ie 'index')") String viewName, 
 		@CliOption(key = "title", mandatory = true, help = "The title of the view") String title) {
-	
+		log.warning("This command has been depricated and will be disabled soon! Please use 'web mvc setup' followed by 'web mvc install view' instead.");
 		view(path, viewName, title);
 	}
 	

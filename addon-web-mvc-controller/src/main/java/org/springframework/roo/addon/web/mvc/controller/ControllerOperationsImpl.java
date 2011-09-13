@@ -118,7 +118,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 				String stringPath = mappingAttribute.getValue();
 				if (StringUtils.hasText(stringPath) && stringPath.equalsIgnoreCase("/" + path)) {
 					existing = coitd;
-					LOG.info("Found existing controller for mapping '/" + path + "', applying @RooWebScaffold annotation to this type");
+					LOG.info("Found existing controller for mapping '/" + path + "'.");
 				}
 			}
 		}
@@ -126,7 +126,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		webMvcOperations.installConversionService(controller.getPackage());
 		
 		List<AnnotationMetadataBuilder> annotations = null;
-		
 		
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
 		if (existing == null) {
@@ -147,14 +146,16 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
 			annotations = typeDetailsBuilder.getAnnotations();
 		}
-		// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
-		List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		rooWebScaffoldAttributes.add(new StringAttributeValue(pathName, path));
-		rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
-		for (String operation : disallowedOperations) {
-			rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));
+		if (existing != null && MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), ROO_WEB_SCAFFOLD) == null) {
+			// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
+			List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			rooWebScaffoldAttributes.add(new StringAttributeValue(pathName, path));
+			rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
+			for (String operation : disallowedOperations) {
+				rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));
+			}
+			annotations.add(new AnnotationMetadataBuilder(ROO_WEB_SCAFFOLD, rooWebScaffoldAttributes));
 		}
-		annotations.add(new AnnotationMetadataBuilder(ROO_WEB_SCAFFOLD, rooWebScaffoldAttributes));
 		typeDetailsBuilder.setAnnotations(annotations);
 		
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
