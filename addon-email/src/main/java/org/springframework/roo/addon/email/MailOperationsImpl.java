@@ -12,13 +12,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -32,6 +35,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.PairList;
@@ -58,12 +62,14 @@ public class MailOperationsImpl implements MailOperations {
 	private static final String SPRING_TASK_NS = "http://www.springframework.org/schema/task";
 	private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.0.xsd";
 	private static final String TEMPLATE_MESSAGE_FIELD = "templateMessage";
+	private static final Logger log = HandlerUtils.getLogger(MailOperationsImpl.class);
 	
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private TypeManagementService typeManagementService;
+	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isInstallEmailAvailable() {
 		return projectOperations.isProjectAvailable();
@@ -248,7 +254,12 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Obtain the physical type and its mutable class details
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType);
-		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+		ClassOrInterfaceTypeDetails existing = typeLocationService.findClassOrInterface(targetType);
+		if (existing == null) {
+			log.warning("Aborting: Unable to find metadata for target type '" + targetType.getFullyQualifiedTypeName() + "'");
+			return;
+		}
+		final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
 
 		// Add the MailSender field
 		final FieldMetadataBuilder mailSenderFieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, PRIVATE_TRANSIENT, annotations, fieldName, MAIL_SENDER);
