@@ -130,7 +130,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
 		if (existing == null) {
-			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(existing == null ? controller : existing.getName(), Path.SRC_MAIN_JAVA);
+			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
 			
 			// Create annotation @RequestMapping("/myobject/**")
