@@ -45,6 +45,9 @@ json all --deepSerialize
 web mvc json setup
 web mvc json all
 
+web mvc setup
+web mvc all --package ~.web
+
 // Example scripts for JSON remoting:
 // curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '{name: "Thin Crust"}' http://localhost:8080/pizzashop/bases
 // curl -i -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '[{name: "Cheesy Crust"},{name: "Thick Crust"}]' http://localhost:8080/pizzashop/bases/jsonArray

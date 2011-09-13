@@ -525,6 +525,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
         tomcat_stop_start_get_stop http://localhost:8888/wedding
 
 		load_roo_build_and_test script pizzashop.roo
+        tomcat_stop_start_get_stop http://localhost:8888/pizzashop
 		pizzashop_tests
 
         load_roo_build_and_test script expenses.roo	
