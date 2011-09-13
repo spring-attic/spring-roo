@@ -29,6 +29,8 @@ public final class GwtUtils {
 	public static final JavaType LOCATOR = new JavaType("com.google.web.bindery.requestfactory.shared.Locator");
 	public static final JavaType ENTITY_PROXY = new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy");
 	public static final JavaType REQUEST_CONTEXT = new JavaType("com.google.web.bindery.requestfactory.shared.RequestContext");
+	public static final JavaType OLD_ENTITY_PROXY = new JavaType("com.google.gwt.requestfactory.shared.EntityProxy");
+	public static final JavaType OLD_REQUEST_CONTEXT = new JavaType("com.google.gwt.requestfactory.shared.RequestContext");
 	public static final JavaType REQUEST = new JavaType("com.google.web.bindery.requestfactory.shared.Request");
 	public static final JavaType INSTANCE_REQUEST = new JavaType("com.google.web.bindery.requestfactory.shared.InstanceRequest");
 	public static final JavaType PROXY_FOR_NAME = new JavaType("com.google.web.bindery.requestfactory.shared.ProxyForName");

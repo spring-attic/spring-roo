@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -38,6 +39,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.Plugin;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.osgi.OSGiUtils;
@@ -180,17 +182,35 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		if (!gwtAlreadySetup) {
 			String sourceAntPath = "setup/*";
-			if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
-				return;
-			}
 			String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, topPackageName.replace('.', File.separatorChar));
 			updateFile(sourceAntPath, targetDirectory, "", false);
 
 			sourceAntPath = "setup/client/*";
-			if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
-				return;
-			}
 			updateFile(sourceAntPath, targetDirectory + "/client", "", false);
+		}
+
+		for (ClassOrInterfaceTypeDetails proxyOrRequest : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_MIRRORED_FROM)) {
+			System.out.println("proxyOrRequest: " + proxyOrRequest.getName());
+			ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(proxyOrRequest);
+			if (proxyOrRequest.extendsType(GwtUtils.ENTITY_PROXY) || proxyOrRequest.extendsType(GwtUtils.OLD_ENTITY_PROXY)) {
+				AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(proxyOrRequest.getAnnotations(), RooJavaType.ROO_GWT_MIRRORED_FROM);
+				if (annotationMetadata != null) {
+					AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
+					annotationMetadataBuilder.setAnnotationType(RooJavaType.ROO_GWT_PROXY);
+					builder.removeAnnotation(RooJavaType.ROO_GWT_MIRRORED_FROM);
+					builder.addAnnotation(annotationMetadataBuilder);
+					typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+				}
+			} else if (proxyOrRequest.extendsType(GwtUtils.REQUEST_CONTEXT) || proxyOrRequest.extendsType(GwtUtils.OLD_REQUEST_CONTEXT)) {
+				AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(proxyOrRequest.getAnnotations(), RooJavaType.ROO_GWT_MIRRORED_FROM);
+				if (annotationMetadata != null) {
+					AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
+					annotationMetadataBuilder.setAnnotationType(RooJavaType.ROO_GWT_REQUEST);
+					builder.removeAnnotation(RooJavaType.ROO_GWT_MIRRORED_FROM);
+					builder.addAnnotation(annotationMetadataBuilder);
+					typeManagementService.createOrUpdateTypeOnDisk(builder.build());
+				}
+			}
 		}
 
 		// Add GWT natures and builder names to maven eclipse plugin
@@ -213,7 +233,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		// Update persistence.xml
 		updatePersistenceXml();
 
-		updateBuildPlugins(projectOperations.getProjectMetadata().isGaeEnabled());
+			updateBuildPlugins(projectOperations.getProjectMetadata().isGaeEnabled());
 	}
 
 	private void createProxy(ClassOrInterfaceTypeDetails entity, JavaPackage destinationPackage) {
@@ -407,6 +427,8 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (Element dependencyElement : gwtDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
+		projectOperations.removeDependencies(dependencies);
+		metadataService.evict(ProjectMetadata.getProjectIdentifier());
 		projectOperations.addDependencies(dependencies);
 	}
 

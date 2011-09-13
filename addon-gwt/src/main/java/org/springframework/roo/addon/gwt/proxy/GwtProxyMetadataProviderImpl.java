@@ -141,7 +141,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
 
 		// Only inherit from EntityProxy if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.ENTITY_PROXY)) {
+		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.OLD_ENTITY_PROXY)) {
 			typeDetailsBuilder.addExtendsTypes(GwtUtils.ENTITY_PROXY);
 		}
 

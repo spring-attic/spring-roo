@@ -180,7 +180,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			typeDetailsBuilder.updateTypeAnnotation(annotationMetadataBuilder);
 		}
 		// Only inherit from RequestContext if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.REQUEST_CONTEXT)) {
+		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.OLD_REQUEST_CONTEXT)) {
 			typeDetailsBuilder.addExtendsTypes(GwtUtils.REQUEST_CONTEXT);
 		}
 		typeDetailsBuilder.setDeclaredMethods(methods);
