@@ -174,7 +174,8 @@ public class GwtOperationsImpl implements GwtOperations {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
-		Set<FileDetails> gwtConfigs = fileManager.findMatchingAntPath(projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml");
+		String topPackageName = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName();
+		Set<FileDetails> gwtConfigs = fileManager.findMatchingAntPath(projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + topPackageName.replace('.', File.separatorChar) + File.separator + "*.gwt.xml");
 		boolean gwtAlreadySetup = !gwtConfigs.isEmpty();
 
 		if (!gwtAlreadySetup) {
@@ -182,7 +183,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
 				return;
 			}
-			String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar));
+			String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, topPackageName.replace('.', File.separatorChar));
 			updateFile(sourceAntPath, targetDirectory, "", false);
 
 			sourceAntPath = "setup/client/*";
