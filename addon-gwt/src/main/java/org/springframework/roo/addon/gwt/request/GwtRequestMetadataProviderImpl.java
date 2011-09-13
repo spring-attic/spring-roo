@@ -159,6 +159,16 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		}
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(request);
+
+		// Only inherit from RequestContext if extension is not already defined
+		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.OLD_REQUEST_CONTEXT) && !typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.REQUEST_CONTEXT)) {
+			typeDetailsBuilder.addExtendsTypes(GwtUtils.REQUEST_CONTEXT);
+		}
+
+		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.REQUEST_CONTEXT)) {
+			typeDetailsBuilder.addExtendsTypes(GwtUtils.REQUEST_CONTEXT);
+		}
+
 		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
 		AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(request, GwtUtils.REQUEST_ANNOTATIONS);
 		if (annotationMetadata != null && entity != null) {
@@ -178,10 +188,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			}
 			typeDetailsBuilder.removeAnnotation(annotationMetadata.getAnnotationType());
 			typeDetailsBuilder.updateTypeAnnotation(annotationMetadataBuilder);
-		}
-		// Only inherit from RequestContext if extension is not already defined
-		if (!typeDetailsBuilder.getExtendsTypes().contains(GwtUtils.OLD_REQUEST_CONTEXT)) {
-			typeDetailsBuilder.addExtendsTypes(GwtUtils.REQUEST_CONTEXT);
 		}
 		typeDetailsBuilder.setDeclaredMethods(methods);
 		return gwtFileManager.write(typeDetailsBuilder.build(), GwtUtils.PROXY_REQUEST_WARNING);
