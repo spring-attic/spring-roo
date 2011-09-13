@@ -60,7 +60,7 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
 				DomUtils.removeTextNodes(original);
 				String updateContents = XmlUtils.nodeToString(original);
-				fileManager.createOrUpdateTextFileIfRequired(filename, updateContents, true);
+				fileManager.createOrUpdateTextFileIfRequired(filename, updateContents, false);
 			}
 		} else {
 			String contents = XmlUtils.nodeToString(proposed);
@@ -69,7 +69,7 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 				String contentsSha = HexUtils.toHex(digest);
 				fileContentsMap.put(filename, contentsSha);
 			}
-			fileManager.createOrUpdateTextFileIfRequired(filename, contents, true);
+			fileManager.createOrUpdateTextFileIfRequired(filename, contents, false);
 		}
 	}
 }
