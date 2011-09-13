@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.2.0.BUILD-SNAPSHOT [rev b96df7e].</para>
+    <para>This appendix was automatically built from Roo 1.2.0.M1 [rev 3dcc5b9].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -2345,7 +2345,7 @@
                 <varlistentry>
                     <term>--cardinality</term>
                     <listitem>
-                        <para>The relationship cardinarily at a JPA level; default: 'MANY_TO_ONE'</para>
+                        <para>The relationship cardinality at a JPA level; default: 'MANY_TO_ONE'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2430,7 +2430,7 @@
                 <varlistentry>
                     <term>--cardinality</term>
                     <listitem>
-                        <para>The relationship cardinarily at a JPA level; default: 'MANY_TO_MANY'</para>
+                        <para>The relationship cardinality at a JPA level; default: 'MANY_TO_MANY'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -2744,6 +2744,152 @@
             <programlisting><![CDATA[gwt setup]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
+        <section xml:id="command-index-web-gwt-all">
+            <title>web gwt all</title>
+            <para>Locates all entities in the project and creates GWT requests, proxies and creates the scaffold</para>
+            <programlisting><![CDATA[web gwt all --proxyPackage --requestPackage]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--proxyPackage</term>
+                    <listitem>
+                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--requestPackage</term>
+                    <listitem>
+                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-gwt-gae-update">
+            <title>web gwt gae update</title>
+            <para>Updates the GWT project to support GAE</para>
+            <programlisting><![CDATA[web gwt gae update]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-web-gwt-proxy-all">
+            <title>web gwt proxy all</title>
+            <para>Locates all entities in the project and creates GWT proxies</para>
+            <programlisting><![CDATA[web gwt proxy all --package]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-gwt-proxy-request-all">
+            <title>web gwt proxy request all</title>
+            <para>Locates all entities in the project and creates GWT requests and proxies</para>
+            <programlisting><![CDATA[web gwt proxy request all --package]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which created proxies and requests will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-gwt-proxy-request-type">
+            <title>web gwt proxy request type</title>
+            <para>Creates a proxy and request based on the specified type</para>
+            <programlisting><![CDATA[web gwt proxy request type --package --type]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which created proxies and requests will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The type to base the created proxy and request on; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-gwt-proxy-type">
+            <title>web gwt proxy type</title>
+            <para>Creates a GWT proxy based on the specified type</para>
+            <programlisting><![CDATA[web gwt proxy type --package --type]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The type to base the created request on; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-gwt-request-all">
+            <title>web gwt request all</title>
+            <para>Locates all entities in the project and creates GWT requests</para>
+            <programlisting><![CDATA[web gwt request all --package]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-gwt-request-type">
+            <title>web gwt request type</title>
+            <para>Creates a GWT proxy based on the specified type</para>
+            <programlisting><![CDATA[web gwt request type --package --type]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The type to base the created request on; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-gwt-scaffold">
+            <title>web gwt scaffold</title>
+            <para>Creates a GWT request, proxy and scaffold for the specified</para>
+            <programlisting><![CDATA[web gwt scaffold --proxyPackage --requestPackage --type]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--proxyPackage</term>
+                    <listitem>
+                        <para>The package in which created proxies will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--requestPackage</term>
+                    <listitem>
+                        <para>The package in which created requests will be placed; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The type to base the created scaffold on; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-web-gwt-setup">
             <title>web gwt setup</title>
             <para>Install Google Web Toolkit (GWT) into your project</para>
@@ -2786,6 +2932,12 @@
                     <term>--permitReservedWords</term>
                     <listitem>
                         <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transactional</term>
+                    <listitem>
+                        <para>Indicates whether the created test cases should be run withing a Spring transaction; default: 'true'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -3651,6 +3803,103 @@
             </variablelist>
         </section>
     </section>
+    <section xml:id="command-index-mongo-commands">
+        <title>Mongo Commands</title>
+        <para>Mongo Commands are contained in org.springframework.roo.addon.layers.repository.mongo.MongoCommands.</para>
+        <section xml:id="command-index-entity-mongo">
+            <title>entity mongo</title>
+            <para>Creates a domain entity which can be backed by a MongoDB repository</para>
+            <programlisting><![CDATA[entity mongo --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>Implementation class for the specified interface; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierType</term>
+                    <listitem>
+                        <para>The ID type to be used for this domain type (defaults to BigInteger); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--testAutomatically</term>
+                    <listitem>
+                        <para>Create automatic integration tests for this entity; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-mongo-setup">
+            <title>mongo setup</title>
+            <para>Configures the project for MongoDB peristence.</para>
+            <programlisting><![CDATA[mongo setup]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--username</term>
+                    <listitem>
+                        <para>Username for accessing the database (defaults to ''); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--password</term>
+                    <listitem>
+                        <para>Password for accessing the database (defaults to ''); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--databaseName</term>
+                    <listitem>
+                        <para>Name of the database (defaults to project name); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--port</term>
+                    <listitem>
+                        <para>Port for the database (defaults to '27017'); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--host</term>
+                    <listitem>
+                        <para>Host for the database (defaults to '127.0.0.1'); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--cloudFoundry</term>
+                    <listitem>
+                        <para>Deploy to CloudFoundry (defaults to 'false'); default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-repository-mongo">
+            <title>repository mongo</title>
+            <para>Adds @RooRepositoryMongo annotation to target type</para>
+            <programlisting><![CDATA[repository mongo --interface]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--interface</term>
+                    <listitem>
+                        <para>The java interface to apply this annotation to; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>Implementation class for the specified interface; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The domain entity this repository should expose; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
     <section xml:id="command-index-op4j-commands">
         <title>Op4j Commands</title>
         <para>Op4j Commands are contained in org.springframework.roo.addon.op4j.Op4jCommands.</para>
@@ -3672,6 +3921,23 @@
             <para>Setup Op4j addon</para>
             <programlisting><![CDATA[op4j setup]]></programlisting>
             <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section xml:id="command-index-os-commands">
+        <title>Os Commands</title>
+        <para>Os Commands are contained in org.springframework.roo.addon.oscommands.OsCommands.</para>
+        <section xml:id="command-index-!">
+            <title>!</title>
+            <para>Allows execution of operating system (OS) commands.</para>
+            <programlisting><![CDATA[!]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--command</term>
+                    <listitem>
+                        <para>The command to execute; default: '*'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
         </section>
     </section>
     <section xml:id="command-index-pgp-commands">
@@ -3891,7 +4157,7 @@
     </section>
     <section xml:id="command-index-repository-jpa-commands">
         <title>Repository Jpa Commands</title>
-        <para>Repository Jpa Commands are contained in org.springframework.roo.addon.layers.repository.RepositoryJpaCommands.</para>
+        <para>Repository Jpa Commands are contained in org.springframework.roo.addon.layers.repository.jpa.RepositoryJpaCommands.</para>
         <section xml:id="command-index-repository-jpa">
             <title>repository jpa</title>
             <para>Adds @RooRepositoryJpa annotation to target type</para>
@@ -4141,7 +4407,7 @@
     </section>
     <section xml:id="command-index-web-json-commands">
         <title>Web Json Commands</title>
-        <para>Web Json Commands are contained in org.springframework.roo.addon.web.mvc.json.WebJsonCommands.</para>
+        <para>Web Json Commands are contained in org.springframework.roo.addon.web.mvc.controller.json.WebJsonCommands.</para>
         <section xml:id="command-index-web-mvc-json-add">
             <title>web mvc json add</title>
             <para>Adds @RooJson annotation to target type</para>
