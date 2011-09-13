@@ -690,6 +690,17 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
         Toolkit</link> (GWT) application using Spring Roo. This shows you the
         new GWT scaffolding support we added to Roo 1.1.</para>
       </listitem>
+
+      <listitem>
+        <para><emphasis>pizzashop.roo</emphasis>: The PizzaShop sample script
+        demonstrates Roo's integration of JPA composite primary keys. It
+        produces a headless application which is accessible via JSON
+        (available through Spring MVC REST integration). To add a Web UI on
+        top of it, simply run the <link
+        linkend="command-index-web-mvc-all">web mvc all</link> command. The
+        application is described in greater detail in our <link
+        linkend="beginning">tutorial</link>.</para>
+      </listitem>
     </itemizedlist>
   </section>
 
