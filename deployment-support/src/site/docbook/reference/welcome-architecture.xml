@@ -540,15 +540,11 @@ public class Choice {
     application and Roo achieves separation of concern via its AspectJ
     ITD-based architecture.</para>
 
-    <para>If you would like to use a services layer, it's as simple as
-    creating a new class (and optional interface) and annotating that class
-    with Spring's <code>@Services</code> <link
-    xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations">stereotype
-    annotation</link>. Just ensure the services layer class appears under the
-    same package as you nominated in the <link
-    linkend="command-index-project">create project</link> command, and Spring
-    Framework will then automatically detect your services layer class when it
-    launches your application.</para>
+    <para>If you would like to use a services layer, since release 1.2.0 Roo
+    offers automatic service layer integration for your application. Please
+    refer to the <link linkend="service-layer">service layer</link> section in
+    the <link linkend="base-layers">application layering</link> chapter for
+    further details.</para>
   </section>
 
   <section xml:id="architecture-dao">
@@ -601,8 +597,8 @@ public class Choice {
           methods, the ability to plug in an alternate implementation is
           already fully supported despite there being no formal DAO layer. You
           can see this yourself by issuing the <link
-          linkend="command-index-jpa-setup">jpa setup
-          </link>command and specifying alternate implementations.</para>
+          linkend="command-index-jpa-setup">jpa setup </link>command and
+          specifying alternate implementations.</para>
         </listitem>
 
         <listitem>
@@ -682,11 +678,9 @@ public class Choice {
     engineering-wise desirable and it's also far less effort for you to write
     and maintain.</para>
 
-    <para>If you are interested in DAO support despite the above, <link
-    xlink:href="http://jira.springframework.org/browse/ROO-301">ROO-301</link>
-    represents an enhancement request for more flexibility around DAOs. You
-    are invited to track this enhancement request or vote for it if you would
-    like to see this. We plan on actioning this enhancement request in the
-    next version of Roo.</para>
+    <para>If you are interested in DAO support despite the above Roo offers
+    support for different repository layers as of release 1.2.0. Please refer
+    to the <link linkend="base-layers">application layering chapter</link> for
+    details.</para>
   </section>
 </chapter>
