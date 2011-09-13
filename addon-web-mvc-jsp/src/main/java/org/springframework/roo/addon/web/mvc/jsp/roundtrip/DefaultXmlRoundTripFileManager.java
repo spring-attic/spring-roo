@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -30,9 +31,9 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 
 	// Fields
 	@Reference private FileManager fileManager;
-	private HashMap<String, String> fileContentsMap = new HashMap<String, String>();
+	private Map<String, String> fileContentsMap = new HashMap<String, String>();
+	
 	private static MessageDigest sha = null;
-
 	static {
 		try {
 			sha = MessageDigest.getInstance("SHA1");

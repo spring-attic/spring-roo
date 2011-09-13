@@ -46,7 +46,8 @@ public class GwtCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "web gwt proxy all")
-	public void proxyAll(@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") JavaPackage javaPackage) {
+	public void proxyAll(
+		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which created proxies will be placed") JavaPackage javaPackage) {
 		gwtOperations.proxyAll(javaPackage);
 	}
 

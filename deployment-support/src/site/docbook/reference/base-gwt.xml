@@ -91,16 +91,33 @@
   <section>
     <title>GWT Add-On Commands</title>
 
-    <para>The GWT add-on has only one command: <emphasis role="bold">gwt
-    setup</emphasis>. With this command you can turn an existing Roo project
-    it a GWT web application. This command can be run at any time, even if you
-    have included your domain model in your Roo project. If your project has a
-    domain model, which is currently represented by Roo’s JPA support via the
-    entity and related field commands, additional views will be created to
-    mirror entities in the domain. (A full run down of how to implement your
-    domain model via the Roo shell can be found in <link
-    linkend="beginning-step-2">section 2.5</link> of <link
-    linkend="beginning">Beginning With Roo: The Tutorial</link>)</para>
+    <para>The main GWT add-on commands are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para><emphasis role="bold">web gwt setup</emphasis> - turn an
+        existing Roo project it a GWT web application.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">web gwt all</emphasis> - create GWT
+        request and proxy classes for all domain types in your project</para>
+
+        <para>If your project has a domain model, which is currently
+        represented by Roo’s JPA support via the entity and related field
+        commands, additional views will be created to mirror entities in the
+        domain. (A full run down of how to implement your domain model via the
+        Roo shell can be found in <link linkend="beginning-step-2">section
+        2.5</link> of <link linkend="beginning">Beginning With Roo: The
+        Tutorial</link>)</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">web gwt gae update</emphasis> - to be run
+        when the database is changed to Google App Engine from an SQL database
+        or back again</para>
+      </listitem>
+    </itemizedlist>
 
     <para>To demostrate the basic structure of the conjured GWT application a
     new Roo project, with a very basic domain model, will be created using the
@@ -134,7 +151,8 @@ field enum --fieldName species --type ~.shared.domain.Species</programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentwidth="0"
-                     fileref="images/gwt/GwtInitialZooProjectLayout.png" width="0"></imagedata>
+                     fileref="images/gwt/GwtInitialZooProjectLayout.png"
+                     width="0"></imagedata>
         </imageobject>
       </mediaobject>
     </figure>
