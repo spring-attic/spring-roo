@@ -141,23 +141,28 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			// Create annotation @Controller
 			List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			annotations.add(new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes));
+			
+			// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
+			annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, pathName));
 			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		} else {
 			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
 			annotations = typeDetailsBuilder.getAnnotations();
-		}
-		if (existing != null && MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), ROO_WEB_SCAFFOLD) == null) {
-			// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
-			List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			rooWebScaffoldAttributes.add(new StringAttributeValue(pathName, path));
-			rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
-			for (String operation : disallowedOperations) {
-				rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));
+			if (MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), ROO_WEB_SCAFFOLD) == null) {
+				annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, pathName));
 			}
-			annotations.add(new AnnotationMetadataBuilder(ROO_WEB_SCAFFOLD, rooWebScaffoldAttributes));
 		}
 		typeDetailsBuilder.setAnnotations(annotations);
-		
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+	}
+
+	private AnnotationMetadataBuilder getRooWebScaffoldAnnotation(JavaType entity, Set<String> disallowedOperations, String path, JavaSymbolName pathName) {
+		List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		rooWebScaffoldAttributes.add(new StringAttributeValue(pathName, path));
+		rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
+		for (String operation : disallowedOperations) {
+			rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));
+		}
+		return new AnnotationMetadataBuilder(ROO_WEB_SCAFFOLD, rooWebScaffoldAttributes);
 	}
 }
