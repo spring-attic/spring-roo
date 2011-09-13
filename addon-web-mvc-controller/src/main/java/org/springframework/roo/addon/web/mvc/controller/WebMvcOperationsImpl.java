@@ -24,6 +24,7 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
@@ -199,20 +200,25 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		String webConfigFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(webConfigFile), "Aborting: Unable to find " + webConfigFile);
-		InputStream webMvcConfigInputStream = fileManager.getInputStream(webConfigFile);
-		Assert.notNull(webMvcConfigInputStream, "Aborting: Unable to acquire webmvc-config.xml file");
-		Document webMvcConfig = XmlUtils.readXml(webMvcConfigInputStream);
-		if (webMvcConfig.getChildNodes().getLength() < 5) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config-additions.xml");
-			Assert.notNull(templateInputStream, "Could not acquire webmvc-config-additions.xml template");
-			Document webMvcConfigAdditions = XmlUtils.readXml(templateInputStream);
+		InputStream webMvcConfigInputStream = null;
+		try {
+			webMvcConfigInputStream = fileManager.getInputStream(webConfigFile);
+			Assert.notNull(webMvcConfigInputStream, "Aborting: Unable to acquire webmvc-config.xml file");
+			Document webMvcConfig = XmlUtils.readXml(webMvcConfigInputStream);
 			Element root = webMvcConfig.getDocumentElement();
-			NodeList nodes = webMvcConfigAdditions.getDocumentElement().getChildNodes();
-			for (int i = 0; i < nodes.getLength(); i++) {
-				root.appendChild(webMvcConfig.importNode(nodes.item(i), true));
+			if (XmlUtils.findFirstElement("/beans/interceptors", root) == null) {
+				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "webmvc-config-additions.xml");
+				Assert.notNull(templateInputStream, "Could not acquire webmvc-config-additions.xml template");
+				Document webMvcConfigAdditions = XmlUtils.readXml(templateInputStream);
+				NodeList nodes = webMvcConfigAdditions.getDocumentElement().getChildNodes();
+				for (int i = 0; i < nodes.getLength(); i++) {
+					root.appendChild(webMvcConfig.importNode(nodes.item(i), true));
+				}
+				fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(webMvcConfig), true);
 			}
+		} finally {
+			IOUtils.closeQuietly(webMvcConfigInputStream);
 		}
-		fileManager.createOrUpdateTextFileIfRequired(webConfigFile, XmlUtils.nodeToString(webMvcConfig), true);
 		
 		// Add MVC dependencies.
 		boolean isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
