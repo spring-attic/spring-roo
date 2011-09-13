@@ -161,7 +161,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(request);
 		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
 		AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(request, GwtUtils.REQUEST_ANNOTATIONS);
-		if (annotationMetadata != null) {
+		if (annotationMetadata != null && entity != null) {
 			AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
 			annotationMetadataBuilder.addStringAttribute("value", entity.getName().getFullyQualifiedTypeName());
 			annotationMetadataBuilder.removeAttribute("locator");
@@ -195,6 +195,9 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			return null;
 		}
 		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+		if (entity == null) {
+			return null;
+		}
 
 		if (entity.getName().equals(service.getName()) && !Modifier.isStatic(methodMetadata.getModifier())) {
 			List<JavaType> methodReturnTypeArgs = Arrays.asList(proxy.getName(), methodMetadata.getReturnType());
@@ -210,6 +213,9 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	private MethodMetadataBuilder getRequestMethod(ClassOrInterfaceTypeDetails request, MethodMetadata methodMetaData, JavaType methodReturnType) {
 		List<AnnotatedJavaType> paramaterTypes = new ArrayList<AnnotatedJavaType>();
 		ClassOrInterfaceTypeDetails mirroredTypeDetails = gwtTypeService.lookupEntityFromRequest(request);
+		if (mirroredTypeDetails == null) {
+			return null;
+		}
 		for (AnnotatedJavaType parameterType : methodMetaData.getParameterTypes()) {
 			paramaterTypes.add(new AnnotatedJavaType(gwtTypeService.getGwtSideLeafType(parameterType.getJavaType(), projectOperations.getProjectMetadata(), mirroredTypeDetails.getName(), true, false)));
 		}
@@ -232,7 +238,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 				List<JavaType> layerTypes = (List<JavaType>) cid.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
 				for (ClassOrInterfaceTypeDetails request : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_REQUEST)) {
 					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
-					if (layerTypes.contains(entity.getName())) {
+					if (entity != null && layerTypes.contains(entity.getName())) {
 						JavaType typeName = PhysicalTypeIdentifier.getJavaType(request.getDeclaredByMetadataId());
 						Path typePath = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
 						downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);

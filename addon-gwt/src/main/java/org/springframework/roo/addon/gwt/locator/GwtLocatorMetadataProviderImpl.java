@@ -90,6 +90,9 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		}
 
 		ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(proxy);
+		if (entity == null) {
+			return null;
+		}
 
 		MethodMetadata idAccessor = persistenceMemberLocator.getIdentifierAccessor(entity.getName());
 		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity.getName());
