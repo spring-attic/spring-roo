@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Hashtable;
@@ -87,8 +88,8 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 		Assert.isTrue(ascUrlFile.exists(), "Signature verification file is not available at '" + ascUrl.toExternalForm() + "'; continuing");
 
 		// Decide if this signature file is well-formed and of a key ID that is trusted by the user
-		FileInputStream resource = null;
-		FileInputStream signature = null;
+		InputStream resource = null;
+		InputStream signature = null;
 		try {
 			signature = new FileInputStream(ascUrlFile);
 			SignatureDecision decision = pgpService.isSignatureAcceptable(signature);
