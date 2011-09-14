@@ -72,8 +72,7 @@ public class PgpServiceImpl implements PgpService {
 	}
 
 	// Instance fields
-	@Reference
-	private UrlInputStreamService urlInputStreamService;
+	@Reference private UrlInputStreamService urlInputStreamService;
 	private boolean automaticTrust;
 	private BundleContext context;
 	private final SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();
