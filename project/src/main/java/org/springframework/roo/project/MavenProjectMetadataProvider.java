@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -55,12 +56,14 @@ import org.w3c.dom.Element;
 public class MavenProjectMetadataProvider implements ProjectMetadataProvider, FileEventListener {
 	
 	// Constants
+	static final String POM_RELATIVE_PATH = "/pom.xml";
+
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier()));
 
-	private static final String ADDED = "added";
-	private static final String CHANGED = "changed";
-	private static final String REMOVED = "removed";
-	private static final String UPDATED = "updated";
+	static final String ADDED = "added";
+	static final String CHANGED = "changed";
+	static final String REMOVED = "removed";
+	static final String UPDATED = "updated";
 
 	/**
 	 * Highlights the given text
@@ -68,14 +71,31 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	 * @param text the text to highlight (can be blank)
 	 * @return the highlighted text
 	 */
-	private static String highlight(final String text) {
+	static String highlight(final String text) {
 		return decorate(text, FG_CYAN);
 	}
+
+	/**
+	 * Generates a message about the addition of the given items to the POM
+	 * 
+	 * @param action the past tense of the action that was performed
+	 * @param items the items that were acted upon (required, can be empty)
+	 * @param singular the singular of this type of item (required)
+	 * @param plural the plural of this type of item (required)
+	 * @return a non-<code>null</code> message
+	 * @since 1.2.0
+	 */
+	static String getDescriptionOfChange(final String action, final Collection<String> items, final String singular, final String plural) {
+		if (items.isEmpty()) {
+			return "";
+		}
+		return highlight(action + " " + (items.size() == 1 ? singular : plural)) + " " + StringUtils.collectionToDelimitedString(items, ", "); 
+	}
 	
-	// Fields
-	@Reference private PathResolver pathResolver;
-	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
+	// Fields (some with default-level access for testability)
+	@Reference FileManager fileManager;
+	@Reference MetadataService metadataService;
+	@Reference PathResolver pathResolver;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private Shell shell;
 	@Reference private UaaRegistrationService uaaRegistrationService;
@@ -83,7 +103,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	private String pom;
 
 	protected void activate(final ComponentContext context) {
-		this.pom = pathResolver.getIdentifier(Path.ROOT, "/pom.xml");
+		this.pom = pathResolver.getIdentifier(Path.ROOT, POM_RELATIVE_PATH);
 	}
 
 	public MetadataItem get(final String metadataIdentificationString) {
@@ -287,13 +307,13 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		addDependencies(Collections.singletonList(dependency));
 	}
 
-	public void removeDependencies(final Collection<? extends Dependency> dependencies) {
-		if (CollectionUtils.isEmpty(dependencies)) {
+	public void removeDependencies(final Collection<? extends Dependency> dependenciesToRemove) {
+		if (CollectionUtils.isEmpty(dependenciesToRemove)) {
 			return;
 		}
-		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.PROJECT_IDENTIFIER);
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so dependency removal is unavailable");
-		if (!projectMetadata.isAnyDependenciesRegistered(dependencies)) {
+		if (!projectMetadata.isAnyDependenciesRegistered(dependenciesToRemove)) {
 			return;
 		}
 
@@ -306,22 +326,21 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final List<Element> existingDependencyElements = XmlUtils.findElements("dependency", dependenciesElement);
 		final List<String> removedDependencies = new ArrayList<String>();
-		final Set<Element> toRemove = new HashSet<Element>();
-		for (final Dependency dependency : dependencies) {
-			if (projectMetadata.isDependencyRegistered(dependency)) {
-				for (final Element candidate : existingDependencyElements) {
+		for (final Dependency dependencyToRemove : dependenciesToRemove) {
+			if (projectMetadata.isDependencyRegistered(dependencyToRemove)) {
+				for (final Iterator<Element> iter = existingDependencyElements.iterator(); iter.hasNext();) {
+					final Element candidate = iter.next();
 					Dependency candidateDependency = new Dependency(candidate);
-					if (candidateDependency.equals(dependency)) {
+					if (candidateDependency.equals(dependencyToRemove)) {
 						// The identifying coordinates match; remove this element
-						toRemove.add(candidate);
-						removedDependencies.add(dependency.getSimpleDescription());
+						dependenciesElement.removeChild(candidate);
+						// Ensure we don't try to remove it again for another Dependency
+						iter.remove();
+						removedDependencies.add(dependencyToRemove.getSimpleDescription());
 					}
 					// Keep looping in case it's in the POM more than once
 				}
 			}
-		}
-		for (Element dependency : toRemove) {
-			dependenciesElement.removeChild(dependency);
 		}
 		if (removedDependencies.isEmpty()) {
 			return;
@@ -398,23 +417,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		final String message = getDescriptionOfChange(ADDED, newPlugins, "plugin", "plugins");
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
-	}
-
-	/**
-	 * Generates a message about the addition of the given items to the POM
-	 * 
-	 * @param action the past tense of the action that was performed
-	 * @param items the items that were acted upon (required, can be empty)
-	 * @param singular the singular of this type of item (required)
-	 * @param plural the plural of this type of item (required)
-	 * @return a non-<code>null</code> message
-	 * @since 1.2.0
-	 */
-	private String getDescriptionOfChange(final String action, final Collection<String> items, final String singular, final String plural) {
-		if (items.isEmpty()) {
-			return "";
-		}
-		return highlight(action + " " + (items.size() == 1 ? singular : plural)) + " " + StringUtils.collectionToDelimitedString(items, ", "); 
 	}
 
 	public void addBuildPlugin(final Plugin plugin) {

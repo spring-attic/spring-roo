@@ -240,15 +240,15 @@ public class Dependency implements Comparable<Dependency> {
 			throw new NullPointerException();
 		}
 		// We omit the version field as it's not part of a Dependency's identity
-		int result = groupId.compareTo(o.groupId);
+		int result = groupId.compareTo(o.getGroupId());
 		if (result == 0) {
-			result = artifactId.compareTo(o.artifactId);
+			result = artifactId.compareTo(o.getArtifactId());
 		}
 		if (result == 0) {
-			result = StringUtils.trimToEmpty(classifier).compareTo(StringUtils.trimToEmpty(o.classifier));
+			result = StringUtils.trimToEmpty(classifier).compareTo(StringUtils.trimToEmpty(o.getClassifier()));
 		}
 		if (result == 0 && type != null) {
-			result = type.compareTo(o.type);
+			result = type.compareTo(o.getType());
 		}
 		return result;
 	}
