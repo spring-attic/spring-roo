@@ -22,6 +22,7 @@ import org.springframework.roo.felix.pgp.SignatureDecision;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
@@ -86,24 +87,32 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 		Assert.isTrue(ascUrlFile.exists(), "Signature verification file is not available at '" + ascUrl.toExternalForm() + "'; continuing");
 
 		// Decide if this signature file is well-formed and of a key ID that is trusted by the user
-		SignatureDecision decision = pgpService.isSignatureAcceptable(new FileInputStream(ascUrlFile));
-		if (!decision.isSignatureAcceptable()) {
-			LOGGER.log(Level.SEVERE, "Download URL '" + resourceUrl.toExternalForm() + "' failed");
-			LOGGER.log(Level.SEVERE, "This resource was signed with PGP key ID '" + decision.getSignatureAsHex() + "', which is not currently trusted");
-			LOGGER.log(Level.SEVERE, "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
-			throw new IOException("Download URL '" + resourceUrl.toExternalForm() + "' has untrusted PGP signature " + JdkDelegatingLogListener.DO_NOT_LOG);
+		FileInputStream resource = null;
+		FileInputStream signature = null;
+		try {
+			signature = new FileInputStream(ascUrlFile);
+			SignatureDecision decision = pgpService.isSignatureAcceptable(signature);
+			if (!decision.isSignatureAcceptable()) {
+				LOGGER.log(Level.SEVERE, "Download URL '" + resourceUrl.toExternalForm() + "' failed");
+				LOGGER.log(Level.SEVERE, "This resource was signed with PGP key ID '" + decision.getSignatureAsHex() + "', which is not currently trusted");
+				LOGGER.log(Level.SEVERE, "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
+				throw new IOException("Download URL '" + resourceUrl.toExternalForm() + "' has untrusted PGP signature " + JdkDelegatingLogListener.DO_NOT_LOG);
+			}
+
+			// So far so good. Next we need the actual resource to ensure the ASC file really did sign it
+			File resourceFile = File.createTempFile("roo_resource", null);
+			resourceFile.deleteOnExit();
+			FileCopyUtils.copy(urlInputStreamService.openConnection(resourceUrl), new FileOutputStream(resourceFile));
+
+			resource = new FileInputStream(resourceFile);
+			Assert.isTrue(pgpService.isResourceSignedBySignature(resource, signature), "PGP signature illegal for URL '" + resourceUrl.toExternalForm() + "'");
+			
+			// Excellent it worked! We don't need the ASC file anymore, so get rid of it
+			ascUrlFile.delete();
+
+			return resourceFile.toURI().toURL().openConnection();
+		} finally {
+			IOUtils.closeQuietly(resource, signature);
 		}
-		
-		// So far so good. Next we need the actual resource to ensure the ASC file really did sign it
-		File resourceFile = File.createTempFile("roo_resource", null);
-		resourceFile.deleteOnExit();
-		FileCopyUtils.copy(urlInputStreamService.openConnection(resourceUrl), new FileOutputStream(resourceFile));
-
-		Assert.isTrue(pgpService.isResourceSignedBySignature(new FileInputStream(resourceFile), new FileInputStream(ascUrlFile)), "PGP signature illegal for URL '" + resourceUrl.toExternalForm() + "'");
-
-		// Excellent it worked! We don't need the ASC file anymore, so get rid of it
-		ascUrlFile.delete();
-
-		return resourceFile.toURI().toURL().openConnection();
 	}
 }
