@@ -3,7 +3,6 @@ package org.springframework.roo.classpath.javaparser.details;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -99,7 +98,6 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 			for (Parameter p : methodDeclaration.getParameters()) {
 				Type pt = p.getType();
 				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices, pt, fullTypeParameters);
-				
 				List<AnnotationExpr> annotationsList = p.getAnnotations();
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 				if (annotationsList != null) {
@@ -215,7 +213,27 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 			if (methodParameter.getJavaType().isPrimitive()) {
 				parameterType = JavaParserUtils.getType(methodParameter.getJavaType());
 			} else {
-				parameterType = JavaParserUtils.getResolvedName(compilationUnitServices.getEnclosingTypeName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(Collections.singletonList(methodParameter)).get(0), compilationUnitServices);
+				NameExpr type = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), methodParameter.getJavaType());
+				ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(type);
+
+				// Add any type arguments presented for the return type
+				if (methodParameter.getJavaType().getParameters().size() > 0) {
+					List<Type> typeArgs = new ArrayList<Type>();
+					cit.setTypeArgs(typeArgs);
+					for (JavaType parameter : methodParameter.getJavaType().getParameters()) {
+						typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
+					}
+				}
+
+				// Handle arrays
+				if (methodParameter.getJavaType().isArray()) {
+					ReferenceType rt = new ReferenceType();
+					rt.setArrayCount(methodParameter.getJavaType().getArray());
+					rt.setType(cit);
+					parameterType = rt;
+				} else {
+					parameterType = cit;
+				}
 			}
 
 			// Create a Java Parser method parameter and add it to the list of parameters
