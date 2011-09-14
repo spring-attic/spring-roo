@@ -12,27 +12,45 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public abstract class AbstractIdentifiableJavaStructureBuilder<T extends IdentifiableJavaStructure> extends AbstractCustomDataAccessorBuilder<T> {
-	private String declaredByMetadataId;
+	
+	// Fields
+	private final String declaredByMetadataId;
 	private int modifier;
 
-	protected AbstractIdentifiableJavaStructureBuilder(String declaredByMetadataId) {
+	/**
+	 * Constructor
+	 *
+	 * @param declaredByMetadataId
+	 */
+	protected AbstractIdentifiableJavaStructureBuilder(final String declaredByMetadataId) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(declaredByMetadataId), "Declared by metadata ID must identify a specific instance (not '" + declaredByMetadataId + "')");
 		this.declaredByMetadataId = declaredByMetadataId;
 	}
 
-	protected AbstractIdentifiableJavaStructureBuilder(IdentifiableJavaStructure existing) {
+	/**
+	 * Constructor
+	 *
+	 * @param existing
+	 */
+	protected AbstractIdentifiableJavaStructureBuilder(final IdentifiableJavaStructure existing) {
 		super(existing);
 		this.declaredByMetadataId = existing.getDeclaredByMetadataId();
 		this.modifier = existing.getModifier();
 	}
 
-	protected AbstractIdentifiableJavaStructureBuilder(String declaredbyMetadataId, IdentifiableJavaStructure existing) {
+	/**
+	 * Constructor
+	 *
+	 * @param declaredbyMetadataId
+	 * @param existing
+	 */
+	protected AbstractIdentifiableJavaStructureBuilder(final String declaredbyMetadataId, final IdentifiableJavaStructure existing) {
 		super(existing);
 		this.declaredByMetadataId = declaredbyMetadataId;
 		this.modifier = existing.getModifier();		
 	}
 
-	public final String getDeclaredByMetadataId() {
+	public String getDeclaredByMetadataId() {
 		return declaredByMetadataId;
 	}
 
@@ -40,7 +58,13 @@ public abstract class AbstractIdentifiableJavaStructureBuilder<T extends Identif
 		return modifier;
 	}
 
-	public final void setModifier(int modifier) {
+	/**
+	 * Sets the modifier of the built Java structure
+	 * 
+	 * @param modifier the modifier to set
+	 * @see Modifier#PUBLIC, etc.
+	 */
+	public final void setModifier(final int modifier) {
 		this.modifier = modifier;
 	}
 }

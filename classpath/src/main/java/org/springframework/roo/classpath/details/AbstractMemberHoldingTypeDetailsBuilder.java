@@ -18,20 +18,20 @@ import org.springframework.roo.model.JavaType;
 public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
 	
 	// Fields
+	private final List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>();
+	private final List<ConstructorMetadataBuilder> declaredConstructors = new ArrayList<ConstructorMetadataBuilder>();
+	private final List<FieldMetadataBuilder> declaredFields = new ArrayList<FieldMetadataBuilder>();
+	private final List<InitializerMetadataBuilder> declaredInitializers = new ArrayList<InitializerMetadataBuilder>();
+	private final List<JavaType> extendsTypes = new ArrayList<JavaType>();
+	private final List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private final List<MethodMetadataBuilder> declaredMethods = new ArrayList<MethodMetadataBuilder>();
-	private List<ConstructorMetadataBuilder> declaredConstructors = new ArrayList<ConstructorMetadataBuilder>();
-	private List<FieldMetadataBuilder> declaredFields = new ArrayList<FieldMetadataBuilder>();
-	private List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>();
-	private List<InitializerMetadataBuilder> declaredInitializers = new ArrayList<InitializerMetadataBuilder>();
-	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
-	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 
 	/**
 	 * Constructor
 	 *
 	 * @param declaredbyMetadataId
 	 */
-	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId) {
+	protected AbstractMemberHoldingTypeDetailsBuilder(final String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
 
@@ -40,7 +40,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	 *
 	 * @param existing
 	 */
-	protected AbstractMemberHoldingTypeDetailsBuilder(MemberHoldingTypeDetails existing) {
+	protected AbstractMemberHoldingTypeDetailsBuilder(final MemberHoldingTypeDetails existing) {
 		super(existing);
 		init(existing);
 	}
@@ -51,25 +51,25 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	 * @param declaredbyMetadataId
 	 * @param existing
 	 */
-	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId, MemberHoldingTypeDetails existing) {
+	protected AbstractMemberHoldingTypeDetailsBuilder(final String declaredbyMetadataId, final MemberHoldingTypeDetails existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing);
 	}
 
-	private void init(MemberHoldingTypeDetails existing) {
-		for (ConstructorMetadata element : existing.getDeclaredConstructors()) {
+	private void init(final MemberHoldingTypeDetails existing) {
+		for (final ConstructorMetadata element : existing.getDeclaredConstructors()) {
 			declaredConstructors.add(new ConstructorMetadataBuilder(element));
 		}
-		for (FieldMetadata element : existing.getDeclaredFields()) {
+		for (final FieldMetadata element : existing.getDeclaredFields()) {
 			declaredFields.add(new FieldMetadataBuilder(element));
 		}
-		for (MethodMetadata element : existing.getDeclaredMethods()) {
+		for (final MethodMetadata element : existing.getDeclaredMethods()) {
 			declaredMethods.add(new MethodMetadataBuilder(element));
 		}
-		for (ClassOrInterfaceTypeDetails element : existing.getDeclaredInnerTypes()) {
+		for (final ClassOrInterfaceTypeDetails element : existing.getDeclaredInnerTypes()) {
 			declaredInnerTypes.add(new ClassOrInterfaceTypeDetailsBuilder(element));
 		}
-		for (InitializerMetadata element : existing.getDeclaredInitializers()) {
+		for (final InitializerMetadata element : existing.getDeclaredInitializers()) {
 			declaredInitializers.add(new InitializerMetadataBuilder(element));
 		}
 		extendsTypes.addAll(existing.getExtendsTypes());
@@ -80,16 +80,32 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return declaredConstructors;
 	}
 
-	public final void setDeclaredConstructors(List<ConstructorMetadataBuilder> declaredConstructors) {
-		this.declaredConstructors = declaredConstructors;
+	/**
+	 * Sets the builders for the constructors that are to be declared
+	 * 
+	 * @param declaredConstructors can be <code>null</code> for none
+	 */
+	public final void setDeclaredConstructors(final Collection<? extends ConstructorMetadataBuilder> declaredConstructors) {
+		this.declaredConstructors.clear();
+		if (declaredConstructors != null) {
+			this.declaredConstructors.addAll(declaredConstructors);
+		}
 	}
 
 	public final List<FieldMetadataBuilder> getDeclaredFields() {
 		return declaredFields;
 	}
 
-	public final void setDeclaredFields(List<FieldMetadataBuilder> declaredFields) {
-		this.declaredFields = declaredFields;
+	/**
+	 * Sets the builders for the fields to be declared by the type being built
+	 * 
+	 * @param declaredFields the builders to set (can be <code>null</code> for none)
+	 */
+	public final void setDeclaredFields(final Collection<? extends FieldMetadataBuilder> declaredFields) {
+		this.declaredFields.clear();
+		if (declaredFields != null) {
+			this.declaredFields.addAll(declaredFields);
+		}
 	}
 
 	/**
@@ -122,35 +138,76 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return declaredInnerTypes;
 	}
 
-	public void setDeclaredInnerTypes(List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes) {
-		this.declaredInnerTypes = declaredInnerTypes;
+	/**
+	 * Sets the builders for the inner types of the type being built
+	 * 
+	 * @param declaredInnerTypes the builders to set; can be <code>null</code> for none
+	 */
+	public void setDeclaredInnerTypes(final Collection<? extends ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes) {
+		this.declaredInnerTypes.clear();
+		if (declaredInnerTypes != null) {
+			this.declaredInnerTypes.addAll(declaredInnerTypes);
+		}
 	}
 
 	public List<InitializerMetadataBuilder> getDeclaredInitializers() {
 		return declaredInitializers;
 	}
 
-	public void setDeclaredInitializers(List<InitializerMetadataBuilder> declaredInitializers) {
-		this.declaredInitializers = declaredInitializers;
+	/**
+	 * Sets the builders for the initializers of the type being built
+	 * 
+	 * @param declaredInitializers the builders to set; can be <code>null</code> for none
+	 */
+	public void setDeclaredInitializers(final Collection<? extends InitializerMetadataBuilder> declaredInitializers) {
+		this.declaredInitializers.clear();
+		if (declaredInitializers != null) {
+			this.declaredInitializers.addAll(declaredInitializers);
+		}
 	}
 
+	/**
+	 * Returns the types that the built instance will extend, if any. Does not
+	 * return a copy, i.e. modifying the returned list will modify this builder!
+	 * 
+	 * TODO improve encapsulation by returning a defensive copy and
+	 * <em>updating callers accordingly</em>
+	 * 
+	 * @return a non-<code>null</code> list
+	 */
 	public final List<JavaType> getExtendsTypes() {
 		return extendsTypes;
 	}
 
-	public final void setExtendsTypes(List<JavaType> extendsTypes) {
-		this.extendsTypes = extendsTypes;
+	/**
+	 * Sets the types that the built instance will extend
+	 * 
+	 * @param extendsTypes can be <code>null</code> for none
+	 */
+	public final void setExtendsTypes(final Collection<? extends JavaType> extendsTypes) {
+		this.extendsTypes.clear();
+		if (extendsTypes != null) {
+			this.extendsTypes.addAll(extendsTypes);
+		}
 	}
 
 	public final List<JavaType> getImplementsTypes() {
 		return implementsTypes;
 	}
 
-	public final void setImplementsTypes(List<JavaType> implementsTypes) {
-		this.implementsTypes = implementsTypes;
+	/**
+	 * Sets the types to be implemented by the type being built
+	 * 
+	 * @param implementsTypes can be <code>null</code> for none
+	 */
+	public final void setImplementsTypes(final Collection<? extends JavaType> implementsTypes) {
+		this.implementsTypes.clear();
+		if (implementsTypes != null) {
+			this.implementsTypes.addAll(implementsTypes);
+		}
 	}
 
-	public final boolean addConstructor(ConstructorMetadataBuilder constructor) {
+	public final boolean addConstructor(final ConstructorMetadataBuilder constructor) {
 		if (constructor == null || !getDeclaredByMetadataId().equals(constructor.getDeclaredByMetadataId())) {
 			return false;
 		}
@@ -158,9 +215,9 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return declaredConstructors.add(constructor);
 	}
 
-	protected void onAddConstructor(ConstructorMetadataBuilder constructor) {}
+	protected void onAddConstructor(final ConstructorMetadataBuilder constructor) {}
 	
-	public final boolean addField(FieldMetadataBuilder field) {
+	public final boolean addField(final FieldMetadataBuilder field) {
 		if (field == null || !getDeclaredByMetadataId().equals(field.getDeclaredByMetadataId())) {
 			return false;
 		}
@@ -168,7 +225,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return declaredFields.add(field);
 	}
 
-	protected void onAddField(FieldMetadataBuilder field) {}
+	protected void onAddField(final FieldMetadataBuilder field) {}
 
 	/**
 	 * Adds the given method to this builder
@@ -177,7 +234,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	 * if its MID doesn't match this builder's MID
 	 * @return true if the state of this builder changed
 	 */
-	public final boolean addMethod(MethodMetadataBuilder method) {
+	public final boolean addMethod(final MethodMetadataBuilder method) {
 		if (method == null || !getDeclaredByMetadataId().equals(method.getDeclaredByMetadataId())) {
 			return false;
 		}
@@ -191,16 +248,16 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	 * 
 	 * @param method the method being added; never <code>null</code>
 	 */
-	protected void onAddMethod(MethodMetadataBuilder method) {}
+	protected void onAddMethod(final MethodMetadataBuilder method) {}
 
-	public final boolean addConstructor(ConstructorMetadata constructor) {
+	public final boolean addConstructor(final ConstructorMetadata constructor) {
 		if (constructor == null) {
 			return false;
 		}
 		return addConstructor(new ConstructorMetadataBuilder(constructor));
 	}
 
-	public final boolean addField(FieldMetadata field) {
+	public final boolean addField(final FieldMetadata field) {
 		if (field == null) {
 			return false;
 		}
@@ -220,14 +277,14 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return addMethod(new MethodMetadataBuilder(method));
 	}
 
-	public final boolean addInnerType(ClassOrInterfaceTypeDetails innerType) {
+	public final boolean addInnerType(final ClassOrInterfaceTypeDetails innerType) {
         if (innerType == null) {
             return false;
         }
         return addInnerType(new ClassOrInterfaceTypeDetailsBuilder(innerType));
     }
 
-    public final boolean addInnerType(ClassOrInterfaceTypeDetailsBuilder innerType) {
+    public final boolean addInnerType(final ClassOrInterfaceTypeDetailsBuilder innerType) {
 		/* There was originally a check to see if the declaredMIDs matched, but this doesn't really make much sense.
 		 * We need to come up with a better model for inner types. I thought about adding an enclosingType attribute
 		 * but this prototype just felt like a hack. In the short term I have just disabled the MID comparison as I
@@ -240,9 +297,9 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
         return declaredInnerTypes.add(innerType);
     }
 
-    protected void onAddInnerType(ClassOrInterfaceTypeDetailsBuilder innerType) {}
+    protected void onAddInnerType(final ClassOrInterfaceTypeDetailsBuilder innerType) {}
 
-    public final boolean addInitializer(InitializerMetadataBuilder initializer) {
+    public final boolean addInitializer(final InitializerMetadataBuilder initializer) {
         if (initializer == null || !getDeclaredByMetadataId().equals(initializer.getDeclaredByMetadataId())) {
             return false;
         }
@@ -250,59 +307,59 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
         return declaredInitializers.add(initializer);
     }
 
-    protected void onAddInitializer(InitializerMetadataBuilder initializer) {}
+    protected void onAddInitializer(final InitializerMetadataBuilder initializer) {}
 
-	public final boolean addImplementsType(JavaType implementsType) {
+	public final boolean addImplementsType(final JavaType implementsType) {
 		if (implementsType == null) return false;
 		onAddImplementType(implementsType);
 		return implementsTypes.add(implementsType);
 	}
 	
-	protected void onAddImplementType(JavaType implementsType) {}
+	protected void onAddImplementType(final JavaType implementsType) {}
 	
-	public final boolean addExtendsTypes(JavaType extendsType) {
+	public final boolean addExtendsTypes(final JavaType extendsType) {
 		if (extendsType == null) return false;
 		onAddExtendsTypes(extendsType);
 		return extendsTypes.add(extendsType);
 	}
 
-	protected void onAddExtendsTypes(JavaType extendsType) {}
+	protected void onAddExtendsTypes(final JavaType extendsType) {}
 
 	public final List<ConstructorMetadata> buildConstructors() {
-		List<ConstructorMetadata> result = new ArrayList<ConstructorMetadata>();
-		for (ConstructorMetadataBuilder builder : declaredConstructors) {
+		final List<ConstructorMetadata> result = new ArrayList<ConstructorMetadata>();
+		for (final ConstructorMetadataBuilder builder : declaredConstructors) {
 			result.add(builder.build());
 		}
 		return result;
 	}
 
 	public final List<FieldMetadata> buildFields() {
-		List<FieldMetadata> result = new ArrayList<FieldMetadata>();
-		for (FieldMetadataBuilder builder : declaredFields) {
+		final List<FieldMetadata> result = new ArrayList<FieldMetadata>();
+		for (final FieldMetadataBuilder builder : declaredFields) {
 			result.add(builder.build());
 		}
 		return result;
 	}
 
 	public final List<MethodMetadata> buildMethods() {
-		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
-		for (MethodMetadataBuilder builder : declaredMethods) {
+		final List<MethodMetadata> result = new ArrayList<MethodMetadata>();
+		for (final MethodMetadataBuilder builder : declaredMethods) {
 			result.add(builder.build());
 		}
 		return result;
 	}
 
     public final List<ClassOrInterfaceTypeDetails> buildInnerTypes() {
-		List<ClassOrInterfaceTypeDetails> result = new ArrayList<ClassOrInterfaceTypeDetails>();
-		for (ClassOrInterfaceTypeDetailsBuilder builder : declaredInnerTypes) {
+		final List<ClassOrInterfaceTypeDetails> result = new ArrayList<ClassOrInterfaceTypeDetails>();
+		for (final ClassOrInterfaceTypeDetailsBuilder builder : declaredInnerTypes) {
 			result.add(builder.build());
 		}
 		return result;
 	}
 
     public final List<InitializerMetadata> buildInitializers() {
-		List<InitializerMetadata> result = new ArrayList<InitializerMetadata>();
-		for (InitializerMetadataBuilder builder : declaredInitializers) {
+		final List<InitializerMetadata> result = new ArrayList<InitializerMetadata>();
+		for (final InitializerMetadataBuilder builder : declaredInitializers) {
 			result.add(builder.build());
 		}
 		return result;
