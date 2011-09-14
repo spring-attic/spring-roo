@@ -7,7 +7,7 @@
     <version>0.1.0.BUILD-SNAPSHOT</version>
     <name>TO_BE_CHANGED_BY_LISTENER</name>
     <properties>
-        <roo.version>1.2.0.M1</roo.version>
+        <roo.version>1.2.0.BUILD-SNAPSHOT</roo.version>
         <spring.version>3.0.6.RELEASE</spring.version>
         <aspectj.version>1.6.12.M2</aspectj.version>
         <slf4j.version>1.6.1</slf4j.version>
