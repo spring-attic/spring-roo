@@ -56,5 +56,4 @@ public class UndoableMonitoringRequest implements UndoableOperation {
 			return false;
 		}
 	}
-
 }

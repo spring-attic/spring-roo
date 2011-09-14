@@ -57,5 +57,4 @@ public class StubMutableFile implements MutableFile {
 	public String getOutputAsString() {
 		return output.toString();
 	}
-
 }

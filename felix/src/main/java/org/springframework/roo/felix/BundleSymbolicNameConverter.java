@@ -18,13 +18,12 @@ import org.springframework.roo.shell.MethodTarget;
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName> {
 
-	// handler service field is solely to ensure it starts before BundleSymbolicNameConverter
+	// Handler service field is solely to ensure it starts before BundleSymbolicNameConverter
 	@Reference protected HttpPgpUrlStreamHandlerService handlerService;
 	@Reference private RepositoryAdmin repositoryAdmin;
 	private ComponentContext context;
@@ -91,5 +90,4 @@ public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return BundleSymbolicName.class.isAssignableFrom(requiredType);
 	}
-
 }

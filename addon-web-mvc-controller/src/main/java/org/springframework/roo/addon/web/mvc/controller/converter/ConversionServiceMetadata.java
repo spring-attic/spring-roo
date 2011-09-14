@@ -76,7 +76,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
 		Set<String> methodNames = new HashSet<String>();
-		//loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
+		// Loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
 		for (final JavaType type : new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
 			String simpleName = type.getSimpleTypeName();
 			while (methodNames.contains(simpleName)) {

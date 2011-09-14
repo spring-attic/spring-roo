@@ -360,9 +360,9 @@ public final class StringUtils {
 			return inString;
 		}
 		StringBuilder sb = new StringBuilder();
-		int pos = 0; // our position in the old string
+		int pos = 0; // Our position in the old string
 		int index = inString.indexOf(oldPattern);
-		// the index of an occurrence we've found, or -1
+		// The index of an occurrence we've found, or -1
 		int patLen = oldPattern.length();
 		while (index >= 0) {
 			sb.append(inString.substring(pos, index));
@@ -371,7 +371,7 @@ public final class StringUtils {
 			index = inString.indexOf(oldPattern, pos);
 		}
 		sb.append(inString.substring(pos));
-		// remember to append any characters to the right of a match
+		// Remember to append any characters to the right of a match
 		return sb.toString();
 	}
 

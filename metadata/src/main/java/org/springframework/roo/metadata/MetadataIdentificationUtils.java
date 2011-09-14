@@ -44,7 +44,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @return true if the string appears to be a valid metadata identification string
 	 */
 	public static final boolean isValid(String metadataIdentificationString) {
-		// previously: return metadataIdentificationString != null && metadataIdentificationString.startsWith("MID:");
+		// Previously: return metadataIdentificationString != null && metadataIdentificationString.startsWith("MID:");
 		if (metadataIdentificationString == null) {
 			return false;
 		}

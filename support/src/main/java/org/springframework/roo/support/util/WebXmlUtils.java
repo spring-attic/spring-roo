@@ -147,12 +147,10 @@ public final class WebXmlUtils {
 			initParams = new ArrayList<WebXmlUtils.WebXmlParam>();
 		}
 		
-		//creating filter
+		// Creating filter
 		Element filter = XmlUtils.findFirstElement("/web-app/filter[filter-name = '" + filterName + "']", webXml.getDocumentElement());
 		if (filter == null) {
-			filter = new XmlElementBuilder("filter", webXml)
-						.addChild(new XmlElementBuilder("filter-name", webXml).setText(filterName).build())
-					.build();
+			filter = new XmlElementBuilder("filter", webXml).addChild(new XmlElementBuilder("filter-name", webXml).setText(filterName).build()).build();
 			if (filterPosition.equals(FilterPosition.FIRST)) {
 				insertBetween(filter, "context-param", "filter", webXml);
 			} else if (filterPosition.equals(FilterPosition.BEFORE)) {
@@ -180,7 +178,7 @@ public final class WebXmlUtils {
 								.build());
 		}
 		
-		//creating filter mapping
+		// Creating filter mapping
 		Element filterMappingE = XmlUtils.findFirstElement("/web-app/filter-mapping[filter-name = '" + filterName + "']", webXml.getDocumentElement());
 		if (filterMappingE == null) {
 			filterMappingE = new XmlElementBuilder("filter-mapping", webXml)
@@ -243,7 +241,7 @@ public final class WebXmlUtils {
 		Assert.hasText(servletName, "Servlet name required");
 		Assert.hasText(className, "Fully qualified class name required");
 
-		//create servlet
+		// Create servlet
 		Element servlet = XmlUtils.findFirstElement("/web-app/servlet[servlet-name = '" + servletName + "']", webXml.getDocumentElement());
 		if (servlet == null) {
 			servlet = new XmlElementBuilder("servlet", webXml)
@@ -265,7 +263,7 @@ public final class WebXmlUtils {
 			appendChildIfNotPresent(servlet, new XmlElementBuilder("load-on-startup", webXml).setText(loadOnStartup.toString()).build());
 		}
 		
-		//create servlet mapping
+		// Create servlet mapping
 		Element servletMapping = XmlUtils.findFirstElement("/web-app/servlet-mapping[servlet-name = '" + servletName + "']", webXml.getDocumentElement());
 		if (servletMapping == null) {
 			servletMapping = new XmlElementBuilder("servlet-mapping", webXml)
@@ -376,70 +374,70 @@ public final class WebXmlUtils {
 		appendChildIfNotPresent(errorPage, new XmlElementBuilder("location", webXml).setText(location).build());
 	}
 
-     /**
-     * Add a security constraint to a web.xml document
-     *
-     * @param displayName (optional)
-     * @param webResourceCollections (required)
-     * @param roleNames (optional)
-     * @param transportGuarantee (optional)
-     * @param webXml (required)
-     * @param comment (optional)
-     * */
-    public static void addSecurityConstraint(final String displayName, final List<WebResourceCollection> webResourceCollections, final List<String> roleNames, final String transportGuarantee, final Document webXml, final String comment) {
-        Assert.notNull(webXml, "Web XML document required");
-        Assert.notNull(webResourceCollections, "A security-constraint element must contain at least one web-resource-collection");
-        Assert.isTrue(webResourceCollections.size() > 0, "A security-constraint element must contain at least one web-resource-collection");
+	/**
+	 * Add a security constraint to a web.xml document
+	 * 
+	 * @param displayName (optional)
+	 * @param webResourceCollections (required)
+	 * @param roleNames (optional)
+	 * @param transportGuarantee (optional)
+	 * @param webXml (required)
+	 * @param comment (optional)
+	 * */
+	public static void addSecurityConstraint(final String displayName, final List<WebResourceCollection> webResourceCollections, final List<String> roleNames, final String transportGuarantee, final Document webXml, final String comment) {
+		Assert.notNull(webXml, "Web XML document required");
+		Assert.notNull(webResourceCollections, "A security-constraint element must contain at least one web-resource-collection");
+		Assert.isTrue(webResourceCollections.size() > 0, "A security-constraint element must contain at least one web-resource-collection");
 
-        Element securityConstraint = XmlUtils.findFirstElement("security-constraint", webXml.getDocumentElement());
-        if (securityConstraint == null) {
-            securityConstraint = webXml.createElement("security-constraint");
-            insertAfter(securityConstraint, "session-config[last()]", webXml);
-            if (StringUtils.hasText(comment)) {
+		Element securityConstraint = XmlUtils.findFirstElement("security-constraint", webXml.getDocumentElement());
+		if (securityConstraint == null) {
+			securityConstraint = webXml.createElement("security-constraint");
+			insertAfter(securityConstraint, "session-config[last()]", webXml);
+			if (StringUtils.hasText(comment)) {
 				addCommentBefore(securityConstraint, comment, webXml);
 			}
-        }
+		}
 
-        if (StringUtils.hasText(displayName)) {
-            appendChildIfNotPresent(securityConstraint, new XmlElementBuilder("display-name", webXml).setText(displayName).build());
-        }
+		if (StringUtils.hasText(displayName)) {
+			appendChildIfNotPresent(securityConstraint, new XmlElementBuilder("display-name", webXml).setText(displayName).build());
+		}
 
-        for (final WebResourceCollection webResourceCollection :  webResourceCollections) {
-            final XmlElementBuilder webResourceCollectionBuilder = new XmlElementBuilder("web-resource-collection", webXml);
-            Assert.hasText(webResourceCollection.getWebResourceName(), "web-resource-name is required");
-            webResourceCollectionBuilder.addChild(new XmlElementBuilder("web-resource-name", webXml).setText(webResourceCollection.getWebResourceName()).build());
-            if (StringUtils.hasText(webResourceCollection.getDescription())) {
-                webResourceCollectionBuilder.addChild(new XmlElementBuilder("description", webXml).setText(webResourceCollection.getWebResourceName()).build());
-            }
-            for (final String urlPattern : webResourceCollection.getUrlPatterns()) {
-                if (StringUtils.hasText(urlPattern)) {
-                    webResourceCollectionBuilder.addChild(new XmlElementBuilder("url-pattern", webXml).setText(urlPattern).build());
-                }
-            }
-            for (final String httpMethod : webResourceCollection.getHttpMethods()) {
-                if (StringUtils.hasText(httpMethod)) {
-                    webResourceCollectionBuilder.addChild(new XmlElementBuilder("http-method", webXml).setText(httpMethod).build());
-                }
-            }
-            appendChildIfNotPresent(securityConstraint, webResourceCollectionBuilder.build());
-        }
+		for (final WebResourceCollection webResourceCollection : webResourceCollections) {
+			final XmlElementBuilder webResourceCollectionBuilder = new XmlElementBuilder("web-resource-collection", webXml);
+			Assert.hasText(webResourceCollection.getWebResourceName(), "web-resource-name is required");
+			webResourceCollectionBuilder.addChild(new XmlElementBuilder("web-resource-name", webXml).setText(webResourceCollection.getWebResourceName()).build());
+			if (StringUtils.hasText(webResourceCollection.getDescription())) {
+				webResourceCollectionBuilder.addChild(new XmlElementBuilder("description", webXml).setText(webResourceCollection.getWebResourceName()).build());
+			}
+			for (final String urlPattern : webResourceCollection.getUrlPatterns()) {
+				if (StringUtils.hasText(urlPattern)) {
+					webResourceCollectionBuilder.addChild(new XmlElementBuilder("url-pattern", webXml).setText(urlPattern).build());
+				}
+			}
+			for (final String httpMethod : webResourceCollection.getHttpMethods()) {
+				if (StringUtils.hasText(httpMethod)) {
+					webResourceCollectionBuilder.addChild(new XmlElementBuilder("http-method", webXml).setText(httpMethod).build());
+				}
+			}
+			appendChildIfNotPresent(securityConstraint, webResourceCollectionBuilder.build());
+		}
 
-        if (roleNames != null && roleNames.size() > 0) {
-            final XmlElementBuilder authConstraintBuilder = new XmlElementBuilder("auth-constraint", webXml);
-            for (final String roleName : roleNames) {
-                if (StringUtils.hasText(roleName)) {
-                    authConstraintBuilder.addChild(new XmlElementBuilder("role-name", webXml).setText(roleName).build());
-                }
-            }
-            appendChildIfNotPresent(securityConstraint, authConstraintBuilder.build());
-        }
+		if (roleNames != null && roleNames.size() > 0) {
+			final XmlElementBuilder authConstraintBuilder = new XmlElementBuilder("auth-constraint", webXml);
+			for (final String roleName : roleNames) {
+				if (StringUtils.hasText(roleName)) {
+					authConstraintBuilder.addChild(new XmlElementBuilder("role-name", webXml).setText(roleName).build());
+				}
+			}
+			appendChildIfNotPresent(securityConstraint, authConstraintBuilder.build());
+		}
 
-        if (StringUtils.hasText(transportGuarantee)) {
-            final XmlElementBuilder userDataConstraintBuilder = new XmlElementBuilder("user-data-constraint", webXml);
-            userDataConstraintBuilder.addChild(new XmlElementBuilder("transport-guarantee", webXml).setText(transportGuarantee).build());
-            appendChildIfNotPresent(securityConstraint, userDataConstraintBuilder.build());
-        }
-    }
+		if (StringUtils.hasText(transportGuarantee)) {
+			final XmlElementBuilder userDataConstraintBuilder = new XmlElementBuilder("user-data-constraint", webXml);
+			userDataConstraintBuilder.addChild(new XmlElementBuilder("transport-guarantee", webXml).setText(transportGuarantee).build());
+			appendChildIfNotPresent(securityConstraint, userDataConstraintBuilder.build());
+		}
+	}
 	
 	private static void insertBetween(final Element element, final String afterElementName, final String beforeElementName, final Document doc) {
 		final Element beforeElement = XmlUtils.findFirstElement("/web-app/" + beforeElementName, doc.getDocumentElement());
@@ -500,10 +498,10 @@ public final class WebXmlUtils {
 		for (int i = 0; i < existingChildren.getLength(); i++) {
 			final Node existingChild = existingChildren.item(i);
 			if (existingChild instanceof Element) {
-				//attempt matching of possibly nested structures by using of 'getTextContent' as 'isEqualNode' does not match due to line returns, etc
-				//note, this does not work if child nodes are appearing in a different order than expected
+				// Attempt matching of possibly nested structures by using of 'getTextContent' as 'isEqualNode' does not match due to line returns, etc
+				// Note, this does not work if child nodes are appearing in a different order than expected
 				if (existingChild.getNodeName().equals(child.getNodeName()) && existingChild.getTextContent().replaceAll(WHITESPACE, "").trim().equals(child.getTextContent().replaceAll(WHITESPACE, ""))) {
-					//if we found a match, there is no need to append the child element
+					// If we found a match, there is no need to append the child element
 					return;
 				}
 			}

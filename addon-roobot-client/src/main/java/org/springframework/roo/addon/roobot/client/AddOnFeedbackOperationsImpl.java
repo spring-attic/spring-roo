@@ -72,7 +72,7 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		JSONObject o = new JSONObject();
 		o.put("version", UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getPatchVersion());
 		o.put("type", "bundle_feedback");
-		o.put("bsn", JSONObject.escape(bsn.getKey())); // a BSN shouldn't need escaping, but anyway...
+		o.put("bsn", JSONObject.escape(bsn.getKey())); // A BSN shouldn't need escaping, but anyway...
 		o.put("rating", rating.getKey());
 		o.put("comment", comment == null ? "" : JSONObject.escape(comment));
 		String customJson = o.toJSONString();
@@ -86,5 +86,4 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		
 		logger.info("Thanks for sharing your feedback.");
 	}
-
 }

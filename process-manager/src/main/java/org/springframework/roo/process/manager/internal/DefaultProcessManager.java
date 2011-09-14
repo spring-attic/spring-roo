@@ -248,7 +248,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 			// Compute how many milliseconds it took to run
 			lastPollDuration = lastPollTime - started;
 			if (lastPollDuration == 0) {
-				lastPollDuration = 1; // ensure it correctly reflects that it has ever run
+				lastPollDuration = 1; // Ensure it correctly reflects that it has ever run
 			}
 		} catch (Throwable t) {
 			logger.log(Level.SEVERE, t.getMessage(), t);

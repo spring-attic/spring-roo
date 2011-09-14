@@ -60,11 +60,11 @@ public class DefaultUndoManager implements UndoManager {
 			try {
 				if (undoMode) {
 					if (!op.undo()) {
-						// undo failed, so switch to reset mode going forward
+						// Undo failed, so switch to reset mode going forward
 						undoMode = false;
 					}
 				} else {
-					// in reset mode
+					// In reset mode
 					op.reset();
 				}
 			} catch (Throwable t) {

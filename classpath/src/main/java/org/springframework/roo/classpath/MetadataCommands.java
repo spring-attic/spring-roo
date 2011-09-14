@@ -117,7 +117,7 @@ public class MetadataCommands implements CommandMarker {
 	public String metadataCacheMaximum(@CliOption(key={"maximumCapacity"}, mandatory=true, help="The maximum number of metadata items to cache") int maxCapacity) {
 		Assert.isTrue(maxCapacity >= 100, "Maximum capacity must be 100 or greater");
 		metadataService.setMaxCapacity(maxCapacity);
-		// show them that the change has taken place
+		// Show them that the change has taken place
 		return metadataTimings();
 	}
 }

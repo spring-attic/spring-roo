@@ -25,5 +25,4 @@ public class BigIntegerConverter implements Converter<BigInteger> {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return BigInteger.class.isAssignableFrom(requiredType);
 	}
-
 }

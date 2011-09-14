@@ -83,5 +83,4 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return fields.get(requiredType) != null;
 	}
-
 }

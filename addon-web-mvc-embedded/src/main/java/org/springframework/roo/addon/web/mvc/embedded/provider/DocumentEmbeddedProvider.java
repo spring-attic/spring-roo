@@ -25,13 +25,13 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
 	
 	public boolean embed(String url, String viewName) {
 		if (url.contains("slideshare.net")) {
-			// expected format http://www.slideshare.net/schmidtstefan/spring-one2-gx-slides-stefan-schmidt
+			// Expected format http://www.slideshare.net/schmidtstefan/spring-one2-gx-slides-stefan-schmidt
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", DocumentProvider.SLIDESHARE.name());
 			options.put("id", url);
 			return install(viewName, options);
 		} else if (url.contains("scribd.com")) {
-			// expected format http://www.scribd.com/doc/27766735/Introduction-to-SpringRoo
+			// Expected format http://www.scribd.com/doc/27766735/Introduction-to-SpringRoo
 			String[] split = url.split("/");
 			if (split.length > 4) {
 				Map<String, String> options = new HashMap<String, String>();
@@ -41,7 +41,7 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
 			}
 			return false;
 		} else if (url.contains("docs.google.") && url.contains("present")) {
-			// expected format http://docs.google.com/present/view?id=dd8rf8t9_31c9f2fcgd&revision=_latest&start=0&theme=blank&authkey=CLj5iZwJ&cwj=true
+			// Expected format http://docs.google.com/present/view?id=dd8rf8t9_31c9f2fcgd&revision=_latest&start=0&theme=blank&authkey=CLj5iZwJ&cwj=true
 			String qStart = url.substring(url.indexOf("id=") + 3);
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", DocumentProvider.GOOGLE_PRESENTATION.name());

@@ -919,7 +919,7 @@ public class SimpleParser implements Parser {
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
 			Transformer transformer = XmlUtils.createIndentingTransformer();
-			// causes an "Error reported by XML parser: Multiple notations were used which had the name 'linespecific', but which were not determined to be duplicates." when creating the DocBook
+			// Causes an "Error reported by XML parser: Multiple notations were used which had the name 'linespecific', but which were not determined to be duplicates." when creating the DocBook
 			// transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//OASIS//DTD DocBook XML V4.5//EN");
 			// transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd");
 

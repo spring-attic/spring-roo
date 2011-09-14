@@ -61,7 +61,7 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
 		
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
-			return; //type exists already - nothing to do
+			return; // Type exists already - nothing to do
 		}
 		
 		// First build interface type
@@ -73,10 +73,10 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
 		
 		// Second build the implementing class
-//		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
-//		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
-//		classTypeBuilder.addImplementsType(interfaceType);
-//		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
+		// String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
+		// ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
+		// classTypeBuilder.addImplementsType(interfaceType);
+		// typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
 		
 		// Third, take care of project configs
 		configureProject();

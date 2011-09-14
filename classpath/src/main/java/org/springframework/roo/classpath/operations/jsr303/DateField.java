@@ -125,5 +125,4 @@ public class DateField extends FieldDetails {
 	public void setPattern(String pattern) {
 		this.pattern = pattern;
 	}
-
 }

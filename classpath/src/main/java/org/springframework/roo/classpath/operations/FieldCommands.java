@@ -436,5 +436,4 @@ public class FieldCommands implements CommandMarker {
 	private boolean isDateField(final JavaType fieldType) {
 		return fieldType.equals(new JavaType("java.util.Date")) || fieldType.equals(new JavaType("java.util.Calendar"));
 	}
-
 }

@@ -237,8 +237,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private JavaType getColumnsListType() {
-		final List<JavaType> parameterTypes = new ArrayList<JavaType>();
-		parameterTypes.add(JavaType.STRING);
+		final List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING);
 		return new JavaType(LIST, 0, DataType.TYPE, null, parameterTypes);
 	}
 

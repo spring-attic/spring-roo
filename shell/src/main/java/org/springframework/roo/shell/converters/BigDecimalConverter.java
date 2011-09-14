@@ -25,5 +25,4 @@ public class BigDecimalConverter implements Converter<BigDecimal> {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return BigDecimal.class.isAssignableFrom(requiredType);
 	}
-
 }

@@ -336,8 +336,8 @@ public class GwtOperationsImpl implements GwtOperations {
 			// Ensure the gwt-maven-plugin appropriate to a GAE enabled or disabled environment is updated
 			updateBuildPlugins(isGaeEnabled);
 
-			// If there is a class that could possibly import from the appengine sdk, denoted here as having Gae in the type name, then we need to add the appengine-api-1.0-sdk dependency to the
-			// pom.xml file
+			// If there is a class that could possibly import from the appengine sdk, denoted here as having Gae in the type name, 
+			// then we need to add the appengine-api-1.0-sdk dependency to the pom.xml file
 			String rootPath = projectOperations.getPathResolver().getRoot(Path.ROOT);
 			Set<FileDetails> files = fileManager.findMatchingAntPath(rootPath + "/**/*Gae*.java");
 			if (!files.isEmpty()) {

@@ -75,7 +75,7 @@ public class DeleteDirectory implements UndoableOperation {
 	}
 	
 	public void reset() {
-		// fix for ROO-1555
+		// Fix for ROO-1555
 		try {
 			if (FileUtils.deleteRecursively(backup)) {
 				LOGGER.finest("Reset manage " + filenameResolver.getMeaningfulName(backup));

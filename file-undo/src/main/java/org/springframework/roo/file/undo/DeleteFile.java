@@ -72,7 +72,7 @@ public class DeleteFile implements UndoableOperation {
 	}
 
 	public void reset() {
-		// fix for ROO-1555
+		// Fix for ROO-1555
 		try {
 			if (backup.delete()) {
 				LOGGER.finest("Reset manage " + filenameResolver.getMeaningfulName(backup));

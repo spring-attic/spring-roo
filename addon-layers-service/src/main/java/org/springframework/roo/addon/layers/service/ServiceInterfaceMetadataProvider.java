@@ -112,7 +112,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 			if (pluralMetadata == null) {
 				return null;
 			}
-			// maintain a list of entities that are being handled by this layer
+			// Maintain a list of entities that are being handled by this layer
 			managedEntityTypes.put(type, metadataIdentificationString);
 			metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
 			domainTypePlurals.put(type, pluralMetadata.getPlural());

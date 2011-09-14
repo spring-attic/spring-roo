@@ -26,7 +26,6 @@ enum ServiceLayerMethod {
 	// these methods by their String key.
 	
 	COUNT (PersistenceCustomDataKeys.COUNT_ALL_METHOD) {
-
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getCountAllMethod())) {
@@ -52,7 +51,6 @@ enum ServiceLayerMethod {
 	},
 	
 	DELETE (PersistenceCustomDataKeys.REMOVE_METHOD) {
-
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getDeleteMethod())) {
@@ -78,7 +76,6 @@ enum ServiceLayerMethod {
 	},
 	
 	FIND (PersistenceCustomDataKeys.FIND_METHOD) {
-		
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindMethod())) {

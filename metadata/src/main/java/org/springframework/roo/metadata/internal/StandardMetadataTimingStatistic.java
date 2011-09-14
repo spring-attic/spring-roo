@@ -59,15 +59,14 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		if (time < 1000000) {
-			// nanosecond precision
+			// Nanosecond precision
 			sb.append(String.format("%06d", time)).append(" ns; ");
 		} else {
-			// millisecond precision
+			// Millisecond precision
 			sb.append(String.format("%06d", time/1000000)).append(" ms; ");
 		}
 		sb.append(String.format("%06d", invocations)).append(" call(s): ");
 		sb.append(name);
 		return sb.toString();
 	}
-
 }

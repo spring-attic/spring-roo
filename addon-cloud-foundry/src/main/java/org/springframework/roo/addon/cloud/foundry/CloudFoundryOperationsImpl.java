@@ -497,7 +497,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 	}
 
 	public void setup() {
-		//TODO: This is where a cloud environment profile would be added to the application config
+		// TODO: This is where a cloud environment profile would be added to the application config
 	}
 
 	public boolean isCloudFoundryCommandAvailable() {

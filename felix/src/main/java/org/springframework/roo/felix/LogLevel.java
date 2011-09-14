@@ -58,5 +58,4 @@ public class LogLevel implements Comparable<LogLevel> {
 		tsc.append("felixCode", felixCode);
 		return tsc.toString();
 	}
-
 }

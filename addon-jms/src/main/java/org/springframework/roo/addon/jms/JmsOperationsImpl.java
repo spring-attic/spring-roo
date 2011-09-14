@@ -171,7 +171,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		final List<JavaType> parameterTypes = Arrays.asList(OBJECT);
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("message"));
 
-		// create some method content to get people started
+		// Create some method content to get people started
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("System.out.println(\"JMS message received: \" + message);");
 		methods.add(new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder));

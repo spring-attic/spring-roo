@@ -108,9 +108,9 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		// Look up the inheritance hierarchy for existing EntityMetadata
 		final EntityMetadata parent = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
 
-		//If the parent is null, but the type has a super class it is likely that the we don't have information to proceed
+		// If the parent is null, but the type has a super class it is likely that the we don't have information to proceed
 		if (parent == null && ((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails()).getSuperclass() != null) {
-			//If the superclass is annotated with the Entity trigger annotation then we can be pretty sure that we don't have enough information to proceed
+			// If the superclass is annotated with the Entity trigger annotation then we can be pretty sure that we don't have enough information to proceed
 			if (MemberFindingUtils.getAnnotationOfType(governorPhysicalType.getMemberHoldingTypeDetails().getAnnotations(), ROO_ENTITY) != null) {
 				return null;
 			}

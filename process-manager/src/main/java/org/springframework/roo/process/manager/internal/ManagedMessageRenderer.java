@@ -47,7 +47,7 @@ public class ManagedMessageRenderer {
 	void logManagedMessage() {
 		StringBuilder message = new StringBuilder();
 		if (hashCode != null && includeHashCode && hashCode.length() >= 7) {
-			// display only the first 6 characters, being consistent with Git hash code display conventions
+			// Display only the first 6 characters, being consistent with Git hash code display conventions
 			message.append(hashCode.subSequence(0, 7)).append(" ");
 		}
 		if (createOperation) {

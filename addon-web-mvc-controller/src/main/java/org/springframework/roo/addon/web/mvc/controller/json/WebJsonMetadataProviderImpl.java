@@ -123,10 +123,10 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 			return null;
 		}
 		
-		// Tmp workaround until AspectJ allows multiple introductions of the same field to a target type.
+		// Temporary workaround until AspectJ allows multiple introductions of the same field to a target type.
 		boolean servicesInjected = MemberFindingUtils.getAnnotationOfType(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getAnnotations(), RooJavaType.ROO_WEB_SCAFFOLD) != null;
 		
-		// maintain a list of entities that are being tested
+		// Maintain a list of entities that are being tested
 		managedEntityTypes.put(jsonObject, metadataIdentificationString);
 		
 		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, persistenceAdditions, javaTypePersistenceMetadataDetails.getIdentifierField(), plural.getPlural(), finderDetails, jsonMetadata, servicesInjected);

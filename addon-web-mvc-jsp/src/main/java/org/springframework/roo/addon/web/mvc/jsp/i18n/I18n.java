@@ -21,10 +21,10 @@ public interface I18n {
 	 * Locale.ENGLISH
 	 * 
 	 * constructor (no country):
-	 * new Locale("en"); //lowercase two-letter ISO-639 code.
+	 * new Locale("en"); // Lowercase two-letter ISO-639 code.
 	 * 
 	 * constructor (country specific):
-	 * new Locale("en", "AU"); //language lowercase two-letter ISO-639 code, country uppercase two-letter ISO-3166 code.
+	 * new Locale("en", "AU"); // Language lowercase two-letter ISO-639 code, country uppercase two-letter ISO-3166 code.
 	 *
 	 * @return the locale
 	 */

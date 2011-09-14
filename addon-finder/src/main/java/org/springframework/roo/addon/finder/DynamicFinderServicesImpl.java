@@ -269,7 +269,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			finder = finder.substring(findBy.length());
 		}
 		
-		// if finder still contains the findBy sequence it is most likely a wrong finder (ie someone pasted the finder string accidentally twice
+		// If finder still contains the findBy sequence it is most likely a wrong finder (ie someone pasted the finder string accidentally twice
 		if (finder.contains(findBy)) {
 			throw new InvalidFinderException("Dynamic finder definition for '" + finderName.getSymbolName() + "' in " + simpleTypeName + ".java is invalid");
 		}

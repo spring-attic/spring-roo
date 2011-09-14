@@ -911,10 +911,10 @@ public class Base64 {
                 // Not too bad of an estimate on array size, I'd say.
                 byte[] finalOut = new byte[e];
                 System.arraycopy(outBuff,0, finalOut,0,e);
-                //System.err.println("Having to resize array from " + outBuff.length + " to " + e);
+                // System.err.println("Having to resize array from " + outBuff.length + " to " + e);
                 return finalOut;
             } else {
-                //System.err.println("No need to resize array.");
+                // System.err.println("No need to resize array.");
                 return outBuff;
             }
         }   // end else: don't compress

@@ -60,5 +60,4 @@ public class LayerTypeMatcher extends AnnotatedTypeMatcher {
 		}
 		return domainTypes;
 	}
-
 }

@@ -22,7 +22,7 @@ import org.w3c.dom.Element;
 public class WaveEmbeddedProvider extends AbstractEmbeddedProvider {
 	
 	public boolean embed(String url, String viewName) {
-		// expected format https://wave.google.com/wave/#restored:wave:googlewave.com%252Fw%252B8Hj0sgUxC
+		// Expected format https://wave.google.com/wave/#restored:wave:googlewave.com%252Fw%252B8Hj0sgUxC
 		if (url.contains("wave.google.")) {			
 			String qStart = url.substring(url.indexOf("%252B") + 5);
 			Map<String, String> options = new HashMap<String, String>();

@@ -80,7 +80,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		String jspx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/embed/" + viewName + ".jspx");
 		Document document = contentElement.getOwnerDocument();
 		if(!fileManager.exists(jspx)) {
-			//add document namespaces
+			// Add document namespaces
 			Element div = new XmlElementBuilder("div", document)
 									.addAttribute("xmlns:util", "urn:jsptagdir:/WEB-INF/tags/util")
 									.addAttribute("xmlns:embed", "urn:jsptagdir:/WEB-INF/tags/embed")

@@ -83,7 +83,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
 		
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
-			return; //type exists already - nothing to do
+			return; // Type exists already - nothing to do
 		}
 		
 		// First build interface type
@@ -103,7 +103,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		
 		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(classIdentifier)) {
-			return; //type exists already - nothing to do
+			return; // Type exists already - nothing to do
 		}
 		
 		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));

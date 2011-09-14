@@ -123,18 +123,18 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 		int result;
 
 		while (true) {
-			// only count the number of zeroes leading the last number compared
+			// Only count the number of zeroes leading the last number compared
 			nza = nzb = 0;
 
 			ca = charAt(a, ia);
 			cb = charAt(b, ib);
 
-			// skip over leading spaces or zeros
+			// Skip over leading spaces or zeros
 			while (isSpace(ca) || ca == '0') {
 				if (ca == '0') {
 					nza++;
 				} else {
-					// only count consecutive zeroes
+					// Only count consecutive zeroes
 					nza = 0;
 				}
 
@@ -145,14 +145,14 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 				if (cb == '0') {
 					nzb++;
 				} else {
-					// only count consecutive zeroes
+					// Only count consecutive zeroes
 					nzb = 0;
 				}
 
 				cb = charAt(b, ++ib);
 			}
 
-			// process run of digits
+			// Process run of digits
 			if (Character.isDigit(ca) && Character.isDigit(cb)) {
 				if ((result = compareRight(a.substring(ia), b.substring(ib))) != 0) {
 					return result;

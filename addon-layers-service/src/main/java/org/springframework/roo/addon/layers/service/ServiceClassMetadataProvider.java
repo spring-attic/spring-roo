@@ -140,7 +140,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 			}
 			domainTypePlurals.put(domainType, pluralMetadata.getPlural());
 			
-			// maintain a list of entities that are being handled by this layer
+			// Maintain a list of entities that are being handled by this layer
 			managedEntityTypes.put(domainType, metadataIdentificationString);
 			
 			// Collect the additions the service class needs in order to invoke each service layer method

@@ -24,5 +24,4 @@ public class CharacterConverter implements Converter<Character> {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return Character.class.isAssignableFrom(requiredType) || char.class.isAssignableFrom(requiredType);
 	}
-
 }

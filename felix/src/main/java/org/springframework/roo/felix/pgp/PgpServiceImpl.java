@@ -164,7 +164,7 @@ public class PgpServiceImpl implements PgpService {
 	private PGPPublicKeyRing trust(final PGPPublicKeyRing keyRing) {
 		rememberKey(keyRing);
 
-		// get the keys we currently trust
+		// Get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
 
 		// Do not store if the first key is revoked
@@ -188,10 +188,10 @@ public class PgpServiceImpl implements PgpService {
 	@SuppressWarnings("unchecked")
 	public PGPPublicKeyRing untrust(PgpKeyId keyId) {
 		Assert.notNull(keyId, "Key ID required");
-		// get the keys we currently trust
+		// Get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
 
-		// build a new list of keys we'll continue to trust after this method ends
+		// Build a new list of keys we'll continue to trust after this method ends
 		List<PGPPublicKeyRing> stillTrusted = new ArrayList<PGPPublicKeyRing>();
 
 		// Locate the element to remove (we need to record it so the method can return it)
@@ -215,7 +215,7 @@ public class PgpServiceImpl implements PgpService {
 
 		Assert.notNull(removed, "The public key ID '" + keyId + "' is not currently trusted");
 
-		// write back to disk
+		// Write back to disk
 		OutputStream fos = null;
 		try {
 			PGPPublicKeyRingCollection newCollection = new PGPPublicKeyRingCollection(stillTrusted);
@@ -231,10 +231,10 @@ public class PgpServiceImpl implements PgpService {
 
 	public SortedMap<PgpKeyId, String> refresh() {
 		SortedMap<PgpKeyId, String> result = new TreeMap<PgpKeyId, String>();
-		// get the keys we currently trust
+		// Get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
 
-		// build a new list of our refreshed keys
+		// Build a new list of our refreshed keys
 		List<PGPPublicKeyRing> stillTrusted = new ArrayList<PGPPublicKeyRing>();
 
 		// Locate the element to remove (we need to record it so the method can return it)
@@ -246,7 +246,7 @@ public class PgpServiceImpl implements PgpService {
 			try {
 				newKeyRing = getPublicKey(candidateKeyId);
 			} catch (Exception e) {
-				// can't retrieve, so keep the old one for now
+				// Can't retrieve, so keep the old one for now
 				stillTrusted.add(candidate);
 				result.put(candidateKeyId, "WARNING: Retained original (download issue)");
 				continue;
@@ -260,7 +260,7 @@ public class PgpServiceImpl implements PgpService {
 			}
 		}
 
-		// write back to disk
+		// Write back to disk
 		OutputStream fos = null;
 		try {
 			PGPPublicKeyRingCollection newCollection = new PGPPublicKeyRingCollection(stillTrusted);
@@ -336,7 +336,6 @@ public class PgpServiceImpl implements PgpService {
 	}
 
 	public SignatureDecision isSignatureAcceptable(InputStream signature) throws IOException {
-
 		PGPObjectFactory factory = new PGPObjectFactory(PGPUtil.getDecoderStream(signature));
 		Object obj = factory.nextObject();
 
@@ -399,7 +398,7 @@ public class PgpServiceImpl implements PgpService {
 
 			pgpSignature.initVerify(publicKey, "BC");
 
-			// now verify the signed content
+			// Now verify the signed content
 			byte[] buff = new byte[BUFFER_SIZE];
 			int chunk;
 			do {

@@ -24,5 +24,4 @@ public class LongConverter implements Converter<Long> {
 	public boolean supports(Class<?> requiredType, String optionContext) {
 		return Long.class.isAssignableFrom(requiredType) || long.class.isAssignableFrom(requiredType);
 	}
-
 }

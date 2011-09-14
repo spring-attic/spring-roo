@@ -1,11 +1,5 @@
 package org.springframework.roo.classpath.javaparser.details;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
@@ -20,6 +14,13 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -173,8 +174,8 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 					List<Type> typeArgs = new ArrayList<Type>();
 					cit.setTypeArgs(typeArgs);
 					for (JavaType parameter : constructorParameter.getJavaType().getParameters()) {
-						//NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-						//typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+						// NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
+						// typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 						typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 					}
 					

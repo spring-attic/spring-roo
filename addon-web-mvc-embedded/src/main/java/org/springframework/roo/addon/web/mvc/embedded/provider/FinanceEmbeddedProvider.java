@@ -19,7 +19,7 @@ public class FinanceEmbeddedProvider extends AbstractEmbeddedProvider {
 	// TODO : disabled due to ROO-2562
 	public boolean embed(String url, String viewName) {
 //		if (url.contains("wikinvest.com")) {
-//			// expected format http://www.wikinvest.com/wiki/Vmw
+//			// Expected format http://www.wikinvest.com/wiki/Vmw
 //			Map<String, String> options = new HashMap<String, String>();
 //			options.put("provider", "FINANCES");
 //			options.put("stockSymbol", url.substring(url.indexOf("wiki/") + 5));

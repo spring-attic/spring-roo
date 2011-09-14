@@ -82,7 +82,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	
 	private MethodMetadata getGetAsObjectMethod(final String builderString, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
-		final JavaType[] parameterTypes = {FACES_CONTEXT, UI_COMPONENT, JavaType.STRING};
+		final List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, JavaType.STRING);
 		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) return method;
 
@@ -117,7 +117,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	
 	private MethodMetadata getGetAsStringMethod(final String builderString, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
-		final JavaType[] parameterTypes = {FACES_CONTEXT, UI_COMPONENT, OBJECT};
+		final List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, OBJECT);
 		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) return method;
 		

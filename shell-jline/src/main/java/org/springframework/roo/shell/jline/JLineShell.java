@@ -342,7 +342,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			// There is nothing to erase
 		} else {
 			buff.append(ANSICodes.gotoxy(row, mostFurtherLeftColNumber));
-			buff.append(ANSICodes.clreol()); // clear what was present on the line
+			buff.append(ANSICodes.clreol()); // Clear what was present on the line
 		}
 
 		if (("".equals(message))) {

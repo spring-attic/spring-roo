@@ -90,5 +90,4 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		}
 	}
-
 }

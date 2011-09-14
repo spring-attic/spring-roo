@@ -58,5 +58,4 @@ public class PsOptions implements Comparable<PsOptions> {
 		tsc.append("felixCode", felixCode);
 		return tsc.toString();
 	}
-
 }

@@ -1,11 +1,5 @@
 package org.springframework.roo.classpath.javaparser;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
@@ -28,6 +22,13 @@ import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaPackage;
@@ -340,7 +341,7 @@ public class JavaParserUtils  {
 			NameExpr qneQualifier = qne.getQualifier();
 			NameExpr enclosedBy = getNameExpr(compilationUnitServices.getEnclosingTypeName().getSimpleTypeName());
 			if (isEqual(qneQualifier, enclosedBy)) {
-				// this qualified name expression is simply an inner type reference
+				// This qualified name expression is simply an inner type reference
 				String name = compilationUnitServices.getEnclosingTypeName().getFullyQualifiedTypeName() + "." + nameToFind.getName();
 				return new JavaType(name);
 			}
@@ -379,7 +380,7 @@ public class JavaParserUtils  {
 		for (TypeDeclaration internalType : compilationUnitServices.getInnerTypes()) {
 			NameExpr nameExpr = getNameExpr(internalType.getName());
 			if (isEqual(nameExpr, nameToFind)) {
-				// found, so now we need to convert the internalType to a proper JavaType
+				// Found, so now we need to convert the internalType to a proper JavaType
 				String name = compilationUnitServices.getEnclosingTypeName().getFullyQualifiedTypeName() + "." + nameToFind.getName();
 				return new JavaType(name);
 			}

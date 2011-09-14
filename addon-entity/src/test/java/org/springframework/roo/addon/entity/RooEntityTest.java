@@ -44,7 +44,7 @@ public class RooEntityTest {
 					candidateMethod.getName().equals(targetMethod.getName()) &&
 					ObjectUtils.nullSafeEquals(candidateMethod.getDefaultValue(), targetMethod.getDefaultValue()))
 			{
-				return;	// found a match
+				return; // Found a match
 			}
 		}
 		fail("No " + RooEntity.class.getSimpleName() + " method has the signature \"" + targetMethod.getReturnType().getSimpleName() + " " + targetMethod.getName() + "() default " + targetMethod.getDefaultValue() + "\"");
