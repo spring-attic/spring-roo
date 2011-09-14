@@ -29,8 +29,7 @@ import org.springframework.roo.shell.CommandMarker;
 public class PgpCommands implements CommandMarker {
 	
 	// Fields
-	@Reference
-	PgpService pgpService;
+	@Reference PgpService pgpService;
 
 	@CliCommand(value = "pgp status", help = "Displays the status of the PGP environment")
 	public String pgpStatus() {
