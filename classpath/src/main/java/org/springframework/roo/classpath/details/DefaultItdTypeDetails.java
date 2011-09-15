@@ -16,94 +16,94 @@ import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Default representation of an {@link ItdTypeDetails}.
  * 
  * <p>
- * Provides a basic {@link #hashCode()} that is used for detecting significant changes in {@link AbstractItdMetadataProvider} and avoiding
- * downstream notifications accordingly.
+ * Provides a basic {@link #hashCode()} that is used for detecting significant
+ * changes in {@link AbstractItdMetadataProvider} and avoiding downstream
+ * notifications accordingly.
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
  */
 public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ItdTypeDetails {
+
+	// Constants
+	static final PhysicalTypeCategory PHYSICAL_TYPE_CATEGORY = PhysicalTypeCategory.ITD;
 	
 	// Fields
-	private ClassOrInterfaceTypeDetails governor;
-	private JavaType aspect;
-	private boolean privilegedAspect;
-
-	private PhysicalTypeCategory physicalTypeCategory = PhysicalTypeCategory.ITD;
-	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
-	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
-	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
-	private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
-	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
-	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-	private Set<JavaType> registeredImports = new HashSet<JavaType>();
-	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
-	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
-	private List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+	private final boolean privilegedAspect;
+	private final ClassOrInterfaceTypeDetails governor;
+	private final JavaType aspect;
+	private final List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+	private final List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
+	private final List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
+	private final List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
+	private final List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
+	private final List<JavaType> extendsTypes = new ArrayList<JavaType>();
+	private final List<JavaType> implementsTypes = new ArrayList<JavaType>();
+	private final List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+	private final Set<JavaType> registeredImports = new HashSet<JavaType>();
 	
-	// Package protected to force the use of the corresponding builder
-	DefaultItdTypeDetails(CustomData customData, String declaredByMetadataId, int modifier, ClassOrInterfaceTypeDetails governor, JavaType aspect,
-		boolean privilegedAspect, Set<JavaType> registeredImports,
-		List<ConstructorMetadata> declaredConstructors,
-		List<FieldMetadata> declaredFields,
-		List<MethodMetadata> declaredMethods,
-		List<JavaType> extendsTypes,
-		List<JavaType> implementsTypes,
-		List<AnnotationMetadata> typeAnnotations,
-		List<DeclaredFieldAnnotationDetails> fieldAnnotations,
-		List<DeclaredMethodAnnotationDetails> methodAnnotations,
-		List<ClassOrInterfaceTypeDetails> innerTypes) {
-		
+	/**
+	 * Constructor (package protected to enforce the use of the corresponding builder)
+	 *
+	 * @param customData
+	 * @param declaredByMetadataId
+	 * @param modifier
+	 * @param governor the type to receive the introductions (required)
+	 * @param aspect (required)
+	 * @param privilegedAspect
+	 * @param registeredImports can be <code>null</code>
+	 * @param declaredConstructors can be <code>null</code>
+	 * @param declaredFields can be <code>null</code>
+	 * @param declaredMethods can be <code>null</code>
+	 * @param extendsTypes can be <code>null</code>
+	 * @param implementsTypes can be <code>null</code>
+	 * @param typeAnnotations can be <code>null</code>
+	 * @param fieldAnnotations can be <code>null</code>
+	 * @param methodAnnotations can be <code>null</code>
+	 * @param innerTypes can be <code>null</code>
+	 */
+	DefaultItdTypeDetails(
+		final CustomData customData,
+		final String declaredByMetadataId,
+		final int modifier,
+		final ClassOrInterfaceTypeDetails governor,
+		final JavaType aspect,
+		final boolean privilegedAspect,
+		final Collection<? extends JavaType> registeredImports,
+		final Collection<ConstructorMetadata> declaredConstructors,
+		final Collection<FieldMetadata> declaredFields,
+		final Collection<MethodMetadata> declaredMethods,
+		final Collection<? extends JavaType> extendsTypes,
+		final Collection<? extends JavaType> implementsTypes,
+		final Collection<AnnotationMetadata> typeAnnotations,
+		final Collection<? extends DeclaredFieldAnnotationDetails> fieldAnnotations,
+		final Collection<? extends DeclaredMethodAnnotationDetails> methodAnnotations,
+		final Collection<ClassOrInterfaceTypeDetails> innerTypes)
+	{
 		super(customData, declaredByMetadataId, modifier, typeAnnotations);
-		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
+		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		
-		this.governor = governor;
 		this.aspect = aspect;
+		this.governor = governor;
 		this.privilegedAspect = privilegedAspect;
 		
-		if (registeredImports != null) {
-			this.registeredImports = registeredImports;
-		}
-
-		if (declaredConstructors != null) {
-			this.declaredConstructors = declaredConstructors;
-		}
-		
-		if (declaredFields != null) {
-			this.declaredFields = declaredFields;
-		}
-		
-		if (declaredMethods != null) {
-			this.declaredMethods = declaredMethods;
-		}
-		
-		if (extendsTypes != null) {
-			this.extendsTypes = extendsTypes;
-		}
-		
-		if (implementsTypes != null) {
-			this.implementsTypes = implementsTypes;
-		}
-
-		if (fieldAnnotations != null) {
-			this.fieldAnnotations = fieldAnnotations;
-		}
-		
-		if (methodAnnotations != null) {
-			this.methodAnnotations = methodAnnotations;
-		}
-		
-		if (innerTypes != null) {
-			this.innerTypes = innerTypes;
-		}
+		CollectionUtils.populate(this.declaredConstructors, declaredConstructors);
+		CollectionUtils.populate(this.declaredFields, declaredFields);
+		CollectionUtils.populate(this.declaredMethods, declaredMethods);
+		CollectionUtils.populate(this.extendsTypes, extendsTypes);
+		CollectionUtils.populate(this.fieldAnnotations, fieldAnnotations);
+		CollectionUtils.populate(this.implementsTypes, implementsTypes);
+		CollectionUtils.populate(this.innerTypes, innerTypes);
+		CollectionUtils.populate(this.methodAnnotations, methodAnnotations);
+		CollectionUtils.populate(this.registeredImports, registeredImports);
 	}
 	
 	public Set<JavaType> getRegisteredImports() {
@@ -115,7 +115,7 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 	}
 
 	public PhysicalTypeCategory getPhysicalTypeCategory() {
-		return physicalTypeCategory;
+		return PHYSICAL_TYPE_CATEGORY;
 	}
 
 	public JavaType getName() {
@@ -138,20 +138,20 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 		return Collections.unmodifiableList(declaredConstructors);
 	}
 	
-	public List<? extends FieldMetadata> getDeclaredFields() {
+	public List<FieldMetadata> getDeclaredFields() {
 		return Collections.unmodifiableList(declaredFields);
 	}
 	
-	public List<? extends MethodMetadata> getDeclaredMethods() {
+	public List<MethodMetadata> getDeclaredMethods() {
 		return Collections.unmodifiableList(declaredMethods);
 	}
 
 	public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
-		return Collections.unmodifiableList(declaredInnerTypes);
+		return Collections.emptyList();
 	}
 
 	public List<InitializerMetadata> getDeclaredInitializers() {
-		return Collections.unmodifiableList(declaredInitializers);
+		return Collections.emptyList();
 	}
 
 	public List<JavaType> getExtendsTypes() {
@@ -172,29 +172,30 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 
 	@Override
 	public int hashCode() {
-		int hash = aspect.hashCode() * governor.getName().hashCode() * governor.getModifier() * governor.getCustomData().hashCode() * physicalTypeCategory.hashCode() * (privilegedAspect ? 2 : 3);
-		hash = hash * includeCustomDataHash(declaredConstructors);
-		hash = hash * includeCustomDataHash(declaredFields);
-		hash = hash * includeCustomDataHash(declaredMethods);
-		hash = hash * new ItdSourceFileComposer(this).getOutput().hashCode();
+		int hash = aspect.hashCode() * governor.getName().hashCode() * governor.getModifier() * governor.getCustomData().hashCode() * PHYSICAL_TYPE_CATEGORY.hashCode() * (privilegedAspect ? 2 : 3);
+		hash *= includeCustomDataHash(declaredConstructors);
+		hash *= includeCustomDataHash(declaredFields);
+		hash *= includeCustomDataHash(declaredMethods);
+		hash *= new ItdSourceFileComposer(this).getOutput().hashCode();
 		return hash;
 	}
 	
-	private int includeCustomDataHash(Collection<? extends CustomDataAccessor> coll) {
+	private int includeCustomDataHash(final Collection<? extends CustomDataAccessor> coll) {
 		int result = 1;
-		for (CustomDataAccessor accessor : coll) {
+		for (final CustomDataAccessor accessor : coll) {
 			result = result * accessor.getCustomData().hashCode();
 		}
 		return result;
 	}
 
+	@Override
 	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
+		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
 		tsc.append("modifier", getModifier());
 		tsc.append("name", governor);
 		tsc.append("aspect", aspect);
-		tsc.append("physicalTypeCategory", physicalTypeCategory);
+		tsc.append("physicalTypeCategory", PHYSICAL_TYPE_CATEGORY);
 		tsc.append("privilegedAspect", privilegedAspect);
 		tsc.append("registeredImports", registeredImports);
 		tsc.append("declaredConstructors", declaredConstructors);

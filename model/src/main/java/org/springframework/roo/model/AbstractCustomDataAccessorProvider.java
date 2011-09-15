@@ -9,9 +9,16 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public abstract class AbstractCustomDataAccessorProvider implements CustomDataAccessor {
-	private CustomData customData;
+	
+	// Fields
+	private final CustomData customData;
 
-	public AbstractCustomDataAccessorProvider(CustomData customData) {
+	/**
+	 * Constructor
+	 *
+	 * @param customData
+	 */
+	protected AbstractCustomDataAccessorProvider(final CustomData customData) {
 		Assert.notNull(customData, "Custom data required");
 		this.customData = customData;
 	}

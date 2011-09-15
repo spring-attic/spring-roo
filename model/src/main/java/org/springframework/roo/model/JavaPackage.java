@@ -11,10 +11,10 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-public final class JavaPackage implements Comparable<JavaPackage> {
+public class JavaPackage implements Comparable<JavaPackage> {
 	
 	// Fields
-	private String fullyQualifiedPackageName;
+	private final String fullyQualifiedPackageName;
 
 	/**
 	 * Construct a JavaPackage.
@@ -41,20 +41,20 @@ public final class JavaPackage implements Comparable<JavaPackage> {
 		return fullyQualifiedPackageName;
 	}
 
-	public final int hashCode() {
+	public int hashCode() {
 		return this.fullyQualifiedPackageName.hashCode();
 	}
 
-	public final boolean equals(Object obj) {
+	public boolean equals(Object obj) {
 		return obj instanceof JavaPackage && this.compareTo((JavaPackage) obj) == 0;
 	}
 
-	public final int compareTo(JavaPackage o) {
+	public int compareTo(JavaPackage o) {
 		if (o == null) return -1;
-		return this.fullyQualifiedPackageName.compareTo(o.fullyQualifiedPackageName);
+		return this.fullyQualifiedPackageName.compareTo(o.getFullyQualifiedPackageName());
 	}
 	
-	public final String toString() {
+	public String toString() {
 		return fullyQualifiedPackageName;
 	}
 }

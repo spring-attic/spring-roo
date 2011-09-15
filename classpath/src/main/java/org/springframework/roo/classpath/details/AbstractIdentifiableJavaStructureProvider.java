@@ -9,14 +9,21 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public abstract class AbstractIdentifiableJavaStructureProvider extends AbstractCustomDataAccessorProvider implements IdentifiableJavaStructure {
 
-	private String declaredByMetadataId;
-	private int modifier;
+	// Fields
+	private final String declaredByMetadataId;
+	private final int modifier;
 	
-	public AbstractIdentifiableJavaStructureProvider(CustomData customData, String declaredByMetadataId, int modifier) {
+	/**
+	 * Constructor
+	 *
+	 * @param customData
+	 * @param declaredByMetadataId
+	 * @param modifier
+	 */
+	protected AbstractIdentifiableJavaStructureProvider(final CustomData customData, final String declaredByMetadataId, final int modifier) {
 		super(customData);
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		this.declaredByMetadataId = declaredByMetadataId;
@@ -30,5 +37,4 @@ public abstract class AbstractIdentifiableJavaStructureProvider extends Abstract
 	public final int getModifier() {
 		return modifier;
 	}
-	
 }
