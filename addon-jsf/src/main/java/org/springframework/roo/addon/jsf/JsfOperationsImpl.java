@@ -243,7 +243,6 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			input = input.replace("__LC_DOMAIN_TYPE__", JavaSymbolName.getReservedWordSafeName(entity).getSymbolName());
 			input = input.replace("__DOMAIN_TYPE_PLURAL__", plural);
 			input = input.replace("__LC_DOMAIN_TYPE_PLURAL__", StringUtils.uncapitalize(plural));
-
 			fileManager.createOrUpdateTextFileIfRequired(domainTypeFile, input, false);
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create '" + domainTypeFile + "'", e);
@@ -390,9 +389,11 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}
+		
+		InputStream inputStream = null;
 		try {
-			InputStream template = TemplateUtils.getTemplate(getClass(), templateName);
-			String input = FileCopyUtils.copyToString(new InputStreamReader(template));
+			inputStream = TemplateUtils.getTemplate(getClass(), templateName);
+			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
 			
@@ -400,6 +401,8 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 		} catch (IOException e) {
 			throw new IllegalStateException("Unable to create '" + physicalPath + "'", e);
+		} finally {
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 	

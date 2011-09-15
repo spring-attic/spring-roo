@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
 /**
- * The JSF 2 implementation.
+ * The JSF implementation.
  * 
  * @author Alan Stewart
  * @since 1.2.0
