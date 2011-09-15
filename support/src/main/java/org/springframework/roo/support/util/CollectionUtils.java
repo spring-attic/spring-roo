@@ -306,6 +306,44 @@ public final class CollectionUtils {
 	}
 	
 	/**
+	 * Adds the given items to the given collection
+	 * 
+	 * @param <T> the type of item in the collection being updated
+	 * @param newItems the items being added; can be <code>null</code> for none
+	 * @param existingItems the items being added to; must be modifiable
+	 * @return <code>true</code> if the existing collection was modified
+	 * @throws UnsupportedOperationException if there are items to add and the
+	 * existing collection is not modifiable
+	 * @since 1.2.0
+	 */
+	public static <T> boolean addAll(final Collection<? extends T> newItems, final Collection<T> existingItems) {
+		if (existingItems != null && newItems != null) {
+			return existingItems.addAll(newItems);
+		}
+		return false;
+	}
+	
+	/**
+	 * Populates the given collection by replacing any existing contents with
+	 * the given elements, in a null-safe way.
+	 * 
+	 * @param <T> the type of element in the collection
+	 * @param collection the collection to populate (can be <code>null</code>)
+	 * @param items the items with which to populate the collection (can be
+	 * <code>null</code> or empty for none)
+	 * @return the given collection (useful if it was anonymous)
+	 */
+	public static <T> Collection<T> populate(final Collection<T> collection, final Collection<? extends T> items) {
+		if (collection != null) {
+			collection.clear();
+			if (items != null) {
+				collection.addAll(items);
+			}
+		}
+		return collection;
+	}
+	
+	/**
 	 * Constructor is private to prevent instantiation
 	 * 
 	 * @since 1.2.0

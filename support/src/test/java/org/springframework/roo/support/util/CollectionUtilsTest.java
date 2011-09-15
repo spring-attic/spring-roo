@@ -1,8 +1,14 @@
 package org.springframework.roo.support.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -21,6 +27,15 @@ public class CollectionUtilsTest {
 			return StringUtils.hasText(instance);
 		}
 	};
+	
+	private static class Parent {
+		@Override
+		public String toString() {
+			return getClass().getSimpleName();
+		}
+	}
+	
+	private static class Child extends Parent {}
 
 	@Test
 	public void testFilterNullCollection() {
@@ -49,5 +64,71 @@ public class CollectionUtilsTest {
 		
 		// Check
 		assertEquals(Arrays.asList("a", "b"), results);
+	}
+	
+	@Test
+	public void testAddNullCollectionToNullCollection() {
+		assertFalse(CollectionUtils.addAll(null, null));
+	}
+	
+	@Test
+	public void testAddNullCollectionToNonNullCollection() {
+		// Set up
+		final Parent parent = new Parent();
+		final Collection<Parent> parents = Arrays.asList(parent);
+		
+		// Invoke
+		final boolean added = CollectionUtils.addAll(null, parents);
+		
+		// Check
+		assertFalse(added);
+	}
+	
+	@Test
+	public void testAddNonNullCollectionToNonNullCollection() {
+		// Set up
+		final Parent parent = new Parent();
+		final Child child = new Child();
+		final Collection<Parent> parents = new ArrayList<Parent>();
+		parents.add(parent);
+		
+		// Invoke
+		final boolean added = CollectionUtils.addAll(Arrays.asList(child), parents);
+		
+		// Check
+		assertTrue(added);
+		assertEquals(Arrays.asList(parent, child), parents);
+	}
+	
+	@Test
+	public void testPopulateNullCollectionWithNullCollection() {
+		assertNull(CollectionUtils.populate(null, null));
+	}
+	
+	@Test
+	public void testPopulateNonNullCollectionWithNullCollection() {
+		// Set up
+		final Collection<Parent> collection = new ArrayList<Parent>();
+		collection.add(new Parent());
+		
+		// Invoke
+		final Collection<Parent> result = CollectionUtils.populate(collection, null);
+		
+		// Check
+		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void testPopulateNonNullCollectionWithNonNullCollection() {
+		// Set up
+		final Collection<Parent> originalCollection = new ArrayList<Parent>();
+		originalCollection.add(new Parent());
+		final Child child = new Child();
+		
+		// Invoke
+		final Collection<Parent> result = CollectionUtils.populate(originalCollection, Arrays.asList(child));
+		
+		// Check
+		assertEquals(Collections.singletonList(child), result);
 	}
 }
