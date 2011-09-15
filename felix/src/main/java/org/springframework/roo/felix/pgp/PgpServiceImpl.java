@@ -338,6 +338,7 @@ public class PgpServiceImpl implements PgpService {
 	public SignatureDecision isSignatureAcceptable(InputStream signature) throws IOException {
 		PGPObjectFactory factory = new PGPObjectFactory(PGPUtil.getDecoderStream(signature));
 		Object obj = factory.nextObject();
+		Assert.notNull(obj, "Unable to retrieve signature from stream");
 
 		PGPSignatureList p3;
 		if (obj instanceof PGPCompressedData) {
@@ -350,9 +351,8 @@ public class PgpServiceImpl implements PgpService {
 		} else {
 			p3 = (PGPSignatureList) obj;
 		}
-
+		
 		PGPSignature pgpSignature = p3.get(0);
-
 		Assert.notNull(pgpSignature, "Unable to retrieve signature from stream");
 
 		PgpKeyId keyIdInHex = new PgpKeyId(pgpSignature);

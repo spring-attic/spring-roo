@@ -106,6 +106,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 			FileCopyUtils.copy(urlInputStreamService.openConnection(resourceUrl), new FileOutputStream(resourceFile));
 
 			resource = new FileInputStream(resourceFile);
+			signature = new FileInputStream(ascUrlFile);
 			Assert.isTrue(pgpService.isResourceSignedBySignature(resource, signature), "PGP signature illegal for URL '" + resourceUrl.toExternalForm() + "'");
 			
 			// Excellent it worked! We don't need the ASC file anymore, so get rid of it
