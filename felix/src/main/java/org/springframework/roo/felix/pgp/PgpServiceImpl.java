@@ -336,6 +336,7 @@ public class PgpServiceImpl implements PgpService {
 	}
 
 	public SignatureDecision isSignatureAcceptable(InputStream signature) throws IOException {
+		Assert.notNull(signature, "Signature input stream required");
 		PGPObjectFactory factory = new PGPObjectFactory(PGPUtil.getDecoderStream(signature));
 		Object obj = factory.nextObject();
 		Assert.notNull(obj, "Unable to retrieve signature from stream");
