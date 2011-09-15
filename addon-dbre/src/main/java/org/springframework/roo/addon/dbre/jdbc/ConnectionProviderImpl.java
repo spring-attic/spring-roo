@@ -11,6 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.jdbc.JdbcDriverManager;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Implementation of {@link ConnectionProvider}.
@@ -51,7 +52,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	}
 
 	public Connection getConnection(Map<String, String> map, boolean displayAddOns) throws RuntimeException {
-		Assert.isTrue(map != null && !map.isEmpty(), "Connection properties map must not be null or empty");
+		Assert.isTrue(!CollectionUtils.isEmpty(map), "Connection properties map must not be null or empty");
 		Properties props = new Properties();
 		props.putAll(map);
 		return getConnection(props, displayAddOns);
