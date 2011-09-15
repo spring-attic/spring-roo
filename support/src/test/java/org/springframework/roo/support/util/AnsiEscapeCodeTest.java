@@ -42,7 +42,7 @@ public class AnsiEscapeCodeTest {
 	
 	@Test
 	public void testDecorateWhitespace() {
-		final AnsiEscapeCode effect = AnsiEscapeCode.values()[0];	// arbitrary
+		final AnsiEscapeCode effect = AnsiEscapeCode.values()[0]; // Arbitrary
 		assertEquals(effect.code + " " + AnsiEscapeCode.OFF.code, AnsiEscapeCode.decorate(" ", effect));
 	}
 }

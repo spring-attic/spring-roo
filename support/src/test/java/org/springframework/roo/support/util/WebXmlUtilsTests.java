@@ -222,12 +222,12 @@ public class WebXmlUtilsTests {
 		
 		assertEquals("context-param", contents.get(2).getNodeName());
 		
-		//filters
+		// filters
 		assertEquals("filter2", contents.get(3).getChildNodes().item(0).getTextContent());
 		assertEquals("filter3", contents.get(4).getChildNodes().item(0).getTextContent());
 		assertEquals("filter1", contents.get(5).getChildNodes().item(0).getTextContent());
 		
-		//filter-mappings
+		// filter-mappings
 		assertEquals("filter2", contents.get(6).getChildNodes().item(0).getTextContent());
 		assertEquals("filter3", contents.get(7).getChildNodes().item(0).getTextContent());
 		assertEquals("filter1", contents.get(8).getChildNodes().item(0).getTextContent());
