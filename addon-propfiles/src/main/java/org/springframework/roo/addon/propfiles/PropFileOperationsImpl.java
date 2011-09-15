@@ -106,7 +106,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		if (fileManager.exists(filePath)) {
 			mutableFile = fileManager.updateFile(filePath);
-			loadProps(props, mutableFile.getInputStream());
+			loadProperties(props, mutableFile.getInputStream());
 		} else {
 			// Unable to find the file, so let's create it
 			mutableFile = fileManager.createFile(filePath);
@@ -139,7 +139,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		if (fileManager.exists(filePath)) {
 			mutableFile = fileManager.updateFile(filePath);
-			loadProps(props, mutableFile.getInputStream());
+			loadProperties(props, mutableFile.getInputStream());
 		} else {
 			throw new IllegalStateException("Properties file not found");
 		}
@@ -160,7 +160,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		if (fileManager.exists(filePath)) {
 			mutableFile = fileManager.updateFile(filePath);
-			loadProps(props, mutableFile.getInputStream());
+			loadProperties(props, mutableFile.getInputStream());
 		} else {
 			return null;
 		}
@@ -177,7 +177,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		try {
 			if (fileManager.exists(filePath)) {
-				loadProps(props, new BufferedInputStream(new FileInputStream(filePath)));
+				loadProperties(props, new BufferedInputStream(new FileInputStream(filePath)));
 			} else {
 				throw new IllegalStateException("Properties file not found");
 			}
@@ -205,7 +205,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		try {
 			if (fileManager.exists(filePath)) {
-				loadProps(props, new BufferedInputStream(new FileInputStream(filePath)));
+				loadProperties(props, new BufferedInputStream(new FileInputStream(filePath)));
 			} else {
 				throw new IllegalStateException("Properties file not found");
 			}
@@ -220,13 +220,21 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return Collections.unmodifiableMap(result);
 	}
 
-	private void loadProps(Properties props, InputStream is) {
+	public Properties loadProperties(final InputStream inputStream) {
+		final Properties properties = new Properties();
+		if (inputStream != null) {
+			loadProperties(properties, inputStream);
+		}
+		return properties;
+	}
+	
+	private void loadProperties(Properties props, InputStream inputStream) {
 		try {
-			props.load(is);
+			props.load(inputStream);
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not load properties", e);
 		} finally {
-			IOUtils.closeQuietly(is);
+			IOUtils.closeQuietly(inputStream);
 		}
 	}
 	
@@ -236,22 +244,14 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return properties;
 	}
 
-	private void storeProps(Properties props, OutputStream os, String comment) {
-		Assert.notNull(os, "OutputStream required");
+	private void storeProps(Properties props, OutputStream outputStream, String comment) {
+		Assert.notNull(outputStream, "OutputStream required");
 		try {
-			props.store(os, comment);
+			props.store(outputStream, comment);
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not store properties", e);
 		} finally {
-			IOUtils.closeQuietly(os);
+			IOUtils.closeQuietly(outputStream);
 		}
-	}
-
-	public Properties loadProperties(final InputStream input) {
-		final Properties properties = new Properties();
-		if (input != null) {
-			loadProps(properties, input);
-		}
-		return properties;
 	}
 }

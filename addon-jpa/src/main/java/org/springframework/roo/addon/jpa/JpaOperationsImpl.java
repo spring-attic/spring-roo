@@ -244,14 +244,14 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updatePersistenceXml(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String hostName, final String databaseName, String userName, final String password, final String persistenceUnit) {
 		final String persistencePath = getPersistencePath();
-		final InputStream in;
+		final InputStream inputStream;
 		if (fileManager.exists(persistencePath)) {
-			in = fileManager.getInputStream(persistencePath);
+			inputStream = fileManager.getInputStream(persistencePath);
 		} else {
-			in = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
-			Assert.notNull(in, "Could not acquire persistence.xml template");
+			inputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
+			Assert.notNull(inputStream, "Could not acquire persistence.xml template");
 		}
-		final Document persistence = XmlUtils.readXml(in);
+		final Document persistence = XmlUtils.readXml(inputStream);
 
 		final InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
 		Assert.notNull(dialectsInputStream, "Could not acquire jpa-dialects.properties");
@@ -312,12 +312,14 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		// Add properties
 		final Element properties = persistence.createElement("properties");
+		
+		boolean isDbreProject = fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml"));
 		switch (ormProvider) {
 			case HIBERNATE:
 				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
 				properties.appendChild(persistence.createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
 				String hbm2dll = "create";
-				if (jdbcDatabase == JdbcDatabase.DB2_400) {
+				if (isDbreProject || jdbcDatabase == JdbcDatabase.DB2_400) {
 					hbm2dll = "validate";
 				}
 				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", hbm2dll, persistence));
@@ -330,13 +332,13 @@ public class JpaOperationsImpl implements JpaOperations {
 			case OPENJPA:
 				properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
 				properties.appendChild(persistence.createComment(" value=\"buildSchema\" to runtime forward map the DDL SQL; value=\"validate\" makes no changes to the database ")); // ROO-627
-				properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));
+				properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", (isDbreProject ? "validate" : "buildSchema"), persistence));
 				properties.appendChild(createPropertyElement("openjpa.RuntimeUnenhancedClasses", "supported", persistence));
 				break;
 			case ECLIPSELINK:
 				properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
 				properties.appendChild(persistence.createComment(" value=\"drop-and-create-tables\" to build a new database on each run; value=\"create-tables\" creates new tables if needed; value=\"none\" makes no changes to the database ")); // ROO-627
-				properties.appendChild(createPropertyElement("eclipselink.ddl-generation", "drop-and-create-tables", persistence));
+				properties.appendChild(createPropertyElement("eclipselink.ddl-generation", (isDbreProject ? "none" : "drop-and-create-tables"), persistence));
 				properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
 				properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
 				break;
@@ -353,11 +355,11 @@ public class JpaOperationsImpl implements JpaOperations {
 						properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "force", persistence));
 						properties.appendChild(createPropertyElement("datanucleus.Optimistic", "false", persistence));
 						properties.appendChild(createPropertyElement("datanucleus.datastoreTransactionDelayOperations", "true", persistence));
-						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", new Boolean(!isDbreProject).toString(), persistence));
 						break;
 					default:
 						properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", jdbcDatabase.getDriverClassName(), persistence));
-						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", new Boolean(!isDbreProject).toString(), persistence));
 						final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 						connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 						if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
@@ -373,7 +375,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
 			}
 			
-			properties.appendChild(createPropertyElement("datanucleus.autoCreateTables", "true", persistence));
+			properties.appendChild(createPropertyElement("datanucleus.autoCreateTables", new Boolean(!isDbreProject).toString(), persistence));
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateColumns", "false", persistence));
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateConstraints", "false", persistence));
 			properties.appendChild(createPropertyElement("datanucleus.validateTables", "false", persistence));

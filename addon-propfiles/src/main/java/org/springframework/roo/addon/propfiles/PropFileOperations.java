@@ -112,8 +112,8 @@ public interface PropFileOperations {
 	/**
 	 * Loads the properties from the given stream, closing it on completion
 	 * 
-	 * @param input the stream from which to read (can be <code>null</code>)
+	 * @param inputStream the stream from which to read (can be <code>null</code>)
 	 * @return an empty {@link Properties} if a null stream is given
 	 */
-	Properties loadProperties(InputStream input);
+	Properties loadProperties(InputStream inputStream);
 }
