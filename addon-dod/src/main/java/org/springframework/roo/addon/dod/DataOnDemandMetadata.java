@@ -453,7 +453,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		Set<String> existingMutators = new HashSet<String>();
 
-		for (MethodMetadata mutator : fieldInitializers.keySet()) {
+		for (Map.Entry<MethodMetadata, String> entry : fieldInitializers.entrySet()) {
+			MethodMetadata mutator = entry.getKey();
+			
 			// Locate user-defined method
 			if (getGovernorMethod(mutator.getMethodName(), parameterTypes) != null) {
 				// Method found in governor so do not create method in ITD
@@ -468,7 +470,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			existingMutators.add(mutatorId);
 
 			// Method not on governor so need to create it
-			String initializer = fieldInitializers.get(mutator);
+			String initializer = entry.getValue();
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutator.getMethodName().getSymbolName());
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -921,10 +923,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private void storeFieldInitializers() {
-		for (MethodMetadata mutatorMethod : locatedMutators.keySet()) {
-			CollaboratingDataOnDemandMetadataHolder metadataHolder = locatedMutators.get(mutatorMethod);
+		for (Map.Entry<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> entry : locatedMutators.entrySet()) {
+			CollaboratingDataOnDemandMetadataHolder metadataHolder = entry.getValue();
 			String initializer = getFieldInitializer(metadataHolder.getField(), metadataHolder.getDataOnDemandMetadata());
-			fieldInitializers.put(mutatorMethod, initializer);
+			fieldInitializers.put(entry.getKey(), initializer);
 		}
 	}
 	
