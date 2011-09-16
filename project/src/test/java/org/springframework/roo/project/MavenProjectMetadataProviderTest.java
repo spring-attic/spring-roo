@@ -97,6 +97,7 @@ public class MavenProjectMetadataProviderTest {
 		when(mockDependency.getGroupId()).thenReturn(GROUP_ID);
 		when(mockDependency.getSimpleDescription()).thenReturn(SIMPLE_DESCRIPTION);
 		when(mockDependency.getType()).thenReturn(DependencyType.JAR);
+		when(mockDependency.getVersion()).thenReturn(VERSION);
 		
 		when(mockMetadataService.get(ProjectMetadata.PROJECT_IDENTIFIER)).thenReturn(mockProjectMetadata);
 		final Collection<Dependency> dependencies = Arrays.asList(mockDependency, mockDependency);

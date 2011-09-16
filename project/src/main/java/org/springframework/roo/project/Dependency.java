@@ -55,11 +55,11 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param classifier the dependency classifier (required)
 	 */
 	public Dependency(final String groupId, final String artifactId, final String version, final DependencyType type, final DependencyScope scope, final String classifier) {
-		XmlUtils.assertElementLegal(artifactId);
 		XmlUtils.assertElementLegal(groupId);
+		XmlUtils.assertElementLegal(artifactId);
+		Assert.hasText(version, "Version required");
 		Assert.notNull(scope, "Dependency scope required");
 		Assert.notNull(type, "Dependency type required");
-		Assert.notNull(version, "Version required");
 		this.artifactId = artifactId;
 		this.classifier = classifier;
 		this.groupId = groupId;
@@ -236,19 +236,31 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	public int compareTo(final Dependency o) {
-		if (o == null) {
-			throw new NullPointerException();
+		int result = compareCoordinates(o);
+		if (result != 0) {
+			return result;
 		}
-		// We omit the version field as it's not part of a Dependency's identity
-		int result = groupId.compareTo(o.getGroupId());
+		return version.compareTo(o.getVersion());
+	}
+	
+	/**
+	 * Compares this dependency's identifying coordinates (i.e. not the version)
+	 * to those of the given dependency
+	 * 
+	 * @param other the dependency being compared to (required)
+	 * @return see {@link Comparable#compareTo(Object)}
+	 */
+	private int compareCoordinates(final Dependency other) {
+		Assert.notNull(other, "Dependency being compared to cannot be null");
+		int result = groupId.compareTo(other.getGroupId());
 		if (result == 0) {
-			result = artifactId.compareTo(o.getArtifactId());
+			result = artifactId.compareTo(other.getArtifactId());
 		}
 		if (result == 0) {
-			result = StringUtils.trimToEmpty(classifier).compareTo(StringUtils.trimToEmpty(o.getClassifier()));
+			result = StringUtils.trimToEmpty(classifier).compareTo(StringUtils.trimToEmpty(other.getClassifier()));
 		}
 		if (result == 0 && type != null) {
-			result = type.compareTo(o.getType());
+			result = type.compareTo(other.getType());
 		}
 		return result;
 	}
@@ -340,10 +352,6 @@ public class Dependency implements Comparable<Dependency> {
 	 * @return <code>false</code> if any coordinates are different
 	 */
 	public boolean hasSameCoordinates(final Dependency dependency) {
-		return dependency != null
-			&& dependency.groupId.equals(groupId)
-			&& dependency.artifactId.equals(artifactId)
-			&& dependency.type == type
-			&& StringUtils.trimToEmpty(dependency.classifier).equals(StringUtils.trimToEmpty(classifier));
+		return dependency != null && compareCoordinates(dependency) == 0;
 	}
 }

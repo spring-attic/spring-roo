@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -52,21 +53,24 @@ import org.w3c.dom.Element;
 public class JpaOperationsImpl implements JpaOperations {
 	
 	// Constants
-	private static Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
+	private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency("org.glassfish.web", "jstl-impl", "1.2");
+	private static final Logger LOGGER = HandlerUtils.getLogger(JpaOperationsImpl.class);
 	private static final String DATABASE_URL = "database.url";
 	private static final String DATABASE_DRIVER = "database.driverClassName";
 	private static final String DATABASE_USERNAME = "database.username";
 	private static final String DATABASE_PASSWORD = "database.password";
-	private static final String PERSISTENCE_UNIT = "persistence-unit";
+	private static final String DEFAULT_PERSISTENCE_UNIT = "persistenceUnit";
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
-	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
-	private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency("org.glassfish.web", "jstl-impl", "1.2");
+	private static final String PERSISTENCE_UNIT = "persistence-unit";
 	
-	// Fields
-	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private ProjectOperations projectOperations;
-	@Reference private PropFileOperations propFileOperations;
+	static final String APPLICATION_CONTEXT_XML = "applicationContext.xml";
+	static final String POM_XML = "pom.xml";
+	
+	// Fields (package access so unit tests can inject mocks)
+	@Reference FileManager fileManager;
+	@Reference MetadataService metadataService;
+	@Reference ProjectOperations projectOperations;
+	@Reference PropFileOperations propFileOperations;
 	
 	public boolean isJpaInstallationPossible() {
 		return projectOperations.isProjectAvailable() && !fileManager.exists(getPersistencePath());
@@ -101,14 +105,21 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		// Parse the configuration.xml file
 		final Element configuration = XmlUtils.getConfiguration(getClass());
+		
+		// Get the first part of the XPath expressions for unwanted databases and ORM providers
+		final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
+		final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
 
-		// Remove unnecessary artifacts not specific to current database and JPA provider
-		cleanup(configuration, ormProvider, jdbcDatabase);
+		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
+			updateEclipsePlugin(false);
+			updateDataNucleusPlugin(false);
+			projectOperations.updateDependencyScope(JSTL_IMPL_DEPENDENCY, null);
+		}
 
 		updateApplicationContext(ormProvider, jdbcDatabase, jndi, transactionManager, persistenceUnit);
 		updatePersistenceXml(ormProvider, jdbcDatabase, hostName, databaseName, userName, password, persistenceUnit);
 		manageGaeXml(ormProvider, jdbcDatabase, applicationId);
-		updateDbdcConfigProperties(ormProvider, jdbcDatabase, hostName, userName, password, StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME);
+		updateDbdcConfigProperties(ormProvider, jdbcDatabase, hostName, userName, password, StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT));
 
 		if (!StringUtils.hasText(jndi)) {
 			updateDatabaseProperties(ormProvider, jdbcDatabase, hostName, databaseName, userName, password);
@@ -116,16 +127,16 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		updateLog4j(ormProvider);
 		updatePomProperties(configuration, ormProvider, jdbcDatabase);
-		updateDependencies(configuration, ormProvider, jdbcDatabase);
+		updateDependencies(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath);
 		updateRepositories(configuration, ormProvider, jdbcDatabase);
 		updatePluginRepositories(configuration, ormProvider, jdbcDatabase);
-		updateFilters(configuration, ormProvider, jdbcDatabase);
-		updateResources(configuration, ormProvider, jdbcDatabase);
-		updateBuildPlugins(configuration, ormProvider, jdbcDatabase);
+		updateFilters(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath);
+		updateResources(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath);
+		updateBuildPlugins(configuration, ormProvider, jdbcDatabase, databaseXPath, providersXPath);
 	}
 
 	private void updateApplicationContext(final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String jndi, String transactionManager, final String persistenceUnit) {
-		final String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		final String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, APPLICATION_CONTEXT_XML);
 		final Document appCtx = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		final Element root = appCtx.getDocumentElement();
 
@@ -224,11 +235,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		switch (jdbcDatabase) {
 			case GOOGLE_APP_ENGINE:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
-				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), appCtx));
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", StringUtils.defaultIfEmpty(persistenceUnit, GAE_PERSISTENCE_UNIT_NAME), appCtx));
 				break;
 			default:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), appCtx));
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT), appCtx));
 				if (!ormProvider.name().startsWith("DATANUCLEUS")) {
 					entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
 				}
@@ -252,11 +263,6 @@ public class JpaOperationsImpl implements JpaOperations {
 			Assert.notNull(inputStream, "Could not acquire persistence.xml template");
 		}
 		final Document persistence = XmlUtils.readXml(inputStream);
-
-		final InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
-		Assert.notNull(dialectsInputStream, "Could not acquire jpa-dialects.properties");
-		final Properties dialects = propFileOperations.loadProperties(dialectsInputStream);
-
 		final Element root = persistence.getDocumentElement();
 		final Element persistenceElement = XmlUtils.findFirstElement("/persistence", root);
 		Assert.notNull(persistenceElement, "No persistence element found");
@@ -265,7 +271,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (StringUtils.hasText(persistenceUnit)) {
 			persistenceUnitElement = XmlUtils.findFirstElement(PERSISTENCE_UNIT + "[@name = '" + persistenceUnit + "']", persistenceElement);
 		} else {
-			persistenceUnitElement = XmlUtils.findFirstElement(PERSISTENCE_UNIT + "[@name = '" + (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE ? GAE_PERSISTENCE_UNIT_NAME : PERSISTENCE_UNIT_NAME) + "']", persistenceElement);
+			persistenceUnitElement = XmlUtils.findFirstElement(PERSISTENCE_UNIT + "[@name = '" + (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE ? GAE_PERSISTENCE_UNIT_NAME : DEFAULT_PERSISTENCE_UNIT) + "']", persistenceElement);
 		}
 
 		if (persistenceUnitElement != null) {
@@ -279,31 +285,31 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		// Set attributes for DataNuclueus 1.1.x/GAE-specific requirements
 		switch (ormProvider) {
-		case DATANUCLEUS:
-			persistenceElement.setAttribute("version", "1.0");
-			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
-			break;
-		default:
-			persistenceElement.setAttribute("version", "2.0");
-			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
-			break;
+			case DATANUCLEUS:
+				persistenceElement.setAttribute("version", "1.0");
+				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
+				break;
+			default:
+				persistenceElement.setAttribute("version", "2.0");
+				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
+				break;
 		}
 
 		// Add provider element
 		final Element provider = persistence.createElement("provider");
 		switch (jdbcDatabase) {
 			case GOOGLE_APP_ENGINE:
-				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME));
+				persistenceUnitElement.setAttribute("name", (StringUtils.defaultIfEmpty(persistenceUnit, GAE_PERSISTENCE_UNIT_NAME)));
 				persistenceUnitElement.removeAttribute("transaction-type");
 				provider.setTextContent(ormProvider.getAlternateAdapter());
 				break;
 			case DATABASE_DOT_COM:
-				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
+				persistenceUnitElement.setAttribute("name", (StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT)));
 				persistenceUnitElement.removeAttribute("transaction-type");
 				provider.setTextContent(ormProvider.getAlternateAdapter());
 				break;
 			default:
-				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
+				persistenceUnitElement.setAttribute("name", (StringUtils.defaultIfEmpty(persistenceUnit, DEFAULT_PERSISTENCE_UNIT)));
 				persistenceUnitElement.setAttribute("transaction-type", "RESOURCE_LOCAL");
 				provider.setTextContent(ormProvider.getAdapter());
 				break;
@@ -311,8 +317,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		persistenceUnitElement.appendChild(provider);
 
 		// Add properties
+		final InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
+		Assert.notNull(dialectsInputStream, "Could not acquire jpa-dialects.properties");
+		final Properties dialects = propFileOperations.loadProperties(dialectsInputStream);
 		final Element properties = persistence.createElement("properties");
-		
 		boolean isDbreProject = fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml"));
 		switch (ormProvider) {
 			case HIBERNATE:
@@ -389,7 +397,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		fileManager.createOrUpdateTextFileIfRequired(persistencePath, XmlUtils.nodeToString(persistence), false);
 		
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE && (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2)) {
-			logger.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
+			LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
 		}
 	}
 
@@ -443,7 +451,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (!textContent.equals(applicationElement.getTextContent())) {
 			applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
 			fileManager.createOrUpdateTextFileIfRequired(appenginePath, XmlUtils.nodeToString(appengine), false);
-			logger.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
+			LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
 		}
 
 		if (!loggingPropertiesPathExists) {
@@ -505,7 +513,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			case ORACLE:
 			case DB2_EXPRESS_C:
 			case DB2_400:
-				logger.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+				LOGGER.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
 				break;
 			case POSTGRES:
 			case DERBY_EMBEDDED:
@@ -513,7 +521,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			case MSSQL:
 			case SYBASE:
 			case MYSQL:
-				logger.warning("Please update your database details in src/main/resources/META-INF/spring/database.properties.");
+				LOGGER.warning("Please update your database details in src/main/resources/META-INF/spring/database.properties.");
 				break;
 		}
 	}
@@ -550,7 +558,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			IOUtils.closeQuietly(outputStream);
 		}
 
-		logger.warning("Please update your database details in src/main/resources/" + persistenceUnit + ".properties.");
+		LOGGER.warning("Please update your database details in src/main/resources/" + persistenceUnit + ".properties.");
 	}
 
 	private Properties getProperties(final String path, final boolean exists, final String templateFilename) {
@@ -610,32 +618,50 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateDependencies(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase) {
-		final List<Dependency> dependencies = new ArrayList<Dependency>();
+	/**
+	 * Updates the POM with the dependencies required for the given database and
+	 * ORM provider, removing any other persistence-related dependencies
+	 * 
+	 * @param configuration
+	 * @param ormProvider
+	 * @param jdbcDatabase
+	 * @param databaseXPath
+	 * @param providersXPath
+	 */
+	private void updateDependencies(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath) {
+		final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
 		final List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
 		for (final Element dependencyElement : databaseDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
+			requiredDependencies.add(new Dependency(dependencyElement));
 		}
 
 		final List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(ormProvider) + "/dependencies/dependency", configuration);
 		for (final Element dependencyElement : ormDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
+			requiredDependencies.add(new Dependency(dependencyElement));
 		}
 
 		// Hard coded to JPA & Hibernate Validator for now
 		final List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id = 'JPA']/dependencies/dependency", configuration);
 		for (final Element dependencyElement : jpaDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
+			requiredDependencies.add(new Dependency(dependencyElement));
 		}
 
 		final List<Element> springDependencies = XmlUtils.findElements("/configuration/spring/dependencies/dependency", configuration);
 		for (final Element dependencyElement : springDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
+			requiredDependencies.add(new Dependency(dependencyElement));
 		}
 
-		// Add all new dependencies to pom.xml
-		projectOperations.addDependencies(dependencies);
+		// Remove redundant dependencies
+		final List<Dependency> redundantDependencies = new ArrayList<Dependency>();
+		redundantDependencies.addAll(getDependencies(databaseXPath, configuration));
+		redundantDependencies.addAll(getDependencies(providersXPath, configuration));
+		// Don't remove any we actually need
+		redundantDependencies.removeAll(requiredDependencies);
+		
+		// Update the POM
+		projectOperations.addDependencies(requiredDependencies);
+		projectOperations.removeDependencies(redundantDependencies);
 	}
 
 	private String getProjectName() {
@@ -681,7 +707,16 @@ public class JpaOperationsImpl implements JpaOperations {
 		projectOperations.addPluginRepositories(pluginRepositories);
 	}
 
-	private void updateFilters(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase) {
+	private void updateFilters(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath) {
+		// Remove redundant filters
+		final List<Filter> redundantFilters = new ArrayList<Filter>();
+		redundantFilters.addAll(getFilters(databaseXPath, configuration));
+		redundantFilters.addAll(getFilters(providersXPath, configuration));
+		for (final Filter filter : redundantFilters) {
+			projectOperations.removeFilter(filter);
+		}
+		
+		// Add required filters
 		final List<Filter> filters = new ArrayList<Filter>();
 
 		final List<Element> databaseFilters = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/filters/filter", configuration);
@@ -699,7 +734,16 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateResources(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase) {
+	private void updateResources(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath) {
+		// Remove redundant resources
+		final List<Resource> redundantResources = new ArrayList<Resource>();
+		redundantResources.addAll(getResources(databaseXPath, configuration));
+		redundantResources.addAll(getResources(providersXPath, configuration));
+		for (final Resource resource : redundantResources) {
+			projectOperations.removeResource(resource);
+		}
+		
+		// Add required resources
 		final List<Resource> resources = new ArrayList<Resource>();
 
 		final List<Element> databaseResources = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/resources/resource", configuration);
@@ -717,20 +761,30 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateBuildPlugins(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase) {
-		final List<Plugin> buildPlugins = new ArrayList<Plugin>();
-
+	private void updateBuildPlugins(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath) {
+		// Identify the required plugins
+		final List<Plugin> requiredPlugins = new ArrayList<Plugin>();
+		
 		final List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/plugins/plugin", configuration);
 		for (final Element pluginElement : databasePlugins) {
-			buildPlugins.add(new Plugin(pluginElement));
+			requiredPlugins.add(new Plugin(pluginElement));
 		}
-
+		
 		final List<Element> ormPlugins = XmlUtils.findElements(getProviderXPath(ormProvider) + "/plugins/plugin", configuration);
 		for (final Element pluginElement : ormPlugins) {
-			buildPlugins.add(new Plugin(pluginElement));
+			requiredPlugins.add(new Plugin(pluginElement));
 		}
-
-		projectOperations.addBuildPlugins(buildPlugins);
+		
+		// Identify any redundant plugins
+		final List<Plugin> redundantPlugins = new ArrayList<Plugin>();
+		redundantPlugins.addAll(getPlugins(databaseXPath, configuration));
+		redundantPlugins.addAll(getPlugins(providersXPath, configuration));
+		// Don't remove any that are still required
+		redundantPlugins.removeAll(requiredPlugins);
+		
+		// Update the POM
+		projectOperations.addBuildPlugins(requiredPlugins);
+		projectOperations.removeBuildPlugins(redundantPlugins);
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(true);
@@ -739,8 +793,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateEclipsePlugin(final boolean addToPlugin) {
-		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+	private void updateEclipsePlugin(final boolean addGaeSettingsToPlugin) {
+		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, POM_XML);
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
 		String descriptionOfChange = "";
@@ -750,14 +804,14 @@ public class JpaOperationsImpl implements JpaOperations {
 		Assert.notNull(additionalBuildcommandsElement, "additionalBuildcommands element of the maven-eclipse-plugin required");
 		final String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
 		Element gaeBuildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + gaeBuildCommandName + "']", additionalBuildcommandsElement);
-		if (addToPlugin && gaeBuildCommandElement == null) {
+		if (addGaeSettingsToPlugin && gaeBuildCommandElement == null) {
 			final Element nameElement = document.createElement("name");
 			nameElement.setTextContent(gaeBuildCommandName);
 			gaeBuildCommandElement = document.createElement("buildCommand");
 			gaeBuildCommandElement.appendChild(nameElement);
 			additionalBuildcommandsElement.appendChild(gaeBuildCommandElement);
 			descriptionOfChange = "added GAE buildCommand to maven-eclipse-plugin";
-		} else if (!addToPlugin && gaeBuildCommandElement != null) {
+		} else if (!addGaeSettingsToPlugin && gaeBuildCommandElement != null) {
 			additionalBuildcommandsElement.removeChild(gaeBuildCommandElement);
 			descriptionOfChange = "removed GAE buildCommand from maven-eclipse-plugin";
 		}
@@ -771,11 +825,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		Assert.notNull(additionalProjectnaturesElement, "additionalProjectnatures element of the maven-eclipse-plugin required");
 		final String gaeProjectnatureName = "com.google.appengine.eclipse.core.gaeNature";
 		Element gaeProjectnatureElement = XmlUtils.findFirstElement("projectnature[text() = '" + gaeProjectnatureName + "']", additionalProjectnaturesElement);
-		if (addToPlugin && gaeProjectnatureElement == null) {
+		if (addGaeSettingsToPlugin && gaeProjectnatureElement == null) {
 			gaeProjectnatureElement = new XmlElementBuilder("projectnature", document).setText(gaeProjectnatureName).build();
 			additionalProjectnaturesElement.appendChild(gaeProjectnatureElement);
 			descriptionOfChange += "added GAE projectnature to maven-eclipse-plugin";
-		} else if (!addToPlugin && gaeProjectnatureElement != null) {
+		} else if (!addGaeSettingsToPlugin && gaeProjectnatureElement != null) {
 			additionalProjectnaturesElement.removeChild(gaeProjectnatureElement);
 			descriptionOfChange += "removed GAE projectnature from maven-eclipse-plugin";
 		}
@@ -784,7 +838,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateDataNucleusPlugin(final boolean addToPlugin) {
-		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, POM_XML);
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
 	
@@ -807,59 +861,21 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
-
-	private void cleanup(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase) {
-		// Get unwanted databases
-		final List<JdbcDatabase> databases = new ArrayList<JdbcDatabase>();
+	
+	private List<JdbcDatabase> getUnwantedDatabases(final JdbcDatabase jdbcDatabase) {
+		final List<JdbcDatabase> unwantedDatabases = new ArrayList<JdbcDatabase>();
 		for (final JdbcDatabase database : JdbcDatabase.values()) {
 			if (!database.getKey().equals(jdbcDatabase.getKey()) && !database.getDriverClassName().equals(jdbcDatabase.getDriverClassName())) {
-				databases.add(database);
+				unwantedDatabases.add(database);
 			}
 		}
-		final String databaseXPath = getDbXPath(databases);
-
-		// Get unwanted ORM providers
-		final List<OrmProvider> ormProviders = new ArrayList<OrmProvider>();
-		for (final OrmProvider provider : OrmProvider.values()) {
-			if (provider != ormProvider) {
-				ormProviders.add(provider);
-			}
-		}
-		final String providersXPath = getProviderXPath(ormProviders);
-
-		// Remove redundant dependencies
-		final List<Dependency> redundantDependencies = new ArrayList<Dependency>();
-		redundantDependencies.addAll(getDependencies(databaseXPath, configuration));
-		redundantDependencies.addAll(getDependencies(providersXPath, configuration));
-		projectOperations.removeDependencies(redundantDependencies);
-
-		// Remove redundant filters
-		final List<Filter> redundantFilters = new ArrayList<Filter>();
-		redundantFilters.addAll(getFilters(databaseXPath, configuration));
-		redundantFilters.addAll(getFilters(providersXPath, configuration));
-		for (final Filter filter : redundantFilters) {
-			projectOperations.removeFilter(filter);
-		}
-
-		// Remove redundant build plugins
-		final List<Plugin> redundantBuildPlugins = new ArrayList<Plugin>();
-		redundantBuildPlugins.addAll(getPlugins(databaseXPath, configuration));
-		redundantBuildPlugins.addAll(getPlugins(providersXPath, configuration));
-		projectOperations.removeBuildPlugins(redundantBuildPlugins);
-
-		// Remove redundant resources
-		final List<Resource> redundantResources = new ArrayList<Resource>();
-		redundantResources.addAll(getResources(databaseXPath, configuration));
-		redundantResources.addAll(getResources(providersXPath, configuration));
-		for (final Resource resource : redundantResources) {
-			projectOperations.removeResource(resource);
-		}
-
-		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE) {
-			updateEclipsePlugin(false);
-			updateDataNucleusPlugin(false);
-			projectOperations.updateDependencyScope(JSTL_IMPL_DEPENDENCY, null);
-		}
+		return unwantedDatabases;
+	}
+	
+	private List<OrmProvider> getUnwantedOrmProviders(final OrmProvider ormProvider) {
+		final List<OrmProvider> unwantedOrmProviders = new ArrayList<OrmProvider>(Arrays.asList(OrmProvider.values()));
+		unwantedOrmProviders.remove(ormProvider);
+		return unwantedOrmProviders;
 	}
 
 	private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {

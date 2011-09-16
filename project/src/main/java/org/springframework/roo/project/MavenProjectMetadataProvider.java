@@ -330,13 +330,13 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			if (projectMetadata.isDependencyRegistered(dependencyToRemove)) {
 				for (final Iterator<Element> iter = existingDependencyElements.iterator(); iter.hasNext();) {
 					final Element candidate = iter.next();
-					Dependency candidateDependency = new Dependency(candidate);
+					final Dependency candidateDependency = new Dependency(candidate);
 					if (candidateDependency.equals(dependencyToRemove)) {
-						// The identifying coordinates match; remove this element
+						// It's the same dependency; remove it
 						dependenciesElement.removeChild(candidate);
 						// Ensure we don't try to remove it again for another Dependency
 						iter.remove();
-						removedDependencies.add(dependencyToRemove.getSimpleDescription());
+						removedDependencies.add(candidateDependency.getSimpleDescription());
 					}
 					// Keep looping in case it's in the POM more than once
 				}
@@ -439,12 +439,13 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final List<String> removedPlugins = new ArrayList<String>();
 		for (final Plugin plugin : plugins) {
 			// Can't filter the XPath on groupId, as it's optional in the POM for Apache-owned plugins
-			for (final Element candidate : XmlUtils.findElements("plugin[artifactId = '" + plugin.getArtifactId() + "']", pluginsElement)) {
-				if (Plugin.getGroupId(candidate).equals(plugin.getGroupId())) {
-					// This element has the same groupId and artifactId as the plugin to be removed; remove it
+			for (final Element candidate : XmlUtils.findElements("plugin[artifactId = '" + plugin.getArtifactId() + "' and version = '" + plugin.getVersion() + "']", pluginsElement)) {
+				final Plugin candidatePlugin = new Plugin(candidate);
+				if (candidatePlugin.getGroupId().equals(plugin.getGroupId())) {
+					// This element has the same groupId, artifactId, and version as the plugin to be removed; remove it
 					pluginsElement.removeChild(candidate);
-					removedPlugins.add(plugin.getSimpleDescription());
-					// Keep looping in case this plugin is in the POM more than once
+					removedPlugins.add(candidatePlugin.getSimpleDescription());
+					// Keep looping in case this plugin is in the POM more than once (unlikely)
 				}
 			}
 		}
