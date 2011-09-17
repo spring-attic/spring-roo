@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.gwt.locator;
 
+import static org.springframework.roo.model.JavaType.CLASS;
+
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
@@ -126,7 +128,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	private MethodMetadataBuilder getDomainTypeMethod(String declaredById, JavaType targetType) {
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return " + targetType.getSimpleTypeName() + ".class;");
-		JavaType returnType = new JavaType(JavaType.CLASS.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(targetType));
+		JavaType returnType = new JavaType(CLASS.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(targetType));
 		return new MethodMetadataBuilder(declaredById, Modifier.PUBLIC, new JavaSymbolName("getDomainType"), returnType, invocableMemberBodyBuilder);
 	}
 

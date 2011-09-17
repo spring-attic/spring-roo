@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.javabean;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +30,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
-
 /**
  * Metadata for {@link RooJavaBean}.
  *
@@ -226,7 +227,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	private FieldMetadata getSingularEntityIdField(JavaSymbolName fieldName) {
-		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, JavaType.LONG_OBJECT, null);
+		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, LONG_OBJECT, null);
 		return fieldMetadataBuilder.build();
 	}
 

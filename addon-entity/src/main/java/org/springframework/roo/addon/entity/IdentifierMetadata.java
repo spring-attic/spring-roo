@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
@@ -207,7 +208,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 
 		// Add precision and scale attributes for numeric fields
-		if (identifier.getScale() > 0 && (identifier.getFieldType().equals(JavaType.DOUBLE_OBJECT) || identifier.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || identifier.getFieldType().equals(new JavaType("java.math.BigDecimal")))) {
+		if (identifier.getScale() > 0 && (identifier.getFieldType().equals(JavaType.DOUBLE_OBJECT) || identifier.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || identifier.getFieldType().equals(BIG_DECIMAL))) {
 			columnBuilder.addIntegerAttribute("precision", identifier.getColumnSize());
 			columnBuilder.addIntegerAttribute("scale", identifier.getScale());
 		}

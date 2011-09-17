@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 
 import java.math.BigDecimal;
@@ -94,7 +95,7 @@ public class Column {
 				break;
 			case Types.BIGINT:
 				jdbcType = "BIGINT";
-				javaType = JavaType.LONG_OBJECT;
+				javaType = LONG_OBJECT;
 				break;
 			case Types.REAL:
 				jdbcType = "REAL";

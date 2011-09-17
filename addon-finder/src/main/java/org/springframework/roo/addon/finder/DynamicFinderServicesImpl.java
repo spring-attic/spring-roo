@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.finder;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -368,7 +370,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return fieldType.equals(JavaType.DOUBLE_OBJECT) ||
 				fieldType.equals(JavaType.FLOAT_OBJECT) ||
 				fieldType.equals(JavaType.INT_OBJECT) ||
-				fieldType.equals(JavaType.LONG_OBJECT) ||
+				fieldType.equals(LONG_OBJECT) ||
 				fieldType.equals(JavaType.SHORT_OBJECT) ||
 				fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
 				fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName());

@@ -12,6 +12,8 @@ import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.Jsr303JavaType.PATTERN;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_INTEGER;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -444,11 +446,11 @@ public class JspViewManager {
 
 	private void addCommonAttributes(FieldMetadata field, Element fieldElement) {
 		AnnotationMetadata annotationMetadata;
-		if (field.getFieldType().equals(INT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName()) || field.getFieldType().equals(SHORT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName()) || field.getFieldType().equals(LONG_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
+		if (field.getFieldType().equals(INT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName()) || field.getFieldType().equals(SHORT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName()) || field.getFieldType().equals(LONG_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName()) || field.getFieldType().equals(BIG_INTEGER)) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_integer");
 		} else if (uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_email");
-		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
+		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName()) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName()) || field.getFieldType().equals(BIG_DECIMAL)) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_number");
 		}
 		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN))) {

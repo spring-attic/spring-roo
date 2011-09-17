@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.gwt;
 
-import javax.xml.parsers.DocumentBuilder;
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +20,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -562,12 +566,12 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			|| JavaType.BYTE_OBJECT.equals(type) 
 			|| JavaType.SHORT_OBJECT.equals(type) 
 			|| JavaType.INT_OBJECT.equals(type) 
-			|| JavaType.LONG_OBJECT.equals(type) 
+			|| LONG_OBJECT.equals(type) 
 			|| JavaType.FLOAT_OBJECT.equals(type) 
 			|| JavaType.DOUBLE_OBJECT.equals(type) 
 			|| JavaType.STRING.equals(type) 
 			|| new JavaType("java.util.Date").equals(type) 
-			|| new JavaType("java.math.BigDecimal").equals(type) 
+			|| BIG_DECIMAL.equals(type) 
 			|| type.isPrimitive() 
 			&& !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(type.getFullyQualifiedTypeName());
 	}

@@ -1,6 +1,9 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
 
@@ -72,13 +75,13 @@ public class GwtProxyProperty {
 				|| isString()
 				|| isBoolean()
 				|| type.equals(JavaType.DOUBLE_OBJECT)
-				|| type.equals(JavaType.LONG_OBJECT)
+				|| type.equals(LONG_OBJECT)
 				|| type.equals(JavaType.INT_OBJECT)
 				|| type.equals(JavaType.FLOAT_OBJECT)
 				|| type.equals(JavaType.BYTE_OBJECT)
 				|| type.equals(JavaType.SHORT_OBJECT)
 				|| type.equals(JavaType.CHAR_OBJECT)
-				|| type.equals(new JavaType("java.math.BigDecimal"));
+				|| type.equals(BIG_DECIMAL);
 	}
 
 	public boolean isString() {
@@ -89,7 +92,7 @@ public class GwtProxyProperty {
 		if (type.equals(JavaType.DOUBLE_OBJECT)) {
 			return "g:DoubleBox";
 		}
-		if (type.equals(JavaType.LONG_OBJECT)) {
+		if (type.equals(LONG_OBJECT)) {
 			return "g:LongBox";
 		}
 		if (type.equals(JavaType.INT_OBJECT)) {
@@ -107,7 +110,7 @@ public class GwtProxyProperty {
 		if (type.equals(JavaType.CHAR_OBJECT)) {
 			return "r:CharBox";
 		}
-		if (type.equals(new JavaType("java.math.BigDecimal"))) {
+		if (type.equals(BIG_DECIMAL)) {
 			return "r:BigDecimalBox";
 		}
 		return isCollection() ? "a:" + getSetEditor() : isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
@@ -132,7 +135,7 @@ public class GwtProxyProperty {
 		if (type.equals(JavaType.DOUBLE_OBJECT)) {
 			return "DoubleBox";
 		}
-		if (type.equals(JavaType.LONG_OBJECT)) {
+		if (type.equals(LONG_OBJECT)) {
 			return "LongBox";
 		}
 		if (type.equals(JavaType.INT_OBJECT)) {
@@ -150,7 +153,7 @@ public class GwtProxyProperty {
 		if (type.equals(JavaType.CHAR_OBJECT)) {
 			return "CharBox";
 		}
-		if (type.equals(new JavaType("java.math.BigDecimal"))) {
+		if (type.equals(BIG_DECIMAL)) {
 			return "BigDecimalBox";
 		}
 		if (isBoolean()) {
@@ -172,7 +175,7 @@ public class GwtProxyProperty {
 			return getCollectionRenderer() + ".render";
 		} else if (isDate()) {
 			return getDateTimeFormat() + ".format";
-		} else if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.FLOAT_OBJECT) || type.equals(JavaType.DOUBLE_OBJECT) || type.equals(new JavaType("java.math.BigInteger")) || type.equals(new JavaType("java.math.BigDecimal"))) {
+		} else if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.FLOAT_OBJECT) || type.equals(JavaType.DOUBLE_OBJECT) || type.equals(BIG_INTEGER) || type.equals(BIG_DECIMAL)) {
 			String formatter = "String.valueOf";
 			if (annotations == null || annotations.isEmpty()) {
 				return formatter;

@@ -1,5 +1,16 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
+import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.DOUBLE_OBJECT;
+import static org.springframework.roo.model.JavaType.DOUBLE_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.FLOAT_OBJECT;
+import static org.springframework.roo.model.JavaType.FLOAT_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JavaType.LONG_PRIMITIVE;
+
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -8,25 +19,28 @@ import org.springframework.roo.model.JavaType;
  * @author Stefan Schmidt
  * @since 1.1
  */
-public abstract class SolrUtils {
+public final class SolrUtils {
 	
 	public static String getSolrDynamicFieldPostFix(JavaType type) {
-		if (type.equals(JavaType.INT_OBJECT) || type.equals(JavaType.INT_PRIMITIVE)) {
+		if (type.equals(INT_OBJECT) || type.equals(INT_PRIMITIVE)) {
 			return "_i";
 		} else if (type.equals(JavaType.STRING)) {
 			return "_s";
-		} else if (type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.LONG_PRIMITIVE)) {
+		} else if (type.equals(LONG_OBJECT) || type.equals(LONG_PRIMITIVE)) {
 			return "_l";
-		} else if (type.equals(JavaType.BOOLEAN_OBJECT) || type.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+		} else if (type.equals(BOOLEAN_OBJECT) || type.equals(BOOLEAN_PRIMITIVE)) {
 			return "_b";
-		} else if (type.equals(JavaType.FLOAT_OBJECT) || type.equals(JavaType.FLOAT_PRIMITIVE)) {
+		} else if (type.equals(FLOAT_OBJECT) || type.equals(FLOAT_PRIMITIVE)) {
 			return "_f";
-		} else if (type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.DOUBLE_PRIMITIVE)) {
+		} else if (type.equals(DOUBLE_OBJECT) || type.equals(DOUBLE_PRIMITIVE)) {
 			return "_d";
 		} else if (type.equals(new JavaType("java.util.Date")) || type.equals(new JavaType("java.util.Calendar"))) {
 			return "_dt";
 		} else {
 			return "_t";
 		}
+	}
+	
+	private SolrUtils() {
 	}
 }

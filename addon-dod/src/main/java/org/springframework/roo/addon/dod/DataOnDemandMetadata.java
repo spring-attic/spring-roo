@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dod;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
 import static org.springframework.roo.model.Jsr303JavaType.DIGITS;
@@ -8,6 +9,8 @@ import static org.springframework.roo.model.Jsr303JavaType.MAX;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.COMPONENT;
 
@@ -65,8 +68,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
-	private static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 	private static final JavaType RANDOM = new JavaType("java.util.Random");
 
 	// Fields
@@ -190,12 +191,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					// Candidate is not private, so we might run into naming clashes if someone subclasses this (therefore go onto the next possible name)
 					continue;
 				}
-
 				if (!candidate.getFieldType().equals(RANDOM)) {
 					// Candidate isn't a java.util.Random, so it isn't suitable
 					continue;
 				}
-
 				// If we got this far, we found a valid candidate
 				// We don't check if there is a corresponding initializer, but we assume the user knows what they're doing and have made one
 				return candidate;
@@ -343,7 +342,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		JavaSymbolName embeddedIdentifierMutator = embeddedIdentifierHolder.getEmbeddedIdentifierMutator();
 		JavaSymbolName methodName = getEmbeddedIdMutatorMethodName();
-		final JavaType[] parameterTypes = {entityType, JavaType.INT_PRIMITIVE};
+		final JavaType[] parameterTypes = { entityType, JavaType.INT_PRIMITIVE };
 
 		// Locate user-defined method
 		if (getGovernorMethod(methodName, parameterTypes) != null) {
@@ -384,7 +383,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	private MethodMetadata getEmbeddedClassMutatorMethod(EmbeddedHolder embeddedHolder) {
 		JavaSymbolName methodName = getEmbeddedFieldMutatorMethodName(embeddedHolder.getEmbeddedField());
-		final JavaType[] parameterTypes = {entityType, JavaType.INT_PRIMITIVE};
+		final JavaType[] parameterTypes = { entityType, JavaType.INT_PRIMITIVE };
 
 		// Locate user-defined method
 		if (getGovernorMethod(methodName, parameterTypes) != null) {
@@ -418,7 +417,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"), new JavaSymbolName("index"));
 
 		JavaType embeddedFieldType = embeddedHolder.getEmbeddedField().getFieldType();
-		final JavaType[] parameterTypes = {embeddedFieldType, JavaType.INT_PRIMITIVE};
+		final JavaType[] parameterTypes = { embeddedFieldType, JavaType.INT_PRIMITIVE };
 
 		for (FieldMetadata field : embeddedHolder.getFields()) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -490,7 +489,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaType fieldType = field.getFieldType();
 
 		String suffix = "";
-		if (fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
+		if (fieldType.equals(LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 			suffix = "L";
 		} else if (fieldType.equals(JavaType.FLOAT_OBJECT) || fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 			suffix = "F";
@@ -1051,7 +1050,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).floatValue()");
 		} else if (fieldType.equals(new JavaType("java.lang.Float", 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).floatValue(), new Integer(index).floatValue() }");
-		} else if (fieldType.equals(JavaType.LONG_OBJECT)) {
+		} else if (fieldType.equals(LONG_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()");
@@ -1070,10 +1069,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(new JavaType("java.lang.Character", 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ 'Y', 'N' }");
 		} else if (fieldType.equals(BIG_DECIMAL)) {
-			imports.addImport(new JavaType("java.math.BigDecimal"));
+			imports.addImport(BIG_DECIMAL);
 			initializer = BIG_DECIMAL.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(BIG_INTEGER)) {
-			imports.addImport(new JavaType("java.math.BigInteger"));
+			imports.addImport(BIG_INTEGER);
 			initializer = BIG_INTEGER.getSimpleTypeName() + ".valueOf(index)";
 		} else if (fieldType.equals(JavaType.BYTE_OBJECT)) {
 			initializer = "new Byte(" + StringUtils.defaultIfEmpty(fieldInitializer, "\"1\"") + ")";
@@ -1103,7 +1102,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private boolean isIntegerFieldType(JavaType fieldType) {
-		return fieldType.equals(BIG_INTEGER) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_OBJECT);
+		return fieldType.equals(BIG_INTEGER) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(LONG_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_OBJECT);
 	}
 
 	private boolean isDecimalFieldType(JavaType fieldType) {

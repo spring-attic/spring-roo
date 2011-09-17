@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -309,7 +312,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			}
 			
 			// Add precision and scale attributes for numeric field
-			if (identifier != null && identifier.getScale() > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(new JavaType("java.math.BigDecimal")))) {
+			if (identifier != null && identifier.getScale() > 0 && (identifierType.equals(JavaType.DOUBLE_OBJECT) || identifierType.equals(JavaType.DOUBLE_PRIMITIVE) || identifierType.equals(BIG_DECIMAL))) {
 				columnBuilder.addIntegerAttribute("precision", identifier.getColumnSize());
 				columnBuilder.addIntegerAttribute("scale", identifier.getScale());
 			}
@@ -398,7 +401,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			return identifier.getFieldType();
 		}
 		// Use the default
-		return JavaType.LONG_OBJECT;
+		return LONG_OBJECT;
 	}
 	
 	/**

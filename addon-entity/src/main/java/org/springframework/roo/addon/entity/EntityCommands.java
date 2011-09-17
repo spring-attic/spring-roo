@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
@@ -152,7 +153,7 @@ public class EntityCommands implements CommandMarker {
 		if (identifierField != null) {
 			entityAnnotationBuilder.addStringAttribute("identifierField", identifierField);
 		}
-		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
+		if (!LONG_OBJECT.equals(identifierType)) {
 			entityAnnotationBuilder.addClassAttribute("identifierType", identifierType);
 		} 
 		if (inheritanceType != null) {

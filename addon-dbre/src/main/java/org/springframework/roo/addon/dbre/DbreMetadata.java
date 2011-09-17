@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
@@ -660,7 +661,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Add precision and scale attributes for numeric fields
-		if (column.getScale() > 0 && (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(new JavaType("java.math.BigDecimal")))) {
+		if (column.getScale() > 0 && (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(BIG_DECIMAL))) {
 			columnBuilder.addIntegerAttribute("precision", column.getColumnSize());
 			columnBuilder.addIntegerAttribute("scale", column.getScale());
 		}

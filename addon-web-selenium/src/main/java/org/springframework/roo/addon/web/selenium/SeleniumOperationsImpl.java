@@ -1,8 +1,10 @@
 package org.springframework.roo.addon.web.selenium;
 
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
+import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.io.InputStream;
@@ -310,11 +312,11 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			initializer = new Double(index).toString();
 		} else if (fieldType.equals(JavaType.FLOAT_OBJECT) || fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 			initializer = new Float(index).toString();
-		} else if (fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
+		} else if (fieldType.equals(LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 			initializer = Long.valueOf(index).toString();
 		} else if (fieldType.equals(JavaType.SHORT_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE)) {
 			initializer = Short.valueOf(index).toString();
-		} else if (fieldType.equals(new JavaType("java.math.BigDecimal"))) {
+		} else if (fieldType.equals(BIG_DECIMAL)) {
 			initializer = new BigDecimal(index).toString();
 		}
 		return initializer;
