@@ -2,7 +2,9 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
+import static org.springframework.roo.model.JpaJavaType.TEMPORAL_TYPE;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
@@ -222,8 +224,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		if ("DATETIME".equals(temporalType)) {
 			temporalType = "TIMESTAMP"; // ROO-2606
 		}
-		AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"));
-		temporalBuilder.addEnumAttribute("value", new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(temporalType)));
+		AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(TEMPORAL);
+		temporalBuilder.addEnumAttribute("value", new EnumDetails(TEMPORAL_TYPE, new JavaSymbolName(temporalType)));
 		annotations.add(temporalBuilder);
 
 		AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(DATE_TIME_FORMAT);

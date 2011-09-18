@@ -1,7 +1,15 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.JpaJavaType.COLUMN;
+import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
+import static org.springframework.roo.model.JpaJavaType.TEMPORAL_TYPE;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
@@ -77,12 +85,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
-	private static final JavaType ONE_TO_ONE = new JavaType("javax.persistence.OneToOne");
-	private static final JavaType ONE_TO_MANY = new JavaType("javax.persistence.OneToMany");
-	private static final JavaType MANY_TO_ONE = new JavaType("javax.persistence.ManyToOne");
-	private static final JavaType MANY_TO_MANY = new JavaType("javax.persistence.ManyToMany");
-	private static final JavaType JOIN_COLUMN = new JavaType("javax.persistence.JoinColumn");
 	private static final String NAME = "name";
 	private static final String VALUE = "value";
 	private static final String MAPPED_BY = "mappedBy";
@@ -680,8 +682,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add JSR 220 @Temporal annotation to date fields
 		if (fieldType.equals(new JavaType("java.util.Date"))) {
-			AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"));
-			temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getJdbcType())));
+			AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(TEMPORAL);
+			temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(TEMPORAL_TYPE, new JavaSymbolName(column.getJdbcType())));
 			annotations.add(temporalBuilder);
 
 			AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(DATE_TIME_FORMAT);

@@ -4,7 +4,7 @@ import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.io.InputStream;

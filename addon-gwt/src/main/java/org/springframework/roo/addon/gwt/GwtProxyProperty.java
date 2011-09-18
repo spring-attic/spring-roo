@@ -2,8 +2,8 @@ package org.springframework.roo.addon.gwt;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_INTEGER;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
 

@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.gwt;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 
 import java.io.File;
 import java.io.IOException;

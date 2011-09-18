@@ -9,8 +9,8 @@ import static org.springframework.roo.model.Jsr303JavaType.MAX;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_INTEGER;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.COMPONENT;
 

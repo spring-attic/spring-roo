@@ -12,8 +12,8 @@ import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.Jsr303JavaType.PATTERN;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_INTEGER;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 
 import java.beans.Introspector;
 import java.util.ArrayList;

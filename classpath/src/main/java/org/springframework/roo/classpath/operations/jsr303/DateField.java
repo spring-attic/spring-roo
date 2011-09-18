@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
+import static org.springframework.roo.model.JpaJavaType.TEMPORAL_TYPE;
 import static org.springframework.roo.model.Jsr303JavaType.FUTURE;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
@@ -63,8 +65,8 @@ public class DateField extends FieldDetails {
 				value = "TIMESTAMP";
 			}
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(value))));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"), attrs));
+			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(TEMPORAL_TYPE, new JavaSymbolName(value))));
+			annotations.add(new AnnotationMetadataBuilder(TEMPORAL, attrs));
 		}
 		// Always add a DateTimeFormat annotation
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();

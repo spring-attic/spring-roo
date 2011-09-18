@@ -8,7 +8,7 @@ package org.springframework.roo.model;
  * @author Alan
  * @since 1.2.0
  */
-public final class MiscellaneousJdkJavaType {
+public final class JdkJavaType {
 
 	// Constants
 	public static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
@@ -17,6 +17,6 @@ public final class MiscellaneousJdkJavaType {
 	/**
 	 * Constructor is private to prevent instantiation
 	 */
-	private MiscellaneousJdkJavaType() {
+	private JdkJavaType() {
 	}
 }

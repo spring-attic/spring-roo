@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
-import static org.springframework.roo.model.MiscellaneousJdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
