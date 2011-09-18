@@ -2,6 +2,13 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JpaJavaType.COLUMN;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDED_ID;
+import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.JpaJavaType.ID;
+import static org.springframework.roo.model.JpaJavaType.INHERITANCE;
+import static org.springframework.roo.model.JpaJavaType.INHERITANCE_TYPE;
+import static org.springframework.roo.model.JpaJavaType.VERSION;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -41,11 +48,6 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-	// Constants for JPA annotations
-	private static final JavaType JPA_COLUMN = new JavaType("javax.persistence.Column");
-	private static final JavaType JPA_EMBEDDED_ID = new JavaType("javax.persistence.EmbeddedId");
-	private static final JavaType JPA_ID = new JavaType("javax.persistence.Id");
-	
 	// Fields
 	private final Identifier identifier;
 	private final JpaEntityAnnotationValues annotationValues;
@@ -130,7 +132,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @return
 	 */
 	private AnnotationMetadata getEntityAnnotation() {
-		AnnotationMetadata entityAnnotation = getTypeAnnotation(new JavaType("javax.persistence.Entity"));
+		AnnotationMetadata entityAnnotation = getTypeAnnotation(ENTITY);
 		if (entityAnnotation == null) {
 			return null;
 		}
@@ -215,9 +217,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		if (parentEntity != null) {
 			final FieldMetadata idField = parentEntity.getIdentifierField();
 			if (idField != null) {
-				if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), JPA_ID) != null) {
+				if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), ID) != null) {
 					return idField;
-				} else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), JPA_EMBEDDED_ID) != null) {
+				} else if (MemberFindingUtils.getAnnotationOfType(idField.getAnnotations(), EMBEDDED_ID) != null) {
 					return idField;
 				}
 			}
@@ -225,15 +227,15 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		// Try to locate an existing field with @javax.persistence.Id
-		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, JPA_ID);
+		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
 		if (!idFields.isEmpty()) {
-			return getIdentifierField(idFields, JPA_ID);
+			return getIdentifierField(idFields, ID);
 		}
 
 		// Try to locate an existing field with @javax.persistence.EmbeddedId
-		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, JPA_EMBEDDED_ID);
+		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
 		if (!embeddedIdFields.isEmpty()) {
-			return getIdentifierField(embeddedIdFields, JPA_EMBEDDED_ID);
+			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
 		final String identifierField = getIdentifierFieldName();
@@ -262,7 +264,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		final boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")));
-		final JavaType annotationType = hasIdClass ? JPA_EMBEDDED_ID : JPA_ID;
+		final JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
 		annotations.add(new AnnotationMetadataBuilder(annotationType));
 
 		// Compute the column name, as required
@@ -271,7 +273,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 			if ("AUTO".equals(generationType)) {
-				AnnotationMetadata inheritance = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Inheritance"));
+				AnnotationMetadata inheritance = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, INHERITANCE);
 				if (inheritance == null) {
 					inheritance = getInheritanceAnnotation();
 				}
@@ -280,7 +282,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 					if (value instanceof EnumAttributeValue) {
 						final EnumAttributeValue enumAttributeValue = (EnumAttributeValue) value;
 						final EnumDetails details = enumAttributeValue.getValue();
-						if (details != null && "javax.persistence.InheritanceType".equals(details.getType().getFullyQualifiedTypeName())) {
+						if (details != null && details.getType().equals(INHERITANCE_TYPE)) {
 							if ("TABLE_PER_CLASS".equals(details.getField().getSymbolName())) {
 								generationType = "TABLE";
 							}
@@ -300,7 +302,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				columnName = identifierColumn;
 			}
 
-			final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(JPA_COLUMN);
+			final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 			columnBuilder.addStringAttribute("name", columnName);
 			if (identifier != null && StringUtils.hasText(identifier.getColumnDefinition())) {
 				columnBuilder.addStringAttribute("columnDefinition", identifier.getColumnDefinition());
@@ -616,9 +618,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Version")));
+		annotations.add(new AnnotationMetadataBuilder(VERSION));
 		
-		final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(JPA_COLUMN);
+		final AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 		columnBuilder.addStringAttribute("name", versionColumn);
 		annotations.add(columnBuilder);
 		

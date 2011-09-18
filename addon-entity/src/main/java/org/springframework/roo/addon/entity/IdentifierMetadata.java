@@ -2,9 +2,11 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JpaJavaType.COLUMN;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL_TYPE;
-import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
@@ -50,8 +52,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = IdentifierMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType EMBEDDABLE = new JavaType("javax.persistence.Embeddable");
-	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
 	// Fields
 	private boolean noArgConstructor;

@@ -1,5 +1,13 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
+import static org.springframework.roo.model.JpaJavaType.ELEMENT_COLLECTION;
+import static org.springframework.roo.model.JpaJavaType.FETCH_TYPE;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,15 +68,15 @@ public class SetField extends CollectionField {
 
 		if (cardinality == null) {
 			// Assume set field is an enum
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ElementCollection")));
+			annotations.add(new AnnotationMetadataBuilder(ELEMENT_COLLECTION));
 		} else {
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(CASCADE_TYPE, new JavaSymbolName("ALL"))));
 			if (fetch != null) {
 				JavaSymbolName value = new JavaSymbolName("EAGER");
 				if (fetch == Fetch.LAZY) {
 					value = new JavaSymbolName("LAZY");
 				}
-				attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
+				attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(FETCH_TYPE, value)));
 			}
 			if (mappedBy != null) {
 				attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
@@ -76,19 +84,18 @@ public class SetField extends CollectionField {
 
 			switch (cardinality) {
 				case ONE_TO_MANY:
-					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToMany"), attributes));
+					annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY, attributes));
 					break;
-				case MANY_TO_ONE:
-					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToOne"), attributes));
+				case MANY_TO_MANY:
+					annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY, attributes));
 					break;
 				case ONE_TO_ONE:
-					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToOne"), attributes));
+					annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE, attributes));
 					break;
 				default:
-					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToMany"), attributes));
+					annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE, attributes));
 					break;
-			}
-		}
+			}		}
 	}
 
 	public JavaType getInitializer() {

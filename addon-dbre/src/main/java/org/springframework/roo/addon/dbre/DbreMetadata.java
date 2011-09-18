@@ -1,7 +1,11 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
+import static org.springframework.roo.model.JpaJavaType.JOIN_TABLE;
+import static org.springframework.roo.model.JpaJavaType.LOB;
 import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
@@ -9,7 +13,6 @@ import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL_TYPE;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
-import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
@@ -347,7 +350,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		annotations.add(manyToManyBuilder);
 
 		// Add @JoinTable annotation
-		AnnotationMetadataBuilder joinTableBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinTable"));
+		AnnotationMetadataBuilder joinTableBuilder = new AnnotationMetadataBuilder(JOIN_TABLE);
 		List<AnnotationAttributeValue<?>> joinTableAnnotationAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		joinTableAnnotationAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getName()));
 
@@ -548,16 +551,15 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 	
 	private void addCascadeType(AnnotationMetadataBuilder annotationBuilder, CascadeAction onUpdate, CascadeAction onDelete) {
-		JavaType cascadeType = new JavaType("javax.persistence.CascadeType");
 		if (onUpdate == CascadeAction.CASCADE && onDelete == CascadeAction.CASCADE) {
-			annotationBuilder.addEnumAttribute("cascade", cascadeType, "ALL");
+			annotationBuilder.addEnumAttribute("cascade", CASCADE_TYPE, "ALL");
 		} else if (onUpdate == CascadeAction.CASCADE && onDelete != CascadeAction.CASCADE) {
 			List<EnumAttributeValue> arrayValues = new ArrayList<EnumAttributeValue>();
-			arrayValues.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(cascadeType, new JavaSymbolName("PERSIST"))));
-			arrayValues.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(cascadeType, new JavaSymbolName("MERGE"))));
+			arrayValues.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(CASCADE_TYPE, new JavaSymbolName("PERSIST"))));
+			arrayValues.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(CASCADE_TYPE, new JavaSymbolName("MERGE"))));
 			annotationBuilder.addAttribute(new ArrayAttributeValue<EnumAttributeValue>(new JavaSymbolName("cascade"), arrayValues));
 		} else if (onUpdate != CascadeAction.CASCADE && onDelete == CascadeAction.CASCADE) {
-			annotationBuilder.addEnumAttribute("cascade", "javax.persistence.CascadeType", "REMOVE");
+			annotationBuilder.addEnumAttribute("cascade", CASCADE_TYPE.getSimpleTypeName(), "REMOVE");
 		}
 	}
 
@@ -693,7 +695,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @Lob for CLOB fields if applicable
 		if (column.getJdbcType().equals("CLOB")) {
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Lob")));
+			annotations.add(new AnnotationMetadataBuilder(LOB));
 		}
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);

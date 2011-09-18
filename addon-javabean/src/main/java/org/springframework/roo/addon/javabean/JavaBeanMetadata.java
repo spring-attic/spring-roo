@@ -1,6 +1,11 @@
 package org.springframework.roo.addon.javabean;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -199,9 +204,9 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 	private void processGaeAnnotations(FieldMetadata field) {
 		for (AnnotationMetadata annotation : field.getAnnotations()) {
-			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToOne")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToOne")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToMany")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToMany"))) {
+			if (annotation.getAnnotationType().equals(ONE_TO_ONE) || annotation.getAnnotationType().equals(MANY_TO_ONE) || annotation.getAnnotationType().equals(ONE_TO_MANY) || annotation.getAnnotationType().equals(MANY_TO_MANY)) {
 				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(annotation.getAnnotationType()).build(), true));
-				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(new JavaType("javax.persistence.Transient")).build()));
+				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(TRANSIENT).build()));
 				break;
 			}
 		}

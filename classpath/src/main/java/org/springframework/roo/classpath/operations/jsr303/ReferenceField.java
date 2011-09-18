@@ -1,5 +1,12 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.JpaJavaType.FETCH_TYPE;
+import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,21 +82,21 @@ public class ReferenceField extends FieldDetails {
 			if (fetch == Fetch.LAZY) {
 				value = new JavaSymbolName("LAZY");
 			}
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(FETCH_TYPE, value)));
 		}
 		
 		switch (cardinality) {
 			case ONE_TO_MANY:
-				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToMany"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY, attributes));
 				break;
 			case MANY_TO_MANY:
-				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToMany"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY, attributes));
 				break;
 			case ONE_TO_ONE:
-				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToOne"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE, attributes));
 				break;
 			default:
-				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToOne"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE, attributes));
 				break;
 		}
 		
@@ -100,7 +107,7 @@ public class ReferenceField extends FieldDetails {
 			if (referencedColumnName != null) {
 				joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName("referencedColumnName"), referencedColumnName));
 			}
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumn"), joinColumnAttrs));
+			annotations.add(new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttrs));
 		}
 	}
 }
