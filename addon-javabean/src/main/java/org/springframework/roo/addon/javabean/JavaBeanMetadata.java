@@ -267,10 +267,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		String instantiableCollection = collectionName;
 
 		// GAE only supports java.util.List and java.util.Set collections and we need a concrete implementation of either.
-		if (collectionType.equals(LIST)) {
+		if (collectionType.getFullyQualifiedTypeName().equals(LIST.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-		} else if (collectionType.equals(SET)) {
+		} else if (collectionType.getFullyQualifiedTypeName().equals(SET.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}
@@ -306,10 +306,10 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
 		String instantiableCollection = collectionName;
-		if (collectionType.equals(LIST)) {
+		if (collectionType.getFullyQualifiedTypeName().equals(LIST.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-		} else if (collectionType.equals(SET)) {
+		} else if (collectionType.getFullyQualifiedTypeName().equals(SET.getFullyQualifiedTypeName())) {
 			collectionType = new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}

@@ -285,7 +285,7 @@ public class GwtProxyProperty {
 	}
 
 	public boolean isProxy() {
-		return ptmd != null && !isDate() && !isString() && !isPrimitive() && !isEnum() && !isCollection() && !isEmbeddable() && !type.getFullyQualifiedTypeName().equals("java.lang.Object");
+		return ptmd != null && !isDate() && !isString() && !isPrimitive() && !isEnum() && !isCollection() && !isEmbeddable() && !type.equals(OBJECT);
 	}
 
 	public boolean isCollection() {

@@ -19,7 +19,7 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 public interface GwtTypeService {
 
-	JavaType getGwtSideLeafType(JavaType type, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType, boolean convertPrimitive);
+	JavaType getGwtSideLeafType(JavaType returnType, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType, boolean convertPrimitive);
 
 	List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType);
 

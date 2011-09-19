@@ -46,6 +46,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtRequestMetadataProvider{
 
+	// Fields
 	@Reference protected GwtTypeService gwtTypeService;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;
 	@Reference protected ProjectOperations projectOperations;
@@ -91,10 +92,10 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			return null;
 		}
 
- 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), target);
- 		if (memberDetails == null) {
- 			return null;
- 		}
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), target);
+		if (memberDetails == null) {
+			return null;
+		}
 
 		List<String> exclusionsList = getMethodExclusions(request);
 
@@ -105,15 +106,15 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 				if (returnType == null) {
 					continue;
 				}
-				MethodMetadataBuilder methodMetadataBuilder = new MethodMetadataBuilder(methodMetadata);
-				methodMetadataBuilder.setReturnType(returnType);
-				methodMetadataBuilder.setBodyBuilder(null);
-				requestMethods.add(methodMetadataBuilder.build());
+				MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(methodMetadata);
+				methodBuilder.setReturnType(returnType);
+				methodBuilder.setBodyBuilder(null);
+				requestMethods.add(methodBuilder.build());
 			}
 		}
-		GwtRequestMetadata metadata = new GwtRequestMetadata(request.getName(), updateRequest(request, requestMethods));
-		notifyIfRequired(metadata);
-		return metadata;
+		GwtRequestMetadata gwtRequestMetadata = new GwtRequestMetadata(request.getName(), updateRequest(request, requestMethods));
+		notifyIfRequired(gwtRequestMetadata);
+		return gwtRequestMetadata;
 	}
 
 	private List<String> getMethodExclusions(ClassOrInterfaceTypeDetails request) {
@@ -194,7 +195,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	}
 
 	private MethodMetadataBuilder getRequestMethod(ClassOrInterfaceTypeDetails request, MethodMetadata methodMetadata) {
-
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
 		ClassOrInterfaceTypeDetails service = gwtTypeService.lookupTargetServiceFromRequest(request);
 		if (proxy == null || service == null) {
@@ -205,27 +205,29 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			return null;
 		}
 
+		List<JavaType> methodReturnTypeArgs;
+		JavaType methodReturnType;
 		if (entity.getName().equals(service.getName()) && !Modifier.isStatic(methodMetadata.getModifier())) {
-			List<JavaType> methodReturnTypeArgs = Arrays.asList(proxy.getName(), methodMetadata.getReturnType());
-			JavaType methodReturnType = new JavaType(GwtUtils.INSTANCE_REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
-			return getRequestMethod(request, methodMetadata, methodReturnType);
+			methodReturnTypeArgs = Arrays.asList(proxy.getName(), methodMetadata.getReturnType());
+			methodReturnType = new JavaType(GwtUtils.INSTANCE_REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
+		} else {
+			methodReturnTypeArgs = Collections.singletonList(methodMetadata.getReturnType());
+			methodReturnType = new JavaType(GwtUtils.REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
 		}
-
-		List<JavaType> methodReturnTypeArgs = Collections.singletonList(methodMetadata.getReturnType());
-		JavaType methodReturnType = new JavaType(GwtUtils.REQUEST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, methodReturnTypeArgs);
 		return getRequestMethod(request, methodMetadata, methodReturnType);
 	}
 
-	private MethodMetadataBuilder getRequestMethod(ClassOrInterfaceTypeDetails request, MethodMetadata methodMetaData, JavaType methodReturnType) {
+	private MethodMetadataBuilder getRequestMethod(ClassOrInterfaceTypeDetails request, MethodMetadata methodMetadata, JavaType methodReturnType) {
 		List<AnnotatedJavaType> paramaterTypes = new ArrayList<AnnotatedJavaType>();
 		ClassOrInterfaceTypeDetails mirroredTypeDetails = gwtTypeService.lookupEntityFromRequest(request);
 		if (mirroredTypeDetails == null) {
 			return null;
 		}
-		for (AnnotatedJavaType parameterType : methodMetaData.getParameterTypes()) {
-			paramaterTypes.add(new AnnotatedJavaType(gwtTypeService.getGwtSideLeafType(parameterType.getJavaType(), projectOperations.getProjectMetadata(), mirroredTypeDetails.getName(), true, false)));
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+		for (AnnotatedJavaType parameterType : methodMetadata.getParameterTypes()) {
+			paramaterTypes.add(new AnnotatedJavaType(gwtTypeService.getGwtSideLeafType(parameterType.getJavaType(), projectMetadata, mirroredTypeDetails.getName(), true, false)));
 		}
-		return new MethodMetadataBuilder(request.getDeclaredByMetadataId(), Modifier.ABSTRACT, methodMetaData.getMethodName(), methodReturnType, paramaterTypes, methodMetaData.getParameterNames(), new InvocableMemberBodyBuilder());
+		return new MethodMetadataBuilder(request.getDeclaredByMetadataId(), Modifier.ABSTRACT, methodMetadata.getMethodName(), methodReturnType, paramaterTypes, methodMetadata.getParameterNames(), new InvocableMemberBodyBuilder());
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {

@@ -106,42 +106,42 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	 * Return the type arg for the client side method, given the domain method return type. If domain method return type is List<Integer> or Set<Integer>, returns the same. If domain method return
 	 * type is List<Employee>, return List<EmployeeProxy>
 	 * 
-	 * @param type
+	 * @param returnType
 	 * @param projectMetadata
 	 * @param governorType
 	 * @return the GWT side leaf type as a JavaType
 	 */
-	public JavaType getGwtSideLeafType(JavaType type, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType, boolean convertPrimitive) {
-		if (type.isPrimitive() && convertPrimitive) {
+	public JavaType getGwtSideLeafType(JavaType returnType, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType, boolean convertPrimitive) {
+		if (returnType.isPrimitive() && convertPrimitive) {
 			if (!requestType) {
-				checkPrimitive(type);
+				checkPrimitive(returnType);
 			}
-			return GwtUtils.convertPrimitiveType(type, requestType);
+			return GwtUtils.convertPrimitiveType(returnType, requestType);
 		}
 
-		if (isTypeCommon(type)) {
-			return type;
+		if (isTypeCommon(returnType)) {
+			return returnType;
 		}
 
-		if (isCollectionType(type)) {
-			List<JavaType> args = type.getParameters();
+		if (isCollectionType(returnType)) {
+			List<JavaType> args = returnType.getParameters();
 			if (args != null && args.size() == 1) {
 				JavaType elementType = args.get(0);
 				JavaType convertedJavaType = getGwtSideLeafType(elementType, projectMetadata, governorType, requestType, convertPrimitive);
 				if (convertedJavaType == null) {
 					return null;
 				}
-				return new JavaType(type.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(convertedJavaType));
+				return new JavaType(returnType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(convertedJavaType));
 			}
-			return type;
+			return returnType;
 		}
 
-		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		if (isDomainObject(type, ptmd)) {
+		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
+		if (isDomainObject(returnType, ptmd)) {
 			if (isEmbeddable(ptmd)) {
-				throw new IllegalStateException("GWT does not currently support embedding objects in entities, such as '" + type.getSimpleTypeName() + "' in '" + governorType.getSimpleTypeName() + "'.");
+				throw new IllegalStateException("GWT does not currently support embedding objects in entities, such as '" + returnType.getSimpleTypeName() + "' in '" + governorType.getSimpleTypeName() + "'.");
 			}
-			ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getClassOrInterface(type);
+			ClassOrInterfaceTypeDetails typeDetails = typeLocationService.getClassOrInterface(returnType);
 			if (typeDetails == null) {
 				return null;
 			}
@@ -151,7 +151,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			}
 			return proxy.getName();
 		}
-		return type;
+		return returnType;
 	}
 
 	public ClassOrInterfaceTypeDetails lookupRequestFromProxy(ClassOrInterfaceTypeDetails proxy) {
@@ -593,7 +593,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	private boolean isCollectionType(JavaType returnType) {
-		return returnType.equals(LIST) || returnType.equals(SET);
+		return returnType.getFullyQualifiedTypeName().equals(LIST.getFullyQualifiedTypeName()) || returnType.getFullyQualifiedTypeName().equals(SET.getFullyQualifiedTypeName());
 	}
 
 	private boolean isEnum(PhysicalTypeMetadata ptmd) {
