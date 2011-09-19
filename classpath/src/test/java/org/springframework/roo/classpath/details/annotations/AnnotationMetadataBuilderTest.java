@@ -30,6 +30,6 @@ public class AnnotationMetadataBuilderTest {
 		
 		// Check
 		assertEquals(0, annotationMetadata.getAttributeNames().size());
-		assertEquals(ID, annotationMetadata.getAnnotationType().getFullyQualifiedTypeName());
+		assertEquals(ID.getFullyQualifiedTypeName(), annotationMetadata.getAnnotationType().getFullyQualifiedTypeName());
 	}
 }
