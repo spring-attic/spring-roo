@@ -346,10 +346,28 @@ public final class StringUtils {
 		}
 		return count;
 	}
+	
+	/**
+	 * Returns the given string repeated the given number of times
+	 * 
+	 * @param string the string to repeat (can be null or empty)
+	 * @param times the number of times to repeat it
+	 * @return <code>null</code> if <code>null</code> is given
+	 */
+	public static String repeat(final String string, final int times) {
+		if (string == null || string.length() == 0) {
+			return string;
+		}
+		final StringBuilder sb = new StringBuilder(string.length() * times);
+		for (int i = 0; i < times; i++) {
+			sb.append(string);
+		}
+		return sb.toString();
+	}
 
 	/**
-	 * Replace all occurences of a substring within a string with
-	 * another string.
+	 * Replace all occurrences of a substring within a string with another string.
+	 * 
 	 * @param inString String to examine
 	 * @param oldPattern String to replace
 	 * @param newPattern String to insert

@@ -291,8 +291,9 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					
 					// Now locate deleted files
 					priorFiles.keySet().removeAll(currentExecution.keySet());
-					for (File deletedFile : priorFiles.keySet()) {
-						eventsToPublish.add(new FileEvent(new FileDetails(deletedFile, priorFiles.get(deletedFile)), FileOperation.DELETED, null));
+					for (final Entry<File, Long> entry : priorFiles.entrySet()) {
+						final File deletedFile = entry.getKey();
+						eventsToPublish.add(new FileEvent(new FileDetails(deletedFile, entry.getValue()), FileOperation.DELETED, null));
 						try {
 							// If this file was already going to be notified, there is no need to do it twice
 							notifyDeleted.remove(deletedFile.getCanonicalPath());
@@ -438,9 +439,11 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			if (priorExecution.containsKey(request)) {
 				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
 
-				Map<File,Long> priorFiles = priorExecution.get(request);
-				for (File thisFile : priorFiles.keySet()) {
-					eventsToPublish.add(new FileEvent(new FileDetails(thisFile, priorFiles.get(thisFile)), FileOperation.MONITORING_FINISH, null));
+				final Map<File, Long> priorFiles = priorExecution.get(request);
+				for (final Entry<File, Long> entry : priorFiles.entrySet()) {
+					final File thisFile = entry.getKey();
+					final Long lastModified = entry.getValue();
+					eventsToPublish.add(new FileEvent(new FileDetails(thisFile, lastModified), FileOperation.MONITORING_FINISH, null));
 				}
 				publish(eventsToPublish);
 			}

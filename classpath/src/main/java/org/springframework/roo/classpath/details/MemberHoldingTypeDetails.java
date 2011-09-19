@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.details;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -57,4 +58,19 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	 * @return an unmodifiable representation of classes this type implements (may be empty, but never null)
 	 */
 	List<JavaType> getImplementsTypes();
+	
+	/**
+	 * Generates a unique name for a governor field, starting from the given
+	 * proposed name and adding underscores until it's unique.
+	 * 
+	 * @param proposedName the proposed field name (required)
+	 * @param prepend whether to prepend (<code>true</code>) or append
+	 * (<code>false</code>) the underscores, if any
+	 * TODO is it a bug or a feature that this parameter is necessary? Why
+	 * wouldn't all callers generate unique names in the same way?
+	 * @return a non-<code>null</code> name that's unique within the governor
+	 * @see MemberFindingUtils#getField(org.springframework.roo.classpath.details.MemberHoldingTypeDetails, JavaSymbolName)
+	 * @since 1.2.0
+	 */
+	JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend);
 }

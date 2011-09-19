@@ -8,7 +8,6 @@ import static org.springframework.roo.addon.jpa.OrmProvider.HIBERNATE;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Properties;
 
 import org.junit.Before;
 import org.mockito.Mock;
@@ -40,7 +39,6 @@ public class JpaOperationsImplTest {
 	
 	// Fixture
 	private JpaOperationsImpl jpaOperations;
-	private Properties dialects = new Properties();	// too hard to mock
 	@Mock private FileManager mockFileManager;
 	@Mock private PathResolver mockPathResolver;
 	@Mock private ProjectOperations mockProjectOperations;

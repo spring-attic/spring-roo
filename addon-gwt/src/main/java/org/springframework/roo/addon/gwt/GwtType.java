@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.addon.gwt.GwtUtils.ACCEPTS_ONE_WIDGET;
+import static org.springframework.roo.addon.gwt.GwtUtils.EVENT_BUS;
+import static org.springframework.roo.addon.gwt.GwtUtils.PLACE;
+import static org.springframework.roo.addon.gwt.GwtUtils.RECEIVER;
 import static org.springframework.roo.model.JdkJavaType.COLLECTION;
 
 import java.util.ArrayList;
@@ -135,14 +139,10 @@ public enum GwtType {
 		watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
 		switch (type) {
 			case EDIT_ACTIVITY_WRAPPER:
-				List<JavaType> params = new ArrayList<JavaType>();
-				params.add(new JavaType("com.google.gwt.user.client.ui.AcceptsOneWidget"));
-				params.add(new JavaType("com.google.gwt.event.shared.EventBus"));
-				watchedMethods.put(new JavaSymbolName("start"), params);
+				watchedMethods.put(new JavaSymbolName("start"), Arrays.asList(ACCEPTS_ONE_WIDGET, EVENT_BUS));
 				break;
 			case DETAIL_ACTIVITY:
-				params = Arrays.asList(new JavaType("com.google.web.bindery.requestfactory.shared.Receiver", 0, DataType.TYPE, null, Collections.singletonList(GwtUtils.ENTITY_PROXY)));
-				watchedMethods.put(new JavaSymbolName("find"), params);
+				watchedMethods.put(new JavaSymbolName("find"), Arrays.asList(GwtUtils.getReceiverType(GwtUtils.ENTITY_PROXY)));
 				watchedMethods.put(new JavaSymbolName("deleteClicked"), new ArrayList<JavaType>());
 				break;
 			case MOBILE_LIST_VIEW:
@@ -152,14 +152,13 @@ public enum GwtType {
 				watchedMethods.put(new JavaSymbolName("init"), new ArrayList<JavaType>());
 				break;
 			case MASTER_ACTIVITIES:
-				watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(new JavaType("com.google.gwt.place.shared.Place")));
+				watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(PLACE));
 				break;
 			case DETAILS_ACTIVITIES:
-				watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(new JavaType("com.google.gwt.place.shared.Place")));
+				watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(PLACE));
 				break;
 			case LIST_ACTIVITY:
-				params = Arrays.asList(new JavaType("com.google.web.bindery.requestfactory.shared.Receiver"));
-				watchedMethods.put(new JavaSymbolName("fireCountRequest"), params);
+				watchedMethods.put(new JavaSymbolName("fireCountRequest"), Collections.singletonList(RECEIVER));
 				break;
 		}
 		return watchedMethods;

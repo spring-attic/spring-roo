@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
@@ -38,7 +39,6 @@ public class EntityCommands implements CommandMarker {
 	private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
 	private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_TO_STRING);
 	private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
-	private static final JavaType GAE_DATASTORE_KEY = new JavaType("com.google.appengine.api.datastore.Key");
 	
 	// Fields
 	@Reference private EntityOperations entityOperations;

@@ -30,7 +30,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  * @author Stefan Schmidt
  * @since 1.0
  */
-public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ItdTypeDetails {
+public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails implements ItdTypeDetails {
 
 	// Constants
 	static final PhysicalTypeCategory PHYSICAL_TYPE_CATEGORY = PhysicalTypeCategory.ITD;

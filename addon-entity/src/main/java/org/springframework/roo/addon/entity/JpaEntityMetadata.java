@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
@@ -244,32 +245,14 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
-		final String identifierField = getIdentifierFieldName();
-
 		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
-		int index= -1;
-		JavaSymbolName idField;
-		while (true) {
-			// Compute the required field name
-			index++;
-			String fieldName = "";
-			for (int i = 0; i < index; i++) {
-				fieldName = fieldName + "_";
-			}
-			fieldName = identifierField + fieldName;
-			
-			idField = new JavaSymbolName(fieldName);
-			if (MemberFindingUtils.getField(governorTypeDetails, idField) == null) {
-				// Found a usable field name
-				break;
-			}
-		}
+		final JavaSymbolName idField = governorTypeDetails.getUniqueFieldName(getIdentifierFieldName(), false);
 		
 		// We need to create one
 		final JavaType identifierType = getIdentifierType();
 		
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		final boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")));
+		final boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(GAE_DATASTORE_KEY));
 		final JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
 		annotations.add(new AnnotationMetadataBuilder(annotationType));
 
@@ -595,23 +578,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		// Ensure there isn't already a field called "version"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
-		int index= -1;
-		JavaSymbolName verField;
-		while (true) {
-			// Compute the required field name
-			index++;
-			String fieldName = "";
-			for (int i = 0; i < index; i++) {
-				fieldName = fieldName + "_";
-			}
-			fieldName = versionField + fieldName;
-			
-			verField = new JavaSymbolName(fieldName);
-			if (MemberFindingUtils.getField(governorTypeDetails, verField) == null) {
-				// Found a usable field name
-				break;
-			}
-		}
+		final JavaSymbolName verField = governorTypeDetails.getUniqueFieldName(versionField, false);
 		
 		// We're creating one
 		JavaType versionType = annotationValues.getVersionType();

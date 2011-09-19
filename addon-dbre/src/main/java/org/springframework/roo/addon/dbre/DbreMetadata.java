@@ -587,7 +587,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 			boolean hasEmbeddedIdField = isEmbeddedIdField(fieldName) && !isCompositeKeyField;
 			if (hasEmbeddedIdField) {
-				fieldName = getUniqueFieldName(fieldName);
+				fieldName = governorTypeDetails.getUniqueFieldName(fieldName.getSymbolName(), true);
 			}
 
 			field = getField(fieldName, column, table.getName(), table.isIncludeNonPortableAttributes());
@@ -726,26 +726,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-	private JavaSymbolName getUniqueFieldName(JavaSymbolName fieldName) {
-		int index = -1;
-		JavaSymbolName uniqueField = null;
-		while (true) {
-			// Compute the required field name
-			index++;
-			String uniqueFieldName = "";
-			for (int i = 0; i < index; i++) {
-				uniqueFieldName = uniqueFieldName + "_";
-			}
-			uniqueFieldName = uniqueFieldName + fieldName;
-			uniqueField = new JavaSymbolName(uniqueFieldName);
-			if (MemberFindingUtils.getField(governorTypeDetails, uniqueField) == null) {
-				// Found a usable field name
-				break;
-			}
-		}
-		return uniqueField;
-	}
-
 	private boolean hasField(FieldMetadata field) {
 		// Check governor for field
 		if (MemberFindingUtils.getField(governorTypeDetails, field.getFieldName()) != null) {
@@ -779,10 +759,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private boolean hasFieldInItd(JavaSymbolName fieldName) {
-		// Check this ITD for field
-		List<FieldMetadataBuilder> declaredFields = builder.getDeclaredFields();
-		for (FieldMetadataBuilder declaredField : declaredFields) {
+	/**
+	 * Indicates whether the ITD being built has a field of the given name
+	 * 
+	 * @param fieldName
+	 * @return
+	 */
+	private boolean hasFieldInItd(final JavaSymbolName fieldName) {
+		for (final FieldMetadataBuilder declaredField : builder.getDeclaredFields()) {
 			if (declaredField.getFieldName().equals(fieldName)) {
 				return true;
 			}

@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.javabean;
 
+import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
+import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY_FACTORY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
@@ -23,7 +25,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -84,11 +85,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			if (entry.getValue() != null) {
 				JavaSymbolName hiddenIdFieldName;
 				if (field.getFieldType().isCommonCollectionType()) {
-					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Keys");
-					builder.getImportRegistrationResolver().addImport(new JavaType("com.google.appengine.api.datastore.KeyFactory"));
+					hiddenIdFieldName = governorTypeDetails.getUniqueFieldName(field.getFieldName().getSymbolName() + "Keys", true);
+					builder.getImportRegistrationResolver().addImport(GAE_DATASTORE_KEY_FACTORY);
 					builder.addField(getMultipleEntityIdField(hiddenIdFieldName));
 				} else {
-					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Id");
+					hiddenIdFieldName = governorTypeDetails.getUniqueFieldName(field.getFieldName().getSymbolName() + "Id", true);
 					builder.addField(getSingularEntityIdField(hiddenIdFieldName));
 				}
 
@@ -217,25 +218,6 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 	}
 
-	private JavaSymbolName getFieldName(String fieldName) {
-		int index = -1;
-		while (true) {
-			// Compute the required field name
-			index++;
-			String tempString = "";
-			for (int i = 0; i < index; i++) {
-				tempString = tempString + "_";
-			}
-			fieldName = tempString + fieldName;
-
-			JavaSymbolName field = new JavaSymbolName(fieldName);
-			if (MemberFindingUtils.getField(governorTypeDetails, field) == null) {
-				// Found a usable field name
-				return field;
-			}
-		}
-	}
-
 	private FieldMetadata getSingularEntityIdField(JavaSymbolName fieldName) {
 		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, LONG_OBJECT, null);
 		return fieldMetadataBuilder.build();
@@ -243,7 +225,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 	private FieldMetadata getMultipleEntityIdField(JavaSymbolName fieldName) {
 		builder.getImportRegistrationResolver().addImport(HASH_SET);
-		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.appengine.api.datastore.Key"))), "new HashSet<Key>()");
+		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(GAE_DATASTORE_KEY)), "new HashSet<Key>()");
 		return fieldMetadataBuilder.build();
 	}
 

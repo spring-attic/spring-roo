@@ -22,20 +22,20 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ClassOrInterfaceTypeDetails {
+public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTypeDetails implements ClassOrInterfaceTypeDetails {
 	
 	// Fields
+	private ClassOrInterfaceTypeDetails superclass;
 	private JavaType name;
-	private PhysicalTypeCategory physicalTypeCategory;
+	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
-	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
-	private ClassOrInterfaceTypeDetails superclass;
+	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
+	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+	private PhysicalTypeCategory physicalTypeCategory;
 	private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
 	
 	/**

@@ -13,8 +13,8 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Properties;
-import java.util.SortedSet;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -29,6 +29,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.MathUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
@@ -302,18 +303,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	@CliCommand(value = { "system properties" }, help = "Shows the shell's properties")
 	public String props() {
-		Properties properties = System.getProperties();
-		SortedSet<String> data = new TreeSet<String>();
-		for (Object property : properties.keySet()) {
-			Object value = properties.get(property);
-			data.add(property + " = " + value);
+		final Set<String> data = new TreeSet<String>();	// for repeatability
+		for (final Entry<Object, Object> entry : System.getProperties().entrySet()) {
+			data.add(entry.getKey() + " = " + entry.getValue());
 		}
 		
-		StringBuilder sb = new StringBuilder();
-		for (String line : data) {
-			sb.append(line).append(System.getProperty("line.separator"));
-		}
-		return sb.toString();
+		final String lineSeparator = System.getProperty("line.separator");
+		return StringUtils.collectionToDelimitedString(data, lineSeparator) + lineSeparator;
 	}
 
 	@CliCommand(value = { "date" }, help = "Displays the local date and time")

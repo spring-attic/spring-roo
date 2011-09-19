@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -799,8 +800,9 @@ public class SimpleParser implements Parser {
 			Document document = builder.newDocument();
 			List<Element> builtSections = new ArrayList<Element>();
 
-			for (String section : sections.keySet()) {
-				Object target = sections.get(section);
+			for (final Entry<String, Object> entry : sections.entrySet()) {
+				final String section = entry.getKey();
+				final Object target = entry.getValue();
 				SortedMap<String, Element> individualCommands = new TreeMap<String, Element>(comparator);
 
 				Method[] methods = target.getClass().getMethods();

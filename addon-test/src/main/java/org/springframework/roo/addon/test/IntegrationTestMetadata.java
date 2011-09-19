@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.test;
 
+import static org.springframework.roo.model.GoogleJavaType.GAE_LOCAL_SERVICE_TEST_HELPER;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
@@ -145,7 +146,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 	private void addOptionalIntegrationTestClassIntroductions() {
 		// Add the GAE test helper field if the user did not define it on the governor directly
-		JavaType helperType = new JavaType("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
+		final JavaType helperType = GAE_LOCAL_SERVICE_TEST_HELPER;
 		FieldMetadata helperField = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName("helper"));
 		if (helperField != null) {
 			Assert.isTrue(helperField.getFieldType().getFullyQualifiedTypeName().equals(helperType.getFullyQualifiedTypeName()), "Field 'helper' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + helperType.getFullyQualifiedTypeName() + "'");
