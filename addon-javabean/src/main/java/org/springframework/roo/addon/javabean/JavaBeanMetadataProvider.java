@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.javabean;
 
+import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 
 import java.util.LinkedHashMap;
@@ -28,6 +29,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.StringUtils;
+
 /**
  * Provides {@link JavaBeanMetadata}.
  *
@@ -116,7 +118,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		}
 		// We are not interested if the field is annotated with @javax.persistence.Transient
 		for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
-			if (annotationMetadata.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Transient")) {
+			if (annotationMetadata.getAnnotationType().equals(TRANSIENT)) {
 				return null;
 			}
 		}

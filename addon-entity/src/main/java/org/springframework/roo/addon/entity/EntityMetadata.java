@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
+import static org.springframework.roo.model.JpaJavaType.ENTITY_MANAGER;
+import static org.springframework.roo.model.JpaJavaType.PERSISTENCE_CONTEXT;
 import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
 import static org.springframework.roo.model.SpringJavaType.TRANSACTIONAL;
 
@@ -50,8 +52,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType COUNT_RETURN_TYPE = JavaType.LONG_PRIMITIVE;
-	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
-	private static final JavaType PERSISTENCE_CONTEXT = new JavaType("javax.persistence.PersistenceContext");
 
 	public static String getMetadataIdentifierType() {
 		return PROVIDES_TYPE;

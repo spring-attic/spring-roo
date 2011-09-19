@@ -4,6 +4,7 @@ import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
 
@@ -297,7 +298,7 @@ public class GwtProxyProperty {
 			if (ptmd.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 				List<AnnotationMetadata> annotations = ptmd.getMemberHoldingTypeDetails().getAnnotations();
 				for (AnnotationMetadata annotation : annotations) {
-					if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
+					if (annotation.getAnnotationType().equals(EMBEDDABLE)) {
 						return true;
 					}
 				}

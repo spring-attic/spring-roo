@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
+import static org.springframework.roo.model.JpaJavaType.ENTITY;
+
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +52,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Assert.notNull(idType, "Id type required");
 		
 		FieldMetadata idField = getIdField(idType);
-		builder.addAnnotation(new AnnotationMetadataBuilder("javax.persistence.Entity"));
+		builder.addAnnotation(new AnnotationMetadataBuilder(ENTITY));
 		builder.addField(getIdField(idType));
 		builder.addMethod(getIdAccessor(idField));
 		builder.addMethod(getIdMutator(idField));

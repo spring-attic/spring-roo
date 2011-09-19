@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
@@ -80,7 +81,7 @@ public class EntityOperationsImpl implements EntityOperations {
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
 		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Embeddable")));
+		annotations.add(new AnnotationMetadataBuilder(EMBEDDABLE));
 		
 		if (serializable) {
 			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));

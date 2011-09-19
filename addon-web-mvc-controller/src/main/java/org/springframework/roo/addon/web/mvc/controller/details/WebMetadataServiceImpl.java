@@ -264,7 +264,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 					return true;
 				}
 //				@Enumerated has a target of Method or Field
-//				if (MemberFindingUtils.getAnnotationOfType(details.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
+//				if (MemberFindingUtils.getAnnotationOfType(details.getAnnotations(), ENUMERATED) != null) {
 //					return true;
 //				}
 			}

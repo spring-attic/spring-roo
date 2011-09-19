@@ -3,11 +3,16 @@ package org.springframework.roo.addon.entity;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
+import static org.springframework.roo.model.JpaJavaType.DISCRIMINATOR_COLUMN;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDED_ID;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
+import static org.springframework.roo.model.JpaJavaType.GENERATED_VALUE;
+import static org.springframework.roo.model.JpaJavaType.GENERATION_TYPE;
 import static org.springframework.roo.model.JpaJavaType.ID;
 import static org.springframework.roo.model.JpaJavaType.INHERITANCE;
 import static org.springframework.roo.model.JpaJavaType.INHERITANCE_TYPE;
+import static org.springframework.roo.model.JpaJavaType.MAPPED_SUPERCLASS;
+import static org.springframework.roo.model.JpaJavaType.TABLE;
 import static org.springframework.roo.model.JpaJavaType.VERSION;
 
 import java.lang.reflect.Modifier;
@@ -121,7 +126,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	private AnnotationMetadata getDiscriminatorColumnAnnotation() {
 		if ((StringUtils.hasText(annotationValues.getInheritanceType()) && InheritanceType.SINGLE_TABLE.name().equals(annotationValues.getInheritanceType()))) {
 			// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
-			return getTypeAnnotation(new JavaType("javax.persistence.DiscriminatorColumn"));
+			return getTypeAnnotation(DISCRIMINATOR_COLUMN);
 		}
 		return null;
 	}
@@ -291,8 +296,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				}
 			}
 			
-			final AnnotationMetadataBuilder generatedValueBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.GeneratedValue"));
-			generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType)));
+			final AnnotationMetadataBuilder generatedValueBuilder = new AnnotationMetadataBuilder(GENERATED_VALUE);
+			generatedValueBuilder.addEnumAttribute("strategy", new EnumDetails(GENERATION_TYPE, new JavaSymbolName(generationType)));
 			annotations.add(generatedValueBuilder);
 
 			final String identifierColumn = StringUtils.trimToEmpty(getIdentifierColumn());
@@ -415,13 +420,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @return <code>null</code> if it's already present or not required
 	 */
 	private AnnotationMetadata getInheritanceAnnotation() {
-		final JavaType inheritanceJavaType = new JavaType("javax.persistence.Inheritance");
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, inheritanceJavaType) != null) {
+		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, INHERITANCE) != null) {
 			return null;
 		}
 		if (StringUtils.hasText(annotationValues.getInheritanceType())) {
-			final AnnotationMetadataBuilder inheritanceBuilder = new AnnotationMetadataBuilder(inheritanceJavaType);
-			inheritanceBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(annotationValues.getInheritanceType())));
+			final AnnotationMetadataBuilder inheritanceBuilder = new AnnotationMetadataBuilder(INHERITANCE);
+			inheritanceBuilder.addEnumAttribute("strategy", new EnumDetails(INHERITANCE_TYPE, new JavaSymbolName(annotationValues.getInheritanceType())));
 			return inheritanceBuilder.build();
 		}
 		return null;
@@ -435,7 +439,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @return
 	 */
 	private AnnotationMetadata getMappedSuperclassAnnotation() {
-		return getTypeAnnotation(new JavaType("javax.persistence.MappedSuperclass"));
+		return getTypeAnnotation(MAPPED_SUPERCLASS);
 	}
 
 	/**
@@ -481,7 +485,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @return
 	 */
 	private AnnotationMetadata getTableAnnotation() {
-		final AnnotationMetadata tableAnnotation = getTypeAnnotation(new JavaType("javax.persistence.Table"));
+		final AnnotationMetadata tableAnnotation = getTypeAnnotation(TABLE);
 		if (tableAnnotation == null) {
 			return null;
 		}
@@ -577,7 +581,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		// Try to locate an existing field with @Version
-		final List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Version"));
+		final List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, VERSION);
 		if (found.size() > 0) {
 			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @Version in '" + destination.getFullyQualifiedTypeName() + "'");
 			return found.get(0);

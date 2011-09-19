@@ -4,6 +4,7 @@ import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
+import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMNS;
 import static org.springframework.roo.model.JpaJavaType.JOIN_TABLE;
 import static org.springframework.roo.model.JpaJavaType.LOB;
 import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
@@ -536,7 +537,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName(VALUE), arrayValues));
-		return new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumns"), attributes);
+		return new AnnotationMetadataBuilder(JOIN_COLUMNS, attributes);
 	}
 
 	private boolean isOneToOne(Table table, ForeignKey foreignKey) {

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.gwt;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 
 import java.io.File;
 import java.io.IOException;
@@ -600,7 +601,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		if (ptmd == null) {
 			return false;
 		}
-		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), new JavaType("javax.persistence.Embeddable"));
+		AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(ptmd.getMemberHoldingTypeDetails(), EMBEDDABLE);
 		return annotationMetadata != null;
 	}
 

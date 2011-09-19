@@ -18,6 +18,18 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_FIELD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_MUTATOR_METHOD;
+import static org.springframework.roo.model.JpaJavaType.COLUMN;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDED;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDED_ID;
+import static org.springframework.roo.model.JpaJavaType.ENUMERATED;
+import static org.springframework.roo.model.JpaJavaType.ID;
+import static org.springframework.roo.model.JpaJavaType.LOB;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
+import static org.springframework.roo.model.JpaJavaType.VERSION;
 import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
@@ -37,7 +49,6 @@ import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MidTypeMatcher;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -58,26 +69,20 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements JpaEntityMetadataProvider {
 	
-	// ------------------------------ Constants --------------------------------
-
-	// Value-less JPA annotations (using literal class names so Roo does not depend on JPA)
-	private static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION =  AnnotationMetadataBuilder.getInstance("javax.persistence.EmbeddedId");
-	private static final AnnotationMetadata JPA_ID_ANNOTATION =  AnnotationMetadataBuilder.getInstance("javax.persistence.Id");
-	
 	// JPA-related field matchers
-	private static final FieldMatcher JPA_COLUMN_FIELD_MATCHER = new FieldMatcher(COLUMN_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.Column"));
-	private static final FieldMatcher JPA_EMBEDDED_FIELD_MATCHER = new FieldMatcher(EMBEDDED_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.Embedded"));
-	private static final FieldMatcher JPA_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(EMBEDDED_ID_FIELD, JPA_EMBEDDED_ID_ANNOTATION);
-	private static final FieldMatcher JPA_ENUMERATED_FIELD_MATCHER = new FieldMatcher(ENUMERATED_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.Enumerated"));
-	private static final FieldMatcher JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(IDENTIFIER_FIELD, JPA_ID_ANNOTATION, JPA_EMBEDDED_ID_ANNOTATION);
-	private static final FieldMatcher JPA_ID_FIELD_MATCHER = new FieldMatcher(IDENTIFIER_FIELD, JPA_ID_ANNOTATION);
-	private static final FieldMatcher JPA_LOB_FIELD_MATCHER = new FieldMatcher(LOB_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.Lob"));
-	private static final FieldMatcher JPA_MANY_TO_MANY_FIELD_MATCHER = new FieldMatcher(MANY_TO_MANY_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.ManyToMany"));
-	private static final FieldMatcher JPA_MANY_TO_ONE_FIELD_MATCHER = new FieldMatcher(MANY_TO_ONE_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.ManyToOne"));
-	private static final FieldMatcher JPA_ONE_TO_MANY_FIELD_MATCHER = new FieldMatcher(ONE_TO_MANY_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.OneToMany"));
-	private static final FieldMatcher JPA_ONE_TO_ONE_FIELD_MATCHER = new FieldMatcher(ONE_TO_ONE_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.OneToOne"));
-	private static final FieldMatcher JPA_TRANSIENT_FIELD_MATCHER = new FieldMatcher(TRANSIENT_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.Transient"));
-	private static final FieldMatcher JPA_VERSION_FIELD_MATCHER = new FieldMatcher(VERSION_FIELD, AnnotationMetadataBuilder.getInstance("javax.persistence.Version"));
+	private static final FieldMatcher JPA_COLUMN_FIELD_MATCHER = new FieldMatcher(COLUMN_FIELD, AnnotationMetadataBuilder.getInstance(COLUMN));
+	private static final FieldMatcher JPA_EMBEDDED_FIELD_MATCHER = new FieldMatcher(EMBEDDED_FIELD, AnnotationMetadataBuilder.getInstance(EMBEDDED));
+	private static final FieldMatcher JPA_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(EMBEDDED_ID_FIELD, AnnotationMetadataBuilder.getInstance(EMBEDDED_ID));
+	private static final FieldMatcher JPA_ENUMERATED_FIELD_MATCHER = new FieldMatcher(ENUMERATED_FIELD, AnnotationMetadataBuilder.getInstance(ENUMERATED));
+	private static final FieldMatcher JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER = new FieldMatcher(IDENTIFIER_FIELD, AnnotationMetadataBuilder.getInstance(ID), AnnotationMetadataBuilder.getInstance(EMBEDDED_ID));
+	private static final FieldMatcher JPA_ID_FIELD_MATCHER = new FieldMatcher(IDENTIFIER_FIELD, AnnotationMetadataBuilder.getInstance(ID));
+	private static final FieldMatcher JPA_LOB_FIELD_MATCHER = new FieldMatcher(LOB_FIELD, AnnotationMetadataBuilder.getInstance(LOB));
+	private static final FieldMatcher JPA_MANY_TO_MANY_FIELD_MATCHER = new FieldMatcher(MANY_TO_MANY_FIELD, AnnotationMetadataBuilder.getInstance(MANY_TO_MANY));
+	private static final FieldMatcher JPA_MANY_TO_ONE_FIELD_MATCHER = new FieldMatcher(MANY_TO_ONE_FIELD, AnnotationMetadataBuilder.getInstance(MANY_TO_ONE));
+	private static final FieldMatcher JPA_ONE_TO_MANY_FIELD_MATCHER = new FieldMatcher(ONE_TO_MANY_FIELD, AnnotationMetadataBuilder.getInstance(ONE_TO_MANY));
+	private static final FieldMatcher JPA_ONE_TO_ONE_FIELD_MATCHER = new FieldMatcher(ONE_TO_ONE_FIELD, AnnotationMetadataBuilder.getInstance(ONE_TO_ONE));
+	private static final FieldMatcher JPA_TRANSIENT_FIELD_MATCHER = new FieldMatcher(TRANSIENT_FIELD, AnnotationMetadataBuilder.getInstance(TRANSIENT));
+	private static final FieldMatcher JPA_VERSION_FIELD_MATCHER = new FieldMatcher(VERSION_FIELD, AnnotationMetadataBuilder.getInstance(VERSION));
 
 	// The order of this array is the order in which we look for annotations. We
 	// use the values of the first one found.
@@ -91,8 +96,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	
-	// ------------------------------- Fields ----------------------------------
-	
+	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	
 	// ------------- Mandatory AbstractItdMetadataProvider methods -------------

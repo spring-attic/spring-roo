@@ -5,7 +5,7 @@ package org.springframework.roo.model;
  * 
  * Use them in preference to creating new instances of these types.
  * 
- * @author Alan
+ * @author Alan Stewart
  * @since 1.2.0
  */
 public final class JdkJavaType {

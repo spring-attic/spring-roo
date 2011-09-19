@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details.annotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.roo.model.JpaJavaType.ID;
 
 import org.junit.Test;
 
@@ -11,9 +12,6 @@ import org.junit.Test;
  * @since 1.2.0
  */
 public class AnnotationMetadataBuilderTest {
-
-	// Constants
-	private static final String ANNOTATION_CLASS_NAME = "javax.persistence.Id";
 
 	@Test
 	public void testGetInstanceFromClassObject() {
@@ -28,10 +26,10 @@ public class AnnotationMetadataBuilderTest {
 	@Test
 	public void testGetInstanceFromFullyQualifiedClassName() {
 		// Invoke
-		final AnnotationMetadata annotationMetadata = AnnotationMetadataBuilder.getInstance(ANNOTATION_CLASS_NAME);
+		final AnnotationMetadata annotationMetadata = AnnotationMetadataBuilder.getInstance(ID);
 		
 		// Check
 		assertEquals(0, annotationMetadata.getAttributeNames().size());
-		assertEquals(ANNOTATION_CLASS_NAME, annotationMetadata.getAnnotationType().getFullyQualifiedTypeName());
+		assertEquals(ID, annotationMetadata.getAnnotationType().getFullyQualifiedTypeName());
 	}
 }

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.JpaJavaType.LOB;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_CONVERTER;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
@@ -189,7 +190,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(annotationBuilder);
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Lob")));
+		annotations.add(new AnnotationMetadataBuilder(LOB));
 		
 		fieldDetails.decorateAnnotationsList(annotations);
 		

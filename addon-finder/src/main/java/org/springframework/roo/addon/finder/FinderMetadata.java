@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.finder;
 
+import static org.springframework.roo.model.JpaJavaType.ENTITY_MANAGER;
+import static org.springframework.roo.model.JpaJavaType.QUERY;
+import static org.springframework.roo.model.JpaJavaType.TYPED_QUERY;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +38,6 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = FinderMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
 	
 	// Fields
 	private MethodMetadata entityManagerMethod;
@@ -104,8 +107,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// To get this far we need to create the method...
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		parameters.add(destination);
-		JavaType queryType = new JavaType("javax.persistence.Query");
-		JavaType typedQueryType = new JavaType("javax.persistence.TypedQuery", 0, DataType.TYPE, null, parameters);
+		JavaType typedQueryType = new JavaType(TYPED_QUERY.getSimpleTypeName(), 0, DataType.TYPE, null, parameters);
 
 		QueryHolder queryHolder = queryHolders.get(finderName);
 		String jpaQuery = queryHolder.getJpaQuery();
@@ -177,7 +179,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				}
 			}		
 			if (isDataNucleusEnabled) {
-				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
+				bodyBuilder.appendFormalLine(QUERY.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
 			} else {
 				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString(), " + destination.getSimpleTypeName() + ".class);");
 			}
@@ -196,7 +198,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}				
 		} else {
 			if (isDataNucleusEnabled) {
-				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\");");
+				bodyBuilder.appendFormalLine(QUERY.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\");");
 			} else {
 				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\", " + destination.getSimpleTypeName() + ".class);");
 			}
@@ -208,7 +210,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		bodyBuilder.appendFormalLine("return q;");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, finderName, (isDataNucleusEnabled ? queryType : typedQueryType), AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, finderName, (isDataNucleusEnabled ? QUERY : typedQueryType), AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	

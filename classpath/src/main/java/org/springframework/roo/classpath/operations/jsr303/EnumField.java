@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.JpaJavaType.ENUMERATED;
+import static org.springframework.roo.model.JpaJavaType.ENUM_TYPE;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +44,9 @@ public class EnumField extends FieldDetails {
 			if (enumType == EnumType.STRING) {
 				value = new JavaSymbolName("STRING");
 			}
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.EnumType"), value)));
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(ENUM_TYPE, value)));
 		}
 		
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Enumerated"), attributes));
+		annotations.add(new AnnotationMetadataBuilder(ENUMERATED, attributes));
 	}
 }

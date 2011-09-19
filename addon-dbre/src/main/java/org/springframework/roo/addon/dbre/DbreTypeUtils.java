@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.JpaJavaType.TABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 
@@ -32,7 +33,6 @@ import org.springframework.roo.support.util.StringUtils;
 public abstract class DbreTypeUtils {
 	
 	// Constants
-	private static final JavaType JPA_TABLE_ANNOTATION = new JavaType("javax.persistence.Table");
 	private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName("name");
 	private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName("schema");
 	private static final JavaSymbolName TABLE_ATTRIBUTE = new JavaSymbolName("table");
@@ -41,7 +41,7 @@ public abstract class DbreTypeUtils {
 	// Linked to preserve the iteration order below
 	private static final Map<JavaType, JavaSymbolName> TABLE_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
 	static {
-		TABLE_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, NAME_ATTRIBUTE);
+		TABLE_ATTRIBUTES.put(TABLE, NAME_ATTRIBUTE);
 		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY, TABLE_ATTRIBUTE);
 		TABLE_ATTRIBUTES.put(ROO_ENTITY, TABLE_ATTRIBUTE);
 	}
@@ -50,7 +50,7 @@ public abstract class DbreTypeUtils {
 	// Linked to preserve the iteration order below
 	private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
 	static {
-		SCHEMA_ATTRIBUTES.put(JPA_TABLE_ANNOTATION, SCHEMA_ATTRIBUTE);
+		SCHEMA_ATTRIBUTES.put(TABLE, SCHEMA_ATTRIBUTE);
 		SCHEMA_ATTRIBUTES.put(ROO_JPA_ENTITY, SCHEMA_ATTRIBUTE);
 		SCHEMA_ATTRIBUTES.put(ROO_ENTITY, SCHEMA_ATTRIBUTE);
 	}

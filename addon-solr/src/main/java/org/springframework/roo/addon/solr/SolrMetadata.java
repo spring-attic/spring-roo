@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.JpaJavaType.POST_PERSIST;
+import static org.springframework.roo.model.JpaJavaType.POST_UPDATE;
+import static org.springframework.roo.model.JpaJavaType.PRE_REMOVE;
 import static org.springframework.roo.model.SpringJavaType.ASYNC;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 
@@ -116,8 +119,8 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (postPersistOrUpdateMethod != null) return postPersistOrUpdateMethod;
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.PostUpdate")));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.PostPersist")));
+		annotations.add(new AnnotationMetadataBuilder(POST_UPDATE));
+		annotations.add(new AnnotationMetadataBuilder(POST_PERSIST));
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(annotationValues.getIndexMethod() + destination.getSimpleTypeName() + "(this);");
 
@@ -250,7 +253,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (preDeleteMethod != null) return preDeleteMethod;
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.PreRemove")));
+		annotations.add(new AnnotationMetadataBuilder(PRE_REMOVE));
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(annotationValues.getDeleteIndexMethod() + "(this);");
 

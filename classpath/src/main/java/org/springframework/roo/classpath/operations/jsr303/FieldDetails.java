@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.NULL;
 import static org.springframework.roo.model.SpringJavaType.VALUE;
@@ -23,9 +24,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class FieldDetails {
-	
-	// Constants
-	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	
 	// Fields
 	/** The JPA @Column value */

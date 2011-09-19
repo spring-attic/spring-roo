@@ -1,5 +1,18 @@
 package org.springframework.roo.classpath.details.annotations;
 
+import static org.springframework.roo.model.JpaJavaType.COLUMN;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDED;
+import static org.springframework.roo.model.JpaJavaType.EMBEDDED_ID;
+import static org.springframework.roo.model.JpaJavaType.ENUMERATED;
+import static org.springframework.roo.model.JpaJavaType.ID;
+import static org.springframework.roo.model.JpaJavaType.LOB;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
+import static org.springframework.roo.model.JpaJavaType.ONE_TO_ONE;
+import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
+import static org.springframework.roo.model.JpaJavaType.VERSION;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -25,18 +38,18 @@ import org.springframework.roo.support.util.Assert;
 public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 	
 	// Constants for valueless JPA annotations (using literal class names so as not to make Roo depend on JPA)
-	public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance("javax.persistence.Column");
-	public static final AnnotationMetadata JPA_EMBEDDED_ANNOTATION = getInstance("javax.persistence.Embedded");
-	public static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION = getInstance("javax.persistence.EmbeddedId");
-	public static final AnnotationMetadata JPA_ENUMERATED_ANNOTATION = getInstance("javax.persistence.Enumerated");
-	public static final AnnotationMetadata JPA_ID_ANNOTATION = getInstance("javax.persistence.Id");
-	public static final AnnotationMetadata JPA_LOB_ANNOTATION = getInstance("javax.persistence.Lob");
-	public static final AnnotationMetadata JPA_MANY_TO_MANY_ANNOTATION = getInstance("javax.persistence.ManyToMany");
-	public static final AnnotationMetadata JPA_MANY_TO_ONE_ANNOTATION = getInstance("javax.persistence.ManyToOne");
-	public static final AnnotationMetadata JPA_ONE_TO_MANY_ANNOTATION = getInstance("javax.persistence.OneToMany");
-	public static final AnnotationMetadata JPA_ONE_TO_ONE_ANNOTATION = getInstance("javax.persistence.OneToOne");
-	public static final AnnotationMetadata JPA_TRANSIENT_ANNOTATION = getInstance("javax.persistence.Transient");
-	public static final AnnotationMetadata JPA_VERSION_ANNOTATION = getInstance("javax.persistence.Version");
+	public static final AnnotationMetadata JPA_COLUMN_ANNOTATION = getInstance(COLUMN);
+	public static final AnnotationMetadata JPA_EMBEDDED_ANNOTATION = getInstance(EMBEDDED);
+	public static final AnnotationMetadata JPA_EMBEDDED_ID_ANNOTATION = getInstance(EMBEDDED_ID);
+	public static final AnnotationMetadata JPA_ENUMERATED_ANNOTATION = getInstance(ENUMERATED);
+	public static final AnnotationMetadata JPA_ID_ANNOTATION = getInstance(ID);
+	public static final AnnotationMetadata JPA_LOB_ANNOTATION = getInstance(LOB);
+	public static final AnnotationMetadata JPA_MANY_TO_MANY_ANNOTATION = getInstance(MANY_TO_MANY);
+	public static final AnnotationMetadata JPA_MANY_TO_ONE_ANNOTATION = getInstance(MANY_TO_ONE);
+	public static final AnnotationMetadata JPA_ONE_TO_MANY_ANNOTATION = getInstance(ONE_TO_MANY);
+	public static final AnnotationMetadata JPA_ONE_TO_ONE_ANNOTATION = getInstance(ONE_TO_ONE);
+	public static final AnnotationMetadata JPA_TRANSIENT_ANNOTATION = getInstance(TRANSIENT);
+	public static final AnnotationMetadata JPA_VERSION_ANNOTATION = getInstance(VERSION);
 
 	/**
 	 * Returns the metadata for the existing annotation, with no attribute
@@ -49,6 +62,11 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	public static AnnotationMetadata getInstance(final String annotationType) {
 		return new AnnotationMetadataBuilder(annotationType).build();
 	}
+
+	public static AnnotationMetadata getInstance(final JavaType annotationType) {
+		return new AnnotationMetadataBuilder(annotationType).build();
+	}
+
 
 	public static AnnotationMetadataBuilder getInstance(JavaType annotationType, Collection<AnnotationAttributeValue<?>> attributeValues) {
 		return new AnnotationMetadataBuilder(annotationType, attributeValues);

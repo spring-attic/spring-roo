@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.JpaJavaType.EMBEDDED;
+
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -20,6 +22,6 @@ public class EmbeddedField extends FieldDetails {
 
 	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Embedded")));
+		annotations.add(new AnnotationMetadataBuilder(EMBEDDED));
 	}
 }
