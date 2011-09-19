@@ -33,9 +33,10 @@ public class MavenCommands implements CommandMarker {
 	public void createProject(
 		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage, 
 		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName, 
-		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion) {
+		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
+		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final String parent) {
 		
-		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion);
+		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parent);
 	}
 
 	@CliAvailabilityIndicator({ "dependency add", "dependency remove" })

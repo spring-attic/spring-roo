@@ -1,6 +1,10 @@
 package org.springframework.roo.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Immutable representation of a Java package.
@@ -56,5 +60,24 @@ public class JavaPackage implements Comparable<JavaPackage> {
 	
 	public String toString() {
 		return fullyQualifiedPackageName;
+	}
+
+	/**
+	 * Returns the elements of this package's fully-qualified name
+	 * 
+	 * @return a non-empty list
+	 */
+	public List<String> getElements() {
+		return Arrays.asList(StringUtils.delimitedListToStringArray(fullyQualifiedPackageName, "."));
+	}
+	
+	/**
+	 * Returns the last element of the fully-qualified package name
+	 * 
+	 * @return a non-blank element
+	 */
+	public String getLastElement() {
+		final List<String> elements = getElements();
+		return elements.get(elements.size() - 1);
 	}
 }

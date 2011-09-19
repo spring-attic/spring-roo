@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
+        <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
+        <version>TO_BE_CHANGED_BY_LISTENER</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
     <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
@@ -7,11 +12,12 @@
     <version>0.1.0.BUILD-SNAPSHOT</version>
     <name>TO_BE_CHANGED_BY_LISTENER</name>
     <properties>
-        <roo.version>1.2.0.BUILD-SNAPSHOT</roo.version>
-        <spring.version>3.0.6.RELEASE</spring.version>
         <aspectj.version>1.6.12.M2</aspectj.version>
-        <slf4j.version>1.6.1</slf4j.version>
+        <java.version>JAVA_VERSION</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <roo.version>1.2.0.BUILD-SNAPSHOT</roo.version>
+        <slf4j.version>1.6.1</slf4j.version>
+        <spring.version>3.0.6.RELEASE</spring.version>
     </properties>
     <repositories>
         <repository>
@@ -161,8 +167,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>JAVA_VERSION</source>
-                    <target>JAVA_VERSION</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -199,8 +205,8 @@
                             <artifactId>spring-aspects</artifactId>
                         </aspectLibrary>
                     </aspectLibraries>
-                    <source>JAVA_VERSION</source>
-                    <target>JAVA_VERSION</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>
