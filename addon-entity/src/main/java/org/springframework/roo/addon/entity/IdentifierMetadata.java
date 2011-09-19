@@ -3,6 +3,7 @@ package org.springframework.roo.addon.entity;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
@@ -148,7 +149,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			for (Identifier identifier : identifierServiceResult) {
 				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 				annotations.add(getColumnBuilder(identifier));
-				if (identifier.getFieldType().equals(new JavaType("java.util.Date"))) {
+				if (identifier.getFieldType().equals(DATE)) {
 					setDateAnnotations(identifier.getColumnDefinition(), annotations);
 				}
 				

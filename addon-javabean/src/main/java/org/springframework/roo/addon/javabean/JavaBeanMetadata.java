@@ -1,6 +1,10 @@
 package org.springframework.roo.addon.javabean;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
+import static org.springframework.roo.model.JdkJavaType.HASH_SET;
+import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.MANY_TO_MANY;
 import static org.springframework.roo.model.JpaJavaType.MANY_TO_ONE;
 import static org.springframework.roo.model.JpaJavaType.ONE_TO_MANY;
@@ -35,6 +39,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+
 /**
  * Metadata for {@link RooJavaBean}.
  *
@@ -237,8 +242,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	private FieldMetadata getMultipleEntityIdField(JavaSymbolName fieldName) {
-		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.HashSet"));
-		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType("java.util.Set", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.appengine.api.datastore.Key"))), "new HashSet<Key>()");
+		builder.getImportRegistrationResolver().addImport(HASH_SET);
+		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.appengine.api.datastore.Key"))), "new HashSet<Key>()");
 		return fieldMetadataBuilder.build();
 	}
 
@@ -262,11 +267,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		String instantiableCollection = collectionName;
 
 		// GAE only supports java.util.List and java.util.Set collections and we need a concrete implementation of either.
-		if (collectionType.getFullyQualifiedTypeName().equals("java.util.List")) {
-			collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
+		if (collectionType.equals(LIST)) {
+			collectionType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-		} else if (collectionType.getFullyQualifiedTypeName().equals("java.util.Set")) {
-			collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
+		} else if (collectionType.equals(SET)) {
+			collectionType = new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}
 
@@ -301,17 +306,17 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
 		String instantiableCollection = collectionName;
-		if (collectionType.getFullyQualifiedTypeName().equals("java.util.List")) {
-			collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
+		if (collectionType.equals(LIST)) {
+			collectionType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-		} else if (collectionType.getFullyQualifiedTypeName().equals("java.util.Set")) {
-			collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
+		} else if (collectionType.equals(SET)) {
+			collectionType = new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, collectionType.getParameters());
 			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
 		}
 
 		builder.getImportRegistrationResolver().addImport(collectionType);
-		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.List"));
-		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.ArrayList"));
+		builder.getImportRegistrationResolver().addImport(LIST);
+		builder.getImportRegistrationResolver().addImport(ARRAY_LIST);
 
 		String identifierMethodName = getIdentifierMethodName(field).getSymbolName();
 

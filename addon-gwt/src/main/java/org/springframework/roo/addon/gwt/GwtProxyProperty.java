@@ -4,6 +4,9 @@ import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.NUMBER_FORMAT;
@@ -67,7 +70,7 @@ public class GwtProxyProperty {
 	}
 
 	public boolean isDate() {
-		return type.equals(new JavaType("java.util.Date"));
+		return type.equals(DATE);
 	}
 
 	public boolean isPrimitive() {
@@ -118,7 +121,7 @@ public class GwtProxyProperty {
 	}
 
 	private String getSetEditor() {
-		String typeName = "java.lang.Object";
+		String typeName = OBJECT.getFullyQualifiedTypeName();
 		if (type.getParameters().size() > 0) {
 			typeName = type.getParameters().get(0).getSimpleTypeName();
 		}
@@ -286,7 +289,7 @@ public class GwtProxyProperty {
 	}
 
 	public boolean isCollection() {
-		return type.getFullyQualifiedTypeName().equals("java.util.List") || type.getFullyQualifiedTypeName().equals("java.util.Set");
+		return type.equals(LIST) || type.equals(SET);
 	}
 
 	boolean isEnum() {

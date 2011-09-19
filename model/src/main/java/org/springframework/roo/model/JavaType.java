@@ -398,7 +398,6 @@ public class JavaType implements Comparable<JavaType> {
 		result = prime * result + ((fullyQualifiedTypeName == null) ? 0 : fullyQualifiedTypeName.hashCode());
 		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
 		result = prime * result + arrayDimensions;
-		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
 		return result;
 	}
 

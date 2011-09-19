@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.tostring;
 
+import static org.springframework.roo.model.JavaType.STRING;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -150,7 +152,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 			bodyBuilder.appendFormalLine("return sb.toString();");
 
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), bodyBuilder);
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
 			result = methodBuilder.build();
 		}
 

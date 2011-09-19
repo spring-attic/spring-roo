@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
+import static org.springframework.roo.model.JdkJavaType.HASH_SET;
 import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.ELEMENT_COLLECTION;
 import static org.springframework.roo.model.JpaJavaType.FETCH_TYPE;
@@ -95,13 +96,14 @@ public class SetField extends CollectionField {
 				default:
 					annotations.add(new AnnotationMetadataBuilder(MANY_TO_ONE, attributes));
 					break;
-			}		}
+			}
+		}
 	}
 
 	public JavaType getInitializer() {
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(getGenericParameterTypeName());
-		return new JavaType("java.util.HashSet", 0, DataType.TYPE, null, params);
+		return new JavaType(HASH_SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params);
 	}
 
 	public JavaSymbolName getMappedBy() {

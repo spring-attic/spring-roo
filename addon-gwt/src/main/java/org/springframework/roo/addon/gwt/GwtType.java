@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.model.JdkJavaType.COLLECTION;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -176,7 +178,7 @@ public enum GwtType {
 				for (GwtProxyProperty property : proxyFieldTypeMap.values()) {
 					if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
 						List<JavaType> params = new ArrayList<JavaType>();
-						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
+						JavaType param = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
 						params.add(param);
 						watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
 					}
@@ -186,7 +188,7 @@ public enum GwtType {
 				for (GwtProxyProperty property : proxyFieldTypeMap.values()) {
 					if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
 						List<JavaType> params = new ArrayList<JavaType>();
-						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
+						JavaType param = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
 						params.add(param);
 						watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
 					}
@@ -196,7 +198,7 @@ public enum GwtType {
 				for (GwtProxyProperty property : proxyFieldTypeMap.values()) {
 					if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
 						List<JavaType> params = new ArrayList<JavaType>();
-						JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
+						JavaType param = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(property.getValueType()));
 						params.add(param);
 						watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
 					}

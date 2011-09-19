@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.gwt;
 
+import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
+import static org.springframework.roo.model.JdkJavaType.HASH_SET;
+import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.JdkJavaType.SET;
 import hapax.Template;
 import hapax.TemplateDataDictionary;
 import hapax.TemplateDictionary;
@@ -659,12 +663,11 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	}
 
 	private JavaType getCollectionImplementation(JavaType javaType) {
-		if (javaType.getFullyQualifiedTypeName().equals("java.util.Set")) {
-			return new JavaType("java.util.HashSet", javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
+		if (javaType.equals(SET)) {
+			return new JavaType(HASH_SET.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
 		}
-
-		if (javaType.getFullyQualifiedTypeName().equals("java.util.List")) {
-			return new JavaType("java.util.ArrayList", javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
+		if (javaType.equals(LIST)) {
+			return new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
 		}
 
 		return javaType;

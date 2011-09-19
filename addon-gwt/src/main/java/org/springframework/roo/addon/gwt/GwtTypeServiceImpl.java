@@ -2,6 +2,9 @@ package org.springframework.roo.addon.gwt;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 
 import java.io.File;
@@ -571,7 +574,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 			|| JavaType.FLOAT_OBJECT.equals(type) 
 			|| JavaType.DOUBLE_OBJECT.equals(type) 
 			|| JavaType.STRING.equals(type) 
-			|| new JavaType("java.util.Date").equals(type) 
+			|| DATE.equals(type) 
 			|| BIG_DECIMAL.equals(type) 
 			|| type.isPrimitive() 
 			&& !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(type.getFullyQualifiedTypeName());
@@ -590,7 +593,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	}
 
 	private boolean isCollectionType(JavaType returnType) {
-		return returnType.getFullyQualifiedTypeName().equals("java.util.List") || returnType.getFullyQualifiedTypeName().equals("java.util.Set");
+		return returnType.equals(LIST) || returnType.equals(SET);
 	}
 
 	private boolean isEnum(PhysicalTypeMetadata ptmd) {

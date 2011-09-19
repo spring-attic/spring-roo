@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.dbre;
 
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.JOIN_COLUMN;
@@ -341,7 +343,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -390,7 +392,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -488,7 +490,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.ONE_TO_MANY);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, element, Cardinality.ONE_TO_MANY);
 
 		// Add @OneToMany annotation
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -684,7 +686,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Add JSR 220 @Temporal annotation to date fields
-		if (fieldType.equals(new JavaType("java.util.Date"))) {
+		if (fieldType.equals(DATE)) {
 			AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(TEMPORAL);
 			temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(TEMPORAL_TYPE, new JavaSymbolName(column.getJdbcType())));
 			annotations.add(temporalBuilder);

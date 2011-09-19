@@ -1,6 +1,8 @@
 package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
+import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.JdkJavaType.SUPPRESS_WARNINGS;
 import static org.springframework.roo.model.JpaJavaType.ENTITY_MANAGER;
 import static org.springframework.roo.model.JpaJavaType.PERSISTENCE_CONTEXT;
 import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
@@ -472,7 +474,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindAllMethod() + plural);
 		final JavaType[] parameterTypes = {};
 		final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(destination));
+		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(destination));
 		
 		// Locate user-defined method
 		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
@@ -574,7 +576,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		final JavaSymbolName methodName = new JavaSymbolName(crudAnnotationValues.getFindEntriesMethod() + destination.getSimpleTypeName() + "Entries");
 		final JavaType[] parameterTypes = {INT_PRIMITIVE, INT_PRIMITIVE};
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
-		final JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, Arrays.asList(destination));
+		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(destination));
 		
 		// Locate user-defined method
 		final MethodMetadata userMethod = getGovernorMethod(methodName, parameterTypes);
@@ -605,7 +607,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private void addSuppressWarnings(final List<AnnotationMetadataBuilder> annotations) {
 		final List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("java.lang.SuppressWarnings"), attributes));
+		annotations.add(new AnnotationMetadataBuilder(SUPPRESS_WARNINGS, attributes));
 	}
 	
 	/**

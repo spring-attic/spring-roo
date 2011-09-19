@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.operations;
 
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
 
@@ -371,7 +374,7 @@ public class FieldCommands implements CommandMarker {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(fieldType);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, fieldType, cardinality);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType(SET.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, params), fieldName, fieldType, cardinality);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (sizeMin != null) fieldDetails.setSizeMin(sizeMin);
@@ -437,6 +440,6 @@ public class FieldCommands implements CommandMarker {
 	}
 	
 	private boolean isDateField(final JavaType fieldType) {
-		return fieldType.equals(new JavaType("java.util.Date")) || fieldType.equals(new JavaType("java.util.Calendar"));
+		return fieldType.equals(DATE) || fieldType.equals(CALENDAR);
 	}
 }

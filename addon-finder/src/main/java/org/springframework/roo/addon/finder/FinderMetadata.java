@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.finder;
 
+import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JpaJavaType.ENTITY_MANAGER;
 import static org.springframework.roo.model.JpaJavaType.QUERY;
 import static org.springframework.roo.model.JpaJavaType.TYPED_QUERY;
@@ -123,7 +124,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			String name = parameterNames.get(i).getSymbolName();
 			
 			StringBuilder length = new StringBuilder();
-			if (parameterTypes.get(i).equals(new JavaType("java.lang.String"))) {
+			if (parameterTypes.get(i).equals(STRING)) {
 				length.append(" || ").append(parameterNames.get(i)).append(".length() == 0");
 			}
 			

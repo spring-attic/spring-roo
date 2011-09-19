@@ -26,6 +26,11 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
 import java.util.ArrayList;
@@ -72,7 +77,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private static final String PROVIDES_TYPE_STRING = JsfManagedBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String CREATE_DIALOG_VISIBLE = "createDialogVisible";
-	private static final String LIST = "java.util.List";
 	
 	// Fields
 	private JavaType entity;
@@ -208,14 +212,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (field != null) return field;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType(LIST));
+		imports.addImport(LIST);
 
 		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), PRIVATE, new ArrayList<AnnotationMetadataBuilder>(), fieldName, getEntityListType());
 		return fieldBuilder.build();
 	}
 
 	private JavaType getEntityListType() {
-		return new JavaType(LIST, 0, DataType.TYPE, null, Arrays.asList(entity));
+		return new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity));
 	}
 	
 	private FieldMetadata getNameField() {
@@ -238,7 +242,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private JavaType getColumnsListType() {
 		final List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING);
-		return new JavaType(LIST, 0, DataType.TYPE, null, parameterTypes);
+		return new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, parameterTypes);
 	}
 
 	private FieldMetadata getPanelGridField(final Action panelType) {
@@ -271,7 +275,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (method != null) return method;
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType("java.util.ArrayList"));
+		imports.addImport(ARRAY_LIST);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("all" + plural + " = " + findAllAdditions.getMethodCall() + ";");
@@ -349,7 +353,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private MethodMetadata getAllEntitiesMutatorMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("setAll" + plural);
-		final JavaType entityListParameter = new JavaType(LIST, 0, DataType.TYPE, null, Arrays.asList(entity));
+		final JavaType entityListParameter = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity));
 		final MethodMetadata method = getGovernorMethod(methodName, entityListParameter);
 		if (method != null) return method;
 
@@ -357,7 +361,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final List<JavaSymbolName> parameterNames = Arrays.asList(fieldName);
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType(LIST));
+		imports.addImport(LIST);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + fieldName + " = " + fieldName + ";");
@@ -531,7 +535,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(fieldValueVar + ".setConverter(" + converterName + ");");
 				} else {
 					imports.addImport(PRIMEFACES_CALENDAR);
-					imports.addImport(new JavaType("java.util.Date"));
+					imports.addImport(DATE);
 					bodyBuilder.appendFormalLine("Calendar " + fieldValueVar + " = " + getComponentCreationStr("Calendar"));
 					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "Date"));
 					bodyBuilder.appendFormalLine(fieldValueVar + ".setNavigator(true);");
@@ -651,7 +655,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return suggestions;");
 
-		final JavaType returnType = new JavaType(LIST, 0, DataType.TYPE, null, Arrays.asList(autoCompleteField.getFieldType()));
+		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(autoCompleteField.getFieldType()));
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
@@ -845,7 +849,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private boolean isDateField(final JavaType fieldType) {
-		return fieldType.equals(new JavaType("java.util.Date")) || fieldType.equals(new JavaType("java.util.Calendar")) || fieldType.equals(new JavaType("java.util.GregorianCalendar"));
+		return fieldType.equals(DATE) || fieldType.equals(CALENDAR) || fieldType.equals(GREGORIAN_CALENDAR);
 	}
 
 	public String toString() {

@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.solr;
 
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.COLLECTION;
 import static org.springframework.roo.model.JpaJavaType.POST_PERSIST;
 import static org.springframework.roo.model.JpaJavaType.POST_UPDATE;
 import static org.springframework.roo.model.JpaJavaType.PRE_REMOVE;
@@ -150,7 +152,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getIndexEntitiesMethod(Map<MethodMetadata, FieldMetadata> accessorDetails, MethodMetadata identifierAccessor, FieldMetadata versionField) {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getIndexMethod() + beanPlural);
-		final JavaType parameterType = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Arrays.asList(destination));
+		final JavaType parameterType = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(destination));
 		MethodMetadata indexEntitiesMethod = getGovernorMethod(methodName, parameterType);
 		if (indexEntitiesMethod != null) return indexEntitiesMethod;
 
@@ -178,7 +180,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				textField.append(".append(\" \")");
 			}
 			final JavaSymbolName accessorMethod = entry.getKey().getMethodName();
-			if (field.getFieldType().equals(new JavaType("java.util.Calendar"))) {
+			if (field.getFieldType().equals(CALENDAR)) {
 				textField.append(".append(").append(javaBeanFieldName).append(".").append(accessorMethod).append("().getTime()").append(")");
 			} else {
 				textField.append(".append(").append(javaBeanFieldName).append(".").append(accessorMethod).append("()").append(")");
@@ -192,7 +194,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					}
 				}
 			}
-			if (field.getFieldType().equals(new JavaType("java.util.Calendar"))) {
+			if (field.getFieldType().equals(CALENDAR)) {
 				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + accessorMethod.getSymbolName() + "().getTime());");
 			} else {
 				bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + accessorMethod.getSymbolName() + "());");

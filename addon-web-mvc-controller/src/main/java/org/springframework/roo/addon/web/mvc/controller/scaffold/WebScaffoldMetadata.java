@@ -1,6 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
 import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JdkJavaType.ARRAYS;
+import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
+import static org.springframework.roo.model.JdkJavaType.COLLECTION;
+import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.Jsr303JavaType.VALID;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.BINDING_RESULT;
@@ -427,8 +431,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				continue;
 			}
 			if (!listAdded) {
-				String listShort = new JavaType("java.util.List").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-				String arrayListShort = new JavaType("java.util.ArrayList").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+				String listShort = new JavaType(LIST.getFullyQualifiedTypeName()).getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+				String arrayListShort = ARRAY_LIST.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 				bodyBuilder.appendFormalLine(listShort + " dependencies = new " + arrayListShort + "();");
 				listAdded = true;
 			}
@@ -537,8 +541,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				bodyBuilder.appendFormalLine("return " + javaTypePersistenceMd.getFindAllMethod().getMethodCall() + ";");
 				javaTypePersistenceMd.getFindMethod().copyAdditionsTo(builder, governorTypeDetails);
 			} else if (javaTypeMd.isEnumType()) {
-				JavaType arrays = new JavaType("java.util.Arrays");
-				bodyBuilder.appendFormalLine("return " + arrays.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+				bodyBuilder.appendFormalLine("return " + ARRAYS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
 			} else {
 				continue;
 			}
@@ -552,8 +555,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), javaTypeMd.getPlural().toLowerCase()));
 			annotations.add(new AnnotationMetadataBuilder(MODEL_ATTRIBUTE, attributes));
 
-			JavaType returnType = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Arrays.asList(type));
-
+			JavaType returnType = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(type));
+			
 			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, populateMethodName, returnType, bodyBuilder);
 			methodBuilder.setAnnotations(annotations);
 			methods.add(methodBuilder.build());

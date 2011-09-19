@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.test;
 
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.CONTEXT_CONFIGURATION;
 import static org.springframework.roo.model.SpringJavaType.PROPAGATION;
@@ -216,6 +220,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertTrue(\"Counter for '" + annotationValues.getEntity().getSimpleTypeName() + "' incorrectly reported there were no entries\", count > 0);");
 
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -254,6 +259,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -277,7 +283,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType("java.util.List"));
+		imports.addImport(LIST);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -292,6 +298,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -315,7 +322,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType("java.util.List"));
+		imports.addImport(LIST);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -332,6 +339,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
 		countMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -356,8 +364,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
-		String versionTypeName = versionAccessorMethod.getReturnType().getFullyQualifiedTypeName();
-		imports.addImport(new JavaType(versionTypeName));
+		JavaType versionType = versionAccessorMethod.getReturnType();
+		imports.addImport(versionType);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
@@ -373,13 +381,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getSimpleTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
-		if (isDateOrCalendarType(versionTypeName)) {
+		if (isDateOrCalendarType(versionType)) {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
 		} else {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 		}
 		flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -404,24 +413,26 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
-		String versionTypeName = versionAccessorMethod.getReturnType().getFullyQualifiedTypeName();
-		imports.addImport(new JavaType(versionTypeName));
+		JavaType versionType = versionAccessorMethod.getReturnType();
+		imports.addImport(versionType);
 		
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
+		String entityName = annotationValues.getEntity().getSimpleTypeName();
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", obj);");
+		bodyBuilder.appendFormalLine(entityName + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to initialize correctly\", obj);");
 		bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getSimpleTypeName() + " id = obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
+		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + entityName + "' failed to provide an identifier\", id);");
 		bodyBuilder.appendFormalLine("obj = " + findMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
 
 		bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getSimpleTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 
-		String castStr = entityHasSuperclass ? "(" + annotationValues.getEntity().getSimpleTypeName() + ")" : "";
-		bodyBuilder.appendFormalLine(annotationValues.getEntity().getSimpleTypeName() + " merged = " + castStr + mergeMethod.getMethodCall() + ";");
+		String castStr = entityHasSuperclass ? "(" + entityName + ")" : "";
+		bodyBuilder.appendFormalLine(entityName + " merged = " + castStr + mergeMethod.getMethodCall() + ";");
 
 		if (flushMethod != null) {
 			bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
@@ -429,13 +440,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." + identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");
-		if (isDateOrCalendarType(versionTypeName)) {
-			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
+		if (isDateOrCalendarType(versionType)) {
+			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + entityName + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
 		} else {
-			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
+			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + entityName + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 		}
 		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -479,6 +491,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
@@ -532,13 +545,14 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		findMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
 
-	private boolean isDateOrCalendarType(String fullyQualifiedTypeName) {
-		return fullyQualifiedTypeName.equals("java.util.Date") || fullyQualifiedTypeName.equals("java.util.Calendar") || fullyQualifiedTypeName.equals("java.util.GregorianCalendar");
+	private boolean isDateOrCalendarType(JavaType javaType) {
+		return javaType.equals(DATE) || javaType.equals(CALENDAR) || javaType.equals(GREGORIAN_CALENDAR);
 	}
 
 	public String toString() {

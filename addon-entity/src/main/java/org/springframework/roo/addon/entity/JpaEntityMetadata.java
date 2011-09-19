@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
 import static org.springframework.roo.model.JpaJavaType.DISCRIMINATOR_COLUMN;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDED_ID;
@@ -617,7 +618,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		String versionColumn = StringUtils.hasText(annotationValues.getVersionColumn()) ? annotationValues.getVersionColumn() : verField.getSymbolName();
 		if (project.isDatabaseDotComEnabled()) {
 			versionField = "lastModifiedDate";
-			versionType = new JavaType("java.util.Calendar");
+			versionType = CALENDAR;
 			versionColumn = "lastModifiedDate";
 		}
 		

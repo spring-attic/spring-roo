@@ -1,6 +1,15 @@
 package org.springframework.roo.addon.dod;
 
-import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JavaType.STRING;
+import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.JdkJavaType.RANDOM;
+import static org.springframework.roo.model.JdkJavaType.SECURE_RANDOM;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
 import static org.springframework.roo.model.Jsr303JavaType.DIGITS;
@@ -9,8 +18,6 @@ import static org.springframework.roo.model.Jsr303JavaType.MAX;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.PAST;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
-import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
-import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.COMPONENT;
 
@@ -18,7 +25,6 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -68,7 +74,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType RANDOM = new JavaType("java.util.Random");
 
 	// Fields
 	private DataOnDemandAnnotationValues annotationValues;
@@ -203,7 +208,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			// Candidate not found, so let's create one
 			ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 			imports.addImport(RANDOM);
-			imports.addImport(new JavaType("java.security.SecureRandom"));
+			imports.addImport(SECURE_RANDOM);
 
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId());
 			fieldBuilder.setModifier(Modifier.PRIVATE);
@@ -240,7 +245,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					continue;
 				}
 
-				if (!candidate.getFieldType().equals(new JavaType("java.util.List", 0, DataType.TYPE, null, parameterTypes))) {
+				if (!candidate.getFieldType().equals(new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, parameterTypes))) {
 					// Candidate isn't a java.util.List<theEntity>, so it isn't suitable
 					// The equals method also verifies type params are present
 					continue;
@@ -255,7 +260,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId());
 			fieldBuilder.setModifier(Modifier.PRIVATE);
 			fieldBuilder.setFieldName(fieldSymbolName);
-			fieldBuilder.setFieldType(new JavaType("java.util.List", 0, DataType.TYPE, null, parameterTypes));
+			fieldBuilder.setFieldType(new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, parameterTypes));
 			return fieldBuilder.build();
 		}
 	}
@@ -489,7 +494,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		JavaType fieldType = field.getFieldType();
 
 		String suffix = "";
-		if (fieldType.equals(LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
+		if (fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 			suffix = "L";
 		} else if (fieldType.equals(JavaType.FLOAT_OBJECT) || fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 			suffix = "F";
@@ -578,7 +583,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			typeStr = "byte" + arrayStr;
 		} else if (fieldType.getFullyQualifiedTypeName().equals(JavaType.CHAR_PRIMITIVE.getFullyQualifiedTypeName()) && fieldType.isPrimitive()) {
 			typeStr = "char" + arrayStr;
-		} else if (fieldType.equals(new JavaType("java.lang.String", 1, DataType.TYPE, null, null))) {
+		} else if (fieldType.equals(new JavaType(STRING.getFullyQualifiedTypeName(), 1, DataType.TYPE, null, null))) {
 			typeStr = "String[]";
 		}
 		return typeStr;
@@ -866,7 +871,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Create the method body
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType("java.util.ArrayList"));
+		imports.addImport(ARRAY_LIST);
 		imports.addImport(new JavaType("java.util.Iterator"));
 		imports.addImport(new JavaType("javax.validation.ConstraintViolationException"));
 		imports.addImport(new JavaType("javax.validation.ConstraintViolation"));
@@ -949,14 +954,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Date fields included for DataNucleus (
 		if (fieldType.equals(new JavaType(Date.class.getName()))) {
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
-				imports.addImport(new JavaType("java.util.Date"));
+				imports.addImport(DATE);
 				initializer = "new Date(new Date().getTime() - 10000000L)";
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), FUTURE) != null) {
-				imports.addImport(new JavaType("java.util.Date"));
+				imports.addImport(DATE);
 				initializer = "new Date(new Date().getTime() + 10000000L)";
 			} else {
-				imports.addImport(new JavaType("java.util.Calendar"));
-				imports.addImport(new JavaType("java.util.GregorianCalendar"));
+				imports.addImport(CALENDAR);
+				imports.addImport(GREGORIAN_CALENDAR);
 				initializer = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH), Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE), Calendar.getInstance().get(Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime()";
 			}
 		} else if (fieldType.equals(JavaType.STRING)) {
@@ -1014,9 +1019,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					}
 				}
 			}
-		} else if (fieldType.equals(new JavaType(Calendar.class.getName()))) {
-			imports.addImport(new JavaType("java.util.Calendar"));
-			imports.addImport(new JavaType("java.util.GregorianCalendar"));
+		} else if (fieldType.equals(CALENDAR)) {
+			imports.addImport(CALENDAR);
+			imports.addImport(GREGORIAN_CALENDAR);
 			
 			String calendarString = "new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)";
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST) != null) {
@@ -1026,7 +1031,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else {
 				initializer = "Calendar.getInstance()";
 			}
-		} else if (fieldType.equals(new JavaType("java.lang.String", 1, DataType.TYPE, null, null))) {
+		} else if (fieldType.equals(new JavaType(STRING.getFullyQualifiedTypeName(), 1, DataType.TYPE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ \"Y\", \"N\" }");
 		} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "Boolean.TRUE");
@@ -1036,37 +1041,37 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index)");
 		} else if (fieldType.equals(JavaType.INT_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "index");
-		} else if (fieldType.equals(new JavaType("java.lang.Integer", 1, DataType.PRIMITIVE, null, null))) {
+		} else if (fieldType.equals(new JavaType(JavaType.INT_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ index, index }");
 		} else if (fieldType.equals(JavaType.DOUBLE_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).doubleValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).doubleValue()");
-		} else if (fieldType.equals(new JavaType("java.lang.Double", 1, DataType.PRIMITIVE, null, null))) {
+		} else if (fieldType.equals(new JavaType(JavaType.DOUBLE_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).doubleValue(), new Integer(index).doubleValue() }");
 		} else if (fieldType.equals(JavaType.FLOAT_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).floatValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).floatValue()");
-		} else if (fieldType.equals(new JavaType("java.lang.Float", 1, DataType.PRIMITIVE, null, null))) {
+		} else if (fieldType.equals(new JavaType(JavaType.FLOAT_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).floatValue(), new Integer(index).floatValue() }");
-		} else if (fieldType.equals(LONG_OBJECT)) {
+		} else if (fieldType.equals(JavaType.LONG_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).longValue()");
-		} else if (fieldType.equals(new JavaType("java.lang.Long", 1, DataType.PRIMITIVE, null, null))) {
+		} else if (fieldType.equals(new JavaType(JavaType.LONG_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).longValue(), new Integer(index).longValue() }");
 		} else if (fieldType.equals(JavaType.SHORT_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).shortValue()"); // Auto-boxed
 		} else if (fieldType.equals(JavaType.SHORT_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Integer(index).shortValue()");
-		} else if (fieldType.equals(new JavaType("java.lang.Short", 1, DataType.PRIMITIVE, null, null))) {
+		} else if (fieldType.equals(new JavaType(JavaType.SHORT_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ new Integer(index).shortValue(), new Integer(index).shortValue() }");
 		} else if (fieldType.equals(JavaType.CHAR_OBJECT)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "new Character('N')");
 		} else if (fieldType.equals(JavaType.CHAR_PRIMITIVE)) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "'N'");
-		} else if (fieldType.equals(new JavaType("java.lang.Character", 1, DataType.PRIMITIVE, null, null))) {
+		} else if (fieldType.equals(new JavaType(JavaType.CHAR_OBJECT.getFullyQualifiedTypeName(), 1, DataType.PRIMITIVE, null, null))) {
 			initializer = StringUtils.defaultIfEmpty(fieldInitializer, "{ 'Y', 'N' }");
 		} else if (fieldType.equals(BIG_DECIMAL)) {
 			imports.addImport(BIG_DECIMAL);
@@ -1102,7 +1107,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	private boolean isIntegerFieldType(JavaType fieldType) {
-		return fieldType.equals(BIG_INTEGER) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(LONG_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_OBJECT);
+		return fieldType.equals(BIG_INTEGER) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_OBJECT);
 	}
 
 	private boolean isDecimalFieldType(JavaType fieldType) {

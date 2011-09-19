@@ -10,6 +10,8 @@ import static org.springframework.roo.model.JavaType.INT_OBJECT;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.LONG_PRIMITIVE;
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
 
 import org.springframework.roo.model.JavaType;
 
@@ -34,7 +36,7 @@ public final class SolrUtils {
 			return "_f";
 		} else if (type.equals(DOUBLE_OBJECT) || type.equals(DOUBLE_PRIMITIVE)) {
 			return "_d";
-		} else if (type.equals(new JavaType("java.util.Date")) || type.equals(new JavaType("java.util.Calendar"))) {
+		} else if (type.equals(DATE) || type.equals(CALENDAR)) {
 			return "_dt";
 		} else {
 			return "_t";
