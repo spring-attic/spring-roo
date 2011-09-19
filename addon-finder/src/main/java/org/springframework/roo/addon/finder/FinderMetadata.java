@@ -107,7 +107,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// To get this far we need to create the method...
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		parameters.add(destination);
-		JavaType typedQueryType = new JavaType(TYPED_QUERY.getSimpleTypeName(), 0, DataType.TYPE, null, parameters);
+		JavaType typedQueryType = new JavaType(TYPED_QUERY.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, parameters);
 
 		QueryHolder queryHolder = queryHolders.get(finderName);
 		String jpaQuery = queryHolder.getJpaQuery();

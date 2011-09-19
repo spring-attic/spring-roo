@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details.annotations;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JpaJavaType.ID;
 
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class AnnotationMetadataBuilderTest {
 		
 		// Check
 		assertEquals(0, annotationMetadata.getAttributeNames().size());
-		assertEquals("java.lang.String", annotationMetadata.getAnnotationType().getFullyQualifiedTypeName());
+		assertEquals(STRING.getFullyQualifiedTypeName(), annotationMetadata.getAnnotationType().getFullyQualifiedTypeName());
 	}
 	
 	@Test
