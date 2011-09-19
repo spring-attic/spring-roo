@@ -508,20 +508,23 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private AnnotationMetadataBuilder getJoinColumnAnnotation(Reference reference, boolean referencedColumn, JavaType fieldType) {
+		Column localColumn = reference.getLocalColumn();
+		Assert.notNull(localColumn, "Foreign-key reference local column '" + reference.getLocalColumnName() + "' must not be null");
 		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN);
-		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getEscapedName());
+		joinColumnBuilder.addStringAttribute(NAME, localColumn.getEscapedName());
 
 		if (referencedColumn) {
-			Assert.notNull(reference.getForeignColumn(), "Foreign key column " + reference.getForeignColumnName() + " is null");
-			joinColumnBuilder.addStringAttribute("referencedColumnName", reference.getForeignColumn().getEscapedName());
+			Column foreignColumn = reference.getForeignColumn();
+			Assert.notNull(foreignColumn, "Foreign-key reference foreign column '" + reference.getForeignColumnName() + "' must not be null");
+			joinColumnBuilder.addStringAttribute("referencedColumnName", foreignColumn.getEscapedName());
 		}
 
-		if (reference.getLocalColumn().isRequired()) {
+		if (localColumn.isRequired()) {
 			joinColumnBuilder.addBooleanAttribute("nullable", false);
 		}
 
 		if (fieldType != null) {
-			if (isCompositeKeyColumn(reference.getLocalColumn()) || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
+			if (isCompositeKeyColumn(localColumn) || localColumn.isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
 				joinColumnBuilder.addBooleanAttribute("insertable", false);
 				joinColumnBuilder.addBooleanAttribute("updatable", false);
 			}
