@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.creator;
 
+import static java.io.File.separatorChar;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -44,9 +46,35 @@ import org.w3c.dom.Element;
 @Service
 public class CreatorOperationsImpl implements CreatorOperations {
 	
+	/**
+	 * The types of project that can be created
+	 */
+	private enum Type {
+		
+		/**
+		 * A simple addon
+		 */
+		SIMPLE,
+		
+		/**
+		 * An advanced addon
+		 */
+		ADVANCED,
+		
+		/**
+		 * A language bundle
+		 */
+		I18N,
+		
+		/**
+		 * An OSGi wrapper for a non-OSGi library
+		 */
+		WRAPPER
+	};
+	
 	// Constants
-	private static final char SEPARATOR = File.separatorChar;
 	private static final String ICON_SET_URL = "http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip";
+	private static final String POM_XML = "pom.xml";
 	
 	// Fields
 	@Reference private FileManager fileManager;
@@ -54,10 +82,6 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlInputStreamService httpService;
 	private String iconSetUrl;
-
-	private enum Type {
-		SIMPLE, ADVANCED, I18N, WRAPPER
-	};
 	
 	protected void activate(ComponentContext context) {
 		iconSetUrl = context.getBundleContext().getProperty("creator.i18n.iconset.url");
@@ -129,8 +153,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			descriptionE.setTextContent(description + " " + descriptionE.getTextContent());
 		}
 		
-		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
-		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+		writePomFile(pom);
 	}
 
 	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName) {
@@ -171,7 +194,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			b.append(StringUtils.capitalize(word.toLowerCase()));
 		}
 		String languageName = b.toString();
-		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', SEPARATOR);
+		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', separatorChar);
 		
 		if (!StringUtils.hasText(description)) {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
@@ -184,9 +207,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N, projectName);
 		
 		try {
-			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + SEPARATOR + messageBundle.getName())).getOutputStream());
+			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + messageBundle.getName())).getOutputStream());
 			if (flagGraphic != null) {
-				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + SEPARATOR + flagGraphic.getName())).getOutputStream());
+				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + flagGraphic.getName())).getOutputStream());
 			} else {
 				installFlagGraphic(locale, packagePath);
 			} 
@@ -194,7 +217,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			throw new IllegalStateException("Could not copy addon resources into project", e);
 		}
 		
-		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + SEPARATOR + languageName + "Language.java");
+		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separatorChar + languageName + "Language.java");
 		
 		if (!fileManager.exists(destinationFile)) {
 			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/Language.java-template");
@@ -221,14 +244,30 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 	}
 
-	private void createProject(JavaPackage topLevelPackage, Type type, String description, String projectName) {
+	/**
+	 * Creates the root files for a new project, namely the:
+	 * <ul>
+	 * <li>Maven POM</li>
+	 * <li>readme.txt</li>
+	 * <li>
+	 * 
+	 * @param topLevelPackage the top-level package of the project being created (required)
+	 * @param type the type of project being created (required)
+	 * @param description the description to put into the POM (can be blank)
+	 * @param projectName if blank, a sanitised version of the given top-level
+	 * package is used for the project name
+	 */
+	private void createProject(final JavaPackage topLevelPackage, final Type type, final String description, String projectName) {
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		
-		Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml"));
-		Element root = pom.getDocumentElement();
+		// Load the POM template
+		final String pomTemplate = type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml";
+		final Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), pomTemplate));
+		final Element root = pom.getDocumentElement();
 		
+		// Populate it from the given inputs
 		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
@@ -237,14 +276,24 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			XmlUtils.findRequiredElement("/project/description", root).setTextContent(description);
 		}
 
-		// Create new project
-		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
-		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+		// Write the new POM to disk
+		writePomFile(pom);
 
+		// Write the other root files
 		writeTextFile("readme.txt", "Welcome to my addon!");
-		writeTextFile("legal" + SEPARATOR + "LICENSE.TXT", "Your license goes here");
+		writeTextFile("legal" + separatorChar + "LICENSE.TXT", "Your license goes here");
 
 		fileManager.scan();
+	}
+
+	/**
+	 * Writes the given Maven POM to disk
+	 * 
+	 * @param pom the POM to write (required)
+	 */
+	private void writePomFile(final Document pom) {
+		final MutableFile pomFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, POM_XML));
+		XmlUtils.writeXml(pomFile.getOutputStream(), pom);
 	}
 
 	private void install(String targetFilename, JavaPackage topLevelPackage, Path path, Type type, String projectName) {
@@ -252,19 +301,19 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		String topLevelPackageName = topLevelPackage.getFullyQualifiedPackageName();
-		String packagePath = topLevelPackageName.replace('.', SEPARATOR);
+		String packagePath = topLevelPackageName.replace('.', separatorChar);
 		String destinationFile = "";
 		if (targetFilename.endsWith(".java")) {
-			destinationFile = pathResolver.getIdentifier(path, packagePath + SEPARATOR + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + targetFilename);
+			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + targetFilename);
 		} else {
-			destinationFile = pathResolver.getIdentifier(path, packagePath + SEPARATOR + targetFilename);
+			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + targetFilename);
 		}
 		
 		// Different destination for assembly.xml
 		if ("assembly.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(path, "src" + SEPARATOR + "main" + SEPARATOR + "assembly" + SEPARATOR + targetFilename);
+			destinationFile = pathResolver.getIdentifier(path, "src" + separatorChar + "main" + separatorChar + "assembly" + separatorChar + targetFilename);
 		} else if (targetFilename.startsWith("RooAnnotation")) { // Adjust name for Roo Annotation
-			destinationFile = pathResolver.getIdentifier(path, packagePath + SEPARATOR + "Roo" + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + ".java");
+			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + "Roo" + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + ".java");
 		}
 		
 		if (!fileManager.exists(destinationFile)) {

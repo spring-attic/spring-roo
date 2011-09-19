@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -36,6 +36,10 @@ import org.w3c.dom.Element;
 @Service
 public class MavenOperationsImpl extends AbstractProjectOperations implements MavenOperations {
 
+	private static final Dependency JAXB_API = new Dependency("javax.xml.bind", "jaxb-api", "2.1");
+
+	private static final Dependency JSR250_API = new Dependency("javax.annotation", "jsr250-api", "1.0");
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(MavenOperationsImpl.class);
 	
@@ -53,16 +57,16 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		return pathResolver.getRoot(Path.ROOT);
 	}
 	
-	public void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
+	public void createProject(final JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
 		Assert.notNull(topLevelPackage, "Top level package required");
 
 		if (majorJavaVersion == null || (majorJavaVersion < 5 || majorJavaVersion > 7)) {
 			// We need to detect the major Java version to use
-			String ver = System.getProperty("java.version");
-			if (ver.indexOf("1.7.") > -1) {
+			final String ver = System.getProperty("java.version");
+			if (ver.contains("1.7.")) {
 				majorJavaVersion = 7;
-			} else if (ver.indexOf("1.6.") > -1) {
+			} else if (ver.contains("1.6.")) {
 				majorJavaVersion = 6;
 			} else {
 				// To be running Roo they must be on Java 5 or above
@@ -71,8 +75,8 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		}
 
 		if (projectName == null) {
-			String packageName = topLevelPackage.getFullyQualifiedPackageName();
-			int lastIndex = packageName.lastIndexOf(".");
+			final String packageName = topLevelPackage.getFullyQualifiedPackageName();
+			final int lastIndex = packageName.lastIndexOf(".");
 			if (lastIndex == -1) {
 				projectName = packageName;
 			} else {
@@ -82,14 +86,14 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
 		final Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "standard-project-template.xml"));
 
-		Element root = pom.getDocumentElement();
+		final Element root = pom.getDocumentElement();
 		
 		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(projectName);
 		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
 
-		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", root);
-		for (Element versionElement : versionElements) {
+		final List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", root);
+		for (final Element versionElement : versionElements) {
 			versionElement.setTextContent("1." + majorJavaVersion);
 		}
 
@@ -97,10 +101,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
 		// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
 		if (majorJavaVersion == 5) {
-			List<Dependency> dependencies = new ArrayList<Dependency>();
-			dependencies.add(new Dependency("javax.annotation", "jsr250-api", "1.0"));
-			dependencies.add(new Dependency("javax.xml.bind", "jaxb-api", "2.1"));
-			addDependencies(dependencies);
+			addDependencies(Arrays.asList(JSR250_API, JAXB_API));
 		}
 
 		fileManager.scan();
@@ -109,21 +110,21 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties")).getOutputStream());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			logger.warning("Unable to install log4j logging configuration");
 		}
 	}
 
-	public void executeMvnCommand(String extra) throws IOException {
-		File root = new File(getProjectRoot());
+	public void executeMvnCommand(final String extra) throws IOException {
+		final File root = new File(getProjectRoot());
 		Assert.isTrue(root.isDirectory() && root.exists(), "Project root does not currently exist as a directory ('" + root.getCanonicalPath() + "')");
 
-		String cmd = (File.separatorChar == '\\' ? "mvn.bat " : "mvn ") + extra;
-		Process p = Runtime.getRuntime().exec(cmd, null, root);
+		final String cmd = (File.separatorChar == '\\' ? "mvn.bat " : "mvn ") + extra;
+		final Process p = Runtime.getRuntime().exec(cmd, null, root);
 
 		// Ensure separate threads are used for logging, as per ROO-652
-		LoggingInputStream input = new LoggingInputStream(p.getInputStream(), processManager);
-		LoggingInputStream errors = new LoggingInputStream(p.getErrorStream(), processManager);
+		final LoggingInputStream input = new LoggingInputStream(p.getInputStream(), processManager);
+		final LoggingInputStream errors = new LoggingInputStream(p.getErrorStream(), processManager);
 
 		p.getOutputStream().close(); // Close OutputStream to avoid blocking by Maven commands that expect input, as per ROO-2034
 		input.start();
@@ -133,7 +134,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			if (p.waitFor() != 0) {
 				logger.warning("The command '" + cmd + "' did not complete successfully");
 			}
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -150,7 +151,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		 * @param inputStream
 		 * @param processManager
 		 */
-		public LoggingInputStream(InputStream inputStream, ProcessManager processManager) {
+		public LoggingInputStream(final InputStream inputStream, final ProcessManager processManager) {
 			this.reader = new BufferedReader(new InputStreamReader(inputStream));
 			this.processManager = processManager;
 		}
@@ -169,7 +170,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 						logger.info(line);
 					}
 				}
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				if (e.getMessage().contains("No such file or directory") || // For *nix/Mac
 					e.getMessage().contains("CreateProcess error=2")) { // For Windows
 					logger.severe("Could not locate Maven executable; please ensure mvn command is in your path");

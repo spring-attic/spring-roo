@@ -44,6 +44,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.osgi.OSGiUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.DomUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.WebXmlUtils;
@@ -65,6 +66,12 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class GwtOperationsImpl implements GwtOperations {
+	
+	// Constants
+	private static final String GWT_BUILD_COMMAND = "com.google.gwt.eclipse.core.gwtProjectValidator";
+	private static final String GWT_PROJECT_NATURE = "com.google.gwt.eclipse.core.gwtNature";
+	private static final String MAVEN_ECLIPSE_PLUGIN = "/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']";
+	private static final String OUTPUT_DIRECTORY = "${project.build.directory}/${project.build.finalName}/WEB-INF/classes";
 	
 	// Fields
 	@Reference protected FileManager fileManager;
@@ -353,53 +360,54 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 	}
 
+	/**
+	 * Updates the Eclipse plugin in the POM with the necessary GWT details
+	 */
 	private void updateEclipsePlugin() {
-		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		Element root = document.getDocumentElement();
+		// Load the POM
+		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
+		final Element root = document.getDocumentElement();
 
-		// Add GWT buildCommand
-		Element additionalBuildCommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
+		// Add the GWT "buildCommand"
+		final Element additionalBuildCommandsElement = XmlUtils.findFirstElement(MAVEN_ECLIPSE_PLUGIN + "/configuration/additionalBuildcommands", root);
 		Assert.notNull(additionalBuildCommandsElement, "additionalBuildCommands element of the maven-eclipse-plugin required");
-		String gwtBuildCommandName = "com.google.gwt.eclipse.core.gwtProjectValidator";
-		Element gwtBuildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + gwtBuildCommandName + "']", additionalBuildCommandsElement);
+		Element gwtBuildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + GWT_BUILD_COMMAND + "']", additionalBuildCommandsElement);
 		if (gwtBuildCommandElement == null) {
-			Element nameElement = document.createElement("name");
-			nameElement.setTextContent(gwtBuildCommandName);
-			gwtBuildCommandElement = document.createElement("buildCommand");
-			gwtBuildCommandElement.appendChild(nameElement);
-			additionalBuildCommandsElement.appendChild(gwtBuildCommandElement);
+			gwtBuildCommandElement = DomUtils.createChildElement("buildCommand", additionalBuildCommandsElement, document);
+			final Element nameElement = DomUtils.createChildElement("name", gwtBuildCommandElement, document);
+			nameElement.setTextContent(GWT_BUILD_COMMAND);
 		}
 
-		// Add GWT projectnature
-		Element additionalProjectNaturesElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalProjectnatures", root);
+		// Add the GWT "projectnature"
+		Element additionalProjectNaturesElement = XmlUtils.findFirstElement(MAVEN_ECLIPSE_PLUGIN + "/configuration/additionalProjectnatures", root);
 		Assert.notNull(additionalProjectNaturesElement, "additionalProjectnatures element of the maven-eclipse-plugin required");
-		String gwtProjectNatureName = "com.google.gwt.eclipse.core.gwtNature";
-		Element gwtProjectNatureElement = XmlUtils.findFirstElement("projectnature[name = '" + gwtProjectNatureName + "']", additionalProjectNaturesElement);
+		Element gwtProjectNatureElement = XmlUtils.findFirstElement("projectnature[name = '" + GWT_PROJECT_NATURE + "']", additionalProjectNaturesElement);
 		if (gwtProjectNatureElement == null) {
-			gwtProjectNatureElement = new XmlElementBuilder("projectnature", document).setText(gwtProjectNatureName).build();
+			gwtProjectNatureElement = new XmlElementBuilder("projectnature", document).setText(GWT_PROJECT_NATURE).build();
 			additionalProjectNaturesElement.appendChild(gwtProjectNatureElement);
 		}
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}
 
+	/**
+	 * Sets the POM's output directory to {@value #OUTPUT_DIRECTORY}, if it's
+	 * not already set to something else.
+	 */
 	private void updateBuildOutputDirectory() {
-		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
-		Element root = document.getDocumentElement();
+		// Read the POM
+		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
+		final Element root = document.getDocumentElement();
 
-		String outputDirectoryText = "${project.build.directory}/${project.build.finalName}/WEB-INF/classes";
 		Element outputDirectoryElement = XmlUtils.findFirstElement("/project/build/outputDirectory", root);
-		if (outputDirectoryElement != null) {
-			if (!outputDirectoryElement.getTextContent().equals(outputDirectoryText)) {
-				outputDirectoryElement.setTextContent(outputDirectoryText);
-			}
-		} else {
-			outputDirectoryElement = new XmlElementBuilder("outputDirectory", document).setText(outputDirectoryText).build();
-			Element buildElement = XmlUtils.findRequiredElement("/project/build", root);
-			buildElement.appendChild(outputDirectoryElement);
+		if (outputDirectoryElement == null) {
+			// Create it
+			final Element buildElement = XmlUtils.findRequiredElement("/project/build", root);
+			outputDirectoryElement = DomUtils.createChildElement("outputDirectory", buildElement, document);
 		}
+		outputDirectoryElement.setTextContent(OUTPUT_DIRECTORY);
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}

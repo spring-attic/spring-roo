@@ -102,7 +102,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		
 		String warPluginXPath = "/project/build/plugins/plugin[artifactId = 'maven-war-plugin']";
 		Element warPluginElement = XmlUtils.findFirstElement(warPluginXPath, root);
-		if (warPluginElement == null ) {
+		if (warPluginElement == null) {
 			// Project may not be a web project, so just exit 
 			return;
 		}
@@ -111,37 +111,23 @@ public class DbreOperationsImpl implements DbreOperations {
 			// <exclude> element is already there, so just exit 
 			return;
 		}
-		
-		Element configurationElement = XmlUtils.findFirstElement("configuration", warPluginElement);
-		if (configurationElement == null) {
-			configurationElement = document.createElement("configuration");
-		}
-		Element webResourcesElement = XmlUtils.findFirstElement("configuration/webResources", warPluginElement);
-		if (webResourcesElement == null) {
-			webResourcesElement = document.createElement("webResources");
-		}
-		Element excludesElement = XmlUtils.findFirstElement("configuration/webResources/resource/excludes", warPluginElement);
-		if (excludesElement == null) {
-			excludesElement = document.createElement("excludes");
-		}
 
-		excludeElement = document.createElement("exclude");
+		// Create the required elements
+		final Element configurationElement = DomUtils.createChildIfNotExists("configuration", warPluginElement, document);
+		final Element webResourcesElement = DomUtils.createChildIfNotExists("webResources", configurationElement, document);
+		final Element resourceElement = DomUtils.createChildIfNotExists("resource", webResourcesElement, document);
+		final Element excludesElement = DomUtils.createChildIfNotExists("excludes", resourceElement, document);
+		excludeElement = DomUtils.createChildIfNotExists("exclude", excludesElement, document);
+		final Element directoryElement = DomUtils.createChildIfNotExists("directory", resourceElement, document);
+
+		// Populate them with the required text
 		excludeElement.setTextContent(DbreModelService.DBRE_XML);
-		excludesElement.appendChild(excludeElement);
-		
-		Element directoryElement = document.createElement("directory");
 		directoryElement.setTextContent("src/main/resources");
-		
-		Element resourceElement = document.createElement("resource");
-		resourceElement.appendChild(directoryElement);
-		resourceElement.appendChild(excludesElement);
-		webResourcesElement.appendChild(resourceElement);
-		
-		configurationElement.appendChild(webResourcesElement);
-		
-		warPluginElement.appendChild(configurationElement);
+
+		// Clean up the XML
 		DomUtils.removeTextNodes(warPluginElement);
 		
+		// Write out the updated POM
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}
 

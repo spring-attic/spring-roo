@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -797,7 +798,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, POM_XML);
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
-		String descriptionOfChange = "";
+		final Collection<String> changes = new ArrayList<String>();
 
 		// Manage GAE buildCommand
 		final Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
@@ -810,16 +811,12 @@ public class JpaOperationsImpl implements JpaOperations {
 			gaeBuildCommandElement = document.createElement("buildCommand");
 			gaeBuildCommandElement.appendChild(nameElement);
 			additionalBuildcommandsElement.appendChild(gaeBuildCommandElement);
-			descriptionOfChange = "added GAE buildCommand to maven-eclipse-plugin";
+			changes.add("added GAE buildCommand to maven-eclipse-plugin");
 		} else if (!addGaeSettingsToPlugin && gaeBuildCommandElement != null) {
 			additionalBuildcommandsElement.removeChild(gaeBuildCommandElement);
-			descriptionOfChange = "removed GAE buildCommand from maven-eclipse-plugin";
+			changes.add("removed GAE buildCommand from maven-eclipse-plugin");
 		}
 
-		if (StringUtils.hasText(descriptionOfChange)) {
-			descriptionOfChange += "; ";
-		}
-		
 		// Manage GAE projectnature
 		final Element additionalProjectnaturesElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalProjectnatures", root);
 		Assert.notNull(additionalProjectnaturesElement, "additionalProjectnatures element of the maven-eclipse-plugin required");
@@ -828,13 +825,16 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (addGaeSettingsToPlugin && gaeProjectnatureElement == null) {
 			gaeProjectnatureElement = new XmlElementBuilder("projectnature", document).setText(gaeProjectnatureName).build();
 			additionalProjectnaturesElement.appendChild(gaeProjectnatureElement);
-			descriptionOfChange += "added GAE projectnature to maven-eclipse-plugin";
+			changes.add("added GAE projectnature to maven-eclipse-plugin");
 		} else if (!addGaeSettingsToPlugin && gaeProjectnatureElement != null) {
 			additionalProjectnaturesElement.removeChild(gaeProjectnatureElement);
-			descriptionOfChange += "removed GAE projectnature from maven-eclipse-plugin";
+			changes.add("removed GAE projectnature from maven-eclipse-plugin");
 		}
-
-		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
+		
+		if (!changes.isEmpty()) {
+			final String changesMessage = StringUtils.collectionToDelimitedString(changes, "; ");
+			fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), changesMessage, false);
+		}
 	}
 
 	private void updateDataNucleusPlugin(final boolean addToPlugin) {

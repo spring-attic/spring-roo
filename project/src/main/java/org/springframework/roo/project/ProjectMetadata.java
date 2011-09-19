@@ -42,9 +42,20 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 */
 	// MID:org.springframework.roo.project.ProjectMetadata#the_project
 	public static final String PROJECT_IDENTIFIER = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
+
+	/**
+	 * Returns the metadata ID for the project-level metadata. Is static because
+	 * each running instance of Roo only ever manages one project at a time.
+	 * 
+	 * @return a non-blank MID
+	 */
+	public static final String getProjectIdentifier() {
+		return PROJECT_IDENTIFIER;
+	}
 	
 	// Fields
 	private final JavaPackage topLevelPackage;
+	private final PathResolver pathResolver;
 	private final String projectName;
 	private final Set<Dependency> dependencies;
 	private final Set<Plugin> buildPlugins;
@@ -53,12 +64,25 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	private final Set<Property> pomProperties;
 	private final Set<Filter> filters;
 	private final Set<Resource> resources;
-	private final PathResolver pathResolver;
-	
+
+	/**
+	 * Constructor
+	 *
+	 * @param topLevelPackage (required)
+	 * @param projectName (required)
+	 * @param dependencies (required)
+	 * @param buildPlugins (required)
+	 * @param repositories (required)
+	 * @param pluginRepositories (required)
+	 * @param pomProperties (required)
+	 * @param filters (required)
+	 * @param resources (required)
+	 * @param pathResolver (required)
+	 */
 	public ProjectMetadata(final JavaPackage topLevelPackage, final String projectName, final Set<Dependency> dependencies, final Set<Plugin> buildPlugins, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final Set<Property> pomProperties, final Set<Filter> filters, final Set<Resource> resources, final PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
-		Assert.notNull(projectName, "Project name required");
+		Assert.hasText(projectName, "Project name required");
 		Assert.notNull(dependencies, "Dependencies required");
 		Assert.notNull(buildPlugins, "Build plugins required");
 		Assert.notNull(repositories, "Repositories required");
@@ -77,10 +101,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		this.filters = filters;
 		this.resources = resources;
 		this.pathResolver = pathResolver;
-	}
-
-	public static final String getProjectIdentifier() {
-		return PROJECT_IDENTIFIER;
 	}
 	
 	/**
