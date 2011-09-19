@@ -201,8 +201,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Convenience method for determining whether any of the presented plugins
-	 * are registered based on the groupId, artifactId, and version.
+	 * Indicates whether any of the given plugins are registered, by evaluating
+	 * the result of calling {@link #isBuildPluginRegistered(Plugin)} for each
+	 * one.
 	 *
 	 * @param plugins the plugins to check (required)
 	 * @return whether any of the plugins are currently registered or not

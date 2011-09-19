@@ -429,6 +429,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata is not yet available, so plugin removal is unavailable");
+		if (!projectMetadata.isAnyPluginsRegistered(plugins)) {
+			return;
+		}
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", document.getDocumentElement());
