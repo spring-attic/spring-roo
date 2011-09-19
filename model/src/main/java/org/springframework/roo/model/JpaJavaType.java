@@ -32,11 +32,11 @@ public final class JpaJavaType {
 	public static final JavaType JOIN_COLUMNS = new JavaType("javax.persistence.JoinColumns");
 	public static final JavaType JOIN_TABLE = new JavaType("javax.persistence.JoinTable");
 	public static final JavaType LOB = new JavaType("javax.persistence.Lob");
-	public static final JavaType MANY_TO_ONE = new JavaType("javax.persistence.ManyToOne");
 	public static final JavaType MANY_TO_MANY = new JavaType("javax.persistence.ManyToMany");
+	public static final JavaType MANY_TO_ONE = new JavaType("javax.persistence.ManyToOne");
 	public static final JavaType MAPPED_SUPERCLASS = new JavaType("javax.persistence.MappedSuperclass");
-	public static final JavaType ONE_TO_ONE = new JavaType("javax.persistence.OneToOne");
 	public static final JavaType ONE_TO_MANY = new JavaType("javax.persistence.OneToMany");
+	public static final JavaType ONE_TO_ONE = new JavaType("javax.persistence.OneToOne");
 	public static final JavaType PERSISTENCE_CONTEXT = new JavaType("javax.persistence.PersistenceContext");
 	public static final JavaType POST_PERSIST = new JavaType("javax.persistence.PostPersist");
 	public static final JavaType POST_UPDATE = new JavaType("javax.persistence.PostUpdate");
