@@ -179,13 +179,13 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 		addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
 	}
 
-	public void addEnumAttribute(String key, JavaType fullyQualifiedTypeName, String enumConstant) {
-		EnumDetails details = new EnumDetails(fullyQualifiedTypeName, new JavaSymbolName(enumConstant));
+	public void addEnumAttribute(String key, JavaType javaType, String enumConstant) {
+		EnumDetails details = new EnumDetails(javaType, new JavaSymbolName(enumConstant));
 		addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
 	}
 
-	public void addEnumAttribute(String key, JavaType fullyQualifiedTypeName, JavaSymbolName enumConstant) {
-		EnumDetails details = new EnumDetails(fullyQualifiedTypeName, enumConstant);
+	public void addEnumAttribute(String key, JavaType javaType, JavaSymbolName enumConstant) {
+		EnumDetails details = new EnumDetails(javaType, enumConstant);
 		addAttribute(new EnumAttributeValue(new JavaSymbolName(key), details));
 	}
 

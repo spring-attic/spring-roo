@@ -63,6 +63,7 @@ import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -557,6 +558,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 	
 	private void addCascadeType(AnnotationMetadataBuilder annotationBuilder, CascadeAction onUpdate, CascadeAction onDelete) {
+		boolean hasCascadeType = true;
 		if (onUpdate == CascadeAction.CASCADE && onDelete == CascadeAction.CASCADE) {
 			annotationBuilder.addEnumAttribute("cascade", CASCADE_TYPE, "ALL");
 		} else if (onUpdate == CascadeAction.CASCADE && onDelete != CascadeAction.CASCADE) {
@@ -566,6 +568,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			annotationBuilder.addAttribute(new ArrayAttributeValue<EnumAttributeValue>(new JavaSymbolName("cascade"), arrayValues));
 		} else if (onUpdate != CascadeAction.CASCADE && onDelete == CascadeAction.CASCADE) {
 			annotationBuilder.addEnumAttribute("cascade", CASCADE_TYPE.getSimpleTypeName(), "REMOVE");
+		} else {
+			hasCascadeType = false;
+		}
+		if (hasCascadeType) {
+			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+			imports.addImport(CASCADE_TYPE);
 		}
 	}
 
