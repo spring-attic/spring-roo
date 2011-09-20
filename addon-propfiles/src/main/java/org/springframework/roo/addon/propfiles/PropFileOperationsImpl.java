@@ -25,6 +25,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
+import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * Provides property file configuration operations.
@@ -253,5 +254,9 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} finally {
 			IOUtils.closeQuietly(outputStream);
 		}
+	}
+
+	public Properties loadProperties(final String filename, final Class<?> loadingClass) {
+		return loadProperties(TemplateUtils.getTemplate(loadingClass, filename));
 	}
 }

@@ -65,6 +65,8 @@ public class JpaOperationsImpl implements JpaOperations {
 	private static final String PERSISTENCE_UNIT = "persistence-unit";
 	
 	static final String APPLICATION_CONTEXT_XML = "applicationContext.xml";
+	static final String JPA_DIALECTS_FILE = "jpa-dialects.properties";
+	static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 	static final String POM_XML = "pom.xml";
 	
 	// Fields (package access so unit tests can inject mocks)
@@ -93,7 +95,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private String getPersistencePath() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);
 	}
 
 	private String getDatabasePropertiesPath() {
@@ -258,8 +260,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		final String persistencePath = getPersistencePath();
 		final InputStream inputStream;
 		if (fileManager.exists(persistencePath)) {
+			// There's an existing persistence config file; read it
 			inputStream = fileManager.getInputStream(persistencePath);
 		} else {
+			// Use the addon's template file
 			inputStream = TemplateUtils.getTemplate(getClass(), "persistence-template.xml");
 			Assert.notNull(inputStream, "Could not acquire persistence.xml template");
 		}
@@ -318,14 +322,13 @@ public class JpaOperationsImpl implements JpaOperations {
 		persistenceUnitElement.appendChild(provider);
 
 		// Add properties
-		final InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
-		Assert.notNull(dialectsInputStream, "Could not acquire jpa-dialects.properties");
-		final Properties dialects = propFileOperations.loadProperties(dialectsInputStream);
+		final Properties dialects = propFileOperations.loadProperties(JPA_DIALECTS_FILE, getClass());
 		final Element properties = persistence.createElement("properties");
 		boolean isDbreProject = fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "dbre.xml"));
 		switch (ormProvider) {
 			case HIBERNATE:
-				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + jdbcDatabase.name()), persistence));
+				final String dialectKey = ormProvider.name() + "." + jdbcDatabase.name();
+				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(dialectKey), persistence));
 				properties.appendChild(persistence.createComment(" value=\"create\" to build a new database on each run; value=\"update\" to modify an existing database; value=\"create-drop\" means the same as \"create\" but also drops tables when Hibernate closes; value=\"validate\" makes no changes to the database ")); // ROO-627
 				String hbm2dll = "create";
 				if (isDbreProject || jdbcDatabase == JdbcDatabase.DB2_400) {
@@ -882,7 +885,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		final List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (final Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
 			final Dependency dependency = new Dependency(dependencyElement);
-			if (projectOperations.getProjectMetadata().isGwtEnabled() && dependency.getGroupId().equals("com.google.appengine") && dependency.getArtifactId().equals("appengine-api-1.0-sdk")) {
+			if (dependency.getGroupId().equals("com.google.appengine") && dependency.getArtifactId().equals("appengine-api-1.0-sdk") && projectOperations.getProjectMetadata().isGwtEnabled()) {
 				continue;
 			}
 			dependencies.add(dependency);
@@ -965,7 +968,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private SortedSet<String> getPropertiesFromDataNucleusConfiguration() {
-		final String persistenceXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		final String persistenceXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, PERSISTENCE_XML);
 		if (!fileManager.exists(persistenceXmlPath)) {
 			throw new IllegalStateException("Failed to find " + persistenceXmlPath);
 		}

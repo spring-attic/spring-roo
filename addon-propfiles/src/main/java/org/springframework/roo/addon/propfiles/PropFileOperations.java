@@ -116,4 +116,15 @@ public interface PropFileOperations {
 	 * @return an empty {@link Properties} if a null stream is given
 	 */
 	Properties loadProperties(InputStream inputStream);
+	
+	/**
+	 * Loads the properties from the given classpath resource
+	 * 
+	 * @param filename the name of the properties file to load
+	 * @param loadingClass the class in whose package to look for the file
+	 * @return a non-<code>null</code> properties
+	 * @throws IllegalArgumentException if the given file can't be loaded
+	 * @since 1.2.0
+	 */
+	Properties loadProperties(String filename, Class<?> loadingClass);
 }
