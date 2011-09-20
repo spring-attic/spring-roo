@@ -323,7 +323,7 @@ public class JavaType implements Comparable<JavaType> {
 		}
 		
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
-		return offset == -1 ? new JavaPackage(fullyQualifiedTypeName) : new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
+		return offset == -1 ? new JavaPackage("") : new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
 	}
 
 	/**
