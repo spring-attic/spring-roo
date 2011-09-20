@@ -251,7 +251,7 @@ public class JavaType implements Comparable<JavaType> {
 		} else if (argName != null && !staticForm) {
 			sb.append(argName);
 			if (dataType == DataType.TYPE) {
-				if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
+				if (!fullyQualifiedTypeName.equals(OBJECT.getFullyQualifiedTypeName())) {
 					sb.append(" extends ");
 				}
 			}
@@ -267,7 +267,7 @@ public class JavaType implements Comparable<JavaType> {
 						sb.append(getSimpleTypeName());
 					}
 				} else {
-					if (fullyQualifiedTypeName.equals("java.lang.Object")) {
+					if (fullyQualifiedTypeName.equals(OBJECT.getFullyQualifiedTypeName())) {
 						// It's Object, so we need to only append if this isn't a type arg
 						if (argName == null) {
 							sb.append(fullyQualifiedTypeName);
