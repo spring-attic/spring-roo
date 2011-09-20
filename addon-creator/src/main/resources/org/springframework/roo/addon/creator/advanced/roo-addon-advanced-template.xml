@@ -43,18 +43,18 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>4.1.0</version>
+            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>4.1.0</version>
+            <version>4.2.0</version>
         </dependency>
         <!-- Apache Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <version>1.2.0</version>
+            <version>1.6.0</version>
         </dependency>
         <!-- Spring Roo modules -->
         <dependency>
@@ -196,7 +196,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.4</version>
+                <version>2.3.5</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -220,7 +220,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.4.2</version>
+                <version>1.7.2</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
