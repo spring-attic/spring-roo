@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -184,9 +185,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		logInfo("PGP Signature", bundleVersion.getPgpKey() + " signed by " + bundleVersion.getPgpDescriptions());
 		logInfo("OBR URL", bundleVersion.getObrUrl());
 		logInfo("JAR URL", bundleVersion.getUri());
-		Map<String, String> commands = bundleVersion.getCommands();
-		for (String command : commands.keySet()) {
-			logInfo("Commands", "'" + command + "' [" + commands.get(command) + "]");
+		for (final Entry<String, String> entry : bundleVersion.getCommands().entrySet()) {
+			logInfo("Commands", "'" + entry.getKey() + "' [" + entry.getValue() + "]");
 		}
 		logInfo("Description", bundleVersion.getDescription());
 		int cc = 0;
@@ -358,33 +358,31 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	public void upgradesAvailable(AddOnStabilityLevel addonStabilityLevel) {
 		synchronized (mutex) {
 			addonStabilityLevel = checkAddOnStabilityLevel(addonStabilityLevel);
-			Map<String, Bundle> bundles = getUpgradableBundles(addonStabilityLevel);
-			if (bundles.size() > 0) {
+			final Map<String, Bundle> bundles = getUpgradableBundles(addonStabilityLevel);
+			if (bundles.isEmpty()) {
+				LOGGER.info("No add-ons / components are available for upgrade for level: " + addonStabilityLevel.name());
+			} else {
 				LOGGER.info("The following add-ons / components are available for upgrade for level: " + addonStabilityLevel.name());
 				printSeparator();
-				for (String existingBundleVersion : bundles.keySet()) {
-					Bundle bundle = bundles.get(existingBundleVersion);
-					BundleVersion latest = bundle.getLatestVersion();
+				for (final Entry<String, Bundle> entry : bundles.entrySet()) {
+					final BundleVersion latest = entry.getValue().getLatestVersion();
 					if (latest != null) {
-						LOGGER.info("[level: " + AddOnStabilityLevel.fromLevel(AddOnStabilityLevel.getAddOnStabilityLevel(latest.getVersion())).name() + "] " + existingBundleVersion + " > " + latest.getVersion());
+						LOGGER.info("[level: " + AddOnStabilityLevel.fromLevel(AddOnStabilityLevel.getAddOnStabilityLevel(latest.getVersion())).name() + "] " + entry.getKey() + " > " + latest.getVersion());
 					}
 				}
 				printSeparator();
-			} else {
-				LOGGER.info("No add-ons / components are available for upgrade for level: " + addonStabilityLevel.name());
 			}
 		}
 	}
 
 	public void upgradeAddOns() {
 		synchronized (mutex) {
-			AddOnStabilityLevel addonStabilityLevel = checkAddOnStabilityLevel(null);
-			Map<String, Bundle> bundles = getUpgradableBundles(addonStabilityLevel);
+			final AddOnStabilityLevel addonStabilityLevel = checkAddOnStabilityLevel(null);
+			final Map<String, Bundle> bundles = getUpgradableBundles(addonStabilityLevel);
 			boolean upgraded = false;
-			for (String key : bundles.keySet()) {
-				Bundle bundle = bundles.get(key);
-				BundleVersion bundleVersion = bundle.getLatestVersion();
-				InstallOrUpgradeStatus status = installOrUpgradeAddOn(bundleVersion, bundle.getSymbolicName(), false);
+			for (final Bundle bundle : bundles.values()) {
+				final BundleVersion bundleVersion = bundle.getLatestVersion();
+				final InstallOrUpgradeStatus status = installOrUpgradeAddOn(bundleVersion, bundle.getSymbolicName(), false);
 				if (status.equals(InstallOrUpgradeStatus.SUCCESS)) {
 					LOGGER.info("Successfully upgraded: " + bundle.getSymbolicName() + " [version: " + bundleVersion.getVersion() + "]");
 					upgraded = true;
