@@ -36,8 +36,8 @@ public class CloudFileConverter implements Converter<CloudFile> {
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
-		final String appName = ConverterUtils.getOptionValue("appName", target.remainingBuffer);
-		String path = ConverterUtils.getOptionValue("path", target.remainingBuffer);
+		final String appName = ConverterUtils.getOptionValue("appName", target.getRemainingBuffer());
+		String path = ConverterUtils.getOptionValue("path", target.getRemainingBuffer());
 		if (path != null) {
 			int index = path.lastIndexOf(/*"/"*/File.separator);
 			if (index > 0) {

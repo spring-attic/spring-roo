@@ -85,19 +85,19 @@ public class SimpleParser implements Parser {
 			MethodTarget methodTarget = matchingTargets.iterator().next();
 
 			// Argument conversion time
-			Annotation[][] parameterAnnotations = methodTarget.method.getParameterAnnotations();
+			Annotation[][] parameterAnnotations = methodTarget.getMethod().getParameterAnnotations();
 			if (parameterAnnotations.length == 0) {
 				// No args
-				return new ParseResult(methodTarget.method, methodTarget.target, null);
+				return new ParseResult(methodTarget.getMethod(), methodTarget.getTarget(), null);
 			}
 
 			// Oh well, we need to convert some arguments
-			final List<Object> arguments = new ArrayList<Object>(methodTarget.method.getParameterTypes().length);
+			final List<Object> arguments = new ArrayList<Object>(methodTarget.getMethod().getParameterTypes().length);
 
 			// Attempt to parse
 			Map<String, String> options = null;
 			try {
-				options = ParserUtils.tokenize(methodTarget.remainingBuffer);
+				options = ParserUtils.tokenize(methodTarget.getRemainingBuffer());
 			} catch (IllegalArgumentException e) {
 				logger.warning(ExceptionUtils.extractRootCause(e).getMessage());
 				return null;
@@ -105,7 +105,7 @@ public class SimpleParser implements Parser {
 			
 			final Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);	
 			for (CliOption cliOption : cliOptions) {
-				Class<?> requiredType = methodTarget.method.getParameterTypes()[arguments.size()];
+				Class<?> requiredType = methodTarget.getMethod().getParameterTypes()[arguments.size()];
 
 				if (cliOption.systemProvided()) {
 					Object result;
@@ -222,7 +222,7 @@ public class SimpleParser implements Parser {
 				return null;
 			}
 
-			return new ParseResult(methodTarget.method, methodTarget.target, arguments.toArray());
+			return new ParseResult(methodTarget.getMethod(), methodTarget.getTarget(), arguments.toArray());
 		}
 	}
 
@@ -276,10 +276,9 @@ public class SimpleParser implements Parser {
 
 		// The reflection could certainly be optimised, but it's good enough for now (and cached reflection
 		// is unlikely to be noticeable to a human being using the CLI)
-		for (Object o : commands) {
-			Method[] methods = o.getClass().getMethods();
-			for (Method m : methods) {
-				CliCommand cmd = m.getAnnotation(CliCommand.class);
+		for (final Object command : commands) {
+			for (final Method method : command.getClass().getMethods()) {
+				CliCommand cmd = method.getAnnotation(CliCommand.class);
 				if (cmd != null) {
 					// We have a @CliCommand.
 					if (checkAvailabilityIndicators) {
@@ -288,9 +287,9 @@ public class SimpleParser implements Parser {
 						for (String value : cmd.value()) {
 							MethodTarget mt = getAvailabilityIndicator(value);
 							if (mt != null) {
-								Assert.isNull(available, "More than one availability indicator is defined for '" + m.toGenericString() + "'");
+								Assert.isNull(available, "More than one availability indicator is defined for '" + method.toGenericString() + "'");
 								try {
-									available = (Boolean) mt.method.invoke(mt.target);
+									available = (Boolean) mt.getMethod().invoke(mt.getTarget());
 									// We should "break" here, but we loop over all to ensure no conflicting availability indicators are defined
 								} catch (Exception e) {
 									available = false;
@@ -306,12 +305,7 @@ public class SimpleParser implements Parser {
 					for (String value : cmd.value()) {
 						String remainingBuffer = isMatch(buffer, value, strictMatching);
 						if (remainingBuffer != null) {
-							MethodTarget mt = new MethodTarget();
-							mt.method = m;
-							mt.target = o;
-							mt.remainingBuffer = remainingBuffer;
-							mt.key = value;
-							result.add(mt);
+							result.add(new MethodTarget(method, command, remainingBuffer, value));
 						}
 					}
 				}
@@ -430,12 +424,12 @@ public class SimpleParser implements Parser {
 					int startAt = translated.length();
 					
 					// Only add the first word of each target
-					int stopAt = target.key.indexOf(" ", startAt);
+					int stopAt = target.getKey().indexOf(" ", startAt);
 					if (stopAt == -1) {
-						stopAt = target.key.length();
+						stopAt = target.getKey().length();
 					}
 					
-					results.add(target.key.substring(0, stopAt) + " ");
+					results.add(target.getKey().substring(0, stopAt) + " ");
 				}
 				candidates.addAll(results);
 				return 0;
@@ -445,13 +439,13 @@ public class SimpleParser implements Parser {
 			MethodTarget methodTarget = targets.iterator().next();
 
 			// Identify the command we're working with
-			CliCommand cmd = methodTarget.method.getAnnotation(CliCommand.class);
-			Assert.notNull(cmd, "CliCommand unavailable for '" + methodTarget.method.toGenericString() + "'");
+			CliCommand cmd = methodTarget.getMethod().getAnnotation(CliCommand.class);
+			Assert.notNull(cmd, "CliCommand unavailable for '" + methodTarget.getMethod().toGenericString() + "'");
 
 			// Make a reasonable attempt at parsing the remainingBuffer
 			Map<String, String> options;
 			try {
-				options = ParserUtils.tokenize(methodTarget.remainingBuffer);
+				options = ParserUtils.tokenize(methodTarget.getRemainingBuffer());
 			} catch (IllegalArgumentException ex) {
 				// Assume any IllegalArgumentException is due to a quotation mark mismatch
 				candidates.add(translated + "\"");
@@ -459,7 +453,7 @@ public class SimpleParser implements Parser {
 			}
 
 			// Lookup arguments for this target
-			Annotation[][] parameterAnnotations = methodTarget.method.getParameterAnnotations();
+			Annotation[][] parameterAnnotations = methodTarget.getMethod().getParameterAnnotations();
 
 			// If there aren't any parameters for the method, at least ensure they have typed the command properly
 			if (parameterAnnotations.length == 0) {
@@ -538,7 +532,7 @@ public class SimpleParser implements Parser {
 
 			// Handle if they are trying to find out the available option keys; always present option keys in order
 			// of their declaration on the method signature, thus we can stop when mandatory options are filled in
-			if (methodTarget.remainingBuffer.endsWith("--")) {
+			if (methodTarget.getRemainingBuffer().endsWith("--")) {
 				boolean showAllRemaining = true;
 				for (CliOption include : unspecified) {
 					if (include.mandatory()) {
@@ -577,13 +571,13 @@ public class SimpleParser implements Parser {
 									// Find the target parameter
 									Class<?> paramType = null;
 									int index = -1;
-									for (Annotation[] a : methodTarget.method.getParameterAnnotations()) {
+									for (Annotation[] a : methodTarget.getMethod().getParameterAnnotations()) {
 										index++;
 										for (Annotation an : a) {
 											if (an instanceof CliOption) {
 												if (an.equals(include)) {
 													// Found the parameter, so store it
-													paramType = methodTarget.method.getParameterTypes()[index];
+													paramType = methodTarget.getMethod().getParameterTypes()[index];
 													break;
 												}
 											}
@@ -644,7 +638,7 @@ public class SimpleParser implements Parser {
 			if (lastOptionKey != null && !"".equals(lastOptionKey)) {
 				// Lookup the relevant CliOption that applies to this lastOptionKey
 				// We do this via the parameter type
-				Class<?>[] parameterTypes = methodTarget.method.getParameterTypes();
+				Class<?>[] parameterTypes = methodTarget.getMethod().getParameterTypes();
 				for (int i = 0; i < parameterTypes.length; i++) {
 					CliOption option = cliOptions.get(i);
 					Class<?> parameterType = parameterTypes[i];
@@ -950,10 +944,10 @@ public class SimpleParser implements Parser {
 				MethodTarget methodTarget = matchingTargets.iterator().next();
 
 				// Argument conversion time
-				Annotation[][] parameterAnnotations = methodTarget.method.getParameterAnnotations();
+				Annotation[][] parameterAnnotations = methodTarget.getMethod().getParameterAnnotations();
 				if (parameterAnnotations.length > 0) {
 					// Offer specified help
-					CliCommand cmd = methodTarget.method.getAnnotation(CliCommand.class);
+					CliCommand cmd = methodTarget.getMethod().getAnnotation(CliCommand.class);
 					Assert.notNull(cmd, "CliCommand not found");
 
 					for (String value : cmd.value()) {
@@ -991,7 +985,7 @@ public class SimpleParser implements Parser {
 
 			SortedSet<String> result = new TreeSet<String>(comparator);
 			for (MethodTarget mt : matchingTargets) {
-				CliCommand cmd = mt.method.getAnnotation(CliCommand.class);
+				CliCommand cmd = mt.getMethod().getAnnotation(CliCommand.class);
 				if (cmd != null) {
 					for (String value : cmd.value()) {
 						if ("".equals(cmd.help())) {
@@ -1031,17 +1025,14 @@ public class SimpleParser implements Parser {
 	public final void add(CommandMarker command) {
 		synchronized (mutex) {
 			commands.add(command);
-			for (Method m : command.getClass().getMethods()) {
-				CliAvailabilityIndicator availability = m.getAnnotation(CliAvailabilityIndicator.class);
+			for (final Method method : command.getClass().getMethods()) {
+				CliAvailabilityIndicator availability = method.getAnnotation(CliAvailabilityIndicator.class);
 				if (availability != null) {
-					Assert.isTrue(m.getParameterTypes().length == 0, "CliAvailabilityIndicator is only legal for 0 parameter methods (" + m.toGenericString() + ")");
-					Assert.isTrue(m.getReturnType().equals(Boolean.TYPE), "CliAvailabilityIndicator is only legal for primitive boolean return types (" + m.toGenericString() + ")");
+					Assert.isTrue(method.getParameterTypes().length == 0, "CliAvailabilityIndicator is only legal for 0 parameter methods (" + method.toGenericString() + ")");
+					Assert.isTrue(method.getReturnType().equals(Boolean.TYPE), "CliAvailabilityIndicator is only legal for primitive boolean return types (" + method.toGenericString() + ")");
 					for (String cmd : availability.value()) {
 						Assert.isTrue(!availabilityIndicators.containsKey(cmd), "Cannot specify an availability indicator for '" + cmd + "' more than once");
-						MethodTarget methodTarget = new MethodTarget();
-						methodTarget.method = m;
-						methodTarget.target = command;
-						availabilityIndicators.put(cmd, methodTarget);
+						availabilityIndicators.put(cmd, new MethodTarget(method, command, null, null));
 					}
 				}
 			}

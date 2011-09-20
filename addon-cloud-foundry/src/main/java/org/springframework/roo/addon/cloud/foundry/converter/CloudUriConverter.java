@@ -34,7 +34,7 @@ public class CloudUriConverter implements Converter<CloudUri> {
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
-		final String appName = ConverterUtils.getOptionValue("appName", target.remainingBuffer);
+		final String appName = ConverterUtils.getOptionValue("appName", target.getRemainingBuffer());
 		final List<String> uris = session.getBoundUrlMap().get(appName);
 		if (uris != null) {
 			completions.addAll(uris);

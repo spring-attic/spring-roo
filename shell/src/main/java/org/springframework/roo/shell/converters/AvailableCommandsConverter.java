@@ -23,8 +23,8 @@ public class AvailableCommandsConverter implements Converter<String> {
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
-		if (target.target instanceof SimpleParser) {
-			SimpleParser cmd = (SimpleParser) target.target;
+		if (target.getTarget() instanceof SimpleParser) {
+			SimpleParser cmd = (SimpleParser) target.getTarget();
 
 			// Only include the first word of each command
 			for (String s : cmd.getEveryCommand()) {
