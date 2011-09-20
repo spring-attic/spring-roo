@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.javaparser;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
 import japa.parser.ASTHelper;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
@@ -169,7 +170,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 			// Superclass handling
 			List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
 			for (JavaType current : cit.getExtendsTypes()) {
-				if (!"java.lang.Object".equals(current.getFullyQualifiedTypeName())) {
+				if (!OBJECT.equals(current)) {
 					extendsList.add(JavaParserUtils.getResolvedName(cit.getName(), current, compilationUnit));
 				}
 			}

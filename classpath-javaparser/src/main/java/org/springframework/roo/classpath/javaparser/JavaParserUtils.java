@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.javaparser;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
@@ -280,7 +281,7 @@ public class JavaParserUtils  {
 				JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
 				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), effectiveType.getDataType(), JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
 			} else {
-				return new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
+				return new JavaType(OBJECT.getFullyQualifiedTypeName(), 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
 			}
 		}
 
@@ -368,7 +369,7 @@ public class JavaParserUtils  {
 		}
 
 		if ("?".equals(nameToFind.getName())) {
-			return new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
+			return new JavaType(OBJECT.getFullyQualifiedTypeName(), 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
 		}
 
 		// Unqualified name detected, so check if it's in the type parameter list
@@ -531,7 +532,7 @@ public class JavaParserUtils  {
 				locatedTypeParameters.add(currentTypeParam);
 				JavaType javaType = null;
 				if (candidate.getTypeBound() == null) {
-					javaType = new JavaType("java.lang.Object", 0, DataType.TYPE, currentTypeParam, null);
+					javaType = new JavaType(OBJECT.getFullyQualifiedTypeName(), 0, DataType.TYPE, currentTypeParam, null);
 				} else {
 					ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
 					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, cit, locatedTypeParameters);
