@@ -338,6 +338,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, Table joinTable, Table inverseSideTable, CascadeAction onUpdate, CascadeAction onDelete) {
+		Assert.notNull(joinTable, "Join table required");
+		Assert.isTrue(joinTable.getImportedKeys().size() == 2, "Join table '"+ joinTable.getName() + "' must have two imported keys");
+		
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = DbreTypeUtils.findTypeForTable(managedEntities, inverseSideTable);
 		Assert.notNull(element, "Attempted to create many-to-many owning-side field '"+ fieldName + "' in '" + destination.getFullyQualifiedTypeName() + "' " + getErrorMsg(inverseSideTable.getFullyQualifiedTableName()));
@@ -371,9 +374,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add "inverseJoinColumns" attribute containing nested @JoinColumn annotations
 		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-		Set<Reference> lastLastReferences = iter.next().getReferences();
-		for (Reference reference : lastLastReferences) {
-			AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(reference, (lastLastReferences.size() > 1));
+		Set<Reference> lastKeyReferences = iter.next().getReferences();
+		for (Reference reference : lastKeyReferences) {
+			AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(reference, (lastKeyReferences.size() > 1));
 			inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
 		}
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
@@ -558,16 +561,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 	
 	private void addCascadeType(AnnotationMetadataBuilder annotationBuilder, CascadeAction onUpdate, CascadeAction onDelete) {
+		final String attributeName = "cascade";
 		boolean hasCascadeType = true;
 		if (onUpdate == CascadeAction.CASCADE && onDelete == CascadeAction.CASCADE) {
-			annotationBuilder.addEnumAttribute("cascade", CASCADE_TYPE, "ALL");
+			annotationBuilder.addEnumAttribute(attributeName, CASCADE_TYPE, "ALL");
 		} else if (onUpdate == CascadeAction.CASCADE && onDelete != CascadeAction.CASCADE) {
 			List<EnumAttributeValue> arrayValues = new ArrayList<EnumAttributeValue>();
-			arrayValues.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(CASCADE_TYPE, new JavaSymbolName("PERSIST"))));
-			arrayValues.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(CASCADE_TYPE, new JavaSymbolName("MERGE"))));
-			annotationBuilder.addAttribute(new ArrayAttributeValue<EnumAttributeValue>(new JavaSymbolName("cascade"), arrayValues));
+			arrayValues.add(new EnumAttributeValue(new JavaSymbolName(attributeName), new EnumDetails(CASCADE_TYPE, new JavaSymbolName("PERSIST"))));
+			arrayValues.add(new EnumAttributeValue(new JavaSymbolName(attributeName), new EnumDetails(CASCADE_TYPE, new JavaSymbolName("MERGE"))));
+			annotationBuilder.addAttribute(new ArrayAttributeValue<EnumAttributeValue>(new JavaSymbolName(attributeName), arrayValues));
 		} else if (onUpdate != CascadeAction.CASCADE && onDelete == CascadeAction.CASCADE) {
-			annotationBuilder.addEnumAttribute("cascade", CASCADE_TYPE.getSimpleTypeName(), "REMOVE");
+			annotationBuilder.addEnumAttribute(attributeName, CASCADE_TYPE.getSimpleTypeName(), "REMOVE");
 		} else {
 			hasCascadeType = false;
 		}
@@ -658,7 +662,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		JavaType fieldType = column.getJavaType();
 		Assert.notNull(fieldType, "Field type for column '" + column.getName() + "' in table '"+ tableName +"' is null");
 		
-		// Check if field is a Boolean object and is required, and change to boolean primitive
+		// Check if field is a Boolean object and is required, then change to boolean primitive
 		if (fieldType.equals(JavaType.BOOLEAN_OBJECT) && column.isRequired()) {
 			fieldType = JavaType.BOOLEAN_PRIMITIVE;
 		}
@@ -740,21 +744,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			return true;
 		}
 
-		// Check @Column annotation on fields in governor with same 'name'
-		// attribute as the 'name' attribute in the @JoinColumn for the generated field
+		// Check @Column and @JoinColumn annotations on fields in governor with the same 'name' as the generated field 
 		List<FieldMetadata> governorFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, COLUMN);
 		governorFields.addAll(MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, JOIN_COLUMN));
 		for (FieldMetadata governorField : governorFields) {
-			governorAnnotations: for (AnnotationMetadata governorAnnotation : governorField.getAnnotations()) {
-				if (governorAnnotation.getAnnotationType().equals(COLUMN) || governorAnnotation.getAnnotationType().equals(JOIN_COLUMN)) {
-					AnnotationAttributeValue<?> name = governorAnnotation.getAttribute(new JavaSymbolName(NAME));
+			governorFieldAnnotations: for (AnnotationMetadata governorFieldAnnotation : governorField.getAnnotations()) {
+				if (governorFieldAnnotation.getAnnotationType().equals(COLUMN) || governorFieldAnnotation.getAnnotationType().equals(JOIN_COLUMN)) {
+					AnnotationAttributeValue<?> name = governorFieldAnnotation.getAttribute(new JavaSymbolName(NAME));
 					if (name == null) {
-						continue governorAnnotations;
+						continue governorFieldAnnotations;
 					}
-					fieldAnnotations: for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
-						if (!annotationMetadata.getAnnotationType().equals(JOIN_COLUMN)) {
-							continue fieldAnnotations;
-						}
+					for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
 						AnnotationAttributeValue<?> columnName = annotationMetadata.getAttribute(new JavaSymbolName(NAME));
 						if (columnName != null && columnName.equals(name)) {
 							return true;
@@ -771,7 +771,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	 * Indicates whether the ITD being built has a field of the given name
 	 * 
 	 * @param fieldName
-	 * @return
+	 * @return true if the field exists in the builder, otherwise false
 	 */
 	private boolean hasFieldInItd(final JavaSymbolName fieldName) {
 		for (final FieldMetadataBuilder declaredField : builder.getDeclaredFields()) {
@@ -783,46 +783,37 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private boolean hasAccessor(FieldMetadata field) {
-		String requiredAccessorName = getRequiredAccessorName(field);
-
 		// Check governor for accessor method
-		return getGovernorMethod(new JavaSymbolName(requiredAccessorName)) != null;
+		return getGovernorMethod(getRequiredAccessorName(field)) != null;
 	}
 
 	private MethodMetadata getAccessor(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
-		String methodBody = "return this." + field.getFieldName().getSymbolName() + ";";
-		return getAccessor(field.getFieldType(), getRequiredAccessorName(field), methodBody);
-	}
-
-	private MethodMetadata getAccessor(JavaType fieldType, String requiredAccessorName, String methodBody) {
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(methodBody);
+		bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), fieldType, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, getRequiredAccessorName(field), field.getFieldType(), bodyBuilder);
 		return methodBuilder.build();
 	}
 
-	private String getRequiredAccessorName(FieldMetadata field) {
+	private JavaSymbolName getRequiredAccessorName(FieldMetadata field) {
 		String methodName;
 		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
 			methodName = "is" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 		} else {
 			methodName = "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 		}
-		return methodName;
+		return new JavaSymbolName(methodName);
 	}
 
 	private boolean hasMutator(FieldMetadata field) {
-		String requiredMutatorName = getRequiredMutatorName(field);
-
 		// Check governor for mutator method
-		return getGovernorMethod(new JavaSymbolName(requiredMutatorName)) != null;
-
+		return getGovernorMethod(getRequiredMutatorName(field)) != null;
 	}
 
 	private MethodMetadata getMutator(FieldMetadata field) {
-		String requiredMutatorName = getRequiredMutatorName(field);
+		Assert.notNull(field, "Field required");
 
 		List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
 		List<JavaSymbolName> parameterNames = Arrays.asList(field.getFieldName());
@@ -830,12 +821,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, getRequiredMutatorName(field), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
-	private String getRequiredMutatorName(FieldMetadata field) {
-		return "set" + StringUtils.capitalize(field.getFieldName().getSymbolName());
+	private JavaSymbolName getRequiredMutatorName(FieldMetadata field) {
+		return new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
 	}
 
 	private String getInflectorPlural(String term) {
