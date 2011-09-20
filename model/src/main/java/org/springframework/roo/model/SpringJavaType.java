@@ -14,8 +14,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public final class SpringJavaType {
 
-	// Literal class names are used to avoid dependencies upon Spring.
-
+	// org.springframework
 	public static final JavaType ASYNC = new JavaType("org.springframework.scheduling.annotation.Async");
 	public static final JavaType AUTOWIRED = new JavaType("org.springframework.beans.factory.annotation.Autowired");
 	public static final JavaType BINDING_RESULT = new JavaType("org.springframework.validation.BindingResult");

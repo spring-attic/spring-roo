@@ -10,7 +10,7 @@ package org.springframework.roo.model;
  */
 public final class JpaJavaType {
 
-	// Constants
+	// javax.persistence
 	public static final JavaType CASCADE_TYPE = new JavaType("javax.persistence.CascadeType");
 	public static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	public static final JavaType DISCRIMINATOR_COLUMN = new JavaType("javax.persistence.DiscriminatorColumn");
@@ -52,6 +52,5 @@ public final class JpaJavaType {
 	/**
 	 * Constructor is private to prevent instantiation
 	 */
-	private JpaJavaType() {
-	}
+	private JpaJavaType() {}
 }

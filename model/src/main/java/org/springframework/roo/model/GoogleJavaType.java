@@ -12,7 +12,7 @@ package org.springframework.roo.model;
  */
 public final class GoogleJavaType {
 	
-	// GAE
+	// com.google.appengine
 	public static final JavaType GAE_DATASTORE_KEY = new JavaType("com.google.appengine.api.datastore.Key");
 	public static final JavaType GAE_DATASTORE_KEY_FACTORY = new JavaType("com.google.appengine.api.datastore.KeyFactory");
 	public static final JavaType GAE_LOCAL_SERVICE_TEST_HELPER = new JavaType("com.google.appengine.tools.development.testing.LocalServiceTestHelper");

@@ -31,6 +31,7 @@ import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.LIST;
+import static org.springframework.roo.model.JdkJavaType.POST_CONSTRUCT;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
 import java.util.ArrayList;
@@ -287,7 +288,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		}
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("javax.annotation.PostConstruct")));
+		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(POST_CONSTRUCT));
 		return methodBuilder.build();
 	}
 	

@@ -10,11 +10,11 @@ package org.springframework.roo.model;
  */
 public final class JdkJavaType {
 
-	// java.math constants
+	// java.math 
 	public static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 	public static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
 	
-	// java.security constants
+	// java.security
 	public static final JavaType SECURE_RANDOM = new JavaType("java.security.SecureRandom");
 
 	// java.util constants
@@ -29,6 +29,9 @@ public final class JdkJavaType {
 	public static final JavaType RANDOM = new JavaType("java.util.Random");
 	public static final JavaType SET = new JavaType("java.util.Set");
 	public static final JavaType SUPPRESS_WARNINGS = new JavaType("java.lang.SuppressWarnings");
+	
+	// javax.annotation 
+	public static final JavaType POST_CONSTRUCT = new JavaType("javax.annotation.PostConstruct");
 
 	/**
 	 * Constructor is private to prevent instantiation
