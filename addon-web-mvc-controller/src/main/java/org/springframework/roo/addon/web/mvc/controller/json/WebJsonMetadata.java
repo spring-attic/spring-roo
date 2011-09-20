@@ -477,7 +477,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			parameterTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
 			
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
-				methodParams.append(field.getFieldName() + " == null ? new Boolean(false) : " + field.getFieldName() + ", ");
+				methodParams.append(field.getFieldName() + " == null ? Boolean.FALSE : " + field.getFieldName() + ", ");
 			} else {
 				methodParams.append(field.getFieldName() + ", ");
 			}

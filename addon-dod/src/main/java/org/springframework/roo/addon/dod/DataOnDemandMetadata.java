@@ -182,13 +182,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		while (true) {
 			// Compute the required field name
 			index++;
-			String fieldName = "";
-			for (int i = 0; i < index; i++) {
-				fieldName = fieldName + "_";
-			}
-			fieldName = fieldName + "rnd";
-
-			JavaSymbolName fieldSymbolName = new JavaSymbolName(fieldName);
+			JavaSymbolName fieldSymbolName = new JavaSymbolName(StringUtils.repeat("_", index) + "rnd");
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
@@ -227,16 +221,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		while (true) {
 			// Compute the required field name
 			index++;
-			String fieldName = "";
-			for (int i = 0; i < index; i++) {
-				fieldName = fieldName + "_";
-			}
-			fieldName = fieldName + "data";
 
 			// The type parameters to be used by the field type
 			List<JavaType> parameterTypes = Arrays.asList(annotationValues.getEntity());
-
-			JavaSymbolName fieldSymbolName = new JavaSymbolName(fieldName);
+			JavaSymbolName fieldSymbolName = new JavaSymbolName(StringUtils.repeat("_", index) + "data");
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
@@ -1133,13 +1121,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		while (true) {
 			// Compute the required field name
 			index++;
-			String fieldName = "";
-			for (int i = 0; i < index; i++) {
-				fieldName = fieldName + "_";
-			}
-			fieldName = "embeddedIdClass" + fieldName;
-
-			embeddedIdField = new JavaSymbolName(fieldName);
+			embeddedIdField = new JavaSymbolName("embeddedIdClass" + StringUtils.repeat("_", index));
 			if (!fieldNames.contains(embeddedIdField)) {
 				// Found a usable name
 				break;

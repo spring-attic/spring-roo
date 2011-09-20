@@ -266,10 +266,12 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					Map<File,Long> priorFiles = priorExecution.get(request);
 					
 					// Locate created and modified files
-					for (File thisFile : currentExecution.keySet()) {
+					for (final Entry<File, Long> entry : currentExecution.entrySet()) {
+						final File thisFile = entry.getKey();
+						final Long currentTimestamp = entry.getValue();
 						if (!priorFiles.containsKey(thisFile)) {
 							// This file did not exist last execution, so it must be new
-							eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentExecution.get(thisFile)), FileOperation.CREATED, null));
+							eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentTimestamp), FileOperation.CREATED, null));
 							try {
 								// If this file was already going to be notified, there is no need to do it twice
 								notifyCreated.remove(thisFile.getCanonicalPath());
@@ -277,11 +279,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 							continue;
 						} 
 						
-						Long currentTimestamp = currentExecution.get(thisFile);
 						Long previousTimestamp = priorFiles.get(thisFile);
 						if (!currentTimestamp.equals(previousTimestamp)) {
 							// Modified
-							eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentExecution.get(thisFile)), FileOperation.UPDATED, null));
+							eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentTimestamp), FileOperation.UPDATED, null));
 							try {
 								// If this file was already going to be notified, there is no need to do it twice
 								notifyChanged.remove(thisFile.getCanonicalPath());

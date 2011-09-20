@@ -206,7 +206,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			parameterTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
 
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
-				methodParams.append(fieldName + " == null ? new Boolean(false) : " + fieldName + ", ");
+				methodParams.append(fieldName + " == null ? Boolean.FALSE : " + fieldName + ", ");
 			} else {
 				methodParams.append(fieldName + ", ");
 			}

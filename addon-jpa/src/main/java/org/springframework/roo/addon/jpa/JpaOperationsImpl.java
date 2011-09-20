@@ -367,11 +367,11 @@ public class JpaOperationsImpl implements JpaOperations {
 						properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "force", persistence));
 						properties.appendChild(createPropertyElement("datanucleus.Optimistic", "false", persistence));
 						properties.appendChild(createPropertyElement("datanucleus.datastoreTransactionDelayOperations", "true", persistence));
-						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", new Boolean(!isDbreProject).toString(), persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", Boolean.toString(!isDbreProject), persistence));
 						break;
 					default:
 						properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", jdbcDatabase.getDriverClassName(), persistence));
-						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", new Boolean(!isDbreProject).toString(), persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", Boolean.toString(!isDbreProject), persistence));
 						final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 						connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 						if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
