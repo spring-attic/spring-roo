@@ -32,7 +32,12 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		String candidateName = proposedName;
 		while (MemberFindingUtils.getField(this, new JavaSymbolName(candidateName)) != null) {
 			// The proposed field name is taken; differentiate it
-			candidateName += "_";
+			if (prepend) {
+				candidateName = "_" + candidateName;
+			} else {
+				// Append
+				candidateName = candidateName + "_";
+			}
 		}
 		// We've derived a unique name
 		return new JavaSymbolName(candidateName);
