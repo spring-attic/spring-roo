@@ -18,6 +18,8 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_CLOSE_EVE
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD_EVENT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MESSAGE;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SLIDER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_UPLOADED_FILE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
@@ -27,11 +29,16 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
+import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.POST_CONSTRUCT;
+import static org.springframework.roo.model.Jsr303JavaType.MAX;
+import static org.springframework.roo.model.Jsr303JavaType.MIN;
+import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
+import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
 import java.util.ArrayList;
@@ -43,6 +50,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -61,6 +69,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -548,13 +557,35 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
 				} else {
+					if (fieldType.equals(JdkJavaType.BIG_INTEGER) || fieldType.equals(JdkJavaType.BIG_DECIMAL)) {
+						imports.addImport(fieldType);
+					}
 					bodyBuilder.appendFormalLine("InputText " + fieldValueVar + " = " + getComponentCreationStr("InputText"));
 				}
-				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "String"));
+				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, fieldType.getSimpleTypeName()));
 			}
 			bodyBuilder.appendFormalLine(fieldValueVar + ".setId(\"" + fieldValueVar + "\");");
 			// bodyBuilder.appendFormalLine(fieldValueVar + ".setStyle(\"font-weight:normal\");");
-			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");	
+			if (action != Action.VIEW) {
+				if (!isNullable(field)) {
+					bodyBuilder.appendFormalLine(fieldValueVar + ".setRequired(true);");
+				}
+				if (isIntegerFieldType(fieldType)) {
+					bodyBuilder.append(getSliderText(field, fieldValueVar));
+				} else {
+					bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");
+				}
+				
+				// Add message for input field
+				imports.addImport(PRIMEFACES_MESSAGE);
+				bodyBuilder.appendFormalLine("");
+				bodyBuilder.appendFormalLine("Message " + fieldValueVar + "Message = " + getComponentCreationStr("Message"));
+				bodyBuilder.appendFormalLine(fieldValueVar + "Message.setFor(\"" + fieldValueVar + "\");");
+				bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + "Message);");
+			} else {
+				bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");
+			}
+
 			bodyBuilder.appendFormalLine("");
 		}
 		
@@ -562,6 +593,32 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
+	}
+	
+	private String getSliderText(FieldMetadata field, String fieldValueVar) {
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(PRIMEFACES_SLIDER);
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("Slider " + fieldValueVar + "Slider = " + getComponentCreationStr("Slider"));
+		bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setFor(\"" + fieldValueVar + "\");");
+
+		// Apply min and max constraints
+		int minValue = getMinValue(field);
+		if (minValue > 0) {
+			bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setMinValue(" + minValue + ");");
+		}
+		int maxValue = getMaxValue(field);
+		if (maxValue > 0) {
+			bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setMaxValue(" + maxValue + ");");
+		}
+
+		bodyBuilder.appendFormalLine("HtmlPanelGrid " + fieldValueVar + "PanelGrid = " + getComponentCreationStr("HtmlPanelGrid"));
+		bodyBuilder.appendFormalLine(fieldValueVar + "PanelGrid.getChildren().add(" + fieldValueVar + ");");
+		bodyBuilder.appendFormalLine(fieldValueVar + "PanelGrid.getChildren().add(" + fieldValueVar + "Slider);");
+		bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + "PanelGrid);");
+		
+		return bodyBuilder.getOutput();
 	}
 
 	/**
@@ -579,6 +636,43 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return false;
 	}
 	
+	private boolean isIntegerFieldType(JavaType fieldType) {
+		return fieldType.equals(BIG_INTEGER) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_OBJECT);
+	}
+	
+	private boolean isNullable(final FieldMetadata field) {
+		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null;
+	}
+	
+	private int getMinValue(final FieldMetadata field) {
+		AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
+		AnnotationMetadata minAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
+		if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("min")) != null) {
+			return (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("min")).getValue();
+		} else if (sizeAnnotation == null && minAnnotation != null) {
+			Number value = (Number) minAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			return value.intValue();
+		}
+		return -1;
+	}
+
+	private int getMaxValue(final FieldMetadata field) {
+		@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+		AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
+		AnnotationMetadata maxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
+		if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
+			return (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
+		} else if (sizeAnnotation == null && maxAnnotation != null) {
+			Number value = (Number) maxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
+			return value.intValue();
+		} else if (maxAnnotation == null && values != null) {
+			if (values.containsKey("length")) {
+				return (Integer) values.get("length");
+			}
+		}
+		return -1;
+	}
+
 	private MethodMetadata getFileUploadListenerMethod(final FieldMetadata rooUploadedFileField) {
 		final JavaSymbolName methodName = getFileUploadMethodName(rooUploadedFileField.getFieldName());
 		final JavaType parameterType = PRIMEFACES_FILE_UPLOAD_EVENT;

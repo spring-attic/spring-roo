@@ -43,6 +43,9 @@ public class JsfJavaType {
 	public static final JavaType PRIMEFACES_INPUT_TEXT = new JavaType("org.primefaces.component.inputtext.InputText");
 	public static final JavaType PRIMEFACES_MENU_ITEM = new JavaType("org.primefaces.component.menuitem.MenuItem");
 	public static final JavaType PRIMEFACES_MENU_MODEL = new JavaType("org.primefaces.model.MenuModel");
+	public static final JavaType PRIMEFACES_MESSAGE = new JavaType("org.primefaces.component.message.Message");
+	public static final JavaType PRIMEFACES_SLIDER = new JavaType("org.primefaces.component.slider.Slider");
+	public static final JavaType PRIMEFACES_SPINNER = new JavaType("org.primefaces.component.spinner.Spinner");
 	public static final JavaType PRIMEFACES_SUB_MENU = new JavaType("org.primefaces.component.submenu.Submenu");
 	public static final JavaType PRIMEFACES_UPLOADED_FILE = new JavaType("org.primefaces.model.UploadedFile");
 
