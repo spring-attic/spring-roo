@@ -19,6 +19,7 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLO
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD_EVENT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MESSAGE;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_REQUEST_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SLIDER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_UPLOADED_FILE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
@@ -506,10 +507,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final String fieldLabelVar = fieldName + fieldSuffix1;
 			final String fieldValueVar = fieldName + fieldSuffix2;
 			final String converterName = fieldValueVar + "Converter";
+			final boolean nullable = isNullable(field);
 
 			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelVar + " = " + getComponentCreationStr("HtmlOutputText"));
 			bodyBuilder.appendFormalLine(fieldLabelVar + ".setId(\"" + fieldLabelVar + "\");");
-			bodyBuilder.appendFormalLine(fieldLabelVar + ".setValue(\"" + fieldName + ": \");");
+			bodyBuilder.appendFormalLine(fieldLabelVar + ".setValue(\"" + fieldName + ":" + (nullable ? "   " : " * ") + "\");");
 			// bodyBuilder.appendFormalLine(fieldLabelVar + ".setStyle(\"font-weight:bold\");");
 			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldLabelVar + ");");
 			bodyBuilder.appendFormalLine("");
@@ -567,11 +569,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			bodyBuilder.appendFormalLine(fieldValueVar + ".setId(\"" + fieldValueVar + "\");");
 			// bodyBuilder.appendFormalLine(fieldValueVar + ".setStyle(\"font-weight:normal\");");
 			if (action != Action.VIEW) {
-				if (!isNullable(field)) {
+				if (!nullable) {
 					bodyBuilder.appendFormalLine(fieldValueVar + ".setRequired(true);");
 				}
 				if (isIntegerFieldType(fieldType)) {
-					bodyBuilder.append(getSliderText(field, fieldValueVar));
+					int minValue = getMinValue(field);
+					int maxValue = getMaxValue(field);
+					bodyBuilder.append(getSliderText(field, fieldValueVar, minValue, maxValue));
 				} else {
 					bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");
 				}
@@ -580,7 +584,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				imports.addImport(PRIMEFACES_MESSAGE);
 				bodyBuilder.appendFormalLine("");
 				bodyBuilder.appendFormalLine("Message " + fieldValueVar + "Message = " + getComponentCreationStr("Message"));
+				bodyBuilder.appendFormalLine(fieldValueVar + "Message.setId(\"" + fieldLabelVar + "Message\");");
 				bodyBuilder.appendFormalLine(fieldValueVar + "Message.setFor(\"" + fieldValueVar + "\");");
+				bodyBuilder.appendFormalLine(fieldValueVar + "Message.setDisplay(\"icon\");");
 				bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + "Message);");
 			} else {
 				bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");
@@ -595,7 +601,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private String getSliderText(FieldMetadata field, String fieldValueVar) {
+	private String getSliderText(FieldMetadata field, String fieldValueVar, int minValue, int maxValue) {
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(PRIMEFACES_SLIDER);
 
@@ -604,11 +610,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setFor(\"" + fieldValueVar + "\");");
 
 		// Apply min and max constraints
-		int minValue = getMinValue(field);
 		if (minValue > 0) {
 			bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setMinValue(" + minValue + ");");
 		}
-		int maxValue = getMaxValue(field);
 		if (maxValue > 0) {
 			bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setMaxValue(" + maxValue + ");");
 		}
@@ -789,6 +793,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(FACES_MESSAGE);
+		imports.addImport(PRIMEFACES_REQUEST_CONTEXT);
 
 		final String fieldName = getEntityName();
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -806,6 +811,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("message = \"Successfully created\";");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("RequestContext context = RequestContext.getCurrentInstance();");
+		bodyBuilder.appendFormalLine("context.execute(\"createDialog.hide()\");");
+		bodyBuilder.appendFormalLine("context.execute(\"editDialog.hide()\");");
+		bodyBuilder.appendFormalLine("");
 		bodyBuilder.appendFormalLine("FacesMessage facesMessage = new FacesMessage(message);");
 		bodyBuilder.appendFormalLine("FacesContext.getCurrentInstance().addMessage(null, facesMessage);");
 		bodyBuilder.appendFormalLine("reset();");
