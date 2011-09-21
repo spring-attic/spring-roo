@@ -1,6 +1,16 @@
 package org.springframework.roo.classpath.javaparser;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+
 import japa.parser.ASTHelper;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
@@ -17,16 +27,6 @@ import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -100,6 +100,9 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		try {
 			CompilationUnit compilationUnit = JavaParser.parse(new ByteArrayInputStream(fileContents.getBytes()));
 			TypeDeclaration typeDeclaration = JavaParserUtils.locateTypeDeclaration(compilationUnit, typeName);
+			if (typeDeclaration == null) {
+				return null;
+			}
 			return JavaParserClassOrInterfaceTypeDetailsBuilder.getInstance(compilationUnit, null, typeDeclaration, declaredByMetadataId, typeName, metadataService, typeLocationService).build();
 		} catch (ParseException e) {
 			throw new IllegalStateException(e);
