@@ -4,12 +4,12 @@ import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
-import hapax.Template;
-import hapax.TemplateDataDictionary;
-import hapax.TemplateDictionary;
-import hapax.TemplateException;
-import hapax.TemplateLoader;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,12 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
+import hapax.Template;
+import hapax.TemplateDataDictionary;
+import hapax.TemplateDictionary;
+import hapax.TemplateException;
+import hapax.TemplateLoader;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -145,7 +144,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				addImport(dataDictionary, proxyProperty.getPropertyType());
 
 				String contents = getTemplateContents("CollectionEditor" + "UiXml", dataDictionary);
-				xmlMap.put(GwtPath.MANAGED_UI.canonicalFileSystemPath(projectMetadata) + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
+				xmlMap.put(GwtPath.MANAGED_UI.canonicalFileSystemPath(projectOperations) + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
 			}
 		}
 

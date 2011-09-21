@@ -1,6 +1,13 @@
 package org.springframework.roo.classpath.javaparser;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
@@ -23,13 +30,6 @@ import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaPackage;

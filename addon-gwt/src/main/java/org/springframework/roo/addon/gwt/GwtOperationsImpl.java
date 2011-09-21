@@ -197,7 +197,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 
 		for (ClassOrInterfaceTypeDetails proxyOrRequest : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_MIRRORED_FROM)) {
-			System.out.println("proxyOrRequest: " + proxyOrRequest.getName());
 			ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(proxyOrRequest);
 			if (proxyOrRequest.extendsType(GwtUtils.ENTITY_PROXY) || proxyOrRequest.extendsType(GwtUtils.OLD_ENTITY_PROXY)) {
 				AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(proxyOrRequest.getAnnotations(), RooJavaType.ROO_GWT_MIRRORED_FROM);
@@ -492,7 +491,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	private void updateGaeHelper() {
 		String sourceAntPath = "module/client/scaffold/gae/GaeHelper-template.java";
 		String segmentPackage = "client.scaffold.gae";
-		String targetDirectory = projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "client" + File.separator + "scaffold" + File.separator + "gae");
+		String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "client" + File.separator + "scaffold" + File.separator + "gae");
 		updateFile(sourceAntPath, targetDirectory, segmentPackage, true);
 	}
 
@@ -507,7 +506,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (sourceAntPath.contains("gae") && !projectOperations.getProjectMetadata().isGaeEnabled()) {
 			return;
 		}
-		String targetDirectory = gwtPath.canonicalFileSystemPath(projectOperations.getProjectMetadata());
+		String targetDirectory = gwtPath.canonicalFileSystemPath(projectOperations);
 		updateFile(sourceAntPath, targetDirectory, gwtPath.segmentPackage(), false);
 	}
 

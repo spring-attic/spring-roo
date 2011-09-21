@@ -180,10 +180,6 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		 * type will trickle down to the governing java type.
 		 */
 		final JpaEntityMetadata parentEntity = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
-
-		// If the project itself changes, we want a chance to refresh this item
-		metadataDependencyRegistry.registerDependency(ProjectMetadata.PROJECT_IDENTIFIER, metadataId);
-		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.PROJECT_IDENTIFIER);
 		
 		// Get the governor's members
 		final MemberDetails governorDetails = getMemberDetails(governorPhysicalType);
@@ -191,7 +187,18 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		// Get the governor's ID field, if any
 		final Identifier identifier = getIdentifier(metadataId);
 
-		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectMetadata, governorDetails, identifier, jpaEntityAnnotationValues);
+		boolean isGaeEnabled = false;
+		boolean isDatabaseDotComEnabled = false;
+
+		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.PROJECT_IDENTIFIER);
+		if (projectMetadata != null) {
+			// If the project itself changes, we want a chance to refresh this item
+			metadataDependencyRegistry.registerDependency(ProjectMetadata.PROJECT_IDENTIFIER, metadataId);
+			isGaeEnabled = projectMetadata.isGaeEnabled();
+			isDatabaseDotComEnabled = projectMetadata.isDatabaseDotComEnabled();
+		}
+
+		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectMetadata, governorDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
 	}
 
 	/**

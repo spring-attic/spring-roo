@@ -60,7 +60,8 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	private final JpaEntityAnnotationValues annotationValues;
 	private final JpaEntityMetadata parentEntity;
 	private final MemberDetails entityDetails;
-	private final ProjectMetadata project;
+	private final boolean isGaeEnabled;
+	private final boolean isDatabaseDotComEnabled;
 
 	/**
 	 * Constructor
@@ -79,12 +80,11 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * account the presence of a {@link RooEntity} and/or {@link RooJpaEntity}
 	 * annotation (required)
 	 */
-	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final ProjectMetadata project, final MemberDetails entityDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues) {
+	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final ProjectMetadata project, final MemberDetails entityDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, boolean isGaeEnabled, boolean isDatabaseDotComEnabled) {
 		super(metadataId, itdName, entityPhysicalType);
 		Assert.notNull(annotationValues, "Annotation values are required");
 		Assert.notNull(entityDetails, "Entity MemberDetails are required");
-		Assert.notNull(project, "Project metadata is required");
-		
+
 		/*
 		 * Ideally we'd pass these parameters to the methods below rather than
 		 * storing them in fields, but this isn't an option due to various calls
@@ -94,8 +94,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		this.entityDetails = entityDetails;
 		this.identifier = identifier;
 		this.parentEntity = parentEntity;
-		this.project = project;
-		
+		this.isGaeEnabled = isGaeEnabled;
+		this.isDatabaseDotComEnabled = isDatabaseDotComEnabled;
+
 		// Add @Entity or @MappedSuperclass annotation
 		builder.addAnnotation(annotationValues.isMappedSuperclass() ? getMappedSuperclassAnnotation() : getEntityAnnotation());
 		
@@ -258,7 +259,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 		// Compute the column name, as required
 		if (!hasIdClass) {
-			String generationType = project.isGaeEnabled() || project.isDatabaseDotComEnabled() ? "IDENTITY" : "AUTO";
+			String generationType = isGaeEnabled || isDatabaseDotComEnabled ? "IDENTITY" : "AUTO";
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 			if ("AUTO".equals(generationType)) {
@@ -383,7 +384,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @return a non-<code>null</code> type
 	 */
 	private JavaType getIdentifierType() {
-		if (project.isDatabaseDotComEnabled()) {
+		if (isDatabaseDotComEnabled) {
 			return JavaType.STRING;
 		}
 		if (annotationValues.getIdentifierType() != null) {
@@ -583,8 +584,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// We're creating one
 		JavaType versionType = annotationValues.getVersionType();
 		String versionColumn = StringUtils.hasText(annotationValues.getVersionColumn()) ? annotationValues.getVersionColumn() : verField.getSymbolName();
-		if (project.isDatabaseDotComEnabled()) {
-			versionField = "lastModifiedDate";
+		if (isDatabaseDotComEnabled) {
 			versionType = CALENDAR;
 			versionColumn = "lastModifiedDate";
 		}

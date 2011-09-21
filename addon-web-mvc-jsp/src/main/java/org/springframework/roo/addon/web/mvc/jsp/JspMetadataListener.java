@@ -45,7 +45,6 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -122,9 +121,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		// Install web artifacts only if Spring MVC config is missing
 		// TODO: Remove this call when 'controller' commands are gone
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		Assert.notNull(projectMetadata, "Project metadata required");
-		PathResolver pathResolver = projectMetadata.getPathResolver();
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, WEB_INF_VIEWS))) {
 			jspOperations.installCommonViewArtefacts();
 		}

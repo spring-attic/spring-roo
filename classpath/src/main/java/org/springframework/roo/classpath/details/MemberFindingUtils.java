@@ -662,6 +662,16 @@ public final class MemberFindingUtils {
 		MethodMetadata methodMetadata = MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes);
 		return methodMetadata != null && !methodMetadata.getDeclaredByMetadataId().equals(declaredByMetadataId);
 	}
+
+	public static AnnotationMetadata getFirstAnnotation(ClassOrInterfaceTypeDetails cid, JavaType... annotationTypes) {
+		for (JavaType annotationType : annotationTypes) {
+			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);
+			if (annotationMetadata != null) {
+				return annotationMetadata;
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * Constructor is private to prevent instantiation

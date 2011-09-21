@@ -46,4 +46,13 @@ public abstract class MonitoringRequest {
 		mre.setAsText(workingDir + ",CRUD");
 		return (MonitoringRequest) mre.getValue();
 	}
+
+	public static MonitoringRequest getInitialSubTreeMonitoringRequest(String workingDir) {
+		if (workingDir == null) {
+			workingDir = ".";
+		}
+		MonitoringRequestEditor mre = new MonitoringRequestEditor();
+		mre.setAsText(workingDir + ",CRUD,**");
+		return (MonitoringRequest) mre.getValue();
+	}
 }

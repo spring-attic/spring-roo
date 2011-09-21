@@ -373,7 +373,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		if (!currentFile.exists() || (currentFile.getName().length() > 1 && currentFile.getName().startsWith("."))) {
 			return;
 		}
-		
+
 		map.put(currentFile, currentFile.lastModified());
 
 		try {

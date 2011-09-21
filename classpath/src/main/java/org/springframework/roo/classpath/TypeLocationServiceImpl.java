@@ -287,7 +287,6 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	}
 
 	private PathResolver getPathResolver() {
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata unavailable");
 		return projectOperations.getPathResolver();
 	}
 
@@ -400,7 +399,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	}
 
 	private void initTypeMap() {
-		for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA)) {
+		for (Path path : Arrays.asList(Path.SRC_MAIN_JAVA, Path.SRC_TEST_JAVA, Path.ROOT)) {
 			PathResolver pathResolver = projectOperations.getPathResolver();
 			for (FileDetails file : fileManager.findMatchingAntPath(pathResolver.getRoot(path) + File.separatorChar + "**" + File.separatorChar + "*.java")) {
 				cacheType(file.getCanonicalPath());

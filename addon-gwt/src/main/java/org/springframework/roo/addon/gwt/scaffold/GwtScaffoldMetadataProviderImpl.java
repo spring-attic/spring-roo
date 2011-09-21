@@ -166,7 +166,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			typesToBeWritten.put(gwtType, gwtTypeService.buildType(gwtType, templateDataHolder.getTemplateTypeDetailsMap().get(gwtType), extendsTypes));
 
 			if (gwtType.isCreateUiXml()) {
-				String destFile = gwtType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + javaType.getSimpleTypeName() + ".ui.xml";
+				String destFile = gwtType.getPath().canonicalFileSystemPath(projectOperations) + File.separatorChar + javaType.getSimpleTypeName() + ".ui.xml";
 				String contents = gwtTemplateService.buildUiXml(templateDataHolder.getXmlTemplates().get(gwtType), destFile, new ArrayList<MethodMetadata>(proxy.getDeclaredMethods()));
 				xmlToBeWritten.put(destFile, contents);
 			}

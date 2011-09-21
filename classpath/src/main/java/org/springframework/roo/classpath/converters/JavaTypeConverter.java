@@ -18,13 +18,13 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.StringUtils;
@@ -38,12 +38,13 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class JavaTypeConverter implements Converter<JavaType> {
+
+	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
 	
 	// Fields
-	@Reference private LastUsed lastUsed;
-	@Reference private MetadataService metadataService;
-	@Reference private FileManager fileManager;
-	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
+	@Reference protected LastUsed lastUsed;
+	@Reference protected FileManager fileManager;
+	@Reference protected ProjectOperations projectOperations;
 
 	public JavaType convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value)) {
@@ -64,7 +65,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		}
 
 		String topLevelPath = null;
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata != null) {
 			JavaPackage topLevelPackage = projectMetadata.getTopLevelPackage();
 			topLevelPath = topLevelPackage.getFullyQualifiedPackageName();
@@ -183,7 +184,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 
 	private void completeProjectSpecificPaths(List<String> completions, String existingData) {
 		String topLevelPath = "";
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 
 		if (projectMetadata == null) {
 			return;
@@ -200,10 +201,10 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			}
 		}
 
-		PathResolver pathResolver = projectMetadata.getPathResolver();
+		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Pass 1: If a '.' suffixes the value then sub-folders will be picked up explicitly
-		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator) + "*";
+		String antPath = projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator) + "*";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
 
 		// Pass 2: Add a separator to the end of the value to pick up sub-folders

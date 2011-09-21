@@ -29,7 +29,7 @@ public class MavenPathResolver extends AbstractPathResolver {
 		pathInformation.add(new PathInformation(Path.SRC_TEST_JAVA, true, new File(root, "src/test/java")));
 		pathInformation.add(new PathInformation(Path.SRC_TEST_RESOURCES, true, new File(root, "src/test/resources")));
 		pathInformation.add(new PathInformation(Path.SRC_MAIN_WEBAPP, false, new File(root, "src/main/webapp")));
-		pathInformation.add(new PathInformation(Path.ROOT, false, root));
+		pathInformation.add(new PathInformation(Path.ROOT, true, root));
 		pathInformation.add(new PathInformation(Path.SPRING_CONFIG_ROOT,false, new File(root, "src/main/resources/META-INF/spring")));
 		init();
 	}

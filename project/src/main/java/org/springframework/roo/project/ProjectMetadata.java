@@ -49,13 +49,12 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * 
 	 * @return a non-blank MID
 	 */
-	public static final String getProjectIdentifier() {
+	public static String getProjectIdentifier() {
 		return PROJECT_IDENTIFIER;
 	}
 	
 	// Fields
 	private final JavaPackage topLevelPackage;
-	private final PathResolver pathResolver;
 	private final String projectName;
 	private final Set<Dependency> dependencies;
 	private final Set<Plugin> buildPlugins;
@@ -77,9 +76,8 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param pomProperties (required)
 	 * @param filters (required)
 	 * @param resources (required)
-	 * @param pathResolver (required)
 	 */
-	public ProjectMetadata(final JavaPackage topLevelPackage, final String projectName, final Set<Dependency> dependencies, final Set<Plugin> buildPlugins, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final Set<Property> pomProperties, final Set<Filter> filters, final Set<Resource> resources, final PathResolver pathResolver) {
+	public ProjectMetadata(final JavaPackage topLevelPackage, final String projectName, final Set<Dependency> dependencies, final Set<Plugin> buildPlugins, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final Set<Property> pomProperties, final Set<Filter> filters, final Set<Resource> resources) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.hasText(projectName, "Project name required");
@@ -90,7 +88,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		Assert.notNull(pomProperties, "POM properties required");
 		Assert.notNull(filters, "Filters required");
 		Assert.notNull(resources, "Resources required");
-		Assert.notNull(pathResolver, "Path resolver required");
 		this.topLevelPackage = topLevelPackage;
 		this.projectName = projectName;
 		this.dependencies = dependencies;
@@ -100,7 +97,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		this.pomProperties = pomProperties;
 		this.filters = filters;
 		this.resources = resources;
-		this.pathResolver = pathResolver;
 	}
 	
 	/**
@@ -281,10 +277,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public String getProjectName() {
 		return projectName;
 	}
-	
-	public PathResolver getPathResolver() {
-		return pathResolver;
-	}
 
 	/**
 	 * Returns an unmodifiable set of the project's dependencies.
@@ -459,7 +451,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		tsc.append("pomProperties", pomProperties);
 		tsc.append("filters", filters);
 		tsc.append("resources", resources);
-		tsc.append("pathResolver", pathResolver);
 		return tsc.toString();
 	}
 }

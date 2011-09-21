@@ -122,7 +122,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		final Element artifactIdElement = XmlUtils.findFirstElement("/project/artifactId", root);
 		final String artifactId = artifactIdElement.getTextContent();
 		Assert.hasText(artifactId, "Project name could not be determined from POM '" + pom + "'");
-		final String projectName = artifactId;
 
 		// Obtain top level package
 		Element groupIdElement = XmlUtils.findFirstElement("/project/groupId", root);
@@ -182,7 +181,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		// Update window title with project name
 		shell.flash(Level.FINE, "Spring Roo: " + topLevelPackage, Shell.WINDOW_TITLE_SLOT);
 
-		final ProjectMetadata result = new ProjectMetadata(topLevelPackage, projectName, dependencies, buildPlugins, repositories, pluginRepositories, pomProperties, filters, resources, pathResolver);
+		final ProjectMetadata result = new ProjectMetadata(topLevelPackage, artifactId, dependencies, buildPlugins, repositories, pluginRepositories, pomProperties, filters, resources);
 
 		// Update UAA with the project name
 		uaaRegistrationService.registerProject(UaaRegistrationService.SPRING_ROO, topLevelPackage.getFullyQualifiedPackageName());

@@ -23,7 +23,9 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -130,11 +132,6 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null || !projectMetadata.isValid()) {
-			return null;
-		}
-		
 		// We need to parse the annotation, which we expect to be present
 		IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType entity = annotationValues.getEntity();
@@ -224,7 +221,14 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		// Maintain a list of entities that are being tested
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
-		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethodAdditions, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethodAdditions, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass);
+		boolean isGaeEnabled = false;
+
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		if (projectMetadata != null && projectMetadata.isValid()) {
+			isGaeEnabled = projectMetadata.isGaeEnabled();
+		}
+
+		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethodAdditions, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethodAdditions, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass, isGaeEnabled);
 	}
 	
 	private ClassOrInterfaceTypeDetails getEntitySuperclass(JavaType entity) {

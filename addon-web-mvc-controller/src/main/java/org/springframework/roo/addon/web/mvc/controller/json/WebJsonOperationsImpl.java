@@ -31,7 +31,6 @@ import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
@@ -53,7 +52,6 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	
 	// Fields
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
@@ -61,7 +59,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isSetupAvailable() {
-		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String mvcConfig = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		return !fileManager.exists(mvcConfig);
 	}
 
@@ -72,7 +70,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	public void setup() {
 		mvcOperations.installMinmalWebArtefacts();
 		// Verify that the web.xml already exists
-		String webXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		String webXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXmlPath), "'" + webXmlPath + "' does not exist");
 
 		Document document = XmlUtils.readXml(fileManager.getInputStream(webXmlPath));
@@ -102,7 +100,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 
 	public void annotateAll(JavaPackage javaPackage) {
 		if (javaPackage == null) {
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 			javaPackage = projectMetadata.getTopLevelPackage();
 		}
 		for (ClassOrInterfaceTypeDetails cod : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_JSON)) {

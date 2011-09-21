@@ -30,6 +30,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	
 	// Fields
 	@Reference protected MetadataService metadataService;
+	@Reference protected PathResolver pathResolver;
 	@Reference protected ProjectMetadataProvider projectMetadataProvider;
 
 	private Set<DependencyListener> listeners = new HashSet<DependencyListener>();
@@ -49,8 +50,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 
 	public PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = getProjectMetadata();
-		return projectMetadata != null ? projectMetadata.getPathResolver() : null;
+		return pathResolver;
 	}
 
 	@Deprecated

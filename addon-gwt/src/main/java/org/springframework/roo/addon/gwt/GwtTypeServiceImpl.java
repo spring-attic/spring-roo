@@ -7,6 +7,7 @@ import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +25,6 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -238,7 +237,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 
 	private Set<String> getGwtModuleXml() {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		String gwtModuleXml = projectMetadata.getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml";
+		String gwtModuleXml = projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + File.separator + "*.gwt.xml";
 		Set<String> paths = new LinkedHashSet<String>();
 		for (FileDetails fileDetails : fileManager.findMatchingAntPath(gwtModuleXml)) {
 			paths.add(fileDetails.getCanonicalPath());

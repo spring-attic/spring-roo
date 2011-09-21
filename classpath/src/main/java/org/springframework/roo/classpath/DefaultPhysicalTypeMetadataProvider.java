@@ -115,7 +115,11 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 			return null;
 		}
 		JavaType typeName = PhysicalTypeIdentifier.getJavaType(metadataIdentificationString);
-		DefaultPhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataIdentificationString, fileIdentifier, typeParsingService.getTypeAtLocation(fileIdentifier, metadataIdentificationString, typeName));
+		ClassOrInterfaceTypeDetails typeDetails = typeParsingService.getTypeAtLocation(fileIdentifier, metadataIdentificationString, typeName);
+		if (typeDetails == null) {
+			return null;
+		}
+		DefaultPhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataIdentificationString, fileIdentifier, typeDetails);
 		if (result.getMemberHoldingTypeDetails() != null && result.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) result.getMemberHoldingTypeDetails();
 			if (details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {

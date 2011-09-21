@@ -26,6 +26,7 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
+	@Reference private PathResolver pathResolver;
 	
 	public void createMiddleTierApplicationContext() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -33,7 +34,7 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 		final Document document = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml"));
 		final Element root = document.getDocumentElement();
 		DomUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-		fileManager.createOrUpdateTextFileIfRequired(projectMetadata.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"), XmlUtils.nodeToString(document), false);
+		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"), XmlUtils.nodeToString(document), false);
 		fileManager.scan();
 	}
 }

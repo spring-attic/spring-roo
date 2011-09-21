@@ -83,10 +83,9 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 		if (segments.length < 2) {
 			throw new IllegalArgumentException("Text '" + text + "' is invalid for a MonitoringRequest");
 		}
-		
 		File file = new File(segments[0]);
 		Assert.isTrue(file.exists(), "File '" + file + "' does not exist");
-		
+
 		Set<FileOperation> ops = new HashSet<FileOperation>();
 		if (segments[1].contains("C")) {
 			ops.add(FileOperation.CREATED);

@@ -33,7 +33,6 @@ import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -61,10 +60,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private boolean hasEmbeddedIdentifier;
 	private boolean entityHasSuperclass;
 	
-	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ProjectMetadata projectMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MemberTypeAdditions countMethod, MemberTypeAdditions findMethod, MemberTypeAdditions findAllMethod, MemberTypeAdditions findEntriesMethod, MemberTypeAdditions flushMethod, MemberTypeAdditions mergeMethod, MemberTypeAdditions persistMethod, MemberTypeAdditions removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass) {
+	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MemberTypeAdditions countMethod, MemberTypeAdditions findMethod, MemberTypeAdditions findAllMethod, MemberTypeAdditions findEntriesMethod, MemberTypeAdditions flushMethod, MemberTypeAdditions mergeMethod, MemberTypeAdditions persistMethod, MemberTypeAdditions removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass, boolean isGaeEnabled) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(projectMetadata, "Project metadata required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(dataOnDemandMetadata, "Data on demand metadata required");
 
@@ -81,7 +79,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		addRequiredIntegrationTestClassIntroductions(DataOnDemandMetadata.getJavaType(dataOnDemandMetadata.getId()));
 
 		// Add GAE LocalServiceTestHelper instance and @BeforeClass/@AfterClass methods if GAE is enabled
-		if (projectMetadata.isGaeEnabled()) {
+		if (isGaeEnabled) {
 			isGaeSupported = true;
 			addOptionalIntegrationTestClassIntroductions();
 		}

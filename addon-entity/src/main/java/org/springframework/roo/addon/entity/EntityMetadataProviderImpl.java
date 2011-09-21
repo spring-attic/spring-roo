@@ -125,18 +125,25 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 			return null;
 		}
 		metadataDependencyRegistry.registerDependency(pluralMID, metadataId);
-	
-		// If the project itself changes, we want a chance to refresh this item
-		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataId);
-		
-		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entityType);
 		if (idFields.size() != 1) {
 			// The ID field metadata is either unavailable or not stable yet
 			return null;
 		}
 		final String entityName = StringUtils.defaultIfEmpty(jpaEntityAnnotationValues.getEntityName(), entityType.getSimpleTypeName());
-		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, projectMetadata, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName);
+
+		boolean isGaeEnabled = false;
+		boolean isDataNucleusEnabled = false;
+
+		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		if (projectMetadata != null) {
+			// If the project itself changes, we want a chance to refresh this item
+			metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataId);
+			isGaeEnabled = projectMetadata.isGaeEnabled();
+			isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
+		}
+		return new EntityMetadata(metadataId, aspectName, governorPhysicalType, parent, crudAnnotationValues, pluralMetadata.getPlural(), idFields.get(0), entityName, isGaeEnabled, isDataNucleusEnabled);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

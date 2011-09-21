@@ -142,7 +142,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				index++;
 				String accessorText = map.get(fieldName);
 				StringBuilder string = new StringBuilder();
-				string.append("sb.append(\"" + fieldName + ": \").append(" + accessorText + ")");
+				string.append("sb.append(\"").append(fieldName).append(": \").append(").append(accessorText).append(")");
 				if (index < size) {
 					string.append(".append(\", \")");
 				}

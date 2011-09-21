@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 
 public enum GwtPath {
 	CLIENT("/client", "module/client/" + GwtPath.templateSelector),
@@ -47,12 +48,12 @@ public enum GwtPath {
 		return sourceAntPath;
 	}
 
-	public String canonicalFileSystemPath(ProjectMetadata projectMetadata) {
-		String packagePath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
+	public String canonicalFileSystemPath(ProjectOperations projectOperations) {
+		String packagePath = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
 		if (WEB.equals(this)) {
-			return projectMetadata.getPathResolver().getRoot(Path.SRC_MAIN_WEBAPP);
+			return projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_WEBAPP);
 		}
-		return projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, packagePath);
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, packagePath);
 	}
 
 	public String segmentPackage() {

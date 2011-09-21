@@ -103,7 +103,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 			setProcessManagerStatus(ProcessManagerStatus.COMPLETING_STARTUP);
 			try {
 				// Register the initial monitoring request
-				doTransactionally(new MonitoringRequestCommand(fileMonitorService, MonitoringRequest.getInitialMonitoringRequest(workingDir), true));
+				doTransactionally(new MonitoringRequestCommand(fileMonitorService, MonitoringRequest.getInitialSubTreeMonitoringRequest(workingDir), true));
 			} catch (Throwable t) {
 				logException(t);
 			} finally {

@@ -59,9 +59,8 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		if (projectMetadata == null || !projectMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid() || entityMetadata.getEntityManagerMethod() == null) {
+		if (entityMetadata == null || !entityMetadata.isValid() || entityMetadata.getEntityManagerMethod() == null) {
 			return null;
 		}
 
@@ -94,8 +93,15 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 
+		boolean isDataNucleusEnabled = false;
+
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		if (projectMetadata != null && !projectMetadata.isValid()) {
+			isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
+		}
+
 		// We make the queryHolders immutable in case FinderMetadata in the future makes it available through an accessor etc
-		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata.isDataNucleusEnabled(), entityMetadata.getEntityManagerMethod(), Collections.unmodifiableSortedMap(queryHolders));
+		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, isDataNucleusEnabled, entityMetadata.getEntityManagerMethod(), Collections.unmodifiableSortedMap(queryHolders));
 	}
 
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {

@@ -78,9 +78,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	
 	// Fields
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlInputStreamService httpService;
+
 	private String iconSetUrl;
 	
 	protected void activate(ComponentContext context) {
@@ -205,6 +205,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		createProject(topLevelPackage, Type.I18N, description, projectName);
 
 		install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N, projectName);
+
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		
 		try {
 			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + messageBundle.getName())).getOutputStream());
@@ -292,7 +294,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	 * @param pom the POM to write (required)
 	 */
 	private void writePomFile(final Document pom) {
-		final MutableFile pomFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, POM_XML));
+		final MutableFile pomFile = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, POM_XML));
 		XmlUtils.writeXml(pomFile.getOutputStream(), pom);
 	}
 
@@ -303,6 +305,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		String topLevelPackageName = topLevelPackage.getFullyQualifiedPackageName();
 		String packagePath = topLevelPackageName.replace('.', separatorChar);
 		String destinationFile = "";
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		if (targetFilename.endsWith(".java")) {
 			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + targetFilename);
 		} else {
@@ -338,7 +341,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	private void writeTextFile(String fullPathFromRoot, String message) {
 		Assert.hasText(fullPathFromRoot, "Text file name to write is required");
 		Assert.hasText(message, "Message required");
-		String path = pathResolver.getIdentifier(Path.ROOT, fullPathFromRoot);
+		String path = projectOperations.getPathResolver().getIdentifier(Path.ROOT, fullPathFromRoot);
 		MutableFile mutableFile = fileManager.exists(path) ? fileManager.updateFile(path) : fileManager.createFile(path);
 		byte[] input = message.getBytes();
 		try {
@@ -364,7 +367,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				if (entry.getName().equals(expectedEntryName)) {
 					int size;
 					byte[] buffer = new byte[2048];
-					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
+					MutableFile target = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
 					BufferedOutputStream bos = null;
 					try {
 						bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);

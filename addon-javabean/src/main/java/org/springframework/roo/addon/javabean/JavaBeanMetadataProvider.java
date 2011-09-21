@@ -71,16 +71,15 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		}
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		// If ProjectMetadata isn't valid do not continue
-		if (projectMetadata == null || !projectMetadata.isValid()) {
-			return;
-		}
-		boolean isGaeEnabled = projectMetadata.isGaeEnabled();
-		// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
-		boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
-		if (hasGaeStateChanged) {
-			wasGaeEnabled = isGaeEnabled;
-			for (String producedMid : producedMids) {
-				metadataService.get(producedMid, true);
+		if (projectMetadata != null && !projectMetadata.isValid()) {
+			boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
+			boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+			if (hasGaeStateChanged) {
+				wasGaeEnabled = isGaeEnabled;
+				for (String producedMid : producedMids) {
+					metadataService.get(producedMid, true);
+				}
 			}
 		}
 	}
@@ -88,12 +87,6 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		JavaBeanAnnotationValues annotationValues = new JavaBeanAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {
-			return null;
-		}
-
-		// Work out the MIDs of the other metadata we depend on
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
-		if (projectMetadata == null || !projectMetadata.isValid()) {
 			return null;
 		}
 
@@ -113,7 +106,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	}
 
 	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field, String metadataIdentificationString) {
-		if (!projectOperations.getProjectMetadata().isGaeEnabled()) {
+		if (projectOperations.getProjectMetadata() == null || !projectOperations.getProjectMetadata().isGaeEnabled()) {
 			return null;
 		}
 		// We are not interested if the field is annotated with @javax.persistence.Transient

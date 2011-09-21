@@ -41,6 +41,7 @@ public class GitOperationsImpl implements GitOperations {
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
+
 	private PersonIdent person;
 
 	public boolean isGitCommandAvailable() {

@@ -47,7 +47,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	// Fields
 	@Reference private ApplicationContextOperations applicationContextOperations;
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private ProcessManager processManager;
 
 	public boolean isCreateProjectAvailable() {

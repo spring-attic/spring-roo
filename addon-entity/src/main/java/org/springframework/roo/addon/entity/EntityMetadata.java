@@ -34,7 +34,6 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -97,15 +96,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @param identifierField the entity's identifier field (required)
 	 * @param entityName the JPA entity name (required)
 	 */
-	public EntityMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final EntityMetadata parent, final ProjectMetadata projectMetadata, final JpaCrudAnnotationValues crudAnnotationValues, final String plural, final FieldMetadata identifierField, final String entityName) {
+	public EntityMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final EntityMetadata parent, final JpaCrudAnnotationValues crudAnnotationValues, final String plural, final FieldMetadata identifierField, final String entityName, final boolean isGaeEnabled, final boolean isDataNucleusEnabled) {
 		super(metadataId, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(metadataId), "Metadata identification string '" + metadataId + "' does not appear to be a valid");
 		Assert.notNull(crudAnnotationValues, "CRUD-related annotation values required");
 		Assert.notNull(identifierField, "Identifier required for '" + metadataId + "'");
 		Assert.hasText(entityName, "Entity name required for '" + metadataId + "'");
 		Assert.hasText(plural, "Plural required for '" + metadataId + "'");
-		Assert.notNull(projectMetadata, "Project metadata required");
-		
+
 		if (!isValid()) {
 			return;
 		}
@@ -113,8 +111,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.crudAnnotationValues = crudAnnotationValues;
 		this.entityName = entityName;
 		this.identifierField = identifierField;
-		this.isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
-		this.isGaeEnabled = projectMetadata.isGaeEnabled();
+		this.isDataNucleusEnabled = isDataNucleusEnabled;
+		this.isGaeEnabled = isGaeEnabled;
 		this.parent = parent;
 		this.plural = StringUtils.capitalize(plural);
 		
