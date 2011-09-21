@@ -143,7 +143,23 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		}
 		
 		// Lookup the DOD's metadata. The DOD must conform to the DOD naming conventions
+		Set<ClassOrInterfaceTypeDetails> potentialDods = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DATA_ON_DEMAND);
 		JavaType dodJavaType = new JavaType(annotationValues.getEntity().getFullyQualifiedTypeName() + "DataOnDemand");
+		// We default to standard naming conventions but if that doesn't result in a match we go fishing
+		if (typeLocationService.getClassOrInterface(dodJavaType) == null) {
+			for (ClassOrInterfaceTypeDetails potentialDod : potentialDods) {
+				// We that the annotation is present but we have to retrieve it
+				AnnotationMetadata dodAnnotation = MemberFindingUtils.getFirstAnnotation(potentialDod, RooJavaType.ROO_DATA_ON_DEMAND);
+				if (dodAnnotation != null && dodAnnotation.getAttribute("entity") != null) {
+					AnnotationAttributeValue<?> entityAttribute = dodAnnotation.getAttribute("entity");
+					if (entityAttribute instanceof ClassAttributeValue) {
+						if (((ClassAttributeValue)entityAttribute).getValue().equals(entity)) {
+							dodJavaType = potentialDod.getName();
+						}
+					}
+				}
+			}
+		}
 		String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dodJavaType, Path.SRC_TEST_JAVA);
 		DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
 
