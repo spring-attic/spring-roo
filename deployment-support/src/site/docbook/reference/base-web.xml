@@ -99,7 +99,7 @@
         <para><programlisting>~.Person roo&gt; <emphasis role="bold">web mvc setup</emphasis></programlisting>The
         first time the <link linkend="command-index-web-mvc-setup">web mvc
         setup</link> command is executed Roo will install all artifacts
-        required for the Web UI. </para>
+        required for the Web UI.</para>
 
         <para></para>
       </listitem>
@@ -268,9 +268,9 @@ public class PersonController {}</programlisting>If you don't define a custom
         provides a convenient way to quickly generate Web MVC controllers for
         all JPA entities Roo can find in your project. You need to specify the
         <emphasis role="bold">--package</emphasis> attribute to define a
-        package where these controllers should be generated. While the
-        controller all command is convenient, it does not give you the same
-        level of control compared to the <link
+        package where these controllers should be generated. While the web mvc
+        all command is convenient, it does not give you the same level of
+        control compared to the <link
         linkend="command-index-web-mvc-scaffold">web mvc scaffold</link>
         command.</para>
 
@@ -717,13 +717,10 @@ field reference --fieldName school --type com.foo.domain.School --class com.foo.
     finders</emphasis></para>
 
     <para>Roo will attempt to scaffold Spring MVC JSP views for all dynamic
-    finders registered in the form backing object. This is done automatically
-    when the 'controller all' or 'controller scaffold' commands are used. To
-    prevent the automatic scaffolding of dynamic finders for the Web frontend,
-    the @RooWebScaffold annotation offers a attribute called 'exposeFinders'
-    which can be set to false. This will disable automatic scaffolding of
-    controller methods for dynamic finders as well as the generation of the
-    relevant jsp artifacts.</para>
+    finders registered in the form backing object. This is done by using the
+    <link linkend="command-index-web-mvc-finder-all">web mvc finder all</link>
+    or <link linkend="command-index-web-mvc-finder-add">web mvc finder
+    add</link> command. </para>
 
     <para>Due to file name length restrictions by many file systems (see <link
     xlink:href="http://en.wikipedia.org/wiki/Comparison_of_file_systems">http://en.wikipedia.org/wiki/Comparison_of_file_systems</link>)
