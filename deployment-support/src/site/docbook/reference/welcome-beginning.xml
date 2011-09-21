@@ -243,10 +243,10 @@ com.springsource.roo.pizzashop roo&gt;
     persistent domain objects (entities) and their underlying database tables.
     To install or change the persistence configuration in your project you can
     use the <emphasis role="bold"><link
-    linkend="command-index-jpa-setup">persistence
-    setup</link></emphasis> command (note: try using the <emphasis
-    role="bold">&lt;TAB&gt;</emphasis> as often as you can to auto-complete
-    your commands, options and even obtain contextual help):</para>
+    linkend="command-index-jpa-setup">persistence setup</link></emphasis>
+    command (note: try using the <emphasis role="bold">&lt;TAB&gt;</emphasis>
+    as often as you can to auto-complete your commands, options and even
+    obtain contextual help):</para>
 
     <para><programlisting>com.springsource.roo.pizzashop roo&gt; <emphasis
           role="bold">hint</emphasis>
@@ -278,15 +278,15 @@ com.springsource.roo.pizzashop roo&gt;
 
     <para>When you are ready to test or install your application in a
     production setting, the <emphasis role="bold"><link
-    linkend="command-index-jpa-setup">persistence
-    setup</link></emphasis> command can be repeated. This allows you to
-    nominate a different database, or even ORM. Roo offers TAB completion for
-    production databases including Postgres, MySQL, Microsoft SQL Server,
-    Oracle, DB2, Sybase, H2, Hypersonic and more. Another important step is to
-    edit the <code>SRC_MAIN_RESOURCES/META-INF/persistence.xml</code> file and
-    modify your JPA provider's DDL (schema management) configuration setting
-    so it preserves the database between restarts of your application. To help
-    you with this, Roo automatically lists the valid settings for your JPA
+    linkend="command-index-jpa-setup">persistence setup</link></emphasis>
+    command can be repeated. This allows you to nominate a different database,
+    or even ORM. Roo offers TAB completion for production databases including
+    Postgres, MySQL, Microsoft SQL Server, Oracle, DB2, Sybase, H2, Hypersonic
+    and more. Another important step is to edit the
+    <code>SRC_MAIN_RESOURCES/META-INF/persistence.xml</code> file and modify
+    your JPA provider's DDL (schema management) configuration setting so it
+    preserves the database between restarts of your application. To help you
+    with this, Roo automatically lists the valid settings for your JPA
     provider as a comment in that file. Note that by default your JPA provider
     will drop all database tables each time it reloads. As such you'll
     certainly want to change this setting.</para>
@@ -591,33 +591,32 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     <title>Step 5: Creating A Web Tier</title>
 
     <para>As a next step we want to scaffold a Web tier for the Pizza Shop
-    application. This is accomplished via the <emphasis role="bold"><link
-    linkend="command-index-controller-commands">controller</link></emphasis>
-    command. The most convenient way to generate controllers and all relevant
-    Web artifacts is to use the <emphasis role="bold"><link
-    linkend="command-index-controller-all">controller all</link></emphasis>
-    command:</para>
+    application. This is accomplished via the <emphasis>web mvc</emphasis>
+    commands. The most convenient way to generate controllers and all relevant
+    Web artifacts is to use the <link
+    linkend="command-index-web-mvc-setup">web mvc setup</link> command
+    followed by the <link linkend="command-index-web-mvc-all">web mvc
+    all</link> command:</para>
 
-    <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">controller all --package ~.web
-</emphasis></programlisting>This command will scan the Pizza Shop project for
-    any domain entities and scaffold a Spring MVC controller for each entity
-    detected. The <code>--package</code> attribute is needed to specify in
-    which package the controllers should be installed. This command can be
-    issued from your normal Roo shell or from the Roo shell, which ships with
-    STS. In order to use the integrated Roo shell within STS you need to right
-    click on the pizzashop application and select 'Spring Tools &gt; Open Roo
-    Shell'.</para>
+    <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">web mvc setup
 
-    <para>Note, that with the first use of the <emphasis role="bold"><link
-    linkend="command-index-controller-commands">controller</link></emphasis>
-    command the nature of the project changes from a normal Java project
-    nature to a Web project nature in STS. The first use of the <emphasis
-    role="bold"><link
-    linkend="command-index-controller-commands">controller</link></emphasis>
-    command will also add additional dependencies such as Spring MVC, Tiles,
-    etc to your project. In order to update the project classpath within STS
-    with these new dependencies you can issue 'perform eclipse' again,
-    followed by a project refresh in STS.</para>
+~.domain.PizzaOrder roo&gt; <emphasis role="bold">web mvc all --package ~.web
+</emphasis></emphasis></programlisting>This command will scan the Pizza Shop
+    project for any domain entities and scaffold a Spring MVC controller for
+    each entity detected. The <code>--package</code> attribute is needed to
+    specify in which package the controllers should be installed. This command
+    can be issued from your normal Roo shell or from the Roo shell, which
+    ships with STS. In order to use the integrated Roo shell within STS you
+    need to right click on the pizzashop application and select 'Spring Tools
+    &gt; Open Roo Shell'.</para>
+
+    <para>Note, that with the <link linkend="command-index-web-mvc-setup">web
+    mvc setup</link> command the nature of the project changes from a normal
+    Java project nature to a Web project nature in STS. This command will also
+    add additional dependencies such as Spring MVC, Tiles, etc to your
+    project. In order to update the project classpath within STS with these
+    new dependencies you can issue 'perform eclipse' again, followed by a
+    project refresh in STS.</para>
 
     <para>All newly added Web artifacts which are needed for the view
     scaffolding can be found under the <code>src/main/webapp</code> folder.

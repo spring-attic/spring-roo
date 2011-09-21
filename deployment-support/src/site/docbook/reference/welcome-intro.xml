@@ -590,8 +590,9 @@ roo&gt; <emphasis role="bold">hint</emphasis>
 roo&gt; <emphasis role="bold">entity --class ~.Timer --testAutomatically</emphasis>
 roo&gt; <emphasis role="bold">hint</emphasis>
 roo&gt; <emphasis role="bold">field string --fieldName message --notNull</emphasis>
-roo&gt; <emphasis role="bold">hint controllers</emphasis>
-roo&gt; <emphasis role="bold">controller all --package ~.web</emphasis>
+roo&gt; <emphasis role="bold"><emphasis role="bold">hint </emphasis>web mvc</emphasis>
+roo&gt; <emphasis role="bold">web mvc setup</emphasis>
+roo&gt; <emphasis role="bold">web mvc all --package ~.web</emphasis>
 roo&gt; <emphasis role="bold">selenium test --controller ~.web.TimerController</emphasis>
 roo&gt; <emphasis role="bold">perform tests</emphasis>
 roo&gt; <emphasis role="bold">perform package</emphasis>

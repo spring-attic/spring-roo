@@ -139,10 +139,10 @@
     as you made a mistake when entering a command or an add-on has a problem
     for whatever reason) the file system will automatically rollback to the
     state it was before the change was attempted. The cascading nature of many
-    changes (i.e. you add a field to a <code>.java</code> file and that changes
-    an AspectJ ITD and that in turn changes a web <code>.jspx</code> etc) is
-    handled in the same unit of work and therefore rolled back as an atomic
-    group when required.</para>
+    changes (i.e. you add a field to a <code>.java</code> file and that
+    changes an AspectJ ITD and that in turn changes a web <code>.jspx</code>
+    etc) is handled in the same unit of work and therefore rolled back as an
+    atomic group when required.</para>
 
     <para>Before leaving this discussion on usability, it's probably worth
     pointing out that although the Roo shell contains <link
@@ -199,9 +199,9 @@
           some options which have a default value of '<code>*</code>'. This is
           the marker which indicates "the current context will be used for
           this command option unless you explicitly specify otherwise". You
-          change the context by simply working with a different Java type (i.e.
-          specify an operation that involves a different Java type and the
-          context will change to that Java type).</para>
+          change the context by simply working with a different Java type
+          (i.e. specify an operation that involves a different Java type and
+          the context will change to that Java type).</para>
         </listitem>
 
         <listitem>
@@ -346,13 +346,15 @@ quit
     File &gt; Import &gt; General &gt; Maven Projects menu option is
     sufficient.</para>
 
-    <para>Irrespective of how you import your project into Eclipse (i.e. via the
-    <link linkend="command-index-perform-eclipse">perform eclipse</link>
+    <para>Irrespective of how you import your project into Eclipse (i.e. via
+    the <link linkend="command-index-perform-eclipse">perform eclipse</link>
     command or via m2eclipse) you should be aware that the project will not be
     a Web Tools Project (WTP) until such time as you install your first web
-    controller. This is usually undertaken via the controller all or
-    controller scaffold command. If you have already imported your project
-    into Eclipse, simply complete the relevant controller command and then
+    controller. This is usually undertaken via the <link
+    linkend="command-index-web-mvc-all">web mvc all</link> or <link
+    linkend="command-index-web-mvc-controller">web mvc controller</link>
+    command. If you have already imported your project into Eclipse, simply
+    complete the relevant <emphasis>web mvc</emphasis> command and then
     re-import. The project will then be a WTP and offer the ability to deploy
     to an IDE-embedded web container. If you attempt to start a WTP server and
     receive an error message, try right-clicking the project and selecting

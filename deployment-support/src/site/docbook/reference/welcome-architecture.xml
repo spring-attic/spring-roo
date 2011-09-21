@@ -475,14 +475,13 @@ public class Choice {
     with scaffolded controllers, it is recommended to observe the default
     identifier and version conventions provided by <code>@RooEntity</code>
     implementations. If you write a web controller by hand (perhaps with the
-    assistance of the <link
-    linkend="command-index-controller-class">controller class</link> command),
-    it is recommended you also use the methods directly exposed on entities.
-    Most Roo applications will place their business logic between the entities
-    and web controllers, with only occasional use of services layers. Please
-    refer to the <link linkend="architecture-services">services layer</link>
-    section for a more complete treatment of when you'd use a services
-    layer.</para>
+    assistance of the <link linkend="command-index-web-mvc-controller">web mvc
+    controller</link> command), it is recommended you also use the methods
+    directly exposed on entities. Most Roo applications will place their
+    business logic between the entities and web controllers, with only
+    occasional use of services layers. Please refer to the <link
+    linkend="architecture-services">services layer</link> section for a more
+    complete treatment of when you'd use a services layer.</para>
   </section>
 
   <section xml:id="architecture-services">
