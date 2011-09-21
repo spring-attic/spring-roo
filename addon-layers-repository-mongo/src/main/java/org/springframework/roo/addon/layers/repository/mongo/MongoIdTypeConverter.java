@@ -11,7 +11,7 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
 /**
- * Custom id type converter for @{link {@link MongoIdType} to limit options in {@link MongoCommands}
+ * Custom id type converter for {@link MongoIdType} to limit options in {@link MongoCommands}
  * 
  * @author Stefan Schmidt
  * @since 1.2.0
