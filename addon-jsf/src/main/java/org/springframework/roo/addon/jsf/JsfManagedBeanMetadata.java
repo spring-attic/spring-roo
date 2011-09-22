@@ -859,6 +859,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (method != null) return method;
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(StringUtils.uncapitalize(entity.getSimpleTypeName()) + " = new " + entity.getSimpleTypeName() + "();");
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = true;");
 		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "\";");
 		

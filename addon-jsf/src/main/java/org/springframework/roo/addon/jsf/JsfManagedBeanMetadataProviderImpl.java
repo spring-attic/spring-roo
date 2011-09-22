@@ -125,8 +125,11 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			return null;
 		}
 
-		// Lookup the entity's metadata
 		final MemberDetails memberDetails = getMemberDetails(entity);
+		if (memberDetails == null) {
+			return null;
+		}
+		
 		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
