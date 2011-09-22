@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 /**
- * Unit test of {@link IOUtils}
+ * Unit test of {@link IOUtils}.
  *
  * @author Andrew Swan
  * @since 1.2.0
@@ -19,7 +19,7 @@ public class IOUtilsTest {
 
 	@Test
 	public void testCloseNullCloseable() {
-		IOUtils.closeQuietly((Closeable) null);	// Shouldn't throw an exception
+		IOUtils.closeQuietly((Closeable) null); // Shouldn't throw an exception
 	}
 	
 	@Test
