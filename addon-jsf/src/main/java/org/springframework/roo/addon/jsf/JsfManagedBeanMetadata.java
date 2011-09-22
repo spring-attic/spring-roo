@@ -588,16 +588,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
 					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
 					if (minValue != null || maxValue != null) {
-						imports.addImport(LONG_RANGE_VALIDATOR);
-						
-						bodyBuilder.appendFormalLine("LongRangeValidator " + fieldValueId + "Validator = new LongRangeValidator();");
-						if (minValue != null) {
-							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.longValue() + ");");
-						}
-						if (maxValue != null) {
-							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.longValue() + ");");
-						}
-						bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+						bodyBuilder.append(getLongRangeValdatorString(fieldValueId, minValue, maxValue));
 					}
 					bodyBuilder.appendFormalLine("");
 					bodyBuilder.appendFormalLine("Slider " + fieldValueId + "Slider = " + getComponentCreationStr("Slider"));
@@ -627,15 +618,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
 					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
 					if (minValue != null || maxValue != null) {
-						imports.addImport(DOUBLE_RANGE_VALIDATOR);
-						bodyBuilder.appendFormalLine("DoubleRangeValidator " + fieldValueId + "Validator = new DoubleRangeValidator();");
-						if (minValue != null) {
-							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.doubleValue() + ");");
-						}
-						if (maxValue != null) {
-							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.doubleValue() + ");");
-						}
-						bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+						bodyBuilder.append(getDoubleRangeValdatorString(fieldValueId, minValue, maxValue));
 					}
 				}
 			} else if (fieldType.equals(STRING)){
@@ -648,18 +631,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(requiredStr);
 					
-					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN), getSizeMinOrMax(field, "min"));
-					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX), getSizeMinOrMax(field, "max"), getColumnLength(field));
+					Integer minValue = getSizeMinOrMax(field, "min");
+					BigDecimal maxValue = NumberUtils.min(getSizeMinOrMax(field, "max"), getColumnLength(field));
 					if (minValue != null || maxValue != null) {
-						imports.addImport(LENGTH_VALIDATOR);
-						bodyBuilder.appendFormalLine("LengthValidator " + fieldValueId + "Validator = new LengthValidator();");
-						if (minValue != null) {
-							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.intValue() + ");");
-						}
-						if (maxValue != null) {
-							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.intValue() + ");");
-						}
-						bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+						bodyBuilder.append(getLengthValdatorString(fieldValueId, minValue, maxValue));
 					}
 				}
 			} else {
@@ -744,6 +719,54 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return (Integer) values.get("length");
 		}
 		return null;
+	}
+
+	public String getLongRangeValdatorString(String fieldValueId, BigDecimal minValue, BigDecimal maxValue) {
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(LONG_RANGE_VALIDATOR);
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("LongRangeValidator " + fieldValueId + "Validator = new LongRangeValidator();");
+		if (minValue != null) {
+			bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.longValue() + ");");
+		}
+		if (maxValue != null) {
+			bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.longValue() + ");");
+		}
+		bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+		return bodyBuilder.getOutput();
+	}
+	
+	public String getDoubleRangeValdatorString(String fieldValueId, BigDecimal minValue, BigDecimal maxValue) {
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(DOUBLE_RANGE_VALIDATOR);
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("DoubleRangeValidator " + fieldValueId + "Validator = new DoubleRangeValidator();");
+		if (minValue != null) {
+			bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.doubleValue() + ");");
+		}
+		if (maxValue != null) {
+			bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.doubleValue() + ");");
+		}
+		bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+		return bodyBuilder.getOutput();
+	}
+
+	public String getLengthValdatorString(String fieldValueId, Number minValue, Number maxValue) {
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		imports.addImport(LENGTH_VALIDATOR);
+
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("LengthValidator " + fieldValueId + "Validator = new LengthValidator();");
+		if (minValue != null) {
+			bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.intValue() + ");");
+		}
+		if (maxValue != null) {
+			bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.intValue() + ");");
+		}
+		bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+		return bodyBuilder.getOutput();
 	}
 
 	private MethodMetadata getFileUploadListenerMethod(final FieldMetadata rooUploadedFileField) {
