@@ -115,7 +115,8 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		DataOnDemandAnnotationValues annotationValues = new DataOnDemandAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || annotationValues.getEntity() == null) {
+		JavaType entity = annotationValues.getEntity();
+		if (!annotationValues.isAnnotationFound() || entity == null) {
 			return null;
 		}
 		
@@ -127,8 +128,6 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		}
 		entityToDodMidMap.put(annotationValues.getEntity(), metadataIdentificationString);
 		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getEntity());
-		
-		JavaType entity = annotationValues.getEntity();
 		
 		MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {

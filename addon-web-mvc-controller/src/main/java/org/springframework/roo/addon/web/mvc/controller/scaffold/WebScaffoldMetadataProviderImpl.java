@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 
 import org.apache.felix.scr.annotations.Component;
@@ -18,9 +18,8 @@ import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataServi
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -87,26 +86,18 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || annotationValues.getFormBackingObject() == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
+		final JavaType formBackingType = annotationValues.getFormBackingObject();
+		if (!annotationValues.isAnnotationFound() || formBackingType == null) {
 			return null;
 		}
-		
-		// Lookup the form backing object's metadata
-		final JavaType formBackingType = annotationValues.getFormBackingObject();
-		final PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 
-		Set<ClassOrInterfaceTypeDetails> persistentTypes = typeLocationService.findClassesOrInterfaceDetailsWithTag(PersistenceCustomDataKeys.PERSISTENT_TYPE);
-
-		boolean found = false;
-		MemberHoldingTypeDetails formBackingMemberHoldingTypeDetails = typeLocationService.getClassOrInterface(formBackingType);
-		for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : persistentTypes) {
-			if (classOrInterfaceTypeDetails.getName().equals(formBackingType)) {
-				formBackingMemberHoldingTypeDetails = classOrInterfaceTypeDetails;
-				found = true;
-				break;
-			}
+		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingType);
+		if (formBackingObjectMemberDetails == null) {
+			return null;
 		}
-		if (!found) {
+
+		final MemberHoldingTypeDetails formBackingMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(formBackingObjectMemberDetails, PERSISTENT_TYPE);
+		if (formBackingMemberHoldingTypeDetails == null) {
 			return null;
 		}
 
@@ -122,7 +113,6 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscove
 		entityToWebScaffoldMidMap.put(formBackingType, metadataIdentificationString);
 		webScaffoldMidToEntityMap.put(metadataIdentificationString, formBackingType);
 
-		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(formBackingObjectPhysicalTypeMetadata);
 		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final List<JavaTypeMetadataDetails> dependentApplicationTypeMetadata = webMetadataService.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final Map<JavaSymbolName, DateTimeFormatDetails> datePatterns = webMetadataService.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);

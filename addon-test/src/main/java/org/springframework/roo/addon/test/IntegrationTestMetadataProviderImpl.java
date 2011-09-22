@@ -139,8 +139,6 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		// We know governor type details are non-null and can be safely cast
-		
 		// We need to parse the annotation, which we expect to be present
 		final IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType entity = annotationValues.getEntity();
@@ -159,7 +157,6 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 			return null;
 		}
 		
-		// Lookup the entity's metadata
 		final MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;

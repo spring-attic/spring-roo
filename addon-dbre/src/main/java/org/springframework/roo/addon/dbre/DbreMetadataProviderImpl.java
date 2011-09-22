@@ -62,13 +62,13 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
-		DbManagedAnnotationValues annotationValues = new DbManagedAnnotationValues(governorPhysicalTypeMetadata);
+		final DbManagedAnnotationValues annotationValues = new DbManagedAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {
 			return null;
 		}
 
 		// Abort if the database couldn't be deserialized. This can occur if the DBRE XML file has been deleted or is empty.
-		Database database = dbreModelService.getDatabase(false);
+		final Database database = dbreModelService.getDatabase(false);
 		if (database == null) {
 			return null;
 		}

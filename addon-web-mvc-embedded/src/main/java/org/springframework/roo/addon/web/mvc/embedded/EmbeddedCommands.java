@@ -28,26 +28,26 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 public class EmbeddedCommands implements CommandMarker {
 
 	// Fields
-	@Reference private EmbeddedOperations operations;
-	@Reference private StaticFieldConverter fieldConverter;
+	@Reference private EmbeddedOperations embeddedOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
 	
 	protected void activate(ComponentContext context) {
-		fieldConverter.add(VideoProvider.class);
-		fieldConverter.add(DocumentProvider.class);
-		fieldConverter.add(VideoStreamProvider.class);
-		fieldConverter.add(PhotoProvider.class);
+		staticFieldConverter.add(VideoProvider.class);
+		staticFieldConverter.add(DocumentProvider.class);
+		staticFieldConverter.add(VideoStreamProvider.class);
+		staticFieldConverter.add(PhotoProvider.class);
 	}
 
 	protected void deactivate(ComponentContext context) {
-		fieldConverter.remove(VideoProvider.class);
-		fieldConverter.remove(DocumentProvider.class);
-		fieldConverter.remove(VideoStreamProvider.class);
-		fieldConverter.remove(PhotoProvider.class);
+		staticFieldConverter.remove(VideoProvider.class);
+		staticFieldConverter.remove(DocumentProvider.class);
+		staticFieldConverter.remove(VideoStreamProvider.class);
+		staticFieldConverter.remove(PhotoProvider.class);
 	}
 	
 	@CliAvailabilityIndicator({ "web mvc embed generic", "web mvc embed wave", "web mvc embed map", "web mvc embed document", "web mvc embed video", "web mvc embed photos", "web mvc embed stream video", "web mvc embed finances", "web mvc embed twitter" })
 	public boolean isPropertyAvailable() {
-		return operations.isCommandAvailable();
+		return embeddedOperations.isCommandAvailable();
 	}
 
 	@CliCommand(value = "web mvc embed generic", help = "Embed media by URL into your WEB MVC application")
@@ -55,7 +55,7 @@ public class EmbeddedCommands implements CommandMarker {
 		@CliOption(key = "url", mandatory = true, help = "The url of the source to be embedded") String url, 
 		@CliOption(key = "viewName", mandatory = false, help = "The name of the jspx view") String viewName) {
 		
-		operations.embed(url, viewName);
+		embeddedOperations.embed(url, viewName);
 	}
 
 	@CliCommand(value = "web mvc embed wave", help = "Embed Google wave integration for your WEB MVC application")
@@ -66,7 +66,7 @@ public class EmbeddedCommands implements CommandMarker {
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", "GOOGLE_WAVE");
 		options.put("id", key);
-		operations.install(viewName, options);
+		embeddedOperations.install(viewName, options);
 	}
 
 	@CliCommand(value = "web mvc embed document", help = "Embed a document for your WEB MVC application")
@@ -78,7 +78,7 @@ public class EmbeddedCommands implements CommandMarker {
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", provider.name());
 		options.put("id", id);
-		operations.install(viewName, options);
+		embeddedOperations.install(viewName, options);
 	}
 
 	@CliCommand(value = "web mvc embed video", help = "Embed a video for your WEB MVC application")
@@ -90,7 +90,7 @@ public class EmbeddedCommands implements CommandMarker {
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", provider.name());
 		options.put("id", id);
-		operations.install(viewName, options);
+		embeddedOperations.install(viewName, options);
 	}
 	
 	@CliCommand(value="web mvc embed map", help="Embed a map for your WEB MVC application")
@@ -99,7 +99,7 @@ public class EmbeddedCommands implements CommandMarker {
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", "GOOGLE_MAPS");
 		options.put("location", location);
-		operations.install(viewName, options);
+		embeddedOperations.install(viewName, options);
 	}
 	
 	@CliCommand(value = "web mvc embed photos", help = "Embed a photo gallery for your WEB MVC application")
@@ -113,7 +113,7 @@ public class EmbeddedCommands implements CommandMarker {
 		options.put("provider", provider.name());
 		options.put("userId", userId);
 		options.put("albumId", albumId);
-		operations.install(viewName, options);
+		embeddedOperations.install(viewName, options);
 	}
 	
 	@CliCommand(value="web mvc embed stream video", help="Embed a video stream into your WEB MVC application")
@@ -123,7 +123,7 @@ public class EmbeddedCommands implements CommandMarker {
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", provider.name());
 		options.put("id", streamId);
-		operations.install(viewName, options); 
+		embeddedOperations.install(viewName, options); 
 	}
 	
 	// TODO: disabled due to ROO-2562
@@ -133,7 +133,7 @@ public class EmbeddedCommands implements CommandMarker {
 //		Map<String, String> options = new HashMap<String, String>();
 //		options.put("provider", "FINANCES");
 //		options.put("stockSymbol", stockSymbol);
-//		operations.install(viewName, options); 
+//		embeddedOperations.install(viewName, options); 
 //	}
 	
 	@CliCommand(value = "web mvc embed twitter", help = "Embed twitter messages into your WEB MVC application")
@@ -144,6 +144,6 @@ public class EmbeddedCommands implements CommandMarker {
 		Map<String, String> options = new HashMap<String, String>();
 		options.put("provider", "TWITTER");
 		options.put("searchTerm", searchTerm);
-		operations.install(viewName, options); 
+		embeddedOperations.install(viewName, options); 
 	}
 }
