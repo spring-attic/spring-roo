@@ -93,6 +93,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private static final String PROVIDES_TYPE_STRING = JsfManagedBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String CREATE_DIALOG_VISIBLE = "createDialogVisible";
+	private static final String HTML_PANEL_GRID_ID = "htmlPanelGrid";
 	
 	// Fields
 	private JavaType entity;
@@ -503,7 +504,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		imports.addImport(HTML_PANEL_GRID);
 		imports.addImport(HTML_OUTPUT_TEXT);
 
-		bodyBuilder.appendFormalLine("HtmlPanelGrid htmlPanelGrid = " + getComponentCreationStr("HtmlPanelGrid"));
+		bodyBuilder.appendFormalLine("HtmlPanelGrid " + HTML_PANEL_GRID_ID + " = " + getComponentCreationStr("HtmlPanelGrid"));
 		bodyBuilder.appendFormalLine("");
 
 		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
@@ -668,14 +669,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			bodyBuilder.appendFormalLine("");
 		}
 		
-		bodyBuilder.appendFormalLine("return htmlPanelGrid;");
+		bodyBuilder.appendFormalLine("return " + HTML_PANEL_GRID_ID + ";");
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 
 	private String getAddToPanelText(final String componentId) {
-		return "htmlPanelGrid.getChildren().add(" + componentId + ");";
+		return HTML_PANEL_GRID_ID + ".getChildren().add(" + componentId + ");";
 	}
 
 	/**
