@@ -171,6 +171,13 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJson</emphas
               converts it into an Owner instance and persists that new
               instance before returning a HTTP 201 (CREATED) status code. The
               accompanying curl command is as follows:</para>
+
+              <programlisting>curl -i -X POST -H Accept:application/json -H Content-Type:application/json 
+     -d '{"address":"The Boulevard","birthDay":861372000000,"city":"Springfield",
+          "email":"bart@simpsons.com","firstName":"Bart",
+          "homePage":"http://simpsons.com","lastName":"Simpson",
+          "telephone":"123456789"}' 
+     http://localhost:8080/petclinic/owners</programlisting>
             </listitem>
 
             <listitem>
