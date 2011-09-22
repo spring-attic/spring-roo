@@ -5,12 +5,15 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.addon.jsf.JsfJavaType.DATE_TIME_CONVERTER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_CREATE_DIALOG;
 import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_LIST;
+import static org.springframework.roo.addon.jsf.JsfJavaType.DOUBLE_RANGE_VALIDATOR;
 import static org.springframework.roo.addon.jsf.JsfJavaType.EL_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.EXPRESSION_FACTORY;
 import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_MESSAGE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.HTML_OUTPUT_TEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.HTML_PANEL_GRID;
+import static org.springframework.roo.addon.jsf.JsfJavaType.LENGTH_VALIDATOR;
+import static org.springframework.roo.addon.jsf.JsfJavaType.LONG_RANGE_VALIDATOR;
 import static org.springframework.roo.addon.jsf.JsfJavaType.MANAGED_BEAN;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_AUTO_COMPLETE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_CALENDAR;
@@ -29,19 +32,20 @@ import static org.springframework.roo.classpath.customdata.PersistenceCustomData
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
-import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
-import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
-import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.POST_CONSTRUCT;
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
+import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
 import static org.springframework.roo.model.Jsr303JavaType.MAX;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -74,6 +78,7 @@ import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.NumberUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -461,22 +466,22 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getPopulatePanelMethod(final Action action) {
 		JavaSymbolName methodName;
-		String fieldSuffix1;
-		String fieldSuffix2;
+		String suffix1;
+		String suffix2;
 		switch (action) {
 			case CREATE:
-				fieldSuffix1 = "CreateOutput";
-				fieldSuffix2 = "CreateInput";
+				suffix1 = "CreateOutput";
+				suffix2 = "CreateInput";
 				methodName = new JavaSymbolName("populateCreatePanel");
 				break;
 			case EDIT:
-				fieldSuffix1 = "EditOutput";
-				fieldSuffix2 = "EditInput";
+				suffix1 = "EditOutput";
+				suffix2 = "EditInput";
 				methodName = new JavaSymbolName("populateEditPanel");
 				break;
 			default:
-				fieldSuffix1 = "Label";
-				fieldSuffix2 = "Value";
+				suffix1 = "Label";
+				suffix2 = "Value";
 				methodName = new JavaSymbolName("populateViewPanel");
 				break;
 		}
@@ -504,92 +509,185 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
 			final JavaType fieldType = field.getFieldType();
 			final String fieldName = field.getFieldName().getSymbolName();
-			final String fieldLabelVar = fieldName + fieldSuffix1;
-			final String fieldValueVar = fieldName + fieldSuffix2;
-			final String converterName = fieldValueVar + "Converter";
+			final String fieldLabelId = fieldName + suffix1;
 			final boolean nullable = isNullable(field);
-
-			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelVar + " = " + getComponentCreationStr("HtmlOutputText"));
-			bodyBuilder.appendFormalLine(fieldLabelVar + ".setId(\"" + fieldLabelVar + "\");");
-			bodyBuilder.appendFormalLine(fieldLabelVar + ".setValue(\"" + fieldName + ":" + (nullable ? "   " : " * ") + "\");");
-			// bodyBuilder.appendFormalLine(fieldLabelVar + ".setStyle(\"font-weight:bold\");");
-			bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldLabelVar + ");");
-			bodyBuilder.appendFormalLine("");
 			
+			// Field label
+			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId + " = " + getComponentCreationStr("HtmlOutputText"));
+			bodyBuilder.appendFormalLine(fieldLabelId + ".setId(\"" + fieldLabelId + "\");");
+			bodyBuilder.appendFormalLine(fieldLabelId + ".setValue(\"" + fieldName + ":" + (nullable ? "   " : " * ") + "\");");
+			// bodyBuilder.appendFormalLine(fieldLabelVar + ".setStyle(\"font-weight:bold\");");
+			bodyBuilder.appendFormalLine(getAddToPanelText(fieldLabelId));
+			bodyBuilder.appendFormalLine("");
+
+			// Field value
+			String fieldValueId = fieldName + suffix2;
+			final String converterName = fieldValueId + "Converter";
+			final String htmlOutputTextStr = "HtmlOutputText " + fieldValueId + " = " + getComponentCreationStr("HtmlOutputText");
+			final String inputTextStr = "InputText " + fieldValueId + " = " + getComponentCreationStr("InputText");
+			final String componentIdStr = fieldValueId + ".setId(\"" + fieldValueId + "\");";
+			final String requiredStr = fieldValueId + ".setRequired(" + !nullable + ");";
+
 			if (isRooUploadFileField(field)) {
 				imports.addImport(PRIMEFACES_FILE_UPLOAD);
 				imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 				imports.addImport(PRIMEFACES_UPLOADED_FILE);
 				final JavaSymbolName fileUploadMethodName = getFileUploadMethodName(field.getFieldName());
-				bodyBuilder.appendFormalLine("FileUpload " + fieldValueVar + " = " + getComponentCreationStr("FileUpload"));
-				bodyBuilder.appendFormalLine(fieldValueVar + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + getEntityName() + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
-				bodyBuilder.appendFormalLine(fieldValueVar + ".setMode(\"advanced\");");
-				bodyBuilder.appendFormalLine(fieldValueVar + ".setUpdate(\"messages\");");
+				bodyBuilder.appendFormalLine("FileUpload " + fieldValueId + " = " + getComponentCreationStr("FileUpload"));
+				bodyBuilder.appendFormalLine(componentIdStr);
+				bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + getEntityName() + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
+				bodyBuilder.appendFormalLine(fieldValueId + ".setMode(\"advanced\");");
+				bodyBuilder.appendFormalLine(fieldValueId + ".setUpdate(\"messages\");");
 			} else if (isEnum(field)) {
 				if (action == Action.VIEW) {
-					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "String"));
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
 				} else {
 					imports.addImport(PRIMEFACES_AUTO_COMPLETE);
 					imports.addImport(fieldType);
-					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueVar + " = " + getComponentCreationStr("AutoComplete"));
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, fieldType.getSimpleTypeName()));
-					bodyBuilder.appendFormalLine(fieldValueVar + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + getEntityName() + "Bean.complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));");
+					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreationStr("AutoComplete"));
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(fieldValueId + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + getEntityName() + "Bean.complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));");
+					bodyBuilder.appendFormalLine(requiredStr);
 					autoCompleteFields.add(field);
 				}
-			} else if (isDateField(fieldType)) {
+			} else if (JdkJavaType.isDateField(fieldType)) {
 				if (action == Action.VIEW) {
 					imports.addImport(DATE_TIME_CONVERTER);
-					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "String"));
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
 					bodyBuilder.appendFormalLine("DateTimeConverter " + converterName + " = new DateTimeConverter();");
 					bodyBuilder.appendFormalLine(converterName + ".setPattern(\"dd/MM/yyyy\");");
-					bodyBuilder.appendFormalLine(fieldValueVar + ".setConverter(" + converterName + ");");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(" + converterName + ");");
 				} else {
 					imports.addImport(PRIMEFACES_CALENDAR);
 					imports.addImport(DATE);
-					bodyBuilder.appendFormalLine("Calendar " + fieldValueVar + " = " + getComponentCreationStr("Calendar"));
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, "Date"));
-					bodyBuilder.appendFormalLine(fieldValueVar + ".setNavigator(true);");
-					bodyBuilder.appendFormalLine(fieldValueVar + ".setEffect(\"slideDown\");");
-					bodyBuilder.appendFormalLine(fieldValueVar + ".setPattern(\"dd/MM/yyyy\");");
+					bodyBuilder.appendFormalLine("Calendar " + fieldValueId + " = " + getComponentCreationStr("Calendar"));
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "Date"));
+					bodyBuilder.appendFormalLine(fieldValueId + ".setNavigator(true);");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setEffect(\"slideDown\");");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setPattern(\"dd/MM/yyyy\");");
+					bodyBuilder.appendFormalLine(requiredStr);
 				}
-			} else {
-				imports.addImport(PRIMEFACES_INPUT_TEXT);
+			} else if (JdkJavaType.isIntegerType(fieldType)) {
 				if (action == Action.VIEW) {
-					bodyBuilder.appendFormalLine("HtmlOutputText " + fieldValueVar + " = " + getComponentCreationStr("HtmlOutputText"));
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
 				} else {
-					if (fieldType.equals(JdkJavaType.BIG_INTEGER) || fieldType.equals(JdkJavaType.BIG_DECIMAL)) {
+					imports.addImport(PRIMEFACES_INPUT_TEXT);
+					imports.addImport(PRIMEFACES_SLIDER);
+					if (fieldType.equals(JdkJavaType.BIG_INTEGER)) {
 						imports.addImport(fieldType);
 					}
-					bodyBuilder.appendFormalLine("InputText " + fieldValueVar + " = " + getComponentCreationStr("InputText"));
-				}
-				bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueVar, fieldName, fieldType.getSimpleTypeName()));
-			}
-			bodyBuilder.appendFormalLine(fieldValueVar + ".setId(\"" + fieldValueVar + "\");");
-			// bodyBuilder.appendFormalLine(fieldValueVar + ".setStyle(\"font-weight:normal\");");
-			if (action != Action.VIEW) {
-				if (!nullable) {
-					bodyBuilder.appendFormalLine(fieldValueVar + ".setRequired(true);");
-				}
-				if (isIntegerFieldType(fieldType)) {
-					int minValue = getMinValue(field);
-					int maxValue = getMaxValue(field);
-					bodyBuilder.append(getSliderText(field, fieldValueVar, minValue, maxValue));
-				} else {
-					bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");
-				}
+					bodyBuilder.appendFormalLine(inputTextStr);
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(requiredStr);
+
+					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
+					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
+					if (minValue != null || maxValue != null) {
+						imports.addImport(LONG_RANGE_VALIDATOR);
+						
+						bodyBuilder.appendFormalLine("LongRangeValidator " + fieldValueId + "Validator = new LongRangeValidator();");
+						if (minValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.longValue() + ");");
+						}
+						if (maxValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.longValue() + ");");
+						}
+						bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+					}
+					bodyBuilder.appendFormalLine("");
+					bodyBuilder.appendFormalLine("Slider " + fieldValueId + "Slider = " + getComponentCreationStr("Slider"));
+					bodyBuilder.appendFormalLine(fieldValueId + "Slider.setFor(\"" + fieldValueId + "\");");
+					bodyBuilder.appendFormalLine("");
 				
+					final String fieldPanelGrid = fieldValueId + "PanelGrid";
+					bodyBuilder.appendFormalLine("HtmlPanelGrid " + fieldPanelGrid + " = " + getComponentCreationStr("HtmlPanelGrid"));
+					bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + ");");
+					bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + "Slider);");
+					fieldValueId = fieldPanelGrid;
+				}
+			} else if (JdkJavaType.isDecimalType(fieldType)) {
+				if (action == Action.VIEW) {
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+				} else {
+					imports.addImport(PRIMEFACES_INPUT_TEXT);
+					if (fieldType.equals(JdkJavaType.BIG_DECIMAL)) {
+						imports.addImport(fieldType);
+					}
+
+					bodyBuilder.appendFormalLine(inputTextStr);
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(requiredStr);
+
+					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
+					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
+					if (minValue != null || maxValue != null) {
+						imports.addImport(DOUBLE_RANGE_VALIDATOR);
+						bodyBuilder.appendFormalLine("DoubleRangeValidator " + fieldValueId + "Validator = new DoubleRangeValidator();");
+						if (minValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.doubleValue() + ");");
+						}
+						if (maxValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.doubleValue() + ");");
+						}
+						bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+					}
+				}
+			} else if (fieldType.equals(STRING)){
+				if (action == Action.VIEW) {
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+				} else {
+					imports.addImport(PRIMEFACES_INPUT_TEXT);
+					bodyBuilder.appendFormalLine(inputTextStr);
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(requiredStr);
+					
+					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN), getSizeMinOrMax(field, "min"));
+					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX), getSizeMinOrMax(field, "max"), getColumnLength(field));
+					if (minValue != null || maxValue != null) {
+						imports.addImport(LENGTH_VALIDATOR);
+						bodyBuilder.appendFormalLine("LengthValidator " + fieldValueId + "Validator = new LengthValidator();");
+						if (minValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMinimum(" + minValue.intValue() + ");");
+						}
+						if (maxValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + "Validator.setMaximum(" + maxValue.intValue() + ");");
+						}
+						bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
+					}
+				}
+			} else {
+				if (action == Action.VIEW) {
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+				} else {
+					imports.addImport(PRIMEFACES_INPUT_TEXT);
+					bodyBuilder.appendFormalLine(inputTextStr);
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(requiredStr);
+				}
+			}
+
+			if (action != Action.VIEW) {
+				bodyBuilder.appendFormalLine(getAddToPanelText(fieldValueId));
+				fieldValueId = fieldName + suffix2;
+
 				// Add message for input field
 				imports.addImport(PRIMEFACES_MESSAGE);
 				bodyBuilder.appendFormalLine("");
-				bodyBuilder.appendFormalLine("Message " + fieldValueVar + "Message = " + getComponentCreationStr("Message"));
-				bodyBuilder.appendFormalLine(fieldValueVar + "Message.setId(\"" + fieldLabelVar + "Message\");");
-				bodyBuilder.appendFormalLine(fieldValueVar + "Message.setFor(\"" + fieldValueVar + "\");");
-				bodyBuilder.appendFormalLine(fieldValueVar + "Message.setDisplay(\"icon\");");
-				bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + "Message);");
+				bodyBuilder.appendFormalLine("Message " + fieldValueId + "Message = " + getComponentCreationStr("Message"));
+				bodyBuilder.appendFormalLine(fieldValueId + "Message.setId(\"" + fieldLabelId + "Message\");");
+				bodyBuilder.appendFormalLine(fieldValueId + "Message.setFor(\"" + fieldValueId + "\");");
+				bodyBuilder.appendFormalLine(fieldValueId + "Message.setDisplay(\"icon\");");
+				bodyBuilder.appendFormalLine(getAddToPanelText(fieldValueId + "Message"));
 			} else {
-				bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + ");");
+				bodyBuilder.appendFormalLine(getAddToPanelText(fieldValueId));
 			}
 
 			bodyBuilder.appendFormalLine("");
@@ -600,29 +698,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
-	
-	private String getSliderText(FieldMetadata field, String fieldValueVar, int minValue, int maxValue) {
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(PRIMEFACES_SLIDER);
 
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("Slider " + fieldValueVar + "Slider = " + getComponentCreationStr("Slider"));
-		bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setFor(\"" + fieldValueVar + "\");");
-
-		// Apply min and max constraints
-		if (minValue > 0) {
-			bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setMinValue(" + minValue + ");");
-		}
-		if (maxValue > 0) {
-			bodyBuilder.appendFormalLine(fieldValueVar + "Slider.setMaxValue(" + maxValue + ");");
-		}
-
-		bodyBuilder.appendFormalLine("HtmlPanelGrid " + fieldValueVar + "PanelGrid = " + getComponentCreationStr("HtmlPanelGrid"));
-		bodyBuilder.appendFormalLine(fieldValueVar + "PanelGrid.getChildren().add(" + fieldValueVar + ");");
-		bodyBuilder.appendFormalLine(fieldValueVar + "PanelGrid.getChildren().add(" + fieldValueVar + "Slider);");
-		bodyBuilder.appendFormalLine("htmlPanelGrid.getChildren().add(" + fieldValueVar + "PanelGrid);");
-		
-		return bodyBuilder.getOutput();
+	private String getAddToPanelText(final String componentId) {
+		return "htmlPanelGrid.getChildren().add(" + componentId + ");";
 	}
 
 	/**
@@ -640,41 +718,32 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return false;
 	}
 	
-	private boolean isIntegerFieldType(JavaType fieldType) {
-		return fieldType.equals(BIG_INTEGER) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_OBJECT);
-	}
-	
 	private boolean isNullable(final FieldMetadata field) {
 		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null;
 	}
 	
-	private int getMinValue(final FieldMetadata field) {
-		AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
-		AnnotationMetadata minAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
-		if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("min")) != null) {
-			return (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("min")).getValue();
-		} else if (sizeAnnotation == null && minAnnotation != null) {
-			Number value = (Number) minAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
-			return value.intValue();
+	private BigDecimal getMinOrMax(final FieldMetadata field, JavaType annotationType) {
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), annotationType);
+		if (annotation != null && annotation.getAttribute(new JavaSymbolName("value")) != null) {
+			return new BigDecimal(String.valueOf(annotation.getAttribute(new JavaSymbolName("value")).getValue()));
 		}
-		return -1;
+		return null;
+	}
+	
+	private Integer getSizeMinOrMax(final FieldMetadata field, String attrName) {
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
+		if (annotation != null && annotation.getAttribute(new JavaSymbolName(attrName)) != null) {
+			return (Integer) annotation.getAttribute(new JavaSymbolName(attrName)).getValue();
+		}
+		return null;
 	}
 
-	private int getMaxValue(final FieldMetadata field) {
+	private Integer getColumnLength(final FieldMetadata field) {
 		@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
-		AnnotationMetadata sizeAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
-		AnnotationMetadata maxAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
-		if (sizeAnnotation != null && sizeAnnotation.getAttribute(new JavaSymbolName("max")) != null) {
-			return (Integer) sizeAnnotation.getAttribute(new JavaSymbolName("max")).getValue();
-		} else if (sizeAnnotation == null && maxAnnotation != null) {
-			Number value = (Number) maxAnnotation.getAttribute(new JavaSymbolName("value")).getValue();
-			return value.intValue();
-		} else if (maxAnnotation == null && values != null) {
-			if (values.containsKey("length")) {
-				return (Integer) values.get("length");
-			}
+		if (values != null && values.containsKey("length")) {
+			return (Integer) values.get("length");
 		}
-		return -1;
+		return null;
 	}
 
 	private MethodMetadata getFileUploadListenerMethod(final FieldMetadata rooUploadedFileField) {
@@ -950,10 +1019,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private String getValueExpressionStr(final String inputFieldVar, final String fieldName, final String className) {
 		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "Bean." + getEntityName() + "." + fieldName + "}\", " + className + ".class));";
-	}
-
-	private boolean isDateField(final JavaType fieldType) {
-		return fieldType.equals(DATE) || fieldType.equals(CALENDAR) || fieldType.equals(GREGORIAN_CALENDAR);
 	}
 
 	public String toString() {

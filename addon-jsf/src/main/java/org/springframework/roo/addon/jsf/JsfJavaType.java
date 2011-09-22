@@ -23,16 +23,19 @@ public class JsfJavaType {
 	// javax.faces
 	public static final JavaType CONVERTER = new JavaType("javax.faces.convert.Converter");
 	public static final JavaType DATE_TIME_CONVERTER =  new JavaType("javax.faces.convert.DateTimeConverter");
+	public static final JavaType DOUBLE_RANGE_VALIDATOR = new JavaType("javax.faces.validator.DoubleRangeValidator");
 	public static final JavaType FACES_CONTEXT = new JavaType("javax.faces.context.FacesContext");
 	public static final JavaType FACES_MESSAGE = new JavaType("javax.faces.application.FacesMessage");
 	public static final JavaType HTML_OUTPUT_TEXT = new JavaType("javax.faces.component.html.HtmlOutputText");
 	public static final JavaType HTML_PANEL_GRID = new JavaType("javax.faces.component.html.HtmlPanelGrid");
+	public static final JavaType LENGTH_VALIDATOR = new JavaType("javax.faces.validator.LengthValidator");
+	public static final JavaType LONG_RANGE_VALIDATOR = new JavaType("javax.faces.validator.LongRangeValidator");
 	public static final JavaType MANAGED_BEAN = new JavaType("javax.faces.bean.ManagedBean");
 	public static final JavaType REQUEST_SCOPED = new JavaType("javax.faces.bean.RequestScoped");
 	public static final JavaType SESSION_SCOPED = new JavaType("javax.faces.bean.SessionScoped");
 	public static final JavaType UI_COMPONENT = new JavaType("javax.faces.component.UIComponent");
 	public static final JavaType VIEW_SCOPED = new JavaType("javax.faces.bean.ViewScoped");
-	
+
 	// org.primefaces
 	public static final JavaType PRIMEFACES_AUTO_COMPLETE = new JavaType("org.primefaces.component.autocomplete.AutoComplete");
 	public static final JavaType PRIMEFACES_CALENDAR = new JavaType("org.primefaces.component.calendar.Calendar");
