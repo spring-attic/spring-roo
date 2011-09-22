@@ -43,7 +43,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return true if the string appears to be a valid metadata identification string
 	 */
-	public static final boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(String metadataIdentificationString) {
 		// Previously: return metadataIdentificationString != null && metadataIdentificationString.startsWith("MID:");
 		if (metadataIdentificationString == null) {
 			return false;
@@ -66,7 +66,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return true if the string is identifying a class of {@link MetadataItem}
 	 */
-	public static final boolean isIdentifyingClass(String metadataIdentificationString) {
+	public static boolean isIdentifyingClass(String metadataIdentificationString) {
 		if (!isValid(metadataIdentificationString)) {
 			return false;
 		}
@@ -79,7 +79,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return true if the string is identifying a specific instance of a {@link MetadataItem}
 	 */
-	public static final boolean isIdentifyingInstance(String metadataIdentificationString) {
+	public static boolean isIdentifyingInstance(String metadataIdentificationString) {
 		if (!isValid(metadataIdentificationString)) {
 			return false;
 		}
@@ -93,7 +93,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return the class only, or null if the identification string is invalid in some way
 	 */
-	public static final String getMetadataClass(String metadataIdentificationString) {
+	public static String getMetadataClass(String metadataIdentificationString) {
 		if (!isValid(metadataIdentificationString)) {
 			return null;
 		}
@@ -122,7 +122,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return the instance only, or null if the identification string is invalid in some way
 	 */
-	public static final String getMetadataInstance(String metadataIdentificationString) {
+	public static String getMetadataInstance(String metadataIdentificationString) {
 		if (!isIdentifyingInstance(metadataIdentificationString)) {
 			return null;
 		}
@@ -143,7 +143,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @param fullyQualifiedClassName to create (can be null or empty)
 	 * @return the metadata identification string (may be null if the input was invalid)
 	 */
-	public static final String create(String fullyQualifiedClassName) {
+	public static String create(String fullyQualifiedClassName) {
 		if (fullyQualifiedClassName == null || "".equals(fullyQualifiedClassName) || fullyQualifiedClassName.contains("#")) {
 			return null;
 		}
@@ -157,7 +157,7 @@ public abstract class MetadataIdentificationUtils {
 	 * @param instanceIdentificationKey to create (mandatory, cannot be empty or null)
 	 * @return the metadata identification string (never null)
 	 */
-	public static final String create(String fullyQualifiedClassName, String instanceIdentificationKey) {
+	public static String create(String fullyQualifiedClassName, String instanceIdentificationKey) {
 		if (instanceIdentificationKey == null || "".equals(instanceIdentificationKey) || fullyQualifiedClassName == null || "".equals(fullyQualifiedClassName) || fullyQualifiedClassName.contains("#")) {
 			return null;
 		}

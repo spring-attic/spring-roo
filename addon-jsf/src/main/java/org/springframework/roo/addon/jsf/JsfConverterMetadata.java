@@ -164,19 +164,19 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return tsc.toString();
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 	
-	public static final String createIdentifier(final JavaType javaType, final Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(final String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(final String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

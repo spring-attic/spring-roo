@@ -136,7 +136,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return tsc.toString();
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 
@@ -147,19 +147,19 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @param javaType (required)
 	 * @return a non-<code>null</code> ID
 	 */
-	public static final String createIdentifier(final JavaType javaType) {
+	public static String createIdentifier(final JavaType javaType) {
 		return createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 	}
 	
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

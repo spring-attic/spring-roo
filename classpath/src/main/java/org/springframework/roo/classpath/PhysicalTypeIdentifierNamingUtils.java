@@ -27,20 +27,20 @@ public abstract class PhysicalTypeIdentifierNamingUtils {
 	 * @param path (required)
 	 * @return a non-blank ID
 	 */
-	public static final String createIdentifier(final String providesType, final JavaType javaType, final Path path) {
+	public static String createIdentifier(final String providesType, final JavaType javaType, final Path path) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");
 		return MetadataIdentificationUtils.create(providesType, path.getName() + "?" + javaType.getFullyQualifiedTypeName());
 	}
 
-	public static final JavaType getJavaType(String providesType, String metadataIdentificationString) {
+	public static JavaType getJavaType(String providesType, String metadataIdentificationString) {
 		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");
 		return new JavaType(instance.substring(index+1));
 	}
 
-	public static final Path getPath(String providesType, String metadataIdentificationString) {
+	public static Path getPath(String providesType, String metadataIdentificationString) {
 		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");

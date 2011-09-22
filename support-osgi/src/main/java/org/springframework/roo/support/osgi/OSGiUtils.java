@@ -37,7 +37,7 @@ public final class OSGiUtils {
 	 * @return null if there was a failure or a set containing zero or more entries (zero entries
 	 * means the search was successful but the resource was simply not found)
 	 */
-	public static final Collection<URL> findEntriesByPath(final BundleContext context, final String path) {
+	public static Collection<URL> findEntriesByPath(final BundleContext context, final String path) {
 		Assert.hasText(path, "Path to locate is required");
 		final Collection<URL> urls = new ArrayList<URL>();
 		// We use a collection of URIs to avoid duplication in the collection of
@@ -80,7 +80,7 @@ public final class OSGiUtils {
 	 * @see AntPathMatcher#match(String, String)
 	 */
 	@SuppressWarnings("unchecked")
-	public static final Collection<URL> findEntriesByPattern(final BundleContext context, final String antPathExpression) {
+	public static Collection<URL> findEntriesByPattern(final BundleContext context, final String antPathExpression) {
 		Assert.hasText(antPathExpression, "Ant path expression to match is required");
 		final Collection<URL> urls = new ArrayList<URL>();
 		// We use a collection of URIs to avoid duplication in the collection of

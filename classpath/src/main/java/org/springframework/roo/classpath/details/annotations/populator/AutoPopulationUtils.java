@@ -44,7 +44,7 @@ public abstract class AutoPopulationUtils {
 	 * @param target to put values into (mandatory, cannot be null)
 	 * @param annotation to obtain values from (can be null, for convenience of the caller)
 	 */
-	public static final void populate(Object target, AnnotationMetadata annotation) {
+	public static void populate(Object target, AnnotationMetadata annotation) {
 		Assert.notNull(target, "Target required");
 		
 		if (annotation == null) {

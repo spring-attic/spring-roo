@@ -32,7 +32,7 @@ public final class UrlFindingUtils {
 	 * {@link OSGiUtils#findEntriesByPath(BundleContext, String)} instead
 	 */
 	@Deprecated
-	public static final Set<URL> findUrls(final BundleContext context, final String resourceName) {
+	public static Set<URL> findUrls(final BundleContext context, final String resourceName) {
 		Assert.hasText(resourceName, "Resource name to locate is required");
 		final Set<URL> results = new HashSet<URL>();
 		OSGiUtils.execute(new BundleCallback() {
@@ -64,7 +64,7 @@ public final class UrlFindingUtils {
 	 */
 	@Deprecated
 	@SuppressWarnings("unchecked")
-	public static final Set<URL> findMatchingClasspathResources(final BundleContext context, final String antPathExpression) {
+	public static Set<URL> findMatchingClasspathResources(final BundleContext context, final String antPathExpression) {
 		Assert.hasText(antPathExpression, "Ant path expression to match is required");
 		final Set<URL> results = new HashSet<URL>();
 		OSGiUtils.execute(new BundleCallback() {

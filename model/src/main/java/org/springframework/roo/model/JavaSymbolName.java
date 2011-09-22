@@ -38,7 +38,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * 
 	 * @param name to the package name to evaluate (required)
 	 */
-	public static final void assertJavaNameLegal(final String name) {
+	public static void assertJavaNameLegal(final String name) {
 		Assert.notNull(name, "Name required");
 		
 		// Note regular expression for legal characters found to be x5 slower in profiling than this approach

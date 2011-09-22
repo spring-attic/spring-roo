@@ -29,7 +29,7 @@ public abstract class HandlerUtils {
 	 * @param clazz to retrieve the logger for (required)
 	 * @return the logger, which will at least of {@link Level#FINE} if no level was specified
 	 */
-	public static final Logger getLogger(Class<?> clazz) {
+	public static Logger getLogger(Class<?> clazz) {
 		Assert.notNull(clazz, "Class required");
 		Logger logger = Logger.getLogger(clazz.getName());
 		if (logger.getLevel() == null && clazz.getName().startsWith("org.springframework.roo")) {
@@ -52,7 +52,7 @@ public abstract class HandlerUtils {
 	 * @param fallbackSeverity to trigger fallback mode (required)
 	 * @return the number of {@link DeferredLogHandler}s now registered against the {@link Logger} (guaranteed to be 1 or above)
 	 */
-	public static final int wrapWithDeferredLogHandler(Logger logger, Level fallbackSeverity) {
+	public static int wrapWithDeferredLogHandler(Logger logger, Level fallbackSeverity) {
 		Assert.notNull(logger, "Logger is required");
 		Assert.notNull(fallbackSeverity, "Fallback severity is required");
 		
@@ -104,7 +104,7 @@ public abstract class HandlerUtils {
 	 * @param target to set as the target {@link Handler}
 	 * @return number of {@link DeferredLogHandler} instances detected and updated (may be 0 if none found)
 	 */
-	public static final int registerTargetHandler(Logger logger, Handler target) {
+	public static int registerTargetHandler(Logger logger, Handler target) {
 		Assert.notNull(logger, "Logger is required");
 		Assert.notNull(target, "Target handler is required");
 		
@@ -129,7 +129,7 @@ public abstract class HandlerUtils {
 	 * @param logger to flush (required)
 	 * @return the number of {@link Handler}s flushed (may be 0 or above)
 	 */
-	public static final int flushAllHandlers(Logger logger) {
+	public static int flushAllHandlers(Logger logger) {
 		Assert.notNull(logger, "Logger is required");
 		
 		int flushed = 0;

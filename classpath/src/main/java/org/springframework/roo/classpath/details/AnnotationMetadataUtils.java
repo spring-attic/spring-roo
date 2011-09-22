@@ -34,7 +34,7 @@ public abstract class AnnotationMetadataUtils {
 	 * @param annotation to covert (required)
 	 * @return a string-based representation (never null)
 	 */
-	public static final String toSourceForm(AnnotationMetadata annotation) {
+	public static String toSourceForm(AnnotationMetadata annotation) {
 		return toSourceForm(annotation, null);
 	}
 
@@ -45,7 +45,7 @@ public abstract class AnnotationMetadataUtils {
 	 * @param resolver to use for automatic addition of used types (may be null)
 	 * @return a string-based representation (never null)
 	 */
-	public static final String toSourceForm(AnnotationMetadata annotation, ImportRegistrationResolver resolver) {
+	public static String toSourceForm(AnnotationMetadata annotation, ImportRegistrationResolver resolver) {
 		Assert.notNull(annotation, "Annotation required");
 
 		StringBuilder sb = new StringBuilder();

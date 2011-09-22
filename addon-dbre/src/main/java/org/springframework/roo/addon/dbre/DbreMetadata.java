@@ -844,19 +844,19 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return annotationValues.isAutomaticallyDelete();
 	}
 	
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

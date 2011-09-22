@@ -28,7 +28,7 @@ public abstract class FileUtils {
 	 * @param file to delete (required; the file may or may not exist)
 	 * @return true if the file is fully deleted, or false if there was a failure when deleting
 	 */
-	public static final boolean deleteRecursively(File file) {
+	public static boolean deleteRecursively(File file) {
 		Assert.notNull(file, "File to delete required");
 		if (!file.exists()) {
 			return true;
@@ -56,7 +56,7 @@ public abstract class FileUtils {
 	 * @param deleteDestinationOnExit indicates whether to mark any created destinations for deletion on exit
 	 * @return true if the copy was successful
 	 */
-	public static final boolean copyRecursively(File source, File destination, boolean deleteDestinationOnExit) {
+	public static boolean copyRecursively(File source, File destination, boolean deleteDestinationOnExit) {
 		Assert.notNull(source, "Source directory required");
 		Assert.notNull(destination, "Destination directory required");
 		Assert.isTrue(source.exists(), "Source directory '" + source + "' must exist");
