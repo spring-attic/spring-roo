@@ -4,7 +4,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-public class JavaTypeTests {
+public class JavaTypeTest {
 	
 	@Test 
 	public void testEnclosingTypeDetection() {
