@@ -105,10 +105,32 @@ public class JavaType implements Comparable<JavaType> {
 	 * @param dataType the {@link DataType} (required)
 	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
+	 * @return a JavaType instance constructed based on the passed in details
 	 * @since 1.2.0
 	 */
 	public static JavaType getInstance(final String fullyQualifiedTypeName, final int arrayDimensions, final DataType dataType, final JavaSymbolName argName, final JavaType... parameters) {
 		return new JavaType(fullyQualifiedTypeName, arrayDimensions, dataType, argName, Arrays.asList(parameters));
+	}
+
+	/**
+	 * Factory method for a {@link JavaType} with full details. Recall that
+	 * {@link JavaType} is immutable and therefore this is the only way of
+	 * setting these non-default values.
+	 *
+	 * This is a factory method rather than a constructor so as not to cause
+	 * ambiguity problems for existing callers of {@link #JavaType(String, int, DataType, JavaSymbolName, List)}
+	 *
+	 * @param fullyQualifiedTypeName the name (as per the rules above)
+	 * @param enclosingType the type's enclosing type
+	 * @param arrayDimensions the number of array dimensions (0 = not an array, 1 = one-dimensional array, etc.)
+	 * @param dataType the {@link DataType} (required)
+	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
+	 * @param parameters the type parameters applicable (can be null if there aren't any)
+	 * @return a JavaType instance constructed based on the passed in details
+	 * @since 1.2.0
+	 */
+	public static JavaType getInstance(final String fullyQualifiedTypeName, final JavaType enclosingType, final int arrayDimensions, final DataType dataType, final JavaSymbolName argName, final JavaType... parameters) {
+		return new JavaType(fullyQualifiedTypeName, enclosingType, arrayDimensions, dataType, argName, Arrays.asList(parameters));
 	}
 	
 	// Fields
@@ -119,6 +141,7 @@ public class JavaType implements Comparable<JavaType> {
 	private final List<JavaType> parameters;
 	private final String fullyQualifiedTypeName;
 	private final String simpleTypeName;
+	private final JavaType enclosingType;
 
 	/**
 	 * Constructs a {@link JavaType}.
@@ -133,8 +156,26 @@ public class JavaType implements Comparable<JavaType> {
 	 * 
 	 * @param fullyQualifiedTypeName the name (as per the above rules; mandatory)
 	 */
-	public JavaType(String fullyQualifiedTypeName) {
+	public JavaType(final String fullyQualifiedTypeName) {
 		this(fullyQualifiedTypeName, 0, DataType.TYPE, null, null);
+	}
+
+	/**
+	 * Constructs a {@link JavaType}.
+	 * <p>
+	 * The fully qualified type name will be enforced as follows:
+	 * <ul>
+	 * <li>The rules listed in {@link JavaSymbolName#assertJavaNameLegal(String)}
+	 * <li>First letter of simple type name must be upper-case</li>
+	 * </ul>
+	 * <p>
+	 * A fully qualified type name may include or exclude a package designator.
+	 *
+	 * @param fullyQualifiedTypeName the name (as per the above rules; mandatory)
+	 * @param enclosingType the type's enclosing type
+	 */
+	public JavaType(final String fullyQualifiedTypeName, final JavaType enclosingType) {
+		this(fullyQualifiedTypeName, enclosingType, 0, DataType.TYPE, null, null);
 	}
 
 	/**
@@ -159,6 +200,21 @@ public class JavaType implements Comparable<JavaType> {
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
 	public JavaType(final String fullyQualifiedTypeName, final int arrayDimensions, final DataType dataType, final JavaSymbolName argName, final List<JavaType> parameters) {
+		this(fullyQualifiedTypeName, null, arrayDimensions, dataType, argName, parameters);
+	}
+
+	/**
+	 * Construct a {@link JavaType} with full details. Recall that {@link JavaType} is immutable and therefore this is the only way of
+	 * setting these non-default values.
+	 *
+	 * @param fullyQualifiedTypeName the name (as per the rules above)
+	 * @param enclosingType the type's enclosing type
+	 * @param arrayDimensions the number of array dimensions (0 = not an array, 1 = one-dimensional array, etc.)
+	 * @param dataType the {@link DataType} (required)
+	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
+	 * @param parameters the type parameters applicable (can be null if there aren't any)
+	 */
+	public JavaType(final String fullyQualifiedTypeName, final JavaType enclosingType, final int arrayDimensions, final DataType dataType, final JavaSymbolName argName, final List<JavaType> parameters) {
 		Assert.hasText(fullyQualifiedTypeName, "Fully qualified type name required");
 		Assert.notNull(dataType, "Data type required");
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
@@ -167,6 +223,11 @@ public class JavaType implements Comparable<JavaType> {
 		this.dataType = dataType;
 		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
 		this.defaultPackage = !fullyQualifiedTypeName.contains(".");
+		if (enclosingType == null) {
+			this.enclosingType = determineEnclosingType();
+		} else {
+			this.enclosingType = enclosingType;
+		}
 		if (defaultPackage) {
 			this.simpleTypeName = fullyQualifiedTypeName;
 		} else {
@@ -311,7 +372,6 @@ public class JavaType implements Comparable<JavaType> {
 			return new JavaPackage("");
 		}
 
-		JavaType enclosingType = getEnclosingType();
 		if (enclosingType != null) {
 			String enclosingTypeFullyQualifiedTypeName = enclosingType.getFullyQualifiedTypeName();
 			int offset = enclosingTypeFullyQualifiedTypeName.lastIndexOf(".");
@@ -330,31 +390,7 @@ public class JavaType implements Comparable<JavaType> {
 	 * @return the enclosing type, if any (will return null if there is no enclosing type)
 	 */
 	public JavaType getEnclosingType() {
-		int offset = fullyQualifiedTypeName.lastIndexOf(".");
-		if (offset == -1) {
-			// There is no dot in the name, so there's no way there's an enclosing type
-			return null;
-		}
-		String possibleName = fullyQualifiedTypeName.substring(0, offset);
-		int offset2 = possibleName.lastIndexOf(".");
-
-		// Start by handling if the type name is Foo.Bar (ie an enclosed type within the default package)
-		String enclosedWithinPackage = null;
-		String enclosedWithinTypeName = possibleName;
-
-		// Handle the probability the type name is within a package like com.alpha.Foo.Bar
-		if (offset2 > -1) {
-			enclosedWithinPackage = possibleName.substring(0, offset2);
-			enclosedWithinTypeName = possibleName.substring(offset2 + 1);
-		}
-
-		if (Character.isUpperCase(enclosedWithinTypeName.charAt(0))) {
-			// First letter is upper-case, so treat it as a type name for now
-			String preTypeNamePortion = enclosedWithinPackage == null ? "" : (enclosedWithinPackage + ".");
-			return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
-		}
-
-		return null;
+		return enclosingType;
 	}
 
 	public boolean isDefaultPackage() {
@@ -379,17 +415,6 @@ public class JavaType implements Comparable<JavaType> {
 
 	public int getArray() {
 		return arrayDimensions;
-	}
-
-	private String getArraySuffix() {
-		if (arrayDimensions == 0) {
-			return "";
-		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < arrayDimensions; i++) {
-			sb.append("[]");
-		}
-		return sb.toString();
 	}
 
 	public int hashCode() {
@@ -428,5 +453,44 @@ public class JavaType implements Comparable<JavaType> {
 
 	public DataType getDataType() {
 		return dataType;
+	}
+
+	private String getArraySuffix() {
+		if (arrayDimensions == 0) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < arrayDimensions; i++) {
+			sb.append("[]");
+		}
+		return sb.toString();
+	}
+
+	private JavaType determineEnclosingType() {
+		int offset = fullyQualifiedTypeName.lastIndexOf(".");
+		if (offset == -1) {
+			// There is no dot in the name, so there's no way there's an enclosing type
+			return null;
+		}
+		String possibleName = fullyQualifiedTypeName.substring(0, offset);
+		int offset2 = possibleName.lastIndexOf(".");
+
+		// Start by handling if the type name is Foo.Bar (ie an enclosed type within the default package)
+		String enclosedWithinPackage = null;
+		String enclosedWithinTypeName = possibleName;
+
+		// Handle the probability the type name is within a package like com.alpha.Foo.Bar
+		if (offset2 > -1) {
+			enclosedWithinPackage = possibleName.substring(0, offset2);
+			enclosedWithinTypeName = possibleName.substring(offset2 + 1);
+		}
+
+		if (Character.isUpperCase(enclosedWithinTypeName.charAt(0))) {
+			// First letter is upper-case, so treat it as a type name for now
+			String preTypeNamePortion = enclosedWithinPackage == null ? "" : (enclosedWithinPackage + ".");
+			return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
+		}
+
+		return null;
 	}
 }

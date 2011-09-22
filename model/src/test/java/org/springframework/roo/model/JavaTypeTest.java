@@ -27,5 +27,14 @@ public class JavaTypeTest {
 		Assert.assertEquals("com.foo._MyBar", new JavaType("com.foo._MyBar").getFullyQualifiedTypeName());
 		Assert.assertEquals(new JavaType("com.Foo.Bar"), new JavaType("com.Foo.Bar.My").getEnclosingType());
 		Assert.assertEquals(new JavaType("com.foo.BAR"), new JavaType("com.foo.BAR.My").getEnclosingType());
+
+		// Enclosing type us explicitly specified
+		Assert.assertEquals(new JavaPackage("com.foo"), new JavaType("com.foo.Bob.Smith", new JavaType("com.foo.Bob")).getEnclosingType().getPackage());
+		Assert.assertEquals(new JavaType("com.foo.Bob"), new JavaType("com.foo.Bob.Smith", new JavaType("com.foo.Bob")).getEnclosingType());
+	}
+
+	@Test
+	public void testTypeInRootPackage() {
+		Assert.assertEquals("", new JavaType("MyRootClass").getPackage().getFullyQualifiedPackageName());
 	}
 }
