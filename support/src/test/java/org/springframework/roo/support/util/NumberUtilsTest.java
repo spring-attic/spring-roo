@@ -17,6 +17,11 @@ import org.junit.Test;
 public class NumberUtilsTest {
 	
 	@Test
+	public void testMinValueOfEmptyArray() {
+		assertNull(NumberUtils.min(new Number[0]));
+	}
+	
+	@Test
 	public void testNullMinValues() {
 		assertNull(NumberUtils.min(null, null));
 	}
@@ -43,7 +48,7 @@ public class NumberUtilsTest {
 	
 	@Test
 	public void testMultipleSameMinValues() {
-		assertEquals(new BigDecimal("-1.0"), NumberUtils.min(-1, -1F, -1L, -1D));
+		assertEquals(-1, NumberUtils.min(-1, -1F, -1L, -1D).intValueExact());
 	}
 	
 	@Test

@@ -14,7 +14,7 @@ public final class NumberUtils {
 	/**
 	 * Returns the minimum value in the array.
 	 * 
-	 * @param array an array of Numbers
+	 * @param array an array of Numbers (can be <code>null</code>)
 	 * @return the minimum value in the array, or null if all the elements are null
 	 */
 	public static BigDecimal min(final Number... array) {
@@ -24,49 +24,54 @@ public final class NumberUtils {
 	/**
 	 * Returns the maximum value in the array.
 	 * 
-	 * @param array an array of Numbers
+	 * @param array an array of Numbers (can be <code>null</code>)
 	 * @return the maximum value in the array, or null if all the elements are null
 	 */
 	public static BigDecimal max(final Number... array) {
 		return minOrMax(false, array);
 	}
 
-	private static BigDecimal minOrMax(final boolean isMin, final Number... array) {
-		if (array == null || array.length == 0) {
+	/**
+	 * Finds the minimum or maxiumum value contained in the given array,
+	 * ignoring any <code>null</code> elements
+	 * 
+	 * @param findMinimum <code>false</code> to get the maximum
+	 * @param numbers can be <code>null</code>, empty, or contain <code>null</code>
+	 * elements
+	 * @return <code>null</code> if the array is <code>null</code>, empty, or
+	 * all its elements are <code>null</code>
+	 */
+	private static BigDecimal minOrMax(final boolean findMinimum, final Number... numbers) {
+		if (numbers == null || numbers.length == 0) {
 			return null;
 		}
-		// Find first non-null element
-		int start = 0;
-		for (int i = 1; i < array.length; i++) {
-			if (array[i] != null) {
-				start = i;
-				break;
+		BigDecimal extreme = null;
+		for (final Number number : numbers) {
+			if (number != null) {
+				final BigDecimal candidate = getBigDecimal(number);
+				if (extreme == null || (findMinimum ? candidate.compareTo(extreme) < 0 : candidate.compareTo(extreme) > 0)) {
+					// The non-null candidate is the new extreme
+					extreme = candidate;
+				}
 			}
 		}
-		
-		BigDecimal minOrMax = getBigDecimal(array[start]);
-		for (int i = start + 1; i < array.length; i++) {
-			BigDecimal number = getBigDecimal(array[i]);
-			BigDecimal value = minOrMax != null ? new BigDecimal(String.valueOf(minOrMax)) : null;
-			if (number != null && (isMin ? number.compareTo(value) < 0 : number.compareTo(value) > 0)) {
-				minOrMax = number;
-			}
-		}
-		return minOrMax;
+		return extreme;
 	}
 	
-	private static BigDecimal getBigDecimal(Number number) {
-		BigDecimal value;
-		if (number == null) {
-			value = null;
-		} else if (number instanceof BigDecimal) {
-			value = (BigDecimal) number;
-		} else if (number instanceof BigInteger) {
-			value = new BigDecimal((BigInteger) number);
-		} else {
-			value = new BigDecimal(String.valueOf(number));
+	/**
+	 * Converts the given number to a {@link BigDecimal}
+	 * 
+	 * @param number the number to convert (can be <code>null</code>)
+	 * @return <code>null</code> if the given number was <code>null</code>
+	 */
+	private static BigDecimal getBigDecimal(final Number number) {
+		if (number == null || number instanceof BigDecimal) {
+			return (BigDecimal) number;
 		}
-		return value;
+		if (number instanceof BigInteger) {
+			return new BigDecimal((BigInteger) number);
+		}
+		return new BigDecimal(number.toString());
 	}
 	
 	/**
