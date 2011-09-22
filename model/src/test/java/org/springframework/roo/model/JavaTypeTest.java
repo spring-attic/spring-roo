@@ -17,8 +17,8 @@ public class JavaTypeTest {
 		
 		// Enclosing type in default package
 		Assert.assertEquals(new JavaType("Bob"), new JavaType("Bob.Smith").getEnclosingType());
-		Assert.assertEquals(new JavaPackage("Bob"), new JavaType("Bob.Smith").getEnclosingType().getPackage());
-		
+		Assert.assertEquals(new JavaPackage(""), new JavaType("Bob.Smith").getEnclosingType().getPackage());
+
 		// Enclosing type in declared package
 		Assert.assertEquals(new JavaType("foo.My"), new JavaType("foo.My.Sar").getEnclosingType());
 		
