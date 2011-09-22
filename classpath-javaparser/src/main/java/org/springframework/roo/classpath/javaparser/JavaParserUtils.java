@@ -1,13 +1,6 @@
 package org.springframework.roo.classpath.javaparser;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
@@ -30,6 +23,13 @@ import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaPackage;
@@ -46,7 +46,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaParserUtils  {
+public final class JavaParserUtils  {
 
 	/**
 	 * Converts the presented class name into a name expression (either a {@link NameExpr} or
@@ -54,7 +54,7 @@ public class JavaParserUtils  {
 	 * @param className to convert (required; can be fully qualified or simple name only)
 	 * @return a compatible expression (never returns null)
 	 */
-	public static final NameExpr getNameExpr(String className) {
+	public static NameExpr getNameExpr(String className) {
 		Assert.hasText(className, "Class name required");
 		if (className.contains(".")) {
 			int offset = className.lastIndexOf(".");
@@ -71,7 +71,7 @@ public class JavaParserUtils  {
 	 * @param modifiers the Java Parser int
 	 * @return the equivalent JDK int
 	 */
-	public static final int getJdkModifier(int modifiers) {
+	public static int getJdkModifier(int modifiers) {
 		int result = 0;
 		if (ModifierSet.isAbstract(modifiers)) {
 			result |= Modifier.ABSTRACT;
@@ -115,7 +115,7 @@ public class JavaParserUtils  {
 	 * @param modifiers the JDK int
 	 * @return the equivalent Java Parser int
 	 */
-	public static final int getJavaParserModifier(int modifiers) {
+	public static int getJavaParserModifier(int modifiers) {
 		int result = 0;
 		if (Modifier.isAbstract(modifiers)) {
 			result = ModifierSet.addModifier(ModifierSet.ABSTRACT, result);
@@ -163,7 +163,7 @@ public class JavaParserUtils  {
 	 * @param annotationExpr to retrieve the type name from (required)
 	 * @return the name (never null)
 	 */
-	public static final NameExpr getNameExpr(AnnotationExpr annotationExpr) {
+	public static NameExpr getNameExpr(AnnotationExpr annotationExpr) {
 		Assert.notNull(annotationExpr, "Annotation expression required");
 		if (annotationExpr instanceof MarkerAnnotationExpr) {
 			MarkerAnnotationExpr a = (MarkerAnnotationExpr) annotationExpr;
@@ -194,7 +194,7 @@ public class JavaParserUtils  {
 	 * @param o2 the second entry to compare (null is acceptable)
 	 * @return true if and only if both entries are identical
 	 */
-	private static final boolean isEqual(NameExpr o1, NameExpr o2) {
+	private static boolean isEqual(NameExpr o1, NameExpr o2) {
 		if (o1 == null && o2 == null) {
 			return true;
 		}
@@ -329,7 +329,7 @@ public class JavaParserUtils  {
 	 * @param typeParameters names to consider type parameters (can be null if there are none)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaType(CompilationUnitServices compilationUnitServices, NameExpr nameToFind, Set<JavaSymbolName> typeParameters) {
+	public static JavaType getJavaType(CompilationUnitServices compilationUnitServices, NameExpr nameToFind, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(nameToFind, "Name to find is required");
 
@@ -408,7 +408,7 @@ public class JavaParserUtils  {
 	 * @param nameExpr to convert (required)
 	 * @return the corresponding {@link ReferenceType} (never null)
 	 */
-	public static final ReferenceType getReferenceType(NameExpr nameExpr) {
+	public static ReferenceType getReferenceType(NameExpr nameExpr) {
 		Assert.notNull(nameExpr, "Java type required");
 		return new ReferenceType(getClassOrInterfaceType(nameExpr));
 	}
@@ -422,7 +422,7 @@ public class JavaParserUtils  {
 	 * @param nameExpr to convert (required)
 	 * @return the corresponding {@link ClassOrInterfaceType} (never null)
 	 */
-	public static final ClassOrInterfaceType getClassOrInterfaceType(NameExpr nameExpr) {
+	public static ClassOrInterfaceType getClassOrInterfaceType(NameExpr nameExpr) {
 		Assert.notNull(nameExpr, "Java type required");
 		if (nameExpr instanceof QualifiedNameExpr) {
 			QualifiedNameExpr qne = (QualifiedNameExpr) nameExpr;
@@ -445,7 +445,7 @@ public class JavaParserUtils  {
 	 * @param javaType a primitive type (required, and must be primitive)
 	 * @return the equivalent Java Parser {@link Type}
 	 */
-	public static final Type getType(JavaType javaType) {
+	public static Type getType(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.isTrue(javaType.isPrimitive(), "Java type must be primitive to be presented to this method");
 		if (javaType.equals(JavaType.VOID_PRIMITIVE)) {
@@ -478,7 +478,7 @@ public class JavaParserUtils  {
 	 * @param cit the class or interface type to resolve (required)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaTypeNow(CompilationUnitServices compilationUnitServices, ClassOrInterfaceType cit, Set<JavaSymbolName> typeParameters) {
+	public static JavaType getJavaTypeNow(CompilationUnitServices compilationUnitServices, ClassOrInterfaceType cit, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(cit, "ClassOrInterfaceType required");
 
@@ -514,7 +514,7 @@ public class JavaParserUtils  {
 	 * @param cid the class or interface declaration to resolve (required)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaType(CompilationUnitServices compilationUnitServices, ClassOrInterfaceDeclaration cid) {
+	public static JavaType getJavaType(CompilationUnitServices compilationUnitServices, ClassOrInterfaceDeclaration cid) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(cid, "ClassOrInterfaceType required");
 
@@ -557,7 +557,7 @@ public class JavaParserUtils  {
 	 * @param nameExpr the expression to locate an import for (which would generally be a {@link NameExpr} and thus not have a package identifier; required)
 	 * @return the relevant import, or null if there is no import for the expression
 	 */
-	private static final ImportDeclaration getImportDeclarationFor(CompilationUnitServices compilationUnitServices, NameExpr nameExpr) {
+	private static ImportDeclaration getImportDeclarationFor(CompilationUnitServices compilationUnitServices, NameExpr nameExpr) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(nameExpr, "Name expression required");
 
@@ -583,7 +583,7 @@ public class JavaParserUtils  {
 		return null;
 	}
 
-	public static final ReferenceType importParametersForType(JavaType targetType, List<ImportDeclaration> imports, JavaType typeToImport) {
+	public static ReferenceType importParametersForType(JavaType targetType, List<ImportDeclaration> imports, JavaType typeToImport) {
 		Assert.notNull(targetType, "Target type is required");
 		Assert.notNull(imports, "Compilation unit imports required");
 		Assert.notNull(typeToImport, "Java type to import is required");
@@ -616,7 +616,7 @@ public class JavaParserUtils  {
 	 * @param typeToImport the type to be imported (required)
 	 * @return the name expression to be used when referring to that type (never null)
 	 */
-	public static final NameExpr importTypeIfRequired(JavaType targetType, List<ImportDeclaration> imports, JavaType typeToImport) {
+	public static NameExpr importTypeIfRequired(JavaType targetType, List<ImportDeclaration> imports, JavaType typeToImport) {
 		Assert.notNull(targetType, "Target type is required");
 		JavaPackage compilationUnitPackage = targetType.getPackage();
 		Assert.notNull(imports, "Compilation unit imports required");
@@ -718,7 +718,7 @@ public class JavaParserUtils  {
 	 * @param value that expression, which need not necessarily be resolvable to a type (required)
 	 * @return the expression to now use, as appropriately resolved (never returns null)
 	 */
-	public static final Expression importExpressionIfRequired(JavaType targetType, List<ImportDeclaration> imports, Expression value) {
+	public static Expression importExpressionIfRequired(JavaType targetType, List<ImportDeclaration> imports, Expression value) {
 		Assert.notNull(targetType, "Target type required");
 		Assert.notNull(imports, "Imports required");
 		Assert.notNull(value, "Expression value required");
@@ -759,13 +759,13 @@ public class JavaParserUtils  {
 	}
 
 	/**
-	 * Searches a compilation unit and locates the declaration with the given type name.
+	 * Searches a compilation unit and locates the declaration with the given type's simple name.
 	 * 
 	 * @param compilationUnit to scan (required)
 	 * @param javaType the target to locate (required)
 	 * @return the located type declaration or null if it could not be found
 	 */
-	public static final TypeDeclaration locateTypeDeclaration(CompilationUnit compilationUnit, JavaType javaType) {
+	public static TypeDeclaration locateTypeDeclaration(CompilationUnit compilationUnit, JavaType javaType) {
 		Assert.notNull(compilationUnit, "Compilation unit required");
 		Assert.notNull(javaType, "Java type to search for required");
 		if (compilationUnit.getTypes() == null) {

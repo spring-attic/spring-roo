@@ -1,16 +1,6 @@
 package org.springframework.roo.classpath.javaparser;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-
 import japa.parser.ASTHelper;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
@@ -27,6 +17,16 @@ import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -56,8 +56,8 @@ import org.springframework.roo.support.util.FileCopyUtils;
 public class JavaParserTypeParsingService implements TypeParsingService {
 
 	// Fields
-	@Reference private MetadataService metadataService;
-	@Reference private TypeLocationService typeLocationService;
+	@Reference MetadataService metadataService;
+	@Reference TypeLocationService typeLocationService;
 
 	public final String getCompilationUnitContents(final ClassOrInterfaceTypeDetails cit) {
 		Assert.notNull(cit, "Class or interface type details are required");
