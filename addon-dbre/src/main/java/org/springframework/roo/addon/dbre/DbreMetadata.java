@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.dbre;
 
-import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.SET;
 import static org.springframework.roo.model.JpaJavaType.CASCADE_TYPE;
@@ -65,6 +64,7 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -676,7 +676,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Add precision and scale attributes for numeric fields
-		if (column.getScale() > 0 && isDecimalField(fieldType)) {
+		if (column.getScale() > 0 && JdkJavaType.isDecimalType(fieldType)) {
 			columnBuilder.addIntegerAttribute("precision", column.getColumnSize());
 			columnBuilder.addIntegerAttribute("scale", column.getScale());
 		}
@@ -711,10 +711,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
-	}
-
-	private boolean isDecimalField(JavaType fieldType) {
-		return fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(BIG_DECIMAL);
 	}
 
 	private void addToBuilder(FieldMetadata field) {

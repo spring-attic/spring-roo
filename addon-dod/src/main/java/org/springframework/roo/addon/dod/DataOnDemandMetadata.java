@@ -54,6 +54,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -526,7 +527,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.appendFormalLine("}");
 				}
 			}
-		} else if (isDecimalFieldType(fieldType)) {
+		} else if (JdkJavaType.isDecimalType(fieldType)) {
 			// Check for @Digits, @DecimalMax, @DecimalMin
 			AnnotationMetadata digitsAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DIGITS);
 			AnnotationMetadata decimalMinAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DECIMAL_MIN);
@@ -540,7 +541,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
 				bodyBuilder.append(getColumnPrecisionAndScaleBody(field, values, suffix));
 			}
-		} else if (isIntegerFieldType(fieldType)) {
+		} else if (JdkJavaType.isIntegerType(fieldType)) {
 			// Check for @Min and @Max
 			bodyBuilder.append(getMinAndMaxBody(field, suffix));
 		}
@@ -1092,14 +1093,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		return initializer;
-	}
-
-	private boolean isIntegerFieldType(JavaType fieldType) {
-		return fieldType.equals(BIG_INTEGER) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.INT_OBJECT) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(JavaType.LONG_OBJECT) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_OBJECT);
-	}
-
-	private boolean isDecimalFieldType(JavaType fieldType) {
-		return fieldType.equals(BIG_DECIMAL) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.FLOAT_PRIMITIVE) || fieldType.equals(JavaType.FLOAT_OBJECT);
 	}
 
 	private JavaSymbolName getCollaboratingFieldName(JavaType entity) {

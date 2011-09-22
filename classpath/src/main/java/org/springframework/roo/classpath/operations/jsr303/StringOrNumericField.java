@@ -5,21 +5,28 @@ import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 public class StringOrNumericField extends FieldDetails {
+	
+	// Constants
+	protected static final Logger LOGGER = HandlerUtils.getLogger(StringOrNumericField.class);
+
 		
 	/** Whether the JSR 303 @DecimalMin annotation will be added */
 	private String decimalMin;
 	
 	/** Whether the JSR 303 @DecimalMax annotation will be added */
 	private String decimalMax;
-	
+		
 	public StringOrNumericField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
@@ -43,6 +50,9 @@ public class StringOrNumericField extends FieldDetails {
 	}
 
 	public void setDecimalMin(String decimalMin) {
+		if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
+			LOGGER.warning("@DecimalMin constraint is not supported for double or float fields");
+		}
 		this.decimalMin = decimalMin;
 	}
 
@@ -51,6 +61,9 @@ public class StringOrNumericField extends FieldDetails {
 	}
 
 	public void setDecimalMax(String decimalMax) {
+		if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
+			LOGGER.warning("@DecimalMax constraint is not supported for double or float fields");
+		}
 		this.decimalMax = decimalMax;
 	}
 }

@@ -1,16 +1,15 @@
 package org.springframework.roo.addon.dbre.model;
 
-import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.JdkJavaType.ARRAY;
+import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
+import static org.springframework.roo.model.JdkJavaType.BLOB;
+import static org.springframework.roo.model.JdkJavaType.CLOB;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.REF;
+import static org.springframework.roo.model.JdkJavaType.STRUCT;
 
-import java.math.BigDecimal;
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Ref;
-import java.sql.Struct;
 import java.sql.Types;
-import java.util.Date;
 
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -67,11 +66,11 @@ public class Column {
 				break;
 			case Types.NUMERIC:
 				jdbcType = "NUMERIC";
-				javaType = new JavaType(BigDecimal.class.getName());
+				javaType = BIG_DECIMAL;
 				break;
 			case Types.DECIMAL:
 				jdbcType = "DECIMAL";
-				javaType = new JavaType(BigDecimal.class.getName());
+				javaType = BIG_DECIMAL;
 				break;
 			case Types.BOOLEAN:
 				jdbcType = "BOOLEAN";
@@ -95,7 +94,7 @@ public class Column {
 				break;
 			case Types.BIGINT:
 				jdbcType = "BIGINT";
-				javaType = LONG_OBJECT;
+				javaType = JavaType.LONG_OBJECT;
 				break;
 			case Types.REAL:
 				jdbcType = "REAL";
@@ -123,27 +122,27 @@ public class Column {
 				break;
 			case Types.DATE:
 				jdbcType = "DATE";
-				javaType = new JavaType(Date.class.getName());
+				javaType = DATE;
 				break;
 			case Types.TIME:
 				jdbcType = "TIME";
-				javaType = new JavaType(Date.class.getName());
+				javaType = DATE;
 				break;
 			case Types.TIMESTAMP:
 				jdbcType = "TIMESTAMP";
-				javaType = new JavaType(Date.class.getName());
+				javaType = DATE;
 				break;
 			case Types.CLOB:
 				jdbcType = "CLOB";
-				javaType = new JavaType(Clob.class.getName());
+				javaType = CLOB;
 				break;
 			case Types.BLOB:
 				jdbcType = "BLOB";
-				javaType = new JavaType(Blob.class.getName());
+				javaType = BLOB;
 				break;
 			case Types.ARRAY:
 				jdbcType = "ARRAY";
-				javaType = new JavaType(Array.class.getName());
+				javaType = ARRAY;
 				break;
 			case Types.DISTINCT:
 				jdbcType = "DISTINCT";
@@ -151,11 +150,11 @@ public class Column {
 				break;
 			case Types.REF:
 				jdbcType = "REF";
-				javaType = new JavaType(Ref.class.getName());
+				javaType = REF;
 				break;
 			case Types.STRUCT:
 				jdbcType = "STRUCT";
-				javaType = new JavaType(Struct.class.getName());
+				javaType = STRUCT;
 				break;
 			case Types.NULL:
 				jdbcType = "NULL";

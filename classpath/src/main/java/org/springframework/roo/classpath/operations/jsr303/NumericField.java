@@ -13,6 +13,7 @@ import org.springframework.roo.classpath.details.annotations.IntegerAttributeVal
 import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.support.util.Assert;
 
 public class NumericField extends StringOrNumericField {
@@ -79,6 +80,9 @@ public class NumericField extends StringOrNumericField {
 	}
 
 	public void setMin(Long min) {
+		if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
+			LOGGER.warning("@Min constraint is not supported for double or float fields");
+		}
 		this.min = min;
 	}
 
@@ -87,6 +91,9 @@ public class NumericField extends StringOrNumericField {
 	}
 
 	public void setMax(Long max) {
+		if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
+			LOGGER.warning("@Max constraint is not supported for double or float fields");
+		}
 		this.max = max;
 	}
 }
