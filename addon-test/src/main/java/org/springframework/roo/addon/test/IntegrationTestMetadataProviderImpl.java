@@ -1,5 +1,18 @@
 package org.springframework.roo.addon.test;
 
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.classpath.layers.LayerCustomDataKeys.LAYER_TYPE;
+import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
+import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
+import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 
 import java.util.HashMap;
@@ -18,18 +31,14 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -39,7 +48,6 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -61,16 +69,16 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	@Reference private ProjectOperations projectOperations;
 	@Reference private LayerService layerService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 
-	private final Set<String> producedMids = new LinkedHashSet<String>();
 	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
+	private final Set<String> producedMids = new LinkedHashSet<String>();
 	private Boolean wasGaeEnabled;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		// Integration test classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
@@ -78,7 +86,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		addMetadataTrigger(ROO_INTEGRATION_TEST);
 	}
 	
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(ROO_INTEGRATION_TEST);
@@ -87,7 +95,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
 	@Override
-	protected void notifyForGenericListener(String upstreamDependency) {
+	protected void notifyForGenericListener(final String upstreamDependency) {
 		// If the upstream dependency is null or invalid do not continue
 		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
 			return;
@@ -95,13 +103,13 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		
 		// We do need to be informed if a new layer is available to see if we should use that
 		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
-			MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
-			if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+			final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
+			if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LAYER_TYPE) != null) {
 				@SuppressWarnings("unchecked")
-				List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+				final List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LAYER_TYPE);
 				if (domainTypes != null) {
-					for (JavaType type : domainTypes) {
-						String localMidType = managedEntityTypes.get(type);
+					for (final JavaType type : domainTypes) {
+						final String localMidType = managedEntityTypes.get(type);
 						if (localMidType != null) {
 							metadataService.get(localMidType);
 						}
@@ -112,53 +120,37 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		
 		// If the upstream dependency isn't ProjectMetadata do not continue
 		if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-			ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+			final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 			// If ProjectMetadata isn't valid do not continue
 			if (projectMetadata == null || !projectMetadata.isValid()) {
 				return;
 			}
-			boolean isGaeEnabled = projectMetadata.isGaeEnabled();
+			final boolean isGaeEnabled = projectMetadata.isGaeEnabled();
 			// We need to determine if the persistence state has changed, we do this by comparing the last known state to the current state
-			boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
+			final boolean hasGaeStateChanged = wasGaeEnabled == null || isGaeEnabled != wasGaeEnabled;
 			if (hasGaeStateChanged) {
 				wasGaeEnabled = isGaeEnabled;
-				for (String producedMid : producedMids) {
+				for (final String producedMid : producedMids) {
 					metadataService.get(producedMid, true);
 				}
 			}
 		}
 	}
 	
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 		
 		// We need to parse the annotation, which we expect to be present
-		IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(governorPhysicalTypeMetadata);
+		final IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(governorPhysicalTypeMetadata);
 		final JavaType entity = annotationValues.getEntity();
 		if (!annotationValues.isAnnotationFound() || entity == null) {
 			return null;
 		}
 		
-		// Lookup the DOD's metadata. The DOD must conform to the DOD naming conventions
-		Set<ClassOrInterfaceTypeDetails> potentialDods = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_DATA_ON_DEMAND);
-		JavaType dodJavaType = new JavaType(annotationValues.getEntity().getFullyQualifiedTypeName() + "DataOnDemand");
-		// We default to standard naming conventions but if that doesn't result in a match we go fishing
-		if (typeLocationService.getClassOrInterface(dodJavaType) == null) {
-			for (ClassOrInterfaceTypeDetails potentialDod : potentialDods) {
-				// We that the annotation is present but we have to retrieve it
-				AnnotationMetadata dodAnnotation = MemberFindingUtils.getFirstAnnotation(potentialDod, RooJavaType.ROO_DATA_ON_DEMAND);
-				if (dodAnnotation != null && dodAnnotation.getAttribute("entity") != null) {
-					AnnotationAttributeValue<?> entityAttribute = dodAnnotation.getAttribute("entity");
-					if (entityAttribute instanceof ClassAttributeValue) {
-						if (((ClassAttributeValue)entityAttribute).getValue().equals(entity)) {
-							dodJavaType = potentialDod.getName();
-						}
-					}
-				}
-			}
-		}
-		String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dodJavaType, Path.SRC_TEST_JAVA);
-		DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
+		final JavaType dataOnDemandType = getDataOnDemandType(entity);
+		final String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dataOnDemandType, Path.SRC_TEST_JAVA);
+		final DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey, metadataIdentificationString);
@@ -168,7 +160,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		}
 		
 		// Lookup the entity's metadata
-		MemberDetails memberDetails = getMemberDetails(entity);
+		final MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
 		}
@@ -178,37 +170,37 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 			return null;
 		}
 		
-		final MethodParameter firstResultParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "firstResult");
-		final MethodParameter maxResultsParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "maxResults");
+		final MethodParameter firstResultParameter = new MethodParameter(INT_PRIMITIVE, "firstResult");
+		final MethodParameter maxResultsParameter = new MethodParameter(INT_PRIMITIVE, "maxResults");
 
-		MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		final MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, IDENTIFIER_ACCESSOR_METHOD);
 		final MethodMetadata versionAccessorMethod = persistenceMemberLocator.getVersionAccessor(entity);
-		MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
-		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
-		MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
-		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name(), entity, idType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
+		final MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
+		final MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), entity, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
+		final MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
+		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD.name(), entity, idType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
 		final MethodParameter entityParameter = new MethodParameter(entity, "obj");
-		MemberTypeAdditions flushMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FLUSH_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.MERGE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions flushMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
 		if (persistMethodAdditions == null || findMethodAdditions == null || identifierAccessorMethod == null) {
 			return null;
 		}
 	
 		String transactionManager = null;
-		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, RooJavaType.ROO_ENTITY);
+		final AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ROO_ENTITY);
 		if (rooEntityAnnotation != null) {
-			StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(new JavaSymbolName("transactionManager"));
+			final StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(new JavaSymbolName("transactionManager"));
 			if (transactionManagerAttr != null) {
 				transactionManager = transactionManagerAttr.getValue();
 			}
 		}
 		
-		boolean hasEmbeddedIdentifier = dataOnDemandMetadata.hasEmbeddedIdentifier();
-		boolean entityHasSuperclass  = getEntitySuperclass(annotationValues.getEntity()) != null;
+		final boolean hasEmbeddedIdentifier = dataOnDemandMetadata.hasEmbeddedIdentifier();
+		final boolean entityHasSuperclass  = getEntitySuperclass(entity) != null;
 
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
 				metadataDependencyRegistry.registerDependency(memberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
 				break;
@@ -223,22 +215,47 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 
 		boolean isGaeEnabled = false;
 
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		if (projectMetadata != null && projectMetadata.isValid()) {
 			isGaeEnabled = projectMetadata.isGaeEnabled();
 		}
 
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethodAdditions, findMethodAdditions, findAllMethodAdditions, findEntriesMethod, flushMethodAdditions, mergeMethodAdditions, persistMethodAdditions, removeMethodAdditions, transactionManager, hasEmbeddedIdentifier, entityHasSuperclass, isGaeEnabled);
 	}
+
+	/**
+	 * Returns the {@link JavaType} for the given entity's "data on demand" class.
+	 * 
+	 * @param entity the entity for which to get the DoD type
+	 * @return a non-<code>null</code> type (which may or may not exist yet)
+	 */
+	private JavaType getDataOnDemandType(final JavaType entity) {
+		// First check for an existing type with the standard DoD naming convention
+		final JavaType defaultDodType = new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
+		if (typeLocationService.getClassOrInterface(defaultDodType) != null) {
+			return defaultDodType;
+		}
+		
+		// Otherwise we look through all DoD-annotated classes for this entity's one
+		for (final ClassOrInterfaceTypeDetails dodType : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
+			final AnnotationMetadata dodAnnotation = MemberFindingUtils.getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
+			if (dodAnnotation != null && dodAnnotation.getAttribute("entity").getValue().equals(entity)) {
+				return dodType.getName();
+			}
+		}
+		
+		// No existing DoD class was found for this entity, so use the default name
+		return defaultDodType;
+	}
 	
-	private ClassOrInterfaceTypeDetails getEntitySuperclass(JavaType entity) {
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+	private ClassOrInterfaceTypeDetails getEntitySuperclass(final JavaType entity) {
+		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
+		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
+		final PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
+		final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 		return classOrInterfaceTypeDetails.getSuperclass();
 	}
 	
@@ -246,13 +263,15 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		return "IntegrationTest";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
-		JavaType javaType = IntegrationTestMetadata.getJavaType(metadataIdentificationString);
-		Path path = IntegrationTestMetadata.getPath(metadataIdentificationString);
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
+		final JavaType javaType = IntegrationTestMetadata.getJavaType(metadataIdentificationString);
+		final Path path = IntegrationTestMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return IntegrationTestMetadata.createIdentifier(javaType, path);
 	}
 

@@ -663,11 +663,20 @@ public final class MemberFindingUtils {
 		return methodMetadata != null && !methodMetadata.getDeclaredByMetadataId().equals(declaredByMetadataId);
 	}
 
-	public static AnnotationMetadata getFirstAnnotation(ClassOrInterfaceTypeDetails cid, JavaType... annotationTypes) {
-		for (JavaType annotationType : annotationTypes) {
-			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);
-			if (annotationMetadata != null) {
-				return annotationMetadata;
+	/**
+	 * Returns the first of the given types of annotation on the given class or interface
+	 * 
+	 * @param cid the class or interface to check (can be <code>null</code>)
+	 * @param annotationTypes the types of annotation to look for, in order (can be <code>null</code>)
+	 * @return <code>null</code> if the given type or array of annotations is <code>null</code>, or none were found
+	 */
+	public static AnnotationMetadata getFirstAnnotation(final ClassOrInterfaceTypeDetails cid, final JavaType... annotationTypes) {
+		if (cid != null && annotationTypes != null) {
+			for (final JavaType annotationType : annotationTypes) {
+				final AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);
+				if (annotationMetadata != null) {
+					return annotationMetadata;
+				}
 			}
 		}
 		return null;
