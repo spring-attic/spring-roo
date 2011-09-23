@@ -138,20 +138,20 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 			return null;
 		}
 		final FieldMetadata identifierField = idFields.get(0);
-		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
-		if (idType == null) {
+		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
+		if (identifierType == null) {
 			return null;
 		}
 		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataId);
 		
-		return layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
+		return layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION);
 	}
 	
-	private List<MethodMetadata> getConverterMethods(final JavaType entityType, final MemberDetails memberDetails, final String metadataIdentificationString) {
+	private List<MethodMetadata> getConverterMethods(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		final List<MethodMetadata> converterMethods = new ArrayList<MethodMetadata>();
 		
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
-		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entityType);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
 
 		int converterMethodCount = 0;
 		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {

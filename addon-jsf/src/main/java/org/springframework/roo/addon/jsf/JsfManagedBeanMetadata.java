@@ -509,6 +509,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
 			final JavaType fieldType = field.getFieldType();
+			System.out.println("**** " + field.getFieldName().getSymbolName() +":"+fieldType.getFullyQualifiedTypeName());
 			final String fieldName = field.getFieldName().getSymbolName();
 			final String fieldLabelId = fieldName + suffix1;
 			final boolean nullable = isNullable(field);

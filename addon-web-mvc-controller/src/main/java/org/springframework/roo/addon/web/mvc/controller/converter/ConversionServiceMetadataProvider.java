@@ -107,14 +107,14 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		
 		for (final Iterator<JavaType> types = relevantDomainTypes.keySet().iterator(); types.hasNext();) {
 			final JavaType type = types.next();
-			final JavaType idType = persistenceMemberLocator.getIdentifierType(type);
-			if (idType == null) {
+			final JavaType identifierType = persistenceMemberLocator.getIdentifierType(type);
+			if (identifierType == null) {
 				// This type either has no ID field (e.g. an embedded type) or it's ID type is unknown right now;
 				// don't generate a converter for it; this will happen later if and when the ID field becomes known.
 				types.remove();
 			} else {
-				idTypes.put(type, idType);
-				final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), type, idType, LayerType.HIGHEST.getPosition(), new MethodParameter(idType, "id"));
+				idTypes.put(type, identifierType);
+				final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), type, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
 				findMethods.put(type, findMethod);
 			}
 		}

@@ -65,8 +65,8 @@ public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
-		final JavaType idType = persistenceMemberLocator.getIdentifierType(javaType);
-		if (idType == null) {
+		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(javaType);
+		if (identifierType == null) {
 			return null;
 		}
 		
@@ -75,7 +75,7 @@ public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 			return null;
 		}
 
-		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, idType, identifierAccessor, entityMetadata.getFindMethod());
+		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, identifierType, identifierAccessor, entityMetadata.getFindMethod());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

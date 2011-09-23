@@ -1,9 +1,6 @@
 package org.springframework.roo.addon.test;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_LOCAL_SERVICE_TEST_HELPER;
-import static org.springframework.roo.model.JdkJavaType.CALENDAR;
-import static org.springframework.roo.model.JdkJavaType.DATE;
-import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.SpringJavaType.AUTOWIRED;
 import static org.springframework.roo.model.SpringJavaType.CONTEXT_CONFIGURATION;
@@ -32,6 +29,7 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -380,7 +378,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getSimpleTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
-		if (isDateOrCalendarType(versionType)) {
+		if (JdkJavaType.isDateField(versionType)) {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
 		} else {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
@@ -411,7 +409,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
+		imports.addImport(identifierAccessorMethod.getReturnType());
 		JavaType versionType = versionAccessorMethod.getReturnType();
 		imports.addImport(versionType);
 		
@@ -439,7 +437,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 		
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." + identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");
-		if (isDateOrCalendarType(versionType)) {
+		if (JdkJavaType.isDateField(versionType)) {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + entityName + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
 		} else {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + entityName + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
@@ -548,10 +546,6 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
-	}
-
-	private boolean isDateOrCalendarType(JavaType javaType) {
-		return javaType.equals(DATE) || javaType.equals(CALENDAR) || javaType.equals(GREGORIAN_CALENDAR);
 	}
 
 	public String toString() {

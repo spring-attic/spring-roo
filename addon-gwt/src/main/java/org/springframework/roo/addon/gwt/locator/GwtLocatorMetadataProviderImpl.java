@@ -96,13 +96,13 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 			return null;
 		}
 
-		MethodMetadata idAccessor = persistenceMemberLocator.getIdentifierAccessor(entity.getName());
+		MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity.getName());
 		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity.getName());
-		if (idAccessor == null || versionAccessor == null) {
+		if (identifierAccessor == null || versionAccessor == null) {
 			return null;
 		}
 		
-		final JavaType idType = GwtUtils.convertPrimitiveType(idAccessor.getReturnType(), true);
+		final JavaType identifierType = GwtUtils.convertPrimitiveType(identifierAccessor.getReturnType(), true);
 		String locatorIdentifier = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType));
 		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorIdentifier);
 		AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(RooJavaType.ROO_GWT_LOCATOR);
@@ -113,12 +113,12 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		locatorBuilder.setName(new JavaType(locatorType));
 		locatorBuilder.setModifier(Modifier.PUBLIC);
 		locatorBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
-		locatorBuilder.addExtendsTypes(new JavaType(GwtUtils.LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity.getName(), idType)));
+		locatorBuilder.addExtendsTypes(new JavaType(GwtUtils.LOCATOR.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(entity.getName(), identifierType)));
 		locatorBuilder.addMethod(getCreateMethod(locatorIdentifier, entity.getName()));
-		locatorBuilder.addMethod(getFindMethod(locatorBuilder, locatorIdentifier, entity.getName(), idType));
+		locatorBuilder.addMethod(getFindMethod(locatorBuilder, locatorIdentifier, entity.getName(), identifierType));
 		locatorBuilder.addMethod(getDomainTypeMethod(locatorIdentifier, entity.getName()));
-		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity.getName(), idAccessor));
-		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity.getName(), idType));
+		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity.getName(), identifierAccessor));
+		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity.getName(), identifierType));
 		locatorBuilder.addMethod(getVersionMethod(locatorIdentifier, entity.getName(), versionAccessor));
 		
 		typeManagementService.createOrUpdateTypeOnDisk(locatorBuilder.build());

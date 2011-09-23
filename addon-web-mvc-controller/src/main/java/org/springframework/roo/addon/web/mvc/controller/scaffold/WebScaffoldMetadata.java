@@ -439,7 +439,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("if (" + dependentType.getPersistenceDetails().getCountMethod().getMethodCall() + " == 0) {");
 			bodyBuilder.indent();
 			// Adding string array which has the fieldName at position 0 and the path at position 1
-			bodyBuilder.appendFormalLine("dependencies.add(new String[]{\"" + dependentType.getJavaType().getSimpleTypeName().toLowerCase() + "\", \"" + dependentType.getPlural().toLowerCase() + "\"});");
+			bodyBuilder.appendFormalLine("dependencies.add(new String[] { \"" + dependentType.getJavaType().getSimpleTypeName().toLowerCase() + "\", \"" + dependentType.getPlural().toLowerCase() + "\" });");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		}

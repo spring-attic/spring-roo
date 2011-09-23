@@ -174,28 +174,45 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			return Collections.emptyMap();
 		}
 		final FieldMetadata identifierField = idFields.get(0);
-		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
-		if (idType == null) {
+		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
+		if (identifierType == null) {
 			return Collections.emptyMap();
 		}
 		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataId);
 
 		final JavaSymbolName entityName = JavaSymbolName.getReservedWordSafeName(entity);
 		final MethodParameter entityParameter = new MethodParameter(entity, entityName);
-		final MethodParameter idParameter = new MethodParameter(idType, "id");
+		final MethodParameter idParameter = new MethodParameter(identifierType, "id");
 		final MethodParameter firstResultParameter = new MethodParameter(INT_PRIMITIVE, "firstResult");
 		final MethodParameter maxResultsParameter = new MethodParameter(INT_PRIMITIVE, "sizeNo");
 		
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> additions = new HashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
-		additions.put(COUNT_ALL_METHOD, layerService.getMemberTypeAdditions(metadataId, COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION));
-		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION));
-		additions.put(FIND_ENTRIES_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_ENTRIES_METHOD.name(), entity, idType, LAYER_POSITION, firstResultParameter, maxResultsParameter));
-		additions.put(FIND_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_METHOD.name(), entity, idType, LAYER_POSITION, idParameter));
-		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataId, MERGE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter));
-		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataId, PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter));
-		additions.put(REMOVE_METHOD, layerService.getMemberTypeAdditions(metadataId, REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter));
+		additions.put(COUNT_ALL_METHOD, layerService.getMemberTypeAdditions(metadataId, COUNT_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION));
+		additions.put(FIND_ALL_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION));
+		additions.put(FIND_ENTRIES_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_ENTRIES_METHOD.name(), entity, identifierType, LAYER_POSITION, firstResultParameter, maxResultsParameter));
+		additions.put(FIND_METHOD, layerService.getMemberTypeAdditions(metadataId, FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, idParameter));
+		additions.put(MERGE_METHOD, layerService.getMemberTypeAdditions(metadataId, MERGE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
+		additions.put(PERSIST_METHOD, layerService.getMemberTypeAdditions(metadataId, PERSIST_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
+		additions.put(REMOVE_METHOD, layerService.getMemberTypeAdditions(metadataId, REMOVE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
 		return additions;
 	}
+	
+//	public List<JavaType> getDependentApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
+//		List<JavaType> dependentTypes = new ArrayList<JavaType>();
+//		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+//			JavaType type = method.getReturnType();
+//			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
+//				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+//				if (field != null && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null) {
+//					MemberDetails typeMemberDetails = getMemberDetails(type);
+//					if (getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataIdentificationString) != null) {
+//						dependentTypes.add(getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
+//					}
+//				}
+//			}
+//		}
+//		return Collections.unmodifiableList(dependentTypes);
+//	}
 	
 	/**
 	 * Returns a map of the given entity's fields to their accessor methods,
@@ -203,16 +220,16 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	 * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable in
 	 * the list view for this entity type.
 	 * 
-	 * @param entityType the entity for which to find the fields and accessors (required)
+	 * @param entity the entity for which to find the fields and accessors (required)
 	 * @param memberDetails the entity's members (required)
 	 * @param metadataIdentificationString the ID of the metadata being generated (required)
 	 * @return a non-<code>null</code> map
 	 */
-	private Map<FieldMetadata, MethodMetadata> locateFieldsAndAccessors(final JavaType entityType, final MemberDetails memberDetails, final String metadataIdentificationString) {
+	private Map<FieldMetadata, MethodMetadata> locateFieldsAndAccessors(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = new LinkedHashMap<FieldMetadata, MethodMetadata>();
 		
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entityType);
-		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entityType);
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
 
 		int listViewFields = 0;
 		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
@@ -220,7 +237,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				continue;
 			}
 			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
-				continue;
+		//		continue;
 			}
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
 			if (field == null) {

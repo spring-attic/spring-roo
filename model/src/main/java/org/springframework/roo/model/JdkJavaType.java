@@ -60,7 +60,7 @@ public final class JdkJavaType {
 	}
 	
 	public static boolean isDateField(final JavaType javaType) {
-		return javaType.equals(DATE) || javaType.equals(CALENDAR) || javaType.equals(GREGORIAN_CALENDAR);
+		return javaType.equals(DATE) || javaType.equals(CALENDAR);
 	}
 
 	/**

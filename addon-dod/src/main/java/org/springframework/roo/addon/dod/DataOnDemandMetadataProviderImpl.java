@@ -139,8 +139,8 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 			return null;
 		}
 
-		JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
-		if (idType == null) {
+		JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
+		if (identifierType == null) {
 			return null;
 		}
 
@@ -150,12 +150,12 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Get the additions to make for each required method
 		final MethodParameter fromParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "from");
 		final MethodParameter toParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "to");
-		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), fromParameter, toParameter);
-		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, idType, LayerType.HIGHEST.getPosition(), new MethodParameter(idType, "id"));
+		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name(), entity, identifierType, LayerType.HIGHEST.getPosition(), fromParameter, toParameter);
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
 		final MethodParameter entityParameter = new MethodParameter(entity, "obj");
-		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
+		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, identifierType, LayerType.HIGHEST.getPosition(), entityParameter);
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
-		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, idType, LayerType.HIGHEST.getPosition(), entityParameter);
+		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, identifierType, LayerType.HIGHEST.getPosition(), entityParameter);
 		
 		if (findEntriesMethod == null || findMethodAdditions == null || identifierAccessor == null || persistMethodAdditions == null) {
 			return null;
@@ -170,7 +170,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Get the list of embedded metadata holders - may be an empty list if no embedded identifier exists
 		List<EmbeddedHolder> embeddedHolders = getEmbeddedHolders(memberDetails, metadataIdentificationString);
 
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethodAdditions, findEntriesMethod, persistMethodAdditions, flushMethod, locatedMutators, entity, idType, embeddedIdentifierHolder, embeddedHolders);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethodAdditions, findEntriesMethod, persistMethodAdditions, flushMethod, locatedMutators, identifierType, embeddedIdentifierHolder, embeddedHolders);
 	}
 
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {

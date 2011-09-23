@@ -116,9 +116,9 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 			}
 		}
 		// We also need the plural
-		final JavaType entityType = EntityMetadata.getJavaType(metadataId);
+		final JavaType entity = EntityMetadata.getJavaType(metadataId);
 		final Path path = EntityMetadata.getPath(metadataId);
-		final String pluralMID = PluralMetadata.createIdentifier(entityType, path);
+		final String pluralMID = PluralMetadata.createIdentifier(entity, path);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMID);
 		if (pluralMetadata == null) {
 			// Can't acquire the plural
@@ -126,12 +126,12 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		}
 		metadataDependencyRegistry.registerDependency(pluralMID, metadataId);
 
-		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entityType);
+		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.size() != 1) {
 			// The ID field metadata is either unavailable or not stable yet
 			return null;
 		}
-		final String entityName = StringUtils.defaultIfEmpty(jpaEntityAnnotationValues.getEntityName(), entityType.getSimpleTypeName());
+		final String entityName = StringUtils.defaultIfEmpty(jpaEntityAnnotationValues.getEntityName(), entity.getSimpleTypeName());
 
 		boolean isGaeEnabled = false;
 		boolean isDataNucleusEnabled = false;

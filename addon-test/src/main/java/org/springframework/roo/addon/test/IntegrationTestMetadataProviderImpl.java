@@ -162,8 +162,8 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 			return null;
 		}
 
-		final JavaType idType = persistenceMemberLocator.getIdentifierType(entity);
-		if (idType == null) {
+		final JavaType identifierType = persistenceMemberLocator.getIdentifierType(entity);
+		if (identifierType == null) {
 			return null;
 		}
 		
@@ -172,15 +172,15 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 
 		final MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, IDENTIFIER_ACCESSOR_METHOD);
 		final MethodMetadata versionAccessorMethod = persistenceMemberLocator.getVersionAccessor(entity);
-		final MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
-		final MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), entity, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
-		final MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD.name(), entity, idType, LAYER_POSITION);
-		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD.name(), entity, idType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
+		final MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION);
+		final MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, new MethodParameter(identifierType, "id"));
+		final MemberTypeAdditions findAllMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION);
+		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD.name(), entity, identifierType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
 		final MethodParameter entityParameter = new MethodParameter(entity, "obj");
-		final MemberTypeAdditions flushMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		final MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		final MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
-		final MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, REMOVE_METHOD.name(), entity, idType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions flushMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions mergeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter);
+		final MemberTypeAdditions removeMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, REMOVE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter);
 		if (persistMethodAdditions == null || findMethodAdditions == null || identifierAccessorMethod == null) {
 			return null;
 		}

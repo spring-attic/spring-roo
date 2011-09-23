@@ -6,9 +6,7 @@ import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,6 +52,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -194,27 +193,27 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			return null;
 		}
 		FieldMetadata identifierField = idFields.get(0);
-		JavaType idType = persistenceMemberLocator.getIdentifierType(javaType);
-		if (idType == null) {
+		JavaType identifierType = persistenceMemberLocator.getIdentifierType(javaType);
+		if (identifierType == null) {
 			return null;
 		}
 		registerDependency(identifierField.getDeclaredByMetadataId(), metadataIdentificationString);
 
 		JavaSymbolName entityName = JavaSymbolName.getReservedWordSafeName(javaType);
 		final MethodParameter entityParameter = new MethodParameter(javaType, entityName);
-		final MethodParameter idParameter = new MethodParameter(idType, "id");
+		final MethodParameter idParameter = new MethodParameter(identifierType, "id");
 		final MethodParameter firstResultParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "firstResult");
 		final MethodParameter maxResultsParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "sizeNo");
 
 		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
-		MemberTypeAdditions persistMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
-		MemberTypeAdditions removeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
-		MemberTypeAdditions mergeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, javaType, idType, LAYER_POSITION, entityParameter);
-		MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, javaType, idType, LAYER_POSITION);
-		MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD, javaType, idType, LAYER_POSITION, idParameter);
-		MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, javaType, idType, LAYER_POSITION);
-		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, javaType, idType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
+		MemberTypeAdditions persistMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, javaType, identifierType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions removeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, DELETE_METHOD, javaType, identifierType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions mergeMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, MERGE_METHOD, javaType, identifierType, LAYER_POSITION, entityParameter);
+		MemberTypeAdditions findAllMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ALL_METHOD, javaType, identifierType, LAYER_POSITION);
+		MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD, javaType, identifierType, LAYER_POSITION, idParameter);
+		MemberTypeAdditions countMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD, javaType, identifierType, LAYER_POSITION);
+		MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD, javaType, identifierType, LAYER_POSITION, firstResultParameter, maxResultsParameter);
 		List<String> dynamicFinderNames = new ArrayList<String>();
 		for (MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
 			if (mhtd.getCustomData().keySet().contains(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES)) {
@@ -226,10 +225,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = null;
 		if (identifierAccessor != null) {
 			registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
-			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(idType, identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
+			javaTypePersistenceMetadataDetails = new JavaTypePersistenceMetadataDetails(identifierType, identifierField, identifierAccessor, versionAccessor, persistMethod, mergeMethod, removeMethod, findAllMethod, 
 					findMethod, countMethod, findEntriesMethod, dynamicFinderNames, isRooIdentifier(javaType, memberDetails), persistenceMemberLocator.getEmbeddedIdentifierFields(javaType));
 		}
-			
+
 		return javaTypePersistenceMetadataDetails;
 	}
 	
@@ -302,32 +301,33 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			if (fieldMetadata == null || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
 				continue;
 			}
-			if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(fieldMetadata.getAnnotations(), DATE_TIME_FORMAT);
-				JavaSymbolName patternSymbol = new JavaSymbolName("pattern");
-				JavaSymbolName styleSymbol = new JavaSymbolName("style");
-				DateTimeFormatDetails dateTimeFormat = null;
-				if (annotation != null) {
-					if (annotation.getAttributeNames().contains(styleSymbol)) {
-						dateTimeFormat = DateTimeFormatDetails.withStyle(annotation.getAttribute(styleSymbol).getValue().toString());
-					} else if (annotation.getAttributeNames().contains(patternSymbol)) {
-						dateTimeFormat = DateTimeFormatDetails.withPattern(annotation.getAttribute(patternSymbol).getValue().toString());
-					}
+			if (!JdkJavaType.isDateField(type)) {
+				continue;
+			}
+			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(fieldMetadata.getAnnotations(), DATE_TIME_FORMAT);
+			JavaSymbolName patternSymbol = new JavaSymbolName("pattern");
+			JavaSymbolName styleSymbol = new JavaSymbolName("style");
+			DateTimeFormatDetails dateTimeFormat = null;
+			if (annotation != null) {
+				if (annotation.getAttributeNames().contains(styleSymbol)) {
+					dateTimeFormat = DateTimeFormatDetails.withStyle(annotation.getAttribute(styleSymbol).getValue().toString());
+				} else if (annotation.getAttributeNames().contains(patternSymbol)) {
+					dateTimeFormat = DateTimeFormatDetails.withPattern(annotation.getAttribute(patternSymbol).getValue().toString());
 				}
-				if (dateTimeFormat != null) {
-					registerDependency(fieldMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
-					dates.put(fieldMetadata.getFieldName(), dateTimeFormat);
-					if (javaTypePersistenceMetadataDetails != null) {
-						for (String finder : javaTypePersistenceMetadataDetails.getFinderNames()) {
-							if (finder.contains(StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName()) + "Between")) {
-								dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
-								dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
-							}
+			}
+			if (dateTimeFormat != null) {
+				registerDependency(fieldMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
+				dates.put(fieldMetadata.getFieldName(), dateTimeFormat);
+				if (javaTypePersistenceMetadataDetails != null) {
+					for (String finder : javaTypePersistenceMetadataDetails.getFinderNames()) {
+						if (finder.contains(StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName()) + "Between")) {
+							dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
+							dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
 						}
 					}
-				} else {
-					logger.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on " + fieldMetadata.getFieldType().getFullyQualifiedTypeName() + "." + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
 				}
+			} else {
+				logger.warning("It is recommended to use @DateTimeFormat(style=\"M-\") on " + fieldMetadata.getFieldType().getFullyQualifiedTypeName() + "." + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
 			}
 		}
 		return Collections.unmodifiableMap(dates);

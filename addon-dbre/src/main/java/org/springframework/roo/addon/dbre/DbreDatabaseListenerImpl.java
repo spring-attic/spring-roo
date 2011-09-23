@@ -345,13 +345,13 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 		typeDetailsBuilder.setAnnotations(annotations);
 
-		final ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
-		typeManagementService.createOrUpdateTypeOnDisk(entityType);
+		final ClassOrInterfaceTypeDetails entity = typeDetailsBuilder.build();
+		typeManagementService.createOrUpdateTypeOnDisk(entity);
 
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 
-		return entityType;
+		return entity;
 	}
 
 	private AnnotationMetadataBuilder getRooDbManagedAnnotation() {
@@ -413,9 +413,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Produce identifier itself
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-		final ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
-		idTypeDetailsBuilder.setAnnotations(identifierAnnotations);
-		typeManagementService.createOrUpdateTypeOnDisk(idTypeDetailsBuilder.build());
+		final ClassOrInterfaceTypeDetailsBuilder identifierTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+		identifierTypeDetailsBuilder.setAnnotations(identifierAnnotations);
+		typeManagementService.createOrUpdateTypeOnDisk(identifierTypeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());

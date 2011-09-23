@@ -224,14 +224,14 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	 * @return <code>null</code> if there isn't one
 	 */
 	private Identifier getIdentifier(final String metadataId) {
-		final JavaType entityType = getType(metadataId);
-		final List<Identifier> identifiers = getIdentifiersForType(entityType);
+		final JavaType entity = getType(metadataId);
+		final List<Identifier> identifiers = getIdentifiersForType(entity);
 		if (identifiers == null || identifiers.isEmpty()) {
 			return null;
 		}
 		// We have potential identifier information from an IdentifierService.
 		// We only use this identifier information if the user did NOT provide ANY identifier-related attributes on @RooEntity....
-		Assert.isTrue(identifiers.size() == 1, "Identifier service indicates " + identifiers.size() + " fields illegally for the entity '" + entityType.getSimpleTypeName() + "' (should only be one identifier field given this is an entity, not an Identifier class)");
+		Assert.isTrue(identifiers.size() == 1, "Identifier service indicates " + identifiers.size() + " fields illegally for the entity '" + entity.getSimpleTypeName() + "' (should only be one identifier field given this is an entity, not an Identifier class)");
 		return identifiers.iterator().next();
 	}
 }
