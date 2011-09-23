@@ -59,7 +59,7 @@ public class __APP_NAME__Metadata extends AbstractItdTypeDetailsProvidingMetadat
 			modifier, // Using package protection rather than private
 			new ArrayList<AnnotationMetadataBuilder>(), // No annotations for this field
 			new JavaSymbolName("sampleField"), // Field name
-			JavaType.STRING_OBJECT); // Field type
+			JavaType.STRING); // Field type
 		
 		return fieldBuilder.build(); // Build and return a FieldMetadata instance
 	}

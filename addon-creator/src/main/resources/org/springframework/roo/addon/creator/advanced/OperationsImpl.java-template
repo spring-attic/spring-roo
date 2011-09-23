@@ -6,15 +6,12 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Dependency;
@@ -35,16 +32,6 @@ import org.w3c.dom.Element;
 public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
 	
 	/**
-	 * MetadataService offers access to Roo's metadata model, use it to retrieve any available metadata by its MID
-	 */
-	@Reference private MetadataService metadataService;
-	
-	/**
-	 * Use the PhysicalTypeMetadataProvider to access information about a physical type in the project
-	 */
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	
-	/**
 	 * Use ProjectOperations to install new dependencies, plugins, properties, etc into the project configuration
 	 */
 	@Reference private ProjectOperations projectOperations;
@@ -53,6 +40,11 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
 	 * Use TypeLocationService to find types which are annotated with a given annotation in the project
 	 */
 	@Reference private TypeLocationService typeLocationService;
+	
+	/**
+	 * Use TypeManagementService to change types
+	 */
+	@Reference private TypeManagementService typeManagementService;
 
 	/** {@inheritDoc} */
 	public boolean isCommandAvailable() {
@@ -65,26 +57,12 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
 		// Use Roo's Assert type for null checks
 		Assert.notNull(javaType, "Java type required");
 
-		// Retrieve metadata for the Java source type the annotation is being added to
-		String id = physicalTypeMetadataProvider.findIdentifier(javaType);
-		if (id == null) {
-			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
-		}
-
-		// Obtain the physical type and itd mutable details
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(id);
-		Assert.notNull(physicalTypeMetadata, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		
-		// Obtain physical type details for the target type
-		PhysicalTypeDetails physicalTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
-		Assert.notNull(physicalTypeDetails, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		
-		// Test if the type is an MutableClassOrInterfaceTypeDetails instance so the annotation can be added
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, physicalTypeDetails, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) physicalTypeDetails;
+		// Obtain ClassOrInterfaceTypeDetails for this java type
+		ClassOrInterfaceTypeDetails existing = typeLocationService.findClassOrInterface(javaType);
 
 		// Test if the annotation already exists on the target type
-		if (MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(Roo__APP_NAME__.class.getName())) == null) {
+		if (existing != null && MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), new JavaType(Roo__APP_NAME__.class.getName())) == null) {
+			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
 			
 			// Create JavaType instance for the add-ons trigger annotation
 			JavaType rooRoo__APP_NAME__ = new JavaType(Roo__APP_NAME__.class.getName());
@@ -93,7 +71,10 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRoo__APP_NAME__);
 			
 			// Add annotation to target type
-			mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
+			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder.build());
+			
+			// Save changes to disk
+			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		}
 	}
 
