@@ -21,10 +21,7 @@ public class PersistenceCustomDataKeys {
 
 	/**
 	 * Tags a type as having a no-arg constructor.
-	 * 
-	 * @deprecated not applied by core Roo addons.
 	 */
-	@Deprecated
 	public static final ConstructorMetadataCustomDataKey NO_ARG_CONSTRUCTOR = new ConstructorMetadataCustomDataKey("NO_ARG_CONSTRUCTOR");
 
 	public static final FieldMetadataCustomDataKey IDENTIFIER_FIELD = new FieldMetadataCustomDataKey("IDENTIFIER_FIELD");
