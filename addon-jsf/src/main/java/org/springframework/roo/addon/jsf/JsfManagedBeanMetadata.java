@@ -99,7 +99,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	// Fields
 	private JavaType entity;
 	private Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors;
-	private Iterable<JavaType> enumTypes;
+//	private Iterable<JavaType> enumTypes;
 	private final Set<FieldMetadata> autoCompleteFields = new LinkedHashSet<FieldMetadata>();
 	private String plural;
 
@@ -107,14 +107,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		CREATE, EDIT, VIEW;
 	};
 
-	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final Iterable<JavaType> enumTypes, final MethodMetadata identifierAccessor) {
+	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.isTrue(StringUtils.hasText(plural), "Plural required");
 		Assert.notNull(crudAdditions, "Crud additions map required");
 		Assert.notNull(locatedFieldsAndAccessors, "Located fields and accessors map required");
-		Assert.notNull(enumTypes, "Enumerated types required");
+//		Assert.notNull(enumTypes, "Enumerated types required");
 		
 		if (!isValid()) {
 			return;
@@ -123,7 +123,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		this.entity = annotationValues.getEntity();
 		this.plural = plural;
 		this.locatedFieldsAndAccessors = locatedFieldsAndAccessors;
-		this.enumTypes = enumTypes;
+	//	this.enumTypes = enumTypes;
 		
 		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
@@ -699,12 +699,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	 * @return see above
 	 */
 	private boolean isEnum(final FieldMetadata field) {
-		for (final JavaType enumType : enumTypes) {
-			if (field.getFieldType().equals(enumType)) {
-				return true;
-			}
-		}
-		return false;
+		return field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD);
 	}
 	
 	private boolean isNullable(final FieldMetadata field) {

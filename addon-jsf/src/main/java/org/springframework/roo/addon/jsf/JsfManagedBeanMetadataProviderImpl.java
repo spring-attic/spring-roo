@@ -16,10 +16,8 @@ import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,10 +151,10 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entity, metadataId);
 		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entity, memberDetails, metadataId);
-		final Iterable<JavaType> enumTypes = getEnumTypes(locatedFieldsAndAccessors.keySet());
+	//	final Iterable<JavaType> enumTypes = getEnumTypes(locatedFieldsAndAccessors.keySet());
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 
-		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, enumTypes, identifierAccessor);
+		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, identifierAccessor);
 	}
 
 	/**
@@ -196,24 +194,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		additions.put(REMOVE_METHOD, layerService.getMemberTypeAdditions(metadataId, REMOVE_METHOD.name(), entity, identifierType, LAYER_POSITION, entityParameter));
 		return additions;
 	}
-	
-//	public List<JavaType> getDependentApplicationTypeMetadata(JavaType javaType, MemberDetails memberDetails, String metadataIdentificationString) {
-//		List<JavaType> dependentTypes = new ArrayList<JavaType>();
-//		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
-//			JavaType type = method.getReturnType();
-//			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
-//				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-//				if (field != null && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null) {
-//					MemberDetails typeMemberDetails = getMemberDetails(type);
-//					if (getJavaTypePersistenceMetadataDetails(type, typeMemberDetails, metadataIdentificationString) != null) {
-//						dependentTypes.add(getJavaTypeMetadataDetails(type, typeMemberDetails, metadataIdentificationString));
-//					}
-//				}
-//			}
-//		}
-//		return Collections.unmodifiableList(dependentTypes);
-//	}
-	
+
 	/**
 	 * Returns a map of the given entity's fields to their accessor methods,
 	 * excluding any ID or version field; along the way, flags the first
@@ -244,17 +225,19 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				continue;
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
-			
-//			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
-//				enumTypes.add(field.getFieldType());
-//			} else {
-//				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
-//				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
-//					enumTypes.add(field.getFieldType());
-//				}
-//			}
 
-			
+			// Check field is an enum type
+			if (!field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
+				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
+				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
+					final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+					customDataBuilder.put(PersistenceCustomDataKeys.ENUMERATED_FIELD, "true");
+					final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+					fieldBuilder.append(customDataBuilder.build());
+					field = fieldBuilder.build();
+				}
+			}
+
 			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
 				listViewFields++;
 				// Flag this field as being displayable in the entity's list view
@@ -270,27 +253,6 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		return locatedFieldsAndAccessors;
 	}
 	
-	/**
-	 * Returns the enum types found among the given fields
-	 * 
-	 * @param locatedFields the fields to look through (required) 
-	 * @return a non-<code>null</code> set
-	 */
-	private Iterable<JavaType> getEnumTypes(final Iterable<FieldMetadata> locatedFields) {
-		final Collection<JavaType> enumTypes = new HashSet<JavaType>();
-		for (final FieldMetadata field : locatedFields) {
-			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
-				enumTypes.add(field.getFieldType());
-			} else {
-				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
-				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
-					enumTypes.add(field.getFieldType());
-				}
-			}
-		}
-		return enumTypes;
-	}
-
 	/**
 	 * Indicates whether the given method is the ID or version accessor
 	 * 
