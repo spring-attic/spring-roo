@@ -93,6 +93,16 @@ public class JavaType implements Comparable<JavaType> {
 	}
 	
 	/**
+	 * Returns a {@link JavaType} for a collection of the given element type
+	 * 
+	 * @param elementType the type of element in the collection (required)
+	 * @return a non-<code>null</code> type
+	 */
+	public static JavaType collectionOf(final JavaType elementType) {
+		return new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
+	}
+	
+	/**
 	 * Factory method for a {@link JavaType} with full details. Recall that
 	 * {@link JavaType} is immutable and therefore this is the only way of
 	 * setting these non-default values.

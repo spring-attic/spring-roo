@@ -121,7 +121,7 @@ enum ServiceLayerMethod {
 
 		@Override
 		public JavaType getReturnType(final JavaType entityType) {
-			return JavaType.listOf(entityType);
+			return JavaType.collectionOf(entityType);
 		}
 	},
 	
@@ -146,7 +146,7 @@ enum ServiceLayerMethod {
 
 		@Override
 		public JavaType getReturnType(final JavaType entityType) {
-			return JavaType.listOf(entityType);
+			return JavaType.collectionOf(entityType);
 		}
 	},
 	
