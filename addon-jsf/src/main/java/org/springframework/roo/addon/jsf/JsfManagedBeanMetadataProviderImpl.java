@@ -237,13 +237,24 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				continue;
 			}
 			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
-		//		continue;
+				continue;
 			}
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
 			if (field == null) {
 				continue;
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
+			
+//			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
+//				enumTypes.add(field.getFieldType());
+//			} else {
+//				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
+//				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
+//					enumTypes.add(field.getFieldType());
+//				}
+//			}
+
+			
 			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
 				listViewFields++;
 				// Flag this field as being displayable in the entity's list view

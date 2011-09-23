@@ -14,13 +14,14 @@
         <p:autoComplete rendered="false"/>
         <p:slider rendered="false"/>
         <p:message rendered="false"/>
-        <p:growl id="growl" showDetail="true" />
+        <p:growl id="growl" showDetail="false" />
         <h:form prependId="false">
             <p:panel id="data" toggleable="true" toggleSpeed="250">
                 <f:facet name="header">
                     <h:outputText value="#{__LC_DOMAIN_TYPE__Bean.name}" />
                 </f:facet>
-                <p:dataTable id="list" value="#{__LC_DOMAIN_TYPE__Bean.all__DOMAIN_TYPE_PLURAL__}" var="__LC_DOMAIN_TYPE__" resizableColumns="false" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,15" rows="10">
+                <h:outputText id="noRecordsFound" value="No __DOMAIN_TYPE_PLURAL__ found" rendered="#{!__LC_DOMAIN_TYPE__Bean.dataVisible}" />
+                <p:dataTable id="list" value="#{__LC_DOMAIN_TYPE__Bean.all__DOMAIN_TYPE_PLURAL__}" var="__LC_DOMAIN_TYPE__" rendered="#{__LC_DOMAIN_TYPE__Bean.dataVisible}" resizableColumns="false" paginator="true" paginatorTemplate=" {CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,15" rows="10">
                     <p:columns value="#{__LC_DOMAIN_TYPE__Bean.columns}" var="column" columnIndexVar="colIndex">
                         <f:facet name="header">
                             <h:outputText value="#{column}" />
@@ -47,27 +48,27 @@
                 </p:dataTable>
             </p:panel>
         </h:form>
-        <p:dialog id="createDialog" header="Create __DOMAIN_TYPE__" widgetVar="createDialog" visible="#{__LC_DOMAIN_TYPE__Bean.createDialogVisible}" resizable="true" width="400" showEffect="fade" hideEffect="explode">
-            <p:ajax event="close" update="list" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
+        <p:dialog id="createDialog" header="Create __DOMAIN_TYPE__" modal="true" widgetVar="createDialog" visible="#{__LC_DOMAIN_TYPE__Bean.createDialogVisible}" resizable="true" width="350" showEffect="fade" hideEffect="explode">
+            <p:ajax event="close" update="data" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="createForm" enctype="multipart/form-data">
                 <h:panelGrid id="createPanelGrid" columns="3" binding="#{__LC_DOMAIN_TYPE__Bean.createPanelGrid}" />
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="#{messages.label_save}" update="createPanelGrid growl" />
             </h:form>
         </p:dialog>
-        <p:dialog id="editDialog" header="Edit __DOMAIN_TYPE__" widgetVar="editDialog" resizable="true" width="400" showEffect="fade" hideEffect="explode">
-            <p:ajax event="close" update="list" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
+        <p:dialog id="editDialog" header="Edit __DOMAIN_TYPE__" modal="true" widgetVar="editDialog" resizable="true" width="350" showEffect="fade" hideEffect="explode">
+            <p:ajax event="close" update="data" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="editForm" enctype="multipart/form-data">
                 <h:panelGrid id="editPanelGrid" columns="3" binding="#{__LC_DOMAIN_TYPE__Bean.editPanelGrid}" />
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="#{messages.label_save}" update="editPanelGrid growl" />
             </h:form>
         </p:dialog>
-        <p:dialog id="viewDialog" header="View __DOMAIN_TYPE__" widgetVar="viewDialog" resizable="true" width="400" showEffect="fade" hideEffect="explode">
+        <p:dialog id="viewDialog" header="View __DOMAIN_TYPE__" modal="true" widgetVar="viewDialog" resizable="true" width="350" showEffect="fade" hideEffect="explode">
             <h:form id="viewForm" enctype="multipart/form-data">
                 <h:panelGrid id="viewPanelGrid" columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.viewPanelGrid}" />
                 <p:commandButton value="#{messages.label_close}" onclick="viewDialog.hide()" />
             </h:form>
         </p:dialog>
-        <p:confirmDialog id="deleteDialog" widgetVar="deleteDialog" message="Are you sure you want to delete this record?" showEffect="fade" hideEffect="explode" header="Confirm Deletion" severity="alarm">
+        <p:confirmDialog id="deleteDialog" widgetVar="deleteDialog" message="Are you sure you want to delete this record?" width="350" showEffect="fade" hideEffect="explode" header="Confirm Deletion" severity="alarm">
             <h:form id="deleteForm">
                 <p:commandButton value="Yes" action="#{__LC_DOMAIN_TYPE__Bean.delete}" update="data" oncomplete="deleteDialog.hide()" />
                 <p:commandButton value="No" onclick="deleteDialog.hide()" type="button" />
