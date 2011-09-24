@@ -27,25 +27,19 @@ public class JsfCommands implements CommandMarker {
 		return jsfOperations.isSetupAvailable();
 	}
 
-	@CliAvailabilityIndicator({ "web jsf implementation", "web jsf all", "web jsf scaffold", "web jsf theme", "field file" }) 
+	@CliAvailabilityIndicator({ "web jsf implementation", "web jsf all", "web jsf scaffold", "field file" }) 
 	public boolean isJsfAvailable() {
 		return jsfOperations.isScaffoldAvailable();
 	}
 
 	@CliCommand(value = "web jsf setup", help = "Set up JSF environment") 
 	public void webJsfSetup(
-		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") JsfImplementation jsfImplementation) {
+		@CliOption(key = "implementation", mandatory = false, help = "The JSF implementation to use") JsfImplementation jsfImplementation,
+		@CliOption(key = "theme", mandatory = false, help = "The name of the theme") Theme theme) {
 		
-		jsfOperations.setup(jsfImplementation);
+		jsfOperations.setup(jsfImplementation, theme);
 	}
 
-	@CliCommand(value = "web jsf implementation", help = "Change JSF implementation") 
-	public void webJsfImplementation(
-		@CliOption(key = "name", mandatory = true, help = "The JSF implementation to use") JsfImplementation jsfImplementation) {
-		
-		jsfOperations.changeJsfImplementation(jsfImplementation);
-	}
-	
 	@CliCommand(value = "web jsf all", help = "Create JSF managed beans for all entities") 
 	public void webJsfAll(
 		@CliOption(key = "package", mandatory = true, optionContext = "update", help = "The package in which new JSF managed beans will be placed") JavaPackage destinationPackage) {
@@ -61,13 +55,6 @@ public class JsfCommands implements CommandMarker {
 		@CliOption(key = "createConverter", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Create JSF converter for the entity") boolean createConverter) {
 		
 		jsfOperations.createManagedBean(managedBean, entity, includeOnMenu, createConverter);
-	}
-	
-	@CliCommand(value = "web jsf theme", help = "Change the PrimeFaces theme") 
-	public void webJsfTheme(
-		@CliOption(key = "name", mandatory = true, help = "The name of the theme") Theme theme) {
-		
-		jsfOperations.changeTheme(theme);
 	}
 	
 	@CliCommand(value = "field file", help ="Adds a field for storing uploaded file contents")	

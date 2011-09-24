@@ -16,15 +16,11 @@ public interface JsfOperations {
 
 	boolean isScaffoldAvailable();
 
-	void setup(JsfImplementation jsfImplementation);
-
-	void changeJsfImplementation(JsfImplementation jsfImplementation);
+	void setup(JsfImplementation jsfImplementation, Theme theme);
 
 	void generateAll(JavaPackage destinationPackage);
 
 	void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu, boolean createConverter);
-
-	void changeTheme(Theme theme);
 
 	void addFileUploadField(JavaSymbolName fieldName, JavaType typeName, String fileName, String contentType, String column, Boolean notNull, boolean permitReservedWords);
 }

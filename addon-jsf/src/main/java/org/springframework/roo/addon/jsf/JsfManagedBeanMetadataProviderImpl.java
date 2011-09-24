@@ -151,7 +151,6 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entity, metadataId);
 		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entity, memberDetails, metadataId);
-	//	final Iterable<JavaType> enumTypes = getEnumTypes(locatedFieldsAndAccessors.keySet());
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 
 		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, identifierAccessor);
