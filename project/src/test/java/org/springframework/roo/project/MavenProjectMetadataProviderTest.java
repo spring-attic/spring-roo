@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Unit test of {@link MavenProjectMetadataProvider}
@@ -108,6 +109,7 @@ public class MavenProjectMetadataProviderTest {
 		metadataProvider.removeDependencies(dependencies);
 		
 		// Check
-		verify(mockFileManager).createOrUpdateTextFileIfRequired(eq(POM_PATH), eq(POM_AFTER_DEPENDENCY_REMOVED), (String) any(), eq(false));
+		final String expectedPom = POM_AFTER_DEPENDENCY_REMOVED.replace("\n", StringUtils.LINE_SEPARATOR);
+		verify(mockFileManager).createOrUpdateTextFileIfRequired(eq(POM_PATH), eq(expectedPom), (String) any(), eq(false));
 	}
 }
