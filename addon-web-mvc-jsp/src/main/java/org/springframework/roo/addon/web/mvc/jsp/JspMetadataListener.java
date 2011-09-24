@@ -264,7 +264,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			}
 		}
 		
-		propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", properties, true, false);
+		propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", properties, true, false);
 
 		// Clean up links to finders which are removed by now
 		menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems);

@@ -91,7 +91,7 @@ public class TilesOperationsImpl implements TilesOperations {
 		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN");
 		XmlUtils.writeXml(transformer, byteArrayOutputStream, body.getOwnerDocument());
 		String viewContent = byteArrayOutputStream.toString();
-		String tilesDefinition = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + folderName + "/views.xml"); 
+		String tilesDefinition = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + folderName + "/views.xml"); 
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
 		MutableFile mutableFile = null;

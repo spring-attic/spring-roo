@@ -50,7 +50,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	}
 
 	public boolean isManageWebFlowAvailable() {
-		return isInstallWebFlowAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml"));
+		return isInstallWebFlowAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webflow-config.xml"));
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	}
 
 	private void installWebFlowConfiguration() {
-		String resolvedSpringConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring");
+		String resolvedSpringConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring");
 		if (fileManager.exists(resolvedSpringConfigPath + "/webflow-config.xml")) {
 			return;
 		}

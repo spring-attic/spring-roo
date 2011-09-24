@@ -89,7 +89,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		if (writeProps) {
 			properties.put("menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
-			propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", properties, true, false);
+			propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", properties, true, false);
 		}
 		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
@@ -162,25 +162,25 @@ public class MenuOperationsImpl implements MenuOperations {
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
 
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx"))) {
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/menu.tagx"))) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "menu.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/menu.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "menu.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
 		}
 
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx"))) {
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/item.tagx"))) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "item.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/item.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "item.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
 		}
 
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx"))) {
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/category.tagx"))) {
 			try {
-				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "category.tagx"))), false);
+				fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/menu/category.tagx"), FileCopyUtils.copyToString(new InputStreamReader(TemplateUtils.getTemplate(getClass(), "category.tagx"))), false);
 			} catch (Exception e) {
 				throw new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}
@@ -190,6 +190,6 @@ public class MenuOperationsImpl implements MenuOperations {
 	}
 
 	private String getMenuFileName() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx");
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/menu.jspx");
 	}
 }

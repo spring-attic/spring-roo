@@ -27,7 +27,7 @@ public class JsfCommands implements CommandMarker {
 		return jsfOperations.isSetupAvailable();
 	}
 
-	@CliAvailabilityIndicator({ "web jsf implementation", "web jsf all", "web jsf scaffold", "field file" }) 
+	@CliAvailabilityIndicator({ "web jsf all", "web jsf scaffold", "field file" }) 
 	public boolean isJsfAvailable() {
 		return jsfOperations.isScaffoldAvailable();
 	}

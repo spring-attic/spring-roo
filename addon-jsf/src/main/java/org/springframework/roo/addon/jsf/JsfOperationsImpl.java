@@ -79,7 +79,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	public boolean isScaffoldAvailable() {
-		return hasWebXml() && hasFacesConfig();
+		return hasWebXml();
 	}
 
 	public void setup(JsfImplementation jsfImplementation, Theme theme) {
@@ -91,13 +91,13 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		createOrUpdateWebXml(theme);
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		copyDirectoryContents("index.html", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/"), false);
-		copyDirectoryContents("viewExpired.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/"), false);
-		copyDirectoryContents("resources/images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/resources/images"), false);
-		copyDirectoryContents("resources/css/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/resources/css"), false);
-		copyDirectoryContents("resources/js/*.js", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/resources/js"), false);
-		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/templates"), false);
-		copyDirectoryContents("pages/main.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/pages"), false);
+		copyDirectoryContents("index.html", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
+		copyDirectoryContents("viewExpired.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, ""), false);
+		copyDirectoryContents("resources/images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "resources/images"), false);
+		copyDirectoryContents("resources/css/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "resources/css"), false);
+		copyDirectoryContents("resources/js/*.js", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "resources/js"), false);
+		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "templates"), false);
+		copyDirectoryContents("pages/main.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "pages"), false);
 		
 		projectOperations.updateProjectType(ProjectType.WAR);
 
@@ -211,7 +211,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 	
 	private void copyEntityTypePage(JavaType entity, String plural) {
-		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
+		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
 		try {
 			InputStream inputStream = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
@@ -246,7 +246,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 	
 	private String getWebXmlFile() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml");
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 	}
 
 	private void createOrUpdateWebXml(Theme theme) {
@@ -314,7 +314,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	}
 
 	private String getFacesConfigFile() {
-		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/faces-config.xml");
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
 	}
 
 	private void updateConfiguration(JsfImplementation jsfImplementation) {

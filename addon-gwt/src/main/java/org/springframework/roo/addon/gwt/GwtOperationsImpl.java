@@ -179,7 +179,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 	public void setup() {
 		// Install web pieces if not already installed
-		if (!fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
+		if (!fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))) {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 

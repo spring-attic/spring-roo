@@ -48,7 +48,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 	public boolean isInstallSecurityAvailable() {
 		// Do not permit installation unless they have a web project (as per ROO-342)
 		// and only permit installation if they don't already have some version of Spring Security installed
-		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml")) && projectOperations.getProjectMetadata().getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", SECURITY_VERSION)).isEmpty();
+		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml")) && projectOperations.getProjectMetadata().getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", SECURITY_VERSION)).isEmpty();
 	}
 
 	public void installSecurity() {
@@ -83,8 +83,8 @@ public class SecurityOperationsImpl implements SecurityOperations {
 			}
 		}
 
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/views.xml"))) {
-			tilesOperations.addViewDefinition("", "login", TilesOperations.PUBLIC_TEMPLATE, "/WEB-INF/views/login.jspx");
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/views.xml"))) {
+			tilesOperations.addViewDefinition("", "login", TilesOperations.PUBLIC_TEMPLATE, "WEB-INF/views/login.jspx");
 		}
 
 		String webXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
