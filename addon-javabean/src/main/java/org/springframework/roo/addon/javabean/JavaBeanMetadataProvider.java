@@ -12,10 +12,8 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -91,12 +89,8 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		}
 
 		final Map<FieldMetadata, JavaSymbolName> declaredFields = new LinkedHashMap<FieldMetadata, JavaSymbolName>();
-		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
-			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
-			for (FieldMetadata field : governorTypeDetails.getDeclaredFields()) {
-				declaredFields.put(field, getIdentifierAccessorMethodName(field, metadataIdentificationString));
-			}
+		for (FieldMetadata field : governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getDeclaredFields()) {
+			declaredFields.put(field, getIdentifierAccessorMethodName(field, metadataIdentificationString));
 		}
 
 		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
