@@ -53,7 +53,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		if (!tagName.endsWith(".tagx")) {
 			tagName = tagName.concat(".tagx");
 		}
-		String tagx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/embed/" + tagName);
+		String tagx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags/embed/" + tagName);
 		if(!fileManager.exists(tagx)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/" + tagName), fileManager.createFile(tagx).getOutputStream());
@@ -73,11 +73,11 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 	public void installJspx(String viewName, String title, Element contentElement) {
 		Assert.hasText(viewName, "View name required");
 		Assert.notNull(contentElement, "Content element required");
-		if (title == null || title.length() == 0) {
+		if (!StringUtils.hasText(title)) {
 			title = getTitle(viewName);
 		}
 		viewName = getViewName(viewName, "default");
-		String jspx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/embed/" + viewName + ".jspx");
+		String jspx = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/embed/" + viewName + ".jspx");
 		Document document = contentElement.getOwnerDocument();
 		if(!fileManager.exists(jspx)) {
 			// Add document namespaces
@@ -110,7 +110,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		String result = null;
 		if (urlStr.startsWith("http://")) {
 			BufferedReader rd = null;
-			try {				
+			try {
 				URL url = new URL(urlStr);
 				rd = new BufferedReader(new InputStreamReader(httpService.openConnection(url)));
 				StringBuffer sb = new StringBuffer();

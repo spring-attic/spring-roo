@@ -99,11 +99,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private DbManagedAnnotationValues annotationValues;
 	private IdentifierHolder identifierHolder;
 	private FieldMetadata versionField;
-	private Set<ClassOrInterfaceTypeDetails> managedEntities;
+	private Iterable<ClassOrInterfaceTypeDetails> managedEntities;
 	private Database database;
 	private ClassOrInterfaceTypeDetailsBuilder updatedGovernorBuilder;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DbManagedAnnotationValues annotationValues, IdentifierHolder identifierHolder, FieldMetadata versionField, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DbManagedAnnotationValues annotationValues, IdentifierHolder identifierHolder, FieldMetadata versionField, Iterable<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");

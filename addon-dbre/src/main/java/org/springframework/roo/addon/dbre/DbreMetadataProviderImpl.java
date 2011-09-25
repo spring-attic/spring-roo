@@ -3,7 +3,6 @@ package org.springframework.roo.addon.dbre;
 import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
 
 import java.util.List;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -83,7 +82,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		FieldMetadata versionField = getVersionField(javaType, metadataIdentificationString);
 
 		// Search for database-managed entities
-		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
+		Iterable<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DB_MANAGED);
 
 		boolean found = false;
 		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {

@@ -7,7 +7,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_JPA_ENTITY;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
@@ -63,7 +62,7 @@ public abstract class DbreTypeUtils {
 	 * @param schemaName the table's schema name
 	 * @return the type (if known) or null (if not found)
 	 */
-	public static JavaType findTypeForTableName(Set<ClassOrInterfaceTypeDetails> managedEntities, String tableName, String schemaName) {
+	public static JavaType findTypeForTableName(Iterable<ClassOrInterfaceTypeDetails> managedEntities, String tableName, String schemaName) {
 		Assert.notNull(managedEntities, "Set of managed entities required");
 		Assert.hasText(tableName, "Table name required");
 
@@ -84,7 +83,7 @@ public abstract class DbreTypeUtils {
 	 * @param table the table to locate (required)
 	 * @return the type (if known) or null (if not found)
 	 */
-	public static JavaType findTypeForTable(Set<ClassOrInterfaceTypeDetails> managedEntities, Table table) {
+	public static JavaType findTypeForTable(Iterable<ClassOrInterfaceTypeDetails> managedEntities, Table table) {
 		Assert.notNull(managedEntities, "Set of managed entities required");
 		Assert.notNull(table, "Table required");
 		return findTypeForTableName(managedEntities, table.getName(), table.getSchema().getName());

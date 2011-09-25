@@ -49,7 +49,5 @@ public class DefaultMetadataDependencyRegistryTests {
 		reg.deregisterDependencies(MVC_CONTROLLER);
 		Assert.assertEquals(0, reg.getDownstream(JAVA_TYPE_PERSON).size());
 		Assert.assertEquals(2, reg.getDownstream(MVC_CONTROLLER).size());
-		
 	}
-	
 }
