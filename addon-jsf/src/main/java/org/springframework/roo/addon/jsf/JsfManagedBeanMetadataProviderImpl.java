@@ -19,8 +19,10 @@ import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -135,6 +137,13 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
+		
+		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
+		final Set<FieldMetadata> locatedFields = locateFields(entity, memberDetails, metadataId, identifierAccessor, versionAccessor);
+		if (locatedFields.isEmpty()) {
+			return null;
+		}
 
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing any previous association
@@ -150,10 +159,8 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		final String plural = pluralMetadata.getPlural();
 
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = getCrudAdditions(entity, metadataId);
-		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = locateFieldsAndAccessors(entity, memberDetails, metadataId);
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 
-		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFieldsAndAccessors, identifierAccessor);
+		return new JsfManagedBeanMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, plural, crudAdditions, locatedFields, identifierAccessor);
 	}
 
 	/**
@@ -195,7 +202,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	}
 
 	/**
-	 * Returns a map of the given entity's fields to their accessor methods,
+	 * Returns an iterable collection of the given entity's fields
 	 * excluding any ID or version field; along the way, flags the first
 	 * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable in
 	 * the list view for this entity type.
@@ -203,14 +210,13 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	 * @param entity the entity for which to find the fields and accessors (required)
 	 * @param memberDetails the entity's members (required)
 	 * @param metadataIdentificationString the ID of the metadata being generated (required)
-	 * @return a non-<code>null</code> map
+	 * @param versionAccessor 
+	 * @param identifierAccessor 
+	 * @return a non-<code>null</code> iterable collection
 	 */
-	private Map<FieldMetadata, MethodMetadata> locateFieldsAndAccessors(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString) {
-		final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors = new LinkedHashMap<FieldMetadata, MethodMetadata>();
+	private Set<FieldMetadata> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString, MethodMetadata identifierAccessor, MethodMetadata versionAccessor) {
+		final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
 		
-		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
-		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
-
 		int listViewFields = 0;
 		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
@@ -237,9 +243,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				}
 			}
 
+			// Check field is to be displayed in the entity's list view
 			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
 				listViewFields++;
-				// Flag this field as being displayable in the entity's list view
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 				customDataBuilder.put(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY, "true");
 				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
@@ -247,9 +253,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				field = fieldBuilder.build();
 			}
 			
-			locatedFieldsAndAccessors.put(field, method);
+			locatedFields.add(field);
 		}
-		return locatedFieldsAndAccessors;
+		return locatedFields;
 	}
 	
 	/**

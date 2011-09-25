@@ -115,6 +115,11 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
+		
+		final List<MethodMetadata> converterMethods = getConverterMethods(entity, memberDetails, metadataId);
+		if (converterMethods.isEmpty()) {
+			return null;
+		}
 
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing any previous association
@@ -126,7 +131,6 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 		converterMidToEntityMap.put(metadataId, entity);
 
 		final MemberTypeAdditions findAllMethod = getFindAllMethod(entity, metadataId);
-		final List<MethodMetadata> converterMethods = getConverterMethods(entity, memberDetails, metadataId);
 
 		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod, converterMethods);
 	}

@@ -67,7 +67,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
 	
 	// Fields
-	@Reference private MetadataDependencyRegistry dependencyRegistry;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
@@ -193,7 +193,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			
 			// Check to see if this persistent type has a JSF metadata listening to it
 			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
-			if (dependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamJsfMetadataId)) {
+			if (metadataDependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamJsfMetadataId)) {
 				// There is already a JSF managed bean for this entity
 				continue;
 			}

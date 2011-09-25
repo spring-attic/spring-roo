@@ -57,7 +57,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -98,8 +97,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	// Fields
 	private JavaType entity;
-	private Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors;
-//	private Iterable<JavaType> enumTypes;
+	private Set<FieldMetadata> locatedFields;
 	private final Set<FieldMetadata> autoCompleteFields = new LinkedHashSet<FieldMetadata>();
 	private String plural;
 
@@ -107,14 +105,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		CREATE, EDIT, VIEW;
 	};
 
-	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<FieldMetadata, MethodMetadata> locatedFieldsAndAccessors, final MethodMetadata identifierAccessor) {
+	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Set<FieldMetadata> locatedFields, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.isTrue(StringUtils.hasText(plural), "Plural required");
 		Assert.notNull(crudAdditions, "Crud additions map required");
-		Assert.notNull(locatedFieldsAndAccessors, "Located fields and accessors map required");
-//		Assert.notNull(enumTypes, "Enumerated types required");
+		Assert.notNull(locatedFields, "Located fields required");
 		
 		if (!isValid()) {
 			return;
@@ -122,14 +119,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		
 		this.entity = annotationValues.getEntity();
 		this.plural = plural;
-		this.locatedFieldsAndAccessors = locatedFieldsAndAccessors;
-	//	this.enumTypes = enumTypes;
+		this.locatedFields = locatedFields;
 		
 		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
 		final MemberTypeAdditions persistMethod = crudAdditions.get(PERSIST_METHOD);
 		final MemberTypeAdditions removeMethod = crudAdditions.get(REMOVE_METHOD);
-		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null) {
+		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null || locatedFields.isEmpty()) {
 			valid = false;
 			return;
 		}
@@ -302,9 +298,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("all" + plural + " = " + findAllAdditions.getMethodCall() + ";");
 		findAllAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("columns = new ArrayList<String>();");
-		for (final MethodMetadata listViewMethod : getListViewMethods()) {
-			final String fieldName = StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(listViewMethod).getSymbolName());
-			bodyBuilder.appendFormalLine("columns.add(\"" + fieldName + "\");");
+		for (final FieldMetadata field : locatedFields) {
+			if (field.getCustomData() != null && field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY)) {
+				bodyBuilder.appendFormalLine("columns.add(\"" + field.getFieldName().getSymbolName() + "\");");
+			}
 		}
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -512,7 +509,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("HtmlPanelGrid " + HTML_PANEL_GRID_ID + " = " + getComponentCreationStr("HtmlPanelGrid"));
 		bodyBuilder.appendFormalLine("");
 
-		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
+		for (final FieldMetadata field : locatedFields) {
 			final JavaType fieldType = field.getFieldType();
 			final String fieldName = field.getFieldName().getSymbolName();
 			final String fieldLabelId = fieldName + suffix1;
@@ -537,6 +534,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final String componentIdStr = fieldValueId + ".setId(\"" + fieldValueId + "\");";
 			final String requiredStr = fieldValueId + ".setRequired(" + !nullable + ");";
 
+			System.out.println(fieldName + ":" + fieldType.getFullyQualifiedTypeName());
 			if (isRooUploadFileField(field)) {
 				imports.addImport(PRIMEFACES_FILE_UPLOAD);
 				imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
@@ -650,6 +648,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.append(getLengthValdatorString(fieldValueId, minValue, maxValue));
 					}
 				}
+	//		} else if (isApplicationType(field)) {
+				
 			} else {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
@@ -1019,7 +1019,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private Set<FieldMetadata> getRooUploadedFileFields() {
 		final Set<FieldMetadata> rooUploadedFileFields = new LinkedHashSet<FieldMetadata>();
-		for (final FieldMetadata rooUploadedFileField : this.locatedFieldsAndAccessors.keySet()) {
+		for (final FieldMetadata rooUploadedFileField : this.locatedFields) {
 			if (isRooUploadFileField(rooUploadedFileField)) {
 				rooUploadedFileFields.add(rooUploadedFileField);
 			}
@@ -1034,16 +1034,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			}
 		}
 		return false;
-	}
-	
-	private List<MethodMetadata> getListViewMethods() {
-		final List<MethodMetadata> listViewMethod = new ArrayList<MethodMetadata>();
-		for (final FieldMetadata field : locatedFieldsAndAccessors.keySet()) {
-			if (field.getCustomData() != null && field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY)) {
-				listViewMethod.add(locatedFieldsAndAccessors.get(field));
-			}
-		}
-		return listViewMethod;
 	}
 	
 	private String getComponentCreationStr(final String componentName) {
