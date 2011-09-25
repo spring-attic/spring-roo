@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -121,14 +122,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	public MethodMetadata getDeclaredGetter(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 
-		// Compute the accessor method name
-		JavaSymbolName methodName;
-
-		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-			methodName = new JavaSymbolName("is" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
-		} else {
-			methodName = new JavaSymbolName("get" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
-		}
+		// Compute the mutator method name
+		JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(field);
 
 		// See if the type itself declared the accessor
 		MethodMetadata result = getGovernorMethod(methodName);
@@ -158,7 +153,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		Assert.notNull(field, "Field required");
 
 		// Compute the mutator method name
-		JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+		JavaSymbolName methodName = BeanInfoUtils.getMutatorMethodName(field);
 
 		// Compute the mutator method parameters
 		final JavaType parameterType = field.getFieldType();

@@ -97,11 +97,9 @@ public abstract class BeanInfoUtils {
 	public static boolean hasAccessorAndMutator(FieldMetadata field, MemberDetails memberDetails) {
 		Assert.notNull(field, "Field metadata required");
 		Assert.notNull(memberDetails, "Member details required");
-		String capitalizedFieldName = StringUtils.capitalize(field.getFieldName().getSymbolName());
 
-		if ((MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("get" + capitalizedFieldName), new ArrayList<JavaType>()) != null
-				|| MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("is" + capitalizedFieldName), new ArrayList<JavaType>()) != null)
-				&& MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName("set" + capitalizedFieldName), Arrays.asList(field.getFieldType())) != null) {
+		if (MemberFindingUtils.getMethod(memberDetails, getAccessorMethodName(field), new ArrayList<JavaType>()) != null
+			&& MemberFindingUtils.getMethod(memberDetails, getMutatorMethodName(field), Arrays.asList(field.getFieldType())) != null) {
 			return true;
 		}
 	
@@ -116,5 +114,31 @@ public abstract class BeanInfoUtils {
 	 */
 	public static boolean isEntityReasonablyNamed(JavaType entity) {
 		return !entity.getSimpleTypeName().startsWith("Test") && !entity.getSimpleTypeName().endsWith("TestCase") && !entity.getSimpleTypeName().endsWith("Test");
+	}
+	
+	/** 
+	 * Returns the accessor name for the given field.
+	 * 
+	 * @param field the field to determine the accessor name
+	 * @return the accessor method name
+	 */
+	public static JavaSymbolName getAccessorMethodName(FieldMetadata field) {
+		JavaSymbolName methodName;
+		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+			methodName = new JavaSymbolName("is" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+		} else {
+			methodName = new JavaSymbolName("get" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+		}
+		return methodName;
+	}
+	
+	/** 
+	 * Returns the accessor name for the given field.
+	 * 
+	 * @param field the field to determine the accessor name
+	 * @return the accessor method name
+	 */
+	public static JavaSymbolName getMutatorMethodName(FieldMetadata field) {
+		return new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
 	}
 }
