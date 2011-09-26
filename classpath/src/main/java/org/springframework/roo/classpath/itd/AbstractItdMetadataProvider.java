@@ -326,6 +326,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			
 			// Quit if the subclass returned null or a metadata item they're not happy with; it might have experienced issues parsing etc
 			if (metadata == null || !metadata.isValid()) {
+				fileManager.createOrUpdateTextFileIfRequired(itdFilename, "", false);
 				return null;
 			}
 			
