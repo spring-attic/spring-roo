@@ -178,10 +178,13 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			resources.add(new Resource(resourceElement));
 		}
 
+		// Packaging
+		final ProjectType type = new ProjectType(XmlUtils.findRequiredElement("/project/packaging", root).getTextContent());
+		
 		// Update window title with project name
 		shell.flash(Level.FINE, "Spring Roo: " + topLevelPackage, Shell.WINDOW_TITLE_SLOT);
 
-		final ProjectMetadata result = new ProjectMetadata(topLevelPackage, artifactId, dependencies, buildPlugins, repositories, pluginRepositories, pomProperties, filters, resources);
+		final ProjectMetadata result = new ProjectMetadata(topLevelPackage, artifactId, dependencies, buildPlugins, repositories, pluginRepositories, pomProperties, filters, resources, type);
 
 		// Update UAA with the project name
 		uaaRegistrationService.registerProject(UaaRegistrationService.SPRING_ROO, topLevelPackage.getFullyQualifiedPackageName());
@@ -495,12 +498,12 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element packaging = DomUtils.createChildIfNotExists("packaging", document.getDocumentElement(), document);
-		if (packaging.getTextContent().equals(projectType.getType())) {
+		if (packaging.getTextContent().equals(projectType.getName())) {
 			return;
 		}
 
-		packaging.setTextContent(projectType.getType());
-		final String descriptionOfChange = highlight(UPDATED + " project type") + " to " + projectType.getType();
+		packaging.setTextContent(projectType.getName());
+		final String descriptionOfChange = highlight(UPDATED + " project type") + " to " + projectType.getName();
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}

@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
@@ -14,18 +12,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.ActiveProcessManager;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.ProcessManager;
+import org.springframework.roo.project.packaging.PackagingType;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.DomUtils;
-import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.IOUtils;
-import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.TemplateUtils;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link MavenOperations}.
@@ -39,14 +30,9 @@ import org.w3c.dom.Element;
 public class MavenOperationsImpl extends AbstractProjectOperations implements MavenOperations {
 
 	// Constants
-	private static final Dependency JAXB_API = new Dependency("javax.xml.bind", "jaxb-api", "2.1");
-	private static final Dependency JSR250_API = new Dependency("javax.annotation", "jsr250-api", "1.0");
 	private static final Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);
-	private static final String GAV_SEPARATOR = ":";
 	
 	// Fields
-	@Reference private ApplicationContextOperations applicationContextOperations;
-	@Reference private FileManager fileManager;
 	@Reference private ProcessManager processManager;
 
 	public boolean isCreateProjectAvailable() {
@@ -57,100 +43,10 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		return pathResolver.getRoot(Path.ROOT);
 	}
 	
-	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final String parentPom) {
+	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final String parentPom, final PackagingType packagingType) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
-		createMavenPom(topLevelPackage, projectName, majorJavaVersion, parentPom);
-
-		fileManager.scan();
-
-		// Set up the Spring application context configuration file
-		applicationContextOperations.createMiddleTierApplicationContext();
-
-		// Set up the logging configuration file
-		try {
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties")).getOutputStream());
-		} catch (final IOException e) {
-			LOGGER.warning("Unable to install log4j logging configuration");
-		}
-	}
-
-	/**
-	 * Creates the Maven POM for a new user project
-	 * 
-	 * @param topLevelPackage the top-level Java package (required)
-	 * @param nullableProjectName the project name provided by the user (can be blank)
-	 * @param majorJavaVersion the major Java version as entered by the user (can be <code>null</code> to auto-detect from the developer's machine)
-	 * @param parentPom the Maven coordinates of the parent POM, in the form G:A:V (can be blank)
-	 */
-	private void createMavenPom(final JavaPackage topLevelPackage, final String nullableProjectName, final Integer majorJavaVersion, final String parentPom) {
-		Assert.notNull(topLevelPackage, "Top level package required");
-		
-		// Read the POM template from this addon's classpath resources
-		final Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "standard-project-template.xml"));
-		final Element root = pom.getDocumentElement();
-
-		// Set the name
-		final String projectName = StringUtils.hasText(nullableProjectName) ? nullableProjectName : topLevelPackage.getLastElement();
-		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
-		
-		// Set the coordinates of the project and its parent, if any
-		setGroupIds(topLevelPackage.getFullyQualifiedPackageName(), parentPom, root);
-		
-		// Project artifactId
-		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(projectName);
-		
-		// Update the target Java version
 		final String javaVersion = getJavaVersion(majorJavaVersion);
-		final List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", root);
-		for (final Element versionElement : versionElements) {
-			versionElement.setTextContent(javaVersion);
-		}
-
-		// Write the new POM to disk
-		fileManager.createOrUpdateTextFileIfRequired(pathResolver.getIdentifier(Path.ROOT, "pom.xml"), XmlUtils.nodeToString(pom), true);
-
-		// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
-		if ("1.5".equals(javaVersion)) {
-			addDependencies(Arrays.asList(JSR250_API, JAXB_API));
-		}
-	}
-
-	/**
-	 * Sets the Maven groupIds of the parent and/or project as necessary
-	 * 
-	 * @param projectGroupId the project's groupId (required)
-	 * @param parentPom the Maven coordinates of the parent POM, in the form G:A:V (can be blank)
-	 * @param root the root element of the POM document
-	 */
-	private void setGroupIds(final String projectGroupId, final String parentPom, final Element root) {
-		final Element projectGroupIdElement = XmlUtils.findRequiredElement("/project/groupId", root);
-		if (StringUtils.hasText(parentPom)) {
-			final String[] parentPomCoordinates = StringUtils.delimitedListToStringArray(parentPom, GAV_SEPARATOR);
-			Assert.isTrue(parentPomCoordinates.length == 3, "Expected three coordinates for parent POM, but found " + parentPomCoordinates.length + ": " + Arrays.toString(parentPomCoordinates) + "; did you use the '" + GAV_SEPARATOR + "' separator?");
-			final String parentGroupId = parentPomCoordinates[0];
-			
-			// Parent and project groupId
-			XmlUtils.findRequiredElement("/project/parent/groupId", root).setTextContent(parentGroupId);
-			if (projectGroupId.equals(parentGroupId)) {
-				// Maven best practice is to inherit the groupId from the parent
-				root.removeChild(projectGroupIdElement);
-				DomUtils.removeTextNodes(root);
-			} else {
-				// Project has its own groupId => needs to be declared
-				projectGroupIdElement.setTextContent(projectGroupId);
-			}
-			
-			// Parent artifactId
-			XmlUtils.findRequiredElement("/project/parent/artifactId", root).setTextContent(parentPomCoordinates[1]);
-			
-			// Parent version
-			XmlUtils.findRequiredElement("/project/parent/version", root).setTextContent(parentPomCoordinates[2]);
-		} else {
-			// No parent POM was specified; remove the templated parent element
-			root.removeChild(XmlUtils.findRequiredElement("/project/parent", root));
-			DomUtils.removeTextNodes(root);
-			projectGroupIdElement.setTextContent(projectGroupId);
-		}
+		packagingType.createArtifacts(topLevelPackage, projectName, javaVersion, parentPom);
 	}
 	
 	/**

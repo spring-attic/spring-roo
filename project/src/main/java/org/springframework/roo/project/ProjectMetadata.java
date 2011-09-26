@@ -55,14 +55,15 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	
 	// Fields
 	private final JavaPackage topLevelPackage;
-	private final String projectName;
+	private final ProjectType type;
 	private final Set<Dependency> dependencies;
-	private final Set<Plugin> buildPlugins;
-	private final Set<Repository> repositories;
-	private final Set<Repository> pluginRepositories;
-	private final Set<Property> pomProperties;
 	private final Set<Filter> filters;
+	private final Set<Plugin> buildPlugins;
+	private final Set<Property> pomProperties;
+	private final Set<Repository> pluginRepositories;
+	private final Set<Repository> repositories;
 	private final Set<Resource> resources;
+	private final String projectName;
 
 	/**
 	 * Constructor
@@ -76,27 +77,31 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param pomProperties (required)
 	 * @param filters (required)
 	 * @param resources (required)
+	 * @param type (required)
 	 */
-	public ProjectMetadata(final JavaPackage topLevelPackage, final String projectName, final Set<Dependency> dependencies, final Set<Plugin> buildPlugins, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final Set<Property> pomProperties, final Set<Filter> filters, final Set<Resource> resources) {
+	public ProjectMetadata(final JavaPackage topLevelPackage, final String projectName, final Set<Dependency> dependencies, final Set<Plugin> buildPlugins, final Set<Repository> repositories, final Set<Repository> pluginRepositories, final Set<Property> pomProperties, final Set<Filter> filters, final Set<Resource> resources, final ProjectType type) {
 		super(PROJECT_IDENTIFIER);
-		Assert.notNull(topLevelPackage, "Top level package required");
-		Assert.hasText(projectName, "Project name required");
-		Assert.notNull(dependencies, "Dependencies required");
 		Assert.notNull(buildPlugins, "Build plugins required");
-		Assert.notNull(repositories, "Repositories required");
+		Assert.notNull(dependencies, "Dependencies required");
+		Assert.notNull(filters, "Filters required");
 		Assert.notNull(pluginRepositories, "Plugin repositories required");
 		Assert.notNull(pomProperties, "POM properties required");
-		Assert.notNull(filters, "Filters required");
+		Assert.hasText(projectName, "Project name required");
+		Assert.notNull(repositories, "Repositories required");
 		Assert.notNull(resources, "Resources required");
-		this.topLevelPackage = topLevelPackage;
-		this.projectName = projectName;
-		this.dependencies = dependencies;
+		Assert.notNull(topLevelPackage, "Top level package required");
+		Assert.notNull(type, "Project type required");
+		
 		this.buildPlugins = buildPlugins;
-		this.repositories = repositories;
+		this.dependencies = dependencies;
+		this.filters = filters;
 		this.pluginRepositories = pluginRepositories;
 		this.pomProperties = pomProperties;
-		this.filters = filters;
+		this.projectName = projectName;
+		this.repositories = repositories;
 		this.resources = resources;
+		this.topLevelPackage = topLevelPackage;
+		this.type = type;
 	}
 	
 	/**
@@ -452,5 +457,14 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		tsc.append("filters", filters);
 		tsc.append("resources", resources);
 		return tsc.toString();
+	}
+
+	/**
+	 * Returns the type of this project or module
+	 * 
+	 * @return a non-<code>null</code> type
+	 */
+	public ProjectType getType() {
+		return this.type;
 	}
 }

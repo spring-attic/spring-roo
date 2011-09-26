@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
     <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
-    <packaging>jar</packaging>
+    <packaging>TO_BE_CHANGED_BY_LISTENER</packaging>
     <version>0.1.0.BUILD-SNAPSHOT</version>
     <name>TO_BE_CHANGED_BY_LISTENER</name>
     <properties>

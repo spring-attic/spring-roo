@@ -6,6 +6,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.project.packaging.PackagingType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -34,9 +35,11 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage, 
 		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName, 
 		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
-		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final String parent) {
+		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final String parent,
+		@CliOption(key = "packaging", help = "The Maven packaging (pom, war, jar, ear, etc.)", unspecifiedDefaultValue = "jar") final PackagingType packagingType) {
 		
-		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parent);
+		// TODO use converter for parent coords?
+		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parent, packagingType);
 	}
 
 	@CliAvailabilityIndicator({ "dependency add", "dependency remove" })
