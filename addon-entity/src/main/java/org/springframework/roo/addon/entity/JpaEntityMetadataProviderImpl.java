@@ -134,38 +134,38 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		registerMatchers();
 	}
 	
-	@SuppressWarnings("unchecked")
-	private void registerMatchers() {
-		customDataKeyDecorator.registerMatchers(
-				getClass(),
-				// Type matchers
-				new MidTypeMatcher(IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"),
-				new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_ENTITY, RooJavaType.ROO_JPA_ENTITY),
-				// Field matchers
-				JPA_COLUMN_FIELD_MATCHER,
-				JPA_EMBEDDED_FIELD_MATCHER,
-				JPA_EMBEDDED_ID_FIELD_MATCHER,
-				JPA_ENUMERATED_FIELD_MATCHER,
-				JPA_ID_FIELD_MATCHER,
-				JPA_LOB_FIELD_MATCHER,
-				JPA_MANY_TO_MANY_FIELD_MATCHER,
-				JPA_MANY_TO_ONE_FIELD_MATCHER,
-				JPA_ONE_TO_MANY_FIELD_MATCHER,
-				JPA_ONE_TO_ONE_FIELD_MATCHER,
-				JPA_TRANSIENT_FIELD_MATCHER,
-				JPA_VERSION_FIELD_MATCHER,
-				// Method matchers
-				new MethodMatcher(Arrays.asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER), IDENTIFIER_ACCESSOR_METHOD, true),
-				new MethodMatcher(Arrays.asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER), IDENTIFIER_MUTATOR_METHOD, false),
-				new MethodMatcher(Arrays.asList(JPA_VERSION_FIELD_MATCHER), VERSION_ACCESSOR_METHOD, true),
-				new MethodMatcher(Arrays.asList(JPA_VERSION_FIELD_MATCHER), VERSION_MUTATOR_METHOD, false)
-		);
-	}
-	
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
 		removeMetadataTriggers(TRIGGER_ANNOTATIONS);
 		customDataKeyDecorator.unregisterMatchers(getClass());
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void registerMatchers() {
+		customDataKeyDecorator.registerMatchers(
+			getClass(),
+			// Type matchers
+			new MidTypeMatcher(IDENTIFIER_TYPE, "org.springframework.roo.addon.entity.IdentifierMetadata"),
+			new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_ENTITY, RooJavaType.ROO_JPA_ENTITY),
+			// Field matchers
+			JPA_COLUMN_FIELD_MATCHER,
+			JPA_EMBEDDED_FIELD_MATCHER,
+			JPA_EMBEDDED_ID_FIELD_MATCHER,
+			JPA_ENUMERATED_FIELD_MATCHER,
+			JPA_ID_FIELD_MATCHER,
+			JPA_LOB_FIELD_MATCHER,
+			JPA_MANY_TO_MANY_FIELD_MATCHER,
+			JPA_MANY_TO_ONE_FIELD_MATCHER,
+			JPA_ONE_TO_MANY_FIELD_MATCHER,
+			JPA_ONE_TO_ONE_FIELD_MATCHER,
+			JPA_TRANSIENT_FIELD_MATCHER,
+			JPA_VERSION_FIELD_MATCHER,
+			// Method matchers
+			new MethodMatcher(Arrays.asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER), IDENTIFIER_ACCESSOR_METHOD, true),
+			new MethodMatcher(Arrays.asList(JPA_ID_AND_EMBEDDED_ID_FIELD_MATCHER), IDENTIFIER_MUTATOR_METHOD, false),
+			new MethodMatcher(Arrays.asList(JPA_VERSION_FIELD_MATCHER), VERSION_ACCESSOR_METHOD, true),
+			new MethodMatcher(Arrays.asList(JPA_VERSION_FIELD_MATCHER), VERSION_MUTATOR_METHOD, false)
+		);
 	}
 	
 	// ---------------- The meat of this provider starts here ------------------
@@ -183,7 +183,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		final JpaEntityMetadata parentEntity = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
 		
 		// Get the governor's members
-		final MemberDetails governorDetails = getMemberDetails(governorPhysicalType);
+		final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalType);
 
 		// Get the governor's ID field, if any
 		final Identifier identifier = getIdentifier(metadataId);
@@ -199,7 +199,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 			isDatabaseDotComEnabled = projectMetadata.isDatabaseDotComEnabled();
 		}
 
-		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectMetadata, governorDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
+		return new JpaEntityMetadata(metadataId, aspectName, governorPhysicalType, parentEntity, projectMetadata, governorMemberDetails, identifier, jpaEntityAnnotationValues, isGaeEnabled, isDatabaseDotComEnabled);
 	}
 
 	/**

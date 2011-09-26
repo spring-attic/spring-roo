@@ -82,16 +82,16 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	@SuppressWarnings("unchecked")
 	private void registerMatchers() {
 		customDataKeyDecorator.registerMatchers(
-				getClass(),
-				new MethodMatcher(CLEAR_METHOD, ROO_ENTITY, new JavaSymbolName("clearMethod"), CLEAR_METHOD_DEFAULT),
-				new MethodMatcher(COUNT_ALL_METHOD, ROO_ENTITY, new JavaSymbolName("countMethod"), COUNT_METHOD_DEFAULT, true, false),
-				new MethodMatcher(FIND_ALL_METHOD, ROO_ENTITY, new JavaSymbolName("findAllMethod"), FIND_ALL_METHOD_DEFAULT, true, false),
-				new MethodMatcher(FIND_ENTRIES_METHOD, ROO_ENTITY, new JavaSymbolName("findEntriesMethod"), "find", false, true, "Entries"),
-				new MethodMatcher(FIND_METHOD, ROO_ENTITY, new JavaSymbolName("findMethod"), FIND_METHOD_DEFAULT, false, true),
-				new MethodMatcher(FLUSH_METHOD, ROO_ENTITY, new JavaSymbolName("flushMethod"), FLUSH_METHOD_DEFAULT),
-				new MethodMatcher(MERGE_METHOD, ROO_ENTITY, new JavaSymbolName("mergeMethod"), MERGE_METHOD_DEFAULT),
-				new MethodMatcher(PERSIST_METHOD, ROO_ENTITY, new JavaSymbolName("persistMethod"), PERSIST_METHOD_DEFAULT),
-				new MethodMatcher(REMOVE_METHOD, ROO_ENTITY, new JavaSymbolName("removeMethod"), REMOVE_METHOD_DEFAULT)
+			getClass(),
+			new MethodMatcher(CLEAR_METHOD, ROO_ENTITY, new JavaSymbolName("clearMethod"), CLEAR_METHOD_DEFAULT),
+			new MethodMatcher(COUNT_ALL_METHOD, ROO_ENTITY, new JavaSymbolName("countMethod"), COUNT_METHOD_DEFAULT, true, false),
+			new MethodMatcher(FIND_ALL_METHOD, ROO_ENTITY, new JavaSymbolName("findAllMethod"), FIND_ALL_METHOD_DEFAULT, true, false),
+			new MethodMatcher(FIND_ENTRIES_METHOD, ROO_ENTITY, new JavaSymbolName("findEntriesMethod"), "find", false, true, "Entries"),
+			new MethodMatcher(FIND_METHOD, ROO_ENTITY, new JavaSymbolName("findMethod"), FIND_METHOD_DEFAULT, false, true),
+			new MethodMatcher(FLUSH_METHOD, ROO_ENTITY, new JavaSymbolName("flushMethod"), FLUSH_METHOD_DEFAULT),
+			new MethodMatcher(MERGE_METHOD, ROO_ENTITY, new JavaSymbolName("mergeMethod"), MERGE_METHOD_DEFAULT),
+			new MethodMatcher(PERSIST_METHOD, ROO_ENTITY, new JavaSymbolName("persistMethod"), PERSIST_METHOD_DEFAULT),
+			new MethodMatcher(REMOVE_METHOD, ROO_ENTITY, new JavaSymbolName("removeMethod"), REMOVE_METHOD_DEFAULT)
 		);
 	}
 

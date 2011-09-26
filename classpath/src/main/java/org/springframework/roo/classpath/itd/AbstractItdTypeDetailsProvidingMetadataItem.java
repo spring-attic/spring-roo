@@ -189,7 +189,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @param parameterTypes a list of parameter types
 	 * @param parameterNames a list of parameter names
 	 * @param bodyBuilder the method body
-	 * @return null if the method exists on the governor, otherwise a new method
+	 * @return null if the method exists on the governor, otherwise a new method is returned
 	 */
 	protected MethodMetadata getMethod(final int modifier, final JavaSymbolName methodName, final JavaType returnType, final List<JavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final InvocableMemberBodyBuilder bodyBuilder) {
 		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);

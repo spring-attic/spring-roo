@@ -60,7 +60,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	private final Identifier identifier;
 	private final JpaEntityAnnotationValues annotationValues;
 	private final JpaEntityMetadata parentEntity;
-	private final MemberDetails entityDetails;
+	private final MemberDetails entityMemberDetails;
 	private final boolean isGaeEnabled;
 	private final boolean isDatabaseDotComEnabled;
 
@@ -73,7 +73,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @param parentEntity can be <code>null</code> if none of the governor's
 	 * ancestors provide {@link JpaEntityMetadata}
 	 * @param project the user's project (required)
-	 * @param entityDetails details of the entity's members (required)
+	 * @param entityMemberDetails details of the entity's members (required)
 	 * @param identifier information about the entity's identifier field in the
 	 * event that the annotation doesn't provide such information; can be
 	 * <code>null</code>
@@ -81,10 +81,10 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * account the presence of a {@link RooEntity} and/or {@link RooJpaEntity}
 	 * annotation (required)
 	 */
-	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final ProjectMetadata project, final MemberDetails entityDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, boolean isGaeEnabled, boolean isDatabaseDotComEnabled) {
+	public JpaEntityMetadata(final String metadataId, final JavaType itdName, final PhysicalTypeMetadata entityPhysicalType, final JpaEntityMetadata parentEntity, final ProjectMetadata project, final MemberDetails entityMemberDetails, final Identifier identifier, final JpaEntityAnnotationValues annotationValues, boolean isGaeEnabled, boolean isDatabaseDotComEnabled) {
 		super(metadataId, itdName, entityPhysicalType);
 		Assert.notNull(annotationValues, "Annotation values are required");
-		Assert.notNull(entityDetails, "Entity MemberDetails are required");
+		Assert.notNull(entityMemberDetails, "Entity MemberDetails are required");
 
 		/*
 		 * Ideally we'd pass these parameters to the methods below rather than
@@ -92,7 +92,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		 * to the parent entity.
 		 */
 		this.annotationValues = annotationValues;
-		this.entityDetails = entityDetails;
+		this.entityMemberDetails = entityMemberDetails;
 		this.identifier = identifier;
 		this.parentEntity = parentEntity;
 		this.isGaeEnabled = isGaeEnabled;
@@ -176,7 +176,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing accessor
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredAccessorName, new ArrayList<JavaType>());
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredAccessorName, new ArrayList<JavaType>());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -356,7 +356,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredMutatorName, parameterTypes);
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredMutatorName, parameterTypes);
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -525,7 +525,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// Locate an existing accessor
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredAccessorName, new ArrayList<JavaType>(), getId());
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredAccessorName, new ArrayList<JavaType>(), getId());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -632,7 +632,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredMutatorName, parameterTypes, getId());
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredMutatorName, parameterTypes, getId());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
