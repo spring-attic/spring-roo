@@ -1,38 +1,16 @@
 package org.springframework.roo.classpath.operations;
 
-import static org.springframework.roo.model.JavaType.OBJECT;
-import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
-import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
-import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
-
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Shell commands for creating classes, interfaces, and enums.
@@ -46,19 +24,8 @@ import org.springframework.roo.support.util.Assert;
 public class ClasspathCommands implements CommandMarker {
 
 	// Fields
-	@Reference private MetadataService metadataService;
+	@Reference private ClasspathOperations classpathOperations;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private StaticFieldConverter staticFieldConverter;
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private TypeManagementService typeManagementService;
-
-	protected void activate(ComponentContext context) {
-		staticFieldConverter.add(InheritanceType.class);
-	}
-
-	protected void deactivate(ComponentContext context) {
-		staticFieldConverter.remove(InheritanceType.class);
-	}
 
 	@CliAvailabilityIndicator( { "class", "interface", "enum type", "enum constant" })
 	public boolean isProjectAvailable() {
@@ -67,11 +34,9 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "focus", help = "Changes focus to a different type") 
 	public void focus(
-		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") JavaType typeName) {
+		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") final JavaType type) {
 		
-		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName);
-		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
-		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");	
+		classpathOperations.focus(type);
 	}
 	
 	@CliCommand(value = "class", help = "Creates a new Java class source file in any project path")
@@ -83,39 +48,7 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "abstract", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should be marked as abstract") boolean createAbstract, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(name);
-		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-
-		int modifier = Modifier.PUBLIC;
-		if (createAbstract) {
-			modifier |= Modifier.ABSTRACT;
-		}
-
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
-
-		if (!superclass.equals(OBJECT)) {
-			ClassOrInterfaceTypeDetails superclassClassOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(superclass);
-			if (superclassClassOrInterfaceTypeDetails != null) {
-				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
-			}
-		}
-		
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		extendsTypes.add(superclass);
-		typeDetailsBuilder.setExtendsTypes(extendsTypes);
-
-		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		if (rooAnnotations) {
-			annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
-			annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
-			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
-		}
-		typeDetailsBuilder.setAnnotations(annotations);
-
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		classpathOperations.createClass(name, rooAnnotations, path, superclass, createAbstract, permitReservedWords);
 	}
 
 	@CliCommand(value = "interface", help = "Creates a new Java interface source file in any project path")
@@ -124,14 +57,7 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the interface in") Path path, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(name);
-		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
-
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		classpathOperations.createInterface(name, path, permitReservedWords);
 	}
 
 	@CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
@@ -140,13 +66,7 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the enum in") Path path, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(name);
-		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
-		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+		classpathOperations.createEnum(name, path, permitReservedWords);
 	}
 
 	@CliCommand(value = "enum constant", help = "Inserts a new enum constant into an enum")
@@ -155,13 +75,6 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "name", mandatory = true, help = "The name of the constant") JavaSymbolName fieldName, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
-		if (!permitReservedWords) {
-			// No need to check the "name" as if the class exists it is assumed it is a legal name
-			ReservedWords.verifyReservedWordsNotPresent(fieldName);
-		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
-	
-		typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
+		classpathOperations.enumConstant(name, fieldName, permitReservedWords);
 	}
 }
