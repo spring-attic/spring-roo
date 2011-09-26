@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
@@ -50,10 +50,19 @@ public class RepositoryMongoMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
 		ensureGovernorExtends(new JavaType(SPRING_DATA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType)));
 		
-		builder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.REPOSITORY));
+		builder.addAnnotation(getRepositoryAnnotation());
 		
 		// Build the ITD
 		itdTypeDetails = builder.build();
+	}
+	
+	private AnnotationMetadata getRepositoryAnnotation() {
+		AnnotationMetadata repositoryAnnotation = getTypeAnnotation(SpringJavaType.REPOSITORY);
+		if (repositoryAnnotation == null) {
+			return null;
+		}
+
+		return repositoryAnnotation;
 	}
 	
 	public RepositoryMongoAnnotationValues getAnnotationValues() {
