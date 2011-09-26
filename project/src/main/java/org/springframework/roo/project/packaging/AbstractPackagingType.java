@@ -214,4 +214,13 @@ public abstract class AbstractPackagingType implements PackagingType {
 	 * by {@link #createPom}). This implementation does nothing.
 	 */
 	protected void createOtherArtifacts() {}
+	
+	/**
+	 * Returns the package-relative path to this {@link PackagingType}'s POM template.
+	 * 
+	 * @return a non-blank path
+	 */
+	String getPomTemplate() {
+		return pomTemplate;
+	}
 }
