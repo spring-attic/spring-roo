@@ -1,4 +1,4 @@
-package org.springframework.roo.project;
+package org.springframework.roo.project.converter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.roo.project.GAV;
+import org.springframework.roo.project.MavenUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**

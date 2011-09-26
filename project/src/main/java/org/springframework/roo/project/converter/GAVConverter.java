@@ -1,9 +1,10 @@
-package org.springframework.roo.project;
+package org.springframework.roo.project.converter;
 
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.project.GAV;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -30,6 +31,7 @@ public class GAVConverter implements Converter<GAV> {
 		// completions as we don't know what GAVs are valid for the user and
 		// the "this" alias (representing the current project or module) isn't
 		// implemented yet either.
+		// TODO offer the GAVs of the project, its modules, and any parent POMs of either
 		return true;
 	}
 }
