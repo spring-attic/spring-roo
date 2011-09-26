@@ -1,6 +1,7 @@
 package org.springframework.roo.project.packaging;
 
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.ProjectOperations;
 
 /**
@@ -25,9 +26,9 @@ public interface PackagingType {
 	 * @param topLevelPackage the top-level Java package for the new project or module (required)
 	 * @param nullableProjectName the project name provided by the user (can be blank)
 	 * @param javaVersion the Java version for this project or module (required)
-	 * @param parentPom the Maven coordinates of the parent POM, in the form G:A:V (can be blank)
+	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code> for none)
 	 */
-	void createArtifacts(JavaPackage topLevelPackage, String projectName, String javaVersion, String parentPom);
+	void createArtifacts(JavaPackage topLevelPackage, String projectName, String javaVersion, GAV parentPom);
 	
 	/**
 	 * Sets the {@link ProjectOperations} in case it's required by this type of

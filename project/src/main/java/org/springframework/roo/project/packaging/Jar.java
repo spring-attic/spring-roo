@@ -7,6 +7,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -33,7 +34,7 @@ public class Jar extends AbstractPackagingType {
 	private static final Dependency JSR250_API = new Dependency("javax.annotation", "jsr250-api", "1.0");
 
 	@Override
-	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final String parentPom) {
+	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {
 		super.createPom(topLevelPackage, nullableProjectName, javaVersion, parentPom);
 		
 		// TODO might be able to move this block to "createOtherArtifacts" and delete this overriding method

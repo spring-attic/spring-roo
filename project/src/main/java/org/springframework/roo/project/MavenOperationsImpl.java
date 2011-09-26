@@ -43,7 +43,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		return pathResolver.getRoot(Path.ROOT);
 	}
 	
-	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final String parentPom, final PackagingType packagingType) {
+	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final GAV parentPom, final PackagingType packagingType) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
 		final String javaVersion = getJavaVersion(majorJavaVersion);
 		packagingType.createArtifacts(topLevelPackage, projectName, javaVersion, parentPom);

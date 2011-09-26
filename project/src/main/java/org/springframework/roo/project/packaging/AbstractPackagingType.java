@@ -1,6 +1,5 @@
 package org.springframework.roo.project.packaging;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -9,6 +8,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ApplicationContextOperations;
+import org.springframework.roo.project.GAV;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
@@ -34,7 +34,6 @@ public abstract class AbstractPackagingType implements PackagingType {
 
 	// Constants
 	protected static final Logger LOGGER = HandlerUtils.getLogger(PackagingType.class);
-	private static final String GAV_SEPARATOR = ":";
 	private static final String JAVA_VERSION_PLACEHOLDER = "JAVA_VERSION";
 	
 	// Fields
@@ -73,7 +72,7 @@ public abstract class AbstractPackagingType implements PackagingType {
 		this.projectOperations = projectOperations;
 	}
 	
-	public void createArtifacts(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final String parentPom) {
+	public void createArtifacts(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {
 		createPom(topLevelPackage, nullableProjectName, javaVersion, parentPom);
 		fileManager.scan();	// TODO not sure why or if this is necessary; find out and document/remove it
 		createOtherArtifacts();
@@ -99,9 +98,9 @@ public abstract class AbstractPackagingType implements PackagingType {
 	 * @param topLevelPackage the new project or module's top-level Java package (required)
 	 * @param nullableProjectName the project name provided by the user (can be blank)
 	 * @param javaVersion the target Java version (required)
-	 * @param parentPom the Maven coordinates of the parent POM, in the form G:A:V (can be blank)
+	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code>)
 	 */
-	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final String parentPom) {
+	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {
 		Assert.hasText(javaVersion, "Java version required");
 		Assert.notNull(topLevelPackage, "Top level package required");
 		
@@ -185,25 +184,26 @@ public abstract class AbstractPackagingType implements PackagingType {
 	 * Sets the Maven groupIds of the parent and/or project as necessary
 	 * 
 	 * @param projectGroupId the project's groupId (required)
-	 * @param parentPom the Maven coordinates of the parent POM, in the form G:A:V (can be blank)
+	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code>)
 	 * @param root the root element of the POM document (required)
 	 * @param pom the POM document (required)
 	 */
-	protected void setGroupIdAndParent(final String projectGroupId, final String parentPom, final Element root, final Document pom) {
+	protected void setGroupIdAndParent(final String projectGroupId, final GAV parentPom, final Element root, final Document pom) {
 		final Element parentPomElement = DomUtils.createChildIfNotExists("parent", root, pom);
 		final Element projectGroupIdElement = DomUtils.createChildIfNotExists("groupId", root, pom);
-		if (StringUtils.hasText(parentPom)) {
-			final String[] parentPomCoordinates = StringUtils.delimitedListToStringArray(parentPom, GAV_SEPARATOR);
-			Assert.isTrue(parentPomCoordinates.length == 3, "Expected three coordinates for parent POM, but found " + parentPomCoordinates.length + ": " + Arrays.toString(parentPomCoordinates) + "; did you use the '" + GAV_SEPARATOR + "' separator?");
-			final String parentGroupId = parentPomCoordinates[0];
-			
+		if (parentPom == null) {
+			// No parent POM was specified; remove the parent element
+			root.removeChild(parentPomElement);
+			DomUtils.removeTextNodes(root);
+			projectGroupIdElement.setTextContent(projectGroupId);
+		} else {
 			// Parent groupId, artifactId, and version
-			DomUtils.createChildIfNotExists("groupId", parentPomElement, pom).setTextContent(parentGroupId);
-			DomUtils.createChildIfNotExists("artifactId", parentPomElement, pom).setTextContent(parentPomCoordinates[1]);
-			DomUtils.createChildIfNotExists("version", parentPomElement, pom).setTextContent(parentPomCoordinates[2]);
-
+			DomUtils.createChildIfNotExists("groupId", parentPomElement, pom).setTextContent(parentPom.getGroupId());
+			DomUtils.createChildIfNotExists("artifactId", parentPomElement, pom).setTextContent(parentPom.getArtifactId());
+			DomUtils.createChildIfNotExists("version", parentPomElement, pom).setTextContent(parentPom.getVersion());
+			
 			// Project groupId (if necessary)
-			if (projectGroupId.equals(parentGroupId)) {
+			if (projectGroupId.equals(parentPom.getGroupId())) {
 				// Maven best practice is to inherit the groupId from the parent
 				root.removeChild(projectGroupIdElement);
 				DomUtils.removeTextNodes(root);
@@ -211,11 +211,6 @@ public abstract class AbstractPackagingType implements PackagingType {
 				// Project has its own groupId => needs to be explicit
 				projectGroupIdElement.setTextContent(projectGroupId);
 			}
-		} else {
-			// No parent POM was specified; remove the parent element
-			root.removeChild(parentPomElement);
-			DomUtils.removeTextNodes(root);
-			projectGroupIdElement.setTextContent(projectGroupId);
 		}
 	}
 	

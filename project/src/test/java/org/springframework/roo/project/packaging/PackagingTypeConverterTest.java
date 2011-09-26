@@ -3,6 +3,7 @@ package org.springframework.roo.project.packaging;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ public class PackagingTypeConverterTest {
 	private void assertInvalidString(final String string) {
 		try {
 			converter.convertFromText(string, PackagingType.class, null);
+			fail("Expected a " + UnsupportedOperationException.class);
 		} catch (UnsupportedOperationException expected) {
 			assertEquals("Unsupported packaging type '" + string + "'", expected.getMessage());
 		}
