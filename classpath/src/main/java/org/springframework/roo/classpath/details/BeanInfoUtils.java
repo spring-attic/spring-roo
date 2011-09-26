@@ -123,22 +123,37 @@ public abstract class BeanInfoUtils {
 	 * @return the accessor method name
 	 */
 	public static JavaSymbolName getAccessorMethodName(FieldMetadata field) {
-		JavaSymbolName methodName;
-		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-			methodName = new JavaSymbolName("is" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
-		} else {
-			methodName = new JavaSymbolName("get" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
-		}
-		return methodName;
+		return getAccessorMethodName(field.getFieldName(), field.getFieldType());
 	}
 	
 	/** 
-	 * Returns the accessor name for the given field.
+	 * Returns the accessor name for the given field name and field type.
 	 * 
-	 * @param field the field to determine the accessor name
+	 * @param fieldName the field name used to determine the accessor name
+	 * @param fieldType the field type
 	 * @return the accessor method name
 	 */
+	public static JavaSymbolName getAccessorMethodName(final JavaSymbolName fieldName, JavaType fieldType) {
+		return fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) ? new JavaSymbolName("is" + StringUtils.capitalize(fieldName.getSymbolName())) : new JavaSymbolName("get" + StringUtils.capitalize(fieldName.getSymbolName()));
+	}
+	
+	/** 
+	 * Returns the mutator name for the given field.
+	 * 
+	 * @param field the field used to determine the accessor name
+	 * @return the mutator method name
+	 */
 	public static JavaSymbolName getMutatorMethodName(FieldMetadata field) {
-		return new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+		return getMutatorMethodName(field.getFieldName());
+	}
+	
+	/** 
+	 * Returns the mutator name for the given field name.
+	 * 
+	 * @param fieldName the field name used to determine the accessor name
+	 * @return the mutator method name
+	 */
+	public static JavaSymbolName getMutatorMethodName(JavaSymbolName fieldName) {
+		return new JavaSymbolName("set" + StringUtils.capitalize(fieldName.getSymbolName()));
 	}
 }

@@ -1,18 +1,27 @@
 package org.springframework.roo.classpath.itd;
 
+import static java.lang.reflect.Modifier.PRIVATE;
+import static java.lang.reflect.Modifier.PUBLIC;
+
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -95,7 +104,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	/**
 	 * Determines if the presented class (or any of its superclasses) implements the target interface.
 	 * 
-	 * @param clazz to search
+	 * @param clazz the cid to search
 	 * @param interfaceTarget the interface to locate
 	 * @return true if the class or any of its superclasses contains the specified interface
 	 */
@@ -110,7 +119,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 	
 	/**
-	 * Returns the given method of the governor
+	 * Returns the given method of the governor.
 	 * 
 	 * @param methodName the name of the method for which to search
 	 * @param parameterTypes the method's parameter types
@@ -123,7 +132,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 	
 	/**
-	 * Returns the given method of the governor
+	 * Returns the given method of the governor.
 	 * 
 	 * @param methodName the name of the method for which to search
 	 * @param parameterTypes the method's parameter types
@@ -135,6 +144,73 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, parameterTypes);
 	}
 	
+	protected FieldMetadata getField(final JavaSymbolName fieldName, final JavaType fieldType) {
+		return getField(fieldName, fieldType, null);
+	}
+
+	/**
+	 * Convenience method for returning a simple private field based on the field name, type, and initializer.
+	 * 
+	 * @param fieldName the field name
+	 * @param fieldType the field type
+	 * @param fieldInitializer the string to initialize the field with
+	 * @return a governor field if it exists, otherwise a new field with the given field name and type
+	 */
+	protected FieldMetadata getField(final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
+		final FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
+		if (field != null) return field;
+		
+		addToImports(Arrays.asList(fieldType));
+		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), PRIVATE, fieldName, fieldType, fieldInitializer);
+		return fieldBuilder.build();
+	}
+
+	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType) {
+		return getAccessorMethod(fieldName, fieldType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + fieldName + ";"));
+	}
+	
+	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
+		return getMethod(BeanInfoUtils.getAccessorMethodName(fieldName, fieldType), fieldType, null, null, bodyBuilder);
+	}
+	
+	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType) {
+		return getMutatorMethod(fieldName, parameterType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("this." + fieldName + " = " + fieldName + ";"));
+	}
+
+	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType, final InvocableMemberBodyBuilder bodyBuilder) {
+		return getMethod(BeanInfoUtils.getMutatorMethodName(fieldName), JavaType.VOID_PRIMITIVE, Arrays.asList(parameterType), Arrays.asList(fieldName), bodyBuilder);
+	}
+
+	/**
+	 * Returns a public method given the method name, return type, parameter types, parameter names, and method body.
+	 * 
+	 * @param methodName the method name
+	 * @param returnType the return type
+	 * @param parameterTypes a list of parameter types
+	 * @param parameterNames a list of parameter names
+	 * @param bodyBuilder the method body
+	 * @return a governor method if it exists, otherwise a new method is created and returned
+	 */
+	protected MethodMetadata getMethod(final JavaSymbolName methodName, final JavaType returnType, final List<JavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final InvocableMemberBodyBuilder bodyBuilder) {
+		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
+		if (method != null) return method;
+		
+		addToImports(parameterTypes);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		return methodBuilder.build();
+	}
+
+	private void addToImports(final List<JavaType> parameterTypes) {
+		if (parameterTypes != null) {
+			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+			for (JavaType parameterType : parameterTypes) {
+				if (!parameterType.getFullyQualifiedTypeName().startsWith("java.lang")) {
+					imports.addImport(parameterType);
+				}
+			}
+		}
+	}
+
 	@Override
 	public int hashCode() {
 		return builder.build().hashCode();
@@ -160,6 +236,6 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected final void ensureGovernorExtends(final JavaType javaType) {
 		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(javaType)) {
 			builder.addExtendsTypes(javaType);
-		}		
+		}
 	}
 }

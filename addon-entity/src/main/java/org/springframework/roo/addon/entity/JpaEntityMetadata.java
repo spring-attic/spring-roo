@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -347,7 +348,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		
 		// Locate the identifier field, and compute the name of the accessor that will be produced
 		final FieldMetadata id = getIdentifierField();
-		String requiredMutatorName = "set" + StringUtils.capitalize(id.getFieldName().getSymbolName());
+		JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(id);
 		
 		final List<JavaType> parameterTypes = Arrays.asList(id.getFieldType());
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"));
@@ -355,7 +356,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredMutatorName), parameterTypes);
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredMutatorName, parameterTypes);
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -363,7 +364,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				}
 				
 				// Method is not public so make the required mutator name unique 
-				requiredMutatorName += "_";
+				requiredMutatorName = new JavaSymbolName(requiredMutatorName.getSymbolName() + "_");
 			}
 		}
 		
@@ -371,7 +372,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + id.getFieldName().getSymbolName() + " = id;");
 		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -519,12 +520,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		// Compute the name of the accessor that will be produced
-		String requiredAccessorName = "get" + StringUtils.capitalize(version.getFieldName().getSymbolName());
+		JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(version);
 		
 		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// Locate an existing accessor
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>(), getId());
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredAccessorName, new ArrayList<JavaType>(), getId());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -532,7 +533,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				}
 				
 				// Method is not public so make the required accessor name unique 
-				requiredAccessorName += "_";
+				requiredAccessorName = new JavaSymbolName(requiredAccessorName.getSymbolName() + "_");
 			}
 		}
 		
@@ -540,7 +541,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + version.getFieldName().getSymbolName() + ";");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), version.getFieldType(), bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, version.getFieldType(), bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -621,7 +622,9 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			// There's no version field, so there certainly won't be a mutator for it 
 			return null;
 		}
-		String requiredMutatorName = "set" + StringUtils.capitalize(version.getFieldName().getSymbolName());
+		
+		// Compute the name of the mutator that will be produced
+		JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(version);
 		
 		final List<JavaType> parameterTypes =  Arrays.asList(version.getFieldType());
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("version"));
@@ -629,7 +632,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredMutatorName), parameterTypes, getId());
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredMutatorName, parameterTypes, getId());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -637,7 +640,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				}
 				
 				// Method is not public so make the required mutator name unique 
-				requiredMutatorName += "_";
+				requiredMutatorName = new JavaSymbolName(requiredMutatorName.getSymbolName() + "_");
 			}
 		}
 		
@@ -645,7 +648,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + version.getFieldName().getSymbolName() + " = version;");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 }

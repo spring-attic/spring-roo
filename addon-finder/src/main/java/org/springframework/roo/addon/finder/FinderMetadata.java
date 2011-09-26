@@ -59,7 +59,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.entityManagerMethod = entityManagerMethod;
 		this.queryHolders = queryHolders;
 		this.isDataNucleusEnabled = isDataNucleusEnabled;
-				
+
 		for (JavaSymbolName finderName : queryHolders.keySet()) {
 			MethodMetadata methodMetadata = getDynamicFinderMethod(finderName);
 			builder.addMethod(methodMetadata);

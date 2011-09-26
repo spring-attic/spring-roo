@@ -23,8 +23,6 @@ import java.util.Set;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -54,10 +52,10 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = JsfApplicationBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaSymbolName MENU_MODEL = new JavaSymbolName("menuModel");
 	
 	// Fields
 	private Set<ClassOrInterfaceTypeDetails> managedBeans;
-	private String projectName;
 
 	public JsfApplicationBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Set<ClassOrInterfaceTypeDetails> managedBeans, String projectName) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -70,7 +68,6 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		}
 
 		this.managedBeans = managedBeans;
-		this.projectName = projectName;
 
 		// Add @ManagedBean annotation if required
 		builder.addAnnotation(getManagedBeanAnnotation());
@@ -78,19 +75,17 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		// Add @SessionScoped annotation if required
 		builder.addAnnotation(getScopeAnnotation());
 
-		if (!managedBeans.isEmpty()) {
-			// Add menu model field
-			builder.addField(getMenuModelField());
+		// Add menu model field
+		builder.addField(getField(MENU_MODEL, PRIMEFACES_MENU_MODEL));
 
-			// Add init() method
-			builder.addMethod(getInitMethod());
+		// Add init() method
+		builder.addMethod(getInitMethod());
 
-			// Add model field accessor method
-			builder.addMethod(getModelAccessorMethod());
-			
-			// Add application name accessor method
-			builder.addMethod(getApplicationAccessorMethod());
-		}
+		// Add model field accessor method
+		builder.addMethod(getAccessorMethod(MENU_MODEL, PRIMEFACES_MENU_MODEL));
+
+		// Add application name accessor method
+		builder.addMethod(getMethod(new JavaSymbolName("getAppName"), JavaType.STRING, null, null, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return \"" + StringUtils.capitalize(projectName) + "\";")));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -114,18 +109,6 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, REQUEST_SCOPED) != null);
 	}
 
-	private FieldMetadata getMenuModelField() {
-		JavaSymbolName fieldName = new JavaSymbolName("menuModel");
-		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
-		if (field != null) return field;
-
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(PRIMEFACES_MENU_MODEL);
-
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new ArrayList<AnnotationMetadataBuilder>(), fieldName, PRIMEFACES_MENU_MODEL);
-		return fieldBuilder.build();
-	}
-	
 	private MethodMetadata getInitMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("init");
 		MethodMetadata method = getGovernorMethod(methodName);
@@ -140,6 +123,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		imports.addImport(PRIMEFACES_DEFAULT_MENU_MODEL);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
 		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
 		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
 		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
@@ -192,33 +176,6 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(POST_CONSTRUCT));
-		return methodBuilder.build();
-	}
-
-	private MethodMetadata getModelAccessorMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("getMenuModel");
-		MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
-
-		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(PRIMEFACES_MENU_MODEL);
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return menuModel;");
-		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, PRIMEFACES_MENU_MODEL, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
-	}
-	
-	private MethodMetadata getApplicationAccessorMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("getAppName");
-		MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return \"" + StringUtils.capitalize(projectName) + "\";");
-		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 
