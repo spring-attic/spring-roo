@@ -40,8 +40,7 @@ public abstract class AbstractPackagingType implements PackagingType {
 	@Reference protected ApplicationContextOperations applicationContextOperations;
 	@Reference protected FileManager fileManager;
 	@Reference protected PathResolver pathResolver;
-	// Can't be injected via OSGi as it would create a circular reference
-	protected ProjectOperations projectOperations;
+	@Reference protected ProjectOperations projectOperations;
 	
 	private final String name;
 	private final String pomTemplate;
@@ -65,11 +64,6 @@ public abstract class AbstractPackagingType implements PackagingType {
 	
 	public String getName() {
 		return this.name;
-	}
-	
-	public void setProjectOperations(final ProjectOperations projectOperations) {
-		Assert.notNull(projectOperations, "ProjectOperations is required");
-		this.projectOperations = projectOperations;
 	}
 	
 	public void createArtifacts(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {

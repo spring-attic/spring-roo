@@ -58,7 +58,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	 */
 	private final String getJavaVersion(final Integer majorJavaVersion) {
 		if (majorJavaVersion != null && majorJavaVersion >= 5 && majorJavaVersion <= 7) {
-			return String.valueOf(majorJavaVersion);
+			return "1." + majorJavaVersion;
 		}
 		
 		// No valid version given; detect the major Java version to use

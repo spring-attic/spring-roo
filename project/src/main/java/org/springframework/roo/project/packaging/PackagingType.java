@@ -2,7 +2,6 @@ package org.springframework.roo.project.packaging;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.GAV;
-import org.springframework.roo.project.ProjectOperations;
 
 /**
  * A Maven packaging type.
@@ -13,8 +12,8 @@ import org.springframework.roo.project.ProjectOperations;
 public interface PackagingType {
 
 	/**
-	 * Returns the Maven name for this type of packaging, i.e. the name used in
-	 * the POM's <code>&lt;packaging&gt;</code> element.
+	 * Returns the Maven name for this type of packaging, i.e. the text that
+	 * appears in the POM's <code>&lt;packaging&gt;</code> element.
 	 * 
 	 * @return a non-blank name
 	 */
@@ -29,14 +28,4 @@ public interface PackagingType {
 	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code> for none)
 	 */
 	void createArtifacts(JavaPackage topLevelPackage, String projectName, String javaVersion, GAV parentPom);
-	
-	/**
-	 * Sets the {@link ProjectOperations} in case it's required by this type of
-	 * packaging. Can't be set via a Felix {@link org.apache.felix.scr.annotations.Reference} 
-	 * as that would create a circular dependency.
-	 * 
-	 * @param projectOperations the instance to set (required)
-	 */
-	@Deprecated // TODO delete
-	void setProjectOperations(ProjectOperations projectOperations);
 }
