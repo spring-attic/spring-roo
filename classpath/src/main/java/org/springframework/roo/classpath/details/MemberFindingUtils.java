@@ -96,7 +96,9 @@ public final class MemberFindingUtils {
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
 	 * @param parameters to locate (can be null if there are no parameters)
 	 * @return the constructor, or null if not found
+	 * @deprecated use {@link MemberHoldingTypeDetails#getDeclaredConstructor(List)} instead
 	 */
+	@Deprecated
 	public static ConstructorMetadata getDeclaredConstructor(MemberHoldingTypeDetails memberHoldingTypeDetails, List<JavaType> parameters) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		if (parameters == null) {

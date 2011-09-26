@@ -26,6 +26,15 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 
 	List<? extends MethodMetadata> getDeclaredMethods();
 
+	/**
+	 * Locates the constructor with the specified parameter types.
+	 * 
+	 * @param parameters to locate (can be null if there are no parameters)
+	 * @return the constructor, or <code>null</code> if not found
+	 * @since 1.2.0
+	 */
+	ConstructorMetadata getDeclaredConstructor(List<JavaType> parameters);
+	
 	List<? extends ConstructorMetadata> getDeclaredConstructors();
 	
 	/**
@@ -33,6 +42,7 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	 * 
 	 * @param fieldName to locate (required)
 	 * @return the field, or <code>null</code> if not found
+	 * @since 1.2.0
 	 */
 	FieldMetadata getDeclaredField(JavaSymbolName fieldName);
 

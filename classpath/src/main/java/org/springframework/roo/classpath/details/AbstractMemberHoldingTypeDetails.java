@@ -1,11 +1,16 @@
 package org.springframework.roo.classpath.details;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Convenient superclass for {@link MemberHoldingTypeDetails} implementations.
@@ -25,6 +30,16 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 	 */
 	protected AbstractMemberHoldingTypeDetails(final CustomData customData, final String declaredByMetadataId, final int modifier, final Collection<AnnotationMetadata> annotations) {
 		super(customData, declaredByMetadataId, modifier, annotations);
+	}
+
+	public ConstructorMetadata getDeclaredConstructor(final List<JavaType> parameters) {
+		final Collection<JavaType> parameterList = CollectionUtils.populate(new ArrayList<JavaType>(), parameters);
+		for (final ConstructorMetadata constructor : getDeclaredConstructors()) {
+			if (parameterList.equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()))) {
+				return constructor;
+			}
+		}
+		return null;
 	}
 	
 	/**
