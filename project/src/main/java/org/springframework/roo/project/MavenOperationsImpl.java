@@ -12,11 +12,13 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.ActiveProcessManager;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.packaging.PackagingType;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link MavenOperations}.
@@ -33,6 +35,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	private static final Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);
 	
 	// Fields
+	@Reference private FileManager fileManager;
 	@Reference private ProcessManager processManager;
 
 	public boolean isCreateProjectAvailable() {
@@ -138,5 +141,28 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 				ActiveProcessManager.clearActiveProcessManager();
 			}
 		}
+	}
+
+	public boolean isCreateModuleAvailable() {
+		// TODO Waiting on JTT's work for ROO-120 to find out if the currently focussed module is POM-packaged
+		return false;
+	}
+
+	public void createModule(final JavaPackage topLevelPackage, final String name, final GAV parent, final PackagingType packagingType) {
+		Assert.isTrue(isCreateModuleAvailable(), "Cannot create modules at this time");
+		final String moduleName = StringUtils.defaultIfEmpty(name, topLevelPackage.getLastElement());
+		final GAV module = new GAV(topLevelPackage.getFullyQualifiedPackageName(), moduleName, parent.getVersion());
+		final ProjectMetadata project = getProjectMetadata();
+		// TODO create or update "modules" element of parent module's POM
+		// Create the new module's directory, named by its artifactId (Maven standard practice)
+		fileManager.createDirectory(moduleName);
+		// Focus the new module so that artifacts created below go to the correct path(s)
+		focus(module);
+		packagingType.createArtifacts(topLevelPackage, name, "${java.version}", parent);
+	}
+	
+	public void focus(final GAV module) {
+		Assert.notNull(module, "Specify the module to focus on");
+		throw new UnsupportedOperationException("Module focussing not implemented yet");	// TODO by JTT for ROO-120
 	}
 }

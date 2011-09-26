@@ -22,15 +22,27 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class MavenCommands implements CommandMarker {
 	
+	// Constants
+	private static final String DEPENDENCY_ADD_COMMAND = "dependency add";
+	private static final String DEPENDENCY_REMOVE_COMMAND = "dependency remove";
+	private static final String MODULE_COMMAND = "module";
+	private static final String PERFORM_ASSEMBLY_COMMAND = "perform assembly";
+	private static final String PERFORM_CLEAN_COMMAND = "perform clean";
+	private static final String PERFORM_COMMAND_COMMAND = "perform command";
+	private static final String PERFORM_ECLIPSE_COMMAND = "perform eclipse";
+	private static final String PERFORM_PACKAGE_COMMAND = "perform package";
+	private static final String PERFORM_TESTS_COMMAND = "perform tests";
+	private static final String PROJECT_COMMAND = "project";
+	
 	// Fields
 	@Reference private MavenOperations mavenOperations;
 
-	@CliAvailabilityIndicator("project")
+	@CliAvailabilityIndicator(PROJECT_COMMAND)
 	public boolean isCreateProjectAvailable() {
 		return mavenOperations.isCreateProjectAvailable();
 	}
 
-	@CliCommand(value = "project", help = "Creates a new Maven project")
+	@CliCommand(value = PROJECT_COMMAND, help = "Creates a new Maven project")
 	public void createProject(
 		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage, 
 		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName, 
@@ -41,12 +53,27 @@ public class MavenCommands implements CommandMarker {
 		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parent, packagingType);
 	}
 
-	@CliAvailabilityIndicator({ "dependency add", "dependency remove" })
+	@CliAvailabilityIndicator(MODULE_COMMAND)
+	public boolean isCreateModuleAvailable() {
+		return mavenOperations.isCreateModuleAvailable();
+	}
+	
+	@CliCommand(value = MODULE_COMMAND, help = "Creates a new module within an existing Maven project")
+	public void createModule(
+		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage, 
+		@CliOption(key = "name", mandatory = false, help = "The name of the module (last segment of package name used as default)") String name, 
+		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parent,
+		@CliOption(key = "packaging", help = "The Maven packaging (pom, war, jar, ear, etc.)", unspecifiedDefaultValue = "jar") final PackagingType packagingType) {
+		
+		mavenOperations.createModule(topLevelPackage, name, parent, packagingType);
+	}
+	
+	@CliAvailabilityIndicator({ DEPENDENCY_ADD_COMMAND, DEPENDENCY_REMOVE_COMMAND })
 	public boolean isDependencyModificationAllowed() {
 		return mavenOperations.isProjectAvailable();
 	}
 
-	@CliCommand(value = "dependency add", help = "Adds a new dependency to the Maven project object model (POM)")
+	@CliCommand(value = DEPENDENCY_ADD_COMMAND, help = "Adds a new dependency to the Maven project object model (POM)")
 	public void addDependency(
 		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") String groupId, 
 		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
@@ -57,7 +84,7 @@ public class MavenCommands implements CommandMarker {
 		mavenOperations.addDependency(groupId, artifactId, version, scope, classifier);
 	}
 
-	@CliCommand(value = "dependency remove", help = "Removes an existing dependency from the Maven project object model (POM)")
+	@CliCommand(value = DEPENDENCY_REMOVE_COMMAND, help = "Removes an existing dependency from the Maven project object model (POM)")
 	public void removeDependency(
 		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") String groupId, 
 		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
@@ -67,40 +94,40 @@ public class MavenCommands implements CommandMarker {
 		mavenOperations.removeDependency(groupId, artifactId, version, classifier);
 	}
 
-	@CliAvailabilityIndicator({ "perform package", "perform eclipse", "perform tests", "perform clean", "perform assembly", "perform command" })
+	@CliAvailabilityIndicator({ PERFORM_PACKAGE_COMMAND, PERFORM_ECLIPSE_COMMAND, PERFORM_TESTS_COMMAND, PERFORM_CLEAN_COMMAND, PERFORM_ASSEMBLY_COMMAND, PERFORM_COMMAND_COMMAND })
 	public boolean isPerformCommandAllowed() {
 		return mavenOperations.isProjectAvailable();
 	}
 
-	@CliCommand(value = { "perform package" }, help = "Packages the application using Maven, but does not execute any tests")
+	@CliCommand(value = { PERFORM_PACKAGE_COMMAND }, help = "Packages the application using Maven, but does not execute any tests")
 	public void runPackage() throws IOException {
 		mvn("-DskipTests=true package");
 	}
 
-	@CliCommand(value = { "perform eclipse" }, help = "Sets up Eclipse configuration via Maven (only necessary if you have not installed the m2eclipse plugin in Eclipse)")
+	@CliCommand(value = { PERFORM_ECLIPSE_COMMAND }, help = "Sets up Eclipse configuration via Maven (only necessary if you have not installed the m2eclipse plugin in Eclipse)")
 	public void runEclipse() throws IOException {
 		mvn("eclipse:clean eclipse:eclipse");
 	}
 
-	@CliCommand(value = { "perform tests" }, help = "Executes the tests via Maven")
+	@CliCommand(value = { PERFORM_TESTS_COMMAND }, help = "Executes the tests via Maven")
 	public void runTest() throws IOException {
 		mvn("test");
 	}
 
-	@CliCommand(value = { "perform assembly" }, help = "Executes the assembly goal via Maven")
+	@CliCommand(value = { PERFORM_ASSEMBLY_COMMAND }, help = "Executes the assembly goal via Maven")
 	public void runAssembly() throws IOException {
 		mvn("assembly:assembly");
 	}
 
-	@CliCommand(value = { "perform clean" }, help = "Executes a full clean (including Eclipse files) via Maven")
+	@CliCommand(value = { PERFORM_CLEAN_COMMAND }, help = "Executes a full clean (including Eclipse files) via Maven")
 	public void runClean() throws IOException {
 		mvn("clean");
 	}
 
-	@CliCommand(value = { "perform command" }, help = "Executes a user-specified Maven command")
+	@CliCommand(value = { PERFORM_COMMAND_COMMAND }, help = "Executes a user-specified Maven command")
 	public void mvn(
-		@CliOption(key = "mavenCommand", mandatory = true, help = "User-specified Maven command (eg test:test)") String extra) throws IOException {
+		@CliOption(key = "mavenCommand", mandatory = true, help = "User-specified Maven command (eg test:test)") String command) throws IOException {
 		
-		mavenOperations.executeMvnCommand(extra);
+		mavenOperations.executeMvnCommand(command);
 	}
 }

@@ -91,7 +91,7 @@ public abstract class AbstractPackagingType implements PackagingType {
 	 * 
 	 * @param topLevelPackage the new project or module's top-level Java package (required)
 	 * @param nullableProjectName the project name provided by the user (can be blank)
-	 * @param javaVersion the target Java version (required)
+	 * @param javaVersion the Java version to substitute into the POM (required)
 	 * @param parentPom the Maven coordinates of the parent POM (can be <code>null</code>)
 	 */
 	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {
