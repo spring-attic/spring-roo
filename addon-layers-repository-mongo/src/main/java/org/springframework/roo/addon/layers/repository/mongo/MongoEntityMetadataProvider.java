@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.model.SpringJavaType;
@@ -67,10 +68,10 @@ public class MongoEntityMetadataProvider extends AbstractItdMetadataProvider {
 			return null;
 		}
 		
-		final JavaType domainType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);
+		// Get the governor's members
+		final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		
-		return new MongoEntityMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType);
+		return new MongoEntityMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType, governorMemberDetails);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

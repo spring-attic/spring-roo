@@ -3,16 +3,25 @@ package org.springframework.roo.addon.layers.repository.mongo;
 import static org.springframework.roo.model.JpaJavaType.ENTITY;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -33,6 +42,9 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private static final String PROVIDES_TYPE_STRING = MongoEntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	
+	// Fields
+	private final MemberDetails entityMemberDetails;
+	
 	/**
 	 * Constructor
 	 *
@@ -40,24 +52,38 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
 	 * @param idType the type of the entity's identifier field (required)
+	 * @param governorMemberDetails the member details of the entity
 	 */
-	public MongoEntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType idType) {
+	public MongoEntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType idType, MemberDetails entityMemberDetails) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(idType, "Id type required");
+		Assert.notNull(entityMemberDetails, "Entity MemberDetails required");
 		
-		builder.addAnnotation(new AnnotationMetadataBuilder(ENTITY));
-		FieldMetadata idField = getIdField(idType);
+		this.entityMemberDetails = entityMemberDetails;
+		
+		builder.addAnnotation(getEntityAnnotation());
+		
+		FieldMetadata idField = getIdentifierField(idType);
 		if (idField != null) {
 			builder.addField(idField);
-			builder.addMethod(getAccessorMethod(idField.getFieldName(), idField.getFieldType()));
-			builder.addMethod(getMutatorMethod(idField.getFieldName(), idField.getFieldType()));
+			builder.addMethod(getIdentifierAccessor(idField));
+			builder.addMethod(getIdentifierMutator(idField));
 		}
 		
 		// Build the ITD
 		itdTypeDetails = builder.build();
 	}
 	
-	private FieldMetadata getIdField(JavaType idType) {
+	private AnnotationMetadata getEntityAnnotation() {
+		AnnotationMetadata entityAnnotation = getTypeAnnotation(ENTITY);
+		if (entityAnnotation == null) {
+			return null;
+		}
+
+		return entityAnnotation;
+	}
+	
+	private FieldMetadata getIdentifierField(JavaType idType) {
 		// Try to locate an existing field with SPRING_DATA_ID
 		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, SpringJavaType.DATA_ID);
 		if (!idFields.isEmpty()) {
@@ -69,6 +95,60 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return fieldBuilder.build();
 	}
 
+	private MethodMetadata getIdentifierAccessor(FieldMetadata idField) {
+		JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(idField);
+
+		// See if the user provided the field
+		if (!getId().equals(idField.getDeclaredByMetadataId())) {
+			// Locate an existing accessor
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredAccessorName, new ArrayList<JavaType>());
+			if (method != null) {
+				if (Modifier.isPublic(method.getModifier())) {
+					// Method exists and is public so return it
+					return method;
+				}
+				
+				// Method is not public so make the required accessor name unique 
+				requiredAccessorName = new JavaSymbolName(requiredAccessorName.getSymbolName() + "_");
+			}
+		}
+
+		// We declared the field in this ITD, so produce a public accessor for it
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return this." + idField.getFieldName().getSymbolName() + ";");
+
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, idField.getFieldType(), bodyBuilder).build();
+	}
+	
+	private MethodMetadata getIdentifierMutator(FieldMetadata idField) {
+		JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(idField);
+		
+		final List<JavaType> parameterTypes = Arrays.asList(idField.getFieldType());
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"));
+		
+		// See if the user provided the field
+		if (!getId().equals(idField.getDeclaredByMetadataId())) {
+			// Locate an existing mutator
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredMutatorName, parameterTypes);
+			if (method != null) {
+				if (Modifier.isPublic(method.getModifier())) {
+					// Method exists and is public so return it
+					return method;
+				}
+				
+				// Method is not public so make the required mutator name unique 
+				requiredMutatorName = new JavaSymbolName(requiredMutatorName.getSymbolName() + "_");
+			}
+		}
+		
+		// We declared the field in this ITD, so produce a public mutator for it
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("this." + idField.getFieldName().getSymbolName() + " = id;");
+		
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredMutatorName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		return methodBuilder.build();
+	}
+	
 	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
