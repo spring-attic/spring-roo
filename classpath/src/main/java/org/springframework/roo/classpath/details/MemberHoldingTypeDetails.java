@@ -60,7 +60,7 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	List<JavaType> getImplementsTypes();
 	
 	/**
-	 * Generates a unique name for a governor field, starting from the given
+	 * Generates a unique name for a field, starting from the given
 	 * proposed name and adding underscores until it's unique.
 	 * 
 	 * @param proposedName the proposed field name (required)

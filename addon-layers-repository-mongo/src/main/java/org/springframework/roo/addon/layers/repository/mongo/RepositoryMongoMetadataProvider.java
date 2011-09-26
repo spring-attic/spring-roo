@@ -9,7 +9,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
@@ -50,9 +49,8 @@ public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final RepositoryMongoAnnotationValues annotationValues = new RepositoryMongoAnnotationValues(governorPhysicalTypeMetadata);
-		final ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		final JavaType domainType = annotationValues.getDomainType();
-		if (!annotationValues.isAnnotationFound() || coitd == null || domainType == null) {
+		if (!annotationValues.isAnnotationFound() || domainType == null) {
 			return null;
 		}
 		
@@ -60,7 +58,9 @@ public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider
 		if (idType == null) {
 			return null;
 		}
+		
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);
+		
 		return new RepositoryMongoMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType, annotationValues);
 	}
 	

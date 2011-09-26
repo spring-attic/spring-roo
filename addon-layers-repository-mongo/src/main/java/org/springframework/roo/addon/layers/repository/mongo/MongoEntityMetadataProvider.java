@@ -18,7 +18,6 @@ import org.springframework.roo.classpath.customdata.taggers.AnnotatedTypeMatcher
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.customdata.taggers.FieldMatcher;
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -63,11 +62,14 @@ public class MongoEntityMetadataProvider extends AbstractItdMetadataProvider {
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final MongoEntityAnnotationValues annotationValues = new MongoEntityAnnotationValues(governorPhysicalTypeMetadata);
-		final ClassOrInterfaceTypeDetails coitd = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		final JavaType idType = annotationValues.getIdentifierType();
-		if (!annotationValues.isAnnotationFound() || coitd == null || idType == null) {
+		if (!annotationValues.isAnnotationFound() || idType == null) {
 			return null;
 		}
+		
+		final JavaType domainType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);
+		
 		return new MongoEntityMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType);
 	}
 	

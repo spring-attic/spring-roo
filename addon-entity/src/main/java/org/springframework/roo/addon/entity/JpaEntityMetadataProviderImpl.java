@@ -58,6 +58,7 @@ import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
@@ -226,7 +227,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	private Identifier getIdentifier(final String metadataId) {
 		final JavaType entity = getType(metadataId);
 		final List<Identifier> identifiers = getIdentifiersForType(entity);
-		if (identifiers == null || identifiers.isEmpty()) {
+		if (CollectionUtils.isEmpty(identifiers)) {
 			return null;
 		}
 		// We have potential identifier information from an IdentifierService.

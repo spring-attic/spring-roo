@@ -154,11 +154,11 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @param fieldName the field name
 	 * @param fieldType the field type
 	 * @param fieldInitializer the string to initialize the field with
-	 * @return a governor field if it exists, otherwise a new field with the given field name and type
+	 * @return null if the field exists on the governor, otherwise a new field with the given field name and type
 	 */
 	protected FieldMetadata getField(final int modifier, final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
 		final FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
-		if (field != null) return field;
+		if (field != null) return null;
 		
 		addToImports(Arrays.asList(fieldType));
 		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), modifier, fieldName, fieldType, fieldInitializer);
@@ -166,7 +166,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 
 	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType) {
-		return getAccessorMethod(fieldName, fieldType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + fieldName + ";"));
+		return getAccessorMethod(fieldName, fieldType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + fieldName.getSymbolName() + ";"));
 	}
 	
 	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
@@ -174,7 +174,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 	
 	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType) {
-		return getMutatorMethod(fieldName, parameterType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("this." + fieldName + " = " + fieldName + ";"));
+		return getMutatorMethod(fieldName, parameterType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("this." + fieldName.getSymbolName() + " = " + fieldName.getSymbolName() + ";"));
 	}
 
 	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType, final InvocableMemberBodyBuilder bodyBuilder) {
@@ -189,11 +189,11 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @param parameterTypes a list of parameter types
 	 * @param parameterNames a list of parameter names
 	 * @param bodyBuilder the method body
-	 * @return a governor method if it exists, otherwise a new method is created and returned
+	 * @return null if the method exists on the governor, otherwise a new method
 	 */
 	protected MethodMetadata getMethod(final int modifier, final JavaSymbolName methodName, final JavaType returnType, final List<JavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final InvocableMemberBodyBuilder bodyBuilder) {
 		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
-		if (method != null) return method;
+		if (method != null) return null;
 		
 		addToImports(parameterTypes);
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
@@ -210,7 +210,20 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 			}
 		}
 	}
-
+	
+	/**
+	 * Ensures that the governor extends the given type, i.e. introduces that
+	 * type as a supertype iff it's not already one
+	 * 
+	 * @param javaType the type to extend (required)
+	 * @since 1.2.0
+	 */
+	protected final void ensureGovernorExtends(final JavaType javaType) {
+		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(javaType)) {
+			builder.addExtendsTypes(javaType);
+		}
+	}
+	
 	@Override
 	public int hashCode() {
 		return builder.build().hashCode();
@@ -224,18 +237,5 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		tsc.append("governor", governorPhysicalTypeMetadata.getId());
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
-	}
-	
-	/**
-	 * Ensures that the governor extends the given type, i.e. introduces that
-	 * type as a supertype iff it's not already one
-	 * 
-	 * @param javaType the type to extend (required)
-	 * @since 1.2.0
-	 */
-	protected final void ensureGovernorExtends(final JavaType javaType) {
-		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().extendsType(javaType)) {
-			builder.addExtendsTypes(javaType);
-		}
 	}
 }
