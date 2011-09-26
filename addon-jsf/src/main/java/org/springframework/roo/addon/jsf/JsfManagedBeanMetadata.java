@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.jsf;
 
+import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.addon.jsf.JsfJavaType.DATE_TIME_CONVERTER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.DISPLAY_CREATE_DIALOG;
@@ -141,15 +142,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addAnnotation(getScopeAnnotation());
 
 		// Add fields
-		builder.addField(getField(NAME, STRING, "\"" + plural + "\""));
+		builder.addField(getField(PRIVATE, NAME, STRING, "\"" + plural + "\""));
 		builder.addField(getField(getEntityName(), entity));
 		builder.addField(getField(allEntitiesFieldName, entityListType));
-		builder.addField(getField(DATA_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
-		builder.addField(getField(COLUMNS, getListType(STRING), null));
+		builder.addField(getField(PRIVATE, DATA_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
+		builder.addField(getField(COLUMNS, getListType(STRING)));
 		builder.addField(getPanelGridField(Action.CREATE));
 		builder.addField(getPanelGridField(Action.EDIT));
 		builder.addField(getPanelGridField(Action.VIEW));
-		builder.addField(getField(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
+		builder.addField(getField(PRIVATE, CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
 		
 		for (final FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
 			builder.addField(getUploadedFileField(rooUploadedFileField));
@@ -224,13 +225,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private FieldMetadata getPanelGridField(final Action panelType) {
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(HTML_PANEL_GRID);
-		return getField(new JavaSymbolName(StringUtils.toLowerCase(panelType.name()) + "PanelGrid"), HTML_PANEL_GRID, null);
+		return getField(new JavaSymbolName(StringUtils.toLowerCase(panelType.name()) + "PanelGrid"), HTML_PANEL_GRID);
 	}
 	
 	private FieldMetadata getUploadedFileField(final FieldMetadata rooUploadedFileField) {
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(PRIMEFACES_UPLOADED_FILE);
-		return getField(rooUploadedFileField.getFieldName(), PRIMEFACES_UPLOADED_FILE, null);
+		return getField(rooUploadedFileField.getFieldName(), PRIMEFACES_UPLOADED_FILE);
 	}
 
 	private MethodMetadata getInitMethod(final MemberTypeAdditions findAllAdditions) {
@@ -727,16 +728,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private MethodMetadata getDisplayListMethod() {
-		final JavaSymbolName methodName = new JavaSymbolName(DISPLAY_LIST);
-		final MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
-
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
-		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "\";");
-		
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
-		return methodBuilder.build();
+		return getMethod(PUBLIC, new JavaSymbolName(DISPLAY_LIST), JavaType.STRING, null, null, InvocableMemberBodyBuilder.getInstance().appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;").appendFormalLine("return \"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "\";"));
 	}
 
 	private MethodMetadata getPersistMethod(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod, final MethodMetadata identifierAccessor) {

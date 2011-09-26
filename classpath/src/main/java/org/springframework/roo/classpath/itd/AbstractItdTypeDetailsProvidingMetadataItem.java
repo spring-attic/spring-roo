@@ -145,7 +145,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 	
 	protected FieldMetadata getField(final JavaSymbolName fieldName, final JavaType fieldType) {
-		return getField(fieldName, fieldType, null);
+		return getField(PRIVATE, fieldName, fieldType, null);
 	}
 
 	/**
@@ -156,12 +156,12 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @param fieldInitializer the string to initialize the field with
 	 * @return a governor field if it exists, otherwise a new field with the given field name and type
 	 */
-	protected FieldMetadata getField(final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
+	protected FieldMetadata getField(final int modifier, final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
 		final FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
 		if (field != null) return field;
 		
 		addToImports(Arrays.asList(fieldType));
-		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), PRIVATE, fieldName, fieldType, fieldInitializer);
+		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), modifier, fieldName, fieldType, fieldInitializer);
 		return fieldBuilder.build();
 	}
 
@@ -170,7 +170,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 	
 	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
-		return getMethod(BeanInfoUtils.getAccessorMethodName(fieldName, fieldType), fieldType, null, null, bodyBuilder);
+		return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(fieldName, fieldType), fieldType, null, null, bodyBuilder);
 	}
 	
 	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType) {
@@ -178,7 +178,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 
 	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType, final InvocableMemberBodyBuilder bodyBuilder) {
-		return getMethod(BeanInfoUtils.getMutatorMethodName(fieldName), JavaType.VOID_PRIMITIVE, Arrays.asList(parameterType), Arrays.asList(fieldName), bodyBuilder);
+		return getMethod(PUBLIC, BeanInfoUtils.getMutatorMethodName(fieldName), JavaType.VOID_PRIMITIVE, Arrays.asList(parameterType), Arrays.asList(fieldName), bodyBuilder);
 	}
 
 	/**
@@ -191,12 +191,12 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @param bodyBuilder the method body
 	 * @return a governor method if it exists, otherwise a new method is created and returned
 	 */
-	protected MethodMetadata getMethod(final JavaSymbolName methodName, final JavaType returnType, final List<JavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final InvocableMemberBodyBuilder bodyBuilder) {
+	protected MethodMetadata getMethod(final int modifier, final JavaSymbolName methodName, final JavaType returnType, final List<JavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final InvocableMemberBodyBuilder bodyBuilder) {
 		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) return method;
 		
 		addToImports(parameterTypes);
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 

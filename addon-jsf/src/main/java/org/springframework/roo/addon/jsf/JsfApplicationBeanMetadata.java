@@ -85,7 +85,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		builder.addMethod(getAccessorMethod(MENU_MODEL, PRIMEFACES_MENU_MODEL));
 
 		// Add application name accessor method
-		builder.addMethod(getMethod(new JavaSymbolName("getAppName"), JavaType.STRING, null, null, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return \"" + StringUtils.capitalize(projectName) + "\";")));
+		builder.addMethod(getMethod(Modifier.PUBLIC, new JavaSymbolName("getAppName"), JavaType.STRING, null, null, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return \"" + StringUtils.capitalize(projectName) + "\";")));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();

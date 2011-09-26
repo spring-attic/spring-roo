@@ -4,9 +4,7 @@ import static org.springframework.roo.model.SpringJavaType.CONFIGURABLE;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
@@ -34,9 +32,7 @@ public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return;
 		}
 
-		if (isConfigurableAnnotationIntroduced()) {
-			builder.addAnnotation(getConfigurableAnnotation());
-		}
+		builder.addAnnotation(getConfigurableAnnotation());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -48,24 +44,8 @@ public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * 
 	 * @return the annotation is already exists or will be created, or null if it will not be created (required)
 	 */
-	public AnnotationMetadata getConfigurableAnnotation() {
-		if (isConfigurableAnnotationIntroduced()) {
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(CONFIGURABLE);
-			return annotationBuilder.build();
-		}
-
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, CONFIGURABLE);
-	}
-
-	/**
-	 * Indicates whether the @org.springframework.beans.factory.annotation.Configurable annotation will
-	 * be introduced via this ITD.
-	 * 
-	 * @return true if it will be introduced, false otherwise
-	 */
-	public boolean isConfigurableAnnotationIntroduced() {
-		AnnotationMetadata result = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, CONFIGURABLE);
-		return result == null;
+	private AnnotationMetadata getConfigurableAnnotation() {
+		return getTypeAnnotation(CONFIGURABLE);
 	}
 
 	public String toString() {
@@ -75,7 +55,7 @@ public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		tsc.append("aspectName", aspectName);
 		tsc.append("destinationType", destination);
 		tsc.append("governor", governorPhysicalTypeMetadata.getId());
-		tsc.append("configurableIntroduced", isConfigurableAnnotationIntroduced());
+		tsc.append("configurableIntroduced", getTypeAnnotation(CONFIGURABLE) != null);
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
 	}

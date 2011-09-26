@@ -51,7 +51,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		
 		// Generate "implements Serializable"
-		if (!isJavaSerializableInterfaceIntroduced()) {
+		if (!isSerializableAnnotationIntroduced()) {
 			builder.addImplementsType(SERIALIZABLE);
 		}
 
@@ -63,13 +63,6 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	/**
-	 * @return true if the ITD will be introducing a java.io.Serializable interface (false means the class already was Serializable)
-	 */
-	private boolean isJavaSerializableInterfaceIntroduced() {
-		return isImplementing(governorTypeDetails, SERIALIZABLE);
-	}
-
-	/**
 	 * Obtains the "serialVersionUID" field for this type, if available.
 	 * 
 	 * <p>
@@ -78,7 +71,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return the "serialVersionUID" field declared on this type or that will be introduced (or null if undeclared and not introduced)
 	 */
 	private FieldMetadata getSerialVersionUIDField() {
-		if (isJavaSerializableInterfaceIntroduced()) {
+		if (isSerializableAnnotationIntroduced()) {
 			return null;
 		}
 		
@@ -99,6 +92,10 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, fieldName, JavaType.LONG_PRIMITIVE, "1L");
 		fieldBuilder.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);
 		return fieldBuilder.build();
+	}
+
+	private boolean isSerializableAnnotationIntroduced() {
+		return isImplementing(governorTypeDetails, SERIALIZABLE);
 	}
 
 	public String toString() {
