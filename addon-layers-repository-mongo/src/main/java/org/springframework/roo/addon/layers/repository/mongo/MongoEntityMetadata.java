@@ -17,7 +17,6 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -61,7 +60,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		this.entityMemberDetails = entityMemberDetails;
 		
-		builder.addAnnotation(getEntityAnnotation());
+		builder.addAnnotation(getTypeAnnotation(ENTITY));
 		
 		FieldMetadata idField = getIdentifierField(idType);
 		if (idField != null) {
@@ -73,16 +72,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		// Build the ITD
 		itdTypeDetails = builder.build();
 	}
-	
-	private AnnotationMetadata getEntityAnnotation() {
-		AnnotationMetadata entityAnnotation = getTypeAnnotation(ENTITY);
-		if (entityAnnotation == null) {
-			return null;
-		}
 
-		return entityAnnotation;
-	}
-	
 	private FieldMetadata getIdentifierField(JavaType idType) {
 		// Try to locate an existing field with SPRING_DATA_ID
 		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, SpringJavaType.DATA_ID);
