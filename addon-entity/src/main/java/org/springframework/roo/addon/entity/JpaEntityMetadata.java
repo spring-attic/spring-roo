@@ -171,12 +171,12 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 
 		// Locate the identifier field, and compute the name of the accessor that will be produced
 		final FieldMetadata id = getIdentifierField();
-		String requiredAccessorName = "get" + StringUtils.capitalize(id.getFieldName().getSymbolName());
+		JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(id);
 
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing accessor
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
+			final MethodMetadata method = MemberFindingUtils.getMethod(entityDetails, requiredAccessorName, new ArrayList<JavaType>());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -184,7 +184,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 				}
 				
 				// Method is not public so make the required accessor name unique 
-				requiredAccessorName += "_";
+				requiredAccessorName = new JavaSymbolName(requiredAccessorName.getSymbolName() + "_");
 			}
 		}
 
@@ -192,7 +192,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, requiredAccessorName, id.getFieldType(), bodyBuilder).build();
 	}
 	
 	private String getIdentifierColumn() {

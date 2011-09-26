@@ -20,6 +20,7 @@ import java.util.List;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -258,30 +259,17 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		// Compute the names of the accessors that will be produced
 		for (FieldMetadata field : fields) {
-			String requiredAccessorName = getRequiredAccessorName(field);
-			MethodMetadata accessor = getGovernorMethod(new JavaSymbolName(requiredAccessorName));
+			JavaSymbolName requiredAccessorName = BeanInfoUtils.getAccessorMethodName(field);
+			MethodMetadata accessor = getGovernorMethod(requiredAccessorName);
 			if (accessor != null) {
-				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
+				Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName.getSymbolName() + "()' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			} else {
-				accessor = getAccessor(field);
+				accessor = getAccessorMethod(field.getFieldName(), field.getFieldType());
 			}
 			accessors.add(accessor);
 		}
 
 		return accessors;
-	}
-
-	private String getRequiredAccessorName(FieldMetadata field) {
-		return "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
-	}
-
-	private MethodMetadata getAccessor(FieldMetadata field) {
-		String requiredAccessorName = getRequiredAccessorName(field);
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), field.getFieldType(), bodyBuilder);
-		return methodBuilder.build();
 	}
 
 	/**
@@ -298,11 +286,11 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		// Compute the names of the mutators that will be produced
 		for (FieldMetadata field : fields) {
-			String requiredMutatorName = getRequiredMutatorName(field);
+			JavaSymbolName requiredMutatorName = BeanInfoUtils.getMutatorMethodName(field);
 			final JavaType parameterType = field.getFieldType();
-			MethodMetadata mutator = getGovernorMethod(new JavaSymbolName(requiredMutatorName), parameterType);
+			MethodMetadata mutator = getGovernorMethod(requiredMutatorName, parameterType);
 			if (mutator == null) {
-				mutator = getMutator(field);
+				mutator = getMutatorMethod(field.getFieldName(), field.getFieldType());
 			} else {
 				Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + destination.getFullyQualifiedTypeName() + "'");
 			}
@@ -311,24 +299,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		return mutators;
 	}
-
-	private String getRequiredMutatorName(FieldMetadata field) {
-		return "set" + StringUtils.capitalize(field.getFieldName().getSymbolName());
-	}
-
-	private MethodMetadata getMutator(FieldMetadata field) {
-		String requiredMutatorName = getRequiredMutatorName(field);
-
-		List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
-		List<JavaSymbolName> parameterNames = Arrays.asList(field.getFieldName());
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
-	}
-
+	
 	/**
 	 * Locates the parameterised constructor consisting of the id fields for this class.
 	 *  

@@ -170,7 +170,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	}
 	
 	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
-		return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(fieldName, fieldType), fieldType, null, null, bodyBuilder);
+		return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(fieldName, fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)), fieldType, null, null, bodyBuilder);
 	}
 	
 	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType) {

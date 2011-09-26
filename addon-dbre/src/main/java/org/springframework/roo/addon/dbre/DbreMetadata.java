@@ -44,9 +44,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -55,7 +52,6 @@ import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -67,7 +63,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooDbManaged}.
@@ -721,14 +716,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		builder.addField(field);
 
 		// Check for an existing accessor in the governor 
-		if (!hasAccessor(field)) {
-			builder.addMethod(getAccessor(field));
-		}
+		builder.addMethod(getAccessorMethod(field.getFieldName(), field.getFieldType()));
 
 		// Check for an existing mutator in the governor 
-		if (!hasMutator(field)) {
-			builder.addMethod(getMutator(field));
-		}
+		builder.addMethod(getMutatorMethod(field.getFieldName(), field.getFieldType()));
 	}
 
 	private boolean hasField(FieldMetadata field) {
@@ -773,54 +764,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			}
 		}
 		return false;
-	}
-
-	private boolean hasAccessor(FieldMetadata field) {
-		// Check governor for accessor method
-		return getGovernorMethod(getRequiredAccessorName(field)) != null;
-	}
-
-	private MethodMetadata getAccessor(FieldMetadata field) {
-		Assert.notNull(field, "Field required");
-		
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, getRequiredAccessorName(field), field.getFieldType(), bodyBuilder);
-		return methodBuilder.build();
-	}
-
-	private JavaSymbolName getRequiredAccessorName(FieldMetadata field) {
-		String methodName;
-		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-			methodName = "is" + StringUtils.capitalize(field.getFieldName().getSymbolName());
-		} else {
-			methodName = "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
-		}
-		return new JavaSymbolName(methodName);
-	}
-
-	private boolean hasMutator(FieldMetadata field) {
-		// Check governor for mutator method
-		return getGovernorMethod(getRequiredMutatorName(field)) != null;
-	}
-
-	private MethodMetadata getMutator(FieldMetadata field) {
-		Assert.notNull(field, "Field required");
-
-		final JavaSymbolName fieldName = field.getFieldName();
-		List<JavaType> parameterTypes = Arrays.asList(field.getFieldType());
-		List<JavaSymbolName> parameterNames = Arrays.asList(fieldName);
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("this." + fieldName.getSymbolName() + " = " + fieldName.getSymbolName() + ";");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, getRequiredMutatorName(field), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
-		return methodBuilder.build();
-	}
-
-	private JavaSymbolName getRequiredMutatorName(FieldMetadata field) {
-		return new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
 	}
 
 	private String getInflectorPlural(String term) {

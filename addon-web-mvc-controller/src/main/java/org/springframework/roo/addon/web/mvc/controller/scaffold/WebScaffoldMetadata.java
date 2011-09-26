@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.scaffold;
 
 import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAYS;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.COLLECTION;
@@ -413,11 +414,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final List<JavaType> parameterTypes = Arrays.asList(MODEL);
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("uiModel"));
 
-		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
+		final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "form"));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("GET"))));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes);
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -431,8 +433,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				continue;
 			}
 			if (!listAdded) {
-				String listShort = new JavaType(LIST.getFullyQualifiedTypeName()).getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-				String arrayListShort = ARRAY_LIST.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+				JavaType stringArrayType = new JavaType(STRING.getFullyQualifiedTypeName(), 1, DataType.TYPE, null, null);
+				
+				JavaType listType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(stringArrayType));
+				String listShort = listType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+				
+				JavaType arrayListType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(stringArrayType));
+				String arrayListShort = arrayListType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+				
 				bodyBuilder.appendFormalLine(listShort + " dependencies = new " + arrayListShort + "();");
 				listAdded = true;
 			}

@@ -148,7 +148,6 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	private ClassOrInterfaceTypeDetails getGovernor(String metadataIdentificationString) {
 		JavaType governorTypeName = GwtRequestMetadata.getJavaType(metadataIdentificationString);
 		Path governorTypePath = GwtRequestMetadata.getPath(metadataIdentificationString);
-
 		String physicalTypeId = PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath);
 		return typeLocationService.getTypeForIdentifier(physicalTypeId);
 	}

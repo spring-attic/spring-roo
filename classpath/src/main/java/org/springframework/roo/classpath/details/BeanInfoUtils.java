@@ -16,7 +16,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.1.1
  */
-public abstract class BeanInfoUtils {
+public final class BeanInfoUtils {
 
 	/**
 	 * Obtains the property name for the specified JavaBean accessor or mutator method. This is determined by discarding the first 2 or 3 letters of the method name (depending whether it is a "get",
@@ -113,6 +113,7 @@ public abstract class BeanInfoUtils {
 	 * @return true if the entity is likely not a test class, otherwise false
 	 */
 	public static boolean isEntityReasonablyNamed(JavaType entity) {
+		Assert.notNull(entity, "Entity required");
 		return !entity.getSimpleTypeName().startsWith("Test") && !entity.getSimpleTypeName().endsWith("TestCase") && !entity.getSimpleTypeName().endsWith("Test");
 	}
 	
@@ -123,7 +124,8 @@ public abstract class BeanInfoUtils {
 	 * @return the accessor method name
 	 */
 	public static JavaSymbolName getAccessorMethodName(FieldMetadata field) {
-		return getAccessorMethodName(field.getFieldName(), field.getFieldType());
+		Assert.notNull(field, "Field metadata required");
+		return getAccessorMethodName(field.getFieldName(), field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE));
 	}
 	
 	/** 
@@ -133,8 +135,9 @@ public abstract class BeanInfoUtils {
 	 * @param fieldType the field type
 	 * @return the accessor method name
 	 */
-	public static JavaSymbolName getAccessorMethodName(final JavaSymbolName fieldName, JavaType fieldType) {
-		return fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) ? new JavaSymbolName("is" + StringUtils.capitalize(fieldName.getSymbolName())) : new JavaSymbolName("get" + StringUtils.capitalize(fieldName.getSymbolName()));
+	public static JavaSymbolName getAccessorMethodName(final JavaSymbolName fieldName, boolean isBooleanPrimitive) {
+		Assert.notNull(fieldName, "Field name required");
+		return isBooleanPrimitive ? new JavaSymbolName("is" + StringUtils.capitalize(fieldName.getSymbolName())) : new JavaSymbolName("get" + StringUtils.capitalize(fieldName.getSymbolName()));
 	}
 	
 	/** 
@@ -144,6 +147,7 @@ public abstract class BeanInfoUtils {
 	 * @return the mutator method name
 	 */
 	public static JavaSymbolName getMutatorMethodName(FieldMetadata field) {
+		Assert.notNull(field, "Field metadata required");
 		return getMutatorMethodName(field.getFieldName());
 	}
 	
@@ -154,6 +158,14 @@ public abstract class BeanInfoUtils {
 	 * @return the mutator method name
 	 */
 	public static JavaSymbolName getMutatorMethodName(JavaSymbolName fieldName) {
+		Assert.notNull(fieldName, "Field name required");
 		return new JavaSymbolName("set" + StringUtils.capitalize(fieldName.getSymbolName()));
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 * 
+	 * @since 1.2.0
+	 */
+	private BeanInfoUtils() {}
 }
