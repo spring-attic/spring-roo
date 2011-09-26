@@ -26,6 +26,22 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 	protected AbstractMemberHoldingTypeDetails(final CustomData customData, final String declaredByMetadataId, final int modifier, final Collection<AnnotationMetadata> annotations) {
 		super(customData, declaredByMetadataId, modifier, annotations);
 	}
+	
+	/**
+	 * Locates the specified field.
+	 * 
+	 * @param fieldName to locate (required)
+	 * @return the field, or <code>null</code> if not found
+	 */
+	public FieldMetadata getDeclaredField(final JavaSymbolName fieldName) {
+		Assert.notNull(fieldName, "Field name required");
+		for (FieldMetadata field : getDeclaredFields()) {
+			if (field.getFieldName().equals(fieldName)) {
+				return field;
+			}
+		}
+		return null;
+	}
 
 	public JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend) {
 		Assert.hasText(proposedName, "Proposed field name is required");

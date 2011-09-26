@@ -82,7 +82,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 	
 		// See if the type itself declared the field
-		FieldMetadata result = MemberFindingUtils.getDeclaredField(governorTypeDetails, fieldName);
+		FieldMetadata result = governorTypeDetails.getDeclaredField(fieldName);
 		if (result != null) {
 			FieldMetadataBuilder field = new FieldMetadataBuilder(result);
 			field.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);

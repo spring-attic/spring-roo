@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -110,7 +109,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		JavaSymbolName fieldName = new JavaSymbolName("solrServer");
 		List<AnnotationMetadataBuilder> autowired = new ArrayList<AnnotationMetadataBuilder>();
 		autowired.add(new AnnotationMetadataBuilder(AUTOWIRED));
-		FieldMetadata fieldMd = MemberFindingUtils.getDeclaredField(governorTypeDetails, fieldName);
+		FieldMetadata fieldMd = governorTypeDetails.getDeclaredField(fieldName);
 		if (fieldMd != null) return fieldMd;
 		return new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, autowired, fieldName, new JavaType("org.apache.solr.client.solrj.SolrServer")).build();
 	}

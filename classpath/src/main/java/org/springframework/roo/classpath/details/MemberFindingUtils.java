@@ -24,16 +24,18 @@ import org.springframework.roo.support.util.Assert;
 public final class MemberFindingUtils {
 
 	/**
-	 * Locates the specified field.
+	 * Locates the specified field of the given {@link MemberHoldingTypeDetails}.
 	 * 
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
 	 * @param fieldName to locate (required)
 	 * @return the field, or null if not found
+	 * @deprecated call {@link MemberHoldingTypeDetails#getDeclaredField(JavaSymbolName)} instead
 	 */
-	public static FieldMetadata getDeclaredField(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName fieldName) {
+	@Deprecated
+	public static FieldMetadata getDeclaredField(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName fieldName) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(fieldName, "Field name required");
-		for (FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
+		for (final FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
 			if (field.getFieldName().equals(fieldName)) {
 				return field;
 			}

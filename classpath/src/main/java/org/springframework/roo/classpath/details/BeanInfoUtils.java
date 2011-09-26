@@ -50,13 +50,13 @@ public final class BeanInfoUtils {
 	public static FieldMetadata getFieldForPropertyName(MemberDetails memberDetails, JavaSymbolName propertyName) {
 		Assert.notNull(propertyName, "Property name required");
 		for (MemberHoldingTypeDetails holder : memberDetails.getDetails()) {
-			FieldMetadata result = MemberFindingUtils.getDeclaredField(holder, propertyName);
+			FieldMetadata result = holder.getDeclaredField(propertyName);
 			if (result != null) {
 				return result;
 			}
 			// To get here means we couldn't find the property using the exact same case;
 			// try to scan with a lowercase first character (see ROO-203)
-			result = MemberFindingUtils.getDeclaredField(holder, new JavaSymbolName(StringUtils.uncapitalize(propertyName.getSymbolName())));
+			result = holder.getDeclaredField(new JavaSymbolName(StringUtils.uncapitalize(propertyName.getSymbolName())));
 			if (result != null) {
 				return result;
 			}

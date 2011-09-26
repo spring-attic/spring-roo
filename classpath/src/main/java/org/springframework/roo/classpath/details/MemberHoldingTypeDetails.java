@@ -27,6 +27,14 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	List<? extends MethodMetadata> getDeclaredMethods();
 
 	List<? extends ConstructorMetadata> getDeclaredConstructors();
+	
+	/**
+	 * Locates the specified field.
+	 * 
+	 * @param fieldName to locate (required)
+	 * @return the field, or <code>null</code> if not found
+	 */
+	FieldMetadata getDeclaredField(JavaSymbolName fieldName);
 
 	List<? extends FieldMetadata> getDeclaredFields();
 

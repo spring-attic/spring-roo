@@ -89,8 +89,8 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 
 	@Override 
 	protected void onAddField(FieldMetadataBuilder md) {
-		Assert.isNull(MemberFindingUtils.getDeclaredField(governor, md.getFieldName()), "Field '" + md.getFieldName() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-		Assert.isNull(MemberFindingUtils.getDeclaredField(build(), md.getFieldName()), "Field '" + md.getFieldName() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + ")'");
+		Assert.isNull(governor.getDeclaredField(md.getFieldName()), "Field '" + md.getFieldName() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isNull(build().getDeclaredField(md.getFieldName()), "Field '" + md.getFieldName() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + ")'");
 	}
 
 	@Override 
