@@ -18,7 +18,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -150,7 +149,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	private void addSolrSearchableAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		if (MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, ROO_SOLR_SEARCHABLE) == null) {
+		if (classOrInterfaceTypeDetails.getTypeAnnotation(ROO_SOLR_SEARCHABLE) == null) {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);
 			classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder);

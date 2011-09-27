@@ -26,4 +26,13 @@ public interface IdentifiableAnnotatedJavaStructure extends IdentifiableJavaStru
 	 * @return annotations on this structure (never null, but may be empty)
 	 */
 	List<AnnotationMetadata> getAnnotations();
+	
+	/**
+	 * Locates an annotation on this class and its superclasses.
+	 * 
+	 * @param annotationType annotation to locate (required)
+	 * @return the annotation, or <code>null</code> if not found
+	 * @since 1.2.0
+	 */
+	AnnotationMetadata getTypeAnnotation(final JavaType annotationType);
 }

@@ -59,8 +59,16 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	List<? extends FieldMetadata> getDeclaredFields();
 
 	List<? extends InitializerMetadata> getDeclaredInitializers();
+	
+	/**
+	 * Locates an inner type with the specified name.
+	 * 
+	 * @param typeName to locate (required)
+	 * @since 1.2.0
+	 */
+	ClassOrInterfaceTypeDetails getDeclaredInnerType(JavaType typeName);
 
-	List<? extends ClassOrInterfaceTypeDetails> getDeclaredInnerTypes();
+	List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes();
 	
 	/**
 	 * Lists the classes this type extends. This may be empty. Always empty in the case of an enum.

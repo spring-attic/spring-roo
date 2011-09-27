@@ -57,6 +57,16 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
+	
+	public ClassOrInterfaceTypeDetails getDeclaredInnerType(final JavaType typeName) {
+		Assert.notNull(typeName, "Name of inner type required");
+		for (final ClassOrInterfaceTypeDetails coitd : getDeclaredInnerTypes()) {
+			if (coitd.getName().getSimpleTypeName().equals(typeName.getSimpleTypeName())) {
+				return coitd;
+			}
+		}
+		return null;
+	}
 
 	public JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend) {
 		Assert.hasText(proposedName, "Proposed field name is required");

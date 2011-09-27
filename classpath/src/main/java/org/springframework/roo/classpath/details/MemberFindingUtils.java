@@ -253,16 +253,11 @@ public final class MemberFindingUtils {
 	 * 
 	 * @param MemberDetails to search (required)
 	 * @param typeName to locate (required)
+	 * @deprecated use {@link MemberHoldingTypeDetails#getDeclaredInnerType(JavaType)} instead
 	 */
+	@Deprecated
 	public static ClassOrInterfaceTypeDetails getDeclaredInnerType(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType typeName) {
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		Assert.notNull(typeName, "Name of inner type required");
-		for (ClassOrInterfaceTypeDetails coitd : memberHoldingTypeDetails.getDeclaredInnerTypes()) {
-			if (coitd.getName().getSimpleTypeName().equals(typeName.getSimpleTypeName())) {
-				return coitd;
-			}
-		}
-		return null;
+		return memberHoldingTypeDetails.getDeclaredInnerType(typeName);
 	}
 
 	/**
@@ -271,23 +266,11 @@ public final class MemberFindingUtils {
 	 * @param memberHoldingTypeDetails to search (required)
 	 * @param annotationType annotation to locate (required)
 	 * @return the annotation, or null if not found
+	 * @deprecated use {@link IdentifiableAnnotatedJavaStructure#getTypeAnnotation(JavaType)} instead
 	 */
+	@Deprecated
 	public static AnnotationMetadata getTypeAnnotation(IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, JavaType annotationType) {
-		Assert.notNull(memberHoldingTypeDetails, "Class or interface type details required");
-		Assert.notNull(annotationType, "Annotation type required");
-		IdentifiableAnnotatedJavaStructure current = memberHoldingTypeDetails;
-		while (current != null) {
-			AnnotationMetadata result = getDeclaredTypeAnnotation(current, annotationType);
-			if (result != null) {
-				return result;
-			}
-			if (current instanceof ClassOrInterfaceTypeDetails) {
-				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
-			} else {
-				current = null;
-			}
-		}
-		return null;
+		return memberHoldingTypeDetails.getTypeAnnotation(annotationType);
 	}
 
 	/**
@@ -440,14 +423,11 @@ public final class MemberFindingUtils {
 	 * 
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return zero or more constructors (never null)
+	 * @deprecated use {@link MemberDetails#getConstructors()} instead
 	 */
-	public static List<ConstructorMetadata> getConstructors(MemberDetails memberDetails) {
-		Assert.notNull(memberDetails, "Member details required");
-		List<ConstructorMetadata> result = new ArrayList<ConstructorMetadata>();
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
-			result.addAll(memberHoldingTypeDetails.getDeclaredConstructors());
-		}
-		return result;
+	@Deprecated
+	public static List<ConstructorMetadata> getConstructors(final MemberDetails memberDetails) {
+		return memberDetails.getConstructors();
 	}
 
 	/**

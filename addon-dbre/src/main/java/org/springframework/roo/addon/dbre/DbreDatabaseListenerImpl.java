@@ -36,7 +36,6 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -227,7 +226,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		final Set<ClassOrInterfaceTypeDetails> identifierTypes = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_IDENTIFIER);
 		for (final ClassOrInterfaceTypeDetails managedIdentifierType : identifierTypes) {
-			final AnnotationMetadata identifierAnnotation = MemberFindingUtils.getTypeAnnotation(managedIdentifierType, ROO_IDENTIFIER);
+			final AnnotationMetadata identifierAnnotation = managedIdentifierType.getTypeAnnotation(ROO_IDENTIFIER);
 			final AnnotationAttributeValue<?> attrValue = identifierAnnotation.getAttribute(new JavaSymbolName("dbManaged"));
 			if (attrValue != null && (Boolean) attrValue.getValue()) {
 				managedIdentifierTypes.add(managedIdentifierType);

@@ -48,4 +48,21 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureProvider extends
 		}
 		return null;
 	}
+	
+	public AnnotationMetadata getTypeAnnotation(final JavaType annotationType) {
+		Assert.notNull(annotationType, "Annotation type required");
+		IdentifiableAnnotatedJavaStructure current = this;
+		while (current != null) {
+			final AnnotationMetadata result = current.getAnnotation(annotationType);
+			if (result != null) {
+				return result;
+			}
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails) current).getSuperclass();
+			} else {
+				current = null;
+			}
+		}
+		return null;
+	}
 }

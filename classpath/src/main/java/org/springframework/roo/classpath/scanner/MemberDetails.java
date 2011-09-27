@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.scanner;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -40,13 +41,22 @@ import org.springframework.roo.model.JavaType;
 public interface MemberDetails {
 	
 	/**
-	 * Locates the specified type-level annotation.
+	 * Locates the specified type-level annotation on any of the
+	 * {@link MemberHoldingTypeDetails} in this {@link MemberDetails}.
 	 * 
 	 * @param type the type of annotation to locate (required)
 	 * @return the annotation, or <code>null</code> if not found
 	 * @since 1.2.0
 	 */
 	AnnotationMetadata getAnnotation(JavaType type);
+	
+	/**
+	 * Searches all {@link MemberHoldingTypeDetails} and returns all constructors.
+	 * 
+	 * @return zero or more constructors (never null)
+	 * @since 1.2.0
+	 */
+	List<ConstructorMetadata> getConstructors();
 	
 	/**
 	 * Returns an immutable representation of the member holders.

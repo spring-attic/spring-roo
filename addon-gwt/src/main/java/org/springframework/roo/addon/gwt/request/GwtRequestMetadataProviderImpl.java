@@ -177,7 +177,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			annotationMetadataBuilder.removeAttribute("locator");
 			Set<ClassOrInterfaceTypeDetails> services = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
 			for (ClassOrInterfaceTypeDetails serviceLayer : services) {
-				AnnotationMetadata serviceAnnotation = MemberFindingUtils.getTypeAnnotation(serviceLayer, RooJavaType.ROO_SERVICE);
+				AnnotationMetadata serviceAnnotation = serviceLayer.getTypeAnnotation(RooJavaType.ROO_SERVICE);
 				AnnotationAttributeValue<List<ClassAttributeValue>> domainTypesAnnotation = serviceAnnotation.getAttribute("domainTypes");
 				for (ClassAttributeValue classAttributeValue : domainTypesAnnotation.getValue()) {
 					if (classAttributeValue.getValue().equals(entity.getName())) {

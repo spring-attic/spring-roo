@@ -124,7 +124,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		this.methods = MemberFindingUtils.getMethods(memberDetails);
 		this.fields = MemberFindingUtils.getFields(memberDetails);
-		this.constructors = MemberFindingUtils.getConstructors(memberDetails);
+		this.constructors = memberDetails.getConstructors();
 
 		if (javaTypeMetadataHolder.getPersistenceDetails() != null && !javaTypeMetadataHolder.getPersistenceDetails().getRooIdentifierFields().isEmpty()) {
 			this.compositePk = true;

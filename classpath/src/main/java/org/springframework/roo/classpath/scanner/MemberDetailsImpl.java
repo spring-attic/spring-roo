@@ -1,8 +1,10 @@
 package org.springframework.roo.classpath.scanner;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -23,7 +25,7 @@ public class MemberDetailsImpl implements MemberDetails {
 	private  List<MemberHoldingTypeDetails> details;
 
 	/**
-	 * Constructors a new instance.
+	 * Constructs a new instance.
 	 * 
 	 * @param details the member holders that should be stored in this instance (cannot be null or empty)
 	 */
@@ -31,19 +33,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		Assert.notEmpty(details, "Member holding details required");
 		this.details = details;
 	}
-
-	public List<MemberHoldingTypeDetails> getDetails() {
-		return Collections.unmodifiableList(details);
-	}
-
-	/**
-	 * Locates the specified type-level annotation on any of the
-	 * {@link MemberHoldingTypeDetails} in this {@link MemberDetails}.
-	 * 
-	 * @param memberDetails the {@link MemberDetails} to search (required)
-	 * @param type to locate (required)
-	 * @return the annotation, or null if not found
-	 */
+	
 	public AnnotationMetadata getAnnotation(final JavaType type) {
 		Assert.notNull(type, "Annotation type to locate required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
@@ -53,6 +43,18 @@ public class MemberDetailsImpl implements MemberDetails {
 			}
 		}
 		return null;
+	}
+	
+	public List<ConstructorMetadata> getConstructors() {
+		final List<ConstructorMetadata> result = new ArrayList<ConstructorMetadata>();
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
+			result.addAll(memberHoldingTypeDetails.getDeclaredConstructors());
+		}
+		return result;
+	}
+
+	public List<MemberHoldingTypeDetails> getDetails() {
+		return Collections.unmodifiableList(details);
 	}
 	
 	public MethodMetadata getMethod(final JavaSymbolName methodName, final List<JavaType> parameters) {

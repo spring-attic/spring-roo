@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import org.springframework.roo.addon.dbre.model.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -141,7 +140,7 @@ public abstract class DbreTypeUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <T> T getAnnotationAttribute(final MemberHoldingTypeDetails type, final JavaType annotationType, final JavaSymbolName attributeName) {
-		final AnnotationMetadata typeAnnotation = MemberFindingUtils.getTypeAnnotation(type, annotationType);
+		final AnnotationMetadata typeAnnotation = type.getTypeAnnotation(annotationType);
 		if (typeAnnotation == null) {
 			return null;
 		}
