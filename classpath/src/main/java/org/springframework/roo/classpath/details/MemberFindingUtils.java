@@ -396,11 +396,7 @@ public final class MemberFindingUtils {
 		if (memberDetails == null) {
 			return null;
 		}
-		final List<MethodMetadata> taggedMethods = memberDetails.getMethodsWithTag(tagKey);
-		if (taggedMethods.isEmpty()) {
-			return null;
-		} 
-		return taggedMethods.get(0);
+		return memberDetails.getMostConcreteMethodWithTag(tagKey);
 	}
 	
 	/**

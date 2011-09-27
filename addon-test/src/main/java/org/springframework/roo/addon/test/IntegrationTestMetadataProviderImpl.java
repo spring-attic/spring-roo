@@ -170,7 +170,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		final MethodParameter firstResultParameter = new MethodParameter(INT_PRIMITIVE, "firstResult");
 		final MethodParameter maxResultsParameter = new MethodParameter(INT_PRIMITIVE, "maxResults");
 
-		final MethodMetadata identifierAccessorMethod = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, IDENTIFIER_ACCESSOR_METHOD);
+		final MethodMetadata identifierAccessorMethod = memberDetails.getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
 		final MethodMetadata versionAccessorMethod = persistenceMemberLocator.getVersionAccessor(entity);
 		final MemberTypeAdditions countMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, COUNT_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION);
 		final MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), entity, identifierType, LAYER_POSITION, new MethodParameter(identifierType, "id"));

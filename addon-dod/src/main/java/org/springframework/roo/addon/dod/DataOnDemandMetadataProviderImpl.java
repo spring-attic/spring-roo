@@ -1,5 +1,18 @@
 package org.springframework.roo.addon.dod;
 
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_ID_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_MANY_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_ONE_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_MANY_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_ONE_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.TRANSIENT_FIELD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_FIELD;
 import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
 
 import java.lang.reflect.Modifier;
@@ -129,12 +142,12 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		entityToDodMidMap.put(annotationValues.getEntity(), metadataIdentificationString);
 		dodMidToEntityMap.put(metadataIdentificationString, annotationValues.getEntity());
 		
-		MemberDetails memberDetails = getMemberDetails(entity);
+		final MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
 		}
 		
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
+		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
@@ -150,11 +163,11 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Get the additions to make for each required method
 		final MethodParameter fromParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "from");
 		final MethodParameter toParameter = new MethodParameter(JavaType.INT_PRIMITIVE, "to");
-		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name(), entity, identifierType, LayerType.HIGHEST.getPosition(), fromParameter, toParameter);
-		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PersistenceCustomDataKeys.FIND_METHOD.name(), entity, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
+		final MemberTypeAdditions findEntriesMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_ENTRIES_METHOD.name(), entity, identifierType, LayerType.HIGHEST.getPosition(), fromParameter, toParameter);
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, FIND_METHOD.name(), entity, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
 		final MethodParameter entityParameter = new MethodParameter(entity, "obj");
 		MemberTypeAdditions flushMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, FLUSH_METHOD, entity, identifierType, LayerType.HIGHEST.getPosition(), entityParameter);
-		MethodMetadata identifierAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(memberDetails, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		MethodMetadata identifierAccessor = memberDetails.getMostConcreteMethodWithTag(IDENTIFIER_ACCESSOR_METHOD);
 		MemberTypeAdditions persistMethodAdditions = layerService.getMemberTypeAdditions(metadataIdentificationString, PERSIST_METHOD, entity, identifierType, LayerType.HIGHEST.getPosition(), entityParameter);
 		
 		if (findEntriesMethod == null || findMethodAdditions == null || identifierAccessor == null || persistMethodAdditions == null) {
@@ -200,17 +213,17 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 			Set<Object> fieldCustomDataKeys = field.getCustomData().keySet();
 
 			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one), or embedded types
-			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.EMBEDDED_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.VERSION_FIELD)) {
+			if (fieldCustomDataKeys.contains(IDENTIFIER_FIELD) || fieldCustomDataKeys.contains(EMBEDDED_ID_FIELD) || fieldCustomDataKeys.contains(EMBEDDED_FIELD) || fieldCustomDataKeys.contains(VERSION_FIELD)) {
 				continue;
 			}
 
 			// Never include persistence transient fields
-			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.TRANSIENT_FIELD)) {
+			if (fieldCustomDataKeys.contains(TRANSIENT_FIELD)) {
 				continue;
 			}
 
 			// Never include any sort of collection; user has to make such entities by hand
-			if (field.getFieldType().isCommonCollectionType() || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ONE_TO_MANY_FIELD) || fieldCustomDataKeys.contains(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD)) {
+			if (field.getFieldType().isCommonCollectionType() || fieldCustomDataKeys.contains(ONE_TO_MANY_FIELD) || fieldCustomDataKeys.contains(MANY_TO_MANY_FIELD)) {
 				continue;
 			}
 			
@@ -227,7 +240,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 
 	private EmbeddedIdentifierHolder getEmbeddedIdentifierHolder(MemberDetails memberDetails, String metadataIdentificationString) {
 		final List<FieldMetadata> identifierFields = new ArrayList<FieldMetadata>();
-		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
+		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithTag(memberDetails, EMBEDDED_ID_FIELD);
 		if (fields.isEmpty()) {
 			return null;
 		}
@@ -250,7 +263,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	private List<EmbeddedHolder> getEmbeddedHolders(MemberDetails memberDetails, String metadataIdentificationString) {
 		final List<EmbeddedHolder> embeddedHolders = new ArrayList<EmbeddedHolder>();
 
-		List<FieldMetadata> embeddedFields = MemberFindingUtils.getFieldsWithTag(memberDetails, PersistenceCustomDataKeys.EMBEDDED_FIELD);
+		List<FieldMetadata> embeddedFields = MemberFindingUtils.getFieldsWithTag(memberDetails, EMBEDDED_FIELD);
 		if (embeddedFields.isEmpty()) {
 			return embeddedHolders;
 		}
@@ -292,13 +305,13 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 			return null;
 		}
 		
-		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PersistenceCustomDataKeys.PERSISTENT_TYPE);
+		MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
 		}
 		
 		// Check field for @ManyToOne or @OneToOne annotation
-		if (!field.getCustomData().keySet().contains(PersistenceCustomDataKeys.MANY_TO_ONE_FIELD) && !field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ONE_TO_ONE_FIELD)) {
+		if (!field.getCustomData().keySet().contains(MANY_TO_ONE_FIELD) && !field.getCustomData().keySet().contains(ONE_TO_ONE_FIELD)) {
 			return null;
 		}
 		

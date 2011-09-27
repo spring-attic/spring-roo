@@ -115,6 +115,14 @@ public class MemberDetailsImpl implements MemberDetails {
 		return result;
 	}
 	
+	public MethodMetadata getMostConcreteMethodWithTag(final Object tagKey) {
+		final List<MethodMetadata> taggedMethods = getMethodsWithTag(tagKey);
+		if (taggedMethods.isEmpty()) {
+			return null;
+		} 
+		return taggedMethods.get(0);
+	}
+	
 	public boolean isMethodDeclaredByAnother(final JavaSymbolName methodName, final List<JavaType> parameterTypes, final String declaredByMetadataId) {
 		final MethodMetadata method = getMethod(methodName, parameterTypes);
 		return method != null && !method.getDeclaredByMetadataId().equals(declaredByMetadataId);

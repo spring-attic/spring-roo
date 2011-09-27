@@ -132,6 +132,16 @@ public interface MemberDetails {
 	List<MethodMetadata> getMethodsWithTag(Object tagKey);
 	
 	/**
+	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases
+	 * where multiple matches are found for a given tag.
+	 * 
+	 * @param tagKey the {@link CustomData} key to search for (required)
+	 * @return the most concrete tagged method or <code>null</code> if not found
+	 * @since 1.2.0
+	 */
+	MethodMetadata getMostConcreteMethodWithTag(final Object tagKey);
+	
+	/**
 	 * Indicates whether a method specified by the method attributes is present and isn't declared by the passed in MID.
 	 *
 	 * @param methodName the name of the method being searched for
