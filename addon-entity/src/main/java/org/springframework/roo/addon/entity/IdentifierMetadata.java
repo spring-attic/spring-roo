@@ -313,7 +313,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			parameterTypes.add(field.getFieldType());
 		}
 		
-		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, parameterTypes);
+		ConstructorMetadata result = governorTypeDetails.getDeclaredConstructor(parameterTypes);
 		if (result != null) {
 			// Found an existing no-arg constructor on this class, so return it
 			publicNoArgConstructor = true;
@@ -346,15 +346,17 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * If a class defines a no-arg constructor, it is returned (irrespective of access modifiers).
 	 * 
 	 * <p>
-	 * If a class does not define a no-arg constructor, one might be created. It will only be created if the {@link #noArgConstructor} is true AND there is at least one other constructor declared in
-	 * the source file. If a constructor is created, it will have a private access modifier.
+	 * If a class does not define a no-arg constructor, one might be created. It
+	 * will only be created if the {@link #noArgConstructor} is true AND there
+	 * is at least one other constructor declared in the source file. If a
+	 * constructor is created, it will have a private access modifier.
 	 * 
 	 * @return the constructor (may return null if no constructor is to be produced)
 	 */
 	public ConstructorMetadata getNoArgConstructor() {
 		// Search for an existing constructor
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
-		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, parameterTypes);
+		ConstructorMetadata result = governorTypeDetails.getDeclaredConstructor(parameterTypes);
 		if (result != null) {
 			// Found an existing no-arg constructor on this class, so return it
 			return result;

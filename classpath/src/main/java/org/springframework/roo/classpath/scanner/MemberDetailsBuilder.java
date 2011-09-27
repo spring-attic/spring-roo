@@ -110,7 +110,7 @@ public class MemberDetailsBuilder {
 	private void doModification(ConstructorMetadata constructor, CustomData customData) {
 		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(constructor.getDeclaredByMetadataId());
 		if (memberHoldingTypeDetails != null) {
-			ConstructorMetadata matchedConstructor = MemberFindingUtils.getDeclaredConstructor(memberHoldingTypeDetails, AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()));
+			ConstructorMetadata matchedConstructor = memberHoldingTypeDetails.getDeclaredConstructor(AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()));
 			if (matchedConstructor != null && !matchedConstructor.getCustomData().keySet().containsAll(customData.keySet())) {
 				TypeDetailsBuilder typeDetailsBuilder = getTypeDetailsBuilder(memberHoldingTypeDetails);
 				typeDetailsBuilder.addDataToConstructor(constructor, customData);

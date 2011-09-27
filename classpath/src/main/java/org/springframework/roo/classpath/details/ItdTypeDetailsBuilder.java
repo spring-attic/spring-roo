@@ -82,8 +82,8 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 
 	@Override 
 	protected void onAddConstructor(ConstructorMetadataBuilder md) {
-		Assert.isNull(MemberFindingUtils.getDeclaredConstructor(governor, AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-		Assert.isNull(MemberFindingUtils.getDeclaredConstructor(build(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
+		Assert.isNull(governor.getDeclaredConstructor(AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isNull(build().getDeclaredConstructor(AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 		Assert.hasText(md.getBody(), "Constructor '" + md + "' failed to provide a body, despite being identified for ITD inclusion");
 	}
 
