@@ -85,8 +85,8 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 		final Collection<AnnotationMetadata> typeAnnotations,
 		final Collection<? extends DeclaredFieldAnnotationDetails> fieldAnnotations,
 		final Collection<? extends DeclaredMethodAnnotationDetails> methodAnnotations,
-		final Collection<ClassOrInterfaceTypeDetails> innerTypes)
-	{
+		final Collection<ClassOrInterfaceTypeDetails> innerTypes) {
+		
 		super(customData, declaredByMetadataId, modifier, typeAnnotations);
 		Assert.notNull(aspect, "Aspect required");
 		Assert.notNull(governor, "Governor (to receive the introductions) required");
@@ -108,10 +108,6 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 	
 	public Set<JavaType> getRegisteredImports() {
 		return Collections.unmodifiableSet(registeredImports);
-	}
-
-	public List<JavaType> getImplementsTypes() {
-		return Collections.unmodifiableList(implementsTypes);
 	}
 
 	public PhysicalTypeCategory getPhysicalTypeCategory() {
@@ -158,6 +154,10 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 		return Collections.unmodifiableList(extendsTypes);
 	}
 
+	public List<JavaType> getImplementsTypes() {
+		return Collections.unmodifiableList(implementsTypes);
+	}
+
 	public List<DeclaredFieldAnnotationDetails> getFieldAnnotations() {
 		return Collections.unmodifiableList(fieldAnnotations);
 	}
@@ -168,6 +168,19 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 
 	public List<ClassOrInterfaceTypeDetails> getInnerTypes() {
 		return Collections.unmodifiableList(innerTypes);
+	}
+
+	public boolean extendsType(final JavaType type) {
+		return this.extendsTypes.contains(type);
+	}
+	
+	public boolean implementsAny(final JavaType... types) {
+		for (final JavaType type : types) {
+			if (this.implementsTypes.contains(type)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -208,9 +221,5 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 		tsc.append("innerTypes", innerTypes);
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
-	}
-
-	public boolean extendsType(final JavaType type) {
-		return this.extendsTypes.contains(type);
 	}
 }

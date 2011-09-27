@@ -224,6 +224,18 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		}
 	}
 	
+	/**
+	 * Ensures that the governor implements the given type.
+	 * 
+	 * @param javaType the type to implement (required)
+	 * @since 1.2.0
+	 */
+	protected final void ensureGovernorImplements(final JavaType javaType) {
+		if (!governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().implementsAny(javaType)) {
+			builder.addImplementsType(javaType);
+		}
+	}
+	
 	@Override
 	public int hashCode() {
 		return builder.build().hashCode();

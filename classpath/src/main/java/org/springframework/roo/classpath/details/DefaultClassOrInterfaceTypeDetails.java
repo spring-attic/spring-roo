@@ -174,6 +174,15 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 		return this.extendsTypes.contains(type);
 	}
 	
+	public boolean implementsAny(final JavaType... types) {
+		for (final JavaType type : types) {
+			if (this.implementsTypes.contains(type)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("name", name);

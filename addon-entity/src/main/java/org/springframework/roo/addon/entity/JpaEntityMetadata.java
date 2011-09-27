@@ -99,7 +99,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		this.isDatabaseDotComEnabled = isDatabaseDotComEnabled;
 
 		// Add @Entity or @MappedSuperclass annotation
-		builder.addAnnotation(annotationValues.isMappedSuperclass() ? getMappedSuperclassAnnotation() : getEntityAnnotation());
+		builder.addAnnotation(annotationValues.isMappedSuperclass() ? getTypeAnnotation(MAPPED_SUPERCLASS) : getEntityAnnotation());
 		
 		// Add @Table annotation if required
 		builder.addAnnotation(getTableAnnotation());
@@ -417,17 +417,6 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		return null;
 	}
 	
-	/**
-	 * Returns the JPA @MappedSuperclass annotation to be applied to the entity,
-	 * if applicable
-	 * 
-	 * @return <code>null</code> if it's already present or not required
-	 * @return
-	 */
-	private AnnotationMetadata getMappedSuperclassAnnotation() {
-		return getTypeAnnotation(MAPPED_SUPERCLASS);
-	}
-
 	/**
 	 * Locates the no-arg constructor for this class, if available.
 	 * 
