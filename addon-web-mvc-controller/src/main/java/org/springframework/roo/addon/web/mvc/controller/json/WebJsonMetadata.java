@@ -118,7 +118,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		builder.addMethod(getUpdateFromJsonArrayMethod(mergeMethod));
 
 		MemberTypeAdditions removeMethod = persistenceAdditions.get(PersistenceCustomDataKeys.REMOVE_METHOD.name());
-			builder.addMethod(getJsonDeleteMethod(removeMethod, identifierField, findMethod));
+		builder.addMethod(getJsonDeleteMethod(removeMethod, identifierField, findMethod));
 
 		if (annotationValues.isExposeFinders()) {
 			for (FinderMetadataDetails finder : finderDetails) {
@@ -515,12 +515,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	}
 	
 	private boolean methodExists(JavaSymbolName methodName) {
-		for (MethodMetadata method : MemberFindingUtils.getMethods(governorTypeDetails)) {
-			if (method.getMethodName().equals(methodName)) {
-				return true;
-			}
-		}
-		return false;
+		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName) != null;
 	}
 
 	public String toString() {

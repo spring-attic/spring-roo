@@ -20,9 +20,6 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -74,7 +71,10 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			return;
 		}
 
-		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
+		builder.addAnnotation(getTypeAnnotation(CONFIGURABLE));
+
+		MethodMetadataBuilder installMethodBuilder = new MethodMetadataBuilder(getInstallMethod());
+		
 		Set<String> methodNames = new HashSet<String>();
 		// Loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
 		for (final JavaType type : new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
@@ -107,6 +107,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 				}
 			}
 		}
+		
 		for (final Entry<JavaType, Map<Object, JavaSymbolName>> entry : compositePrimaryKeyTypes.entrySet()) {
 			final JavaType type = entry.getKey();
 			for (final MethodMetadata converterMethod : getCompositePkConverters(type, entry.getValue())) {
@@ -120,19 +121,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 			builder.addMethod(installMethod);
 		}
 		builder.addMethod(getAfterPropertiesSetMethod(installMethod));
-
-		AnnotationMetadata configurable = AnnotationMetadataBuilder.getInstance(CONFIGURABLE, new ArrayList<AnnotationAttributeValue<?>>()).build();
-		boolean configurablePresent = false;
-		for (AnnotationMetadata annotation : governorTypeDetails.getAnnotations()) {
-			if (annotation.getAnnotationType().equals(configurable.getAnnotationType())) {
-				configurablePresent = true;
-				break;
-			}
-		}
-		if(!configurablePresent) {
-			builder.addAnnotation(configurable);
-		}
-		
+	
 		itdTypeDetails = builder.build();
 	}
 	
@@ -181,9 +170,10 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	}
 	
 	private MethodMetadata getToStringConverterMethod(JavaType targetType, JavaSymbolName methodName, List<MethodMetadata> methods) {
-		if (MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, new ArrayList<JavaType>()) != null) {
+		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
+		
 		final JavaType converterJavaType = SpringJavaType.getConverterType(targetType, JavaType.STRING);
 		String targetTypeName = StringUtils.uncapitalize(targetType.getSimpleTypeName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
@@ -235,6 +225,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("};");
+		
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, converterJavaType, bodyBuilder).build();
 	}
 	
@@ -258,25 +249,25 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, converterJavaType, bodyBuilder).build();
 	}
 	
-	private MethodMetadataBuilder getInstallMethodBuilder() {
+	private MethodMetadata getInstallMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
 		final JavaType parameterType = FORMATTER_REGISTRY;
 		MethodMetadata method = getGovernorMethod(methodName, parameterType);
 		if (method != null) {
-			return new MethodMetadataBuilder(method);
+			return method;
 		}
 		
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("registry"));
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, new InvocableMemberBodyBuilder());
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, new InvocableMemberBodyBuilder()).build();
 	}
 
-	private MethodMetadataBuilder getAfterPropertiesSetMethod(MethodMetadata installConvertersMethod) {
+	private MethodMetadata getAfterPropertiesSetMethod(MethodMetadata installConvertersMethod) {
 		JavaSymbolName methodName = new JavaSymbolName("afterPropertiesSet");
 		final JavaType[] parameterTypes = {};
 		MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) {
-			return new MethodMetadataBuilder(method);
+			return method;
 		}
 
 		List<JavaSymbolName> parameterNames = Collections.emptyList();
@@ -285,6 +276,6 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.appendFormalLine("super.afterPropertiesSet();");
 		bodyBuilder.appendFormalLine(installConvertersMethod.getMethodName().getSymbolName() + "(getObject());");
 
-		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
+		return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
 }

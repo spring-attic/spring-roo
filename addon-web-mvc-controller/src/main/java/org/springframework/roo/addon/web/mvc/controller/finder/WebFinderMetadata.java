@@ -155,8 +155,9 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			parameterNames.add(new JavaSymbolName("uiModel"));
 		}
 		
-		MethodMetadata existingMethod = methodExists(finderFormMethodName, parameterTypes);
-		if (existingMethod != null) return existingMethod;
+		if (methodExists(finderFormMethodName, parameterTypes)) {
+			return null;
+		}
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		List<StringAttributeValue> arrayValues = new ArrayList<StringAttributeValue>();
@@ -217,11 +218,10 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 
 		parameterTypes.add(new AnnotatedJavaType(MODEL));
-		
-		MethodMetadata existingMethod = methodExists(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes));
-		if (existingMethod != null) {
-			return existingMethod;
+		if (methodExists(finderMethodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameterTypes))) {
+			return null;
 		}
+		
 		List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
 		newParamNames.addAll(parameterNames);
 		newParamNames.add(new JavaSymbolName("uiModel"));
@@ -244,8 +244,8 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata methodExists(JavaSymbolName methodName, List<JavaType> parameterTypes) {
-		return MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes, getId());
+	private boolean methodExists(JavaSymbolName methodName, List<JavaType> parameterTypes) {
+		return MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes, getId()) != null;
 	}
 	
 	private String uncapitalize(String term) {
