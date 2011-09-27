@@ -1,8 +1,5 @@
 package org.springframework.roo.classpath.javaparser.details;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.ArrayInitializerExpr;
 import japa.parser.ast.expr.BinaryExpr;
@@ -20,7 +17,13 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.NormalAnnotationExpr;
 import japa.parser.ast.expr.SingleMemberAnnotationExpr;
 import japa.parser.ast.expr.StringLiteralExpr;
+import japa.parser.ast.expr.UnaryExpr;
+import japa.parser.ast.expr.UnaryExpr.Operator;
 import japa.parser.ast.type.Type;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -215,9 +218,7 @@ public final class JavaParserAnnotationMetadataBuilder implements Builder<Annota
 		if (expression instanceof NameExpr) {
 			NameExpr field = (NameExpr) expression;
 			String name = field.getName();
-
 			JavaType fieldType = new JavaType("unknown.Object"); // As we have no way of finding out the real type
-
 			EnumDetails enumDetails = new EnumDetails(fieldType, new JavaSymbolName(name));
 			return new EnumAttributeValue(annotationName, enumDetails);
 		}
@@ -236,6 +237,18 @@ public final class JavaParserAnnotationMetadataBuilder implements Builder<Annota
 				arrayElements.add(convert(null, e, compilationUnitServices));
 			}
 			return new ArrayAttributeValue<AnnotationAttributeValue<?>>(annotationName, arrayElements);
+		}
+		
+		if (expression instanceof UnaryExpr) {
+			UnaryExpr castExp = (UnaryExpr) expression;
+			if (castExp.getOperator() == Operator.negative) {
+				String value = castExp.toString();
+				value = value.toUpperCase().endsWith("L") ? value.substring(0, value.length() - 1) : value;
+				long l = new Long(value);
+				return new LongAttributeValue(annotationName, l);
+			} else {
+				throw new UnsupportedOperationException("Only negative operator in UnaryExpr is supported");
+			}
 		}
 
 		throw new UnsupportedOperationException("Unable to parse annotation attribute '" + annotationName + "' due to unsupported annotation expression '" + expression.getClass().getName() + "'");
@@ -305,8 +318,7 @@ public final class JavaParserAnnotationMetadataBuilder implements Builder<Annota
 		annotations.add(annotationExpression);
 
 		// Add member-value pairs to our AnnotationExpr
-		if (memberValuePairs.size() > 0) {
-
+		if (!memberValuePairs.isEmpty()) {
 			// Have to check here for cases where we need to change an existing MarkerAnnotationExpr to a NormalAnnotationExpr or SingleMemberAnnotationExpr
 			if (annotationExpression instanceof MarkerAnnotationExpr) {
 				MarkerAnnotationExpr mae = (MarkerAnnotationExpr) annotationExpression;
