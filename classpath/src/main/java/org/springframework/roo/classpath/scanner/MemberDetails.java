@@ -6,8 +6,10 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Immutable representation of member details scanned at a particular point in time.
@@ -34,7 +36,16 @@ import org.springframework.roo.metadata.MetadataProvider;
  * @since 1.1
  */
 public interface MemberDetails {
-
+	
+	/**
+	 * Locates the specified type-level annotation.
+	 * 
+	 * @param type the type of annotation to locate (required)
+	 * @return the annotation, or <code>null</code> if not found
+	 * @since 1.2.0
+	 */
+	AnnotationMetadata getAnnotation(JavaType type);
+	
 	/**
 	 * Returns an immutable representation of the member holders.
 	 * 

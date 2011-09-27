@@ -156,7 +156,9 @@ public final class MemberFindingUtils {
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
+	 * @deprecated use {@link MemberDetails#getAnnotation(JavaType)} instead
 	 */
+	@Deprecated
 	public static AnnotationMetadata getDeclaredTypeAnnotation(MemberDetails memberDetails, JavaType type) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(type, "Annotation type to locate required");

@@ -24,7 +24,6 @@ import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.IdentifiableAnnotatedJavaStructure;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -319,7 +318,7 @@ public class FieldCommands implements CommandMarker {
 		
 		// Check if the requested entity is a JPA @Entity
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ENTITY);
+		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
 		Assert.notNull(entityAnnotation, "The field reference command is only applicable to JPA @Entity target types.");
 
 		Assert.isTrue(cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE, "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
@@ -363,7 +362,7 @@ public class FieldCommands implements CommandMarker {
 	
 		// Check if the requested entity is a JPA @Entity
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ENTITY);
+		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
 		if (entityAnnotation != null) {
 			Assert.isTrue(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY, "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
 		} else if (ptd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
@@ -433,7 +432,7 @@ public class FieldCommands implements CommandMarker {
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, targetPtd);
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) targetPtd;
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ENTITY), "The field embedded command is only applicable to JPA @Entity target types.");
+		Assert.notNull(memberDetails.getAnnotation(ENTITY), "The field embedded command is only applicable to JPA @Entity target types.");
 
 		EmbeddedField fieldDetails = new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
 	

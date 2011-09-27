@@ -16,7 +16,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -63,7 +62,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 
 		// Check if the requested entity is a JPA @Entity
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(DataOnDemandOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ENTITY);
+		AnnotationMetadata entityAnnotation = memberDetails.getAnnotation(ENTITY);
 		Assert.notNull(entityAnnotation, "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
 
 		// Everything is OK to proceed

@@ -186,7 +186,7 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		}
 	
 		String transactionManager = null;
-		final AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, ROO_ENTITY);
+		final AnnotationMetadata rooEntityAnnotation = memberDetails.getAnnotation(ROO_ENTITY);
 		if (rooEntityAnnotation != null) {
 			final StringAttributeValue transactionManagerAttr = (StringAttributeValue) rooEntityAnnotation.getAttribute(new JavaSymbolName("transactionManager"));
 			if (transactionManagerAttr != null) {
