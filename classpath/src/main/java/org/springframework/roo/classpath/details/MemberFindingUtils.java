@@ -119,9 +119,9 @@ public final class MemberFindingUtils {
 	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure> memberHoldingTypeDetails, JavaType type) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(type, "Annotation type to locate required");
-		for (AnnotationMetadataBuilder md : memberHoldingTypeDetails.getAnnotations()) {
-			if (md.getAnnotationType().equals(type)) {
-				return md;
+		for (AnnotationMetadataBuilder annotationBuilder : memberHoldingTypeDetails.getAnnotations()) {
+			if (annotationBuilder.getAnnotationType().equals(type)) {
+				return annotationBuilder;
 			}
 		}
 		return null;
@@ -169,9 +169,9 @@ public final class MemberFindingUtils {
 	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName) {
 		Assert.notNull(memberDetails, "Member details required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
-			MethodMetadata md = getDeclaredMethod(memberHoldingTypeDetails, methodName);
-			if (md != null) {
-				return md;
+			MethodMetadata method = getDeclaredMethod(memberHoldingTypeDetails, methodName);
+			if (method != null) {
+				return method;
 			}
 		}
 		return null;
@@ -223,9 +223,9 @@ public final class MemberFindingUtils {
 		if (annotations == null) {
 			return null;
 		}
-		for (final AnnotationMetadata md : annotations) {
-			if (md.getAnnotationType().equals(annotationType)) {
-				return md;
+		for (final AnnotationMetadata annotation : annotations) {
+			if (annotation.getAnnotationType().equals(annotationType)) {
+				return annotation;
 			}
 		}
 		return null;
@@ -510,8 +510,8 @@ public final class MemberFindingUtils {
 		Assert.notNull(tagKey, "Custom data key required");
 		final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		if (memberDetails != null) {
-			for (final MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
-				for (final FieldMetadata field: mhtd.getDeclaredFields()) {
+			for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+				for (final FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
 					if (field.getCustomData().keySet().contains(tagKey)) {
 						fields.add(field);
 					}
@@ -533,9 +533,9 @@ public final class MemberFindingUtils {
 		Assert.notNull(tagKey, "Custom data tag required");
 		final List<MemberHoldingTypeDetails> result = new ArrayList<MemberHoldingTypeDetails>();
 		if (memberDetails != null) {
-			for (final MemberHoldingTypeDetails mhtd: memberDetails.getDetails()) {
-				if (mhtd.getCustomData().keySet().contains(tagKey)) {
-					result.add(mhtd);
+			for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+				if (memberHoldingTypeDetails.getCustomData().keySet().contains(tagKey)) {
+					result.add(memberHoldingTypeDetails);
 				}
 			}
 		}
@@ -611,8 +611,8 @@ public final class MemberFindingUtils {
 	 */
 	public static boolean isMethodDeclaredByAnother(MemberDetails memberDetails,  JavaSymbolName methodName, List<JavaType> parameterTypes, String declaredByMetadataId) {
 		Assert.notNull(memberDetails, "Member details required");
-		MethodMetadata methodMetadata = MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes);
-		return methodMetadata != null && !methodMetadata.getDeclaredByMetadataId().equals(declaredByMetadataId);
+		MethodMetadata method = MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes);
+		return method != null && !method.getDeclaredByMetadataId().equals(declaredByMetadataId);
 	}
 
 	/**
@@ -625,9 +625,9 @@ public final class MemberFindingUtils {
 	public static AnnotationMetadata getFirstAnnotation(final ClassOrInterfaceTypeDetails cid, final JavaType... annotationTypes) {
 		if (cid != null && annotationTypes != null) {
 			for (final JavaType annotationType : annotationTypes) {
-				final AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);
-				if (annotationMetadata != null) {
-					return annotationMetadata;
+				final AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);
+				if (annotation != null) {
+					return annotation;
 				}
 			}
 		}
