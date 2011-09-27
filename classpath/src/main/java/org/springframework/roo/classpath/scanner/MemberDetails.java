@@ -6,9 +6,11 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -52,4 +54,18 @@ public interface MemberDetails {
 	 * @return a List of immutable member holders (never null or empty)
 	 */
 	List<MemberHoldingTypeDetails> getDetails();
+	
+	/**
+	 * Locates a method with the name and parameter signature presented. Searches
+	 * all {@link MemberDetails} until the first such method is located
+	 * or none can be found.
+	 * 
+	 * @param methodName the method name to locate (can be <code>null</code>)
+	 * @param parameters the method parameter signature to locate (can be null
+	 * if no parameters are required)
+	 * @return the first located method, or <code>null</code> if the method name
+	 * is <code>null</code> or such a method cannot be found
+	 * @since 1.2.0
+	 */
+	MethodMetadata getMethod(JavaSymbolName methodName, List<JavaType> parameters);
 }

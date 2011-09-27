@@ -33,14 +33,7 @@ public final class MemberFindingUtils {
 	 */
 	@Deprecated
 	public static FieldMetadata getDeclaredField(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName fieldName) {
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		Assert.notNull(fieldName, "Field name required");
-		for (final FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
-			if (field.getFieldName().equals(fieldName)) {
-				return field;
-			}
-		}
-		return null;
+		return memberHoldingTypeDetails.getDeclaredField(fieldName);
 	}
 
 	/**
@@ -100,16 +93,7 @@ public final class MemberFindingUtils {
 	 */
 	@Deprecated
 	public static ConstructorMetadata getDeclaredConstructor(MemberHoldingTypeDetails memberHoldingTypeDetails, List<JavaType> parameters) {
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		if (parameters == null) {
-			parameters = new ArrayList<JavaType>();
-		}
-		for (ConstructorMetadata constructor : memberHoldingTypeDetails.getDeclaredConstructors()) {
-			if (parameters.equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()))) {
-				return constructor;
-			}
-		}
-		return null;
+		return memberHoldingTypeDetails.getDeclaredConstructor(parameters);
 	}
 
 	/**
@@ -122,14 +106,7 @@ public final class MemberFindingUtils {
 	 */
 	@Deprecated
 	public static AnnotationMetadata getDeclaredTypeAnnotation(IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, JavaType type) {
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		Assert.notNull(type, "Annotation type to locate required");
-		for (AnnotationMetadata md : memberHoldingTypeDetails.getAnnotations()) {
-			if (md.getAnnotationType().equals(type)) {
-				return md;
-			}
-		}
-		return null;
+		return memberHoldingTypeDetails.getAnnotation(type);
 	}
 
 	/**
@@ -160,15 +137,7 @@ public final class MemberFindingUtils {
 	 */
 	@Deprecated
 	public static AnnotationMetadata getDeclaredTypeAnnotation(MemberDetails memberDetails, JavaType type) {
-		Assert.notNull(memberDetails, "Member details required");
-		Assert.notNull(type, "Annotation type to locate required");
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
-			AnnotationMetadata md = getDeclaredTypeAnnotation(memberHoldingTypeDetails, type);
-			if (md != null) {
-				return md;
-			}
-		}
-		return null;
+		return memberDetails.getAnnotation(type);
 	}
 	
 	/**
@@ -181,16 +150,11 @@ public final class MemberFindingUtils {
 	 * if no parameters are required)
 	 * @return the first located method, or <code>null</code> if the method name
 	 * is <code>null</code> or such a method cannot be found
+	 * @deprecated use {@link MemberDetails#getMethod(JavaSymbolName, List)} instead
 	 */
+	@Deprecated
 	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName, final List<JavaType> parameters) {
-		Assert.notNull(memberDetails, "Member details required");
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
-			MethodMetadata md = getDeclaredMethod(memberHoldingTypeDetails, methodName, parameters);
-			if (md != null) {
-				return md;
-			}
-		}
-		return null;
+		return memberDetails.getMethod(methodName, parameters);
 	}
 
 	/**

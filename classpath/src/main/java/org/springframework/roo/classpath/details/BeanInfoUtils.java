@@ -98,8 +98,8 @@ public final class BeanInfoUtils {
 		Assert.notNull(field, "Field metadata required");
 		Assert.notNull(memberDetails, "Member details required");
 
-		if (MemberFindingUtils.getMethod(memberDetails, getAccessorMethodName(field), new ArrayList<JavaType>()) != null
-			&& MemberFindingUtils.getMethod(memberDetails, getMutatorMethodName(field), Arrays.asList(field.getFieldType())) != null) {
+		if (memberDetails.getMethod(getAccessorMethodName(field), new ArrayList<JavaType>()) != null
+			&& memberDetails.getMethod(getMutatorMethodName(field), Arrays.asList(field.getFieldType())) != null) {
 			return true;
 		}
 	

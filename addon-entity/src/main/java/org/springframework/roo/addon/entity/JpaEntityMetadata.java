@@ -176,7 +176,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing accessor
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredAccessorName, new ArrayList<JavaType>());
+			final MethodMetadata method = entityMemberDetails.getMethod(requiredAccessorName, new ArrayList<JavaType>());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -356,7 +356,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredMutatorName, parameterTypes);
+			final MethodMetadata method = entityMemberDetails.getMethod(requiredMutatorName, parameterTypes);
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
