@@ -159,7 +159,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getDeleteMethod(deleteMethod, findMethod));
 			deleteMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		if (specialDomainTypes.size() > 0) {
+		if (!specialDomainTypes.isEmpty()) {
 			for (MethodMetadata method : getPopulateMethods()) {
 				builder.addMethod(method);
 			}

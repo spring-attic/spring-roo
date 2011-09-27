@@ -46,8 +46,8 @@ public final class GwtUtils {
 	public static final JavaType SERVICE = new JavaType("com.google.web.bindery.requestfactory.shared.Service");
 	public static final JavaType SERVICE_NAME = new JavaType("com.google.web.bindery.requestfactory.shared.ServiceName");
 	
-	public static final JavaType[] PROXY_ANNOTATIONS = {PROXY_FOR, PROXY_FOR_NAME};
-	public static final JavaType[] REQUEST_ANNOTATIONS = {SERVICE, SERVICE_NAME};
+	public static final JavaType[] PROXY_ANNOTATIONS = { PROXY_FOR, PROXY_FOR_NAME };
+	public static final JavaType[] REQUEST_ANNOTATIONS = { SERVICE, SERVICE_NAME };
 	public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = {RooJavaType.ROO_GWT_PROXY, RooJavaType.ROO_GWT_REQUEST, RooJavaType.ROO_GWT_MIRRORED_FROM};
 
 	/**
