@@ -264,7 +264,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 			if ("AUTO".equals(generationType)) {
-				AnnotationMetadata inheritance = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, INHERITANCE);
+				AnnotationMetadata inheritance = governorTypeDetails.getAnnotation(INHERITANCE);
 				if (inheritance == null) {
 					inheritance = getInheritanceAnnotation();
 				}
@@ -406,7 +406,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	 * @return <code>null</code> if it's already present or not required
 	 */
 	private AnnotationMetadata getInheritanceAnnotation() {
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, INHERITANCE) != null) {
+		if (governorTypeDetails.getAnnotation(INHERITANCE) != null) {
 			return null;
 		}
 		if (StringUtils.hasText(annotationValues.getInheritanceType())) {

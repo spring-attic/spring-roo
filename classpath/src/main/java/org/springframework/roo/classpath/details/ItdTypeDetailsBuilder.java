@@ -116,8 +116,8 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 
 	@Override 
 	protected void onAddAnnotation(AnnotationMetadataBuilder md) {
-		Assert.isNull(MemberFindingUtils.getDeclaredTypeAnnotation(governor, md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-		Assert.isNull(MemberFindingUtils.getDeclaredTypeAnnotation(build(), md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
+		Assert.isNull(governor.getAnnotation(md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isNull(build().getAnnotation(md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 	}
 
 	public void addFieldAnnotation(DeclaredFieldAnnotationDetails declaredFieldAnnotationDetails) {

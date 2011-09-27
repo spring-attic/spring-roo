@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 
 /**
@@ -35,5 +37,15 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureProvider extends
 
 	public List<AnnotationMetadata> getAnnotations() {
 		return Collections.unmodifiableList(annotations);
+	}
+	
+	public AnnotationMetadata getAnnotation(final JavaType type) {
+		Assert.notNull(type, "Annotation type to locate required");
+		for (final AnnotationMetadata md : getAnnotations()) {
+			if (md.getAnnotationType().equals(type)) {
+				return md;
+			}
+		}
+		return null;
 	}
 }

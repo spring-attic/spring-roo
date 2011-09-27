@@ -13,7 +13,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
@@ -289,7 +288,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 			// Only create metadata if the type is annotated with one of the metadata triggers
 			for (JavaType trigger : metadataTriggers) {
-				if (MemberFindingUtils.getDeclaredTypeAnnotation(cid, trigger) != null) {
+				if (cid.getAnnotation(trigger) != null) {
 					produceMetadata = true;
 					break;
 				}

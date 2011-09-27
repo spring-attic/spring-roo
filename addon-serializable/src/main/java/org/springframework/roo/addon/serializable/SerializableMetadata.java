@@ -8,7 +8,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -45,7 +44,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_SERIALIZABLE);
+		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(ROO_SERIALIZABLE);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}

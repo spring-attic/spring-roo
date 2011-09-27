@@ -167,7 +167,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return the annotation is already exists or will be created, or null if it will not be created (required)
 	 */
 	public AnnotationMetadata getComponentAnnotation() {
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, COMPONENT) != null) {
+		if (governorTypeDetails.getAnnotation(COMPONENT) != null) {
 			return null;
 		}
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(COMPONENT);

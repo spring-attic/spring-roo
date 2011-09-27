@@ -186,7 +186,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		 * having to enter the same value for the "activeRecord" option each
 		 * time they run the database reverse engineer command.
 		 */
-		return MemberFindingUtils.getDeclaredTypeAnnotation(managedEntities.iterator().next(), ROO_ENTITY) != null;
+		return managedEntities.iterator().next().getAnnotation(ROO_ENTITY) != null;
 	}
 
 	private JavaPackage getDestinationPackage(final Database database, final Set<ClassOrInterfaceTypeDetails> managedEntities) {
@@ -295,11 +295,11 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	 */
 	private AnnotationMetadata getJpaAnnotation(final ClassOrInterfaceTypeDetails managedEntity) {
 		// The @RooJpaEntity annotation takes precedence if present
-		final AnnotationMetadata rooJpaEntity = MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, ROO_JPA_ENTITY);
+		final AnnotationMetadata rooJpaEntity = managedEntity.getAnnotation(ROO_JPA_ENTITY);
 		if (rooJpaEntity != null) {
 			return rooJpaEntity;
 		}
-		return MemberFindingUtils.getDeclaredTypeAnnotation(managedEntity, ROO_ENTITY);
+		return managedEntity.getAnnotation(ROO_ENTITY);
 	}
 
 	/**

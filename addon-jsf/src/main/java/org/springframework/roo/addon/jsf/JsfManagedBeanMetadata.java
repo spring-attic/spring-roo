@@ -214,9 +214,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 	
 	private boolean hasScopeAnnotation() {
-		return (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, SESSION_SCOPED) != null 
-			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, VIEW_SCOPED) != null 
-			|| MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, REQUEST_SCOPED) != null);
+		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null 
+			|| governorTypeDetails.getAnnotation(VIEW_SCOPED) != null 
+			|| governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null);
 	}
 	
 	private JavaType getListType(final JavaType parameterType) {

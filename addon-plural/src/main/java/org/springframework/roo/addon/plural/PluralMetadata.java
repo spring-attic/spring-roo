@@ -50,7 +50,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_PLURAL);
+		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(ROO_PLURAL);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}

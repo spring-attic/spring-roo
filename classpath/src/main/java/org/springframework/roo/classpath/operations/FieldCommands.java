@@ -23,6 +23,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.IdentifiableAnnotatedJavaStructure;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -422,7 +423,7 @@ public class FieldCommands implements CommandMarker {
 		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, EMBEDDABLE), "The field embedded command is only applicable to JPA @Embeddable field types.");
+		Assert.notNull(((IdentifiableAnnotatedJavaStructure) ptd).getAnnotation(EMBEDDABLE), "The field embedded command is only applicable to JPA @Embeddable field types.");
 		
 		// Check if the requested entity is a JPA @Entity
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);

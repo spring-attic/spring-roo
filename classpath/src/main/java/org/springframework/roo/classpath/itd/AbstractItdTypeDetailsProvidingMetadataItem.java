@@ -95,7 +95,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @return <code>null</code> if the governor already has that annotation
 	 */
 	protected AnnotationMetadata getTypeAnnotation(final JavaType annotationType) {
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType) != null) {
+		if (governorTypeDetails.getAnnotation(annotationType) != null) {
 			return null;
 		}
 		return new AnnotationMetadataBuilder(annotationType).build();

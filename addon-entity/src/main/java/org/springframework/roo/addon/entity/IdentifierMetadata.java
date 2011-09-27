@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.entity;
 
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_TYPE;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
@@ -9,6 +10,7 @@ import static org.springframework.roo.model.JpaJavaType.EMBEDDABLE;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL;
 import static org.springframework.roo.model.JpaJavaType.TEMPORAL_TYPE;
 import static org.springframework.roo.model.JpaJavaType.TRANSIENT;
+import static org.springframework.roo.model.RooJavaType.ROO_IDENTIFIER;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
@@ -19,7 +21,6 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
@@ -39,7 +40,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -80,7 +80,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		this.identifierServiceResult = identifierServiceResult;
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, RooJavaType.ROO_IDENTIFIER);
+		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(ROO_IDENTIFIER);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}
@@ -118,14 +118,14 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addMethod(getHashCodeMethod());
 		
 		// Add custom data tag for Roo Identifier type
-		builder.putCustomData(PersistenceCustomDataKeys.IDENTIFIER_TYPE, null);
+		builder.putCustomData(IDENTIFIER_TYPE, null);
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 
 	public AnnotationMetadata getEmbeddableAnnotation() {
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, EMBEDDABLE) != null) {
+		if (governorTypeDetails.getAnnotation(EMBEDDABLE) != null) {
 			return null;
 		}
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(EMBEDDABLE);

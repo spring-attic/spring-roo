@@ -438,7 +438,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void excludeFieldsInToStringAnnotation(String fieldName) {
-		AnnotationMetadata toStringAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_TO_STRING);
+		AnnotationMetadata toStringAnnotation = governorTypeDetails.getAnnotation(ROO_TO_STRING);
 		if (toStringAnnotation == null) {
 			return;
 		}

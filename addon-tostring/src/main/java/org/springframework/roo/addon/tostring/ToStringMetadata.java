@@ -67,7 +67,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		this.locatedAccessors = locatedAccessors;
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, RooJavaType.ROO_TO_STRING);
+		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(RooJavaType.ROO_TO_STRING);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}
