@@ -105,7 +105,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		// This variable tracks the new attribute values the replacement will hold.
 		Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new LinkedHashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
 
-		AnnotationMetadataBuilder existingBuilder = MemberFindingUtils.getDeclaredTypeAnnotation(this, annotation.getAnnotationType());
+		AnnotationMetadataBuilder existingBuilder = getDeclaredTypeAnnotation(annotation.getAnnotationType());
 
 		if (existingBuilder == null) {
 			// Not already present, so just go and add it
@@ -164,5 +164,21 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		addAnnotation(replacement);
 
 		return true;
+	}
+	
+	/**
+	 * Locates the specified type-level annotation.
+	 *
+	 * @param type to locate (can be <code>null</code>)
+	 * @return the annotation, or null if not found
+	 * @since 1.2.0
+	 */
+	public AnnotationMetadataBuilder getDeclaredTypeAnnotation(final JavaType type) {
+		for (AnnotationMetadataBuilder annotationBuilder : getAnnotations()) {
+			if (annotationBuilder.getAnnotationType().equals(type)) {
+				return annotationBuilder;
+			}
+		}
+		return null;
 	}
 }

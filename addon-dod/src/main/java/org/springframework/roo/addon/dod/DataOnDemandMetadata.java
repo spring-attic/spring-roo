@@ -183,7 +183,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			// Compute the required field name
 			index++;
 			JavaSymbolName fieldSymbolName = new JavaSymbolName(StringUtils.repeat("_", index) + "rnd");
-			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
+			FieldMetadata candidate = governorTypeDetails.getField(fieldSymbolName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
 				if (!Modifier.isPrivate(candidate.getModifier())) {
@@ -225,7 +225,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			// The type parameters to be used by the field type
 			List<JavaType> parameterTypes = Arrays.asList(entity);
 			JavaSymbolName fieldSymbolName = new JavaSymbolName(StringUtils.repeat("_", index) + "data");
-			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
+			FieldMetadata candidate = governorTypeDetails.getField(fieldSymbolName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
 				if (!Modifier.isPrivate(candidate.getModifier())) {
@@ -260,7 +260,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			String collaboratingFieldName = getCollaboratingFieldName(entityNeedingCollaborator).getSymbolName();
 
 			JavaSymbolName fieldSymbolName = new JavaSymbolName(collaboratingFieldName);
-			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
+			FieldMetadata candidate = governorTypeDetails.getField(fieldSymbolName);
 			if (candidate != null) {
 				// We really expect the field to be correct if we're going to rely on it
 				Assert.isTrue(candidate.getFieldType().equals(collaboratorType), "Field '" + collaboratingFieldName + "' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + collaboratorType.getFullyQualifiedTypeName() + "'");

@@ -115,6 +115,11 @@ public class MemberDetailsImpl implements MemberDetails {
 		return result;
 	}
 	
+	public boolean isMethodDeclaredByAnother(final JavaSymbolName methodName, final List<JavaType> parameterTypes, final String declaredByMetadataId) {
+		final MethodMetadata method = getMethod(methodName, parameterTypes);
+		return method != null && !method.getDeclaredByMetadataId().equals(declaredByMetadataId);
+	}
+	
 	public boolean isRequestingAnnotatedWith(final AnnotationMetadata annotationMetadata, final String requestingMid) {
 		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
 			if (MemberFindingUtils.getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), annotationMetadata.getAnnotationType()) != null) {

@@ -14,7 +14,6 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -86,7 +85,7 @@ public class MemberDetailsBuilder {
 	private void doModification(FieldMetadata field, CustomData customData) {
 		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(field.getDeclaredByMetadataId());
 		if (memberHoldingTypeDetails != null) {
-			FieldMetadata matchedField = MemberFindingUtils.getField(memberHoldingTypeDetails, field.getFieldName());
+			FieldMetadata matchedField = memberHoldingTypeDetails.getField(field.getFieldName());
 			if (matchedField != null && !matchedField.getCustomData().keySet().containsAll(customData.keySet())) {
 				TypeDetailsBuilder typeDetailsBuilder = getTypeDetailsBuilder(memberHoldingTypeDetails);
 				typeDetailsBuilder.addDataToField(field, customData);

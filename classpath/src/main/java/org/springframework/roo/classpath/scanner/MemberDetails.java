@@ -132,6 +132,17 @@ public interface MemberDetails {
 	List<MethodMetadata> getMethodsWithTag(Object tagKey);
 	
 	/**
+	 * Indicates whether a method specified by the method attributes is present and isn't declared by the passed in MID.
+	 *
+	 * @param methodName the name of the method being searched for
+	 * @param parameterTypes the parameters of the method being searched for
+	 * @param declaredByMetadataId the MID to be used to see if a found method is declared by the MID
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	boolean isMethodDeclaredByAnother(final JavaSymbolName methodName, final List<JavaType> parameterTypes, final String declaredByMetadataId);
+	
+	/**
 	 * Indicates whether the requesting MID is annotated with the specified annotation.
 	 *
 	 * @param annotationMetadata the annotation to look for

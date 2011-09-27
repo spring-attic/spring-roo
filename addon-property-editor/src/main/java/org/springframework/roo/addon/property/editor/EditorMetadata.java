@@ -11,7 +11,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -75,7 +74,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		JavaSymbolName fieldName = new JavaSymbolName("typeConverter");
 
 		// Locate user-defined field
-		FieldMetadata userField = MemberFindingUtils.getField(governorTypeDetails, fieldName);
+		FieldMetadata userField = governorTypeDetails.getField(fieldName);
 		final JavaType fieldType = SpringJavaType.SIMPLE_TYPE_CONVERTER;
 		if (userField != null) {
 			Assert.isTrue(userField.getFieldType().equals(fieldType), "Field '" + fieldName + "' on '" + destination + "' must be of type '" + fieldType.getNameIncludingTypeParameters() + "'");

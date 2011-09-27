@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -84,7 +83,7 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 */
 	private MethodMetadata getMethod(final ServiceLayerMethod method, final JavaType domainType, final JavaType idType, final String plural) {
 		final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, plural);
-		if (methodName != null && MemberFindingUtils.isMethodDeclaredByAnother(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
+		if (methodName != null && governorDetails.isMethodDeclaredByAnother(methodName, method.getParameterTypes(domainType, idType), getId())) {
 			// We don't want this method, or the governor already declares it
 			return null;
 		}

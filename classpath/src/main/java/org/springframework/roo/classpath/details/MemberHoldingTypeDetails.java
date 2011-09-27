@@ -84,6 +84,15 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	List<JavaType> getExtendsTypes();
 	
 	/**
+	 * Searches up the inheritance hierarchy until the first field with the specified name is located.
+	 * 
+	 * @param fieldName to locate (required)
+	 * @return the field, or null if not found
+	 * @since 1.2.0
+	 */
+	FieldMetadata getField(JavaSymbolName fieldName);
+	
+	/**
 	 * Searches up the inheritance hierarchy and locates all declared fields which are annotated with the specified annotation.
 	 * 
 	 * @param annotation to locate (required)

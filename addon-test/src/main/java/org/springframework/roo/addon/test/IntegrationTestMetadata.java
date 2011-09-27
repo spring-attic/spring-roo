@@ -124,7 +124,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 	
 		// Add the data on demand field if the user did not define it on the governor directly
-		FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName("dod"));
+		FieldMetadata field = governorTypeDetails.getField(new JavaSymbolName("dod"));
 		if (field != null) {
 			Assert.isTrue(field.getFieldType().equals(dodGovernor), "Field 'dod' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + dodGovernor.getFullyQualifiedTypeName() + "'");
 			Assert.notNull(MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), AUTOWIRED), "Field 'dod' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @Autowired");
@@ -143,7 +143,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private void addOptionalIntegrationTestClassIntroductions() {
 		// Add the GAE test helper field if the user did not define it on the governor directly
 		final JavaType helperType = GAE_LOCAL_SERVICE_TEST_HELPER;
-		FieldMetadata helperField = MemberFindingUtils.getField(governorTypeDetails, new JavaSymbolName("helper"));
+		FieldMetadata helperField = governorTypeDetails.getField(new JavaSymbolName("helper"));
 		if (helperField != null) {
 			Assert.isTrue(helperField.getFieldType().getFullyQualifiedTypeName().equals(helperType.getFullyQualifiedTypeName()), "Field 'helper' on '" + destination.getFullyQualifiedTypeName() + "' must be of type '" + helperType.getFullyQualifiedTypeName() + "'");
 		} else {

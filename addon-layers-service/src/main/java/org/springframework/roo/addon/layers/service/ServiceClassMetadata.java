@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -63,7 +62,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			final Map<ServiceLayerMethod, MemberTypeAdditions> crudAdditions = allCrudAdditions.get(domainType);
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 				final JavaSymbolName methodName = method.getSymbolName(annotationValues, domainType, domainTypePlurals.get(domainType));
-				if (methodName != null && !MemberFindingUtils.isMethodDeclaredByAnother(governorDetails, methodName, method.getParameterTypes(domainType, idType), getId())) {
+				if (methodName != null && !governorDetails.isMethodDeclaredByAnother(methodName, method.getParameterTypes(domainType, idType), getId())) {
 					// The method is desired and the service class' Java file doesn't contain it, so generate it
 					final MemberTypeAdditions lowerLayerCallAdditions = crudAdditions.get(method);
 					if (lowerLayerCallAdditions != null) {

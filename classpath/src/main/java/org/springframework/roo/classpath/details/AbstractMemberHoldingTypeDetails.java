@@ -68,6 +68,23 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		return null;
 	}
 	
+	public FieldMetadata getField(final JavaSymbolName fieldName) {
+		Assert.notNull(fieldName, "Field name required");
+		MemberHoldingTypeDetails current = this;
+		while (current != null) {
+			FieldMetadata result = current.getDeclaredField(fieldName);
+			if (result != null) {
+				return result;
+			}
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
+			} else {
+				current = null;
+			}
+		}
+		return null;
+	}
+	
 	public List<FieldMetadata> getFieldsWithAnnotation(final JavaType annotation) {
 		Assert.notNull(annotation, "Annotation required");
 		final List<FieldMetadata> result = new ArrayList<FieldMetadata>();
@@ -146,7 +163,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 	public JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend) {
 		Assert.hasText(proposedName, "Proposed field name is required");
 		String candidateName = proposedName;
-		while (MemberFindingUtils.getField(this, new JavaSymbolName(candidateName)) != null) {
+		while (getField(new JavaSymbolName(candidateName)) != null) {
 			// The proposed field name is taken; differentiate it
 			if (prepend) {
 				candidateName = "_" + candidateName;

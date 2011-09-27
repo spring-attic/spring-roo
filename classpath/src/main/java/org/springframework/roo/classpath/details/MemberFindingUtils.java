@@ -115,16 +115,11 @@ public final class MemberFindingUtils {
 	 * @param builder the {@link MemberHoldingTypeDetails} to search (required)
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
+	 * @deprecated use {@link AbstractIdentifiableAnnotatedJavaStructureBuilder#getDeclaredTypeAnnotation(JavaType)} instead
 	 */
+	@Deprecated
 	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure> builder, JavaType type) {
-		Assert.notNull(builder, "Member holding type details required");
-		Assert.notNull(type, "Annotation type to locate required");
-		for (AnnotationMetadataBuilder annotationBuilder : builder.getAnnotations()) {
-			if (annotationBuilder.getAnnotationType().equals(type)) {
-				return annotationBuilder;
-			}
-		}
-		return null;
+		return builder.getDeclaredTypeAnnotation(type);
 	}
 
 	/**
@@ -282,23 +277,11 @@ public final class MemberFindingUtils {
 	 * @param memberHoldingTypeDetails to search (required)
 	 * @param fieldName to locate (required)
 	 * @return the field, or null if not found
+	 * @deprecated use {@link MemberHoldingTypeDetails#getField(JavaSymbolName)} instead
 	 */
-	public static FieldMetadata getField(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName fieldName) {
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		Assert.notNull(fieldName, "Field name required");
-		MemberHoldingTypeDetails current = memberHoldingTypeDetails;
-		while (current != null) {
-			FieldMetadata result = getDeclaredField(current, fieldName);
-			if (result != null) {
-				return result;
-			}
-			if (current instanceof ClassOrInterfaceTypeDetails) {
-				current = ((ClassOrInterfaceTypeDetails)current).getSuperclass();
-			} else {
-				current = null;
-			}
-		}
-		return null;
+	@Deprecated
+	public static FieldMetadata getField(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName fieldName) {
+		return memberHoldingTypeDetails.getField(fieldName);
 	}
 
 	/**
@@ -413,7 +396,7 @@ public final class MemberFindingUtils {
 		if (memberDetails == null) {
 			return null;
 		}
-		final List<MethodMetadata> taggedMethods = getMethodsWithTag(memberDetails, tagKey);
+		final List<MethodMetadata> taggedMethods = memberDetails.getMethodsWithTag(tagKey);
 		if (taggedMethods.isEmpty()) {
 			return null;
 		} 
@@ -478,22 +461,6 @@ public final class MemberFindingUtils {
 			return null;
 		}
 		return memberHoldingTypeDetailsList.get(memberHoldingTypeDetailsList.size() - 1);
-	}
-
-	/**
-	 * Indicates whether a method specified by the method attributes is present and isn't declared by the passed in MID.
-	 *
-	 * @param memberDetails the {@link MemberDetails} to search (required)
-	 * @param methodName the name of the method being searched for
-	 * @param parameterTypes the parameters of the method being searched for
-	 * @param declaredByMetadataId the MID to be used to see if a found method is declared by the MID
-	 * @return see above
-	 * @since 1.2.0
-	 */
-	public static boolean isMethodDeclaredByAnother(MemberDetails memberDetails, JavaSymbolName methodName, List<JavaType> parameterTypes, String declaredByMetadataId) {
-		Assert.notNull(memberDetails, "Member details required");
-		final MethodMetadata method = memberDetails.getMethod(methodName, parameterTypes);
-		return method != null && !method.getDeclaredByMetadataId().equals(declaredByMetadataId);
 	}
 
 	/**

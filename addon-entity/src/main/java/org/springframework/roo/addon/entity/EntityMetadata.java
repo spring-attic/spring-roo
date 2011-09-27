@@ -166,7 +166,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// Compute the required field name
 			index++;
 			final JavaSymbolName fieldSymbolName = new JavaSymbolName(StringUtils.repeat("_", index) + "entityManager");
-			final FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
+			final FieldMetadata candidate = governorTypeDetails.getField(fieldSymbolName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
 				

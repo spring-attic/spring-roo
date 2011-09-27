@@ -157,7 +157,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @return null if the field exists on the governor, otherwise a new field with the given field name and type
 	 */
 	protected FieldMetadata getField(final int modifier, final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
-		final FieldMetadata field = MemberFindingUtils.getField(governorTypeDetails, fieldName);
+		final FieldMetadata field = governorTypeDetails.getField(fieldName);
 		if (field != null) return null;
 		
 		addToImports(Arrays.asList(fieldType));
