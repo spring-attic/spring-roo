@@ -218,7 +218,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
 		
 		int listViewFields = 0;
-		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		for (final MethodMetadata method : memberDetails.getMethods()) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
@@ -267,7 +267,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	 * @return see above
 	 */
 	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
-		return MemberFindingUtils.hasSameName(method, idMethod, versionMethod);
+		return method.hasSameName(idMethod, versionMethod);
 	}
 	
 	/**

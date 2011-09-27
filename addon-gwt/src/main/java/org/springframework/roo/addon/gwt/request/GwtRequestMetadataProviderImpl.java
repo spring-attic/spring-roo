@@ -100,7 +100,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		List<String> exclusionsList = getMethodExclusions(request);
 
 		List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
-		for (MethodMetadata methodMetadata : MemberFindingUtils.getMethods(memberDetails)) {
+		for (MethodMetadata methodMetadata : memberDetails.getMethods()) {
 			if (Modifier.isPublic(methodMetadata.getModifier()) && !exclusionsList.contains(methodMetadata.getMethodName().getSymbolName())) {
 				JavaType returnType = gwtTypeService.getGwtSideLeafType(methodMetadata.getReturnType(), projectMetadata, target.getName(), true, true);
 				if (returnType == null) {

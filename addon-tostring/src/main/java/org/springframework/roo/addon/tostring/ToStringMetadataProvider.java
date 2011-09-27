@@ -16,7 +16,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -52,7 +51,7 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 			return null;
 		}
 
-		List<MethodMetadata> methods = MemberFindingUtils.getMethods(memberDetails);
+		List<MethodMetadata> methods = memberDetails.getMethods();
 		if (methods.isEmpty()) {
 			return null;
 		}

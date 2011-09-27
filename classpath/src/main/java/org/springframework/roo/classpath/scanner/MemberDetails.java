@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -11,6 +12,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
+import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -66,6 +68,24 @@ public interface MemberDetails {
 	List<MemberHoldingTypeDetails> getDetails();
 	
 	/**
+	 * Searches all {@link MemberHoldingTypeDetails} and returns all fields.
+	 * 
+	 * @return zero or more fields (never null)
+	 */
+	List<FieldMetadata> getFields();
+	
+	/**
+	 * Locates a method with the name presented. Searches all {@link MemberDetails} until the first such method is located
+	 * or none can be found.
+	 *
+	 * @param methodName the method name to locate (can be <code>null</code>)
+	 * @return the first located method, or <code>null</code> if the method name
+	 * is <code>null</code> or such a method cannot be found
+	 * @since 1.2.0
+	 */
+	MethodMetadata getMethod(JavaSymbolName methodName);
+	
+	/**
 	 * Locates a method with the name and parameter signature presented. Searches
 	 * all {@link MemberDetails} until the first such method is located
 	 * or none can be found.
@@ -78,4 +98,46 @@ public interface MemberDetails {
 	 * @since 1.2.0
 	 */
 	MethodMetadata getMethod(JavaSymbolName methodName, List<JavaType> parameters);
+	
+	/**
+	 * Locates a method with the name and parameter signature presented that is not declared by the presented MID.
+	 * 
+	 * @param methodName the method name to locate (can be <code>null</code>)
+	 * @param parameters the method parameter signature to locate (can be null
+	 * if no parameters are required)
+	 * @param excludingMid the MID that a found method cannot be declared by
+	 * @return the first located method, or <code>null</code> if the method name
+	 * is <code>null</code> or such a method cannot be found
+	 * @since 1.2.0
+	 */
+	MethodMetadata getMethod(JavaSymbolName methodName, List<JavaType> parameters, String excludingMid);
+	
+	/**
+	 * Searches all {@link MemberHoldingTypeDetails} and returns all methods.
+	 * 
+	 * @return zero or more methods (never null)
+	 * @since 1.2.0
+	 */
+	List<MethodMetadata> getMethods();
+	
+	/**
+	 * Searches all {@link MemberDetails} and returns all methods which contain a given
+	 * {@link CustomData} tag.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param tagKey the {@link CustomData} key to search for
+	 * @return zero or more methods (never null)
+	 * @since 1.2.0
+	 */
+	List<MethodMetadata> getMethodsWithTag(Object tagKey);
+	
+	/**
+	 * Indicates whether the requesting MID is annotated with the specified annotation.
+	 *
+	 * @param annotationMetadata the annotation to look for
+	 * @param requestingMid the MID interested in
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	boolean isRequestingAnnotatedWith(AnnotationMetadata annotationMetadata, String requestingMid);
 }

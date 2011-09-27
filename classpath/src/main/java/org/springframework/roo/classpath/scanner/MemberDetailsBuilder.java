@@ -98,7 +98,7 @@ public class MemberDetailsBuilder {
 	private void doModification(MethodMetadata method, CustomData customData) {
 		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(method.getDeclaredByMetadataId());
 		if (memberHoldingTypeDetails != null) {
-			MethodMetadata matchedMethod = MemberFindingUtils.getMethod(memberHoldingTypeDetails, method.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes()));
+			MethodMetadata matchedMethod = memberHoldingTypeDetails.getMethod(method.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes()));
 			if (matchedMethod != null && !matchedMethod.getCustomData().keySet().containsAll(customData.keySet())) {
 				TypeDetailsBuilder typeDetailsBuilder = getTypeDetailsBuilder(memberHoldingTypeDetails);
 				typeDetailsBuilder.addDataToMethod(method, customData);

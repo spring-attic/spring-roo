@@ -31,6 +31,15 @@ public final class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
 		this.methodName = methodName;
 		this.returnType = returnType;
 	}
+	
+	public boolean hasSameName(final MethodMetadata... otherMethods) {
+		for (final MethodMetadata otherMethod : otherMethods) {
+			if (otherMethod != null && this.methodName.equals(otherMethod.getMethodName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public JavaSymbolName getMethodName() {
 		return methodName;

@@ -381,7 +381,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = new " + destination.getSimpleTypeName() + "() {");
 			// Handle any abstract methods in this class
 			bodyBuilder.indent();
-			for (final MethodMetadata method : MemberFindingUtils.getMethods(governorTypeDetails)) {
+			for (final MethodMetadata method : governorTypeDetails.getMethods()) {
 				if (Modifier.isAbstract(method.getModifier())) {
 					final StringBuilder params = new StringBuilder();
 					int i = -1;

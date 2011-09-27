@@ -26,7 +26,6 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -175,7 +174,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 
 		// Remove fields with the @Transient annotation
-		List<FieldMetadata> transientAnnotatedFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, TRANSIENT);
+		List<FieldMetadata> transientAnnotatedFields = governorTypeDetails.getFieldsWithAnnotation(TRANSIENT);
 		if (fields.containsAll(transientAnnotatedFields)) {
 			fields.removeAll(transientAnnotatedFields);
 		}

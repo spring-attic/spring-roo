@@ -143,7 +143,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 		if (!embeddedIdFields.isEmpty()) {
 			domainTypeEmbeddedIdFieldsCache.remove(type);
 			domainTypeEmbeddedIdFieldsCache.put(type, new ArrayList<FieldMetadata>());
-			final List<FieldMetadata> fields = MemberFindingUtils.getFields(getMemberDetails(embeddedIdFields.get(0).getFieldType()));
+			final List<FieldMetadata> fields = getMemberDetails(embeddedIdFields.get(0).getFieldType()).getFields();
 			for (final FieldMetadata field : fields) {
 				if (!field.getCustomData().keySet().contains("SERIAL_VERSION_UUID_FIELD")) {
 					domainTypeEmbeddedIdFieldsCache.get(type).add(field);

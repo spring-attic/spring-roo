@@ -19,7 +19,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -47,7 +46,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 		SortedSet<JavaSymbolName> finders = new TreeSet<JavaSymbolName>();
 
-		List<FieldMetadata> fields = MemberFindingUtils.getFields(memberDetails);
+		List<FieldMetadata> fields = memberDetails.getFields();
 		for (int i = 0; i < depth; i++) {
 			SortedSet<JavaSymbolName> tempFinders = new TreeSet<JavaSymbolName>();
 			for (FieldMetadata field : fields) {
@@ -249,7 +248,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 	private List<MethodMetadata> getLocatedMutators(MemberDetails memberDetails) {
 		List<MethodMetadata> locatedMutators = new ArrayList<MethodMetadata>();
-		for (MethodMetadata methodMetadata : MemberFindingUtils.getMethods(memberDetails)) {
+		for (MethodMetadata methodMetadata : memberDetails.getMethods()) {
 			if (isMethodOfInterest(methodMetadata)) {
 				locatedMutators.add(methodMetadata);
 			}

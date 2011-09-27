@@ -84,6 +84,15 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	List<JavaType> getExtendsTypes();
 	
 	/**
+	 * Searches up the inheritance hierarchy and locates all declared fields which are annotated with the specified annotation.
+	 * 
+	 * @param annotation to locate (required)
+	 * @return all the located fields (never null, but may be empty)
+	 * @since 1.2.0
+	 */
+	List<FieldMetadata> getFieldsWithAnnotation(JavaType annotation);
+	
+	/**
 	 * Lists the classes this type implements. Always empty in the case of an interface.
 	 * 
 	 * <p>
@@ -94,6 +103,34 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	 * @return an unmodifiable representation of classes this type implements (may be empty, but never null)
 	 */
 	List<JavaType> getImplementsTypes();
+	
+	/**
+	 * Searches up the inheritance hierarchy until the first method with the
+	 * specified name is located; method parameters are not taken into account.
+	 *
+	 * @param methodName to locate (required)
+	 * @return the method, or null if not found
+	 * @since 1.2.0
+	 */
+	MethodMetadata getMethod(JavaSymbolName methodName);
+	
+	/**
+	 * Searches up the inheritance hierarchy until the first method with the
+	 * specified name and parameters is located.
+	 * 
+	 * @param methodName to locate (required)
+	 * @param parameters to locate (can be null if there are no parameters)
+	 * @return the method, or <code>null</code> if not found
+	 * @since 1.2.0
+	 */
+	MethodMetadata getMethod(JavaSymbolName methodName, List<JavaType> parameters);
+	
+	/**
+	 * Locates all methods on this class and its superclasses.
+	 * 
+	 * @return zero or more methods (never null)
+	 */
+	List<MethodMetadata> getMethods();
 	
 	/**
 	 * Generates a unique name for a field, starting from the given

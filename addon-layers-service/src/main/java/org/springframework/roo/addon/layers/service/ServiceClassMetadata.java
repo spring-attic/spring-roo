@@ -90,14 +90,14 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		
 		// Introduce the @Service annotation via the ITD if it's not already on the service's Java class
 		final AnnotationMetadata serviceAnnotation = new AnnotationMetadataBuilder(SERVICE).build();
-		if (!MemberFindingUtils.isRequestingAnnotatedWith(governorDetails, serviceAnnotation, getId())) {
+		if (!governorDetails.isRequestingAnnotatedWith(serviceAnnotation, getId())) {
 			builder.addAnnotation(serviceAnnotation);
 		}
 		
 		// Introduce the @Transactional annotation via the ITD if it's not already on the service's Java class
 		if (annotationValues.isTransactional()) {
 			final AnnotationMetadata transactionalAnnotation = new AnnotationMetadataBuilder(TRANSACTIONAL).build();
-			if (!MemberFindingUtils.isRequestingAnnotatedWith(governorDetails, serviceAnnotation, getId())) {
+			if (!governorDetails.isRequestingAnnotatedWith(serviceAnnotation, getId())) {
 				builder.addAnnotation(transactionalAnnotation);
 			}
 		}

@@ -176,7 +176,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	private Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> getLocatedMutators(MemberDetails memberDetails, String metadataIdentificationString) {
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
 
-		List<MethodMetadata> mutatorMethods = MemberFindingUtils.getMethods(memberDetails);
+		List<MethodMetadata> mutatorMethods = memberDetails.getMethods();
 		// To avoid unnecessary rewriting of the DoD ITD we sort the mutators by method name to provide a consistent ordering
 		Collections.sort(mutatorMethods, new NaturalOrderComparator<MethodMetadata>() {
 			@Override
@@ -237,7 +237,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 			return null;
 		}
 		
-		for (FieldMetadata field : MemberFindingUtils.getFields(identifierMemberDetails)) {
+		for (FieldMetadata field : identifierMemberDetails.getFields()) {
 			if (!(Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier()) || Modifier.isTransient(field.getModifier()))) {
 				metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 				identifierFields.add(field);
@@ -263,7 +263,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 
 			final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 
-			for (FieldMetadata field : MemberFindingUtils.getFields(embeddedMemberDetails)) {
+			for (FieldMetadata field : embeddedMemberDetails.getFields()) {
 				if (!(Modifier.isStatic(field.getModifier()) || Modifier.isFinal(field.getModifier()) || Modifier.isTransient(field.getModifier()))) {
 					metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 					fields.add(field);

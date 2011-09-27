@@ -99,7 +99,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		JavaTypeMetadataDetails javaTypeMetadataDetails = getJavaTypeMetadataDetails(javaType, memberDetails, metadataIdentificationString);
 		specialTypes.put(javaType, javaTypeMetadataDetails);
 		
-		for (MethodMetadata method: MemberFindingUtils.getMethods(memberDetails)) {
+		for (final MethodMetadata method : memberDetails.getMethods()) {
 			// Not interested in non accessor methods
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
@@ -136,7 +136,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(memberDetails, "Member details required");
 		
 		List<JavaTypeMetadataDetails> dependentTypes = new ArrayList<JavaTypeMetadataDetails>();
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		for (MethodMetadata method : memberDetails.getMethods()) {
 			JavaType type = method.getReturnType();
 			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(type)) {
 				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
@@ -159,7 +159,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(javaType);
 
 		Map<JavaSymbolName, FieldMetadata> fields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
-		List<MethodMetadata> methods = MemberFindingUtils.getMethods(memberDetails);
+		List<MethodMetadata> methods = memberDetails.getMethods();
 
 		for (MethodMetadata method : methods) {
 			// Only interested in accessors
@@ -286,7 +286,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Map<JavaSymbolName, DateTimeFormatDetails> dates = new LinkedHashMap<JavaSymbolName, DateTimeFormatDetails>();
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = getJavaTypePersistenceMetadataDetails(javaType, memberDetails, metadataIdentificationString);
 
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		for (MethodMetadata method : memberDetails.getMethods()) {
 			// Only interested in accessors
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;

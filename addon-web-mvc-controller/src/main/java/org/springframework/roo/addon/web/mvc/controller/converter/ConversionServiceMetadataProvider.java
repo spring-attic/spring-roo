@@ -179,7 +179,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		int counter = 0;
-		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		for (MethodMetadata method : memberDetails.getMethods()) {
 			// Track any changes to that method (eg it goes away)
 			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 

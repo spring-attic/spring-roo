@@ -13,7 +13,6 @@ import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -75,7 +74,7 @@ public class MongoEntityMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private FieldMetadata getIdentifierField(JavaType idType) {
 		// Try to locate an existing field with SPRING_DATA_ID
-		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, SpringJavaType.DATA_ID);
+		final List<FieldMetadata> idFields = governorTypeDetails.getFieldsWithAnnotation(SpringJavaType.DATA_ID);
 		if (!idFields.isEmpty()) {
 			return idFields.get(0);
 		}

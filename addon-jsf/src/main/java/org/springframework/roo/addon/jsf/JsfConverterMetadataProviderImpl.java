@@ -158,7 +158,7 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
 
 		int converterMethodCount = 0;
-		for (final MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+		for (final MethodMetadata method : memberDetails.getMethods()) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
@@ -188,7 +188,7 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 	 * @return see above
 	 */
 	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
-		return MemberFindingUtils.hasSameName(method, idMethod, versionMethod);
+		return method.hasSameName(idMethod, versionMethod);
 	}
 	
 	/**

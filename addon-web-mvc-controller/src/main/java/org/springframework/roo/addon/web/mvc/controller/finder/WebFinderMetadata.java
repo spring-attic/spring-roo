@@ -245,7 +245,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 	}
 
 	private boolean methodExists(JavaSymbolName methodName, List<JavaType> parameterTypes) {
-		return MemberFindingUtils.getMethod(memberDetails, methodName, parameterTypes, getId()) != null;
+		return memberDetails.getMethod(methodName, parameterTypes, getId()) != null;
 	}
 	
 	private String uncapitalize(String term) {

@@ -67,6 +67,81 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
+	
+	public List<FieldMetadata> getFieldsWithAnnotation(final JavaType annotation) {
+		Assert.notNull(annotation, "Annotation required");
+		final List<FieldMetadata> result = new ArrayList<FieldMetadata>();
+		MemberHoldingTypeDetails current = this;
+		while (current != null) {
+			for (final FieldMetadata field : current.getDeclaredFields()) {
+				if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), annotation) != null) {
+					// Found the annotation on this field
+					result.add(field);
+				}
+			}
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails) current).getSuperclass();
+			} else {
+				current = null;
+			}
+		}
+		return result;
+	}
+
+	public MethodMetadata getMethod(final JavaSymbolName methodName) {
+		Assert.notNull(methodName, "Method name required");
+
+		MemberHoldingTypeDetails current = this;
+		while (current != null) {
+			MethodMetadata result = MemberFindingUtils.getDeclaredMethod(current, methodName);
+			if (result != null) {
+				return result;
+			}
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails) current).getSuperclass();
+			} else {
+				current = null;
+			}
+		}
+		return null;
+	}
+	
+	public MethodMetadata getMethod(final JavaSymbolName methodName, List<JavaType> parameters) {
+		Assert.notNull(methodName, "Method name required");
+		if (parameters == null) {
+			parameters = new ArrayList<JavaType>();
+		}
+
+		MemberHoldingTypeDetails current = this;
+		while (current != null) {
+			MethodMetadata result = MemberFindingUtils.getDeclaredMethod(current, methodName, parameters);
+			if (result != null) {
+				return result;
+			}
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails) current).getSuperclass();
+			} else {
+				current = null;
+			}
+		}
+		return null;
+	}
+	
+	public List<MethodMetadata> getMethods() {
+		final List<MethodMetadata> result = new ArrayList<MethodMetadata>();
+		MemberHoldingTypeDetails current = this;
+		while (current != null) {
+			for (final MethodMetadata methods : current.getDeclaredMethods()) {
+				result.add(methods);
+			}
+			if (current instanceof ClassOrInterfaceTypeDetails) {
+				current = ((ClassOrInterfaceTypeDetails) current).getSuperclass();
+			} else {
+				current = null;
+			}
+		}
+		return result;
+	}
 
 	public JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend) {
 		Assert.hasText(proposedName, "Proposed field name is required");

@@ -729,8 +729,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Check @Column and @JoinColumn annotations on fields in governor with the same 'name' as the generated field 
-		List<FieldMetadata> governorFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, COLUMN);
-		governorFields.addAll(MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, JOIN_COLUMN));
+		final List<FieldMetadata> governorFields = governorTypeDetails.getFieldsWithAnnotation(COLUMN);
+		governorFields.addAll(governorTypeDetails.getFieldsWithAnnotation(JOIN_COLUMN));
 		for (FieldMetadata governorField : governorFields) {
 			governorFieldAnnotations: for (AnnotationMetadata governorFieldAnnotation : governorField.getAnnotations()) {
 				if (governorFieldAnnotation.getAnnotationType().equals(COLUMN) || governorFieldAnnotation.getAnnotationType().equals(JOIN_COLUMN)) {

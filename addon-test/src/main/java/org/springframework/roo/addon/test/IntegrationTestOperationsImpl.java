@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.test;
 
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 import static org.springframework.roo.model.SpringJavaType.MOCK_STATIC_ENTITY_METHODS;
 
@@ -16,11 +18,9 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -137,7 +137,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 			if (classOrInterfaceTypeDetails != null) {
 				MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(IntegrationTestOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
-				List<MethodMetadata> countMethods = MemberFindingUtils.getMethodsWithTag(memberDetails, PersistenceCustomDataKeys.COUNT_ALL_METHOD);
+				List<MethodMetadata> countMethods = memberDetails.getMethodsWithTag(COUNT_ALL_METHOD);
 				if (countMethods.size() == 1) {
 					String countMethod = entity.getSimpleTypeName() + "." + countMethods.get(0).getMethodName().getSymbolName() + "()";
 					bodyBuilder.appendFormalLine("int expectedCount = 13;");
@@ -188,7 +188,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), governorTypeDetails);
 			for (MemberHoldingTypeDetails typeDetails : memberDetails.getDetails()) {
-				if (!(typeDetails.getCustomData().keySet().contains(PersistenceCustomDataKeys.PERSISTENT_TYPE) || typeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.tostring.ToStringMetadata"))) {
+				if (!(typeDetails.getCustomData().keySet().contains(PERSISTENT_TYPE) || typeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.tostring.ToStringMetadata"))) {
 					for (MethodMetadata method : typeDetails.getDeclaredMethods()) {
 						// Check if public, non-abstract method
 						if (Modifier.isPublic(method.getModifier()) && !Modifier.isAbstract(method.getModifier())) {

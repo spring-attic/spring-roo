@@ -314,7 +314,7 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetails.getDetails();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-			for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+			for (MethodMetadata method : memberDetails.getMethods()) {
 				if (isPublicAccessor(method)) {
 					if (isValidMethodReturnType(method, memberHoldingTypeDetail)) {
 						proxyMethods.remove(method.getMethodName());

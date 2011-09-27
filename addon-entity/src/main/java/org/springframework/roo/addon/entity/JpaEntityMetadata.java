@@ -236,13 +236,13 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		// Try to locate an existing field with @javax.persistence.Id
-		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
+		final List<FieldMetadata> idFields = governorTypeDetails.getFieldsWithAnnotation(ID);
 		if (!idFields.isEmpty()) {
 			return getIdentifierField(idFields, ID);
 		}
 
 		// Try to locate an existing field with @javax.persistence.EmbeddedId
-		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
+		final List<FieldMetadata> embeddedIdFields = governorTypeDetails.getFieldsWithAnnotation(EMBEDDED_ID);
 		if (!embeddedIdFields.isEmpty()) {
 			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
@@ -514,7 +514,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// Locate an existing accessor
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredAccessorName, new ArrayList<JavaType>(), getId());
+			final MethodMetadata method = entityMemberDetails.getMethod(requiredAccessorName, new ArrayList<JavaType>(), getId());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it
@@ -556,7 +556,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		// Try to locate an existing field with @Version
-		final List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, VERSION);
+		final List<FieldMetadata> found = governorTypeDetails.getFieldsWithAnnotation(VERSION);
 		if (found.size() > 0) {
 			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @Version in '" + destination.getFullyQualifiedTypeName() + "'");
 			return found.get(0);
@@ -621,7 +621,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
-			final MethodMetadata method = MemberFindingUtils.getMethod(entityMemberDetails, requiredMutatorName, parameterTypes, getId());
+			final MethodMetadata method = entityMemberDetails.getMethod(requiredMutatorName, parameterTypes, getId());
 			if (method != null) {
 				if (Modifier.isPublic(method.getModifier())) {
 					// Method exists and is public so return it

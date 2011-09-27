@@ -20,4 +20,15 @@ public interface MethodMetadata extends InvocableMemberMetadata {
 	 * @return the name of the method (never null)
 	 */
 	JavaSymbolName getMethodName();
+	
+	/**
+	 * Indicates whether this method has the same name (case-sensitive) as
+	 * any of the given methods
+	 * 
+	 * @param otherMethods the methods to check against; can be empty or
+	 * contain <code>null</code> elements, which will be ignored
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	boolean hasSameName(final MethodMetadata... otherMethods);
 }
