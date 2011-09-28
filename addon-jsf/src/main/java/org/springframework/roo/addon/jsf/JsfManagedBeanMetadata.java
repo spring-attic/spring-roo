@@ -24,6 +24,7 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEX
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MESSAGE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_REQUEST_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SLIDER;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SPINNER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_UPLOADED_FILE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
@@ -154,7 +155,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addField(getField(PRIVATE, CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
 		
 		for (final FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
-			builder.addField(getUploadedFileField(rooUploadedFileField));
+			builder.addField(getField(rooUploadedFileField.getFieldName(), PRIMEFACES_UPLOADED_FILE));
 		}
 
 		// Add methods
@@ -224,21 +225,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 	
 	private FieldMetadata getPanelGridField(final Action panelType) {
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(HTML_PANEL_GRID);
 		return getField(new JavaSymbolName(StringUtils.toLowerCase(panelType.name()) + "PanelGrid"), HTML_PANEL_GRID);
 	}
 	
-	private FieldMetadata getUploadedFileField(final FieldMetadata rooUploadedFileField) {
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(PRIMEFACES_UPLOADED_FILE);
-		return getField(rooUploadedFileField.getFieldName(), PRIMEFACES_UPLOADED_FILE);
-	}
-
 	private MethodMetadata getInitMethod(final MemberTypeAdditions findAllAdditions) {
 		final JavaSymbolName methodName = new JavaSymbolName("init");
-		final MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName) != null) {
+			return null;
+		}
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(ARRAY_LIST);
@@ -272,8 +266,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getFindAllEntitiesMethod(final JavaSymbolName fieldName, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("findAll" + plural);
-		final MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName) != null) {
+			return null;
+		}
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = " + findAllMethod.getMethodCall() + ";");
@@ -288,8 +283,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getPanelGridAccessorMethod(final Action action) {
 		final String fieldName = StringUtils.toLowerCase(action.name()) + "PanelGrid";
 		final JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(new JavaSymbolName(fieldName), false);
-		final MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName) != null) {
+			return null;
+		}
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(HTML_PANEL_GRID);
@@ -341,8 +337,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				methodName = new JavaSymbolName("populateViewPanel");
 				break;
 		}
-		final MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
+		
+		if (getGovernorMethod(methodName) != null) {
+			return null;
+		}
 		
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(EL_CONTEXT);
@@ -439,10 +437,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				} else {
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
 					imports.addImport(PRIMEFACES_SLIDER);
+					imports.addImport(PRIMEFACES_SPINNER);
 					if (fieldType.equals(JdkJavaType.BIG_INTEGER)) {
 						imports.addImport(fieldType);
 					}
-					bodyBuilder.appendFormalLine(inputTextStr);
+					bodyBuilder.appendFormalLine("Spinner " + fieldValueId + " = " + getComponentCreationStr("Spinner"));
+			//		bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
 					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(requiredStr);
@@ -453,15 +453,16 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.append(getLongRangeValdatorString(fieldValueId, minValue, maxValue));
 					}
 					bodyBuilder.appendFormalLine("");
-					bodyBuilder.appendFormalLine("Slider " + fieldValueId + "Slider = " + getComponentCreationStr("Slider"));
-					bodyBuilder.appendFormalLine(fieldValueId + "Slider.setFor(\"" + fieldValueId + "\");");
-					bodyBuilder.appendFormalLine("");
+			//		bodyBuilder.appendFormalLine("Slider " + fieldValueId + "Slider = " + getComponentCreationStr("Slider"));
+			//		bodyBuilder.appendFormalLine(fieldValueId + "Slider.setFor(\"" + fieldValueId + "\");");
+			//		bodyBuilder.appendFormalLine(fieldValueId + "Spinner.setFor(\"" + fieldValueId + "\");");
+			//		bodyBuilder.appendFormalLine("");
 				
-					final String fieldPanelGrid = fieldValueId + "PanelGrid";
-					bodyBuilder.appendFormalLine("HtmlPanelGrid " + fieldPanelGrid + " = " + getComponentCreationStr("HtmlPanelGrid"));
-					bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + ");");
-					bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + "Slider);");
-					fieldValueId = fieldPanelGrid;
+			//		final String fieldPanelGrid = fieldValueId + "PanelGrid";
+			//		bodyBuilder.appendFormalLine("HtmlPanelGrid " + fieldPanelGrid + " = " + getComponentCreationStr("HtmlPanelGrid"));
+			//		bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + ");");
+			//		bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + "Slider);");
+			//		fieldValueId = fieldPanelGrid;
 				}
 			} else if (JdkJavaType.isDecimalType(fieldType)) {
 				if (action == Action.VIEW) {
@@ -501,7 +502,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.append(getLengthValdatorString(fieldValueId, minValue, maxValue));
 					}
 				}
-	//		} else if (isApplicationType(field)) {
+			} else if (fieldType.isCommonCollectionType()) {
+				
+			} else if (isApplicationType(field)) {
 				
 			} else {
 				if (action == Action.VIEW) {
@@ -553,6 +556,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	 */
 	private boolean isEnum(final FieldMetadata field) {
 		return field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD);
+	}
+	
+	private boolean isApplicationType(final FieldMetadata field) {
+		return field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.APPLICATION_TYPE_CUSTOM_DATA_KEY);
 	}
 	
 	private boolean isNullable(final FieldMetadata field) {
@@ -634,12 +641,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getFileUploadListenerMethod(final FieldMetadata rooUploadedFileField) {
 		final JavaSymbolName methodName = getFileUploadMethodName(rooUploadedFileField.getFieldName());
 		final JavaType parameterType = PRIMEFACES_FILE_UPLOAD_EVENT;
-		final MethodMetadata method = getGovernorMethod(methodName, parameterType);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName, parameterType) != null) {
+			return null;
+		}
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(FACES_MESSAGE);
-		imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("event"));
 		
@@ -656,8 +663,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getEnumAutoCompleteMethod(final FieldMetadata autoCompleteField) {
 		final JavaSymbolName methodName = new JavaSymbolName("complete" + StringUtils.capitalize(autoCompleteField.getFieldName().getSymbolName()));
 		final JavaType parameterType = JavaType.STRING;
-		final MethodMetadata method = getGovernorMethod(methodName, parameterType);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName, parameterType) != null) {
+			return null;
+		}
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("query"));
 
@@ -733,8 +741,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	private MethodMetadata getDeleteMethod(final MemberTypeAdditions removeMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("delete");
-		final MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName) != null) {
+			return null;
+		}
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
@@ -758,8 +767,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getHandleDialogCloseMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("handleDialogClose");
 		final JavaType parameterType = PRIMEFACES_CLOSE_EVENT;
-		final MethodMetadata method = getGovernorMethod(methodName, parameterType);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName, parameterType) != null) {
+			return null;
+		}
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(PRIMEFACES_CLOSE_EVENT);

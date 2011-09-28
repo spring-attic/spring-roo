@@ -11,4 +11,6 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 public interface JsfManagedBeanMetadataProvider extends ItdTriggerBasedMetadataProvider {
 	
 	String LIST_VIEW_FIELD_CUSTOM_DATA_KEY = "listViewField";
+
+	String APPLICATION_TYPE_CUSTOM_DATA_KEY = "applicationType";
 }

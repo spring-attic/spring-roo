@@ -44,12 +44,17 @@
                     <artifactId>primefaces</artifactId>
                     <version>3.0.M3</version>
                 </dependency>
+                <dependency>
+                    <groupId>org.primefaces.themes</groupId>
+                    <artifactId>south-street</artifactId>
+                    <version>1.0.1</version>
+                </dependency>
             </dependencies>
             <repositories>
                 <repository>
                     <id>prime-repo</id>
-                    <name>Prime Technology Maven Repository</name>
-                    <url>http://repository.prime.com.tr</url>
+                    <name>PrimeFaces Maven Repository</name>
+                    <url>http://repository.primefaces.org</url>
                     <layout>default</layout>
                 </repository>
             </repositories>

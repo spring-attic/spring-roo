@@ -111,8 +111,9 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 	private MethodMetadata getInitMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("init");
-		MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
+		if (getGovernorMethod(methodName) != null) {
+			return null;
+		}
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(EL_CONTEXT);
@@ -157,7 +158,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"create" + entity.getSimpleTypeName() + "MenuItem\");");
-			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_create}\", String.class));");
+			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.label_create}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_CREATE_DIALOG + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");
@@ -165,7 +166,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 
 			bodyBuilder.appendFormalLine("item = new MenuItem();");
 			bodyBuilder.appendFormalLine("item.setId(\"list" + entity.getSimpleTypeName() + "MenuItem\");");
-			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.global_menu_list}\", String.class));");
+			bodyBuilder.appendFormalLine("item.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{messages.label_list}\", String.class));");
 			bodyBuilder.appendFormalLine("item.setActionExpression(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + DISPLAY_LIST + "}\", String.class, new Class[0]));");
 			bodyBuilder.appendFormalLine("item.setAjax(false);");
 			bodyBuilder.appendFormalLine("item.setAsync(false);");

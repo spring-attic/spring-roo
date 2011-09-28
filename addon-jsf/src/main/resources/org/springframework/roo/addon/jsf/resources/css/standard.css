@@ -1,35 +1,33 @@
-/* main elements */
-body, div, td {
+body,div,td {
     font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px; /* color: #666; */
-     word-wrap: break-word;
+    font-size: 12px;
+    word-wrap: break-word;
 }
 
 body {
     background-color: #fff;
     text-align: left;
-    
 }
 
 a img {
     border: 0 none;
     vertical-align: middle;
-
 }
+
 a {
-	text-decoration: underline;
+    text-decoration: underline;
 }
 
 a:hover {
-	color: #456314;
+    color: #456314;
 }
 
 a:active {
-	color: #7db223;
+    color: #7db223;
 }
 
 a:visited {
-	color: #7db223;
+    color: #7db223;
 }
 
 .wrapper {
@@ -38,24 +36,17 @@ a:visited {
     max-width: 1024px;
     margin-right: auto;
     margin-left: auto; /* fix max-width incompatibility in IE6 */
-    width: expression(document.body.clientWidth >  1024 ? "1024px" : "auto");
+    width: expression(document.body.clientWidth > 1024 ? "1024px" : "auto");
     overflow: hidden;
     display: block;
-   
 }
 
 .menu {
     width: 230px;
     vertical-align: top;
     text-align: center;
-     margin-right: 5px;
-      word-wrap: break-word;
-}
-
-
-
-.listrow td {
-    height: 15px !important;
+    margin-right: 5px;
+    word-wrap: break-word;
 }
 
 .content {
@@ -63,82 +54,15 @@ a:visited {
     height: auto;
     vertical-align: top;
     text-align: left;
-   
 }
 
-.form_textarea  {
-
-    clear:both;
-    float:left;
-    min-width:250px;
-    min-height:50px;
-
+.banner {
+    margin-bottom:5px;
 }
 
-.form_fieldlabel  {
-
-    margin-top: 5px;
-    clear:both;
-    float:left;
-
-}
-
-.form_field  {
-
-    clear:both;
-    float:left;
-
-}
-
-.form_button  {
-    margin-top: 0px;
-    clear:both;
-    float:right;
-    text-align:right;
-
-}
-
-.ui-message-error  {
-
-    display:block;
-    float:left;
-
-}
-
-.delete {
-    background-image: url(../images/delete.png) !important;
-   
-}
-
-.edit {
-    background-image: url(../images/edit.png) !important;
-}
-
-.view {
-    background-image: url(../images/view.png) !important;
-}
-
-.add {
-    background-image: url(../images/add.png) !important;
-}
-
-.update {
-    background-image: url(../images/update.png) !important;
-}
-
-.header-option {
-    float:right;
-    font-size:10px;
-}
-
-.app-header {
-	text-align: left !important;
-    margin-top:0px !important;
-  
-   
-    font-weight:normal !important;
-    font-size:18px;
-
+.action-column {
+    text-align: center;
+    width:120px;
 }
 
 #footer {
@@ -150,35 +74,4 @@ a:visited {
     margin-top:15px;
     text-align:left;
 }
-
-.settings {
-    padding-right:5px;
-    float:right;
-}
-
-.hidden {
-    display:none;
-}
-
-.message {
-    display:inline-block;
-    font-size:14px;
-    margin-left:10px;
-    padding-top:10px;
-}
-
-.banner {
-    margin-bottom:5px;
-}
-
-.action-column {
-	text-align: center;
-    width:120px;
-}
-
-.action-icon {
-    margin:0px 1px ;
-    padding: 0px;
-}
-
 

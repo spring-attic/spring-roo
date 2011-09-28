@@ -11,15 +11,15 @@
             <h:panelGrid columns="2">
                 <h:panelGrid columns="2" width="600">
                     <h:panelGrid columns="5">
-                        <h:outputLink value="../pages/main.jsf">Home</h:outputLink>
-                        <h:outputText value="| Language:" />
+                        <h:outputLink value="../pages/main.jsf">#{messages.label_home}</h:outputLink>
+                        <h:outputText value="| #{messages.label_language}:" />
                         <h:panelGroup>
                             <h:commandLink id="switchToEnglish" action="#{localeBean.setSelectedLocale}">
                                 <f:param name="locale" value="en" />
-                                <h:graphicImage library="images" name="en.png" styleClass="flag" />
+                                <h:graphicImage library="images" name="en.png" />
                             </h:commandLink>
                             <p:tooltip for="switchToEnglish">
-                                <h:outputFormat value="#{messages.global_language_switch}">
+                                <h:outputFormat value="#{messages.label_language_switch}">
                                     <f:param value="English" />
                                 </h:outputFormat>
                             </p:tooltip>
@@ -27,10 +27,10 @@
                         <h:panelGroup>
                             <h:commandLink id="switchToGerman" action="#{localeBean.setSelectedLocale}">
                                 <f:param name="locale" value="de" />
-                                <h:graphicImage library="images" name="de.png" styleClass="flag" />
+                                <h:graphicImage library="images" name="de.png" />
                             </h:commandLink>
                             <p:tooltip for="switchToGerman">
-                                <h:outputFormat value="#{messages.global_language_switch}">
+                                <h:outputFormat value="#{messages.label_language_switch}">
                                     <f:param value="Deutsch" />
                                 </h:outputFormat>
                             </p:tooltip>
@@ -38,10 +38,10 @@
                         <h:panelGroup>
                             <h:commandLink id="switchToSpanish" action="#{localeBean.setSelectedLocale}">
                                 <f:param name="locale" value="es" />
-                                <h:graphicImage library="images" name="es.png" styleClass="flag" />
+                                <h:graphicImage library="images" name="es.png" />
                             </h:commandLink>
                             <p:tooltip for="switchToSpanish">
-                                <h:outputFormat value="#{messages.global_language_switch}">
+                                <h:outputFormat value="#{messages.label_language_switch}">
                                     <f:param value="Espanol" />
                                 </h:outputFormat>
                             </p:tooltip>

@@ -24,11 +24,11 @@
                 <h:panelGrid cellspacing="0" cellpadding="0" styleClass="content">
                     <p:panel id="data" toggleable="true" toggleSpeed="250">
                         <f:facet name="header">
-                            <h:outputFormat value="#{messages.welcome_titlepane}">
+                            <h:outputFormat value="#{messages.label_welcome_titlepane}">
                                 <f:param value="#{applicationBean.appName}" />
                             </h:outputFormat>
                         </f:facet>
-                        <h:outputText value="Your session has expired. Click the Spring Roo logo to return." />
+                        <h:outputText value="#{messages.label_session_expired}" />
                     </p:panel>
                 </h:panelGrid>
             </h:panelGrid>

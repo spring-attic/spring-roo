@@ -231,9 +231,11 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 
+			JavaType fieldType = field.getFieldType();
+			
 			// Check field is an enum type
 			if (!field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
-				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(field.getFieldType());
+				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(fieldType);
 				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
 					final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 					customDataBuilder.put(PersistenceCustomDataKeys.ENUMERATED_FIELD, "true");
@@ -244,7 +246,8 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			}
 
 			// Check field is to be displayed in the entity's list view
-			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
+			boolean isApplicationType = isApplicationType(fieldType);
+			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field) && !isApplicationType) {
 				listViewFields++;
 				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 				customDataBuilder.put(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY, "true");
@@ -253,9 +256,36 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				field = fieldBuilder.build();
 			}
 			
+			if (isApplicationType) {
+				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+				customDataBuilder.put(JsfManagedBeanMetadataProvider.APPLICATION_TYPE_CUSTOM_DATA_KEY, "true");
+				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+				fieldBuilder.append(customDataBuilder.build());
+				field = fieldBuilder.build();
+			}
+			
+			if (fieldType.isCommonCollectionType()) {
+				for (JavaType genericType: fieldType.getParameters()) {
+					if (isApplicationType(genericType)) {
+						MemberDetails genericTypeMemberDetails = getMemberDetails(genericType);
+				//	specialTypes.put(genericType, getJavaTypeMetadataDetails(genericType, genericTypeMemberDetails, metadataIdentificationString));
+					}
+				}
+			} else {
+				if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD)) {
+					MemberDetails typeMemberDetails = getMemberDetails(fieldType);
+			// 		specialTypes.put(fieldType, getJavaTypeMetadataDetails(fieldType, typeMemberDetails, metadataIdentificationString));
+				}
+			}
+			
+			
 			locatedFields.add(field);
 		}
 		return locatedFields;
+	}
+
+	private boolean isApplicationType(JavaType fieldType) {
+		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType)) != null;
 	}
 	
 	/**
@@ -284,14 +314,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			&& !fieldType.equals(BOOLEAN_PRIMITIVE)
 			&& !fieldType.equals(BOOLEAN_OBJECT)
 			&& !fieldType.equals(BYTE_ARRAY_PRIMITIVE)
-			&& !field.getCustomData().keySet().contains(EMBEDDED_FIELD)
-			// References to other domain objects would be too verbose
-			&& !isApplicationType(fieldType);
-	}
-
-	public boolean isApplicationType(final JavaType javaType) {
-		Assert.notNull(javaType, "Java type required");
-		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType)) != null;
+			&& !field.getCustomData().keySet().contains(EMBEDDED_FIELD);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
