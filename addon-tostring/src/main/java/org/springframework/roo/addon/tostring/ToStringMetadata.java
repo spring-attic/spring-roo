@@ -15,18 +15,13 @@ import java.util.Set;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -45,11 +40,8 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	
 	// Fields
+	private final ToStringAnnotationValues annotationValues;
 	private final List<MethodMetadata> locatedAccessors;
-
-	// From annotation
-	@AutoPopulate private String toStringMethod = "toString";
-	@AutoPopulate private String[] excludeFields;
 
 	/**
 	 * Constructor
@@ -57,20 +49,17 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 * @param identifier
 	 * @param aspectName
 	 * @param governorPhysicalTypeMetadata
+	 * @param annotationValues 
 	 * @param locatedAccessors
 	 */
-	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<MethodMetadata> locatedAccessors) {
+	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, ToStringAnnotationValues annotationValues, List<MethodMetadata> locatedAccessors) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(locatedAccessors, "Public accessors required");
+		Assert.notNull(annotationValues, "Annotation values required");
+		Assert.notNull(locatedAccessors, "Located accessors required");
 
+		this.annotationValues = annotationValues;
 		this.locatedAccessors = locatedAccessors;
-
-		// Process values from the annotation, if present
-		AnnotationMetadata annotation = governorTypeDetails.getAnnotation(RooJavaType.ROO_TO_STRING);
-		if (annotation != null) {
-			AutoPopulationUtils.populate(this, annotation);
-		}
 
 		// Generate the toString
 		builder.addMethod(getToStringMethod());
@@ -87,22 +76,23 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 * @return the "toString" method declared on this type or that will be introduced (or null if undeclared and not introduced)
 	 */
 	public MethodMetadata getToStringMethod() {
-		// Compute the relevant toString method name
-		JavaSymbolName methodName = new JavaSymbolName("toString");
-		if (!this.toStringMethod.equals("")) {
-			methodName = new JavaSymbolName(this.toStringMethod);
+		String toStringMethod = annotationValues.getToStringMethod();
+		if (!StringUtils.hasText(toStringMethod)) {
+			return null;
 		}
+		// Compute the relevant toString method name
+		JavaSymbolName methodName = new JavaSymbolName(toStringMethod);
 
 		// See if the type itself declared the method
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
+		MethodMetadata result = getGovernorMethod(methodName);
 		if (result != null) {
-			return result;
+			return null;
 		}
 
 		// Decide whether we need to produce the toString method
-		if (this.toStringMethod.equals("")) {
-			return null;
-		}
+//		if (this.toStringMethod.equals("")) {
+//			return null;
+//		}
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("StringBuilder sb = new StringBuilder();");
@@ -114,6 +104,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		List<String> order = new ArrayList<String>();
 
 		Set<String> excludeFieldsSet = new LinkedHashSet<String>();
+		String[] excludeFields = annotationValues.getExcludeFields();
 		if (excludeFields != null && excludeFields.length > 0) {
 			Collections.addAll(excludeFieldsSet, excludeFields);
 		}

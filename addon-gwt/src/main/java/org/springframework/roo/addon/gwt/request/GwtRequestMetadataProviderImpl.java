@@ -239,6 +239,9 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 			
 			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
+			if (cid == null) {
+				return;
+			}
 			boolean processed = false;
 			if (cid.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
 				@SuppressWarnings("unchecked")

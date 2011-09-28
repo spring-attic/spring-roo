@@ -50,6 +50,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true) 
 @Service
@@ -94,7 +95,10 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 	}
 
 	public ClassOrInterfaceTypeDetails getTypeFromString(String fileContents, String declaredByMetadataId, JavaType typeName) {
-		Assert.hasText(fileContents, "Compilation unit contents required");
+		if (!StringUtils.hasText(fileContents)) {
+			return null;
+		}
+
 		Assert.hasText(declaredByMetadataId, "Declaring metadata ID required");
 		Assert.notNull(typeName, "Java type to locate required");
 		try {

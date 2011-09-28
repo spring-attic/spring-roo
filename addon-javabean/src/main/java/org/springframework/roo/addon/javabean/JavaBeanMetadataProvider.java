@@ -92,7 +92,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		for (FieldMetadata field : governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getDeclaredFields()) {
 			declaredFields.put(field, getIdentifierAccessorMethodName(field, metadataIdentificationString));
 		}
-
+		
 		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
 		producedMids.add(metadataIdentificationString);
 		

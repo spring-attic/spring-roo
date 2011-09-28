@@ -188,6 +188,9 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 
 			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
+			if (cid == null) {
+				return;
+			}
 			boolean processed = false;
 			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) != null) {
 				ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(cid);

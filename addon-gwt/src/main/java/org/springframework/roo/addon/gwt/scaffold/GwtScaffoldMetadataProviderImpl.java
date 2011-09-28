@@ -149,7 +149,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		Map<GwtType, List<ClassOrInterfaceTypeDetails>> typesToBeWritten = new HashMap<GwtType, List<ClassOrInterfaceTypeDetails>>();
 		Map<String, String> xmlToBeWritten = new HashMap<String, String>();
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, mirroredType.getName());
-	   	mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
+		mirrorTypeMap.put(GwtType.PROXY, proxy.getName());
 		mirrorTypeMap.put(GwtType.REQUEST, request.getName());
 
 		for (Map.Entry<GwtType, JavaType> entry : mirrorTypeMap.entrySet()) {
@@ -210,6 +210,9 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
+			if (cid == null) {
+				return;
+			}
 			if (MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_PROXY) != null) {
 				ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromProxy(cid);
 				if (entity != null) {
