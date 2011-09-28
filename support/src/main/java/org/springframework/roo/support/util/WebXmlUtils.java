@@ -172,18 +172,13 @@ public final class WebXmlUtils {
 		}
 		appendChildIfNotPresent(filter, new XmlElementBuilder("filter-class", webXml).setText(filterClass).build());
 		for (final WebXmlParam initParam: initParams) {
-			appendChildIfNotPresent(filter, new XmlElementBuilder("init-param", webXml)
-									.addChild(new XmlElementBuilder("param-name", webXml).setText(initParam.getName()).build())
-									.addChild(new XmlElementBuilder("param-value", webXml).setText(initParam.getValue()).build())
-								.build());
+			appendChildIfNotPresent(filter, new XmlElementBuilder("init-param", webXml).addChild(new XmlElementBuilder("param-name", webXml).setText(initParam.getName()).build()).addChild(new XmlElementBuilder("param-value", webXml).setText(initParam.getValue()).build()).build());
 		}
 		
 		// Creating filter mapping
 		Element filterMappingE = XmlUtils.findFirstElement("/web-app/filter-mapping[filter-name = '" + filterName + "']", webXml.getDocumentElement());
 		if (filterMappingE == null) {
-			filterMappingE = new XmlElementBuilder("filter-mapping", webXml)
-								.addChild(new XmlElementBuilder("filter-name", webXml).setText(filterName).build())
-							.build();
+			filterMappingE = new XmlElementBuilder("filter-mapping", webXml).addChild(new XmlElementBuilder("filter-name", webXml).setText(filterName).build()).build();
 			if (filterPosition.equals(FilterPosition.FIRST)) {
 				insertBetween(filterMappingE, "filter", "filter-mapping", webXml);
 			} else if (filterPosition.equals(FilterPosition.BEFORE)) {
@@ -215,9 +210,7 @@ public final class WebXmlUtils {
 		
 		Element listener = XmlUtils.findFirstElement("/web-app/listener[listener-class = '" + className + "']", webXml.getDocumentElement());
 		if (listener == null) {
-			listener = new XmlElementBuilder("listener", webXml)
-						.addChild(new XmlElementBuilder("listener-class", webXml).setText(className).build())
-					.build();
+			listener = new XmlElementBuilder("listener", webXml).addChild(new XmlElementBuilder("listener-class", webXml).setText(className).build()).build();
 			insertBetween(listener, "filter-mapping[last()]", "servlet", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(listener, comment, webXml);
@@ -244,31 +237,24 @@ public final class WebXmlUtils {
 		// Create servlet
 		Element servlet = XmlUtils.findFirstElement("/web-app/servlet[servlet-name = '" + servletName + "']", webXml.getDocumentElement());
 		if (servlet == null) {
-			servlet = new XmlElementBuilder("servlet", webXml)
-						.addChild(new XmlElementBuilder("servlet-name", webXml).setText(servletName).build())
-					.build();
+			servlet = new XmlElementBuilder("servlet", webXml).addChild(new XmlElementBuilder("servlet-name", webXml).setText(servletName).build()).build();
 			insertBetween(servlet, "listener[last()]", "servlet-mapping", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(servlet, comment, webXml);
 			}
 		}
 		appendChildIfNotPresent(servlet, new XmlElementBuilder("servlet-class", webXml).setText(className).build());
-		for (final WebXmlParam initParam: initParams) {
-			appendChildIfNotPresent(servlet, new XmlElementBuilder("init-param", webXml)
-							.addChild(new XmlElementBuilder("param-name", webXml).setText(initParam.getName()).build())
-							.addChild(new XmlElementBuilder("param-value", webXml).setText(initParam.getValue()).build())
-						.build());
+		for (final WebXmlParam initParam : initParams) {
+			appendChildIfNotPresent(servlet, new XmlElementBuilder("init-param", webXml).addChild(new XmlElementBuilder("param-name", webXml).setText(initParam.getName()).build()).addChild(new XmlElementBuilder("param-value", webXml).setText(initParam.getValue()).build()).build());
 		}
 		if (loadOnStartup != null) {
 			appendChildIfNotPresent(servlet, new XmlElementBuilder("load-on-startup", webXml).setText(loadOnStartup.toString()).build());
 		}
-		
+
 		// Create servlet mapping
 		Element servletMapping = XmlUtils.findFirstElement("/web-app/servlet-mapping[servlet-name = '" + servletName + "']", webXml.getDocumentElement());
 		if (servletMapping == null) {
-			servletMapping = new XmlElementBuilder("servlet-mapping", webXml)
-								.addChild(new XmlElementBuilder("servlet-name", webXml).setText(servletName).build())
-							.build();
+			servletMapping = new XmlElementBuilder("servlet-mapping", webXml).addChild(new XmlElementBuilder("servlet-name", webXml).setText(servletName).build()).build();
 			insertBetween(servletMapping, "servlet[last()]", "session-config", webXml);
 		}
 		if (urlPattern != null && urlPattern.length() > 0) {
@@ -360,12 +346,10 @@ public final class WebXmlUtils {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.notNull(errorCode, "Error code required");
 		Assert.hasText(location, "Location required");
-		
+
 		Element errorPage = XmlUtils.findFirstElement("/web-app/error-page[error-code = '" + errorCode.toString() + "']", webXml.getDocumentElement());
 		if (errorPage == null) {
-			errorPage = new XmlElementBuilder("error-page", webXml)
-								.addChild(new XmlElementBuilder("error-code", webXml).setText(errorCode.toString()).build())
-							.build();
+			errorPage = new XmlElementBuilder("error-page", webXml).addChild(new XmlElementBuilder("error-code", webXml).setText(errorCode.toString()).build()).build();
 			insertBetween(errorPage, "welcome-file-list[last()]", "the-end", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(errorPage, comment, webXml);
@@ -570,37 +554,38 @@ public final class WebXmlUtils {
 		FORWARD, REQUEST, INCLUDE, ERROR;
 	}
 
-    /**
-     * Convenience class for passing a web-resource-collection element's details
-     * @since 1.1.1
-     */
-    public static class WebResourceCollection {
-        private final String webResourceName;
-        private final String description;
-        private final List<String> urlPatterns;
-        private final List<String> httpMethods;
+	/**
+	 * Convenience class for passing a web-resource-collection element's details
+	 * 
+	 * @since 1.1.1
+	 */
+	public static class WebResourceCollection {
+		private final String webResourceName;
+		private final String description;
+		private final List<String> urlPatterns;
+		private final List<String> httpMethods;
 
-        public WebResourceCollection(final String webResourceName, final String description, final List<String> urlPatterns, final List<String> httpMethods) {
-            this.webResourceName = webResourceName;
-            this.description = description;
-            this.urlPatterns = urlPatterns;
-            this.httpMethods = httpMethods;
-        }
+		public WebResourceCollection(final String webResourceName, final String description, final List<String> urlPatterns, final List<String> httpMethods) {
+			this.webResourceName = webResourceName;
+			this.description = description;
+			this.urlPatterns = urlPatterns;
+			this.httpMethods = httpMethods;
+		}
 
-        public String getWebResourceName() {
-            return webResourceName;
-        }
+		public String getWebResourceName() {
+			return webResourceName;
+		}
 
-        public List<String> getUrlPatterns() {
-            return urlPatterns;
-        }
+		public List<String> getUrlPatterns() {
+			return urlPatterns;
+		}
 
-        public List<String> getHttpMethods() {
-            return httpMethods;
-        }
+		public List<String> getHttpMethods() {
+			return httpMethods;
+		}
 
-        public String getDescription() {
-            return description;
-        }
-    }
+		public String getDescription() {
+			return description;
+		}
+	}
 }
