@@ -25,6 +25,7 @@ public class JsfJavaType {
 	public static final JavaType DATE_TIME_CONVERTER =  new JavaType("javax.faces.convert.DateTimeConverter");
 	public static final JavaType DOUBLE_RANGE_VALIDATOR = new JavaType("javax.faces.validator.DoubleRangeValidator");
 	public static final JavaType FACES_CONTEXT = new JavaType("javax.faces.context.FacesContext");
+	public static final JavaType FACES_CONVERTER = new JavaType("javax.faces.convert.FacesConverter");
 	public static final JavaType FACES_MESSAGE = new JavaType("javax.faces.application.FacesMessage");
 	public static final JavaType HTML_OUTPUT_TEXT = new JavaType("javax.faces.component.html.HtmlOutputText");
 	public static final JavaType HTML_PANEL_GRID = new JavaType("javax.faces.component.html.HtmlPanelGrid");
@@ -48,6 +49,8 @@ public class JsfJavaType {
 	public static final JavaType PRIMEFACES_MENU_MODEL = new JavaType("org.primefaces.model.MenuModel");
 	public static final JavaType PRIMEFACES_MESSAGE = new JavaType("org.primefaces.component.message.Message");
 	public static final JavaType PRIMEFACES_REQUEST_CONTEXT = new JavaType("org.primefaces.context.RequestContext");
+	public static final JavaType PRIMEFACES_SELECT_BOOLEAN_CHECKBOX = new JavaType("org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox");
+	public static final JavaType PRIMEFACES_SELECT_ONE_LISTBOX = new JavaType("org.primefaces.component.selectonelistbox.SelectOneListbox");
 	public static final JavaType PRIMEFACES_SLIDER = new JavaType("org.primefaces.component.slider.Slider");
 	public static final JavaType PRIMEFACES_SPINNER = new JavaType("org.primefaces.component.spinner.Spinner");
 	public static final JavaType PRIMEFACES_SUB_MENU = new JavaType("org.primefaces.component.submenu.Submenu");

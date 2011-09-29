@@ -4,6 +4,12 @@ import static org.springframework.roo.model.JavaType.DOUBLE_OBJECT;
 import static org.springframework.roo.model.JavaType.DOUBLE_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.FLOAT_OBJECT;
 import static org.springframework.roo.model.JavaType.FLOAT_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.INT_OBJECT;
+import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JavaType.LONG_PRIMITIVE;
+import static org.springframework.roo.model.JavaType.SHORT_OBJECT;
+import static org.springframework.roo.model.JavaType.SHORT_PRIMITIVE;
 
 /**
  * Constants for JDK {@link JavaType}s.
@@ -48,7 +54,7 @@ public final class JdkJavaType {
 	// Static methods
 	
 	public static boolean isIntegerType(final JavaType javaType) {
-		return javaType.equals(BIG_INTEGER) || javaType.equals(JavaType.INT_PRIMITIVE) || javaType.equals(JavaType.INT_OBJECT) || javaType.equals(JavaType.LONG_PRIMITIVE) || javaType.equals(JavaType.LONG_OBJECT) || javaType.equals(JavaType.SHORT_PRIMITIVE) || javaType.equals(JavaType.SHORT_OBJECT);
+		return javaType.equals(BIG_INTEGER) || javaType.equals(INT_PRIMITIVE) || javaType.equals(INT_OBJECT) || javaType.equals(LONG_PRIMITIVE) || javaType.equals(LONG_OBJECT) || javaType.equals(SHORT_PRIMITIVE) || javaType.equals(SHORT_OBJECT);
 	}
 	
 	public static boolean isDecimalType(final JavaType javaType) {

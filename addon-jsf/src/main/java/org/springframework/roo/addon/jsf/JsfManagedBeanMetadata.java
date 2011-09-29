@@ -23,6 +23,7 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLO
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MESSAGE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_REQUEST_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SELECT_BOOLEAN_CHECKBOX;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SLIDER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SPINNER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_UPLOADED_FILE;
@@ -101,7 +102,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	
 	// Fields
 	private JavaType entity;
-	private Set<FieldMetadata> locatedFields;
+	private Set<JsfFieldHolder> locatedFields;
 	private final Set<FieldMetadata> autoCompleteFields = new LinkedHashSet<FieldMetadata>();
 	private String plural;
 
@@ -109,7 +110,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		CREATE, EDIT, VIEW;
 	};
 
-	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Set<FieldMetadata> locatedFields, final MethodMetadata identifierAccessor) {
+	public JsfManagedBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfManagedBeanAnnotationValues annotationValues, final String plural, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Set<JsfFieldHolder> locatedFields, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -241,7 +242,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("all" + plural + " = " + findAllAdditions.getMethodCall() + ";");
 		findAllAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("columns = new ArrayList<String>();");
-		for (final FieldMetadata field : locatedFields) {
+		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
+			FieldMetadata field = jsfFieldHolder.getField();
 			if (field.getCustomData() != null && field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY)) {
 				bodyBuilder.appendFormalLine("columns.add(\"" + field.getFieldName().getSymbolName() + "\");");
 			}
@@ -360,7 +362,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("HtmlPanelGrid " + HTML_PANEL_GRID_ID + " = " + getComponentCreationStr("HtmlPanelGrid"));
 		bodyBuilder.appendFormalLine("");
 
-		for (final FieldMetadata field : locatedFields) {
+		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
+			final FieldMetadata field = jsfFieldHolder.getField();
+			
 			final JavaType fieldType = field.getFieldType();
 			final String fieldName = field.getFieldName().getSymbolName();
 			final String fieldLabelId = fieldName + suffix1;
@@ -379,7 +383,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 			// Field value
 			String fieldValueId = fieldName + suffix2;
-			final String converterName = fieldValueId + "Converter";
+			String converterName = fieldValueId + "Converter";
 			final String htmlOutputTextStr = "HtmlOutputText " + fieldValueId + " = " + getComponentCreationStr("HtmlOutputText");
 			final String inputTextStr = "InputText " + fieldValueId + " = " + getComponentCreationStr("InputText");
 			final String componentIdStr = fieldValueId + ".setId(\"" + fieldValueId + "\");";
@@ -396,7 +400,18 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + entityName + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 				bodyBuilder.appendFormalLine(fieldValueId + ".setMode(\"advanced\");");
 				bodyBuilder.appendFormalLine(fieldValueId + ".setUpdate(\"messages\");");
-			} else if (isEnum(field)) {
+			} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+				if (action == Action.VIEW) {
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+				} else {
+					imports.addImport(PRIMEFACES_SELECT_BOOLEAN_CHECKBOX);
+					bodyBuilder.appendFormalLine("SelectBooleanCheckbox " + fieldValueId + " = " + getComponentCreationStr("SelectBooleanCheckbox"));
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(requiredStr);
+				}
+			} else if (jsfFieldHolder.isEnumerated()) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
 					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
@@ -502,10 +517,21 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.append(getLengthValdatorString(fieldValueId, minValue, maxValue));
 					}
 				}
-			} else if (fieldType.isCommonCollectionType()) {
+		//	} else if (jsfFieldHolder.isCommonCollectionType()) {
 				
-			} else if (isApplicationType(field)) {
 				
+//			} else if (jsfFieldHolder.isApplicationType()) {
+//				converterName = destination.getPackage().getFullyQualifiedPackageName() + "." + fieldType.getSimpleTypeName() + "Converter";
+//				if (action == Action.VIEW) {
+//					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+//					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+//					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterName + "());");
+//				} else {
+//					imports.addImport(PRIMEFACES_SELECT_ONE_LISTBOX);
+//					bodyBuilder.appendFormalLine("SelectOneListbox " + fieldValueId + " = " + getComponentCreationStr("SelectOneListbox"));
+//					bodyBuilder.appendFormalLine(componentIdStr);
+//					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterName + "());");
+//				}
 			} else {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
@@ -548,20 +574,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return HTML_PANEL_GRID_ID + ".getChildren().add(" + componentId + ");";
 	}
 
-	/**
-	 * Indicates whether the given field contains an enum value
-	 * 
-	 * @param field the field to check (required)
-	 * @return see above
-	 */
-	private boolean isEnum(final FieldMetadata field) {
-		return field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD);
-	}
-	
-	private boolean isApplicationType(final FieldMetadata field) {
-		return field.getCustomData().keySet().contains(JsfManagedBeanMetadataProvider.APPLICATION_TYPE_CUSTOM_DATA_KEY);
-	}
-	
 	private boolean isNullable(final FieldMetadata field) {
 		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null;
 	}
@@ -793,9 +805,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 	private Set<FieldMetadata> getRooUploadedFileFields() {
 		final Set<FieldMetadata> rooUploadedFileFields = new LinkedHashSet<FieldMetadata>();
-		for (final FieldMetadata rooUploadedFileField : this.locatedFields) {
-			if (isRooUploadFileField(rooUploadedFileField)) {
-				rooUploadedFileFields.add(rooUploadedFileField);
+		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
+			final FieldMetadata field = jsfFieldHolder.getField();
+			if (isRooUploadFileField(field)) {
+				rooUploadedFileFields.add(field);
 			}
 		}
 		return rooUploadedFileFields;

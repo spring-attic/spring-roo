@@ -8,8 +8,9 @@
 <ui:composition>
     <div id="footer">
         <h:form>
-            <h:panelGrid columns="2">
-                <h:panelGrid columns="2" width="600">
+            <p:separator style="margin-top:15px;" />
+            <h:panelGrid columns="2" cellspacing="0" cellpadding="0">
+                <h:panelGrid width="600" cellspacing="0" cellpadding="0">
                     <h:panelGrid columns="5">
                         <h:outputLink value="../pages/main.jsf">#{messages.label_home}</h:outputLink>
                         <h:outputText value="| #{messages.label_language}:" />

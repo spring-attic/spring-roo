@@ -140,7 +140,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
-		final Set<FieldMetadata> locatedFields = locateFields(entity, memberDetails, metadataId, identifierAccessor, versionAccessor);
+		final Set<JsfFieldHolder> locatedFields = locateFields(entity, memberDetails, metadataId, identifierAccessor, versionAccessor);
 		if (locatedFields.isEmpty()) {
 			return null;
 		}
@@ -214,9 +214,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	 * @param identifierAccessor 
 	 * @return a non-<code>null</code> iterable collection
 	 */
-	private Set<FieldMetadata> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString, MethodMetadata identifierAccessor, MethodMetadata versionAccessor) {
-		final Set<FieldMetadata> locatedFields = new LinkedHashSet<FieldMetadata>();
-		
+	private Set<JsfFieldHolder> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString, MethodMetadata identifierAccessor, MethodMetadata versionAccessor) {
+		final Set<JsfFieldHolder> locatedFields = new LinkedHashSet<JsfFieldHolder>();
+
 		int listViewFields = 0;
 		for (final MethodMetadata method : memberDetails.getMethods()) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
@@ -232,16 +232,15 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 
 			JavaType fieldType = field.getFieldType();
-			
+
 			// Check field is an enum type
-			if (!field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
+			boolean enumerated = false;
+			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
+				enumerated = true;
+			} else {
 				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(fieldType);
 				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
-					final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-					customDataBuilder.put(PersistenceCustomDataKeys.ENUMERATED_FIELD, "true");
-					final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-					fieldBuilder.append(customDataBuilder.build());
-					field = fieldBuilder.build();
+					enumerated = true;
 				}
 			}
 
@@ -255,32 +254,26 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				fieldBuilder.append(customDataBuilder.build());
 				field = fieldBuilder.build();
 			}
-			
-			if (isApplicationType) {
-				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-				customDataBuilder.put(JsfManagedBeanMetadataProvider.APPLICATION_TYPE_CUSTOM_DATA_KEY, "true");
-				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-				fieldBuilder.append(customDataBuilder.build());
-				field = fieldBuilder.build();
-			}
-			
+
+			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated);
+
 			if (fieldType.isCommonCollectionType()) {
-				for (JavaType genericType: fieldType.getParameters()) {
+				Map<JavaType, MemberDetails> genericTypes = new LinkedHashMap<JavaType, MemberDetails>();
+				for (JavaType genericType : fieldType.getParameters()) {
 					if (isApplicationType(genericType)) {
-						MemberDetails genericTypeMemberDetails = getMemberDetails(genericType);
-				//	specialTypes.put(genericType, getJavaTypeMetadataDetails(genericType, genericTypeMemberDetails, metadataIdentificationString));
+						genericTypes.put(genericType, getMemberDetails(genericType));
 					}
 				}
+				jsfFieldHolder.setGenericTypes(genericTypes);
 			} else {
 				if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD)) {
-					MemberDetails typeMemberDetails = getMemberDetails(fieldType);
-			// 		specialTypes.put(fieldType, getJavaTypeMetadataDetails(fieldType, typeMemberDetails, metadataIdentificationString));
+					jsfFieldHolder.setMemberDetails(getMemberDetails(fieldType));
 				}
 			}
-			
-			
-			locatedFields.add(field);
+
+			locatedFields.add(jsfFieldHolder);
 		}
+
 		return locatedFields;
 	}
 

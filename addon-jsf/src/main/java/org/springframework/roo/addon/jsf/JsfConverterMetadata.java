@@ -3,6 +3,7 @@ package org.springframework.roo.addon.jsf;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static org.springframework.roo.addon.jsf.JsfJavaType.CONVERTER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONTEXT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.FACES_CONVERTER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.UI_COMPONENT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 
@@ -14,6 +15,8 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -68,12 +71,26 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			builder.addImplementsType(CONVERTER);
 		}
 		
+		builder.addAnnotation(getFacesConverterAnnotation());
+		
 		String builderString = getBuilderString(converterMethods);
 		builder.addMethod(getGetAsObjectMethod(builderString, findAllMethod));
 		builder.addMethod(getGetAsStringMethod(builderString, findAllMethod));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+	}
+
+	private AnnotationMetadata getFacesConverterAnnotation() {
+		AnnotationMetadata annotation = getTypeAnnotation(FACES_CONVERTER);
+		if (annotation == null) {
+			return null;
+		}
+		
+		AnnotationMetadataBuilder annotationBuulder = new AnnotationMetadataBuilder(annotation);
+		annotationBuulder.addClassAttribute("forClass", entity); // TODO The forClass attribute seems to prevent a page from rendering
+		annotationBuulder.addStringAttribute("value", destination.getFullyQualifiedTypeName());
+		return annotationBuulder.build();
 	}
 
 	private boolean isConverterInterfaceIntroduced() {
