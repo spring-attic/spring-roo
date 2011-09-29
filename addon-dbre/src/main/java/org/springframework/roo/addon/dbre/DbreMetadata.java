@@ -472,7 +472,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), ignoreFields));
 		AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(ROO_TO_STRING, attributes);
-		updatedGovernorBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
+		updatedGovernorBuilder = new ClassOrInterfaceTypeDetailsBuilder(governorTypeDetails);
 		updatedGovernorBuilder.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
 	}
 

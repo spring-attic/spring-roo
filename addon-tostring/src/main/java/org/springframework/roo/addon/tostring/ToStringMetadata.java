@@ -1,10 +1,10 @@
 package org.springframework.roo.addon.tostring;
 
 import static org.springframework.roo.model.JavaType.STRING;
+import static org.springframework.roo.model.JdkJavaType.ARRAYS;
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -20,6 +20,7 @@ import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -61,7 +62,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		this.annotationValues = annotationValues;
 		this.locatedAccessors = locatedAccessors;
 
-		// Generate the toString
+		// Generate the toString() method
 		builder.addMethod(getToStringMethod());
 
 		// Create a representation of the desired output ITD
@@ -80,74 +81,67 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		if (!StringUtils.hasText(toStringMethod)) {
 			return null;
 		}
+
 		// Compute the relevant toString method name
 		JavaSymbolName methodName = new JavaSymbolName(toStringMethod);
 
 		// See if the type itself declared the method
-		MethodMetadata result = getGovernorMethod(methodName);
-		if (result != null) {
+		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
 
-		// Decide whether we need to produce the toString method
-//		if (this.toStringMethod.equals("")) {
-//			return null;
-//		}
-		
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("StringBuilder sb = new StringBuilder();");
-
-		/** Key: field name, Value: accessor name */
-		Map<String, String> map = new LinkedHashMap<String, String>();
-
-		/** Field names */
-		List<String> order = new ArrayList<String>();
-
-		Set<String> excludeFieldsSet = new LinkedHashSet<String>();
+		final Set<String> excludeFieldsSet = new LinkedHashSet<String>();
 		String[] excludeFields = annotationValues.getExcludeFields();
 		if (excludeFields != null && excludeFields.length > 0) {
 			Collections.addAll(excludeFieldsSet, excludeFields);
 		}
 
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+		final Map<String, String> map = new LinkedHashMap<String, String>();
 		for (MethodMetadata accessor : locatedAccessors) {
 			String accessorName = accessor.getMethodName().getSymbolName();
 			String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-			if (!excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName)) && !map.containsKey(fieldName)) {
-				String accessorText = accessorName + "()";
-				if (accessor.getReturnType().isCommonCollectionType()) {
-					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
-				} else if (accessor.getReturnType().isArray()) {
-					accessorText = "java.util.Arrays.toString(" + accessorName + "())";
-				} else if (Calendar.class.getName().equals(accessor.getReturnType().getFullyQualifiedTypeName())) {
-					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().getTime()";
-				}
-				map.put(fieldName, accessorText);
-				order.add(fieldName);
+			if (excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
+				continue;
 			}
-		}
-
-		if (!order.isEmpty()) {
-			int index = 0;
-			int size = map.keySet().size();
-			for (String fieldName : order) {
-				index++;
-				String accessorText = map.get(fieldName);
-				StringBuilder string = new StringBuilder();
-				string.append("sb.append(\"").append(fieldName).append(": \").append(").append(accessorText).append(")");
-				if (index < size) {
-					string.append(".append(\", \")");
-				}
-				string.append(";");
-				bodyBuilder.appendFormalLine(string.toString());
+			
+			String accessorText = accessorName + "()";
+			if (accessor.getReturnType().isCommonCollectionType()) {
+				accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
+			} else if (accessor.getReturnType().isArray()) {
+				imports.addImport(ARRAYS);
+				accessorText = "Arrays.toString(" + accessorName + "())";
+			} else if (CALENDAR.equals(accessor.getReturnType())) {
+				accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().getTime()";
 			}
 
-			bodyBuilder.appendFormalLine("return sb.toString();");
-
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
-			result = methodBuilder.build();
+			map.put(fieldName, accessorText);
 		}
 
-		return result;
+		if (map.isEmpty()) {
+			return null;
+		}
+		
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("StringBuilder sb = new StringBuilder();");
+
+		int index = 0;
+		int size = map.size();
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			index++;
+			StringBuilder builder = new StringBuilder();
+			builder.append("sb.append(\"").append(entry.getKey()).append(": \").append(").append(entry.getValue()).append(")");
+			if (index < size) {
+				builder.append(".append(\", \")");
+			}
+			builder.append(";");
+			bodyBuilder.appendFormalLine(builder.toString());
+		}
+
+		bodyBuilder.appendFormalLine("return sb.toString();");
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
+		return methodBuilder.build();
 	}
 
 	public String toString() {
