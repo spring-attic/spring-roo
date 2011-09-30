@@ -75,8 +75,7 @@ public class EntityLayerProvider extends CoreLayerProvider {
 	 * @return <code>null</code> if it can't be found or is actually <code>null</code>
 	 */
 	private String getPlural(final JavaType javaType) {
-		final String key = PluralMetadata.createIdentifier(javaType);
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(key);
+		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType));
 		if (pluralMetadata == null) {
 			// Can't acquire the plural
 			return null;

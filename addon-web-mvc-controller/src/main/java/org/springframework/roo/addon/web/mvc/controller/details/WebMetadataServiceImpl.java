@@ -241,10 +241,10 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		
-		String pluralMetadataKey = PluralMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMetadataKey);
+		String pluralId = PluralMetadata.createIdentifier(javaType);
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 		if (pluralMetadata != null) {
-			registerDependency(pluralMetadataKey, metadataIdentificationString);
+			registerDependency(pluralId, metadataIdentificationString);
 			return pluralMetadata.getPlural();
 		}
 		return javaType.getSimpleTypeName() + "s";

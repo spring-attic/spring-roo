@@ -107,7 +107,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 			}
 			// We simply take the first disregarding any further fields which may be identifiers
 			domainTypeToIdTypeMap.put(type, idType);
-			String pluralId = PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA);
+			String pluralId = PluralMetadata.createIdentifier(type);
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {
 				return null;

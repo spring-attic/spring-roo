@@ -142,8 +142,8 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 	}
 	
 	private void createNewType(JavaType type, JavaType jsonEntity) {
-		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonEntity));
-		if (plural == null) {
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonEntity));
+		if (pluralMetadata == null) {
 			return;
 		}
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA);
@@ -151,7 +151,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.CONTROLLER));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(SpringJavaType.REQUEST_MAPPING);
-		requestMapping.addAttribute(new StringAttributeValue(new JavaSymbolName("value"), "/" + plural.getPlural().toLowerCase()));
+		requestMapping.addAttribute(new StringAttributeValue(new JavaSymbolName("value"), "/" + pluralMetadata.getPlural().toLowerCase()));
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(requestMapping);
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}

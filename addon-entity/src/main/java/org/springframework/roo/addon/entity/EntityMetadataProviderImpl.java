@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.displayname.DisplayNameMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -62,12 +63,14 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
+	@Reference private DisplayNameMetadataProvider displayNameMetadataProvider;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_ENTITY);
 		configurableMetadataProvider.addMetadataTrigger(ROO_ENTITY);
 		pluralMetadataProvider.addMetadataTrigger(ROO_ENTITY);
+		displayNameMetadataProvider.addMetadataTrigger(ROO_ENTITY);
 		registerMatchers();
 	}
 	
@@ -76,6 +79,7 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		removeMetadataTrigger(ROO_ENTITY);
 		configurableMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
 		pluralMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
+		displayNameMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 	
@@ -118,13 +122,13 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		// We also need the plural
 		final JavaType entity = EntityMetadata.getJavaType(metadataId);
 		final Path path = EntityMetadata.getPath(metadataId);
-		final String pluralMID = PluralMetadata.createIdentifier(entity, path);
-		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralMID);
+		final String pluralId = PluralMetadata.createIdentifier(entity, path);
+		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 		if (pluralMetadata == null) {
 			// Can't acquire the plural
 			return null;
 		}
-		metadataDependencyRegistry.registerDependency(pluralMID, metadataId);
+		metadataDependencyRegistry.registerDependency(pluralId, metadataId);
 
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(entity);
 		if (idFields.size() != 1) {

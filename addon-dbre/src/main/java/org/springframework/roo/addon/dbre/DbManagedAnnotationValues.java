@@ -1,10 +1,11 @@
 package org.springframework.roo.addon.dbre;
 
+import static org.springframework.roo.model.RooJavaType.ROO_DB_MANAGED;
+
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
-import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooDbManaged} annotation.
@@ -23,7 +24,7 @@ public class DbManagedAnnotationValues extends AbstractAnnotationValues {
 	 * @param governorPhysicalTypeMetadata
 	 */
 	public DbManagedAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, RooJavaType.ROO_DB_MANAGED);
+		super(governorPhysicalTypeMetadata, ROO_DB_MANAGED);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 

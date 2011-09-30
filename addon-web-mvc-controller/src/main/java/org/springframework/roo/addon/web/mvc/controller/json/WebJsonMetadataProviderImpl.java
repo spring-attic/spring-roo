@@ -118,8 +118,8 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 		
 		final Map<String, MemberTypeAdditions> persistenceAdditions = webMetadataService.getCrudAdditions(jsonObject, metadataIdentificationString);
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(jsonObject, getMemberDetails(jsonObject), metadataIdentificationString);
-		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonObject));
-		if (persistenceAdditions.isEmpty() || javaTypePersistenceMetadataDetails == null || plural == null) {
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonObject));
+		if (persistenceAdditions.isEmpty() || javaTypePersistenceMetadataDetails == null || pluralMetadata == null) {
 			return null;
 		}
 		
@@ -129,7 +129,7 @@ public final class WebJsonMetadataProviderImpl extends AbstractItdMetadataProvid
 		// Maintain a list of entities that are being tested
 		managedEntityTypes.put(jsonObject, metadataIdentificationString);
 		
-		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, persistenceAdditions, javaTypePersistenceMetadataDetails.getIdentifierField(), plural.getPlural(), finderDetails, jsonMetadata, servicesInjected);
+		return new WebJsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, persistenceAdditions, javaTypePersistenceMetadataDetails.getIdentifierField(), pluralMetadata.getPlural(), finderDetails, jsonMetadata, servicesInjected);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

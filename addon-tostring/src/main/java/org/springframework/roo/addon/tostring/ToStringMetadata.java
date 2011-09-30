@@ -137,7 +137,6 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			builder.append(";");
 			bodyBuilder.appendFormalLine(builder.toString());
 		}
-
 		bodyBuilder.appendFormalLine("return sb.toString();");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);

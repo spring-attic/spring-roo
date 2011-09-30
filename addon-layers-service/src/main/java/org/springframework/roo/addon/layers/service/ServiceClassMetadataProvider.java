@@ -133,7 +133,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 			}
 			domainTypeToIdTypeMap.put(domainType, idType);
 			// Collect the plural for this domain type
-			final String pluralId = PluralMetadata.createIdentifier(domainType, Path.SRC_MAIN_JAVA);
+			final String pluralId = PluralMetadata.createIdentifier(domainType);
 			final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 			if (pluralMetadata == null) {
 				return null;

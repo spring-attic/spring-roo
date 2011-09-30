@@ -30,7 +30,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = PluralMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -118,8 +118,10 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// Create the cache (we defer this in case there is no field plural retrieval ever required for this instance)
 			cache = new HashMap<String, String>();
 		}
+		
 		// Populate the cache for next time
 		cache.put(symbolName, thePlural);
+		
 		return thePlural;
 	}
 
