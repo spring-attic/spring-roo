@@ -145,10 +145,11 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return null;
 		}
 		
+		String separator = StringUtils.defaultIfEmpty(annotationValues.getSeparator(), " ");
 		final StringBuilder builder = new StringBuilder("return new StringBuilder()");
 		for (int i = 0; i < displayMethods.size(); i++) {
 			if (i > 0) {
-				builder.append(".append(\" \")");
+				builder.append(".append(\"").append(separator).append("\")");
 			}
 			builder.append(".append(").append(displayMethods.get(i)).append(")");
 		}

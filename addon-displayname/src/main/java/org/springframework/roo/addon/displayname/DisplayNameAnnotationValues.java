@@ -18,6 +18,7 @@ public class DisplayNameAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
 	@AutoPopulate private String methodName = "getDisplayName";
 	@AutoPopulate private String[] fields;
+	@AutoPopulate private String separator;
 
 	/**
 	 * Constructor
@@ -35,5 +36,9 @@ public class DisplayNameAnnotationValues extends AbstractAnnotationValues {
 
 	public String[] getFields() {
 		return fields;
+	}
+
+	public String getSeparator() {
+		return separator;
 	}
 }

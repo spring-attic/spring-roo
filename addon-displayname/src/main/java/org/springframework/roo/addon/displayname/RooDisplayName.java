@@ -24,4 +24,9 @@ public @interface RooDisplayName {
 	 * @return an array of fields to use in the display name method
 	 */
 	String[] fields() default "";
+	
+	/**
+	 * @return the delimiter between fields, defaults to a space if empty
+	 */
+	String separator() default "";
 }
