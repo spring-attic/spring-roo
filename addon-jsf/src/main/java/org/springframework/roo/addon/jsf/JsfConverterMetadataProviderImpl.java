@@ -29,8 +29,10 @@ import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link JsfConverterMetadataProvider}.
@@ -118,21 +120,29 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 		converterMidToEntityMap.put(metadataId, entity);
 
 		final MemberTypeAdditions findAllMethod = getFindAllMethod(entity, metadataId);
+
+		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod, getDisplayMethod(entity, memberDetails));
+	}
+
+	private String getDisplayMethod(final JavaType entity, MemberDetails memberDetails) {
+		String displayMethod = "toString()";
 		
 		final DisplayNameMetadata displayNameMetadata = (DisplayNameMetadata) metadataService.get(DisplayNameMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
-		final String displayNameMethod;
-		if (displayNameMetadata != null) {
-			displayNameMethod = displayNameMetadata.getMethodName();
+		if (displayNameMetadata != null && StringUtils.hasText(displayNameMetadata.getMethodName())) {
+			displayMethod = displayNameMetadata.getMethodName() + "()";
 		} else {
-			final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
-			if (identifierAccessor != null) {
-				displayNameMethod = identifierAccessor.getMethodName().getSymbolName() + "().toString";
+			final JavaSymbolName methodName = new JavaSymbolName("getDisplayName");
+			MethodMetadata method = memberDetails.getMethod(methodName);
+			if (method != null) {
+				displayMethod = methodName.getSymbolName() + "()";
 			} else {
-				displayNameMethod = "toString";
+				final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+				if (identifierAccessor != null) {
+					displayMethod = identifierAccessor.getMethodName().getSymbolName() + "()." + displayMethod;
+				}
 			}
 		}
-
-		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod, displayNameMethod);
+		return displayMethod;
 	}
 
 	private MemberTypeAdditions getFindAllMethod(final JavaType entity, final String metadataId) {
