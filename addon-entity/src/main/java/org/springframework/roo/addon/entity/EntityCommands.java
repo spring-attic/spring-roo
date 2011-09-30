@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_NAME;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
@@ -39,7 +40,8 @@ public class EntityCommands implements CommandMarker {
 	private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
 	private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_TO_STRING);
 	private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
-	
+	private static final AnnotationMetadataBuilder ROO_DISPLAY_NAME_BUILDER = new AnnotationMetadataBuilder(ROO_DISPLAY_NAME);
+
 	// Fields
 	@Reference private EntityOperations entityOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
@@ -67,6 +69,7 @@ public class EntityCommands implements CommandMarker {
 		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") final InheritanceType inheritanceType, 
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass, 
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable, 
+		@CliOption(key = "displayName", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should provide a pretty-print method") final boolean displayName, 
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
 		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
@@ -101,6 +104,9 @@ public class EntityCommands implements CommandMarker {
 		annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, versionType, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
 		if (serializable) {
 			annotationBuilder.add(ROO_SERIALIZABLE_BUILDER);
+		}
+		if (displayName) {
+			annotationBuilder.add(ROO_DISPLAY_NAME_BUILDER);
 		}
 
 		// Produce the entity itself
