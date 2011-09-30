@@ -155,4 +155,12 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	 * @since 1.2.0
 	 */
 	JavaSymbolName getUniqueFieldName(final String proposedName, final boolean prepend);
+
+	/**
+	 * Returns the names of any dynamic finders
+	 * 
+	 * @return a non-<code>null</code> list
+	 * @since 1.2.0
+	 */
+	List<String> getDynamicFinderNames();
 }

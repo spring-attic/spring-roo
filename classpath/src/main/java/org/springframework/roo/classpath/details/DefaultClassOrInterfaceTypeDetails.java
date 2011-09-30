@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
@@ -199,5 +200,15 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 		tsc.append("annotations", getAnnotations());
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<String> getDynamicFinderNames() {
+		final List<String> dynamicFinders = new ArrayList<String>();
+		final Object finders = getCustomData().get(PersistenceCustomDataKeys.DYNAMIC_FINDER_NAMES);
+		if (finders instanceof Collection) {
+			dynamicFinders.addAll((Collection<String>) finders);
+		}
+		return dynamicFinders;
 	}
 }

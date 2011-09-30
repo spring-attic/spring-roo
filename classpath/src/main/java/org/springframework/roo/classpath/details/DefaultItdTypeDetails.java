@@ -222,4 +222,8 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
+
+	public List<String> getDynamicFinderNames() {
+		return Collections.emptyList();
+	}
 }

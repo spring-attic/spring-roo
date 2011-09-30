@@ -13,6 +13,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Default implementation of {@link MemberDetails}.
@@ -56,6 +57,14 @@ public class MemberDetailsImpl implements MemberDetails {
 
 	public List<MemberHoldingTypeDetails> getDetails() {
 		return Collections.unmodifiableList(details);
+	}
+	
+	public List<String> getDynamicFinderNames() {
+		final List<String> dynamicFinderNames = new ArrayList<String>();
+		for (final MemberHoldingTypeDetails mhtd : this.details) {
+			dynamicFinderNames.addAll(mhtd.getDynamicFinderNames());
+		}
+		return dynamicFinderNames;
 	}
 	
 	public List<FieldMetadata> getFields() {
@@ -116,11 +125,7 @@ public class MemberDetailsImpl implements MemberDetails {
 	}
 	
 	public MethodMetadata getMostConcreteMethodWithTag(final Object tagKey) {
-		final List<MethodMetadata> taggedMethods = getMethodsWithTag(tagKey);
-		if (taggedMethods.isEmpty()) {
-			return null;
-		} 
-		return taggedMethods.get(0);
+		return CollectionUtils.firstElementOf(getMethodsWithTag(tagKey));
 	}
 	
 	public boolean isMethodDeclaredByAnother(final JavaSymbolName methodName, final List<JavaType> parameterTypes, final String declaredByMetadataId) {

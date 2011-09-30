@@ -68,6 +68,14 @@ public interface MemberDetails {
 	List<MemberHoldingTypeDetails> getDetails();
 	
 	/**
+	 * Returns the names of this type's dynamic finders
+	 * 
+	 * @return a non-<code>null</code> list
+	 * @since 1.2.0
+	 */
+	List<String> getDynamicFinderNames();
+	
+	/**
 	 * Searches all {@link MemberHoldingTypeDetails} and returns all fields.
 	 * 
 	 * @return zero or more fields (never null)
