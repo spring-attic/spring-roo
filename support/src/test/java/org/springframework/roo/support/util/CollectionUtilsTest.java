@@ -131,4 +131,26 @@ public class CollectionUtilsTest {
 		// Check
 		assertEquals(Collections.singletonList(child), result);
 	}
+	
+	@Test
+	public void testFirstElementOfNullCollection() {
+		assertNull(CollectionUtils.firstElementOf(null));
+	}
+	
+	@Test
+	public void testFirstElementOfEmptyCollection() {
+		assertNull(CollectionUtils.firstElementOf(Collections.emptySet()));
+	}
+	
+	@Test
+	public void testFirstElementOfSingleElementCollection() {
+		final String member = "x";
+		assertEquals(member, CollectionUtils.firstElementOf(Collections.singleton(member)));
+	}
+		
+	@Test
+	public void testFirstElementOfMultiElementCollection() {
+		final String[] members = {"x", "y", "z"};
+		assertEquals(members[0], CollectionUtils.firstElementOf(Arrays.asList(members)));
+	}
 }

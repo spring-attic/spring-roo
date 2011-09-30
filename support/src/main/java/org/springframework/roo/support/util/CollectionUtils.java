@@ -344,6 +344,21 @@ public final class CollectionUtils {
 	}
 	
 	/**
+	 * Returns the first element of the given collection
+	 * 
+	 * @param <T>
+	 * @param collection
+	 * @return <code>null</code> if the first element is <code>null</code> or
+	 * the collection is <code>null</code> or empty
+	 */
+	public static <T> T firstElementOf(final Collection<? extends T> collection) {
+		if (isEmpty(collection)) {
+			return null;
+		}
+		return collection.iterator().next();
+	}
+	
+	/**
 	 * Constructor is private to prevent instantiation
 	 * 
 	 * @since 1.2.0
