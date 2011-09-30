@@ -52,6 +52,8 @@ import org.springframework.roo.support.util.StringUtils;
 public class ControllerOperationsImpl implements ControllerOperations {
 	
 	// Constants
+	private static final JavaSymbolName PATH = new JavaSymbolName("path");
+	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 	private static final Logger LOG = HandlerUtils.getLogger(ControllerOperationsImpl.class);
 	
 	// Fields
@@ -107,34 +109,22 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		Assert.notNull(entity, "Entity Java Type required");
 		Assert.notNull(disallowedOperations, "Set of disallowed operations required");
 		Assert.hasText(path, "Controller base path required");
-		JavaSymbolName pathName = new JavaSymbolName("path");
-		JavaSymbolName value = new JavaSymbolName("value");
 		
-		ClassOrInterfaceTypeDetails existing = null;
-		// Check if a controller mapping for this path exists already
-		for (ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(REQUEST_MAPPING)) {
-			StringAttributeValue mappingAttribute = (StringAttributeValue) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), REQUEST_MAPPING).getAttribute(value);
-			if (mappingAttribute != null) {
-				String stringPath = mappingAttribute.getValue();
-				if (StringUtils.hasText(stringPath) && stringPath.equalsIgnoreCase("/" + path)) {
-					existing = coitd;
-					LOG.info("Found existing controller for mapping '/" + path + "'.");
-				}
-			}
-		}
+		// Look for an existing controller mapped to this path
+		final ClassOrInterfaceTypeDetails existingController = getExistingController(path);
 		
 		webMvcOperations.installConversionService(controller.getPackage());
 		
 		List<AnnotationMetadataBuilder> annotations = null;
 		
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
-		if (existing == null) {
+		if (existingController == null) {
 			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
 			
 			// Create annotation @RequestMapping("/myobject/**")
 			List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + path));
+			requestMappingAttributes.add(new StringAttributeValue(VALUE, "/" + path));
 			annotations = new ArrayList<AnnotationMetadataBuilder>();
 			annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes));
 			
@@ -143,17 +133,37 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			annotations.add(new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes));
 			
 			// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
-			annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, pathName));
+			annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, PATH));
 			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		} else {
-			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existing);
+			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(existingController);
 			annotations = typeDetailsBuilder.getAnnotations();
-			if (MemberFindingUtils.getAnnotationOfType(existing.getAnnotations(), ROO_WEB_SCAFFOLD) == null) {
-				annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, pathName));
+			if (MemberFindingUtils.getAnnotationOfType(existingController.getAnnotations(), ROO_WEB_SCAFFOLD) == null) {
+				annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, PATH));
 			}
 		}
 		typeDetailsBuilder.setAnnotations(annotations);
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
+	}
+
+	/**
+	 * Looks for an existing controller mapped to the given path
+	 * 
+	 * @param path (required)
+	 * @return <code>null</code> if there is no such controller
+	 */
+	private ClassOrInterfaceTypeDetails getExistingController(final String path) {
+		for (final ClassOrInterfaceTypeDetails coitd : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(REQUEST_MAPPING)) {
+			final StringAttributeValue mappingAttribute = (StringAttributeValue) MemberFindingUtils.getAnnotationOfType(coitd.getAnnotations(), REQUEST_MAPPING).getAttribute(VALUE);
+			if (mappingAttribute != null) {
+				final String mapping = mappingAttribute.getValue();
+				if (StringUtils.hasText(mapping) && mapping.equalsIgnoreCase("/" + path)) {
+					LOG.info("Introducing into existing controller '" + coitd.getName().getFullyQualifiedTypeName() + "' mapped to '/" + path);
+					return coitd;
+				}
+			}
+		}
+		return null;
 	}
 
 	private AnnotationMetadataBuilder getRooWebScaffoldAnnotation(JavaType entity, Set<String> disallowedOperations, String path, JavaSymbolName pathName) {
