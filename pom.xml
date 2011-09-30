@@ -72,6 +72,7 @@
         <module>addon-layers-repository-jpa</module>
 		<module>addon-layers-repository-mongo</module>
 		<module>addon-oscommands</module>
+		<module>addon-displayname</module>
         <module>annotations</module>
     </modules>
     <organization>
@@ -677,7 +678,7 @@
                 <artifactId>org.springframework.roo.addon.jsf</artifactId> 
                 <version>${project.version}</version> 
             </dependency>
-           -->
+            -->
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.bootstrap</artifactId>
@@ -821,6 +822,11 @@
             <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.oscommands</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.displayname</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
