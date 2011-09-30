@@ -12,7 +12,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.displayname.DisplayNameMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -32,7 +31,6 @@ import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link JsfConverterMetadataProvider}.
@@ -127,9 +125,9 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 	private String getDisplayMethod(final JavaType entity, MemberDetails memberDetails) {
 		String displayMethod = "toString()";
 		
-		final DisplayNameMetadata displayNameMetadata = (DisplayNameMetadata) metadataService.get(DisplayNameMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
-		if (displayNameMetadata != null && StringUtils.hasText(displayNameMetadata.getMethodName())) {
-			displayMethod = displayNameMetadata.getMethodName() + "()";
+		MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
+		if (displayNameMethod != null) {
+			displayMethod = displayNameMethod.getMethodName().getSymbolName() + "()";
 		} else {
 			final JavaSymbolName methodName = new JavaSymbolName("getDisplayName");
 			MethodMetadata method = memberDetails.getMethod(methodName);
