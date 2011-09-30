@@ -14,13 +14,13 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -52,7 +52,7 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_SERVICE);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(LayerCustomDataKeys.LAYER_TYPE, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE), ROO_SERVICE));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(CustomDataKeys.LAYER_TYPE, ROO_SERVICE, new JavaSymbolName(RooService.DOMAIN_TYPES_ATTRIBUTE), ROO_SERVICE));
 	}
 
 	protected void deactivate(ComponentContext context) {
@@ -71,9 +71,9 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 		}
 		
 		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(governor);
-		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE) != null) {
 			@SuppressWarnings("unchecked")
-			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE);
 			if (domainTypes != null) {
 				for (JavaType type : domainTypes) {
 					String localMidType = managedEntityTypes.get(type);

@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.entity;
 
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_TYPE;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;

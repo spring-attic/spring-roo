@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.displayname;
 
+import static org.springframework.roo.addon.displayname.RooDisplayName.DISPLAY_NAME_DEFAULT;
 import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_NAME;
 
 import java.util.ArrayList;
@@ -14,6 +15,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
+import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
+import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -21,6 +25,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
@@ -35,20 +40,31 @@ import org.springframework.roo.project.Path;
 public final class DisplayNameMetadataProviderImpl extends AbstractItdMetadataProvider implements DisplayNameMetadataProvider {
 
 	// Fields
+	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_DISPLAY_NAME);
+		registerMatchers();
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_DISPLAY_NAME);
+		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void registerMatchers() {
+		customDataKeyDecorator.registerMatchers(
+			getClass(),
+			new MethodMatcher(CustomDataKeys.DISPLAY_NAME_METHOD, ROO_DISPLAY_NAME, new JavaSymbolName("methodName"), DISPLAY_NAME_DEFAULT)
+		);
+	}
+
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		final DisplayNameAnnotationValues annotationValues = new DisplayNameAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {

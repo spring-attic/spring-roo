@@ -35,7 +35,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -494,7 +494,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		if (fieldType.equals(JavaType.STRING)) {
 			boolean isUnique = isFieldOfEmbeddableType;
-			@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+			@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataKeys.COLUMN_FIELD);
 			if (!isUnique && values != null && values.containsKey("unique")) {
 				isUnique = (Boolean) values.get("unique");
 			}
@@ -536,8 +536,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				bodyBuilder.append(getDigitsBody(field, digitsAnnotation, suffix));
 			} else if (decimalMinAnnotation != null || decimalMaxAnnotation != null) {
 				bodyBuilder.append(getDecimalMinAndDecimalMaxBody(field, decimalMinAnnotation, decimalMaxAnnotation, suffix));
-			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-				@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+			} else if (field.getCustomData().keySet().contains(CustomDataKeys.COLUMN_FIELD)) {
+				@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataKeys.COLUMN_FIELD);
 				bodyBuilder.append(getColumnPrecisionAndScaleBody(field, values, suffix));
 			}
 		} else if (JdkJavaType.isIntegerType(fieldType)) {
@@ -993,8 +993,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						}
 					}
 				} else {
-					if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
-						@SuppressWarnings("unchecked") Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+					if (field.getCustomData().keySet().contains(CustomDataKeys.COLUMN_FIELD)) {
+						@SuppressWarnings("unchecked") Map<String, Object> columnValues = (Map<String, Object>) field.getCustomData().get(CustomDataKeys.COLUMN_FIELD);
 						if (columnValues.keySet().contains("length")) {
 							maxLength = ((Integer) columnValues.get("length")).intValue();
 						}
@@ -1076,7 +1076,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		} else if (fieldType.equals(entity)) {
 			// Avoid circular references (ROO-562)
 			initializer = "obj";
-		} else if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
+		} else if (fieldCustomDataKeys.contains(CustomDataKeys.ENUMERATED_FIELD)) {
 			imports.addImport(field.getFieldType());
 			initializer = field.getFieldType().getSimpleTypeName() + ".class.getEnumConstants()[0]";
 		} else if (collaboratingMetadata != null && collaboratingMetadata.getEntityType() != null) {
@@ -1084,7 +1084,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 			// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
-			if (fieldCustomDataKeys.contains(PersistenceCustomDataKeys.ONE_TO_ONE_FIELD)) {
+			if (fieldCustomDataKeys.contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
 				initializer = collaboratingFieldName + "." + collaboratingMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
 			} else {
 				initializer = collaboratingFieldName + "." + collaboratingMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";

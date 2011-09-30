@@ -11,7 +11,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.ItdDiscoveryService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -96,7 +96,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 
 		final MemberDetails details = getMemberDetails(domainType);
 		
-		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, PersistenceCustomDataKeys.PERSISTENT_TYPE) == null) {
+		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, CustomDataKeys.PERSISTENT_TYPE) == null) {
 			return;
 		}
 
@@ -121,7 +121,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private void populateVersionAccessor(final MemberDetails details, final JavaType type) {
-		final MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD);
+		final MethodMetadata versionAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, CustomDataKeys.VERSION_ACCESSOR_METHOD);
 		if (versionAccessor != null) {
 			domainTypeVersionAccessorCache.put(type, versionAccessor);
 		} else if (domainTypeVersionAccessorCache.containsKey(type)) {
@@ -130,7 +130,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private void populateIdAccessors(final MemberDetails details, final JavaType type) {
-		final MethodMetadata idAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
+		final MethodMetadata idAccessor = MemberFindingUtils.getMostConcreteMethodWithTag(details, CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD);
 		if (idAccessor != null) {
 			domainTypeIdAccessorCache.put(type, idAccessor);
 		} else if (domainTypeIdAccessorCache.containsKey(type)) {
@@ -139,7 +139,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private void populateEmbeddedIdFields(final MemberDetails details, final JavaType type) {
-		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
+		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.EMBEDDED_ID_FIELD);
 		if (!embeddedIdFields.isEmpty()) {
 			domainTypeEmbeddedIdFieldsCache.remove(type);
 			domainTypeEmbeddedIdFieldsCache.put(type, new ArrayList<FieldMetadata>());
@@ -155,8 +155,8 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private void populateIdTypes(final MemberDetails details, final JavaType type) {
-		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
-		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
+		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.IDENTIFIER_FIELD);
+		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.EMBEDDED_ID_FIELD);
 		if (!idFields.isEmpty()) {
 			domainTypeIdCache.put(type, idFields.get(0).getFieldType());
 		} else if (!embeddedIdFields.isEmpty()) {
@@ -167,8 +167,8 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 	
 	private void populateIdFields(final MemberDetails details, final JavaType type) {
-		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.IDENTIFIER_FIELD);
-		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.EMBEDDED_ID_FIELD);
+		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.IDENTIFIER_FIELD);
+		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.EMBEDDED_ID_FIELD);
 		if (!idFields.isEmpty()) {
 			domainTypeIdFieldsCache.put(type, idFields);
 		} else if (!embeddedIdFields.isEmpty()) {
@@ -179,7 +179,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 	}
 
 	private void populateVersionField(final MemberDetails details, final JavaType type) {
-		final List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(details, PersistenceCustomDataKeys.VERSION_FIELD);
+		final List<FieldMetadata> versionFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.VERSION_FIELD);
 		if (!versionFields.isEmpty()) {
 			domainTypeVersionFieldCache.put(type, versionFields.get(0));
 		} else if (domainTypeVersionFieldCache.containsKey(type)) {

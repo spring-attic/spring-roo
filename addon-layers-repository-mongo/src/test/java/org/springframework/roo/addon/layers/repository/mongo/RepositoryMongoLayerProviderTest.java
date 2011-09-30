@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 
 import java.util.Arrays;
 

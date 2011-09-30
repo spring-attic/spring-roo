@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.test;
 
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 import static org.springframework.roo.model.SpringJavaType.MOCK_STATIC_ENTITY_METHODS;
 

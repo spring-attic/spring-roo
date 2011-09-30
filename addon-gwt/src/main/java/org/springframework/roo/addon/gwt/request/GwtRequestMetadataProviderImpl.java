@@ -16,6 +16,7 @@ import org.springframework.roo.addon.gwt.GwtTypeService;
 import org.springframework.roo.addon.gwt.GwtUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -27,7 +28,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
@@ -243,9 +243,9 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 				return;
 			}
 			boolean processed = false;
-			if (cid.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+			if (cid.getCustomData().get(CustomDataKeys.LAYER_TYPE) != null) {
 				@SuppressWarnings("unchecked")
-				List<JavaType> layerTypes = (List<JavaType>) cid.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+				List<JavaType> layerTypes = (List<JavaType>) cid.getCustomData().get(CustomDataKeys.LAYER_TYPE);
 				for (ClassOrInterfaceTypeDetails request : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_REQUEST)) {
 					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
 					if (entity != null && layerTypes.contains(entity.getName())) {

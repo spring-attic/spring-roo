@@ -1,15 +1,15 @@
 package org.springframework.roo.addon.jsf;
 
 import static org.springframework.roo.classpath.PhysicalTypeCategory.ENUMERATION;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JavaType.BOOLEAN_OBJECT;
 import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.BYTE_ARRAY_PRIMITIVE;
@@ -32,7 +32,7 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -44,7 +44,6 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -101,9 +100,9 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		}
 
 		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getGovernor().getName());
-		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE) != null) {
+		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE) != null) {
 			@SuppressWarnings("unchecked")
-			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE);
 			if (domainTypes != null) {
 				for (JavaType type : domainTypes) {
 					String localMidType = entityToManagedBeanMidMap.get(type);
@@ -235,7 +234,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 			// Check field is an enum type
 			boolean enumerated = false;
-			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
+			if (field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD)) {
 				enumerated = true;
 			} else {
 				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(fieldType);
@@ -266,7 +265,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				}
 				jsfFieldHolder.setGenericTypes(genericTypes);
 			} else {
-				if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_FIELD)) {
+				if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
 					jsfFieldHolder.setMemberDetails(getMemberDetails(fieldType));
 				}
 			}

@@ -1,18 +1,18 @@
 package org.springframework.roo.addon.dod;
 
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_ID_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_MANY_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MANY_TO_ONE_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_MANY_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.ONE_TO_ONE_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.TRANSIENT_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_ID_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.MANY_TO_MANY_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.MANY_TO_ONE_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.ONE_TO_MANY_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.ONE_TO_ONE_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.TRANSIENT_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.VERSION_FIELD;
 import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
 
 import java.lang.reflect.Modifier;
@@ -30,7 +30,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -39,7 +39,6 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
 import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
@@ -64,8 +63,8 @@ import org.springframework.roo.shell.NaturalOrderComparator;
 public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DataOnDemandMetadataProvider {
 	
 	// Constants
-	private static final String FLUSH_METHOD = PersistenceCustomDataKeys.FLUSH_METHOD.name();
-	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final String FLUSH_METHOD = CustomDataKeys.FLUSH_METHOD.name();
+	private static final String PERSIST_METHOD = CustomDataKeys.PERSIST_METHOD.name();
 	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
@@ -95,7 +94,7 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
 		JavaType governor = itdTypeDetails.getName();
 		
-		Object layerTypeValue = itdTypeDetails.getGovernor().getCustomData().get(LayerCustomDataKeys.LAYER_TYPE);
+		Object layerTypeValue = itdTypeDetails.getGovernor().getCustomData().get(CustomDataKeys.LAYER_TYPE);
 		if (layerTypeValue != null) {
 			@SuppressWarnings("unchecked")
 			List<JavaType> domainTypes = (List<JavaType>) layerTypeValue;

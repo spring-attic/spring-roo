@@ -34,7 +34,7 @@ import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadata
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -121,7 +121,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addConstructor(getConstructor());
 		}
 
-		MemberTypeAdditions persistMethod = crudAdditions.get(PersistenceCustomDataKeys.PERSIST_METHOD.name());
+		MemberTypeAdditions persistMethod = crudAdditions.get(CustomDataKeys.PERSIST_METHOD.name());
 		if (annotationValues.isCreate() && persistMethod != null) {
 			builder.addMethod(getCreateMethod(persistMethod));
 			builder.addMethod(getCreateFormMethod(dependentTypes));
@@ -129,10 +129,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		
 		// "list" method
-		MemberTypeAdditions countAllMethod = crudAdditions.get(PersistenceCustomDataKeys.COUNT_ALL_METHOD.name());
-		MemberTypeAdditions findMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_METHOD.name());
-		MemberTypeAdditions findAllMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
-		MemberTypeAdditions findEntriesMethod = crudAdditions.get(PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name());
+		MemberTypeAdditions countAllMethod = crudAdditions.get(CustomDataKeys.COUNT_ALL_METHOD.name());
+		MemberTypeAdditions findMethod = crudAdditions.get(CustomDataKeys.FIND_METHOD.name());
+		MemberTypeAdditions findAllMethod = crudAdditions.get(CustomDataKeys.FIND_ALL_METHOD.name());
+		MemberTypeAdditions findEntriesMethod = crudAdditions.get(CustomDataKeys.FIND_ENTRIES_METHOD.name());
 
 		if (findMethod != null) {
 			builder.addMethod(getShowMethod(findMethod));
@@ -147,14 +147,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		
 		// "update" method
-		MemberTypeAdditions updateMethod = crudAdditions.get(PersistenceCustomDataKeys.MERGE_METHOD.name());
+		MemberTypeAdditions updateMethod = crudAdditions.get(CustomDataKeys.MERGE_METHOD.name());
 		if (annotationValues.isUpdate() && updateMethod != null && findMethod != null) {
 			builder.addMethod(getUpdateMethod(updateMethod));
 			builder.addMethod(getUpdateFormMethod(findMethod));
 			updateMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		
-		MemberTypeAdditions deleteMethod = crudAdditions.get(PersistenceCustomDataKeys.REMOVE_METHOD.name());
+		MemberTypeAdditions deleteMethod = crudAdditions.get(CustomDataKeys.REMOVE_METHOD.name());
 		if (annotationValues.isDelete() && deleteMethod != null && findMethod != null) {
 			builder.addMethod(getDeleteMethod(deleteMethod, findMethod));
 			deleteMethod.copyAdditionsTo(builder, governorTypeDetails);

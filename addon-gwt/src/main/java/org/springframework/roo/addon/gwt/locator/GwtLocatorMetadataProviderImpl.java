@@ -15,7 +15,7 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -156,7 +156,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	}
 
 	private MethodMetadataBuilder getFindMethod(ClassOrInterfaceTypeDetailsBuilder locatorBuilder, String declaredById, JavaType targetType, JavaType idType) {
-		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(declaredById, PersistenceCustomDataKeys.FIND_METHOD.name(), targetType, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
+		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(declaredById, CustomDataKeys.FIND_METHOD.name(), targetType, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return ").append(findMethodAdditions.getMethodCall()).append(";");
 		findMethodAdditions.copyAdditionsTo(locatorBuilder, locatorBuilder.build());

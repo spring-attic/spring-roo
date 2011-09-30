@@ -25,7 +25,7 @@ import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -103,21 +103,21 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 
 		this.jsonMetadata = jsonMetadata;
 		
-		MemberTypeAdditions findMethod = persistenceAdditions.get(PersistenceCustomDataKeys.FIND_METHOD.name());
+		MemberTypeAdditions findMethod = persistenceAdditions.get(CustomDataKeys.FIND_METHOD.name());
 		builder.addMethod(getJsonShowMethod(identifierField, findMethod));
 		
-		MemberTypeAdditions findAllMethod = persistenceAdditions.get(PersistenceCustomDataKeys.FIND_ALL_METHOD.name());
+		MemberTypeAdditions findAllMethod = persistenceAdditions.get(CustomDataKeys.FIND_ALL_METHOD.name());
 		builder.addMethod(getJsonListMethod(findAllMethod));
 
-		MemberTypeAdditions persistMethod = persistenceAdditions.get(PersistenceCustomDataKeys.PERSIST_METHOD.name());
+		MemberTypeAdditions persistMethod = persistenceAdditions.get(CustomDataKeys.PERSIST_METHOD.name());
 		builder.addMethod(getJsonCreateMethod(persistMethod));
 		builder.addMethod(getCreateFromJsonArrayMethod(persistMethod));
 		
-		MemberTypeAdditions mergeMethod = persistenceAdditions.get(PersistenceCustomDataKeys.MERGE_METHOD.name());
+		MemberTypeAdditions mergeMethod = persistenceAdditions.get(CustomDataKeys.MERGE_METHOD.name());
 		builder.addMethod(getJsonUpdateMethod(mergeMethod));
 		builder.addMethod(getUpdateFromJsonArrayMethod(mergeMethod));
 
-		MemberTypeAdditions removeMethod = persistenceAdditions.get(PersistenceCustomDataKeys.REMOVE_METHOD.name());
+		MemberTypeAdditions removeMethod = persistenceAdditions.get(CustomDataKeys.REMOVE_METHOD.name());
 		builder.addMethod(getJsonDeleteMethod(removeMethod, identifierField, findMethod));
 
 		if (annotationValues.isExposeFinders()) {

@@ -13,6 +13,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -49,7 +50,7 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 		if (!annotationValues.isAnnotationFound()) {
 			return null;
 		}
-		
+
 		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		if (memberDetails == null) {
 			return null;
@@ -65,10 +66,12 @@ public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItd
 				return l.getMethodName().compareTo(r.getMethodName());
 			}
 		});
-		
+
+		MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
+
 		for (MethodMetadata method : methods) {
 			// Exclude cyclic self-references (ROO-325)
-			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName())) {
+			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName()) && !method.hasSameName(displayNameMethod)) {
 				locatedAccessors.add(method);
 				// Track any changes to that method (eg it goes away)
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);

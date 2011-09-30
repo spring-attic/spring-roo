@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.model.JavaSymbolName;
@@ -25,7 +25,7 @@ enum ServiceLayerMethod {
 	// The names of these enum constants are arbitrary; calling code refers to
 	// these methods by their String key.
 	
-	COUNT (PersistenceCustomDataKeys.COUNT_ALL_METHOD) {
+	COUNT (CustomDataKeys.COUNT_ALL_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getCountAllMethod())) {
@@ -50,7 +50,7 @@ enum ServiceLayerMethod {
 		}
 	},
 	
-	DELETE (PersistenceCustomDataKeys.REMOVE_METHOD) {
+	DELETE (CustomDataKeys.REMOVE_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getDeleteMethod())) {
@@ -75,7 +75,7 @@ enum ServiceLayerMethod {
 		}
 	},
 	
-	FIND (PersistenceCustomDataKeys.FIND_METHOD) {
+	FIND (CustomDataKeys.FIND_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindMethod())) {
@@ -100,7 +100,7 @@ enum ServiceLayerMethod {
 		}
 	},
 
-	FIND_ALL (PersistenceCustomDataKeys.FIND_ALL_METHOD) {
+	FIND_ALL (CustomDataKeys.FIND_ALL_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindAllMethod())) {
@@ -125,7 +125,7 @@ enum ServiceLayerMethod {
 		}
 	},
 	
-	FIND_ENTRIES (PersistenceCustomDataKeys.FIND_ENTRIES_METHOD) {
+	FIND_ENTRIES (CustomDataKeys.FIND_ENTRIES_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindEntriesMethod())) {
@@ -150,7 +150,7 @@ enum ServiceLayerMethod {
 		}
 	},
 	
-	SAVE (PersistenceCustomDataKeys.PERSIST_METHOD) {
+	SAVE (CustomDataKeys.PERSIST_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getSaveMethod())) {
@@ -175,7 +175,7 @@ enum ServiceLayerMethod {
 		}
 	},
 	
-	UPDATE (PersistenceCustomDataKeys.MERGE_METHOD) {
+	UPDATE (CustomDataKeys.MERGE_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
 			if (StringUtils.hasText(annotationValues.getUpdateMethod())) {

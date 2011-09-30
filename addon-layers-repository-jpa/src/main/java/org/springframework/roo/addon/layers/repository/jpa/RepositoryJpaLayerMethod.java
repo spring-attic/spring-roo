@@ -1,13 +1,13 @@
 package org.springframework.roo.addon.layers.repository.jpa;
 
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 
 import java.util.ArrayList;
 import java.util.Arrays;

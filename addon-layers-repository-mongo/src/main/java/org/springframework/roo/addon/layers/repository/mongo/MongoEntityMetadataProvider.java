@@ -1,9 +1,9 @@
 package org.springframework.roo.addon.layers.repository.mongo;
 
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_MUTATOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSISTENT_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_MUTATOR_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;
 import static org.springframework.roo.model.RooJavaType.ROO_MONGO_ENTITY;
 
 import java.util.Arrays;

@@ -71,8 +71,8 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	public MethodMatcher(CustomDataKey<MethodMetadata> customDataKey, JavaType catalystAnnotationType, JavaSymbolName userDefinedNameAttribute, String defaultName) {
 		this.catalystAnnotationType = catalystAnnotationType;
 		this.customDataKey = customDataKey;
-		this.defaultName = defaultName;
 		this.userDefinedNameAttribute = userDefinedNameAttribute;
+		this.defaultName = defaultName;
 	}
 
 	/**
@@ -172,7 +172,6 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	}
 
 	private String getSuffix(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList, boolean singular, Map<String, String> pluralMap) {
-
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getMostConcreteClassOrInterfaceTypeDetails(memberHoldingTypeDetailsList);
 		if (singular) {
 			return classOrInterfaceTypeDetails.getName().getSimpleTypeName();

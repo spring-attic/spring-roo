@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -23,7 +23,7 @@ enum EntityLayerMethod {
 	
 	// The names of these enum constants are arbitrary
 
-	CLEAR (PersistenceCustomDataKeys.CLEAR_METHOD, true) {
+	CLEAR (CustomDataKeys.CLEAR_METHOD, true) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -39,7 +39,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	COUNT_ALL (PersistenceCustomDataKeys.COUNT_ALL_METHOD, true) {
+	COUNT_ALL (CustomDataKeys.COUNT_ALL_METHOD, true) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -55,7 +55,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FIND (PersistenceCustomDataKeys.FIND_METHOD, true) {
+	FIND (CustomDataKeys.FIND_METHOD, true) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -71,7 +71,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FIND_ALL (PersistenceCustomDataKeys.FIND_ALL_METHOD, true) {
+	FIND_ALL (CustomDataKeys.FIND_ALL_METHOD, true) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -87,7 +87,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FIND_ENTRIES (PersistenceCustomDataKeys.FIND_ENTRIES_METHOD, true) {
+	FIND_ENTRIES (CustomDataKeys.FIND_ENTRIES_METHOD, true) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -103,7 +103,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	FLUSH (PersistenceCustomDataKeys.FLUSH_METHOD, false) {
+	FLUSH (CustomDataKeys.FLUSH_METHOD, false) {
 
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -119,7 +119,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	MERGE (PersistenceCustomDataKeys.MERGE_METHOD, false) {
+	MERGE (CustomDataKeys.MERGE_METHOD, false) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -135,7 +135,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	PERSIST (PersistenceCustomDataKeys.PERSIST_METHOD, false) {
+	PERSIST (CustomDataKeys.PERSIST_METHOD, false) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
@@ -151,7 +151,7 @@ enum EntityLayerMethod {
 		}
 	},
 	
-	REMOVE (PersistenceCustomDataKeys.REMOVE_METHOD, false) {
+	REMOVE (CustomDataKeys.REMOVE_METHOD, false) {
 		
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {

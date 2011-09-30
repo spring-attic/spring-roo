@@ -14,7 +14,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.TypeManagementService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -112,7 +112,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		}
 		
 		FieldMetadata identifierField = identifierFields.get(0);
-		boolean embeddedIdField = identifierField.getCustomData().get(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD) != null;
+		boolean embeddedIdField = identifierField.getCustomData().get(CustomDataKeys.EMBEDDED_ID_FIELD) != null;
 		List<FieldMetadata> embeddedIdFields = persistenceMemberLocator.getEmbeddedIdentifierFields(javaType);
 		return new IdentifierHolder(identifierField, embeddedIdField, embeddedIdFields);
 	}

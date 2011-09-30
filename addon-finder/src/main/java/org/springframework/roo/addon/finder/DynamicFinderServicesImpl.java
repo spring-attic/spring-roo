@@ -16,7 +16,7 @@ import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -362,7 +362,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	}
 	
 	private boolean isTransient(FieldMetadata field) {
-		return Modifier.isTransient(field.getModifier()) || field.getCustomData().keySet().contains(PersistenceCustomDataKeys.TRANSIENT_FIELD);
+		return Modifier.isTransient(field.getModifier()) || field.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD);
 	}
 
 	private boolean isNumberOrDate(JavaType fieldType) {

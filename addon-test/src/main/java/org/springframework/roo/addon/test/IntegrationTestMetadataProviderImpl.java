@@ -1,15 +1,15 @@
 package org.springframework.roo.addon.test;
 
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.COUNT_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ALL_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_ENTRIES_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FIND_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.FLUSH_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.MERGE_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.PERSIST_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.REMOVE_METHOD;
-import static org.springframework.roo.classpath.layers.LayerCustomDataKeys.LAYER_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ENTRIES_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.LAYER_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.JavaType.INT_PRIMITIVE;
 import static org.springframework.roo.model.RooJavaType.ROO_DATA_ON_DEMAND;
 import static org.springframework.roo.model.RooJavaType.ROO_ENTITY;

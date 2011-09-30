@@ -35,7 +35,7 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.AbstractIdentifiableAnnotatedJavaStructureBuilder;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -329,12 +329,12 @@ public class GwtTypeServiceImpl implements GwtTypeService {
 	public List<MethodMetadata> getRequestMethods(ClassOrInterfaceTypeDetails governorTypeDetails) {
 		List<MethodMetadata> requestMethods = new ArrayList<MethodMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(GwtTypeServiceImpl.class.getName(), governorTypeDetails);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.PERSIST_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.REMOVE_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.COUNT_ALL_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.FIND_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.FIND_ALL_METHOD);
-		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, PersistenceCustomDataKeys.FIND_ENTRIES_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.PERSIST_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.REMOVE_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.COUNT_ALL_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ALL_METHOD);
+		setRequestMethod(requestMethods, governorTypeDetails, memberDetails, CustomDataKeys.FIND_ENTRIES_METHOD);
 		return requestMethods;
 	}
 

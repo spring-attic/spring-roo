@@ -1,9 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller.details;
 
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.EMBEDDED_FIELD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.IDENTIFIER_TYPE;
-import static org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys.VERSION_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_TYPE;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.VERSION_ACCESSOR_METHOD;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
@@ -32,7 +32,7 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -76,13 +76,13 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 	private static final Logger logger = HandlerUtils.getLogger(WebMetadataServiceImpl.class);
 	private static final MethodParameter FIRST_RESULT_PARAMETER = new MethodParameter(JavaType.INT_PRIMITIVE, "firstResult");
 	private static final MethodParameter MAX_RESULTS_PARAMETER = new MethodParameter(JavaType.INT_PRIMITIVE, "sizeNo");
-	private static final String COUNT_ALL_METHOD = PersistenceCustomDataKeys.COUNT_ALL_METHOD.name();
-	private static final String DELETE_METHOD = PersistenceCustomDataKeys.REMOVE_METHOD.name();
-	private static final String FIND_METHOD = PersistenceCustomDataKeys.FIND_METHOD.name();
-	private static final String FIND_ALL_METHOD = PersistenceCustomDataKeys.FIND_ALL_METHOD.name();
-	private static final String FIND_ENTRIES_METHOD = PersistenceCustomDataKeys.FIND_ENTRIES_METHOD.name();
-	private static final String MERGE_METHOD = PersistenceCustomDataKeys.MERGE_METHOD.name();
-	private static final String PERSIST_METHOD = PersistenceCustomDataKeys.PERSIST_METHOD.name();
+	private static final String COUNT_ALL_METHOD = CustomDataKeys.COUNT_ALL_METHOD.name();
+	private static final String DELETE_METHOD = CustomDataKeys.REMOVE_METHOD.name();
+	private static final String FIND_METHOD = CustomDataKeys.FIND_METHOD.name();
+	private static final String FIND_ALL_METHOD = CustomDataKeys.FIND_ALL_METHOD.name();
+	private static final String FIND_ENTRIES_METHOD = CustomDataKeys.FIND_ENTRIES_METHOD.name();
+	private static final String MERGE_METHOD = CustomDataKeys.MERGE_METHOD.name();
+	private static final String PERSIST_METHOD = CustomDataKeys.PERSIST_METHOD.name();
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
 
 	// Fields
@@ -116,7 +116,7 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 			}
 			// Not interested in fields that are JPA transient fields or immutable fields
 			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-			if (fieldMetadata == null || fieldMetadata.getCustomData().keySet().contains(PersistenceCustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
+			if (fieldMetadata == null || fieldMetadata.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD) || !BeanInfoUtils.hasAccessorAndMutator(fieldMetadata, memberDetails)) {
 				continue;
 			}
 			JavaType type = method.getReturnType();

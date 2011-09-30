@@ -7,22 +7,22 @@ import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustom
 import org.springframework.roo.model.CustomData;
 
 /**
- * {@link CustomData} tag definitions for persistence-related functionality.
+ * {@link CustomData} tag definitions.
  * 
  * @author Stefan Schmidt
  * @author James Tyrrell
+ * @author Alan Stewart
  * @since 1.1.3
  */
-public class PersistenceCustomDataKeys {
+public class CustomDataKeys {
+
 	// TODO: Once CustomDataKey builders have been created they should be used here -JT
 
+	public static final ConstructorMetadataCustomDataKey NO_ARG_CONSTRUCTOR = new ConstructorMetadataCustomDataKey("NO_ARG_CONSTRUCTOR");
+
+	// Persistence keys
 	public static final MemberHoldingTypeDetailsCustomDataKey IDENTIFIER_TYPE = new MemberHoldingTypeDetailsCustomDataKey("IDENTIFIER_TYPE");
 	public static final MemberHoldingTypeDetailsCustomDataKey PERSISTENT_TYPE = new MemberHoldingTypeDetailsCustomDataKey("PERSISTENT_TYPE");
-
-	/**
-	 * Tags a type as having a no-arg constructor.
-	 */
-	public static final ConstructorMetadataCustomDataKey NO_ARG_CONSTRUCTOR = new ConstructorMetadataCustomDataKey("NO_ARG_CONSTRUCTOR");
 
 	public static final FieldMetadataCustomDataKey IDENTIFIER_FIELD = new FieldMetadataCustomDataKey("IDENTIFIER_FIELD");
 	public static final FieldMetadataCustomDataKey VERSION_FIELD = new FieldMetadataCustomDataKey("VERSION_FIELD");
@@ -53,4 +53,10 @@ public class PersistenceCustomDataKeys {
 
 	// Dynamic finder method names; CustomData value expected to be a java.util.List<String> of finder names
 	public static final MethodMetadataCustomDataKey DYNAMIC_FINDER_NAMES = new MethodMetadataCustomDataKey("DYNAMIC_FINDER_NAMES");
+		
+	// Layer-related key
+	public static final MemberHoldingTypeDetailsCustomDataKey LAYER_TYPE = new MemberHoldingTypeDetailsCustomDataKey("LAYER_TYPE");
+	
+	// Display name key
+	public static final MethodMetadataCustomDataKey DISPLAY_NAME_METHOD = new MethodMetadataCustomDataKey("DISPLAY_NAME_METHOD");
 }

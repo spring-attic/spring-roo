@@ -29,7 +29,7 @@ import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDe
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
-import org.springframework.roo.classpath.customdata.PersistenceCustomDataKeys;
+import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -127,7 +127,7 @@ public class JspViewManager {
 				} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 					columnElement.setAttribute("calendar", "true");
 					columnElement.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}");
-				} else if (field.getFieldType().isCommonCollectionType() && field.getCustomData().get(PersistenceCustomDataKeys.ONE_TO_MANY_FIELD) != null) {
+				} else if (field.getFieldType().isCommonCollectionType() && field.getCustomData().get(CustomDataKeys.ONE_TO_MANY_FIELD) != null) {
 					continue;
 				}
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
@@ -178,7 +178,7 @@ public class JspViewManager {
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 				fieldDisplay.setAttribute("calendar", "true");
 				fieldDisplay.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}");
-			} else if (field.getFieldType().isCommonCollectionType() && field.getCustomData().get(PersistenceCustomDataKeys.ONE_TO_MANY_FIELD) != null) {
+			} else if (field.getFieldType().isCommonCollectionType() && field.getCustomData().get(CustomDataKeys.ONE_TO_MANY_FIELD) != null) {
 				continue;
 			}
 			fieldDisplay.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldDisplay));
@@ -309,11 +309,11 @@ public class JspViewManager {
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataHolder = collectionTypeMetadataHolder.getPersistenceDetails();
 				if (typePersistenceMetadataHolder != null) {
 					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("required", "true").addAttribute("items", "${" + collectionTypeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(getJavaTypeForField(field))).build();
-					if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD)) {
+					if (field.getCustomData().keySet().contains(CustomDataKeys.MANY_TO_MANY_FIELD)) {
 						fieldElement.setAttribute("multiple", "true");
 					}
 				}
-			} else if (typeMetadataHolder != null && typeMetadataHolder.isEnumType() && field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ENUMERATED_FIELD)) {
+			} else if (typeMetadataHolder != null && typeMetadataHolder.isEnumType() && field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD)) {
 				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("required", "true").addAttribute("items", "${" + typeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("path", "/" + getPathForType(type)).build();
 			} else if (type.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || type.getFullyQualifiedTypeName().equals(boolean.class.getName())) {
 				fieldElement = document.createElement("field:checkbox");
@@ -351,7 +351,7 @@ public class JspViewManager {
 				continue;
 			}
 			// Fields contained in the embedded Id type have been added separately to the field list
-			if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.EMBEDDED_ID_FIELD)) {
+			if (field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_ID_FIELD)) {
 				continue;
 			}
 			
@@ -370,7 +370,7 @@ public class JspViewManager {
 				// Handle enum fields
 			} else if (typeMetadataHolder != null && typeMetadataHolder.isEnumType()) {
 				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + typeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("path", getPathForType(fieldType)).build();
-			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ONE_TO_MANY_FIELD)) {
+			} else if (field.getCustomData().keySet().contains(CustomDataKeys.ONE_TO_MANY_FIELD)) {
 				// OneToMany relationships are managed from the 'many' side of the relationship, therefore we provide a link to the relevant form
 				// the link URL is determined as a best effort attempt following Roo REST conventions, this link might be wrong if custom paths are used
 				// if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
@@ -379,13 +379,13 @@ public class JspViewManager {
 				} else {
 					continue;
 				}
-			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.MANY_TO_ONE_FIELD) || field.getCustomData().keySet().contains(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD) || field.getCustomData().keySet().contains(PersistenceCustomDataKeys.ONE_TO_ONE_FIELD)) {
+			} else if (field.getCustomData().keySet().contains(CustomDataKeys.MANY_TO_ONE_FIELD) || field.getCustomData().keySet().contains(CustomDataKeys.MANY_TO_MANY_FIELD) || field.getCustomData().keySet().contains(CustomDataKeys.ONE_TO_ONE_FIELD)) {
 				JavaType referenceType = getJavaTypeForField(field);
 				JavaTypeMetadataDetails referenceTypeMetadata = relatedDomainTypes.get(referenceType);
 				if (referenceType != null/** fix for ROO-1888 --> **/ && referenceTypeMetadata != null && referenceTypeMetadata.isApplicationType() && typePersistenceMetadataHolder != null) {
 					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + referenceTypeMetadata.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(getJavaTypeForField(field))).build();
 
-					if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.MANY_TO_MANY_FIELD)) {
+					if (field.getCustomData().keySet().contains(CustomDataKeys.MANY_TO_MANY_FIELD)) {
 						fieldElement.setAttribute("multiple", "true");
 					}
 				}
@@ -398,7 +398,7 @@ public class JspViewManager {
 				} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PAST)) {
 					fieldElement.setAttribute("past", "true");
 				}
-			} else if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.LOB_FIELD)) {
+			} else if (field.getCustomData().keySet().contains(CustomDataKeys.LOB_FIELD)) {
 				fieldElement = new XmlElementBuilder("field:textarea", document).build();
 			} 
 			if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE))) {
@@ -502,9 +502,9 @@ public class JspViewManager {
 				fieldElement.setAttribute("required", "true");
 			}
 		}
-		if (field.getCustomData().keySet().contains(PersistenceCustomDataKeys.COLUMN_FIELD)) {
+		if (field.getCustomData().keySet().contains(CustomDataKeys.COLUMN_FIELD)) {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(PersistenceCustomDataKeys.COLUMN_FIELD);
+			Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataKeys.COLUMN_FIELD);
 			if (values.keySet().contains("nullable") && ((Boolean) values.get("nullable")) == false) {
 				fieldElement.setAttribute("required", "true"); 
 			}
