@@ -64,7 +64,7 @@ public abstract class DatabaseXmlUtils {
 		final List<Element> tableElements = XmlUtils.findElements("table", databaseElement);
 		for (final Element tableElement : tableElements) {
 			final String alias = tableElement.getAttribute("alias");
-			final String schemaName = StringUtils.hasText(alias) ? alias : databaseElement.getAttribute(NAME);
+			final String schemaName = StringUtils.defaultIfEmpty(alias, databaseElement.getAttribute(NAME));
 			final Table table = new Table(tableElement.getAttribute(NAME), new Schema(schemaName));
 			if (StringUtils.hasText(tableElement.getAttribute(DESCRIPTION))) {
 				table.setDescription(tableElement.getAttribute(DESCRIPTION));

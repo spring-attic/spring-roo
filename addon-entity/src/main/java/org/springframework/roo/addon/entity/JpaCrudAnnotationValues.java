@@ -50,15 +50,15 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	}
 	
 	public String getClearMethod() {
-		return StringUtils.hasText(clearMethod) ? clearMethod : CLEAR_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(clearMethod, CLEAR_METHOD_DEFAULT);
 	}
 	
 	public String getCountMethod() {
-		return StringUtils.hasText(countMethod) ? countMethod : COUNT_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(countMethod, COUNT_METHOD_DEFAULT);
 	}
 
 	public String getFindAllMethod() {
-		return StringUtils.hasText(findAllMethod) ? findAllMethod : FIND_ALL_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(findAllMethod, FIND_ALL_METHOD_DEFAULT);
 	}
 	
 	/**
@@ -81,15 +81,15 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	}
 	
 	public String getFindMethod() {
-		return StringUtils.hasText(findMethod) ? findMethod : FIND_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(findMethod, FIND_METHOD_DEFAULT);
 	}
 	
 	public String getFlushMethod() {
-		return StringUtils.hasText(flushMethod) ? flushMethod : FLUSH_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(flushMethod, FLUSH_METHOD_DEFAULT);
 	}
 	
 	public String getMergeMethod() {
-		return StringUtils.hasText(mergeMethod) ? mergeMethod : MERGE_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(mergeMethod, MERGE_METHOD_DEFAULT);
 	}
 	
 	public String getPersistenceUnit() {
@@ -97,11 +97,11 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	}
 
 	public String getPersistMethod() {
-		return StringUtils.hasText(persistMethod) ? persistMethod : PERSIST_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(persistMethod, PERSIST_METHOD_DEFAULT);
 	}
 
 	public String getRemoveMethod() {
-		return StringUtils.hasText(removeMethod) ? removeMethod : REMOVE_METHOD_DEFAULT;
+		return StringUtils.defaultIfEmpty(removeMethod, REMOVE_METHOD_DEFAULT);
 	}
 
 	public String getTransactionManager() {

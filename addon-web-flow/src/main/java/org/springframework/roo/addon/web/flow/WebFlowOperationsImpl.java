@@ -140,7 +140,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	}
 
 	private String getFlowId(String flowName) {
-		flowName = StringUtils.hasText(flowName) ? flowName : "sample-flow";
+		flowName = StringUtils.defaultIfEmpty(flowName, "sample-flow");
 		if (flowName.startsWith("/")) {
 			flowName = flowName.substring(1);
 		}

@@ -92,7 +92,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	}
 
 	private String getJpaQuery(List<Token> tokens, String simpleTypeName, JavaSymbolName finderName, String plural, String entityName) {
-		String typeName = StringUtils.hasText(entityName) ? entityName : simpleTypeName;
+		String typeName = StringUtils.defaultIfEmpty(entityName, simpleTypeName);
 		StringBuilder builder = new StringBuilder();
 		builder.append("SELECT o FROM ").append(typeName);
 		builder.append(" AS o WHERE ");

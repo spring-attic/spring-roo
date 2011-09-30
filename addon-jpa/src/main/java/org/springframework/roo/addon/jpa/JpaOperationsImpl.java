@@ -207,7 +207,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 		
-		transactionManager = StringUtils.hasText(transactionManager) ? transactionManager : "transactionManager";
+		transactionManager = StringUtils.defaultIfEmpty(transactionManager, "transactionManager");
 		Element transactionManagerElement = XmlUtils.findFirstElement("/beans/bean[@id = '" + transactionManager + "']", root);
 		if (transactionManagerElement == null) {
 			transactionManagerElement = appCtx.createElement("bean");
@@ -375,7 +375,7 @@ public class JpaOperationsImpl implements JpaOperations {
 						final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 						connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 						if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
-							userName = StringUtils.hasText(userName) ? userName : "sa";
+							userName = StringUtils.defaultIfEmpty(userName, "sa");
 						}
 						properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "rdbms", persistence));
 				}
@@ -409,7 +409,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		String connectionString = jdbcDatabase.getConnectionString();
 		if (connectionString.contains("TO_BE_CHANGED_BY_ADDON")) {
 			final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", (StringUtils.hasText(databaseName) ? databaseName : projectMetadata.getProjectName()));
+			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", (StringUtils.defaultIfEmpty(databaseName, projectMetadata.getProjectName())));
 		} else {
 			if (StringUtils.hasText(databaseName)) {
 				// Oracle uses a different connection URL - see ROO-1203
@@ -451,9 +451,9 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		final Element root = appengine.getDocumentElement();
 		final Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", root);
-		final String textContent = StringUtils.hasText(applicationId) ? applicationId : getProjectName();
+		final String textContent = StringUtils.defaultIfEmpty(applicationId, getProjectName());
 		if (!textContent.equals(applicationElement.getTextContent())) {
-			applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
+			applicationElement.setTextContent(textContent);
 			fileManager.createOrUpdateTextFileIfRequired(appenginePath, XmlUtils.nodeToString(appengine), false);
 			LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
 		}
@@ -483,7 +483,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		final String connectionString = getConnectionString(jdbcDatabase, hostName, databaseName);
 		if (jdbcDatabase.getKey().equals("HYPERSONIC") || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY || jdbcDatabase == JdbcDatabase.SYBASE) {
-			userName = StringUtils.hasText(userName) ? userName : "sa";
+			userName = StringUtils.defaultIfEmpty(userName, "sa");
 		}
 
 		boolean hasChanged = !props.get(DATABASE_DRIVER).equals(jdbcDatabase.getDriverClassName());

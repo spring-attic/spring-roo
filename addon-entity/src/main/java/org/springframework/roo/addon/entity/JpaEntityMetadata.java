@@ -556,14 +556,14 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		}
 		
 		// Try to locate an existing field with @Version
-		final List<FieldMetadata> found = governorTypeDetails.getFieldsWithAnnotation(VERSION);
-		if (found.size() > 0) {
-			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @Version in '" + destination.getFullyQualifiedTypeName() + "'");
-			return found.get(0);
+		final List<FieldMetadata> versionFields = governorTypeDetails.getFieldsWithAnnotation(VERSION);
+		if (!versionFields.isEmpty()) {
+			Assert.isTrue(versionFields.size() == 1, "More than 1 field was annotated with @Version in '" + destination.getFullyQualifiedTypeName() + "'");
+			return versionFields.get(0);
 		}
 		
 		// Quit at this stage if the user doesn't want a version field
-		String versionField = annotationValues.getVersionField();
+		final String versionField = annotationValues.getVersionField();
 		if ("".equals(versionField)) {
 			return null;
 		}
@@ -573,7 +573,7 @@ public class JpaEntityMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 		
 		// We're creating one
 		JavaType versionType = annotationValues.getVersionType();
-		String versionColumn = StringUtils.hasText(annotationValues.getVersionColumn()) ? annotationValues.getVersionColumn() : verField.getSymbolName();
+		String versionColumn = StringUtils.defaultIfEmpty(annotationValues.getVersionColumn(), verField.getSymbolName());
 		if (isDatabaseDotComEnabled) {
 			versionType = CALENDAR;
 			versionColumn = "lastModifiedDate";
