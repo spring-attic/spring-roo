@@ -124,7 +124,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			return; 
 		}
 		
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity));
 		if (pluralMetadata == null) {
 			return;
 		}
