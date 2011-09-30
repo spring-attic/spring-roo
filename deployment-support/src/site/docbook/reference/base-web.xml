@@ -383,6 +383,14 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
     toString() method for that, a Converter defines the formatting logic for
     how to present the associated entity as a String.</para>
 
+    <para><sidebar>
+        <para>Note, a custom written or pushed in converter method needs to be
+        registered manually via the <emphasis>installFormatters</emphasis>
+        method which is already present in your
+        <emphasis>ApplicationConversionServiceFactoryBean.java</emphasis>
+        source code.</para>
+      </sidebar></para>
+
     <para>In some cases you may wish to customize how a specific entity is
     formatted as a String in JSP views. For example suppose we have an entity
     called Vote. To customize how it is displayed in the JSP views add a
@@ -396,16 +404,16 @@ public class ApplicationConversionServiceFactoryBean extends FormattingConversio
     public Converter&lt;Vote, String&gt; getVoteConverter() {
         return new Converter&lt;Vote, String&gt;() {
             public String convert(Vote source) {
-                return new StringBuilder().append(source.getIp()).append(" ").append(source.getRegistered()).toString();
+                return new StringBuilder().append(
+                       source.getIp()).append(" ").append(source.getRegistered()).toString();
             }
         };
     }
-
 }</programlisting>
 
     <para>At this point Roo will notice that the addition of the method and
     will remove it from the ITD much like overriding the toString() method in
-    a Roo entity works.</para>
+    a Roo entity works. </para>
 
     <para>Note, in some cases you may create a form backing entity which does
     not contain any suitable fields for conversion. For example, the entity
@@ -720,7 +728,7 @@ field reference --fieldName school --type com.foo.domain.School --class com.foo.
     finders registered in the form backing object. This is done by using the
     <link linkend="command-index-web-mvc-finder-all">web mvc finder all</link>
     or <link linkend="command-index-web-mvc-finder-add">web mvc finder
-    add</link> command. </para>
+    add</link> command.</para>
 
     <para>Due to file name length restrictions by many file systems (see <link
     xlink:href="http://en.wikipedia.org/wiki/Comparison_of_file_systems">http://en.wikipedia.org/wiki/Comparison_of_file_systems</link>)
