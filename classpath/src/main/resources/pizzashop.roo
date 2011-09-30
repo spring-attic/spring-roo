@@ -40,10 +40,10 @@ service --interface ~.service.BaseService --entity ~.domain.Base
 service --interface ~.service.PizzaService --entity ~.domain.Pizza
 service --interface ~.service.PizzaOrderService --entity ~.domain.PizzaOrder
 
-// Offer JSON remoting for all domain types trough Spring MVC
+// Offer JSON remoting for all domain types through Spring MVC
 json all --deepSerialize
 web mvc json setup
-web mvc json all
+web mvc json all --package ~.web
 
 web mvc setup
 web mvc all --package ~.web
