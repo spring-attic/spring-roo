@@ -20,6 +20,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerCustomDataKeys;
@@ -119,11 +120,17 @@ public final class JsfConverterMetadataProviderImpl extends AbstractMemberDiscov
 		final MemberTypeAdditions findAllMethod = getFindAllMethod(entity, metadataId);
 		
 		final DisplayNameMetadata displayNameMetadata = (DisplayNameMetadata) metadataService.get(DisplayNameMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
-		if (displayNameMetadata == null) {
-			return null;
+		final String displayNameMethod;
+		if (displayNameMetadata != null) {
+			displayNameMethod = displayNameMetadata.getMethodName();
+		} else {
+			final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
+			if (identifierAccessor != null) {
+				displayNameMethod = identifierAccessor.getMethodName().getSymbolName() + "().toString";
+			} else {
+				displayNameMethod = "toString";
+			}
 		}
-
-		String displayNameMethod = displayNameMetadata.getMethodName();
 
 		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod, displayNameMethod);
 	}
