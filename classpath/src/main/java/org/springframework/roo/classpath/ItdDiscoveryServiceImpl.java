@@ -2,6 +2,8 @@ package org.springframework.roo.classpath;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -21,8 +23,10 @@ import org.springframework.roo.support.util.StringUtils;
 public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 
 	// Fields
-	private HashMap<String, HashMap<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, HashMap<String, MemberHoldingTypeDetails>>();
-	private HashMap<String, String> itdIdToTypeMap = new HashMap<String, String>();
+	private final Map<String, HashMap<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, HashMap<String, MemberHoldingTypeDetails>>();
+	private final Map<String, String> itdIdToTypeMap = new HashMap<String, String>();
+	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
+
 
 	public void addItdTypeDetails(ItdTypeDetails itdTypeDetails) {
 		if (itdTypeDetails == null || itdTypeDetails.getGovernor() == null) {
@@ -42,7 +46,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 		}
 		String type = itdIdToTypeMap.get(itdTypeDetailsId);
 		if (type != null) {
-			HashMap<String, MemberHoldingTypeDetails> typeDetailsHashMap = typeMap.get(type);
+			Map<String, MemberHoldingTypeDetails> typeDetailsHashMap = typeMap.get(type);
 			if (typeDetailsHashMap != null) {
 				typeDetailsHashMap.remove(itdTypeDetailsId);
 			}
@@ -50,10 +54,8 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 		}
 	}
 
-	private final HashMap<String, LinkedHashSet<String>> changeMap = new HashMap<String, LinkedHashSet<String>>();
-
 	public boolean haveItdsChanged(String requestingClass, JavaType javaType) {
-		LinkedHashSet<String> changesSinceLastRequest = changeMap.get(requestingClass);
+		Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
 		if (changesSinceLastRequest == null) {
 			changesSinceLastRequest = new LinkedHashSet<String>(typeMap.keySet());
 			changeMap.put(requestingClass, changesSinceLastRequest);
@@ -65,7 +67,6 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 			}
 		}
 		return false;
-
 	}
 
 	private void updateChanges(JavaType javaType, boolean remove) {
