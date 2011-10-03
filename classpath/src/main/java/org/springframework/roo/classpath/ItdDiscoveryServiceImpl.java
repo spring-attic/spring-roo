@@ -23,7 +23,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 
 	// Fields
-	private final Map<String, HashMap<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, HashMap<String, MemberHoldingTypeDetails>>();
+	private final Map<String, Map<String, MemberHoldingTypeDetails>> typeMap = new HashMap<String, Map<String, MemberHoldingTypeDetails>>();
 	private final Map<String, String> itdIdToTypeMap = new HashMap<String, String>();
 	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
 
