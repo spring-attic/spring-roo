@@ -44,7 +44,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Fields
 	private JavaType entity;
 
-	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MemberTypeAdditions findAllMethod, final String displayNameMethod) {
+	public JsfConverterMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JsfConverterAnnotationValues annotationValues, final MemberTypeAdditions findAllMethod, final String displayName) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -66,8 +66,8 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		
 		builder.addAnnotation(getFacesConverterAnnotation());
-		builder.addMethod(getGetAsObjectMethod(displayNameMethod, findAllMethod));
-		builder.addMethod(getGetAsStringMethod(displayNameMethod, findAllMethod));
+		builder.addMethod(getGetAsObjectMethod(displayName, findAllMethod));
+		builder.addMethod(getGetAsStringMethod(displayName, findAllMethod));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -89,7 +89,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return isImplementing(governorTypeDetails, CONVERTER);
 	}
 	
-	private MethodMetadata getGetAsObjectMethod(String displayMethod, final MemberTypeAdditions findAllMethod) {
+	private MethodMetadata getGetAsObjectMethod(String displayNameMethod, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsObject");
 		final List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, JavaType.STRING);
 		if (getGovernorMethod(methodName, parameterTypes) != null) {
@@ -107,7 +107,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + "." + displayMethod + ".equals(value)) {");
+		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + "." + displayNameMethod + ".equals(value)) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return " + StringUtils.uncapitalize(simpleTypeName) + ";");
 		bodyBuilder.indentRemove();
@@ -122,7 +122,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getGetAsStringMethod(String displayMethod, final MemberTypeAdditions findAllMethod) {
+	private MethodMetadata getGetAsStringMethod(String displayNameMethod, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("getAsString");
 		final List<JavaType> parameterTypes = Arrays.asList(FACES_CONTEXT, UI_COMPONENT, OBJECT);
 		if (getGovernorMethod(methodName, parameterTypes) != null) {
@@ -138,7 +138,7 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " = (" + simpleTypeName + ") value;" );
-		bodyBuilder.appendFormalLine("return " + StringUtils.uncapitalize(simpleTypeName) + "." + displayMethod + ";");
+		bodyBuilder.appendFormalLine("return " + StringUtils.uncapitalize(simpleTypeName) + "." + displayNameMethod + ";");
 		
 		// Create getAsString method
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("context"), new JavaSymbolName("component"), new JavaSymbolName("value"));
