@@ -94,30 +94,28 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 			return;
 		}
 
-		final MemberDetails details = getMemberDetails(domainType);
-		
-		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(details, CustomDataKeys.PERSISTENT_TYPE) == null) {
+		final MemberDetails memberDetails = getMemberDetails(domainType);
+		if (MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, CustomDataKeys.PERSISTENT_TYPE) == null) {
 			return;
 		}
 
 		// Update normal persistence ID fields cache
-		populateIdTypes(details, domainType);
-				
+		populateIdTypes(memberDetails, domainType);
+
 		// Update normal persistence ID cache
-		populateIdFields(details, domainType);
-		
+		populateIdFields(memberDetails, domainType);
+
 		// Update embedded ID fields cache
-		populateEmbeddedIdFields(details, domainType);
-		
+		populateEmbeddedIdFields(memberDetails, domainType);
+
 		// Update ID accessor cache
-		populateIdAccessors(details, domainType);
+		populateIdAccessors(memberDetails, domainType);
 
 		// Update version field cache
-		populateVersionField(details, domainType);
+		populateVersionField(memberDetails, domainType);
 
 		// Update version accessor cache
-		populateVersionAccessor(details, domainType);
-
+		populateVersionAccessor(memberDetails, domainType);
 	}
 
 	private void populateVersionAccessor(final MemberDetails details, final JavaType type) {

@@ -4,7 +4,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_CONVERSION_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,29 +94,12 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		
 		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(ROO_WEB_SCAFFOLD);
-		Map<JavaType, String> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
-		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
+//		Map<JavaType, String> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
+		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(controllers);
 		Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
 		final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
 		
-		for (final Iterator<JavaType> types = relevantDomainTypes.keySet().iterator(); types.hasNext();) {
-			final JavaType type = types.next();
-			final JavaType identifierType = persistenceMemberLocator.getIdentifierType(type);
-			if (identifierType == null) {
-				// This type either has no ID field (e.g. an embedded type) or it's ID type is unknown right now;
-				// don't generate a converter for it; this will happen later if and when the ID field becomes known.
-				types.remove();
-			} else {
-				idTypes.put(type, identifierType);
-				final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.FIND_METHOD.name(), type, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
-				findMethods.put(type, findMethod);
-			}
-		}
 		
-		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes, compositePrimaryKeyTypes);
-	}
-	
-	private Map<JavaType, String> findDomainTypesRequiringAConverter(String metadataIdentificationString, Set<JavaType> controllers) {
 		Map<JavaType, String> relevantDomainTypes = new LinkedHashMap<JavaType, String>();
 		for (JavaType controller : controllers) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
@@ -127,12 +109,23 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			if (formBackingObject == null) {
 				continue;
 			}
+			final JavaType identifierType = persistenceMemberLocator.getIdentifierType(formBackingObject);
+			if (identifierType == null) {
+				// This type either has no ID field (e.g. an embedded type) or it's ID type is unknown right now;
+				// don't generate a converter for it; this will happen later if and when the ID field becomes known.
+				continue;
+			}
+
 			relevantDomainTypes.put(formBackingObject, getDisplayMethod(formBackingObject));
+			idTypes.put(formBackingObject, identifierType);
+			final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.FIND_METHOD.name(), formBackingObject, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
+			findMethods.put(formBackingObject, findMethod);
 		}
-		return relevantDomainTypes;
+		
+		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
 	
-	private Map<JavaType, Map<Object, JavaSymbolName>> findCompositePrimaryKeyTypesRequiringAConverter(String metadataIdentificationString, Set<JavaType> controllers) {
+	private Map<JavaType, Map<Object, JavaSymbolName>> findCompositePrimaryKeyTypesRequiringAConverter(Set<JavaType> controllers) {
 		Map<JavaType, Map<Object, JavaSymbolName>> types = new TreeMap<JavaType, Map<Object,JavaSymbolName>>();
 		for (JavaType controller : controllers) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
@@ -166,7 +159,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	private String getDisplayMethod(final JavaType formBackingObject) {
 		final MemberDetails memberDetails = getMemberDetails(formBackingObject);
 		String displayMethod = "toString()";
-		
+
 		final MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
 		if (displayNameMethod != null) {
 			displayMethod = displayNameMethod.getMethodName().getSymbolName() + "()";
