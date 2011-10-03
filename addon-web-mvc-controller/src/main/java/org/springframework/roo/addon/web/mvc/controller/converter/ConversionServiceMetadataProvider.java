@@ -3,8 +3,6 @@ package org.springframework.roo.addon.web.mvc.controller.converter;
 import static org.springframework.roo.model.RooJavaType.ROO_CONVERSION_SERVICE;
 import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -20,7 +18,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.json.CustomDataJsonTags;
 import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -28,7 +25,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.customdata.CustomDataKeys;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -61,10 +57,9 @@ import org.springframework.roo.support.util.Assert;
 public final class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Fields
-	@Reference private TypeLocationService typeLocationService;
-	@Reference private WebMetadataService webMetadataService;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private LayerService layerService;
+	@Reference private PersistenceMemberLocator persistenceMemberLocator;
+	@Reference private TypeLocationService typeLocationService;
 	
 	// Stores the MID (as accepted by this ConversionServiceMetadataProvider) for the one (and only one) application-wide conversion service
 	private String applicationConversionServiceFactoryBeanMid;
@@ -100,7 +95,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		
 		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(ROO_WEB_SCAFFOLD);
-		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
+		Map<JavaType, String> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(metadataIdentificationString, controllers);
 		Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
 		final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
@@ -122,17 +117,17 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
 	
-	private Map<JavaType, List<MethodMetadata>> findDomainTypesRequiringAConverter(String metadataIdentificationString, Set<JavaType> controllers) {
-		Map<JavaType, List<MethodMetadata>> relevantDomainTypes = new LinkedHashMap<JavaType, List<MethodMetadata>>();
+	private Map<JavaType, String> findDomainTypesRequiringAConverter(String metadataIdentificationString, Set<JavaType> controllers) {
+		Map<JavaType, String> relevantDomainTypes = new LinkedHashMap<JavaType, String>();
 		for (JavaType controller : controllers) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
 			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
 			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
-			if (webScaffoldAnnotationValues.getFormBackingObject() == null) {
+			final JavaType formBackingObject = webScaffoldAnnotationValues.getFormBackingObject();
+			if (formBackingObject == null) {
 				continue;
 			}
-			Map<JavaType, List<MethodMetadata>> relevantTypes = findRelevantTypes(webScaffoldAnnotationValues.getFormBackingObject(), metadataIdentificationString);
-			relevantDomainTypes.putAll(relevantTypes);
+			relevantDomainTypes.put(formBackingObject, getDisplayMethod(formBackingObject));
 		}
 		return relevantDomainTypes;
 	}
@@ -147,14 +142,14 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			if (formBackingObject == null) {
 				continue;
 			}
-			MemberDetails memberDetails = getMemberDetails(formBackingObject);
-			List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataKeys.EMBEDDED_ID_FIELD);
+			final MemberDetails memberDetails = getMemberDetails(formBackingObject);
+			final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(memberDetails, CustomDataKeys.EMBEDDED_ID_FIELD);
 			if (embeddedIdFields.size() > 1) {
 				throw new IllegalStateException("Found multiple embedded ID fields in " + formBackingObject.getFullyQualifiedTypeName() + " type. Only one is allowed.");
 			} else if (embeddedIdFields.size() == 1) {
-				Map<Object, JavaSymbolName> jsonMethodNames = new LinkedHashMap<Object, JavaSymbolName>();
-				MemberDetails fieldMemberDetails = getMemberDetails(embeddedIdFields.get(0).getFieldType());
-				MethodMetadata fromJsonMethod = MemberFindingUtils.getMostConcreteMethodWithTag(fieldMemberDetails, CustomDataJsonTags.FROM_JSON_METHOD);
+				final Map<Object, JavaSymbolName> jsonMethodNames = new LinkedHashMap<Object, JavaSymbolName>();
+				final MemberDetails fieldMemberDetails = getMemberDetails(embeddedIdFields.get(0).getFieldType());
+				final MethodMetadata fromJsonMethod = MemberFindingUtils.getMostConcreteMethodWithTag(fieldMemberDetails, CustomDataJsonTags.FROM_JSON_METHOD);
 				if (fromJsonMethod != null) {
 					jsonMethodNames.put(CustomDataJsonTags.FROM_JSON_METHOD, fromJsonMethod.getMethodName());
 					MethodMetadata toJsonMethod = MemberFindingUtils.getMostConcreteMethodWithTag(fieldMemberDetails, CustomDataJsonTags.TO_JSON_METHOD);
@@ -168,54 +163,28 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		return types;
 	}
 
-	private Map<JavaType, List<MethodMetadata>> findRelevantTypes(JavaType type, String metadataIdentificationString) {
-		final MemberDetails memberDetails = getMemberDetails(type);
-		if (memberDetails == null) {
-			return Collections.emptyMap();
-		}
+	private String getDisplayMethod(final JavaType formBackingObject) {
+		final MemberDetails memberDetails = getMemberDetails(formBackingObject);
+		String displayMethod = "toString()";
 		
-		Map<JavaType, List<MethodMetadata>> types = new LinkedHashMap<JavaType, List<MethodMetadata>>();
-		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
-		
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA), metadataIdentificationString);
-		int counter = 0;
-		for (MethodMetadata method : memberDetails.getMethods()) {
-			// Track any changes to that method (eg it goes away)
-			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-
-			if (counter < 4 && isMethodOfInterest(method, memberDetails)) {
-				counter++;
-				locatedAccessors.add(method);
-			} 
+		final MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
+		if (displayNameMethod != null) {
+			displayMethod = displayNameMethod.getMethodName().getSymbolName() + "()";
+		} else {
+			final JavaSymbolName methodName = new JavaSymbolName("getDisplayName");
+			MethodMetadata method = memberDetails.getMethod(methodName);
+			if (method != null) {
+				displayMethod = methodName.getSymbolName() + "()";
+			} else {
+				final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(formBackingObject);
+				if (identifierAccessor != null) {
+					displayMethod = identifierAccessor.getMethodName().getSymbolName() + "()." + displayMethod;
+				}
+			}
 		}
-
-		if (!locatedAccessors.isEmpty()) {
-			types.put(type, locatedAccessors);
-		}
-		return types;
+		return displayMethod;
 	}
-	
-	private boolean isMethodOfInterest(MethodMetadata method, MemberDetails memberDetails) {
-		if (!BeanInfoUtils.isAccessorMethod(method)) {
-			return false; // Only interested in accessors
-		}
-		if (method.getCustomData().keySet().contains(CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD) || method.getCustomData().keySet().contains(CustomDataKeys.VERSION_ACCESSOR_METHOD)) {
-			return false; // Only interested in methods which are not accessors for persistence version or id fields
-		}
-		FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-		if (field == null) {
-			return false;
-		}
-		JavaType fieldType = field.getFieldType();
-		if (fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
-				|| webMetadataService.isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
-				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD) /* Not interested in embedded types */) {
-			return false;
-		}
-		return true;
-	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "ConversionService";
 	}

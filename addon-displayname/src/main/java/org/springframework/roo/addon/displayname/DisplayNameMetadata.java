@@ -3,6 +3,8 @@ package org.springframework.roo.addon.displayname;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAYS;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.DATE_FORMAT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -113,18 +115,24 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final List<String> displayMethods = new ArrayList<String>();
 		for (MethodMetadata accessor : locatedAccessors) {
 			String accessorName = accessor.getMethodName().getSymbolName();
-			String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-			String accessorText = accessorName + "()";
+			String accessorText;
 			if (accessor.getReturnType().isCommonCollectionType()) {
 				accessorText = accessorName + "() == null ? \"\" : " + accessorName + "().size()";
 			} else if (accessor.getReturnType().isArray()) {
 				imports.addImport(ARRAYS);
 				accessorText = "Arrays.toString(" + accessorName + "())";
 			} else if (CALENDAR.equals(accessor.getReturnType())) {
-				accessorText = accessorName + "() == null ? \"\" : " + accessorName + "().getTime()";
+				imports.addImport(DATE_FORMAT);
+				accessorText = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "().getTime())";
+			} else if (DATE.equals(accessor.getReturnType())) {
+				imports.addImport(DATE_FORMAT);
+				accessorText = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "())";
+			} else {
+				accessorText = accessorName + "()";
 			}
 
 			if (!fieldsSet.isEmpty()) {
+				String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 				if (fieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
 					displayMethods.add(accessorText);
 				}

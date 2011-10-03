@@ -41,6 +41,7 @@ public final class JdkJavaType {
 	public static final JavaType CALENDAR = new JavaType("java.util.Calendar");
 	public static final JavaType COLLECTION = new JavaType("java.util.Collection");
 	public static final JavaType DATE = new JavaType("java.util.Date");
+	public static final JavaType DATE_FORMAT = new JavaType("java.text.DateFormat");
 	public static final JavaType GREGORIAN_CALENDAR = new JavaType("java.util.GregorianCalendar");
 	public static final JavaType HASH_SET = new JavaType("java.util.HashSet");
 	public static final JavaType LIST = new JavaType("java.util.List");

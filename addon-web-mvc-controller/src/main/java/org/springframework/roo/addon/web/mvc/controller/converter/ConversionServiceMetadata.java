@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.springframework.roo.addon.json.CustomDataJsonTags;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -59,7 +58,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	 * @param relevantDomainTypes the types for which to generate converters (required)
 	 * @param compositePrimaryKeyTypes (required)
 	 */
-	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<JavaType, MemberTypeAdditions> findMethods, Map<JavaType, JavaType> idTypes, Map<JavaType, List<MethodMetadata>> relevantDomainTypes, Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes) {
+	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<JavaType, MemberTypeAdditions> findMethods, Map<JavaType, JavaType> idTypes, Map<JavaType, String> relevantDomainTypes, Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(relevantDomainTypes, "List of domain types required");
 		Assert.notNull(compositePrimaryKeyTypes, "List of PK types required");
@@ -73,34 +72,35 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 		builder.addAnnotation(getTypeAnnotation(CONFIGURABLE));
 
-		MethodMetadataBuilder installMethodBuilder = new MethodMetadataBuilder(getInstallMethod());
+		final MethodMetadataBuilder installMethodBuilder = new MethodMetadataBuilder(getInstallMethod());
+		final Set<String> methodNames = new HashSet<String>();
 		
-		Set<String> methodNames = new HashSet<String>();
-		// Loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
-		for (final JavaType type : new TreeSet<JavaType>(relevantDomainTypes.keySet())) {
-			String simpleName = type.getSimpleTypeName();
+		for (final Map.Entry<JavaType, String> entry : relevantDomainTypes.entrySet()) {
+			JavaType formBackingObject = entry.getKey();
+			String displayNameMethod = entry.getValue();
+			String simpleName = formBackingObject.getSimpleTypeName();
 			while (methodNames.contains(simpleName)) {
 				simpleName += "_";
 			}
 			methodNames.add(simpleName);
 			JavaSymbolName toIdMethodName = new JavaSymbolName("get" + simpleName + "ToStringConverter");
-			MethodMetadata toIdMethod = getToStringConverterMethod(type, toIdMethodName, relevantDomainTypes.get(type));
+			MethodMetadata toIdMethod = getToStringConverterMethod(formBackingObject, toIdMethodName, displayNameMethod);
 			if (toIdMethod != null) {
 				builder.addMethod(toIdMethod);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + toIdMethodName.getSymbolName() + "());");
 			}
 			
 			JavaSymbolName toTypeMethodName = new JavaSymbolName("getIdTo" + simpleName + "Converter");
-			MethodMetadata toTypeMethod = getToTypeConverterMethod(type, toTypeMethodName, findMethods.get(type), idTypes.get(type));
+			MethodMetadata toTypeMethod = getToTypeConverterMethod(formBackingObject, toTypeMethodName, findMethods.get(formBackingObject), idTypes.get(formBackingObject));
 			if (toTypeMethod != null) {
 				builder.addMethod(toTypeMethod);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + toTypeMethodName.getSymbolName() + "());");
 			}
 			
 			// Only allow conversion if ID type is not String already.
-			if (!idTypes.get(type).equals(JavaType.STRING)) {
+			if (!idTypes.get(formBackingObject).equals(JavaType.STRING)) {
 				JavaSymbolName stringToTypeMethodName = new JavaSymbolName("getStringTo" + simpleName + "Converter");
-				MethodMetadata stringToTypeMethod = getStringToTypeConverterMethod(type, stringToTypeMethodName, idTypes.get(type));
+				MethodMetadata stringToTypeMethod = getStringToTypeConverterMethod(formBackingObject, stringToTypeMethodName, idTypes.get(formBackingObject));
 				if (stringToTypeMethod != null) {
 					builder.addMethod(stringToTypeMethod);
 					installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + stringToTypeMethodName.getSymbolName() + "());");
@@ -169,7 +169,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return converterMethods;
 	}
 	
-	private MethodMetadata getToStringConverterMethod(JavaType targetType, JavaSymbolName methodName, List<MethodMetadata> methods) {
+	private MethodMetadata getToStringConverterMethod(JavaType targetType, JavaSymbolName methodName, String displayNameMethod) {
 		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
@@ -180,16 +180,8 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters() + "() {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("public String convert(" + targetType.getSimpleTypeName() + " " + targetTypeName + ") {");
-		StringBuilder sb = new StringBuilder("return new StringBuilder()");
-		for (int i=0; i < methods.size(); i++) {
-			if (i > 0) {
-				sb.append(".append(\" \")");
-			}
-			sb.append(".append(").append(targetTypeName).append(".").append(methods.get(i).getMethodName().getSymbolName()).append("())");
-		}
-		sb.append(".toString();");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(sb.toString()); 
+		bodyBuilder.appendFormalLine("return " + targetTypeName + "." + displayNameMethod + ";");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();
