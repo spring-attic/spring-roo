@@ -91,16 +91,14 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
-		
+
 		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
-		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(ROO_WEB_SCAFFOLD);
-//		Map<JavaType, String> relevantDomainTypes = findDomainTypesRequiringAConverter(metadataIdentificationString, controllers);
-		Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(controllers);
-		Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
+		final Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(ROO_WEB_SCAFFOLD);
+		final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(controllers);
+		final Map<JavaType, String> relevantDomainTypes = new LinkedHashMap<JavaType, String>();
+		final Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
 		final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
-		
-		
-		Map<JavaType, String> relevantDomainTypes = new LinkedHashMap<JavaType, String>();
+
 		for (JavaType controller : controllers) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
 			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metadata for type " + controller.getFullyQualifiedTypeName());
@@ -121,7 +119,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.FIND_METHOD.name(), formBackingObject, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
 			findMethods.put(formBackingObject, findMethod);
 		}
-		
+
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
 	
