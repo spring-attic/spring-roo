@@ -3,7 +3,6 @@ package org.springframework.roo.addon.property.editor;
 import static org.springframework.roo.model.RooJavaType.ROO_EDITOR;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
@@ -12,9 +11,9 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+
 /**
  * Provides {@link EditorMetadata}.
  * 
@@ -25,9 +24,6 @@ import org.springframework.roo.project.Path;
 @Service 
 public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 	
-	// Fields
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_EDITOR);

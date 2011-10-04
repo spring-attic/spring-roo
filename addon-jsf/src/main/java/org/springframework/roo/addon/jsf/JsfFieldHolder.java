@@ -2,7 +2,9 @@ package org.springframework.roo.addon.jsf;
 
 import java.util.Map;
 
+import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -15,12 +17,13 @@ public class JsfFieldHolder {
 	private boolean commonCollectionType;
 	private boolean applicationType;
 	private MemberDetails memberDetails;
-	private Map<JavaType, MemberDetails> genericTypes;
+	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
+	private String displayMethod;
+	private Map<JavaType, MemberDetails> collectionGenericTypes;
 	
-	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated) {
+	public JsfFieldHolder(final FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 		this.field = field;
-		this.enumerated = enumerated;
 	}
 
 	public FieldMetadata getField() {
@@ -31,6 +34,10 @@ public class JsfFieldHolder {
 		return enumerated;
 	}
 	
+	public void setEnumerated(boolean enumerated) {
+		this.enumerated = enumerated;
+	}
+
 	public boolean isCommonCollectionType() {
 		return commonCollectionType;
 	}
@@ -48,12 +55,28 @@ public class JsfFieldHolder {
 		applicationType = this.memberDetails != null;
 	}
 
-	public Map<JavaType, MemberDetails> getGenericTypes() {
-		return genericTypes;
+	public Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions() {
+		return crudAdditions;
 	}
 
-	public void setGenericTypes(final Map<JavaType, MemberDetails> genericTypes) {
-		this.genericTypes = genericTypes;
-		commonCollectionType = this.genericTypes == null;
+	public void setCrudAdditions(Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
+		this.crudAdditions = crudAdditions;
+	}
+
+	public String getDisplayMethod() {
+		return displayMethod;
+	}
+
+	public void setDisplayMethod(String displayMethod) {
+		this.displayMethod = displayMethod;
+	}
+
+	public Map<JavaType, MemberDetails> getCollectionGenericTypes() {
+		return collectionGenericTypes;
+	}
+
+	public void setCollectionGenericTypes(final Map<JavaType, MemberDetails> collectionGenericTypes) {
+		this.collectionGenericTypes = collectionGenericTypes;
+		commonCollectionType = this.collectionGenericTypes == null;
 	}
 }

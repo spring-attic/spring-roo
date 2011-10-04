@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -39,7 +38,6 @@ import org.springframework.roo.support.util.StringUtils;
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Fields
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
 	private final Set<String> producedMids = new LinkedHashSet<String>();
 	private Boolean wasGaeEnabled;

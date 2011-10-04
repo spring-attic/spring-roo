@@ -24,7 +24,6 @@ import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -48,7 +47,6 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 	
 	// Fields
 	@Reference private LayerService layerService;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private TypeLocationService typeLocationService;
 	
 	protected void activate(ComponentContext context) {

@@ -43,7 +43,6 @@ import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -69,7 +68,6 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	private final Map<JavaType, String> entityToDodMidMap = new LinkedHashMap<JavaType, String>();
 	private final Map<String, JavaType> dodMidToEntityMap = new LinkedHashMap<String, JavaType>();

@@ -103,8 +103,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	// Fields
 	private JavaType entity;
 	private Set<JsfFieldHolder> locatedFields;
-	private final Set<FieldMetadata> autoCompleteFields = new LinkedHashSet<FieldMetadata>();
 	private String plural;
+	private JavaSymbolName entityName;
+	private final Set<FieldMetadata> autoCompleteEnumFields = new LinkedHashSet<FieldMetadata>();
+	private final Set<JsfFieldHolder> autoCompleteApplicationTypeFields = new LinkedHashSet<JsfFieldHolder>();
 
 	private enum Action {
 		CREATE, EDIT, VIEW;
@@ -122,7 +124,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return;
 		}
 		
-		this.entity = annotationValues.getEntity();
+		entity = annotationValues.getEntity();
 		this.plural = plural;
 		this.locatedFields = locatedFields;
 		
@@ -130,13 +132,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
 		final MemberTypeAdditions persistMethod = crudAdditions.get(PERSIST_METHOD);
 		final MemberTypeAdditions removeMethod = crudAdditions.get(REMOVE_METHOD);
-		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null || locatedFields.isEmpty()) {
+		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null || this.locatedFields.isEmpty() || entity == null) {
 			valid = false;
 			return;
 		}
+		
 		final Set<FieldMetadata> rooUploadedFileFields = getRooUploadedFileFields();
 		final JavaSymbolName allEntitiesFieldName = new JavaSymbolName("all" + plural);
 		final JavaType entityListType = getListType(entity);
+		entityName = JavaSymbolName.getReservedWordSafeName(entity);
 
 		// Add @ManagedBean annotation if required
 		builder.addAnnotation(getManagedBeanAnnotation());
@@ -146,7 +150,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		// Add fields
 		builder.addField(getField(PRIVATE, NAME, STRING, "\"" + plural + "\""));
-		builder.addField(getField(getEntityName(), entity));
+		builder.addField(getField(entityName, entity));
 		builder.addField(getField(allEntitiesFieldName, entityListType));
 		builder.addField(getField(PRIVATE, DATA_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
 		builder.addField(getField(COLUMNS, getListType(STRING)));
@@ -164,7 +168,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getAccessorMethod(NAME, STRING));
 		builder.addMethod(getAccessorMethod(COLUMNS, getListType(STRING)));
 		builder.addMethod(getSelectedEntityAccessorMethod());
-		builder.addMethod(getMutatorMethod(getEntityName(), entity));
+		builder.addMethod(getMutatorMethod(entityName, entity));
 		builder.addMethod(getAccessorMethod(allEntitiesFieldName, entityListType));
 		builder.addMethod(getMutatorMethod(allEntitiesFieldName, entityListType));
 		builder.addMethod(getFindAllEntitiesMethod(allEntitiesFieldName, findAllMethod));
@@ -186,8 +190,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			builder.addMethod(getMutatorMethod(rooUploadedFileField.getFieldName(), rooUploadedFileField.getFieldType()));
 		}
 		
-		for (final FieldMetadata autoCompleteField : autoCompleteFields) {
-			builder.addMethod(getEnumAutoCompleteMethod(autoCompleteField));
+		for (final FieldMetadata field : autoCompleteEnumFields) {
+			builder.addMethod(getAutoCompleteEnumMethod(field));
+		}
+		
+		for (final JsfFieldHolder jsfFieldHolder : autoCompleteApplicationTypeFields) {
+			builder.addMethod(getAutoCompleteApplicationTypeMethod(jsfFieldHolder));
 		}
 
 		builder.addMethod(getAccessorMethod(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE));
@@ -234,13 +242,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
+		
+		findAllAdditions.copyAdditionsTo(builder, governorTypeDetails);
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(ARRAY_LIST);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("all" + plural + " = " + findAllAdditions.getMethodCall() + ";");
-		findAllAdditions.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("columns = new ArrayList<String>();");
 		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
 			FieldMetadata field = jsfFieldHolder.getField();
@@ -255,15 +264,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 	
 	private MethodMetadata getSelectedEntityAccessorMethod() {
-		final JavaSymbolName fieldName = getEntityName();
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (" + fieldName.getSymbolName() + " == null) {");
+		bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " == null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = new " + entity.getSimpleTypeName() + "();");
+		bodyBuilder.appendFormalLine(entityName.getSymbolName() + " = new " + entity.getSimpleTypeName() + "();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return " + fieldName.getSymbolName() + ";");
-		return getAccessorMethod(fieldName, entity, bodyBuilder);
+		bodyBuilder.appendFormalLine("return " + entityName.getSymbolName() + ";");
+		return getAccessorMethod(entityName, entity, bodyBuilder);
 	}
 	
 	private MethodMetadata getFindAllEntitiesMethod(final JavaSymbolName fieldName, final MemberTypeAdditions findAllMethod) {
@@ -272,10 +280,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return null;
 		}
 
+		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = " + findAllMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine(DATA_VISIBLE + " = !" + fieldName.getSymbolName() + ".isEmpty();");
-		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		bodyBuilder.appendFormalLine("return null;");
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
@@ -359,7 +368,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		imports.addImport(HTML_PANEL_GRID);
 		imports.addImport(HTML_OUTPUT_TEXT);
 
-		bodyBuilder.appendFormalLine("HtmlPanelGrid " + HTML_PANEL_GRID_ID + " = " + getComponentCreationStr("HtmlPanelGrid"));
+		bodyBuilder.appendFormalLine("HtmlPanelGrid " + HTML_PANEL_GRID_ID + " = " + getComponentCreation("HtmlPanelGrid"));
 		bodyBuilder.appendFormalLine("");
 
 		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
@@ -372,7 +381,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final String requiredFlag = action != Action.VIEW && !nullable ? " * " : "   ";
 			
 			// Field label
-			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId + " = " + getComponentCreationStr("HtmlOutputText"));
+			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId + " = " + getComponentCreation("HtmlOutputText"));
 			bodyBuilder.appendFormalLine(fieldLabelId + ".setId(\"" + fieldLabelId + "\");");
 			bodyBuilder.appendFormalLine(fieldLabelId + ".setValue(\"" + fieldName + ":" + requiredFlag + "\");");
 			if (action == Action.VIEW) {
@@ -384,18 +393,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			// Field value
 			String fieldValueId = fieldName + suffix2;
 			String converterName = fieldValueId + "Converter";
-			final String htmlOutputTextStr = "HtmlOutputText " + fieldValueId + " = " + getComponentCreationStr("HtmlOutputText");
-			final String inputTextStr = "InputText " + fieldValueId + " = " + getComponentCreationStr("InputText");
+			final String htmlOutputTextStr = "HtmlOutputText " + fieldValueId + " = " + getComponentCreation("HtmlOutputText");
+			final String inputTextStr = "InputText " + fieldValueId + " = " + getComponentCreation("InputText");
 			final String componentIdStr = fieldValueId + ".setId(\"" + fieldValueId + "\");";
 			final String requiredStr = fieldValueId + ".setRequired(" + !nullable + ");";
-			final String entityName = getEntityName().getSymbolName();
 			
 			if (isRooUploadFileField(field)) {
 				imports.addImport(PRIMEFACES_FILE_UPLOAD);
 				imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 				imports.addImport(PRIMEFACES_UPLOADED_FILE);
 				final JavaSymbolName fileUploadMethodName = getFileUploadMethodName(field.getFieldName());
-				bodyBuilder.appendFormalLine("FileUpload " + fieldValueId + " = " + getComponentCreationStr("FileUpload"));
+				bodyBuilder.appendFormalLine("FileUpload " + fieldValueId + " = " + getComponentCreation("FileUpload"));
 				bodyBuilder.appendFormalLine(componentIdStr);
 				bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + entityName + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 				bodyBuilder.appendFormalLine(fieldValueId + ".setMode(\"advanced\");");
@@ -403,43 +411,43 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldName, fieldValueId));
 				} else {
 					imports.addImport(PRIMEFACES_SELECT_BOOLEAN_CHECKBOX);
-					bodyBuilder.appendFormalLine("SelectBooleanCheckbox " + fieldValueId + " = " + getComponentCreationStr("SelectBooleanCheckbox"));
+					bodyBuilder.appendFormalLine("SelectBooleanCheckbox " + fieldValueId + " = " + getComponentCreation("SelectBooleanCheckbox"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(requiredStr);
 				}
 			} else if (jsfFieldHolder.isEnumerated()) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldName, fieldValueId));
 				} else {
 					imports.addImport(PRIMEFACES_AUTO_COMPLETE);
 					imports.addImport(fieldType);
-					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreationStr("AutoComplete"));
+					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreation("AutoComplete"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + entityName + "Bean.complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
 					bodyBuilder.appendFormalLine(requiredStr);
-					autoCompleteFields.add(field);
+					autoCompleteEnumFields.add(field);
 				}
 			} else if (JdkJavaType.isDateField(fieldType)) {
 				if (action == Action.VIEW) {
 					imports.addImport(DATE_TIME_CONVERTER);
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldName, fieldValueId));
 					bodyBuilder.appendFormalLine("DateTimeConverter " + converterName + " = new DateTimeConverter();");
 					bodyBuilder.appendFormalLine(converterName + ".setPattern(\"dd/MM/yyyy\");");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(" + converterName + ");");
 				} else {
 					imports.addImport(PRIMEFACES_CALENDAR);
 					imports.addImport(DATE);
-					bodyBuilder.appendFormalLine("Calendar " + fieldValueId + " = " + getComponentCreationStr("Calendar"));
+					bodyBuilder.appendFormalLine("Calendar " + fieldValueId + " = " + getComponentCreation("Calendar"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "Date"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, "Date"));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setNavigator(true);");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setEffect(\"slideDown\");");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setPattern(\"dd/MM/yyyy\");");
@@ -448,7 +456,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			} else if (JdkJavaType.isIntegerType(fieldType)) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldName, fieldValueId));
 				} else {
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
 					imports.addImport(PRIMEFACES_SLIDER);
@@ -456,15 +464,21 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					if (fieldType.equals(JdkJavaType.BIG_INTEGER)) {
 						imports.addImport(fieldType);
 					}
-					bodyBuilder.appendFormalLine("Spinner " + fieldValueId + " = " + getComponentCreationStr("Spinner"));
+					bodyBuilder.appendFormalLine("Spinner " + fieldValueId + " = " + getComponentCreation("Spinner"));
 			//		bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(requiredStr);
 
 					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
 					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
 					if (minValue != null || maxValue != null) {
+						if (minValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + ".setMin(" + minValue.doubleValue() + ");");
+						}
+						if (maxValue != null) {
+							bodyBuilder.appendFormalLine(fieldValueId + ".setMax(" + maxValue.doubleValue() + ");");
+						}
 						bodyBuilder.append(getLongRangeValdatorString(fieldValueId, minValue, maxValue));
 					}
 					bodyBuilder.appendFormalLine("");
@@ -482,7 +496,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			} else if (JdkJavaType.isDecimalType(fieldType)) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldName, fieldValueId));
 				} else {
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
 					if (fieldType.equals(JdkJavaType.BIG_DECIMAL)) {
@@ -491,7 +505,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 					bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(requiredStr);
 
 					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
@@ -503,12 +517,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			} else if (fieldType.equals(STRING)){
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldName, fieldValueId));
 				} else {
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
 					bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(requiredStr);
 					
 					Integer minValue = getSizeMinOrMax(field, "min");
@@ -520,27 +534,37 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		//	} else if (jsfFieldHolder.isCommonCollectionType()) {
 				
 				
-//			} else if (jsfFieldHolder.isApplicationType()) {
-//				converterName = destination.getPackage().getFullyQualifiedPackageName() + "." + fieldType.getSimpleTypeName() + "Converter";
-//				if (action == Action.VIEW) {
-//					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-//					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
-//					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterName + "());");
-//				} else {
-//					imports.addImport(PRIMEFACES_SELECT_ONE_LISTBOX);
-//					bodyBuilder.appendFormalLine("SelectOneListbox " + fieldValueId + " = " + getComponentCreationStr("SelectOneListbox"));
-//					bodyBuilder.appendFormalLine(componentIdStr);
-//					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterName + "());");
-//				}
+			} else if (jsfFieldHolder.isApplicationType()) {
+				JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + "." + fieldType.getSimpleTypeName() + "Converter");
+				if (action == Action.VIEW) {
+					bodyBuilder.appendFormalLine(htmlOutputTextStr);
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
+				} else {
+					imports.addImport(PRIMEFACES_AUTO_COMPLETE);
+					imports.addImport(fieldType);
+					imports.addImport(new JavaType(converterName));
+					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreation("AutoComplete"));
+					bodyBuilder.appendFormalLine(componentIdStr);
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(fieldValueId + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + entityName + "Bean.complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \""+ fieldName + "\", " + fieldType.getSimpleTypeName() + ".class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + ".displayName}\", String.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", " + fieldType.getSimpleTypeName() + ".class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
+					bodyBuilder.appendFormalLine(requiredStr);
+					autoCompleteApplicationTypeFields.add(jsfFieldHolder);
+				}
 			} else {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, "String"));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldName, fieldValueId));
 				} else {
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
 					bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getValueExpressionStr(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine(requiredStr);
 				}
 			}
@@ -552,7 +576,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				// Add message for input field
 				imports.addImport(PRIMEFACES_MESSAGE);
 				bodyBuilder.appendFormalLine("");
-				bodyBuilder.appendFormalLine("Message " + fieldValueId + "Message = " + getComponentCreationStr("Message"));
+				bodyBuilder.appendFormalLine("Message " + fieldValueId + "Message = " + getComponentCreation("Message"));
 				bodyBuilder.appendFormalLine(fieldValueId + "Message.setId(\"" + fieldLabelId + "Message\");");
 				bodyBuilder.appendFormalLine(fieldValueId + "Message.setFor(\"" + fieldValueId + "\");");
 				bodyBuilder.appendFormalLine(fieldValueId + "Message.setDisplay(\"icon\");");
@@ -672,17 +696,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getEnumAutoCompleteMethod(final FieldMetadata autoCompleteField) {
+	private MethodMetadata getAutoCompleteEnumMethod(final FieldMetadata autoCompleteField) {
 		final JavaSymbolName methodName = new JavaSymbolName("complete" + StringUtils.capitalize(autoCompleteField.getFieldName().getSymbolName()));
-		final JavaType parameterType = JavaType.STRING;
+		final JavaType parameterType = STRING;
 		if (getGovernorMethod(methodName, parameterType) != null) {
 			return null;
 		}
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("query"));
 
-		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		final String simpleTypeName = autoCompleteField.getFieldType().getSimpleTypeName();
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("List<" + simpleTypeName + "> suggestions = new ArrayList<" + simpleTypeName + ">();");
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + simpleTypeName + ".values()) {");
 		bodyBuilder.indent();
@@ -700,17 +724,49 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
+	
+	private MethodMetadata getAutoCompleteApplicationTypeMethod(final JsfFieldHolder jsfFieldHolder) {
+		final FieldMetadata field = jsfFieldHolder.getField();
+		final JavaSymbolName methodName = new JavaSymbolName("complete" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+		final JavaType parameterType = STRING;
+		if (getGovernorMethod(methodName, parameterType) != null) {
+			return null;
+		}
+
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("query"));
+		final MemberTypeAdditions findAllMethod = jsfFieldHolder.getCrudAdditions().get(FIND_ALL_METHOD);
+		final String simpleTypeName = field.getFieldType().getSimpleTypeName();
+		
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("List<" + simpleTypeName + "> suggestions = new ArrayList<" + simpleTypeName + ">();");
+		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + "." + jsfFieldHolder.getDisplayMethod() + ".toLowerCase().startsWith(query.toLowerCase())) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("suggestions.add(" + StringUtils.uncapitalize(simpleTypeName) + ");");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("return suggestions;");
+
+		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(field.getFieldType()));
+		
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
+		return methodBuilder.build();
+	}
+
 
 	private MethodMetadata getDisplayCreateDialogMethod() {
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(StringUtils.uncapitalize(entity.getSimpleTypeName()) + " = new " + entity.getSimpleTypeName() + "();");
+		bodyBuilder.appendFormalLine(entityName.getSymbolName() + " = new " + entity.getSimpleTypeName() + "();");
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = true;");
-		bodyBuilder.appendFormalLine("return \"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "\";");
-		return getMethod(PUBLIC, new JavaSymbolName(DISPLAY_CREATE_DIALOG), JavaType.STRING, null, null, bodyBuilder);
+		bodyBuilder.appendFormalLine("return \"" + entityName.getSymbolName() + "\";");
+		return getMethod(PUBLIC, new JavaSymbolName(DISPLAY_CREATE_DIALOG), STRING, null, null, bodyBuilder);
 	}
 
 	private MethodMetadata getDisplayListMethod() {
-		return getMethod(PUBLIC, new JavaSymbolName(DISPLAY_LIST), JavaType.STRING, null, null, InvocableMemberBodyBuilder.getInstance().appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;").appendFormalLine("return \"" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "\";"));
+		return getMethod(PUBLIC, new JavaSymbolName(DISPLAY_LIST), STRING, null, null, InvocableMemberBodyBuilder.getInstance().appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;").appendFormalLine("return \"" + entityName.getSymbolName() + "\";"));
 	}
 
 	private MethodMetadata getPersistMethod(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod, final MethodMetadata identifierAccessor) {
@@ -722,10 +778,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		imports.addImport(FACES_MESSAGE);
 		imports.addImport(PRIMEFACES_REQUEST_CONTEXT);
 
-		final String fieldName = getEntityName().getSymbolName();
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("String message = \"\";");
-		bodyBuilder.appendFormalLine("if (" + fieldName + "." +  identifierAccessor.getMethodName().getSymbolName() + "() != null) {");
+		bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + "." +  identifierAccessor.getMethodName().getSymbolName() + "() != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(mergeMethod.getMethodCall() + ";");
 		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -747,7 +802,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("reset();");
 		bodyBuilder.appendFormalLine("return findAll" + plural + "();");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 	
@@ -765,13 +820,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("reset();");
 		bodyBuilder.appendFormalLine("return findAll" + plural + "();");
 
-		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 
 	private MethodMetadata getResetMethod() {
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(getEntityName() + " = null;");
+		bodyBuilder.appendFormalLine(entityName.getSymbolName() + " = null;");
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
 		return getMethod(PUBLIC, new JavaSymbolName("reset"), JavaType.VOID_PRIMITIVE, null, null, bodyBuilder);
 	}
@@ -795,10 +850,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 
-	private JavaSymbolName getEntityName() {
-		return JavaSymbolName.getReservedWordSafeName(entity);
-	}
-	
 	private JavaSymbolName getFileUploadMethodName(final JavaSymbolName fieldName) {
 		return new JavaSymbolName("handleFileUploadFor" + StringUtils.capitalize(fieldName.getSymbolName()));
 	}
@@ -823,12 +874,16 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return false;
 	}
 	
-	private String getComponentCreationStr(final String componentName) {
+	private String getComponentCreation(final String componentName) {
 		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
 	}
 	
-	private String getValueExpressionStr(final String inputFieldVar, final String fieldName, final String className) {
-		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + "Bean." + getEntityName() + "." + fieldName + "}\", " + className + ".class));";
+	private String getValueExpression(final String inputFieldVar, final String fieldName, final String className) {
+		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + entityName.getSymbolName() + "Bean." + entityName.getSymbolName() + "." + fieldName + "}\", " + className + ".class));";
+	}
+	
+	private String getValueExpression(final String fieldName, String fieldValueId) {
+		return getValueExpression(fieldValueId, fieldName, "String");
 	}
 
 	public String toString() {

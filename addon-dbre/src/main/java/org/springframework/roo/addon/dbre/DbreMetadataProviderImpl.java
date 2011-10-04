@@ -19,7 +19,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
@@ -35,7 +34,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 
 	// Fields
 	@Reference private DbreModelService dbreModelService;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 

@@ -39,7 +39,6 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -60,7 +59,6 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 
 	protected void activate(ComponentContext context) {

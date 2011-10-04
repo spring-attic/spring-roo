@@ -33,7 +33,6 @@ import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
@@ -57,7 +56,6 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 	
 	// Fields
 	@Reference private LayerService layerService;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private TypeLocationService typeLocationService;
 	
 	// Stores the MID (as accepted by this ConversionServiceMetadataProvider) for the one (and only one) application-wide conversion service
@@ -152,28 +150,6 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 			}
 		}
 		return types;
-	}
-
-	private String getDisplayMethod(final JavaType formBackingObject) {
-		final MemberDetails memberDetails = getMemberDetails(formBackingObject);
-		String displayMethod = "toString()";
-
-		final MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
-		if (displayNameMethod != null) {
-			displayMethod = displayNameMethod.getMethodName().getSymbolName() + "()";
-		} else {
-			final JavaSymbolName methodName = new JavaSymbolName("getDisplayName");
-			MethodMetadata method = memberDetails.getMethod(methodName);
-			if (method != null) {
-				displayMethod = methodName.getSymbolName() + "()";
-			} else {
-				final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(formBackingObject);
-				if (identifierAccessor != null) {
-					displayMethod = identifierAccessor.getMethodName().getSymbolName() + "()." + displayMethod;
-				}
-			}
-		}
-		return displayMethod;
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

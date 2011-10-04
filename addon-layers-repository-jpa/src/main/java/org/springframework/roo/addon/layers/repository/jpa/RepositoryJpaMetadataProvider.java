@@ -14,7 +14,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -31,7 +30,6 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	
 	@SuppressWarnings("unchecked")
 	protected void activate(final ComponentContext context) {

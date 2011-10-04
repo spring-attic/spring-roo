@@ -23,7 +23,6 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -41,7 +40,6 @@ public final class DisplayNameMetadataProviderImpl extends AbstractItdMetadataPr
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);

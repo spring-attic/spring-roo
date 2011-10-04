@@ -43,7 +43,6 @@ import org.springframework.roo.classpath.layers.LayerService;
 import org.springframework.roo.classpath.layers.LayerType;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.layers.MethodParameter;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
@@ -70,7 +69,6 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 
