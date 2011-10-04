@@ -14,7 +14,7 @@ import org.springframework.roo.model.CustomData;
  * @author Alan Stewart
  * @since 1.1.3
  */
-public class CustomDataKeys {
+public final class CustomDataKeys {
 
 	// TODO: Once CustomDataKey builders have been created they should be used here -JT
 
@@ -59,4 +59,9 @@ public class CustomDataKeys {
 	
 	// Display name key
 	public static final MethodMetadataCustomDataKey DISPLAY_NAME_METHOD = new MethodMetadataCustomDataKey("DISPLAY_NAME_METHOD");
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private CustomDataKeys() {}
 }
