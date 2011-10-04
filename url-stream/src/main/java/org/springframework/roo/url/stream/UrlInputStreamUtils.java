@@ -7,6 +7,7 @@ package org.springframework.roo.url.stream;
  * @since 1.1.1
  */
 public abstract class UrlInputStreamUtils {
+	
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	
 	public static final String SETUP_UAA_REQUIRED = LINE_SEPARATOR +

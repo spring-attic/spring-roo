@@ -43,10 +43,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Component(immediate = true)
 @Service
 public class JLineShellComponent extends JLineShell {
-	
-	// Constants
-	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-	
+
 	// Fields
 	@Reference private ExecutionStrategy executionStrategy;
 	@Reference private Parser parser;
@@ -101,7 +98,7 @@ public class JLineShellComponent extends JLineShell {
 		String screenName = (String) ((JSONObject) jsonObject.get("user")).get("screen_name");
 		String tweet = (String) jsonObject.get("text");
 		// We only want one line
-		tweet = tweet.replaceAll(LINE_SEPARATOR, " ");
+		tweet = tweet.replaceAll(StringUtils.LINE_SEPARATOR, " ");
 		List<String> words = Arrays.asList(tweet.split(" "));
 		StringBuilder sb = new StringBuilder();
 		// Add in Roo's twitter account to give context to the notification

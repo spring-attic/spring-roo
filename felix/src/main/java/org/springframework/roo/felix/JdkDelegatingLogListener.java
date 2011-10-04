@@ -19,6 +19,7 @@ import org.osgi.service.log.LogService;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Delegates OSGi log messages to the JDK logging infrastructure. This in turn makes it compatible
@@ -97,13 +98,12 @@ public class JdkDelegatingLogListener extends AbstractFlashingObject implements 
 	
 	public static String cleanThrowable(Throwable throwable) {
 		final StringBuilder result = new StringBuilder();
-		final String NEW_LINE = System.getProperty("line.separator");
-		result.append(NEW_LINE);
+		result.append(StringUtils.LINE_SEPARATOR);
 		result.append(throwable.toString().replace(DO_NOT_LOG, ""));
-		result.append(NEW_LINE);
+		result.append(StringUtils.LINE_SEPARATOR);
 		for (StackTraceElement ste : throwable.getStackTrace()) {
 			result.append(ste);
-			result.append(NEW_LINE);
+			result.append(StringUtils.LINE_SEPARATOR);
 		}
 		return result.toString();
 	}

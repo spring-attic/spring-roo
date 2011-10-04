@@ -17,6 +17,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Enables a user to manage the Roo PGP keystore.
@@ -189,6 +190,6 @@ public class PgpCommands implements CommandMarker {
 	}
 
 	private void appendLine(StringBuilder sb, String line) {
-		sb.append(line).append(System.getProperty("line.separator"));
+		sb.append(line).append(StringUtils.LINE_SEPARATOR);
 	}
 }

@@ -567,7 +567,7 @@ public class ItdSourceFileComposer {
 		if (indent) appendIndent();
 		// We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
 		pw.append(getNewLine());
-		// pw.append(System.getProperty("line.separator"));
+		// pw.append(StringUtils.LINE_SEPARATOR);
 		return this;
 	}
 

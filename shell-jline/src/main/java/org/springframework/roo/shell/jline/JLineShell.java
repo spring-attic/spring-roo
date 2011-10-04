@@ -110,7 +110,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		// Try to build previous command history from the project's log
 		try {
 			String logFileContents = FileCopyUtils.copyToString(new File("log.roo"));
-			String[] logEntries = logFileContents.split(System.getProperty("line.separator"));
+			String[] logEntries = logFileContents.split(StringUtils.LINE_SEPARATOR);
 			// LIFO
 			for (String logEntry : logEntries) {
 				if (!logEntry.startsWith("//")) {

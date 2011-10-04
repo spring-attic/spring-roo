@@ -1,5 +1,7 @@
 package org.springframework.roo.shell;
 
+import static org.springframework.roo.support.util.StringUtils.LINE_SEPARATOR;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -308,8 +310,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			data.add(entry.getKey() + " = " + entry.getValue());
 		}
 		
-		final String lineSeparator = System.getProperty("line.separator");
-		return StringUtils.collectionToDelimitedString(data, lineSeparator) + lineSeparator;
+		return StringUtils.collectionToDelimitedString(data, LINE_SEPARATOR) + LINE_SEPARATOR;
 	}
 
 	@CliCommand(value = { "date" }, help = "Displays the local date and time")
@@ -347,36 +348,36 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     	StringBuilder sb = new StringBuilder();
 		
     	if ("jaime".equals(extra)) {
-    		sb.append("               /\\ /l").append(System.getProperty("line.separator"));
-    		sb.append("               ((.Y(!").append(System.getProperty("line.separator"));
-    		sb.append("                \\ |/").append(System.getProperty("line.separator"));
-    		sb.append("                /  6~6,").append(System.getProperty("line.separator"));
-    		sb.append("                \\ _    +-.").append(System.getProperty("line.separator"));
-    		sb.append("                 \\`-=--^-' \\").append(System.getProperty("line.separator"));
-    		sb.append("                  \\   \\     |\\--------------------------+").append(System.getProperty("line.separator"));
-    		sb.append("                 _/    \\    |  Thanks for loading Roo!  |").append(System.getProperty("line.separator"));
-    		sb.append("                (  .    Y   +---------------------------+").append(System.getProperty("line.separator"));
-    		sb.append("               /\"\\ `---^--v---.").append(System.getProperty("line.separator"));
-    		sb.append("              / _ `---\"T~~\\/~\\/").append(System.getProperty("line.separator"));
-    		sb.append("             / \" ~\\.      !").append(System.getProperty("line.separator"));
-    		sb.append("       _    Y      Y.~~~ /'").append(System.getProperty("line.separator"));
-    		sb.append("      Y^|   |      | Roo 7").append(System.getProperty("line.separator"));
-    		sb.append("      | l   |     / .   /'").append(System.getProperty("line.separator"));
-    		sb.append("      | `L  | Y .^/   ~T").append(System.getProperty("line.separator"));
-    		sb.append("      |  l  ! | |/  | |               ____  ____  ____").append(System.getProperty("line.separator"));
-    		sb.append("      | .`\\/' | Y   | !              / __ \\/ __ \\/ __ \\").append(System.getProperty("line.separator"));
-    		sb.append("      l  \"~   j l   j L______       / /_/ / / / / / / /").append(System.getProperty("line.separator"));
-    		sb.append("       \\,____{ __\"\" ~ __ ,\\_,\\_    / _, _/ /_/ / /_/ /").append(System.getProperty("line.separator"));
-    		sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(" ").append(versionInfo()).append(System.getProperty("line.separator"));
+    		sb.append("               /\\ /l").append(LINE_SEPARATOR);
+    		sb.append("               ((.Y(!").append(LINE_SEPARATOR);
+    		sb.append("                \\ |/").append(LINE_SEPARATOR);
+    		sb.append("                /  6~6,").append(LINE_SEPARATOR);
+    		sb.append("                \\ _    +-.").append(LINE_SEPARATOR);
+    		sb.append("                 \\`-=--^-' \\").append(LINE_SEPARATOR);
+    		sb.append("                  \\   \\     |\\--------------------------+").append(LINE_SEPARATOR);
+    		sb.append("                 _/    \\    |  Thanks for loading Roo!  |").append(LINE_SEPARATOR);
+    		sb.append("                (  .    Y   +---------------------------+").append(LINE_SEPARATOR);
+    		sb.append("               /\"\\ `---^--v---.").append(LINE_SEPARATOR);
+    		sb.append("              / _ `---\"T~~\\/~\\/").append(LINE_SEPARATOR);
+    		sb.append("             / \" ~\\.      !").append(LINE_SEPARATOR);
+    		sb.append("       _    Y      Y.~~~ /'").append(LINE_SEPARATOR);
+    		sb.append("      Y^|   |      | Roo 7").append(LINE_SEPARATOR);
+    		sb.append("      | l   |     / .   /'").append(LINE_SEPARATOR);
+    		sb.append("      | `L  | Y .^/   ~T").append(LINE_SEPARATOR);
+    		sb.append("      |  l  ! | |/  | |               ____  ____  ____").append(LINE_SEPARATOR);
+    		sb.append("      | .`\\/' | Y   | !              / __ \\/ __ \\/ __ \\").append(LINE_SEPARATOR);
+    		sb.append("      l  \"~   j l   j L______       / /_/ / / / / / / /").append(LINE_SEPARATOR);
+    		sb.append("       \\,____{ __\"\" ~ __ ,\\_,\\_    / _, _/ /_/ / /_/ /").append(LINE_SEPARATOR);
+    		sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
     		return sb.toString();
     	}
     	
-    	sb.append("    ____  ____  ____  ").append(System.getProperty("line.separator")); 
-		sb.append("   / __ \\/ __ \\/ __ \\ ").append(System.getProperty("line.separator"));
-		sb.append("  / /_/ / / / / / / / ").append(System.getProperty("line.separator"));
-		sb.append(" / _, _/ /_/ / /_/ /  ").append(System.getProperty("line.separator"));
-		sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo()).append(System.getProperty("line.separator"));
-		sb.append(System.getProperty("line.separator"));
+    	sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR); 
+		sb.append("   / __ \\/ __ \\/ __ \\ ").append(LINE_SEPARATOR);
+		sb.append("  / /_/ / / / / / / / ").append(LINE_SEPARATOR);
+		sb.append(" / _, _/ /_/ / /_/ /  ").append(LINE_SEPARATOR);
+		sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
+		sb.append(LINE_SEPARATOR);
 		
 		return sb.toString();
 	}

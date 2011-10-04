@@ -260,7 +260,7 @@ public final class XmlUtils {
 	 */
 	private static StreamResult createUnixStreamResultForEntry(final OutputStream outputStream) throws UnsupportedEncodingException {
 		final Writer writer;
-		if (System.getProperty("line.separator").equals("\r\n")) {
+		if (StringUtils.LINE_SEPARATOR.equals("\r\n")) {
 			writer = new OutputStreamWriter(outputStream, "ISO-8859-1") {
 				@Override
 				public void write(final char[] cbuf, final int off, final int len) throws IOException {

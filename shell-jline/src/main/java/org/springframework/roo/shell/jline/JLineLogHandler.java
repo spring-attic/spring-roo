@@ -14,6 +14,7 @@ import org.springframework.roo.shell.ShellPromptAccessor;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.IOUtils;
 import org.springframework.roo.support.util.OsUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * JDK logging {@link Handler} that emits log messages to a JLine {@link ConsoleReader}.
@@ -48,7 +49,7 @@ public class JLineLogHandler extends Handler {
 			public String format(LogRecord record) {
 				StringBuffer sb = new StringBuffer();
 				if (record.getMessage() != null) {
-					sb.append(record.getMessage()).append(System.getProperty("line.separator"));
+					sb.append(record.getMessage()).append(StringUtils.LINE_SEPARATOR);
 				}
 				if (record.getThrown() != null) {
 					PrintWriter pw = null;
@@ -155,7 +156,7 @@ public class JLineLogHandler extends Handler {
 				lineSeparatorAndIndentingString.append(" ");
 			}
 
-			eventString = " " + getFormatter().format(event).replace(System.getProperty("line.separator"), System.getProperty("line.separator") + lineSeparatorAndIndentingString.toString());
+			eventString = " " + getFormatter().format(event).replace(StringUtils.LINE_SEPARATOR, StringUtils.LINE_SEPARATOR + lineSeparatorAndIndentingString.toString());
 
 			if (eventString.endsWith(lineSeparatorAndIndentingString.toString())) {
 				eventString = eventString.substring(0, eventString.length() - lineSeparatorAndIndentingString.length());

@@ -10,6 +10,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Utility methods for dealing with {@link Handler} objects.
@@ -72,7 +73,7 @@ public abstract class HandlerUtils {
 			ConsoleHandler consoleHandler = new ConsoleHandler();
 			consoleHandler.setFormatter(new Formatter() {
 				public String format(LogRecord record) {
-					return record.getMessage() + System.getProperty("line.separator");
+					return record.getMessage() + StringUtils.LINE_SEPARATOR;
 				}
 			});
 			newHandlers.add(new DeferredLogHandler(consoleHandler, fallbackSeverity));

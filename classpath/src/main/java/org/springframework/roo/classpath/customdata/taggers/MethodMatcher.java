@@ -162,9 +162,9 @@ public class MethodMatcher implements Matcher<MethodMetadata> {
 	private ClassOrInterfaceTypeDetails getMostConcreteClassOrInterfaceTypeDetails(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = null;
 		// The last ClassOrInterfaceTypeDetails is the most concrete as dictated by the logic in MemberDetailsScannerImpl
-		for (MemberHoldingTypeDetails aMemberHoldingTypeDetailsList : memberHoldingTypeDetailsList) {
-			if (aMemberHoldingTypeDetailsList instanceof ClassOrInterfaceTypeDetails) {
-				classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) aMemberHoldingTypeDetailsList;
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+			if (memberHoldingTypeDetails instanceof ClassOrInterfaceTypeDetails) {
+				classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) memberHoldingTypeDetails;
 			}
 		}
 		Assert.notNull(classOrInterfaceTypeDetails, "No concrete type found; cannot continue");

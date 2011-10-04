@@ -704,7 +704,7 @@ public class SimpleParser implements Parser {
 
 							// ROO-389: give inline options given there's multiple choices available and we want to help the user
 							StringBuilder help = new StringBuilder();
-							help.append(System.getProperty("line.separator"));
+							help.append(StringUtils.LINE_SEPARATOR);
 							help.append(option.mandatory() ? "required --" : "optional --");
 							if ("".equals(option.help())) {
 								help.append(lastOptionKey).append(": ").append("No help available");
@@ -951,10 +951,10 @@ public class SimpleParser implements Parser {
 					Assert.notNull(cmd, "CliCommand not found");
 
 					for (String value : cmd.value()) {
-						sb.append("Keyword:                   ").append(value).append(System.getProperty("line.separator"));
+						sb.append("Keyword:                   ").append(value).append(StringUtils.LINE_SEPARATOR);
 					}
 
-					sb.append("Description:               ").append(cmd.help()).append(System.getProperty("line.separator"));
+					sb.append("Description:               ").append(cmd.help()).append(StringUtils.LINE_SEPARATOR);
 
 					for (Annotation[] annotations : parameterAnnotations) {
 						CliOption cliOption = null;
@@ -966,14 +966,14 @@ public class SimpleParser implements Parser {
 									if ("".equals(key)) {
 										key = "** default **";
 									}
-									sb.append(" Keyword:                  ").append(key).append(System.getProperty("line.separator"));
+									sb.append(" Keyword:                  ").append(key).append(StringUtils.LINE_SEPARATOR);
 								}
 
-								sb.append("   Help:                   ").append(cliOption.help()).append(System.getProperty("line.separator"));
-								sb.append("   Mandatory:              ").append(cliOption.mandatory()).append(System.getProperty("line.separator"));
-								sb.append("   Default if specified:   '").append(cliOption.specifiedDefaultValue()).append("'").append(System.getProperty("line.separator"));
-								sb.append("   Default if unspecified: '").append(cliOption.unspecifiedDefaultValue()).append("'").append(System.getProperty("line.separator"));
-								sb.append(System.getProperty("line.separator"));
+								sb.append("   Help:                   ").append(cliOption.help()).append(StringUtils.LINE_SEPARATOR);
+								sb.append("   Mandatory:              ").append(cliOption.mandatory()).append(StringUtils.LINE_SEPARATOR);
+								sb.append("   Default if specified:   '").append(cliOption.specifiedDefaultValue()).append("'").append(StringUtils.LINE_SEPARATOR);
+								sb.append("   Default if unspecified: '").append(cliOption.unspecifiedDefaultValue()).append("'").append(StringUtils.LINE_SEPARATOR);
+								sb.append(StringUtils.LINE_SEPARATOR);
 							}
 
 						}
@@ -998,11 +998,11 @@ public class SimpleParser implements Parser {
 			}
 
 			for (String s : result) {
-				sb.append(s).append(System.getProperty("line.separator"));
+				sb.append(s).append(StringUtils.LINE_SEPARATOR);
 			}
 
 			logger.info(sb.toString());
-			logger.warning("** Type 'hint' (without the quotes) and hit ENTER for step-by-step guidance **" + System.getProperty("line.separator"));
+			logger.warning("** Type 'hint' (without the quotes) and hit ENTER for step-by-step guidance **" + StringUtils.LINE_SEPARATOR);
 		}
 	}
 
