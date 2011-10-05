@@ -8,7 +8,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -37,7 +36,7 @@ public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider
 		super.setDependsOnGovernorBeingAClass(false);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_REPOSITORY_MONGO);
-		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(CustomDataKeys.LAYER_TYPE, ROO_REPOSITORY_MONGO, new JavaSymbolName(RooRepositoryMongo.DOMAIN_TYPE_ATTRIBUTE), ROO_REPOSITORY_MONGO));
+		customDataKeyDecorator.registerMatchers(getClass(), new LayerTypeMatcher(ROO_REPOSITORY_MONGO, new JavaSymbolName(RooRepositoryMongo.DOMAIN_TYPE_ATTRIBUTE)));
 	}
 
 	protected void deactivate(final ComponentContext context) {
