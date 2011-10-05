@@ -1,58 +1,62 @@
 package org.springframework.roo.metadata;
 
+import org.springframework.roo.support.util.StringUtils;
+
 /**
- * Tokenizes metadata identification strings.
+ * Utility methods relating to metadata identification strings.
  * 
  * <p>
- * Identification strings are used for metadata in order to reduce memory consumption and
- * garbage collection overhead. It also benefits from the immutability and textual representation
- * simplicity that are fundamental to {@link String}s.
+ * We use identification strings for metadata in order to reduce memory
+ * consumption and garbage collection overhead. Strings also have the advantage
+ * of being immutable and easy to display as text.
  * 
  * <p>
- * Metadata identification strings can identify either (a) a specific {@link MetadataItem} or (b)
- * a class of {@link MetadataItem}. A string representing a specific {@link MetadataItem} is denoted
- * by the presence of a hash character ("#") in the string name. A hash is used because it is not
- * legal to use in a Java type name, is uncommon to use in file system paths, and yet it still looks
- * relatively logical should a human read the metadata identification string.
+ * Metadata identification strings can identify either:
+ * <ul>
+ * <li>a class of {@link MetadataItem} (in which case {@link #isIdentifyingClass(String)} returns <code>true</code>), or</li>
+ * <li>a specific instance of such a class (in which case {@link #isIdentifyingInstance(String)} returns <code>true</code>)</li>
+ * </ul>
  * 
- * <p>
- * Any metadata identification string always commences with "MID:" and then the result of calling 
- * {@link Class#getName()}. If there is no hash sign in the metadata identification string, it is 
- * taken as representing a class of {@link MetadataItem}. If there is one of more hash characters in 
- * the metadata identification string, the first hash is taken as denoting the end of the type name. 
- * The hash is then discarded and the remainder of the string is taken as identifying a specific 
- * {@link MetadataItem}. The "MID:" prefix is for convenience of presentation together with providing
- * some basic verification a randomly-presented string is less likely to be parsed as a formal
- * metadata identification string.
- * 
- * <p>
- * This utility class simplifies working with these metadata identification strings. It should not be
- * necessary for any part of the system to manually build or parse these strings.
- *  
  * @author Ben Alex
  * @since 1.0
  */
-public abstract class MetadataIdentificationUtils {
+public final class MetadataIdentificationUtils {
 	
 	// Constants
-	private static final char[] MID_COLON = {'M', 'I', 'D', ':'};
+	
+	// All MIDs start with these characters
+	private static final char[] MID_PREFIX_CHARACTERS = {'M', 'I', 'D', ':'};
+	private static final int MID_PREFIX_LENGTH = MID_PREFIX_CHARACTERS.length;
+	
+	static final String MID_PREFIX = String.valueOf(MID_PREFIX_CHARACTERS);
+	
+	/*
+	 * This delimiter was chosen because it never appears in a Java type name,
+	 * is uncommon to use in file system paths, and looks OK to a human in a
+	 * metadata id string. The first instance of this character in a given MID
+	 * separates the metadata class name from the name of the project type to
+	 * which the metadata applies.
+	 */
+	static final String INSTANCE_DELIMITER = "#";
 
 	/**
-	 * Indicates whether the argument appears to be a valid metadata identification string.
+	 * Indicates whether the argument is a well-formed metadata identification
+	 * string. This does not guarantee that it is valid, i.e. that the
+	 * identified metadata actually exists or could ever exist.
 	 * 
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
-	 * @return true if the string appears to be a valid metadata identification string
+	 * @return <code>true</code> if the string appears to be a valid metadata identification string
 	 */
-	public static boolean isValid(String metadataIdentificationString) {
-		// Previously: return metadataIdentificationString != null && metadataIdentificationString.startsWith("MID:");
-		if (metadataIdentificationString == null) {
+	public static boolean isValid(final String metadataIdentificationString) {
+		/*
+		 * According to the first comment on ROO-1932, the algorithm below is an
+		 * optimisation over simply checking for null and calling String#startsWith().
+		 */
+		if (metadataIdentificationString == null || metadataIdentificationString.length() <= MID_PREFIX_LENGTH) {
 			return false;
 		}
-		if (metadataIdentificationString.length() < 4) {
-			return false;
-		}
-		for (int i = 0; i < 4; i++) {
-			if (metadataIdentificationString.charAt(i) != MID_COLON[i]) {
+		for (int i = 0; i < MID_PREFIX_LENGTH; i++) {
+			if (metadataIdentificationString.charAt(i) != MID_PREFIX_CHARACTERS[i]) {
 				return false;
 			}
 		}
@@ -66,11 +70,8 @@ public abstract class MetadataIdentificationUtils {
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return true if the string is identifying a class of {@link MetadataItem}
 	 */
-	public static boolean isIdentifyingClass(String metadataIdentificationString) {
-		if (!isValid(metadataIdentificationString)) {
-			return false;
-		}
-		return !metadataIdentificationString.contains("#");
+	public static boolean isIdentifyingClass(final String metadataIdentificationString) {
+		return isValid(metadataIdentificationString) && !metadataIdentificationString.contains(INSTANCE_DELIMITER);
 	}
 	
 	/**
@@ -79,63 +80,45 @@ public abstract class MetadataIdentificationUtils {
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return true if the string is identifying a specific instance of a {@link MetadataItem}
 	 */
-	public static boolean isIdentifyingInstance(String metadataIdentificationString) {
-		if (!isValid(metadataIdentificationString)) {
-			return false;
-		}
-		return metadataIdentificationString.contains("#");
+	public static boolean isIdentifyingInstance(final String metadataIdentificationString) {
+		return isValid(metadataIdentificationString) && metadataIdentificationString.contains(INSTANCE_DELIMITER) && !metadataIdentificationString.endsWith(INSTANCE_DELIMITER);
 	}
 	
 	/**
 	 * Indicates the class of metadata a particular string represents. The class will be
 	 * returned even if the metadata identification string represents a specific instance.
 	 * 
-	 * @param metadataIdentificationString to evaluate (can be null or empty)
+	 * @param metadataId to evaluate (can be null or empty)
 	 * @return the class only, or null if the identification string is invalid in some way
 	 */
-	public static String getMetadataClass(String metadataIdentificationString) {
-		if (!isValid(metadataIdentificationString)) {
+	public static String getMetadataClass(final String metadataId) {
+		if (!isValid(metadataId) || metadataId.equals(MID_PREFIX + INSTANCE_DELIMITER)) {
 			return null;
 		}
-		if (metadataIdentificationString.length() == 4) {
-			// Only gave a "MID:", so quit
-			return null;
-		}
-		int index = metadataIdentificationString.indexOf("#");
-		if (index == -1) {
+		final int delimiterIndex = metadataId.indexOf(INSTANCE_DELIMITER);
+		if (delimiterIndex == -1) {
 			// No specific metadata instance was identified, so return everything except "MID:"
-			return metadataIdentificationString.substring(4);
+			return metadataId.substring(MID_PREFIX_LENGTH);
 		}
-		// A particular instance was identified, so we need to only return the class name portion
-		if (metadataIdentificationString.length() == 5) {
-			// Only gave "MID:#", so quit
-			return null;
-		}
-		return metadataIdentificationString.substring(4, index);
+		// A particular instance was identified, so we only return the instance name part
+		return metadataId.substring(MID_PREFIX_LENGTH, delimiterIndex);
 	}
 
 	/**
-	 * Indicates the instance key a particular string represents. If an instance key cannot
-	 * be determined, perhaps due to an illegal metadata identification string or the instance
-	 * portion of the string being empty, null will be returned
+	 * Returns the instance key from the given metadata ID.
 	 * 
-	 * @param metadataIdentificationString to evaluate (can be null or empty)
-	 * @return the instance only, or null if the identification string is invalid in some way
+	 * @param metadataId the MID to evaluate (can be blank)
+	 * @return the instance ID only, or <code>null</code> if the identification string is invalid in some way
 	 */
-	public static String getMetadataInstance(String metadataIdentificationString) {
-		if (!isIdentifyingInstance(metadataIdentificationString)) {
-			return null;
+	public static String getMetadataInstance(final String metadataId) {
+		if (isIdentifyingInstance(metadataId)) {
+			return metadataId.substring(metadataId.indexOf(INSTANCE_DELIMITER) + 1);
 		}
-		if (metadataIdentificationString.endsWith("#")) {
-			// There isn't an instance key in there we can read (eg "MID:xyz#" was given)
-			return null;
-		}
-		int index = metadataIdentificationString.indexOf("#");
-		return metadataIdentificationString.substring(index+1);
+		return null;
 	}
 	
 	/**
-	 * Creates a class-specific metadata identification string for the presented fully qualified class name.
+	 * Creates a class-specific metadata id for the given fully qualified class name.
 	 * 
 	 * <p>
 	 * A fully qualified class name should be acquired using {@link Class#getName()} or equivalent.
@@ -143,24 +126,35 @@ public abstract class MetadataIdentificationUtils {
 	 * @param fullyQualifiedClassName to create (can be null or empty)
 	 * @return the metadata identification string (may be null if the input was invalid)
 	 */
-	public static String create(String fullyQualifiedClassName) {
-		if (fullyQualifiedClassName == null || "".equals(fullyQualifiedClassName) || fullyQualifiedClassName.contains("#")) {
+	public static String create(final String fullyQualifiedClassName) {
+		if (!StringUtils.hasText(fullyQualifiedClassName) || fullyQualifiedClassName.contains(INSTANCE_DELIMITER)) {
 			return null;
 		}
-		return "MID:" + fullyQualifiedClassName;
+		return MID_PREFIX + fullyQualifiedClassName;
 	}
 	
 	/**
 	 * Creates an instance-specific metadata identification string for the presented class/key pair. 
 	 * 
-	 * @param fullyQualifiedClassName to create (mandatory, cannot be empty or null)
-	 * @param instanceIdentificationKey to create (mandatory, cannot be empty or null)
-	 * @return the metadata identification string (never null)
+	 * @param fullyQualifiedMetadataClass
+	 * @param instanceIdentificationKey
+	 * @return <code>null</code> if either of the given strings is blank or the
+	 * metadata class name is not well-formed
 	 */
-	public static String create(String fullyQualifiedClassName, String instanceIdentificationKey) {
-		if (instanceIdentificationKey == null || "".equals(instanceIdentificationKey) || fullyQualifiedClassName == null || "".equals(fullyQualifiedClassName) || fullyQualifiedClassName.contains("#")) {
+	public static String create(final String fullyQualifiedMetadataClass, final String instanceIdentificationKey) {
+		if (!StringUtils.hasText(instanceIdentificationKey) || !StringUtils.hasText(fullyQualifiedMetadataClass) || fullyQualifiedMetadataClass.contains(INSTANCE_DELIMITER)) {
 			return null;
 		}
-		return "MID:" + fullyQualifiedClassName + "#" + instanceIdentificationKey;
+		final StringBuilder mid = new StringBuilder();
+		mid.append(MID_PREFIX);
+		mid.append(fullyQualifiedMetadataClass);
+		mid.append(INSTANCE_DELIMITER);
+		mid.append(instanceIdentificationKey);
+		return mid.toString();
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private MetadataIdentificationUtils() {}
 }
