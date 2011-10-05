@@ -114,6 +114,16 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	List<JavaType> getImplementsTypes();
 	
 	/**
+	 * If this is a layering component, for example a service or repository,
+	 * returns the domain entities managed by this component, otherwise returns
+	 * an empty list.
+	 * 
+	 * @return a non-<code>null</code> list (may be empty)
+	 * @since 1.2.0
+	 */
+	List<JavaType> getLayerEntities();
+	
+	/**
 	 * Searches up the inheritance hierarchy until the first method with the
 	 * specified name is located; method parameters are not taken into account.
 	 *

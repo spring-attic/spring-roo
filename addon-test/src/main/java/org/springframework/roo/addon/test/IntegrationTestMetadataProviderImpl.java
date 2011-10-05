@@ -6,7 +6,6 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_E
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FLUSH_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_ACCESSOR_METHOD;
-import static org.springframework.roo.classpath.customdata.CustomDataKeys.LAYER_TYPE;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
@@ -17,7 +16,6 @@ import static org.springframework.roo.model.RooJavaType.ROO_INTEGRATION_TEST;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -102,15 +100,11 @@ public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetada
 		// We do need to be informed if a new layer is available to see if we should use that
 		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
 			final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
-			if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(LAYER_TYPE) != null) {
-				@SuppressWarnings("unchecked")
-				final List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(LAYER_TYPE);
-				if (domainTypes != null) {
-					for (final JavaType type : domainTypes) {
-						final String localMidType = managedEntityTypes.get(type);
-						if (localMidType != null) {
-							metadataService.get(localMidType);
-						}
+			if (memberHoldingTypeDetails != null) {
+				for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
+					final String localMidType = managedEntityTypes.get(type);
+					if (localMidType != null) {
+						metadataService.get(localMidType);
 					}
 				}
 			}

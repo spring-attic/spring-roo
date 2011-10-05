@@ -97,16 +97,12 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 			return localMid;
 		}
 
-		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getGovernor().getName());
-		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE) != null) {
-			@SuppressWarnings("unchecked")
-			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE);
-			if (domainTypes != null) {
-				for (JavaType type : domainTypes) {
-					String localMidType = entityToManagedBeanMidMap.get(type);
-					if (localMidType != null) {
-						return localMidType;
-					}
+		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getGovernor().getName());
+		if (memberHoldingTypeDetails != null) {
+			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
+				final String localMidType = entityToManagedBeanMidMap.get(type);
+				if (localMidType != null) {
+					return localMidType;
 				}
 			}
 		}

@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.gwt.request;
 
+import static org.springframework.roo.model.RooJavaType.ROO_GWT_PROXY;
+import static org.springframework.roo.model.RooJavaType.ROO_GWT_REQUEST;
+import static org.springframework.roo.model.RooJavaType.ROO_SERVICE;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +20,6 @@ import org.springframework.roo.addon.gwt.GwtTypeService;
 import org.springframework.roo.addon.gwt.GwtUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -35,7 +38,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.model.RooJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
@@ -77,7 +79,7 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			return null;
 		}
 
-		AnnotationMetadata mirrorAnnotation = MemberFindingUtils.getAnnotationOfType(request.getAnnotations(), RooJavaType.ROO_GWT_REQUEST);
+		AnnotationMetadata mirrorAnnotation = MemberFindingUtils.getAnnotationOfType(request.getAnnotations(), ROO_GWT_REQUEST);
 		if (mirrorAnnotation == null) {
 			return null;
 		}
@@ -118,24 +120,24 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 	}
 
 	private List<String> getMethodExclusions(ClassOrInterfaceTypeDetails request) {
-		List<String> exclusionList = GwtUtils.getAnnotationValues(request, RooJavaType.ROO_GWT_REQUEST, "exclude");
+		List<String> exclusionList = GwtUtils.getAnnotationValues(request, ROO_GWT_REQUEST, "exclude");
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromRequest(request);
 		if (proxy != null) {
-			Boolean ignoreProxyExclusions = GwtUtils.getBooleanAnnotationValue(request, RooJavaType.ROO_GWT_REQUEST, "ignoreProxyExclusions", false);
+			Boolean ignoreProxyExclusions = GwtUtils.getBooleanAnnotationValue(request, ROO_GWT_REQUEST, "ignoreProxyExclusions", false);
 			if (!ignoreProxyExclusions) {
-				for (String exclusion : GwtUtils.getAnnotationValues(proxy, RooJavaType.ROO_GWT_PROXY, "exclude")) {
+				for (String exclusion : GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "exclude")) {
 					exclusionList.add("set" + StringUtils.capitalize(exclusion));
 					exclusionList.add("get" + StringUtils.capitalize(exclusion));
 				}
-				exclusionList.addAll(GwtUtils.getAnnotationValues(proxy, RooJavaType.ROO_GWT_PROXY, "exclude"));
+				exclusionList.addAll(GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "exclude"));
 			}
-			Boolean ignoreProxyReadOnly = GwtUtils.getBooleanAnnotationValue(request, RooJavaType.ROO_GWT_REQUEST, "ignoreProxyReadOnly", false);
+			Boolean ignoreProxyReadOnly = GwtUtils.getBooleanAnnotationValue(request, ROO_GWT_REQUEST, "ignoreProxyReadOnly", false);
 			if (!ignoreProxyReadOnly) {
-				for (String exclusion : GwtUtils.getAnnotationValues(proxy, RooJavaType.ROO_GWT_PROXY, "readOnly")) {
+				for (String exclusion : GwtUtils.getAnnotationValues(proxy, ROO_GWT_PROXY, "readOnly")) {
 					exclusionList.add("set" + StringUtils.capitalize(exclusion));
 				}
 			}
-			Boolean dontIncludeProxyMethods = GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_REQUEST, "ignoreProxyReadOnly", true);
+			Boolean dontIncludeProxyMethods = GwtUtils.getBooleanAnnotationValue(proxy, ROO_GWT_REQUEST, "ignoreProxyReadOnly", true);
 			if (dontIncludeProxyMethods) {
 				for (MethodMetadata methodMetadata : proxy.getDeclaredMethods())  {
 					exclusionList.add(methodMetadata.getMethodName().getSymbolName());
@@ -175,9 +177,9 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 			AnnotationMetadataBuilder annotationMetadataBuilder = new AnnotationMetadataBuilder(annotationMetadata);
 			annotationMetadataBuilder.addStringAttribute("value", entity.getName().getFullyQualifiedTypeName());
 			annotationMetadataBuilder.removeAttribute("locator");
-			Set<ClassOrInterfaceTypeDetails> services = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_SERVICE);
+			Set<ClassOrInterfaceTypeDetails> services = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_SERVICE);
 			for (ClassOrInterfaceTypeDetails serviceLayer : services) {
-				AnnotationMetadata serviceAnnotation = serviceLayer.getTypeAnnotation(RooJavaType.ROO_SERVICE);
+				AnnotationMetadata serviceAnnotation = serviceLayer.getTypeAnnotation(ROO_SERVICE);
 				AnnotationAttributeValue<List<ClassAttributeValue>> domainTypesAnnotation = serviceAnnotation.getAttribute("domainTypes");
 				for (ClassAttributeValue classAttributeValue : domainTypesAnnotation.getValue()) {
 					if (classAttributeValue.getValue().equals(entity.getName())) {
@@ -229,8 +231,8 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		return new MethodMetadataBuilder(request.getDeclaredByMetadataId(), Modifier.ABSTRACT, methodMetadata.getMethodName(), methodReturnType, paramaterTypes, methodMetadata.getParameterNames(), new InvocableMemberBodyBuilder());
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
-		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
+	public void notify(final String upstreamDependency, String downstreamDependency) {
+		final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return;
 		}
@@ -238,28 +240,27 @@ public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMeta
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
 			
-			ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
+			final ClassOrInterfaceTypeDetails cid = typeLocationService.getTypeForIdentifier(upstreamDependency);
 			if (cid == null) {
 				return;
 			}
 			boolean processed = false;
-			if (cid.getCustomData().get(CustomDataKeys.LAYER_TYPE) != null) {
-				@SuppressWarnings("unchecked")
-				List<JavaType> layerTypes = (List<JavaType>) cid.getCustomData().get(CustomDataKeys.LAYER_TYPE);
-				for (ClassOrInterfaceTypeDetails request : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_REQUEST)) {
-					ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
+			final List<JavaType> layerTypes = cid.getLayerEntities(); 
+			if (!layerTypes.isEmpty()) {
+				for (final ClassOrInterfaceTypeDetails request : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
+					final ClassOrInterfaceTypeDetails entity = gwtTypeService.lookupEntityFromRequest(request);
 					if (entity != null && layerTypes.contains(entity.getName())) {
-						JavaType typeName = PhysicalTypeIdentifier.getJavaType(request.getDeclaredByMetadataId());
-						Path typePath = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
+						final JavaType typeName = PhysicalTypeIdentifier.getJavaType(request.getDeclaredByMetadataId());
+						final Path typePath = PhysicalTypeIdentifier.getPath(request.getDeclaredByMetadataId());
 						downstreamDependency = GwtRequestMetadata.createIdentifier(typeName, typePath);
 						processed = true;
 						break;
 					}
 				}
 			}
-			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), RooJavaType.ROO_GWT_REQUEST) == null) {
+			if (!processed && MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), ROO_GWT_REQUEST) == null) {
 				boolean found = false;
-				for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_REQUEST)) {
+				for (ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_GWT_REQUEST)) {
 					AnnotationMetadata annotationMetadata = GwtUtils.getFirstAnnotation(classOrInterfaceTypeDetails, GwtUtils.REQUEST_ANNOTATIONS);
 					if (annotationMetadata != null) {
 						AnnotationAttributeValue<?> attributeValue = annotationMetadata.getAttribute("value");

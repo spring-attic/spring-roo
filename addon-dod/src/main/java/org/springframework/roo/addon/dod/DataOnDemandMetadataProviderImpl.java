@@ -90,17 +90,12 @@ public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscov
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any DOD metadata is even hoping to hear about changes to that JavaType and its ITDs
-		JavaType governor = itdTypeDetails.getName();
+		final JavaType governor = itdTypeDetails.getName();
 		
-		Object layerTypeValue = itdTypeDetails.getGovernor().getCustomData().get(CustomDataKeys.LAYER_TYPE);
-		if (layerTypeValue != null) {
-			@SuppressWarnings("unchecked")
-			List<JavaType> domainTypes = (List<JavaType>) layerTypeValue;
-			for (JavaType type : domainTypes) {
-				String localMidType = entityToDodMidMap.get(type);
-				if (localMidType != null) {
-					return localMidType;
-				}
+		for (final JavaType type : itdTypeDetails.getGovernor().getLayerEntities()) {
+			String localMidType = entityToDodMidMap.get(type);
+			if (localMidType != null) {
+				return localMidType;
 			}
 		}
 		

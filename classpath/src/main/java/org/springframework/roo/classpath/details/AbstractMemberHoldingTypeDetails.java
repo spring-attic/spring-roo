@@ -1,7 +1,10 @@
 package org.springframework.roo.classpath.details;
 
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.LAYER_TYPE;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -42,12 +45,6 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		return null;
 	}
 	
-	/**
-	 * Locates the specified field.
-	 * 
-	 * @param fieldName to locate (required)
-	 * @return the field, or <code>null</code> if not found
-	 */
 	public FieldMetadata getDeclaredField(final JavaSymbolName fieldName) {
 		Assert.notNull(fieldName, "Field name required");
 		for (FieldMetadata field : getDeclaredFields()) {
@@ -174,5 +171,14 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		// We've derived a unique name
 		return new JavaSymbolName(candidateName);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<JavaType> getLayerEntities() {
+		final Object entities = getCustomData().get(LAYER_TYPE);
+		if (entities == null) {
+			return Collections.emptyList();
+		}
+		return (List<JavaType>) entities;
 	}
 }

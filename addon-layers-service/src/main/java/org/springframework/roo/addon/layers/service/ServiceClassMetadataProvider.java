@@ -3,7 +3,6 @@ package org.springframework.roo.addon.layers.service;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -14,7 +13,6 @@ import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -61,24 +59,20 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 	}
 	
 	@Override
-	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
-		JavaType governor = itdTypeDetails.getName();
-		String localMid = managedEntityTypes.get(governor);
+		final JavaType governor = itdTypeDetails.getName();
+		final String localMid = managedEntityTypes.get(governor);
 		if (localMid != null) {
 			return localMid;
 		}
 		
-		MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(governor);
-		if (memberHoldingTypeDetails != null && memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE) != null) {
-			@SuppressWarnings("unchecked")
-			List<JavaType> domainTypes = (List<JavaType>) memberHoldingTypeDetails.getCustomData().get(CustomDataKeys.LAYER_TYPE);
-			if (domainTypes != null) {
-				for (JavaType type : domainTypes) {
-					String localMidType = managedEntityTypes.get(type);
-					if (localMidType != null) {
-						return localMidType;
-					}
+		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(governor);
+		if (memberHoldingTypeDetails != null) {
+			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
+				final String localMidType = managedEntityTypes.get(type);
+				if (localMidType != null) {
+					return localMidType;
 				}
 			}
 		}
