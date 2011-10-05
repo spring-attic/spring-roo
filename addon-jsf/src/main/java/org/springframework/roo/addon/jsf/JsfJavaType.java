@@ -4,9 +4,9 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Constants for JSF/PrimeFaces-specific {@link JavaType}s.
- *
+ * 
  * Use them in preference to creating new instances of these types.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -15,11 +15,11 @@ public class JsfJavaType {
 	// General
 	public static final String DISPLAY_CREATE_DIALOG = "displayCreateDialog";
 	public static final String DISPLAY_LIST = "displayList";
-
+	
 	// javax.el
 	public static final JavaType EL_CONTEXT = new JavaType("javax.el.ELContext");
 	public static final JavaType EXPRESSION_FACTORY = new JavaType("javax.el.ExpressionFactory");
-
+	
 	// javax.faces
 	public static final JavaType CONVERTER = new JavaType("javax.faces.convert.Converter");
 	public static final JavaType DATE_TIME_CONVERTER =  new JavaType("javax.faces.convert.DateTimeConverter");
@@ -50,6 +50,7 @@ public class JsfJavaType {
 	public static final JavaType PRIMEFACES_MESSAGE = new JavaType("org.primefaces.component.message.Message");
 	public static final JavaType PRIMEFACES_REQUEST_CONTEXT = new JavaType("org.primefaces.context.RequestContext");
 	public static final JavaType PRIMEFACES_SELECT_BOOLEAN_CHECKBOX = new JavaType("org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox");
+	public static final JavaType PRIMEFACES_SELECT_MANY_MENU = new JavaType("org.primefaces.component.selectmanymenu.SelectManyMenu");
 	public static final JavaType PRIMEFACES_SELECT_ONE_LISTBOX = new JavaType("org.primefaces.component.selectonelistbox.SelectOneListbox");
 	public static final JavaType PRIMEFACES_SLIDER = new JavaType("org.primefaces.component.slider.Slider");
 	public static final JavaType PRIMEFACES_SPINNER = new JavaType("org.primefaces.component.spinner.Spinner");

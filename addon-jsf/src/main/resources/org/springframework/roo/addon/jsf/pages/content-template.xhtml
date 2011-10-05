@@ -12,6 +12,7 @@
         <p:inputText value="" rendered="false"/>
         <p:calendar rendered="false"/>
         <p:autoComplete rendered="false"/>
+        <p:selectManyMenu rendered="false"/>
         <p:slider rendered="false"/>
         <p:spinner rendered="false"/>
         <p:message rendered="false"/>
@@ -51,21 +52,21 @@
                 </p:dataTable>
             </p:panel>
         </h:form>
-        <p:dialog id="createDialog" header="#{messages.label_create}" modal="true" widgetVar="createDialog" visible="#{__LC_DOMAIN_TYPE__Bean.createDialogVisible}" resizable="true" width="350" showEffect="fade" hideEffect="explode">
+        <p:dialog id="createDialog" header="#{messages.label_create} __DOMAIN_TYPE__" modal="true" widgetVar="createDialog" visible="#{__LC_DOMAIN_TYPE__Bean.createDialogVisible}" resizable="true" width="350" showEffect="fade" hideEffect="explode">
             <p:ajax event="close" update="data" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="createForm" enctype="multipart/form-data">
                 <h:panelGrid id="createPanelGrid" columns="3" binding="#{__LC_DOMAIN_TYPE__Bean.createPanelGrid}" />
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="#{messages.label_save}" update="createPanelGrid growl" />
             </h:form>
         </p:dialog>
-        <p:dialog id="editDialog" header="#{messages.label_edit}" modal="true" widgetVar="editDialog" resizable="true" width="350" showEffect="fade" hideEffect="explode">
+        <p:dialog id="editDialog" header="#{messages.label_edit} __DOMAIN_TYPE__" modal="true" widgetVar="editDialog" resizable="true" width="350" showEffect="fade" hideEffect="explode">
             <p:ajax event="close" update="data" listener="#{__LC_DOMAIN_TYPE__Bean.handleDialogClose}" />
             <h:form id="editForm" enctype="multipart/form-data">
                 <h:panelGrid id="editPanelGrid" columns="3" binding="#{__LC_DOMAIN_TYPE__Bean.editPanelGrid}" />
                 <p:commandButton action="#{__LC_DOMAIN_TYPE__Bean.persist}" value="#{messages.label_save}" update="editPanelGrid growl" />
             </h:form>
         </p:dialog>
-        <p:dialog id="viewDialog" header="#{messages.label_view}" modal="true" widgetVar="viewDialog" resizable="true" width="350" showEffect="fade" hideEffect="explode">
+        <p:dialog id="viewDialog" header="#{messages.label_view} __DOMAIN_TYPE__" modal="true" widgetVar="viewDialog" resizable="true" width="350" showEffect="fade" hideEffect="explode">
             <h:form id="viewForm" enctype="multipart/form-data">
                 <h:panelGrid id="viewPanelGrid" columns="2" binding="#{__LC_DOMAIN_TYPE__Bean.viewPanelGrid}" />
                 <p:commandButton value="#{messages.label_close}" onclick="viewDialog.hide()" />

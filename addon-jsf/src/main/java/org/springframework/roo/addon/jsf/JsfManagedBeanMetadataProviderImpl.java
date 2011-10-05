@@ -57,13 +57,13 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link JsfManagedBeanMetadataProvider}.
- *
+ * 
  * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true)
-@Service
-public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
+@Component(immediate = true) 
+@Service 
+public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
@@ -122,7 +122,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		if (memberDetails == null) {
 			return null;
 		}
-
+		
 		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
@@ -130,7 +130,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
-
+		
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
 		final Set<JsfFieldHolder> locatedFields = locateFields(entity, memberDetails, metadataId, identifierAccessor, versionAccessor);
@@ -161,15 +161,15 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	 * excluding any ID or version field; along the way, flags the first
 	 * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable in
 	 * the list view for this entity type.
-	 *
+	 * 
 	 * @param entity the entity for which to find the fields and accessors (required)
 	 * @param memberDetails the entity's members (required)
 	 * @param metadataIdentificationString the ID of the metadata being generated (required)
-	 * @param versionAccessor
-	 * @param identifierAccessor
+	 * @param versionAccessor 
+	 * @param identifierAccessor 
 	 * @return a non-<code>null</code> iterable collection
 	 */
-	private Set<JsfFieldHolder> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
+	private Set<JsfFieldHolder> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, MethodMetadata identifierAccessor, MethodMetadata versionAccessor) {
 		final Set<JsfFieldHolder> locatedFields = new LinkedHashSet<JsfFieldHolder>();
 
 		int listViewFields = 0;
@@ -186,7 +186,16 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			}
 			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataId);
 
-			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field);
+			// Check field is to be displayed in the entity's list view
+			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field)) {
+				listViewFields++;
+				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
+				customDataBuilder.put(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY, "true");
+				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+				fieldBuilder.append(customDataBuilder.build());
+				field = fieldBuilder.build();
+			}
+			
 			final JavaType fieldType = field.getFieldType();
 
 			// Check field is an enum type
@@ -199,36 +208,27 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 					enumerated = true;
 				}
 			}
-			jsfFieldHolder.setEnumerated(enumerated);
 
-			// Check field is to be displayed in the entity's list view
-			boolean isApplicationType = isApplicationType(fieldType);
-			if (listViewFields <= MAX_LIST_VIEW_FIELDS && isDisplayableInListView(field) && !isApplicationType) {
-				listViewFields++;
-				final CustomDataBuilder customDataBuilder = new CustomDataBuilder();
-				customDataBuilder.put(JsfManagedBeanMetadataProvider.LIST_VIEW_FIELD_CUSTOM_DATA_KEY, "true");
-				final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
-				fieldBuilder.append(customDataBuilder.build());
-				field = fieldBuilder.build();
-			}
+			final Map<JavaType, MemberDetails> genericTypes = new LinkedHashMap<JavaType, MemberDetails>();
+			MemberDetails fieldTypeMemberDetails = null;
+			Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = null;
+			String displayMethod = null;
 
 			if (fieldType.isCommonCollectionType()) {
-				Map<JavaType, MemberDetails> genericTypes = new LinkedHashMap<JavaType, MemberDetails>();
 				for (JavaType genericType : fieldType.getParameters()) {
 					if (isApplicationType(genericType)) {
 						genericTypes.put(genericType, getMemberDetails(genericType));
 					}
 				}
-				jsfFieldHolder.setCollectionGenericTypes(genericTypes);
 			} else {
 				if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
-					jsfFieldHolder.setCrudAdditions(getCrudAdditions(fieldType, metadataId));
-					final MemberDetails fieldTypeMemberDetails = getMemberDetails(fieldType);
-					jsfFieldHolder.setMemberDetails(fieldTypeMemberDetails);
-					jsfFieldHolder.setDisplayMethod(getDisplayMethod(fieldType, fieldTypeMemberDetails));
+					crudAdditions = getCrudAdditions(fieldType, metadataId);
+					fieldTypeMemberDetails = getMemberDetails(fieldType);
+					displayMethod = getDisplayMethod(fieldType, fieldTypeMemberDetails);
 				}
 			}
 
+			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, fieldTypeMemberDetails, crudAdditions, genericTypes, displayMethod);
 			locatedFields.add(jsfFieldHolder);
 		}
 
@@ -238,7 +238,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	/**
 	 * Returns the additions to make to the generated ITD in order to invoke the
 	 * various CRUD methods of the given entity
-	 *
+	 * 
 	 * @param entity the target entity type (required)
 	 * @param metadataId the ID of the metadata that's being created (required)
 	 * @return a non-<code>null</code> map (may be empty if the CRUD methods are indeterminable)
@@ -273,13 +273,13 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		return additions;
 	}
 
-	private boolean isApplicationType(final JavaType fieldType) {
+	private boolean isApplicationType(JavaType fieldType) {
 		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType)) != null;
 	}
-
+	
 	/**
 	 * Indicates whether the given method is the ID or version accessor
-	 *
+	 * 
 	 * @param method the method to check (required)
 	 * @param idMethod the ID accessor method (can be <code>null</code>)
 	 * @param versionMethod the version accessor method (can be <code>null</code>)
@@ -288,10 +288,10 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
 		return method.hasSameName(idMethod, versionMethod);
 	}
-
+	
 	/**
 	 * Indicates whether the given field is for display in the entity's list view.
-	 *
+	 * 
 	 * @param field the field to check (required)
 	 * @return see above
 	 */
