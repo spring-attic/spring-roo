@@ -57,13 +57,13 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link JsfManagedBeanMetadataProvider}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true) 
-@Service 
-public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
+@Component(immediate = true)
+@Service
+public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
@@ -122,7 +122,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		if (memberDetails == null) {
 			return null;
 		}
-		
+
 		final MemberHoldingTypeDetails persistenceMemberHoldingTypeDetails = MemberFindingUtils.getMostConcreteMemberHoldingTypeDetailsWithTag(memberDetails, PERSISTENT_TYPE);
 		if (persistenceMemberHoldingTypeDetails == null) {
 			return null;
@@ -130,7 +130,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
-		
+
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 		final MethodMetadata versionAccessor = persistenceMemberLocator.getVersionAccessor(entity);
 		final Set<JsfFieldHolder> locatedFields = locateFields(entity, memberDetails, metadataId, identifierAccessor, versionAccessor);
@@ -161,15 +161,15 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	 * excluding any ID or version field; along the way, flags the first
 	 * {@value #MAX_LIST_VIEW_FIELDS} non ID/version fields as being displayable in
 	 * the list view for this entity type.
-	 * 
+	 *
 	 * @param entity the entity for which to find the fields and accessors (required)
 	 * @param memberDetails the entity's members (required)
 	 * @param metadataIdentificationString the ID of the metadata being generated (required)
-	 * @param versionAccessor 
-	 * @param identifierAccessor 
+	 * @param versionAccessor
+	 * @param identifierAccessor
 	 * @return a non-<code>null</code> iterable collection
 	 */
-	private Set<JsfFieldHolder> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, MethodMetadata identifierAccessor, MethodMetadata versionAccessor) {
+	private Set<JsfFieldHolder> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
 		final Set<JsfFieldHolder> locatedFields = new LinkedHashSet<JsfFieldHolder>();
 
 		int listViewFields = 0;
@@ -195,7 +195,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 				fieldBuilder.append(customDataBuilder.build());
 				field = fieldBuilder.build();
 			}
-			
+
 			final JavaType fieldType = field.getFieldType();
 
 			// Check field is an enum type
@@ -238,7 +238,7 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	/**
 	 * Returns the additions to make to the generated ITD in order to invoke the
 	 * various CRUD methods of the given entity
-	 * 
+	 *
 	 * @param entity the target entity type (required)
 	 * @param metadataId the ID of the metadata that's being created (required)
 	 * @return a non-<code>null</code> map (may be empty if the CRUD methods are indeterminable)
@@ -273,13 +273,13 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 		return additions;
 	}
 
-	private boolean isApplicationType(JavaType fieldType) {
+	private boolean isApplicationType(final JavaType fieldType) {
 		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType)) != null;
 	}
-	
+
 	/**
 	 * Indicates whether the given method is the ID or version accessor
-	 * 
+	 *
 	 * @param method the method to check (required)
 	 * @param idMethod the ID accessor method (can be <code>null</code>)
 	 * @param versionMethod the version accessor method (can be <code>null</code>)
@@ -288,10 +288,10 @@ public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDisc
 	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
 		return method.hasSameName(idMethod, versionMethod);
 	}
-	
+
 	/**
 	 * Indicates whether the given field is for display in the entity's list view.
-	 * 
+	 *
 	 * @param field the field to check (required)
 	 * @return see above
 	 */
