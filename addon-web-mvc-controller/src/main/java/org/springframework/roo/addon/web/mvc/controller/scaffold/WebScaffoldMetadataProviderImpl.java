@@ -39,7 +39,7 @@ import org.springframework.roo.support.util.CollectionUtils;
  */
 @Component(immediate = true) 
 @Service 
-public final class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements WebScaffoldMetadataProvider {
+public class WebScaffoldMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements WebScaffoldMetadataProvider {
 	
 	// Fields
 	@Reference private TypeLocationService typeLocationService;

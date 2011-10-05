@@ -19,7 +19,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service 
-public final class Op4jMetadataProvider extends AbstractItdMetadataProvider {
+public class Op4jMetadataProvider extends AbstractItdMetadataProvider {
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

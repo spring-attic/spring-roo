@@ -60,7 +60,7 @@ import org.springframework.roo.support.util.XmlUtils;
  */
 @Component(immediate = true) 
 @Service 
-public final class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
+public class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
 	
 	// Constants
 	private static final String WEB_INF_VIEWS = "/WEB-INF/views/";

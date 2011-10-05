@@ -32,7 +32,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true) 
 @Service 
-public final class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider implements WebFinderMetadataProvider {
+public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider implements WebFinderMetadataProvider {
 
 	// Fields
 	@Reference private WebMetadataService webMetadataService;

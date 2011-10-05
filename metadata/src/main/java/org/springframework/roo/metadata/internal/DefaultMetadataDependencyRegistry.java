@@ -30,7 +30,7 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component
 @Service
-public final class DefaultMetadataDependencyRegistry implements MetadataDependencyRegistry {
+public class DefaultMetadataDependencyRegistry implements MetadataDependencyRegistry {
 	@Reference private MetadataLogger metadataLogger;
 	/** key: upstream dependency; value: list<downstream dependencies> */
 	private Map<String, Set<String>> upstreamKeyed = new HashMap<String, Set<String>>();

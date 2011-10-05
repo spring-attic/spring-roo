@@ -31,7 +31,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @since 1.0
  */
-public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ItdTypeDetails> {
+public class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ItdTypeDetails> {
 	
 	// Fields
 	private final boolean privilegedAspect;

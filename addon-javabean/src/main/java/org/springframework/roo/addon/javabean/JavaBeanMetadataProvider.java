@@ -35,7 +35,7 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component(immediate = true)
 @Service
-public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
+public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Fields
 	@Reference private ProjectOperations projectOperations;

@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-public final class DefaultPhysicalTypeDetails extends AbstractCustomDataAccessorProvider implements PhysicalTypeDetails {
+public class DefaultPhysicalTypeDetails extends AbstractCustomDataAccessorProvider implements PhysicalTypeDetails {
 
 	// Fields
 	private PhysicalTypeCategory physicalTypeCategory;

@@ -52,7 +52,7 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true)
 @Service
-public final class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
+public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Fields
 	@Reference private LayerService layerService;

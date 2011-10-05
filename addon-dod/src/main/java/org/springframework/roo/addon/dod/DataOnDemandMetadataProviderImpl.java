@@ -59,7 +59,7 @@ import org.springframework.roo.shell.NaturalOrderComparator;
  */
 @Component(immediate = true)
 @Service
-public final class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DataOnDemandMetadataProvider {
+public class DataOnDemandMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DataOnDemandMetadataProvider {
 	
 	// Constants
 	private static final String FLUSH_METHOD = CustomDataKeys.FLUSH_METHOD.name();

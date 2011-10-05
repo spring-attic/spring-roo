@@ -30,7 +30,7 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true) 
 @Service 
-public final class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfApplicationBeanMetadataProvider {
+public class JsfApplicationBeanMetadataProviderImpl extends AbstractItdMetadataProvider implements JsfApplicationBeanMetadataProvider {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private ProjectOperations projectOperations;
 

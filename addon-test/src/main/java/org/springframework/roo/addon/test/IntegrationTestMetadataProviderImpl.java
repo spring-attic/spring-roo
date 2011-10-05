@@ -59,7 +59,7 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component(immediate = true)
 @Service
-public final class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
+public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
 	
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();

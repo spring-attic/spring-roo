@@ -52,7 +52,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Andrew Swan
  * @since 1.0
  */
-public final class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata>{
+public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata>{
 
 	// Fields
 	private JavaType annotationType;

@@ -9,7 +9,7 @@ import org.springframework.roo.model.JavaType;
  * @author James Tyrrell
  * @since 1.1.1
  */
-public final class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<ImportMetadata> {
+public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<ImportMetadata> {
 	
 	// Fields
 	private JavaPackage importPackage;

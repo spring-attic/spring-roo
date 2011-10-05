@@ -54,7 +54,7 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component(immediate = true)
 @Service
-public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvider implements EntityMetadataProvider {
+public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider implements EntityMetadataProvider {
 	
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;

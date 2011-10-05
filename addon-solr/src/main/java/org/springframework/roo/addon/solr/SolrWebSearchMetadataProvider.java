@@ -23,7 +23,7 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true)
 @Service
-public final class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
+public class SolrWebSearchMetadataProvider extends AbstractItdMetadataProvider {
 	
 	// Fields
 	@Reference private WebScaffoldMetadataProvider webScaffoldMetadataProvider;

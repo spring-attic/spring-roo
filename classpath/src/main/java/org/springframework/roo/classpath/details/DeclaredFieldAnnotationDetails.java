@@ -10,7 +10,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @since 1.1
  */
-public final class DeclaredFieldAnnotationDetails {
+public class DeclaredFieldAnnotationDetails {
 	
 	// Fields
 	private FieldMetadata fieldMetadata;

@@ -20,7 +20,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public final class SerializableMetadataProviderImpl extends AbstractItdMetadataProvider implements SerializableMetadataProvider {
+public class SerializableMetadataProviderImpl extends AbstractItdMetadataProvider implements SerializableMetadataProvider {
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

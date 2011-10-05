@@ -63,7 +63,7 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component(immediate = true) 
 @Service 
-public final class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
+public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfManagedBeanMetadataProvider {
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();

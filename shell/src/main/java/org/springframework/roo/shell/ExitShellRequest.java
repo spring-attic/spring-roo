@@ -9,7 +9,7 @@ package org.springframework.roo.shell;
  * 
  * @author Ben Alex
  */
-public final class ExitShellRequest {
+public class ExitShellRequest {
 
 	// Constants
 	public static final ExitShellRequest NORMAL_EXIT = new ExitShellRequest(0);

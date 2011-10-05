@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.1
  */
-public final class CustomDataImpl implements CustomData {
+public class CustomDataImpl implements CustomData {
 	
 	// Constants
 	public static final CustomData NONE = new CustomDataImpl(new LinkedHashMap<Object, Object>());

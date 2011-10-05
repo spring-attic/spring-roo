@@ -22,7 +22,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true) 
 @Service 
-public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
+public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

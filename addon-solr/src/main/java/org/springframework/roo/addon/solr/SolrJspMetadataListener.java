@@ -53,7 +53,7 @@ import org.w3c.dom.Element;
  */
 @Component(immediate = true)
 @Service
-public final class SolrJspMetadataListener implements MetadataProvider, MetadataNotificationListener {
+public class SolrJspMetadataListener implements MetadataProvider, MetadataNotificationListener {
 	
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;

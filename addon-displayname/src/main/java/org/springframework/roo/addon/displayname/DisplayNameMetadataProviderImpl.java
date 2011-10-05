@@ -36,7 +36,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public final class DisplayNameMetadataProviderImpl extends AbstractItdMetadataProvider implements DisplayNameMetadataProvider {
+public class DisplayNameMetadataProviderImpl extends AbstractItdMetadataProvider implements DisplayNameMetadataProvider {
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;

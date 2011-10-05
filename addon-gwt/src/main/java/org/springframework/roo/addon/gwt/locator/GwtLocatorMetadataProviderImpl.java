@@ -47,7 +47,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
-public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvider{
+public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvider {
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();

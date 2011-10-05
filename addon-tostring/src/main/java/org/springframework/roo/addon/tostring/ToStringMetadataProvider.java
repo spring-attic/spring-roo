@@ -31,7 +31,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public final class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
+public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);

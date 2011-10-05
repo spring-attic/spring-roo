@@ -48,7 +48,7 @@ import org.springframework.roo.support.util.Assert;
 		@Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) 
 	}
 )
-public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
+public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 	
 	// Fields
 	@Reference protected MetadataService metadataService;
