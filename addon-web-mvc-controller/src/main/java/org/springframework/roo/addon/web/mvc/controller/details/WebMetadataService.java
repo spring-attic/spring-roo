@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -39,5 +40,5 @@ public interface WebMetadataService {
 
 	MemberDetails getMemberDetails(JavaType javaType);
 
-	Map<String, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString);
+	Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions(JavaType domainType, String metadataIdentificationString);
 }

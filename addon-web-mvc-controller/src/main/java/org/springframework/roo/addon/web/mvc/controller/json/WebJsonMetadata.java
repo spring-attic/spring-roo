@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.web.mvc.controller.json;
 
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
+import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.HTTP_HEADERS;
 import static org.springframework.roo.model.SpringJavaType.HTTP_STATUS;
@@ -25,7 +30,7 @@ import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
+import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -68,7 +73,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	private JsonMetadata jsonMetadata;
 	private String entityName;
 	private WebJsonAnnotationValues annotationValues;
-	private boolean servicesInjected;
+	private boolean introduceLayerComponents;
 
 	/**
 	 * Constructor
@@ -82,11 +87,11 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 	 * @param plural
 	 * @param finderDetails (required)
 	 * @param jsonMetadata
-	 * @param servicesInjected
+	 * @param introduceLayerComponents whether to introduce any required layer components (services, repositories, etc.)
 	 */
-	public WebJsonMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebJsonAnnotationValues annotationValues, final Map<String, MemberTypeAdditions> persistenceAdditions, final FieldMetadata identifierField, final String plural, final Set<FinderMetadataDetails> finderDetails, JsonMetadata jsonMetadata, boolean servicesInjected) {
+	public WebJsonMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final WebJsonAnnotationValues annotationValues, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> persistenceAdditions, final FieldMetadata identifierField, final String plural, final Set<FinderMetadataDetails> finderDetails, JsonMetadata jsonMetadata, boolean introduceLayerComponents) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
+		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' is invalid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(persistenceAdditions, "Persistence additions required");
 		Assert.notNull(finderDetails, "Set of dynamic finder methods cannot be null");
@@ -99,25 +104,25 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		this.annotationValues = annotationValues;
 		this.jsonEnabledType = annotationValues.getJsonObject();
 		this.entityName = JavaSymbolName.getReservedWordSafeName(jsonEnabledType).getSymbolName();
-		this.servicesInjected = servicesInjected;
+		this.introduceLayerComponents = introduceLayerComponents;
 
 		this.jsonMetadata = jsonMetadata;
 		
-		MemberTypeAdditions findMethod = persistenceAdditions.get(CustomDataKeys.FIND_METHOD.name());
+		MemberTypeAdditions findMethod = persistenceAdditions.get(FIND_METHOD);
 		builder.addMethod(getJsonShowMethod(identifierField, findMethod));
 		
-		MemberTypeAdditions findAllMethod = persistenceAdditions.get(CustomDataKeys.FIND_ALL_METHOD.name());
+		MemberTypeAdditions findAllMethod = persistenceAdditions.get(FIND_ALL_METHOD);
 		builder.addMethod(getJsonListMethod(findAllMethod));
 
-		MemberTypeAdditions persistMethod = persistenceAdditions.get(CustomDataKeys.PERSIST_METHOD.name());
+		MemberTypeAdditions persistMethod = persistenceAdditions.get(PERSIST_METHOD);
 		builder.addMethod(getJsonCreateMethod(persistMethod));
 		builder.addMethod(getCreateFromJsonArrayMethod(persistMethod));
 		
-		MemberTypeAdditions mergeMethod = persistenceAdditions.get(CustomDataKeys.MERGE_METHOD.name());
+		MemberTypeAdditions mergeMethod = persistenceAdditions.get(MERGE_METHOD);
 		builder.addMethod(getJsonUpdateMethod(mergeMethod));
 		builder.addMethod(getUpdateFromJsonArrayMethod(mergeMethod));
 
-		MemberTypeAdditions removeMethod = persistenceAdditions.get(CustomDataKeys.REMOVE_METHOD.name());
+		MemberTypeAdditions removeMethod = persistenceAdditions.get(REMOVE_METHOD);
 		builder.addMethod(getJsonDeleteMethod(removeMethod, identifierField, findMethod));
 
 		if (annotationValues.isExposeFinders()) {
@@ -171,7 +176,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + beanShortName.toLowerCase() + "." + toJsonMethodName.getSymbolName() + "(), headers, " +  httpStatusShortName + ".OK);");
 
-		if (!servicesInjected) {
+		if (introduceLayerComponents) {
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
@@ -209,7 +214,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
-		if (!servicesInjected) {
+		if (introduceLayerComponents) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
@@ -254,7 +259,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("headers.add(\"Content-Type\", \"application/text\");");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
-		if (!servicesInjected) {
+		if (introduceLayerComponents) {
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
@@ -291,7 +296,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine(list.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " result = " + findAllMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return new " + responseEntityShortName + "<String>(" + entityName + "." + toJsonArrayMethodName.getSymbolName() + "(result), headers, " +  httpStatusShortName + ".OK);");
 
-		if (!servicesInjected) {
+		if (introduceLayerComponents) {
 			findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, bodyBuilder);
@@ -335,7 +340,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
-		if (!servicesInjected) {
+		if (introduceLayerComponents) {
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
@@ -385,7 +390,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 		
-		if (!servicesInjected) {
+		if (introduceLayerComponents) {
 			mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, RESPONSE_ENTITY_STRING, parameterTypes, parameterNames, bodyBuilder);
@@ -433,7 +438,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 		bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(headers, " + HTTP_STATUS.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 
-		if (!servicesInjected) {
+		if (introduceLayerComponents) {
 			removeMethod.copyAdditionsTo(builder, governorTypeDetails);
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
