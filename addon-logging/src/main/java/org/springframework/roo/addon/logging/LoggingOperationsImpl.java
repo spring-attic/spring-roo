@@ -27,27 +27,27 @@ import org.springframework.roo.support.util.TemplateUtils;
 @Component
 @Service
 public class LoggingOperationsImpl implements LoggingOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
-	
+
 	public boolean isConfigureLoggingAvailable() {
 		return projectOperations.isProjectAvailable();
 	}
-	
-	public void configureLogging(LogLevel logLevel, LoggerPackage loggerPackage) {
+
+	public void configureLogging(final LogLevel logLevel, final LoggerPackage loggerPackage) {
 		Assert.notNull(logLevel, "LogLevel required");
 		Assert.notNull(loggerPackage, "LoggerPackage required");
-		
+
 		setupProperties(logLevel, loggerPackage);
 	}
-	
-	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {
+
+	private void setupProperties(final LogLevel logLevel, final LoggerPackage loggerPackage) {
 		String filePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
 		MutableFile log4jMutableFile = null;
 		Properties props = new Properties();
-		
+
 		InputStream inputStream = null;
 		try {
 			if (fileManager.exists(filePath)) {
@@ -68,7 +68,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 
 		JavaPackage topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage();
 		final String logStr = "log4j.logger.";
-		
+
 		switch (loggerPackage) {
 			case ROOT:
 				props.remove("log4j.rootLogger");

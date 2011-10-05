@@ -2,7 +2,7 @@ package org.springframework.roo.classpath.details;
 
 /**
  * Builder for {@link ConstructorMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */

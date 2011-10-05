@@ -23,34 +23,34 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Automatically populates the {@link AutoPopulate} annotated fields on a 
+ * Automatically populates the {@link AutoPopulate} annotated fields on a
  * given {@link Object}.
- *  
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public abstract class AutoPopulationUtils {
 	private static final Map<Class<?>,List<Field>> cachedIntrospections = new HashMap<Class<?>, List<Field>>();
 	private static final Map<Field, JavaSymbolName> attributeNameForEachField = new HashMap<Field, JavaSymbolName>();
-	
+
 	/**
 	 * Introspects the target {@link Object} for its declared fields, locating all
 	 * {@link AutoPopulate} annotated fields. For each field, an attempt will be made to
 	 * locate the value from the passed {@link AnnotationMetadata}. The annotation value
 	 * will be converted into the required field type, or silently skipped if this is not
-	 * possible (eg the user edited source code and made a formatting error). As such it 
+	 * possible (eg the user edited source code and made a formatting error). As such it
 	 * is important that the caller.
-	 * 
+	 *
 	 * @param target to put values into (mandatory, cannot be null)
 	 * @param annotation to obtain values from (can be null, for convenience of the caller)
 	 */
-	public static void populate(Object target, AnnotationMetadata annotation) {
+	public static void populate(final Object target, final AnnotationMetadata annotation) {
 		Assert.notNull(target, "Target required");
-		
+
 		if (annotation == null) {
 			return;
 		}
-		
+
 		List<Field> fields = cachedIntrospections.get(target.getClass());
 		if (fields == null) {
 			// Go and cache them
@@ -62,40 +62,40 @@ public abstract class AutoPopulationUtils {
 				if (ap == null) {
 					continue;
 				}
-				
+
 				// Determine attribute name we should be looking for in the annotation
 				String attribute = ap.value();
 				if ("".equals(ap.value())) {
 					attribute = field.getName();
 				}
-				
+
 				// Ensure field is accessible
 				if (!field.isAccessible()) {
 					field.setAccessible(true);
 				}
 
 				JavaSymbolName attributeName = new JavaSymbolName(attribute);
-				
+
 				// Store the info
 				fields.add(field);
 				attributeNameForEachField.put(field, attributeName);
 
 			}
-			
+
 			cachedIntrospections.put(target.getClass(), fields);
 		}
-		
+
 		for (Field field : fields) {
 			// Lookup whether this attribute name was provided
 			JavaSymbolName attributeName = attributeNameForEachField.get(field);
 			if (attributeName == null) {
 				throw new IllegalStateException("Expected cached attribute name lookup");
 			}
-			
+
 			if (annotation.getAttributeNames().contains(attributeName)) {
 				// Get the value
 				AnnotationAttributeValue<?> value = annotation.getAttribute(attributeName);
-				
+
 				// Assign the value to the target object
 				try {
 					Class<?> fieldType = field.getType();

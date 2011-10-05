@@ -8,7 +8,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.jsp.i18n.AbstractLanguage;
 import org.springframework.roo.support.util.TemplateUtils;
 
-/** 
+/**
  * Svedish language support.
  *
  * @author Stefan Schmidt
@@ -21,7 +21,7 @@ public class SwedishLanguage extends AbstractLanguage {
 	public Locale getLocale() {
 		return new Locale("sv");
 	}
-	
+
 	public String getLanguage() {
 		return "Svenska";
 	}

@@ -14,14 +14,14 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Shell commands for {@link MavenOperations} and also to launch native mvn commands.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component
 @Service
 public class MavenCommands implements CommandMarker {
-	
+
 	// Constants
 	private static final String DEPENDENCY_ADD_COMMAND = "dependency add";
 	private static final String DEPENDENCY_REMOVE_COMMAND = "dependency remove";
@@ -33,7 +33,7 @@ public class MavenCommands implements CommandMarker {
 	private static final String PERFORM_PACKAGE_COMMAND = "perform package";
 	private static final String PERFORM_TESTS_COMMAND = "perform tests";
 	private static final String PROJECT_COMMAND = "project";
-	
+
 	// Fields
 	@Reference private MavenOperations mavenOperations;
 
@@ -44,12 +44,12 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = PROJECT_COMMAND, help = "Creates a new Maven project")
 	public void createProject(
-		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage, 
-		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName, 
-		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
+		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") final String projectName,
+		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") final Integer majorJavaVersion,
 		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parent,
 		@CliOption(key = "packaging", help = "The Maven packaging (pom, war, jar, ear, etc.)", unspecifiedDefaultValue = "jar") final PackagingType packagingType) {
-		
+
 		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion, parent, packagingType);
 	}
 
@@ -57,17 +57,17 @@ public class MavenCommands implements CommandMarker {
 	public boolean isCreateModuleAvailable() {
 		return mavenOperations.isCreateModuleAvailable();
 	}
-	
+
 	@CliCommand(value = MODULE_COMMAND, help = "Creates a new module within an existing Maven project")
 	public void createModule(
-		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage, 
-		@CliOption(key = "name", mandatory = false, help = "The name of the module (last segment of package name used as default)") String name, 
+		@CliOption(key = { "", "topLevelPackage" }, mandatory = true, optionContext = "update", help = "The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") final JavaPackage topLevelPackage,
+		@CliOption(key = "name", mandatory = false, help = "The name of the module (last segment of package name used as default)") final String name,
 		@CliOption(key = "parent", help = "The Maven coordinates of the parent POM, in the form \"groupId:artifactId:version\"") final GAV parent,
 		@CliOption(key = "packaging", help = "The Maven packaging (pom, war, jar, ear, etc.)", unspecifiedDefaultValue = "jar") final PackagingType packagingType) {
-		
+
 		mavenOperations.createModule(topLevelPackage, name, parent, packagingType);
 	}
-	
+
 	@CliAvailabilityIndicator({ DEPENDENCY_ADD_COMMAND, DEPENDENCY_REMOVE_COMMAND })
 	public boolean isDependencyModificationAllowed() {
 		return mavenOperations.isProjectAvailable();
@@ -75,22 +75,22 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = DEPENDENCY_ADD_COMMAND, help = "Adds a new dependency to the Maven project object model (POM)")
 	public void addDependency(
-		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") String groupId, 
-		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
-		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version, 
-		@CliOption(key = "classifier", mandatory = false, help = "The classifier of the dependency") String classifier, 
-		@CliOption(key = "scope", mandatory = false, help = "The scope of the dependency") DependencyScope scope) {
-		
+		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") final String groupId,
+		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") final String artifactId,
+		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
+		@CliOption(key = "classifier", mandatory = false, help = "The classifier of the dependency") final String classifier,
+		@CliOption(key = "scope", mandatory = false, help = "The scope of the dependency") final DependencyScope scope) {
+
 		mavenOperations.addDependency(groupId, artifactId, version, scope, classifier);
 	}
 
 	@CliCommand(value = DEPENDENCY_REMOVE_COMMAND, help = "Removes an existing dependency from the Maven project object model (POM)")
 	public void removeDependency(
-		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") String groupId, 
-		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
-		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version, 
-		@CliOption(key = "classifier", mandatory = false, help = "The classifier of the dependency") String classifier) {
-		
+		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") final String groupId,
+		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") final String artifactId,
+		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") final String version,
+		@CliOption(key = "classifier", mandatory = false, help = "The classifier of the dependency") final String classifier) {
+
 		mavenOperations.removeDependency(groupId, artifactId, version, classifier);
 	}
 
@@ -126,8 +126,8 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = { PERFORM_COMMAND_COMMAND }, help = "Executes a user-specified Maven command")
 	public void mvn(
-		@CliOption(key = "mavenCommand", mandatory = true, help = "User-specified Maven command (eg test:test)") String command) throws IOException {
-		
+		@CliOption(key = "mavenCommand", mandatory = true, help = "User-specified Maven command (eg test:test)") final String command) throws IOException {
+
 		mavenOperations.executeMvnCommand(command);
 	}
 }

@@ -15,12 +15,12 @@ import org.junit.Test;
  * @since 1.2.0
  */
 public class NumberUtilsTest {
-	
+
 	@Test
 	public void testMinValueOfEmptyArray() {
 		assertNull(NumberUtils.min(new Number[0]));
 	}
-	
+
 	@Test
 	public void testNullMinValues() {
 		assertNull(NumberUtils.min(null, null));
@@ -30,12 +30,12 @@ public class NumberUtilsTest {
 	public void testOneMinValue() {
 		assertEquals(BigDecimal.ONE, NumberUtils.min(1));
 	}
-	
+
 	@Test
 	public void testMinValues() {
 		assertEquals(new BigDecimal("11"), NumberUtils.min(21, 11, 20L, 33.3D, new Short("55"), 11.3));
 	}
-	
+
 	@Test
 	public void testMinValues2() {
 		assertEquals(new BigDecimal("3"), NumberUtils.min(null, 3, null, 4));
@@ -45,12 +45,12 @@ public class NumberUtilsTest {
 	public void testMultipleMinValues() {
 		assertEquals(new BigDecimal(-10), NumberUtils.min(0, 10, null, -10, Integer.MAX_VALUE, BigInteger.TEN));
 	}
-	
+
 	@Test
 	public void testMultipleSameMinValues() {
 		assertEquals(-1, NumberUtils.min(-1, -1F, -1L, -1D).intValueExact());
 	}
-	
+
 	@Test
 	public void testNullMaxValues() {
 		assertNull(NumberUtils.max(null, null));
@@ -60,7 +60,7 @@ public class NumberUtilsTest {
 	public void testOneMaxValue() {
 		assertEquals(BigDecimal.ONE, NumberUtils.max(1));
 	}
-	
+
 	@Test
 	public void testMaxValues() {
 		assertEquals(BigDecimal.ONE, NumberUtils.max(null, 1, -1, null));

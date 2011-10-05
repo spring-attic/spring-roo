@@ -7,11 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * Marks the annotated type as a Spring Data JPA repository interface.
- * 
+ *
  * For the time being, we don't allow users to customise the names of repository
  * methods like we do for service interfaces, because Spring Data JPA provides
  * a complete pre-named set of CRUD methods out of the box.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -19,16 +19,16 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooRepositoryJpa {
-	
+
 	/**
 	 * The name of this annotation's attribute that specifies the managed domain
 	 * type.
 	 */
 	String DOMAIN_TYPE_ATTRIBUTE = "domainType";
-	
+
 	/**
 	 * The domain type managed by the annotated repository
-	 * 
+	 *
 	 * @return a non-<code>null</code> entity type
 	 */
 	Class<?> domainType();	// no default => mandatory

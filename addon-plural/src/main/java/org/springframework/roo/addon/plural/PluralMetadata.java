@@ -25,7 +25,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooPlural}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -41,7 +41,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	// Cache
 	private Map<String, String> cache;
 
-	public PluralMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public PluralMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -67,12 +67,12 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	/**
 	 * This method returns the plural term as per inflector.
 	 * ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
-	 * 
+	 *
 	 * @param term The term to be pluralized
 	 * @param locale Locale
 	 * @return pluralized term
 	 */
-	public String getInflectorPlural(String term, Locale locale) {
+	public String getInflectorPlural(final String term, final Locale locale) {
 		try {
 			return Noun.pluralOf(term, locale);
 		} catch (RuntimeException re) {
@@ -92,7 +92,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @param field the field to obtain plural details for (required)
 	 * @return a guaranteed plural, computed via an annotation or Inflector (never returns null or an empty string)
 	 */
-	public String getPlural(FieldMetadata field) {
+	public String getPlural(final FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 		// Obtain the plural from the cache, if available
 		String symbolName = field.getFieldName().getSymbolName();
@@ -118,13 +118,14 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// Create the cache (we defer this in case there is no field plural retrieval ever required for this instance)
 			cache = new HashMap<String, String>();
 		}
-		
+
 		// Populate the cache for next time
 		cache.put(symbolName, thePlural);
-		
+
 		return thePlural;
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -145,27 +146,27 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	/**
 	 * Creates a plural identifier for the given type, assumed to be located in
 	 * {@link Path#SRC_MAIN_JAVA}
-	 * 
+	 *
 	 * @param javaType (required)
 	 * @return a non-<code>null</code> ID
 	 */
 	public static String createIdentifier(final JavaType javaType) {
 		return createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 	}
-	
-	public static String createIdentifier(JavaType javaType, Path path) {
+
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }

@@ -13,6 +13,6 @@ public interface Op4jOperations {
 	boolean isOp4jAvailable();
 
 	void annotateType(JavaType type);
-	
+
 	void setup();
 }

@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Command type to allow execution of native OS commands from the Spring Roo shell.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -36,7 +36,7 @@ public class OsCommands implements CommandMarker {
 
 	@CliCommand(value = "!", help = "Allows execution of operating system (OS) commands.")
 	public void command(
-		@CliOption(key = { "", "command" }, mandatory = false, specifiedDefaultValue = "*", unspecifiedDefaultValue = "*", help = "The command to execute") String command) {
+		@CliOption(key = { "", "command" }, mandatory = false, specifiedDefaultValue = "*", unspecifiedDefaultValue = "*", help = "The command to execute") final String command) {
 
 		if (StringUtils.hasText(command)) {
 			try {

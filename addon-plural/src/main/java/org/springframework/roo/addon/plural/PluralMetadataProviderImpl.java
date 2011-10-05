@@ -12,25 +12,26 @@ import org.springframework.roo.project.Path;
 
 /**
  * Implementation of {@link PluralMetadataProvider}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true) 
-@Service 
+@Component(immediate = true)
+@Service
 public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider implements PluralMetadataProvider {
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		setIgnoreTriggerAnnotations(true);
 		setDependsOnGovernorBeingAClass(false);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		return new PluralMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
 	}
 
@@ -38,13 +39,15 @@ public class PluralMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		return "Plural";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = PluralMetadata.getJavaType(metadataIdentificationString);
 		Path path = PluralMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return PluralMetadata.createIdentifier(javaType, path);
 	}
 

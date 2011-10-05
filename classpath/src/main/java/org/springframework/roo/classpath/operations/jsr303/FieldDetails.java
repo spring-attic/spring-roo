@@ -19,24 +19,24 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Base class containing common JSR 303 and JSR 220 properties that can be auto-generated.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class FieldDetails {
-	
+
 	// Fields
 	/** The JPA @Column value */
 	private String column;
 
 	/** The type that will receive the field */
-	private String physicalTypeIdentifier;
+	private final String physicalTypeIdentifier;
 
 	/** The type of field to be added */
-	private JavaType fieldType;
+	private final JavaType fieldType;
 
 	/** The name of the field to be added */
-	private JavaSymbolName fieldName;
+	private final JavaSymbolName fieldName;
 
 	/** Whether the JSR 303 @NotNull annotation will be added */
 	private boolean notNull;
@@ -46,13 +46,13 @@ public class FieldDetails {
 
 	/** Any JavaDoc comments (reserved for future expansion) */
 	protected String comment = "";
-	
+
 	/** Whether unique = true is added to the @Column annotation */
 	private boolean unique;
-	
+
 	/** The Spring @Value value **/
 	private String value;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -60,7 +60,7 @@ public class FieldDetails {
 	 * @param fieldType
 	 * @param fieldName
 	 */
-	public FieldDetails(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
+	public FieldDetails(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Destination physical type identifier is invalid");
 		Assert.notNull(fieldType, "Field type required");
 		Assert.notNull(fieldName, "Field name required");
@@ -69,17 +69,17 @@ public class FieldDetails {
 		this.fieldName = fieldName;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
+	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
 		Assert.notNull(annotations);
-		
+
 		if (notNull) {
 			annotations.add(new AnnotationMetadataBuilder(NOT_NULL));
 		}
-		
+
 		if (nullRequired) {
 			annotations.add(new AnnotationMetadataBuilder(NULL));
 		}
-		
+
 		AnnotationMetadataBuilder columnBuilder = null;
 		if (column != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
@@ -98,19 +98,19 @@ public class FieldDetails {
 		if (columnBuilder != null) {
 			annotations.add(columnBuilder);
 		}
-		
+
 		if (value != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("value"), value));
 			annotations.add(new AnnotationMetadataBuilder(VALUE, attrs));
 		}
 	}
-	
+
 	public boolean isNotNull() {
 		return notNull;
 	}
 
-	public void setNotNull(boolean notNull) {
+	public void setNotNull(final boolean notNull) {
 		this.notNull = notNull;
 	}
 
@@ -118,7 +118,7 @@ public class FieldDetails {
 		return comment;
 	}
 
-	public void setComment(String comment) {
+	public void setComment(final String comment) {
 		if (comment != null) {
 			this.comment = comment;
 		}
@@ -128,7 +128,7 @@ public class FieldDetails {
 		return column;
 	}
 
-	public void setColumn(String column) {
+	public void setColumn(final String column) {
 		this.column = column;
 	}
 
@@ -136,7 +136,7 @@ public class FieldDetails {
 		return nullRequired;
 	}
 
-	public void setNullRequired(boolean nullRequired) {
+	public void setNullRequired(final boolean nullRequired) {
 		this.nullRequired = nullRequired;
 	}
 
@@ -156,14 +156,14 @@ public class FieldDetails {
 		return unique;
 	}
 
-	public void setUnique(boolean unique) {
+	public void setUnique(final boolean unique) {
 		this.unique = unique;
 	}
-	
-	public void setValue(String value) {
+
+	public void setValue(final String value) {
 		this.value = value;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}

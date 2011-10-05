@@ -5,15 +5,15 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * ORM providers known to the JPA add-on.
- * 
+ *
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
  */
 public enum OrmProvider {
-	
-	HIBERNATE("org.hibernate.ejb.HibernatePersistence"), 
-	OPENJPA("org.apache.openjpa.persistence.PersistenceProviderImpl"), 
+
+	HIBERNATE("org.hibernate.ejb.HibernatePersistence"),
+	OPENJPA("org.apache.openjpa.persistence.PersistenceProviderImpl"),
 	ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"),
 	DATANUCLEUS("org.datanucleus.jpa.PersistenceProviderImpl", "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider"),
 	DATANUCLEUS_2("org.datanucleus.jpa.PersistenceProviderImpl", "com.force.sdk.jpa.PersistenceProviderImpl");

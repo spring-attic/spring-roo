@@ -14,12 +14,12 @@ import org.springframework.uaa.client.util.Assert;
 
 /**
  * Builder for {@link ClassOrInterfaceTypeDetails}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails> {
-	
+
 	// Fields
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
@@ -32,7 +32,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	 *
 	 * @param declaredbyMetadataId
 	 */
-	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId) {
+	public ClassOrInterfaceTypeDetailsBuilder(final String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
 
@@ -41,7 +41,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	 *
 	 * @param existing
 	 */
-	public ClassOrInterfaceTypeDetailsBuilder(ClassOrInterfaceTypeDetails existing) {
+	public ClassOrInterfaceTypeDetailsBuilder(final ClassOrInterfaceTypeDetails existing) {
 		super(existing);
 		init(existing);
 	}
@@ -52,7 +52,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	 * @param declaredbyMetadataId
 	 * @param existing
 	 */
-	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, ClassOrInterfaceTypeDetails existing) {
+	public ClassOrInterfaceTypeDetailsBuilder(final String declaredbyMetadataId, final ClassOrInterfaceTypeDetails existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing);
 	}
@@ -65,14 +65,14 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 	 * @param name
 	 * @param physicalTypeCategory
 	 */
-	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, int modifier, JavaType name, PhysicalTypeCategory physicalTypeCategory) {
+	public ClassOrInterfaceTypeDetailsBuilder(final String declaredbyMetadataId, final int modifier, final JavaType name, final PhysicalTypeCategory physicalTypeCategory) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
 		this.name = name;
 		this.physicalTypeCategory = physicalTypeCategory;
 	}
-	
-	private void init(ClassOrInterfaceTypeDetails existing) {
+
+	private void init(final ClassOrInterfaceTypeDetails existing) {
 		this.name = existing.getName();
 		this.physicalTypeCategory = existing.getPhysicalTypeCategory();
 		if (existing.getSuperclass() != null) {
@@ -87,7 +87,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		return name;
 	}
 
-	public void setName(JavaType name) {
+	public void setName(final JavaType name) {
 		this.name = name;
 	}
 
@@ -95,7 +95,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		return physicalTypeCategory;
 	}
 
-	public void setPhysicalTypeCategory(PhysicalTypeCategory physicalTypeCategory) {
+	public void setPhysicalTypeCategory(final PhysicalTypeCategory physicalTypeCategory) {
 		this.physicalTypeCategory = physicalTypeCategory;
 	}
 
@@ -103,11 +103,11 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		return superclass;
 	}
 
-	public void setSuperclass(ClassOrInterfaceTypeDetailsBuilder superclass) {
+	public void setSuperclass(final ClassOrInterfaceTypeDetailsBuilder superclass) {
 		this.superclass = superclass;
 	}
 
-	public void setSuperclass(ClassOrInterfaceTypeDetails superclass) {
+	public void setSuperclass(final ClassOrInterfaceTypeDetails superclass) {
 		setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclass));
 	}
 
@@ -117,7 +117,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 
 	/**
 	 * Sets this builder's enum constants to the given collection
-	 * 
+	 *
 	 * @param enumConstants can be <code>null</code> for none, otherwise is
 	 * defensively copied
 	 */
@@ -128,7 +128,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		}
 	}
 
-	public boolean addEnumConstant(JavaSymbolName javaSymbolName) {
+	public boolean addEnumConstant(final JavaSymbolName javaSymbolName) {
 		return enumConstants.add(javaSymbolName);
 	}
 
@@ -142,7 +142,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 
 	/**
 	 * Returns this builder's imports
-	 * 
+	 *
 	 * @return a non-<code>null</code> copy
 	 */
 	public Set<ImportMetadata> getRegisteredImports() {
@@ -151,7 +151,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 
 	/**
 	 * Sets this builder's imports
-	 * 
+	 *
 	 * @param registeredImports can be <code>null</code> for none; defensively copied
 	 */
 	public void setRegisteredImports(final Collection<ImportMetadata> registeredImports) {
@@ -160,10 +160,10 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 			this.registeredImports.addAll(registeredImports);
 		}
 	}
-	
+
 	/**
 	 * Adds the given import to this builder
-	 * 
+	 *
 	 * @param importMetadata the import to add; can be <code>null</code> not to
 	 * add anything
 	 * @return <code>true</code> if the state of this builder changed
@@ -174,10 +174,10 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		}
 		return this.registeredImports.add(importMetadata);
 	}
-	
+
 	/**
 	 * Adds the given imports to this builder, if not already present
-	 * 
+	 *
 	 * @param imports the imports to add; can be <code>null</code> for none
 	 * @return <code>true</code> if the state of this builder changed
 	 */
@@ -187,14 +187,14 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 		}
 		return this.registeredImports.addAll(imports);
 	}
-	
+
 	/**
 	 * Copies this builder's modifications into the given ITD builder
-	 * 
+	 *
 	 * @param targetBuilder the ITD builder to receive the additions (required)
 	 * @param governorDetails the {@link ClassOrInterfaceTypeDetails} of the governor (required)
 	 */
-	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, ClassOrInterfaceTypeDetails governorDetails) {
+	public void copyTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, final ClassOrInterfaceTypeDetails governorDetails) {
 		Assert.notNull(targetBuilder, "Target builder required");
 		Assert.notNull(governorDetails, "Governor member holding types required");
 		// Copy fields
@@ -207,7 +207,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 			}
 			targetBuilder.addField(field.build());
 		}
-		
+
 		// Copy methods
 		methodAdditions: for (MethodMetadataBuilder method : getDeclaredMethods()) {
 			for(MethodMetadataBuilder targetMethod : targetBuilder.getDeclaredMethods()) {
@@ -217,7 +217,7 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 			}
 			targetBuilder.addMethod(method);
 		}
-		
+
 		// Copy annotations
 		annotationAdditions: for (AnnotationMetadataBuilder annotation : getAnnotations()) {
 			for(AnnotationMetadataBuilder targetAnnotation : targetBuilder.getAnnotations()) {
@@ -227,12 +227,12 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 			}
 			targetBuilder.addAnnotation(annotation);
 		}
-		
+
 		// Copy custom data
 		if (getCustomData() != null) {
 			targetBuilder.append(getCustomData().build());
 		}
-		
+
 		// Copy constructors
 		constructorAdditions: for (ConstructorMetadataBuilder constructor : getDeclaredConstructors()) {
 			for(ConstructorMetadataBuilder targetConstructor : targetBuilder.getDeclaredConstructors()) {
@@ -242,12 +242,12 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 			}
 			targetBuilder.addConstructor(constructor);
 		}
-		
+
 		// Copy initializers
 		for (InitializerMetadataBuilder initializer : getDeclaredInitializers()) {
 			targetBuilder.addInitializer(initializer);
 		}
-		
+
 		// Copy inner types
 		innerTypeAdditions: for (ClassOrInterfaceTypeDetailsBuilder innerType : getDeclaredInnerTypes()) {
 			for(ClassOrInterfaceTypeDetailsBuilder targetInnerType : targetBuilder.getDeclaredInnerTypes()) {
@@ -257,14 +257,14 @@ public class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTyp
 			}
 			targetBuilder.addInnerType(innerType);
 		}
-		
+
 		// Copy extends types
 		for (JavaType type : getExtendsTypes()) {
 			if (!targetBuilder.getExtendsTypes().contains(type)) {
 				targetBuilder.addExtendsTypes(type);
 			}
 		}
-		
+
 		// Copy implements types
 		for (JavaType type : getImplementsTypes()) {
 			if (!targetBuilder.getImplementsTypes().contains(type)) {

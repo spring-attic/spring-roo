@@ -9,7 +9,7 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * The values of a given {@link RooService} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -44,31 +44,31 @@ public class ServiceAnnotationValues extends AbstractAnnotationValues {
 	public String getCountAllMethod() {
 		return countAllMethod;
 	}
-	
+
 	public String getFindMethod() {
 		return findMethod;
 	}
-	
+
 	public String getFindAllMethod() {
 		return findAllMethod;
 	}
-	
+
 	public String getFindEntriesMethod() {
 		return findEntriesMethod;
 	}
-	
+
 	public String getSaveMethod() {
 		return saveMethod;
 	}
-	
+
 	public String getUpdateMethod() {
 		return updateMethod;
 	}
-	
+
 	public String getDeleteMethod() {
 		return deleteMethod;
 	}
-	
+
 	public boolean isTransactional() {
 		return transactional;
 	}

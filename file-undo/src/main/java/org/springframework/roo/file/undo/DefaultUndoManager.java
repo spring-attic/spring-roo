@@ -12,7 +12,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of the {@link UndoManager} interface.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -21,14 +21,14 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultUndoManager implements UndoManager {
 
 	// Fields
-	private Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
-	private Set<UndoListener> listeners = new HashSet<UndoListener>();
+	private final Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
+	private final Set<UndoListener> listeners = new HashSet<UndoListener>();
 	private boolean undoEnabled = true;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 	}
 
-	public void add(UndoableOperation undoableOperation) {
+	public void add(final UndoableOperation undoableOperation) {
 		Assert.notNull(undoableOperation, "Undoable operation required");
 		this.stack.push(undoableOperation);
 	}
@@ -36,7 +36,7 @@ public class DefaultUndoManager implements UndoManager {
 	public void flush() {
 		notifyListeners(UndoOperation.FLUSH);
 	}
-	
+
 	public void reset() {
 		while (!this.stack.empty()) {
 			UndoableOperation op = this.stack.pop();
@@ -74,22 +74,22 @@ public class DefaultUndoManager implements UndoManager {
 		notifyListeners(UndoOperation.UNDO);
 		return undoMode;
 	}
-	
-	public void setUndoEnabled(boolean undoEnabled) {
+
+	public void setUndoEnabled(final boolean undoEnabled) {
 		this.undoEnabled = undoEnabled;
 	}
 
-	private void notifyListeners(UndoOperation operation) {
+	private void notifyListeners(final UndoOperation operation) {
 		for (UndoListener listener : listeners) {
 			listener.onUndoEvent(new UndoEvent(operation));
 		}
 	}
 
-	public void addUndoListener(UndoListener undoListener) {
+	public void addUndoListener(final UndoListener undoListener) {
 		listeners.add(undoListener);
 	}
 
-	public void removeUndoListener(UndoListener undoListener) {
+	public void removeUndoListener(final UndoListener undoListener) {
 		listeners.remove(undoListener);
 	}
 }

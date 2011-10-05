@@ -14,7 +14,7 @@ public interface ServiceAnnotationValuesFactory {
 	/**
 	 * Returns the values of the {@link RooService} annotation on the given
 	 * service interface (assumed to be in {@link Path#SRC_MAIN_JAVA}).
-	 * 
+	 *
 	 * @param serviceInterface (required)
 	 * @return <code>null</code> if the values aren't available, e.g. because
 	 * the interface's physical details are unknown

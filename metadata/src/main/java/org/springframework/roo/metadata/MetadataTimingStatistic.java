@@ -2,7 +2,7 @@ package org.springframework.roo.metadata;
 
 /**
  * Represents an immutable representation of a single timing statistic from {@link MetadataDependencyRegistry}.
- * 
+ *
  * @author Ben Alex
  */
 public interface MetadataTimingStatistic extends Comparable<MetadataTimingStatistic> {
@@ -11,12 +11,12 @@ public interface MetadataTimingStatistic extends Comparable<MetadataTimingStatis
 	 * @return the number of nanoseconds associated with this {@link #getName()}.
 	 */
 	long getTime();
-	
+
 	/**
 	 * @return the number of invocations associated with this {@link #getName()}.
 	 */
 	long getInvocations();
-	
+
 	/**
 	 * @return an identifier to differentiate this timing statistic from another (never null or empty)
 	 */

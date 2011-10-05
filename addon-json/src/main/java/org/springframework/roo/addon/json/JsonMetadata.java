@@ -28,21 +28,21 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata to be triggered by {@link RooJson} annotation
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = JsonMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
+
 	// Fields
 	private JsonAnnotationValues annotationValues;
 	private String typeNamePlural;
 
-	public JsonMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String typeNamePlural, JsonAnnotationValues annotationValues) {
+	public JsonMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String typeNamePlural, final JsonAnnotationValues annotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.hasText(typeNamePlural, "Plural of the target type required");
@@ -51,7 +51,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (!isValid()) {
 			return;
 		}
-		
+
 		this.annotationValues = annotationValues;
 		this.typeNamePlural = typeNamePlural;
 
@@ -145,7 +145,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (methodName == null) {
 			return null;
 		}
-		
+
 		final JavaType parameterType = JavaType.STRING;
 		MethodMetadata result = getGovernorMethod(methodName, parameterType);
 		if (result != null) {
@@ -202,6 +202,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return methodBuilder.build();
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -217,19 +218,19 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }

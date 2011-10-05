@@ -50,7 +50,7 @@ import org.w3c.dom.Element;
 
 /**
  * Implementation of commands that are available via the Roo shell.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.1
@@ -58,13 +58,13 @@ import org.w3c.dom.Element;
 @Component(immediate = true)
 @Service
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
-	
+
 	// Constants
 	public static final String ADDON_UPGRADE_STABILITY_LEVEL = "ADDON_UPGRADE_STABILITY_LEVEL";
 	private static final Logger LOGGER = HandlerUtils.getLogger(AddOnRooBotOperationsImpl.class);
 	private static final List<String> NO_UPGRADE_BSN_LIST = Arrays.asList(
-			"org.springframework.uaa.client", 
-			"org.springframework.roo.url.stream.jdk", 
+			"org.springframework.uaa.client",
+			"org.springframework.roo.url.stream.jdk",
 			"org.springframework.roo.url.stream",
 			"org.springframework.roo.file.monitor",
 			"org.springframework.roo.file.monitor.polling",
@@ -90,7 +90,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			"org.springframework.roo.support",
 			"org.springframework.roo.support.osgi",
 			"org.springframework.roo.uaa");
-	
+
 	// Fields
 	@Reference private PgpService pgpService;
 	@Reference private Shell shell;
@@ -104,8 +104,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private Preferences prefs;
 	private String rooBotXmlUrl = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
 	private volatile Thread rooBotEagerDownload;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		this.context = context;
 		prefs = Preferences.userNodeForPackage(AddOnRooBotOperationsImpl.class);
 		bundleCache = new HashMap<String, Bundle>();
@@ -129,14 +129,14 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			rooBotEagerDownload.start();
 		}
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		if (rooBotEagerDownload != null && rooBotEagerDownload.isAlive()) {
 			rooBotEagerDownload = null;
 		}
 	}
 
-	public void addOnInfo(AddOnBundleSymbolicName bsn) {
+	public void addOnInfo(final AddOnBundleSymbolicName bsn) {
 		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
 		synchronized (mutex) {
 			String bsnString = bsn.getKey();
@@ -152,7 +152,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public void addOnInfo(String bundleKey) {
+	public void addOnInfo(final String bundleKey) {
 		Assert.hasText(bundleKey, "A valid bundle ID is required");
 		synchronized (mutex) {
 			Bundle bundle = null;
@@ -167,7 +167,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	private void addOnInfo(Bundle bundle, BundleVersion bundleVersion) {
+	private void addOnInfo(final Bundle bundle, final BundleVersion bundleVersion) {
 		StringBuilder sb = new StringBuilder(bundleVersion.getVersion());
 		if (bundle.getVersions().size() > 1) {
 			sb.append(" [available versions: ");
@@ -195,7 +195,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public InstallOrUpgradeStatus installAddOn(AddOnBundleSymbolicName bsn) {
+	public InstallOrUpgradeStatus installAddOn(final AddOnBundleSymbolicName bsn) {
 		synchronized (mutex) {
 			Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
 			String bsnString = bsn.getKey();
@@ -211,7 +211,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public InstallOrUpgradeStatus installAddOn(String bundleKey) {
+	public InstallOrUpgradeStatus installAddOn(final String bundleKey) {
 		synchronized (mutex) {
 			Assert.hasText(bundleKey, "A valid bundle ID is required");
 			Bundle bundle = null;
@@ -226,7 +226,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	private InstallOrUpgradeStatus installAddon(BundleVersion bundleVersion, String bsn) {
+	private InstallOrUpgradeStatus installAddon(final BundleVersion bundleVersion, final String bsn) {
 		InstallOrUpgradeStatus status = installOrUpgradeAddOn(bundleVersion, bsn, true);
 		if (status.equals(InstallOrUpgradeStatus.SUCCESS)) {
 			LOGGER.info("Successfully installed add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
@@ -240,7 +240,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return status;
 	}
 
-	private InstallOrUpgradeStatus installOrUpgradeAddOn(BundleVersion bundleVersion, String bsn, boolean install) {
+	private InstallOrUpgradeStatus installOrUpgradeAddOn(final BundleVersion bundleVersion, final String bsn, final boolean install) {
 		if (!verifyRepository(bundleVersion.getObrUrl())) {
 			return InstallOrUpgradeStatus.INVALID_OBR_URL;
 		}
@@ -261,7 +261,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return success ? InstallOrUpgradeStatus.SUCCESS : InstallOrUpgradeStatus.FAILED;
 	}
 
-	public InstallOrUpgradeStatus removeAddOn(BundleSymbolicName bsn) {
+	public InstallOrUpgradeStatus removeAddOn(final BundleSymbolicName bsn) {
 		synchronized (mutex) {
 			Assert.notNull(bsn, "Bundle symbolic name required");
 			boolean success = false;
@@ -279,12 +279,12 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
+	public Integer searchAddOns(final boolean showFeedback, final String searchTerms, final boolean refresh, final int linesPerResult, final int maxResults, final boolean trustedOnly, final boolean compatibleOnly, final boolean communityOnly, final String requiresCommand) {
 		List<Bundle> result = findAddons(showFeedback, searchTerms, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, communityOnly, requiresCommand);
 		return (result != null) ? result.size() : null;
 	}
-	
-	public List<Bundle> findAddons(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
+
+	public List<Bundle> findAddons(final boolean showFeedback, final String searchTerms, boolean refresh, final int linesPerResult, int maxResults, final boolean trustedOnly, final boolean compatibleOnly, final boolean communityOnly, final String requiresCommand) {
 		synchronized (mutex) {
 			if (maxResults > 99) {
 				maxResults = 99;
@@ -336,7 +336,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand) {
+	public void listAddOns(boolean refresh, final int linesPerResult, final int maxResults, final boolean trustedOnly, final boolean compatibleOnly, final boolean communityOnly, final String requiresCommand) {
 		synchronized (mutex) {
 			if (bundleCache.isEmpty()) {
 				// We should refresh regardless in this case
@@ -398,7 +398,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public InstallOrUpgradeStatus upgradeAddOn(AddOnBundleSymbolicName bsn) {
+	public InstallOrUpgradeStatus upgradeAddOn(final AddOnBundleSymbolicName bsn) {
 		synchronized (mutex) {
 			Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
 			String bsnString = bsn.getKey();
@@ -422,7 +422,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public InstallOrUpgradeStatus upgradeAddOn(String bundleId) {
+	public InstallOrUpgradeStatus upgradeAddOn(final String bundleId) {
 		synchronized (mutex) {
 			Assert.hasText(bundleId, "A valid bundle ID is required");
 			Bundle bundle = null;
@@ -465,7 +465,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public Map<String, Bundle> getAddOnCache(boolean refresh) {
+	public Map<String, Bundle> getAddOnCache(final boolean refresh) {
 		synchronized (mutex) {
 			if (refresh) {
 				populateBundleCache(false);
@@ -474,7 +474,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	private List<Bundle> filterList(List<Bundle> bundles, boolean trustedOnly, boolean compatibleOnly, boolean communityOnly, String requiresCommand, boolean onlyRelevantBundles) {
+	private List<Bundle> filterList(final List<Bundle> bundles, final boolean trustedOnly, final boolean compatibleOnly, final boolean communityOnly, final String requiresCommand, final boolean onlyRelevantBundles) {
 		List<Bundle> filteredList = new ArrayList<Bundle>();
 		List<PGPPublicKeyRing> keys = null;
 		if (trustedOnly) {
@@ -514,7 +514,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return filteredList;
 	}
 
-	private void printResultList(Collection<Bundle> bundles, int maxResults, int linesPerResult) {
+	private void printResultList(final Collection<Bundle> bundles, int maxResults, final int linesPerResult) {
 		int bundleId = 1;
 		searchResultCache.clear();
 		StringBuilder sb = new StringBuilder();
@@ -559,8 +559,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		LOGGER.info("[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version");
 	}
 
-	@SuppressWarnings("unchecked") 
-	private boolean isTrustedKey(List<PGPPublicKeyRing> keys, String keyId) {
+	@SuppressWarnings("unchecked")
+	private boolean isTrustedKey(final List<PGPPublicKeyRing> keys, final String keyId) {
 		for (PGPPublicKeyRing keyRing : keys) {
 			Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
 			while (it.hasNext()) {
@@ -573,7 +573,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return false;
 	}
 
-	private boolean populateBundleCache(boolean startupTime) {
+	private boolean populateBundleCache(final boolean startupTime) {
 		boolean success = false;
 		InputStream is = null;
 		ByteArrayInputStream bais = null;
@@ -693,7 +693,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 		return success;
 	}
-	
+
 	private void printAddonStats() {
 		String msg = null;
 		AddOnStabilityLevel currentLevel = AddOnStabilityLevel.fromLevel(prefs.getInt(ADDON_UPGRADE_STABILITY_LEVEL, AddOnStabilityLevel.RELEASE.getLevel()));
@@ -726,7 +726,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return 0;
 	}
 
-	private void logInfo(String label, String content) {
+	private void logInfo(final String label, String content) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(label);
 		for (int i = 0; i < 13 - label.length(); i++) {
@@ -762,8 +762,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			}
 		}
 	}
-	
-	private boolean verifyRepository(String repoUrl) {
+
+	private boolean verifyRepository(final String repoUrl) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		Document doc = null;
 		try {
@@ -777,7 +777,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				try {
 					zip = new ZipInputStream(obrUrl.openStream());
 					zip.getNextEntry();
-					
+
 					baos = new ByteArrayOutputStream();
 					byte[] buffer = new byte[8192];
 					int length = -1;
@@ -810,8 +810,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 		return true;
 	}
-	
-	private Map<String, Bundle> getUpgradableBundles(AddOnStabilityLevel asl) {
+
+	private Map<String, Bundle> getUpgradableBundles(final AddOnStabilityLevel asl) {
 		Map<String, Bundle> bundles = new HashMap<String, Bundle>();
 		if (context == null) {
 			return bundles;
@@ -829,36 +829,36 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				continue;
 			}
 			String exisingBundleVersion = ebv.toString().trim();
-			if (isCompatible(b.getLatestVersion().getRooVersion()) 
-				&& rooBotBundleVersion.compareToIgnoreCase(exisingBundleVersion) > 0 
+			if (isCompatible(b.getLatestVersion().getRooVersion())
+				&& rooBotBundleVersion.compareToIgnoreCase(exisingBundleVersion) > 0
 				&& asl.getLevel() > AddOnStabilityLevel.getAddOnStabilityLevel(exisingBundleVersion)) {
-				
+
 				bundles.put(b.getSymbolicName() + ";" + exisingBundleVersion, b);
 			}
 		}
 		return bundles;
 	}
-	
+
 	private AddOnStabilityLevel checkAddOnStabilityLevel(AddOnStabilityLevel addOnStabilityLevel) {
 		if (addOnStabilityLevel == null) {
 			addOnStabilityLevel = AddOnStabilityLevel.fromLevel(prefs.getInt(ADDON_UPGRADE_STABILITY_LEVEL, /* default */ AddOnStabilityLevel.RELEASE.getLevel()));
 		}
 		return addOnStabilityLevel;
 	}
-	
+
 	private void printSeparator() {
 		LOGGER.warning("--------------------------------------------------------------------------------");
 	}
-	
-	private boolean isCompatible(String version) {
+
+	private boolean isCompatible(final String version) {
 		return version.equals(getVersionForCompatibility());
 	}
-	
+
 	private String getVersionForCompatibility() {
 		return UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMinorVersion();
 	}
-	
-	private boolean isBundleInstalled(Bundle search) {
+
+	private boolean isBundleInstalled(final Bundle search) {
 		BundleContext bundleContext = context.getBundleContext();
 		for (org.osgi.framework.Bundle bundle : bundleContext.getBundles()) {
 			String bsn = (String) bundle.getHeaders().get("Bundle-SymbolicName");

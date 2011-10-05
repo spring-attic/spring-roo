@@ -16,10 +16,10 @@ import org.w3c.dom.NodeList;
 
 /**
  * Simplified immutable representation of a maven build plugin.
- * 
+ *
  * <p>
  * Structured after the model used by Maven.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -32,27 +32,27 @@ public class Plugin implements Comparable<Plugin> {
 
 	/**
 	 * Parses the given plugin XML element for the plugin's Maven artifactId
-	 * 
+	 *
 	 * @param plugin the XML element to parse (required)
 	 * @return a non-blank id
 	 */
 	private static String getArtifactId(final Element plugin) {
 		return plugin.getElementsByTagName("artifactId").item(0).getTextContent();
 	}
-	
+
 	/**
 	 * Parses the configuration of the given plugin (global, not execution-scoped)
-	 * 
+	 *
 	 * @param plugin the XML element to parse (required)
 	 * @return <code>null</code> if there isn't one
 	 */
 	private static Configuration getConfiguration(final Element plugin) {
 		return Configuration.getInstance(XmlUtils.findFirstElement("configuration", plugin));
 	}
-	
+
 	/**
 	 * Parses the given XML plugin element for the plugin's dependencies
-	 * 
+	 *
 	 * @param plugin the XML element to parse (required)
 	 * @return a non-<code>null</code> list
 	 */
@@ -62,7 +62,7 @@ public class Plugin implements Comparable<Plugin> {
 			// groupId
 			final Element groupIdElement = XmlUtils.findFirstElement("groupId", dependencyElement);
 			final String groupId = DomUtils.getTextContent(groupIdElement, "");
-			
+
 			// artifactId
 			final Element artifactIdElement = XmlUtils.findFirstElement("artifactId", dependencyElement);
 			final String artifactId = DomUtils.getTextContent(artifactIdElement, "");
@@ -78,11 +78,11 @@ public class Plugin implements Comparable<Plugin> {
 				// groupId
 				final Element exclusionGroupIdElement = XmlUtils.findFirstElement("groupId", exclusion);
 				final String exclusionGroupId = DomUtils.getTextContent(exclusionGroupIdElement, "");
-				
+
 				// artifactId
 				final Element exclusionArtifactIdElement = XmlUtils.findFirstElement("artifactId", exclusion);
 				final String exclusionArtifactId = DomUtils.getTextContent(exclusionArtifactIdElement , "");
-				
+
 				if (StringUtils.hasText(exclusionGroupId) && StringUtils.hasText(exclusionArtifactId)) {
 					dependency.addExclusion(exclusionGroupId, exclusionArtifactId);
 				}
@@ -94,7 +94,7 @@ public class Plugin implements Comparable<Plugin> {
 
 	/**
 	 * Parses the given XML plugin element for the plugin's executions
-	 * 
+	 *
 	 * @param plugin the XML element to parse (required)
 	 * @return a non-<code>null</code> list
 	 */
@@ -114,11 +114,11 @@ public class Plugin implements Comparable<Plugin> {
 			executions.add(new Execution(id, phase, configuration, goals.toArray(new String[goals.size()])));
 		}
 		return executions;
-	}	
-	
+	}
+
 	/**
 	 * Parses the plugin's Maven groupId from the given element
-	 * 
+	 *
 	 * @param plugin the element to parse (required)
 	 * @return a non-blank groupId
 	 */
@@ -128,10 +128,10 @@ public class Plugin implements Comparable<Plugin> {
 		}
 		return DEFAULT_GROUP_ID;
 	}
-	
+
 	/**
 	 * Parses the plugin's version number from the given XML element
-	 * 
+	 *
 	 * @param plugin the element to parse (required)
 	 * @return a non-<code>null</code> version number (might be empty)
 	 */
@@ -141,8 +141,8 @@ public class Plugin implements Comparable<Plugin> {
 			return versionElements.item(0).getTextContent();
 		}
 		return "";
-	}	
-	
+	}
+
 	// Fields
 	private final String groupId;
 	private final String artifactId;
@@ -153,27 +153,27 @@ public class Plugin implements Comparable<Plugin> {
 
 	/**
 	 * Constructor from a POM-style XML element that defines a Maven <plugin>.
-	 * 
+	 *
 	 * @param plugin the XML element to parse (required)
 	 */
 	public Plugin(final Element plugin) {
 		this(getGroupId(plugin), getArtifactId(plugin),	getVersion(plugin),	getConfiguration(plugin), getDependencies(plugin), getExecutions(plugin));
 	}
-	
+
 	/**
 	 * Constructor that takes the minimal Maven artifact coordinates.
-	 * 
+	 *
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version (required)
 	 */
-	public Plugin(String groupId, String artifactId, String version) {
+	public Plugin(final String groupId, final String artifactId, final String version) {
 		this(groupId, artifactId, version, null, null, null);
 	}
-	
+
 	/**
 	 * Constructor that allows all fields to be set.
-	 * 
+	 *
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version (required)
@@ -181,7 +181,7 @@ public class Plugin implements Comparable<Plugin> {
 	 * @param dependencies the dependencies for this plugin (can be <code>null</code>)
 	 * @param executions the executions for this plugin (can be <code>null</code>)
 	 */
-	public Plugin(String groupId, String artifactId, String version, Configuration configuration, Collection<? extends Dependency> dependencies, Collection<? extends Execution> executions) {
+	public Plugin(final String groupId, final String artifactId, final String version, final Configuration configuration, final Collection<? extends Dependency> dependencies, final Collection<? extends Execution> executions) {
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.notNull(version, "Version required");
@@ -202,7 +202,7 @@ public class Plugin implements Comparable<Plugin> {
 
 	/**
 	 * Returns this plugin's groupId.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getGroupId() {
@@ -221,7 +221,7 @@ public class Plugin implements Comparable<Plugin> {
 	 * Returns the top-level configuration of this plugin, if any. Note that
 	 * individual {@link Execution}s may have their own {@link Configuration}s
 	 * instead of or in addition to this configuration.
-	 * 
+	 *
 	 * @return <code>null</code> if none exists
 	 */
 	public Configuration getConfiguration() {
@@ -236,6 +236,7 @@ public class Plugin implements Comparable<Plugin> {
 		return executions;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -246,11 +247,12 @@ public class Plugin implements Comparable<Plugin> {
 		return result;
 	}
 
+	@Override
 	public boolean equals(final Object obj) {
 		return obj instanceof Plugin && this.compareTo((Plugin) obj) == 0;
 	}
 
- 	public int compareTo(Plugin o) {
+ 	public int compareTo(final Plugin o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}
@@ -274,6 +276,7 @@ public class Plugin implements Comparable<Plugin> {
 		return groupId + ":" + artifactId + ":" + version;
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("groupId", groupId);
@@ -284,11 +287,11 @@ public class Plugin implements Comparable<Plugin> {
 		}
 		return tsc.toString();
 	}
-	
+
 	/**
 	 * Returns the {@link Element} to add to the given POM {@link Document} for
 	 * this plugin
-	 * 
+	 *
 	 * @param plugin the plugin for which to create an XML Element (required)
 	 * @param document the document to which the element will belong (required)
 	 * @return a non-<code>null</code> element
@@ -296,18 +299,18 @@ public class Plugin implements Comparable<Plugin> {
 	 */
 	public Element getElement(final Document document) {
 		final Element pluginElement = document.createElement("plugin");
-		
+
 		// Basic coordinates
 		pluginElement.appendChild(XmlUtils.createTextElement(document, "groupId", this.groupId));
 		pluginElement.appendChild(XmlUtils.createTextElement(document, "artifactId", this.artifactId));
 		pluginElement.appendChild(XmlUtils.createTextElement(document, "version", this.version));
-		
+
 		// Configuration
 		if (this.configuration != null) {
 			final Node configuration = document.importNode(this.configuration.getConfiguration(), true);
 			pluginElement.appendChild(configuration);
 		}
-		
+
 		// Executions
 		if (!this.executions.isEmpty()) {
 			final Element executionsElement = DomUtils.createChildElement("executions", pluginElement, document);
@@ -315,7 +318,7 @@ public class Plugin implements Comparable<Plugin> {
 				executionsElement.appendChild(execution.getElement(document));
 			}
 		}
-		
+
 		// Dependencies
 		if (!this.dependencies.isEmpty()) {
 			final Element dependenciesElement = DomUtils.createChildElement("dependencies", pluginElement, document);
@@ -323,7 +326,7 @@ public class Plugin implements Comparable<Plugin> {
 				dependenciesElement.appendChild(dependency.getElement(document));
 			}
 		}
-		
+
 		return pluginElement;
 	}
 }

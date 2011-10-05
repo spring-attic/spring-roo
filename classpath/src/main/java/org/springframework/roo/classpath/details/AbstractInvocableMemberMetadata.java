@@ -13,7 +13,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Abstract implementation of {@link InvocableMemberMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -24,7 +24,7 @@ public abstract class AbstractInvocableMemberMetadata extends AbstractIdentifiab
 	private final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private final List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	private final String body;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -37,14 +37,14 @@ public abstract class AbstractInvocableMemberMetadata extends AbstractIdentifiab
 	 * @param throwsTypes
 	 * @param body
 	 */
-	protected AbstractInvocableMemberMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, String body) {
+	protected AbstractInvocableMemberMetadata(final CustomData customData, final String declaredByMetadataId, final int modifier, final List<AnnotationMetadata> annotations, final List<AnnotatedJavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final List<JavaType> throwsTypes, final String body) {
 		super(customData, declaredByMetadataId, modifier, annotations);
 		this.body = body;
 		CollectionUtils.populate(this.parameterNames, parameterNames);
 		CollectionUtils.populate(this.parameterTypes, parameterTypes);
 		CollectionUtils.populate(this.throwsTypes, throwsTypes);
 	}
-	
+
 	public final List<JavaSymbolName> getParameterNames() {
 		return Collections.unmodifiableList(parameterNames);
 	}
@@ -52,7 +52,7 @@ public abstract class AbstractInvocableMemberMetadata extends AbstractIdentifiab
 	public final List<AnnotatedJavaType> getParameterTypes() {
 		return Collections.unmodifiableList(parameterTypes);
 	}
-	
+
 	public final List<JavaType> getThrowsTypes() {
 		return Collections.unmodifiableList(throwsTypes);
 	}

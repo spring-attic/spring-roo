@@ -8,7 +8,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Builder for {@link FieldMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -18,16 +18,16 @@ public class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJavaStruc
 	private JavaSymbolName fieldName;
 	private JavaType fieldType;
 	private String fieldInitializer;
-	
+
 	public FieldMetadataBuilder(final String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
-	
+
 	public FieldMetadataBuilder(final FieldMetadata existing) {
 		super(existing);
 		init(existing.getFieldName(), existing.getFieldType(), existing.getFieldInitializer());
 	}
-	
+
 	public FieldMetadataBuilder(final String declaredbyMetadataId, final FieldMetadata existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing.getFieldName(), existing.getFieldType(), existing.getFieldInitializer());
@@ -65,7 +65,7 @@ public class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJavaStruc
 		this.fieldName = fieldName;
 		this.fieldType = fieldType;
 	}
-	
+
 	public FieldMetadata build() {
 		return new DefaultFieldMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getFieldName(), getFieldType(), getFieldInitializer());
 	}

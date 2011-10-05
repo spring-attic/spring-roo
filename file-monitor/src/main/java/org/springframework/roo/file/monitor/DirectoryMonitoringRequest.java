@@ -9,15 +9,15 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * A request to monitor a particular directory.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  *
  */
 public class DirectoryMonitoringRequest extends MonitoringRequest {
-	private boolean watchSubtree;
-	
-	public DirectoryMonitoringRequest(File file, boolean watchSubtree, Set<FileOperation> notifyOn) {
+	private final boolean watchSubtree;
+
+	public DirectoryMonitoringRequest(final File file, final boolean watchSubtree, final Set<FileOperation> notifyOn) {
 		super(file, notifyOn);
 		Assert.isTrue(file.isDirectory(), "File '" + file + "' must be a directory");
 		this.watchSubtree = watchSubtree;

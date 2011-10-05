@@ -50,15 +50,15 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 	@Reference protected TypeLocationService typeLocationService;
 	@Reference protected GwtFileManager gwtFileManager;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	public MetadataItem get(String metadataIdentificationString) {
+	public MetadataItem get(final String metadataIdentificationString) {
 		// Abort early if we can't continue
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
@@ -128,7 +128,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		return metadata;
 	}
 
-	private ClassOrInterfaceTypeDetails getGovernor(String metadataIdentificationString) {
+	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtProxyMetadata.getJavaType(metadataIdentificationString);
 		Path governorTypePath = GwtProxyMetadata.getPath(metadataIdentificationString);
 
@@ -136,7 +136,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		return typeLocationService.getTypeForIdentifier(physicalTypeId);
 	}
 
-	private String updateProxy(ClassOrInterfaceTypeDetails proxy, List<MethodMetadata> proxyMethods, List<String> exclusionList, List<String> readOnlyList) {
+	private String updateProxy(final ClassOrInterfaceTypeDetails proxy, final List<MethodMetadata> proxyMethods, final List<String> exclusionList, final List<String> readOnlyList) {
 		// Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will be overridden if the Proxy has already been created
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(proxy);
 
@@ -182,7 +182,7 @@ public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetada
 		return gwtFileManager.write(typeDetailsBuilder.build(), GwtUtils.PROXY_REQUEST_WARNING);
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
+	public void notify(final String upstreamDependency, String downstreamDependency) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return;

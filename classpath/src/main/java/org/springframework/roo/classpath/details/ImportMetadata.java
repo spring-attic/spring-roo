@@ -5,10 +5,10 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Metadata concerning a particular import.
- * 
+ *
  * <p>
  * As always with metadata types, instances of this class are immutable once constructed.
- * 
+ *
  * @author James Tyrrell
  * @since 1.1.1
  */

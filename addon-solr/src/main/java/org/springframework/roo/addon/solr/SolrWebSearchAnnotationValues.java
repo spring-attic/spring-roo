@@ -8,26 +8,26 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooSolrWebSearchable} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 public class SolrWebSearchAnnotationValues extends AbstractAnnotationValues {
 
 	// Fields
-	@AutoPopulate String autoCompleteMethod = "autoComplete";
-	@AutoPopulate String searchMethod = "search";
-	
+	@AutoPopulate private String autoCompleteMethod = "autoComplete";
+	@AutoPopulate private String searchMethod = "search";
+
 	/**
 	 * Constructor
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public SolrWebSearchAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public SolrWebSearchAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_SOLR_WEB_SEARCHABLE);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
-	
+
 	public String getAutoCompleteMethod() {
 		return autoCompleteMethod;
 	}

@@ -25,19 +25,19 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class MetadataCommands implements CommandMarker {
-	
+
 	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private MetadataLogger metadataLogger;
 	@Reference private TypeLocationService typeLocationService;
-	
+
 	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications")
-	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true, help="The verbosity of notifications (0=none, 1=some, 2=all)") int level) {
+	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true, help="The verbosity of notifications (0=none, 1=some, 2=all)") final int level) {
 		metadataLogger.setTraceLevel(level);
 	}
-	
+
 	@CliCommand(value="metadata status", help="Shows metadata statistics")
 	public String metadataTimings() {
 		StringBuilder sb = new StringBuilder();
@@ -47,12 +47,12 @@ public class MetadataCommands implements CommandMarker {
 		sb.append(metadataService.toString());
 		return sb.toString();
 	}
-	
+
 	@CliCommand(value = "metadata for id", help = "Shows detailed information about the metadata item")
-	public String metadataForId(@CliOption(key = { "", "metadataId" }, mandatory = true, help = "The metadata ID (should start with MID:)") String metadataId) {
+	public String metadataForId(@CliOption(key = { "", "metadataId" }, mandatory = true, help = "The metadata ID (should start with MID:)") final String metadataId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Identifier : ").append(metadataId).append(LINE_SEPARATOR);
-		
+
 		Set<String> upstream = metadataDependencyRegistry.getUpstream(metadataId);
 		if (upstream.isEmpty()) {
 			sb.append("Upstream   : ").append(LINE_SEPARATOR);
@@ -61,7 +61,7 @@ public class MetadataCommands implements CommandMarker {
 		for (String s : upstream) {
 			sb.append("Upstream   : ").append(s).append(LINE_SEPARATOR);
 		}
-		
+
 		// Include any "class level" notifications that this instance would receive (useful for debugging)
 		// Only necessary if the ID doesn't already represent a class (as such dependencies would have been listed earlier)
 		if (!MetadataIdentificationUtils.isIdentifyingClass(metadataId)) {
@@ -78,7 +78,7 @@ public class MetadataCommands implements CommandMarker {
 		for (String s : downstream) {
 			sb.append("Downstream : ").append(s).append(LINE_SEPARATOR);
 		}
-		
+
 		// Include any "class level" notifications that this instance would receive (useful for debugging)
 		// Only necessary if the ID doesn't already represent a class (as such dependencies would have been listed earlier)
 		if (!MetadataIdentificationUtils.isIdentifyingClass(metadataId)) {
@@ -93,9 +93,9 @@ public class MetadataCommands implements CommandMarker {
 		}
 		return sb.toString();
 	}
-	
+
 	@CliCommand(value="metadata for type", help="Shows detailed metadata for the indicated type")
-	public String metadataForType(@CliOption(key={"", "type"}, mandatory=true, help="The Java type name to display metadata for") JavaType javaType) {
+	public String metadataForType(@CliOption(key={"", "type"}, mandatory=true, help="The Java type name to display metadata for") final JavaType javaType) {
 		String id = typeLocationService.findIdentifier(javaType);
 		if (id == null) {
 			return "Cannot locate source for " + javaType.getFullyQualifiedTypeName();
@@ -116,7 +116,7 @@ public class MetadataCommands implements CommandMarker {
 	}
 
 	@CliCommand(value="metadata cache", help="Shows detailed metadata for the indicated type")
-	public String metadataCacheMaximum(@CliOption(key={"maximumCapacity"}, mandatory=true, help="The maximum number of metadata items to cache") int maxCapacity) {
+	public String metadataCacheMaximum(@CliOption(key={"maximumCapacity"}, mandatory=true, help="The maximum number of metadata items to cache") final int maxCapacity) {
 		Assert.isTrue(maxCapacity >= 100, "Maximum capacity must be 100 or greater");
 		metadataService.setMaxCapacity(maxCapacity);
 		// Show them that the change has taken place

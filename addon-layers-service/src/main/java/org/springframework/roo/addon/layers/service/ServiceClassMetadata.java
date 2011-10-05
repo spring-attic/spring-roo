@@ -26,16 +26,16 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
 /**
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = ServiceClassMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
+
 	/**
 	 * Constructor
 	 *
@@ -49,13 +49,13 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * order to invoke lower-layer methods (required)
 	 * @param domainTypePlurals the plurals of each domain type managed by the service
 	 */
-	public ServiceClassMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, ServiceAnnotationValues annotationValues, Map<JavaType, JavaType> domainTypeToIdTypeMap, Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions, Map<JavaType, String> domainTypePlurals) {
+	public ServiceClassMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MemberDetails governorDetails, final ServiceAnnotationValues annotationValues, final Map<JavaType, JavaType> domainTypeToIdTypeMap, final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions, final Map<JavaType, String> domainTypePlurals) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(allCrudAdditions, "CRUD additions required");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor details required");
 		Assert.notNull(domainTypePlurals, "Domain type plurals required");
-		
+
 		for (final Entry<JavaType, JavaType> entry : domainTypeToIdTypeMap.entrySet()) {
 			final JavaType domainType = entry.getKey();
 			final JavaType idType = entry.getValue();
@@ -86,13 +86,13 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				}
 			}
 		}
-		
+
 		// Introduce the @Service annotation via the ITD if it's not already on the service's Java class
 		final AnnotationMetadata serviceAnnotation = new AnnotationMetadataBuilder(SERVICE).build();
 		if (!governorDetails.isRequestingAnnotatedWith(serviceAnnotation, getId())) {
 			builder.addAnnotation(serviceAnnotation);
 		}
-		
+
 		// Introduce the @Transactional annotation via the ITD if it's not already on the service's Java class
 		if (annotationValues.isTransactional()) {
 			final AnnotationMetadata transactionalAnnotation = new AnnotationMetadataBuilder(TRANSACTIONAL).build();
@@ -100,7 +100,7 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				builder.addAnnotation(transactionalAnnotation);
 			}
 		}
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
@@ -109,22 +109,23 @@ public class ServiceClassMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-	
+
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

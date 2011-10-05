@@ -12,11 +12,11 @@ import java.util.zip.ZipFile;
  * @since 1.2.0
  */
 public final class IOUtils {
-	
+
 	/**
 	 * Quietly closes each of the given {@link Closeable}s, i.e. eats any
 	 * {@link IOException}s arising.
-	 * 
+	 *
 	 * @param closeables the closeables to close (any of which can be
 	 * <code>null</code> or already closed)
 	 */
@@ -35,7 +35,7 @@ public final class IOUtils {
 	/**
 	 * Quietly closes each of the given {@link ZipFile}s, i.e. eats any
 	 * {@link IOException}s arising.
-	 * 
+	 *
 	 * @param zipFiles the zipFiles to close (any of which can be
 	 * <code>null</code> or already closed)
 	 */
@@ -50,7 +50,7 @@ public final class IOUtils {
 			}
 		}
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

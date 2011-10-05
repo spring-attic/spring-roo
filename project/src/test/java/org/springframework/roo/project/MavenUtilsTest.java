@@ -27,7 +27,7 @@ public class MavenUtilsTest {
 	public void testValidGroupIdIsAValidId() {
 		assertTrue(MavenUtils.isValidMavenId("org.springframework"));
 	}
-	
+
 	@Test
 	public void testValidArtifactIdIsAValidId() {
 		assertTrue(MavenUtils.isValidMavenId("spring-core"));

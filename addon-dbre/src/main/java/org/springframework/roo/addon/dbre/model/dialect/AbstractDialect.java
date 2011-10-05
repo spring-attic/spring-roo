@@ -2,7 +2,7 @@ package org.springframework.roo.addon.dbre.model.dialect;
 
 /**
  * Abstract base class for database {@link Dialect}s.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */

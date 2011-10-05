@@ -5,15 +5,15 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * A simple way of producing method bodies for {@link InvocableMemberMetadata#getBody()}.
- * 
+ *
  * <p>
  * Method bodies immediately assume they are indented two levels.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class InvocableMemberBodyBuilder {
-	
+
 	// Fields
 	private boolean reset;
 	private int indentLevel;
@@ -38,7 +38,7 @@ public class InvocableMemberBodyBuilder {
 		indentLevel++;
 		return this;
 	}
-	
+
 	/**
 	 * Resets the indent to zero.
 	 */
@@ -59,7 +59,7 @@ public class InvocableMemberBodyBuilder {
 	/**
 	 * Prints a blank line, ensuring any indent is included before doing so.
 	 */
-	public InvocableMemberBodyBuilder newLine(boolean indentBefore) {
+	public InvocableMemberBodyBuilder newLine(final boolean indentBefore) {
 		if (indentBefore) {
 			appendIndent();
 		}
@@ -68,16 +68,16 @@ public class InvocableMemberBodyBuilder {
 		// stringBuilder.append(StringUtils.LINE_SEPARATOR);
 		return this;
 	}
-	
+
 	public InvocableMemberBodyBuilder newLine() {
 		newLine(true);
 		return this;
 	}
-	
+
 	/**
 	 * Prints the message, WITHOUT ANY INDENTATION.
 	 */
-	public InvocableMemberBodyBuilder append(String message) {
+	public InvocableMemberBodyBuilder append(final String message) {
 		if (message != null && !"".equals(message)) {
 			stringBuilder.append(message);
 		}
@@ -87,7 +87,7 @@ public class InvocableMemberBodyBuilder {
 	/**
 	 * Prints the message, after adding indents and returns to a new line. This is the most commonly used method.
 	 */
-	public InvocableMemberBodyBuilder appendFormalLine(String message) {
+	public InvocableMemberBodyBuilder appendFormalLine(final String message) {
 		appendIndent();
 		if (message != null && !"".equals(message)) {
 			stringBuilder.append(message);
@@ -104,7 +104,7 @@ public class InvocableMemberBodyBuilder {
 		}
 		return this;
 	}
-	
+
 	public String getOutput() {
 		if (reset) {
 			Assert.isTrue(this.indentLevel == 0, "Indent level must be 0 (not " + indentLevel + ") to terminate following a reset!");

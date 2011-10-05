@@ -2,7 +2,7 @@ package org.springframework.roo.addon.dbre.model;
 
 /**
  * Represents a column of an index in the database model.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -10,7 +10,7 @@ public class IndexColumn {
 	private String name;
 	private int size;
 
-	IndexColumn(String name) {
+	IndexColumn(final String name) {
 		this.name = name;
 	}
 
@@ -18,7 +18,7 @@ public class IndexColumn {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -26,10 +26,11 @@ public class IndexColumn {
 		return size;
 	}
 
-	public void setSize(int size) {
+	public void setSize(final int size) {
 		this.size = size;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -37,7 +38,8 @@ public class IndexColumn {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -58,6 +60,7 @@ public class IndexColumn {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return String.format("IndexColumn [name=%s, size=%s]", name, size);
 	}

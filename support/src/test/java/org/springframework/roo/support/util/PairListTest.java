@@ -27,7 +27,7 @@ public class PairListTest {
 	public void testConstructFromVarargArrayOfPairs() {
 		// Invoke
 		final PairList<Integer, String> pairs = new PairList<Integer, String>(PAIR_1, PAIR_2);
-		
+
 		// Check
 		assertEquals(2, pairs.size());
 		assertEquals(Arrays.asList(KEY_1, KEY_2), pairs.getKeys());
@@ -36,23 +36,23 @@ public class PairListTest {
 		assertEquals(pairs.size(), array.length);
 		assertEquals(pairs, Arrays.asList(array));
 	}
-	
+
 	@Test
 	public void testConstructFromListsOfKeysAndValues() {
 		// Invoke
 		final PairList<Integer, String> pairs = new PairList<Integer, String>(Arrays.asList(KEY_1, KEY_2), Arrays.asList(VALUE_1, VALUE_2));
-		
+
 		// Check
 		assertEquals(2, pairs.size());
 		assertEquals(PAIR_1, pairs.get(0));
 		assertEquals(PAIR_2, pairs.get(1));
 	}
-	
+
 	@Test
 	public void testConstructFromNulListsOfKeysAndValues() {
 		// Invoke
 		final PairList<Integer, String> pairs = new PairList<Integer, String>(null, null);
-		
+
 		// Check
 		assertEquals(0, pairs.size());
 	}

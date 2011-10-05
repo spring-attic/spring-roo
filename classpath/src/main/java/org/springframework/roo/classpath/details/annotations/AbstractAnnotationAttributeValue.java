@@ -5,12 +5,12 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract base class for annotation attribute values.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public abstract class AbstractAnnotationAttributeValue<T extends Object> implements AnnotationAttributeValue<T> {
-	
+
 	// Fields
 	private final JavaSymbolName name;
 
@@ -19,7 +19,7 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object> impleme
 	 *
 	 * @param name the attribute name (required)
 	 */
-	protected AbstractAnnotationAttributeValue(JavaSymbolName name) {
+	protected AbstractAnnotationAttributeValue(final JavaSymbolName name) {
 		Assert.notNull(name, "Annotation attribute name required");
 		this.name = name;
 	}
@@ -28,7 +28,7 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object> impleme
 		return name;
 	}
 
-	@Override 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -37,8 +37,8 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object> impleme
 		return result;
 	}
 
-	@Override 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}

@@ -14,7 +14,7 @@ import org.w3c.dom.Element;
 
 /**
  * Provides Spring application context-related operations.
- *  
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
@@ -22,12 +22,12 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class ApplicationContextOperationsImpl implements ApplicationContextOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
-	
+
 	public void createMiddleTierApplicationContext() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");

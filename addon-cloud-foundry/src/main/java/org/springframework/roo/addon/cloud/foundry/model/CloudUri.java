@@ -1,9 +1,9 @@
 package org.springframework.roo.addon.cloud.foundry.model;
 
 public class CloudUri {
-	private String uri;
+	private final String uri;
 
-	public CloudUri(String uri) {
+	public CloudUri(final String uri) {
 		this.uri = uri;
 	}
 

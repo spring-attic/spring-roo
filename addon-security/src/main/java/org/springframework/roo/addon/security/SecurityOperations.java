@@ -2,7 +2,7 @@ package org.springframework.roo.addon.security;
 
 /**
  * Interface for {@link SecurityOperationsImpl}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */

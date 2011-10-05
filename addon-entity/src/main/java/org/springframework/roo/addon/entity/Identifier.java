@@ -6,12 +6,12 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents an entity identifier. Instances are immutable.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class Identifier {
-	
+
 	// Fields
 	private final int columnSize;
 	private final int scale;
@@ -30,7 +30,7 @@ public class Identifier {
 	 * @param scale
 	 * @param columnDefinition
 	 */
-	public Identifier(JavaSymbolName fieldName, JavaType fieldType, String columnName, int columnSize, int scale, String columnDefinition) {
+	public Identifier(final JavaSymbolName fieldName, final JavaType fieldType, final String columnName, final int columnSize, final int scale, final String columnDefinition) {
 		Assert.notNull(fieldName, "Field name required");
 		Assert.notNull(fieldType, "Field type required");
 		Assert.hasText(columnName, "Column name required");
@@ -66,7 +66,7 @@ public class Identifier {
 		return columnDefinition;
 	}
 
-	@Override 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -79,8 +79,8 @@ public class Identifier {
 		return result;
 	}
 
-	@Override 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -128,7 +128,7 @@ public class Identifier {
 		return true;
 	}
 
-	@Override 
+	@Override
 	public String toString() {
 		return String.format("Identifier [fieldName=%s, fieldType=%s, columnName=%s, columnSize=%s, scale=%s, columnDefinition=%s]", fieldName, fieldType, columnName, columnSize, scale, columnDefinition);
 	}

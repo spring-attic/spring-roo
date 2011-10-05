@@ -11,14 +11,14 @@ import org.springframework.roo.model.JavaType;
 /**
  * The purely JPA-related values of a single {@link RooJpaEntity} or
  * {@link RooEntity} annotation.
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// Fields (one for each attribute of the RooJpaEntity annotation)
-	@AutoPopulate private boolean mappedSuperclass = false;
+	@AutoPopulate private boolean mappedSuperclass;
 	
 	@AutoPopulate private JavaType identifierType;
 	@AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
@@ -49,43 +49,43 @@ public class JpaEntityAnnotationValues extends AbstractAnnotationValues {
 	public String getCatalog() {
 		return catalog;
 	}
-	
+
 	public String getEntityName() {
 		return entityName;
 	}
-	
+
 	public String getIdentifierColumn() {
 		return identifierColumn;
 	}
-	
+
 	public String getIdentifierField() {
 		return identifierField;
 	}
-	
+
 	public JavaType getIdentifierType() {
 		return identifierType;
 	}
-	
+
 	public String getInheritanceType() {
 		return inheritanceType;
 	}
-	
+
 	public String getSchema() {
 		return schema;
 	}
-	
+
 	public String getTable() {
 		return table;
 	}
-	
+
 	public String getVersionColumn() {
 		return versionColumn;
 	}
-	
+
 	public String getVersionField() {
 		return versionField;
 	}
-	
+
 	public JavaType getVersionType() {
 		return versionType;
 	}

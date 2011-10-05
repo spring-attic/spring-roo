@@ -26,23 +26,23 @@ import org.springframework.uaa.client.util.Assert;
 
 /**
  * A provider of the {@link LayerType#REPOSITORY} layer.
- *  
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component
 @Service
 public class RepositoryMongoLayerProvider extends CoreLayerProvider {
-	
+
 	// Fields
 	@Reference private RepositoryMongoLocator repositoryLocator;
-	
+
 	public MemberTypeAdditions getMemberTypeAdditions(final String callerMID, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final MethodParameter... callerParameters) {
 		Assert.isTrue(StringUtils.hasText(callerMID), "Caller's metadata ID required");
 		Assert.isTrue(StringUtils.hasText(methodIdentifier), "Method identifier required");
 		Assert.notNull(targetEntity, "Target enitity type required");
 		Assert.notNull(idType, "Enitity Id type required");
-		
+
 		// Look for a repository layer method with this ID and parameter types
 		final PairList<JavaType, JavaSymbolName> parameterList = new PairList<JavaType, JavaSymbolName>(callerParameters);
 		final List<JavaType> parameterTypes = parameterList.getKeys();
@@ -50,24 +50,24 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
 		if (method == null) {
 			return null;
 		}
-		
+
 		// Look for repositories that support this domain type
 		final Collection<ClassOrInterfaceTypeDetails> repositories = repositoryLocator.getRepositories(targetEntity);
 		if (CollectionUtils.isEmpty(repositories)) {
 			return null;
 		}
-		
+
 		// Use the first such repository (could refine this later)
 		final ClassOrInterfaceTypeDetails repository = repositories.iterator().next();
-		
+
 		// Return the additions the caller needs to make
 		return getMethodAdditions(callerMID, method, repository.getName(), parameterList.getValues());
 	}
-	
+
 	/**
 	 * Returns the additions that the caller needs to make in order to invoke
 	 * the given method
-	 * 
+	 *
 	 * @param callerMID the caller's metadata ID (required)
 	 * @param method the method being called (required)
 	 * @param repositoryType the type of repository being called
@@ -80,18 +80,18 @@ public class RepositoryMongoLayerProvider extends CoreLayerProvider {
 		final AnnotationMetadataBuilder autowiredAnnotation = new AnnotationMetadataBuilder(AUTOWIRED);
 		final String repositoryFieldName = StringUtils.uncapitalize(repositoryType.getSimpleTypeName());
 		classBuilder.addField(new FieldMetadataBuilder(callerMID, 0, Arrays.asList(autowiredAnnotation), new JavaSymbolName(repositoryFieldName), repositoryType).build());
-		
+
 		// Create the additions to invoke the given method on this field
 		final String methodCall = repositoryFieldName + "." + method.getCall(parameterNames);
-		return new MemberTypeAdditions(classBuilder, method.getName(), methodCall);		
+		return new MemberTypeAdditions(classBuilder, method.getName(), methodCall);
 	}
 
 	public int getLayerPosition() {
 		return LayerType.REPOSITORY.getPosition() - 1;
 	}
-	
+
 	// -------------------- Setters for use by unit tests ----------------------
-	
+
 	void setRepositoryLocator(final RepositoryMongoLocator repositoryLocator) {
 		this.repositoryLocator = repositoryLocator;
 	}

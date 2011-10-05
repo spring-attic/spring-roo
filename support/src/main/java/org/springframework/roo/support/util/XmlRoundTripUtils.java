@@ -15,13 +15,13 @@ import org.w3c.dom.NodeList;
 
 /**
  * Utilities related to round tripping XML documents
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 public abstract class XmlRoundTripUtils {
 	private static MessageDigest digest;
-	
+
 	static {
 		try {
 			digest = MessageDigest.getInstance("sha-1");
@@ -29,17 +29,17 @@ public abstract class XmlRoundTripUtils {
 			throw new IllegalStateException("Could not create hash key for identifier");
 		}
 	}
-	
+
 	/**
-	 * Create a base 64 encoded SHA1 hash key for a given XML element. The key is based on the 
-	 * element name, the attribute names and their values. Child elements are ignored. 
+	 * Create a base 64 encoded SHA1 hash key for a given XML element. The key is based on the
+	 * element name, the attribute names and their values. Child elements are ignored.
 	 * Attributes named 'z' are not concluded since they contain the hash key itself.
-	 * 
+	 *
 	 * @param element The element to create the base 64 encoded hash key for
 	 * @return the unique key
 	 */
-	public static String calculateUniqueKeyFor(Element element) {
-		StringBuilder sb = new StringBuilder(); 
+	public static String calculateUniqueKeyFor(final Element element) {
+		StringBuilder sb = new StringBuilder();
 		sb.append(element.getTagName());
 		NamedNodeMap attributes = element.getAttributes();
 		SortedMap<String, String> attrKVStore = Collections.synchronizedSortedMap(new TreeMap<String, String>());
@@ -54,34 +54,34 @@ public abstract class XmlRoundTripUtils {
 		}
 		return base64(sha1(sb.toString().getBytes()));
 	}
-	
+
 	/**
-	 * This method will compare the original document with the proposed document and return 
-	 * true if adjustments to the original document were necessary. Adjustments are only made if new elements or 
-	 * attributes are proposed. Changes to the order of attributes or elements in the 
+	 * This method will compare the original document with the proposed document and return
+	 * true if adjustments to the original document were necessary. Adjustments are only made if new elements or
+	 * attributes are proposed. Changes to the order of attributes or elements in the
 	 * original document will not result in an adjustment.
-	 * 
+	 *
 	 * @param original document as read from the file system
 	 * @param proposed document as determined by the JspViewManager
 	 * @return true if the document was adjusted, otherwise false
 	 */
-	public static boolean compareDocuments(Document original, Document proposed) {
+	public static boolean compareDocuments(final Document original, final Document proposed) {
 		boolean originalDocumentAdjusted = checkNamespaces(original, proposed);
 		originalDocumentAdjusted |= addOrUpdateElements(original.getDocumentElement(), proposed.getDocumentElement(), originalDocumentAdjusted);
 		originalDocumentAdjusted |= removeElements(original.getDocumentElement(), proposed.getDocumentElement(), originalDocumentAdjusted);
 		return originalDocumentAdjusted;
 	}
-	
+
 	/**
-	 * Compare necessary namespace declarations between original and proposed document, if 
-	 * namespaces in the original are missing compared to the proposed, we add them to the 
+	 * Compare necessary namespace declarations between original and proposed document, if
+	 * namespaces in the original are missing compared to the proposed, we add them to the
 	 * original.
-	 * 
+	 *
 	 * @param original document as read from the file system
 	 * @param proposed document as determined by the JspViewManager
 	 * @return true if the document was adjusted, otherwise false
 	 */
-	private static boolean checkNamespaces(Document original, Document proposed) {
+	private static boolean checkNamespaces(final Document original, final Document proposed) {
 		boolean originalDocumentChanged = false;
 		NamedNodeMap nsNodes = proposed.getDocumentElement().getAttributes();
 		for (int i = 0; i < nsNodes.getLength(); i++) {
@@ -92,8 +92,8 @@ public abstract class XmlRoundTripUtils {
 		}
 		return originalDocumentChanged;
 	}
-	
-	private static boolean addOrUpdateElements(Element original, Element proposed, boolean originalDocumentChanged) {
+
+	private static boolean addOrUpdateElements(final Element original, final Element proposed, boolean originalDocumentChanged) {
 		NodeList proposedChildren = proposed.getChildNodes();
 		for (int i = 0, n = proposedChildren.getLength(); i < n; i++) { // Check proposed elements and compare to originals to find out if we need to add or replace elements
 			Node node = proposedChildren.item(i);
@@ -107,7 +107,7 @@ public abstract class XmlRoundTripUtils {
 						if (placeHolder != null) { // Insert right before place holder if we can find it
 							placeHolder.getParentNode().insertBefore(original.getOwnerDocument().importNode(proposedElement, false), placeHolder);
 						} else { // Find the best place to insert the element
-							if (proposed.getAttribute("id").length() != 0) { // Try to find the id of the proposed element's parent id in the original document 
+							if (proposed.getAttribute("id").length() != 0) { // Try to find the id of the proposed element's parent id in the original document
 								Element originalParent = XmlUtils.findFirstElement("//*[@id='" + proposed.getAttribute("id") + "']", original);
 								if (originalParent != null) { // Found parent with the same id, so we can just add it as new child
 									originalParent.appendChild(original.getOwnerDocument().importNode(proposedElement, false));
@@ -119,7 +119,7 @@ public abstract class XmlRoundTripUtils {
 							}
 						}
 						originalDocumentChanged = true;
-					} else { // We found an element in the original document with a matching id	
+					} else { // We found an element in the original document with a matching id
 						String originalElementHashCode = originalElement.getAttribute("z");
 						if (originalElementHashCode.length() > 0) { // Only act if a hash code exists
 							if ("?".equals(originalElementHashCode) || originalElementHashCode.equals(calculateUniqueKeyFor(originalElement))) { // Only act if hash codes match (no user changes in the element) or the user requests for the hash code to be regenerated
@@ -130,13 +130,13 @@ public abstract class XmlRoundTripUtils {
 								if ("?".equals(originalElementHashCode)) { // Replace z if the user sets its value to '?' as an indication that roo should take over the management of this element again
 									originalElement.setAttribute("z", calculateUniqueKeyFor(proposedElement));
 									originalDocumentChanged = true;
-								} 
+								}
 							} else { // If hash codes don't match we will mark the element as z="user-managed"
 								if (!originalElementHashCode.equals("user-managed")) {
 									originalElement.setAttribute("z", "user-managed"); // Mark the element as 'user-managed' if the hash codes don't match any more
 									originalDocumentChanged = true;
 								}
-							}	
+							}
 						}
 					}
 				}
@@ -145,8 +145,8 @@ public abstract class XmlRoundTripUtils {
 		}
 		return originalDocumentChanged;
 	}
-	
-	private static boolean removeElements(Element original, Element proposed, boolean originalDocumentChanged) {
+
+	private static boolean removeElements(final Element original, final Element proposed, boolean originalDocumentChanged) {
 		NodeList originalChildren = original.getChildNodes();
 		for (int i = 0, n = originalChildren.getLength(); i < n; i++) { // Check original elements and compare to proposed to find out if we need to remove elements
 			Node node = originalChildren.item(i);
@@ -165,9 +165,9 @@ public abstract class XmlRoundTripUtils {
 		}
 		return originalDocumentChanged;
 	}
-	
-	private static boolean equalElements(Element a, Element b) {
-		if (!a.getTagName().equals(b.getTagName())) { 
+
+	private static boolean equalElements(final Element a, final Element b) {
+		if (!a.getTagName().equals(b.getTagName())) {
 			return false;
 		}
 		NamedNodeMap attributes = a.getAttributes();
@@ -187,19 +187,19 @@ public abstract class XmlRoundTripUtils {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Creates a sha-1 hash value for the given data byte array.
-	 * 
+	 *
 	 * @param data to hash
 	 * @return byte[] hash of the input data
 	 */
-	private static byte[] sha1(byte[] data) {
+	private static byte[] sha1(final byte[] data) {
 		Assert.notNull(digest, "Could not create hash key for identifier");
 		return digest.digest(data);
 	}
-	
-	private static String base64(byte[] data) {
+
+	private static String base64(final byte[] data) {
 		return Base64.encodeBytes(data);
 	}
 }

@@ -23,18 +23,18 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 public class ServiceConfigurationConverter implements Converter<ServiceConfiguration> {
 	@Reference private CloudFoundrySession session;
 
-	public ServiceConfiguration convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public ServiceConfiguration convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
 		return session.getService(value);
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return ServiceConfiguration.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		completions.addAll(session.getServiceTypes());
 		return false;
 	}

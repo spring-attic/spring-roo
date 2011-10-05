@@ -36,7 +36,7 @@ public class Jar extends AbstractPackagingType {
 	@Override
 	protected void createPom(final JavaPackage topLevelPackage, final String nullableProjectName, final String javaVersion, final GAV parentPom) {
 		super.createPom(topLevelPackage, nullableProjectName, javaVersion, parentPom);
-		
+
 		// TODO might be able to move this block to "createOtherArtifacts" and delete this overriding method
 		// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
 		if ("1.5".equals(javaVersion)) {
@@ -48,7 +48,7 @@ public class Jar extends AbstractPackagingType {
 	protected void createOtherArtifacts() {
 		// Set up the Spring application context configuration file
 		applicationContextOperations.createMiddleTierApplicationContext();
-		
+
 		// Set up the logging configuration file
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties")).getOutputStream());

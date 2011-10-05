@@ -22,7 +22,7 @@ public abstract class XmlTestCase {
 	 * A builder for XML DOM documents.
 	 */
 	protected static final DocumentBuilder DOCUMENT_BUILDER;
-	
+
 	static {
 		try {
 			DOCUMENT_BUILDER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -30,10 +30,10 @@ public abstract class XmlTestCase {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	/**
 	 * Asserts that the given XML node contains the expected content
-	 * 
+	 *
 	 * @param expectedLines the expected lines of XML (required); separate each
 	 * line with "\n" regardless of the platform
 	 * @param actualNode the actual XML node (required)

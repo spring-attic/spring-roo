@@ -42,10 +42,10 @@ import org.w3c.dom.Element;
 
 /**
  * Provides {@link ProjectMetadata}.
- * 
+ *
  * <p>
  * For simplicity of operation, this is the only implementation shipping with ROO that supports {@link ProjectMetadata}.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
@@ -54,7 +54,7 @@ import org.w3c.dom.Element;
 @Component(immediate = true)
 @Service
 public class MavenProjectMetadataProvider implements ProjectMetadataProvider, FileEventListener {
-	
+
 	// Constants
 	static final String POM_RELATIVE_PATH = "/pom.xml";
 
@@ -67,7 +67,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	/**
 	 * Highlights the given text
-	 * 
+	 *
 	 * @param text the text to highlight (can be blank)
 	 * @return the highlighted text
 	 */
@@ -77,7 +77,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	/**
 	 * Generates a message about the addition of the given items to the POM
-	 * 
+	 *
 	 * @param action the past tense of the action that was performed
 	 * @param items the items that were acted upon (required, can be empty)
 	 * @param singular the singular of this type of item (required)
@@ -89,9 +89,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (items.isEmpty()) {
 			return "";
 		}
-		return highlight(action + " " + (items.size() == 1 ? singular : plural)) + " " + StringUtils.collectionToDelimitedString(items, ", "); 
+		return highlight(action + " " + (items.size() == 1 ? singular : plural)) + " " + StringUtils.collectionToDelimitedString(items, ", ");
 	}
-	
+
 	// Fields (some with default-level access for testability)
 	@Reference FileManager fileManager;
 	@Reference MetadataService metadataService;
@@ -180,7 +180,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Packaging
 		final ProjectType type = new ProjectType(XmlUtils.findRequiredElement("/project/packaging", root).getTextContent());
-		
+
 		// Update window title with project name
 		shell.flash(Level.FINE, "Spring Roo: " + topLevelPackage, Shell.WINDOW_TITLE_SLOT);
 
@@ -225,7 +225,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				uaaRegistrationService.registerProject(product, topLevelPackage.getFullyQualifiedPackageName());
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -349,14 +349,14 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		DomUtils.removeTextNodes(dependenciesElement);
 		final String message = getDescriptionOfChange(REMOVED, removedDependencies, "dependency", "dependencies");
-		
+
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
 
 	public void removeDependency(final Dependency dependency) {
 		removeDependency(dependency, "/project/dependencies", "/project/dependencies/dependency");
 	}
-	
+
 	public void updateDependencyScope(final Dependency dependency, final DependencyScope dependencyScope) {
 		Assert.notNull(dependency, "Dependency to update required");
 		final ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -371,7 +371,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (dependencyElement == null) {
 			return;
 		}
-		
+
 		final Element scopeElement = XmlUtils.findFirstElement("scope", dependencyElement);
 		final String descriptionOfChange;
 		if (scopeElement == null) {
@@ -459,14 +459,14 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		}
 		DomUtils.removeTextNodes(pluginsElement);
 		final String message = getDescriptionOfChange(REMOVED, removedPlugins, "plugin", "plugins");
-		
+
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
 
 	public void removeBuildPlugin(final Plugin plugin) {
 		removeBuildPlugins(Collections.singletonList(plugin));
 	}
-	
+
 	public void addRepositories(final Collection<? extends Repository> repositories) {
 		addRepositories(repositories, "repositories", "repository");
 	}
@@ -542,7 +542,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 		}
 		final String message = getDescriptionOfChange(ADDED, addedRepositories, path, containingPath);
-		
+
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), message, false);
 	}
 
@@ -745,7 +745,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 	/**
 	 * Removes an element identified by the given dependency, whenever it occurs at the given path
-	 * 
+	 *
 	 * @param dependency
 	 * @param containingPath
 	 * @param path

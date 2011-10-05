@@ -16,35 +16,36 @@ import org.springframework.roo.project.Path;
 
 /**
  * Provides {@link EditorMetadata}.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component(immediate = true) 
-@Service 
+@Component(immediate = true)
+@Service
 public class EditorMetadataProvider extends AbstractItdMetadataProvider {
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_EDITOR);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_EDITOR);
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 
 		// We need to parse the annotation, which we expect to be present
 		EditorAnnotationValues annotationValues = new EditorAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || annotationValues.providePropertyEditorFor == null) {
+		if (!annotationValues.isAnnotationFound() || annotationValues.getEditedType() == null) {
 			return null;
 		}
 
 		// Lookup the form backing object's metadata
-		JavaType javaType = annotationValues.providePropertyEditorFor;
+		JavaType javaType = annotationValues.getEditedType();
 		Path path = Path.SRC_MAIN_JAVA;
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 
@@ -65,7 +66,7 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		if (identifierType == null) {
 			return null;
 		}
-		
+
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
 		if (identifierAccessor == null) {
 			return null;
@@ -78,13 +79,15 @@ public class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		return "Editor";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = EditorMetadata.getJavaType(metadataIdentificationString);
 		Path path = EditorMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return EditorMetadata.createIdentifier(javaType, path);
 	}
 

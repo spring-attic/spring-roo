@@ -24,14 +24,14 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component
 @Service
-@Reference(name = "packagingType", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PackagingType.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE) 
+@Reference(name = "packagingType", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = PackagingType.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 public class PackagingTypeConverter implements Converter<PackagingType> {
-	
+
 	// Fields
 	private final Object mutex = new Object();
 	// Using a map avoids each PackagingType having to implement equals() properly
 	private final Map<String, PackagingType> packagingTypes = new HashMap<String, PackagingType>();
-	
+
 	protected void bindPackagingType(final PackagingType packagingType) {
 		synchronized (mutex) {
 			packagingTypes.put(packagingType.getName(), packagingType);
@@ -43,7 +43,7 @@ public class PackagingTypeConverter implements Converter<PackagingType> {
 			packagingTypes.remove(packagingType.getName());
 		}
 	}
-	
+
 	public boolean supports(final Class<?> type, final String optionContext) {
 		return PackagingType.class.isAssignableFrom(type);
 	}
@@ -56,7 +56,7 @@ public class PackagingTypeConverter implements Converter<PackagingType> {
 		}
 		throw new UnsupportedOperationException("Unsupported packaging type '" + value + "'");
 	}
-	
+
 	public boolean getAllPossibleValues(final List<String> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (final String packaging : packagingTypes.keySet()) {
 			if (!StringUtils.hasText(existingData) || packaging.toLowerCase().startsWith(existingData.toLowerCase())) {

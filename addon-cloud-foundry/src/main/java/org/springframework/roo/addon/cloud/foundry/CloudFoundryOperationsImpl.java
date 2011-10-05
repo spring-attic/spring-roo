@@ -29,7 +29,7 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 
 /**
  * Operations for Cloud Foundry add-on.
- * 
+ *
  * TODO Move the table rendering stuff out to a separate class in org.sfw.shell so can be used elsewhere; feel free to try using it in AddOnOperationsImpl (talk to him)
  *
  * @author James Tyrrell
@@ -38,10 +38,10 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Component
 @Service
 public class CloudFoundryOperationsImpl extends AbstractFlashingObject implements CloudFoundryOperations {
-	
+
 	// Constants
 	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
-	
+
 	// Fields
 	@Reference private CloudFoundrySession session;
 	private AppCloudClient client;
@@ -81,7 +81,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		});
 	}
 
-	public void login(String email, String password, final String cloudControllerUrl) {
+	public void login(final String email, final String password, final String cloudControllerUrl) {
 		final String finalEmail = email;
 		final String finalPassword = password;
 		executeCommand(new CloudCommand("Login failed") {
@@ -123,7 +123,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		});
 	}
 
-	public void createService(final String service, final String name, String bind) {
+	public void createService(final String service, final String name, final String bind) {
 		String failureMessage = "The service '" + name + "' failed to be created";
 		String successMessage = "The service '" + name + "' was successfully created";
 		executeCommand(new CloudCommand(failureMessage, successMessage) {
@@ -302,7 +302,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		});
 	}
 
-	public void update(String appName) {
+	public void update(final String appName) {
 
 	}
 
@@ -359,7 +359,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		});
 	}
 
-	public void crashLogs(String appName, String instance) {
+	public void crashLogs(final String appName, final String instance) {
 		logs(appName, instance);
 	}
 
@@ -508,7 +508,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		return true;
 	}
 
-	private double roundTwoDecimals(double d) {
+	private double roundTwoDecimals(final double d) {
 		DecimalFormat twoDForm = new DecimalFormat("#.##");
 		return Double.valueOf(twoDForm.format(d));
 	}
@@ -519,17 +519,17 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		protected String gerund;
 		protected boolean displaySuccessMessage = true;
 
-		protected CloudCommand(String failureMessage, String successMessage, String gerund) {
+		protected CloudCommand(final String failureMessage, final String successMessage, final String gerund) {
 			this.failureMessage = failureMessage;
 			this.successMessage = successMessage;
 			this.gerund = gerund;
 		}
 
-		protected CloudCommand(String failureMessage, String successMessage) {
+		protected CloudCommand(final String failureMessage, final String successMessage) {
 			this(failureMessage, successMessage, "Performing operation");
 		}
 
-		protected CloudCommand(String failureMessage) {
+		protected CloudCommand(final String failureMessage) {
 			this(failureMessage, null);
 		}
 
@@ -582,7 +582,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		}
 	}
 
-	private String formatDurationInSeconds(Double seconds) {
+	private String formatDurationInSeconds(final Double seconds) {
 		long secondsInMinute = 60;
 		long secondsInHour = secondsInMinute ^ 2;
 		long secondsInDay = secondsInHour * 24;
@@ -605,7 +605,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		return sb.toString();
 	}
 
-	private CloudApplication getApplication(String appName) {
+	private CloudApplication getApplication(final String appName) {
 		try {
 			return client.getApplication(appName);
 		} catch (Exception ignored) {
@@ -613,7 +613,7 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 		return null;
 	}
 
-	private Integer getInteger(String potentialInt) {
+	private Integer getInteger(final String potentialInt) {
 		if (potentialInt == null) {
 			return null;
 		}

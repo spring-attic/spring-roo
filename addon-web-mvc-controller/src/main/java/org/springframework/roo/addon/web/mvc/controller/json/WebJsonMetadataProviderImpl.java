@@ -36,12 +36,12 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link WebJsonMetadataProvider}.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1.3
  */
-@Component(immediate = true) 
-@Service 
+@Component(immediate = true)
+@Service
 public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements WebJsonMetadataProvider {
 
 	// Fields
@@ -51,38 +51,38 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 	// Maps entities to the IDs of their WebJsonMetadata
 	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_WEB_JSON);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_WEB_JSON);
 	}
-	
+
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		final MemberHoldingTypeDetails governorDetails = typeLocationService.findClassOrInterface(itdTypeDetails.getName());
-		
+
 		// Check whether a relevant layer component has appeared, changed, or disappeared
 		final String localMidForLayerManagedEntity = getWebJsonMidIfLayerComponent(governorDetails);
 		if (StringUtils.hasText(localMidForLayerManagedEntity)) {
 			return localMidForLayerManagedEntity;
 		}
-		
+
 		// Check whether the relevant MVC controller has appeared, changed, or disappeared
 		return getWebJsonMidIfMvcController(governorDetails);
 	}
-	
+
 	/**
 	 * If the given type is a layer component (e.g. repository or service),
 	 * returns the ID of the WebJsonMetadata for the first (!) domain type it
 	 * manages, in case this is a new layer component that the JSON ITD needs to
 	 * use.
-	 * 
+	 *
 	 * @param governorDetails the type to check (required)
 	 */
 	private String getWebJsonMidIfLayerComponent(final MemberHoldingTypeDetails governorDetails) {
@@ -101,7 +101,7 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 	 * layer components are injected. This is a workaround to AspectJ not
 	 * handling multiple ITDs introducing the same field (in our case the layer
 	 * component) into one Java class.
-	 * 
+	 *
 	 * @param governorDetails the type to check (required)
 	 */
 	private String getWebJsonMidIfMvcController(final MemberHoldingTypeDetails governorDetails) {
@@ -122,20 +122,21 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 		return null;
 	}
 
+	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final WebJsonAnnotationValues annotationValues = new WebJsonAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound() || annotationValues.getJsonObject() == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
 			return null;
 		}
-		
+
 		// Lookup the form backing object's metadata
 		final JavaType jsonObject = annotationValues.getJsonObject();
 		final JsonMetadata jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(jsonObject, Path.SRC_MAIN_JAVA));
 		if (jsonMetadata == null) {
 			return null;
 		}
-		
+
 		final PhysicalTypeMetadata backingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(jsonObject, Path.SRC_MAIN_JAVA));
 		Assert.notNull(backingObjectPhysicalTypeMetadata, "Unable to obtain physical type metadata for type " + jsonObject.getFullyQualifiedTypeName());
 		final MemberDetails formBackingObjectMemberDetails = getMemberDetails(backingObjectPhysicalTypeMetadata);
@@ -143,31 +144,31 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 		if (backingMemberHoldingTypeDetails == null) {
 			return null;
 		}
-		
+
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(backingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
-		
+
 		final Set<FinderMetadataDetails> finderDetails = webMetadataService.getDynamicFinderMethodsAndFields(jsonObject, formBackingObjectMemberDetails, metadataId);
-		
+
 		final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> persistenceAdditions = webMetadataService.getCrudAdditions(jsonObject, metadataId);
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = webMetadataService.getJavaTypePersistenceMetadataDetails(jsonObject, getMemberDetails(jsonObject), metadataId);
 		final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonObject));
 		if (persistenceAdditions.isEmpty() || javaTypePersistenceMetadataDetails == null || pluralMetadata == null) {
 			return null;
 		}
-		
+
 		// Maintain a list of entities that are being tested
 		managedEntityTypes.put(jsonObject, metadataId);
-		
+
 		return new WebJsonMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, persistenceAdditions, javaTypePersistenceMetadataDetails.getIdentifierField(), pluralMetadata.getPlural(), finderDetails, jsonMetadata, introduceLayerComponents(governorPhysicalTypeMetadata));
 	}
-	
+
 	/**
 	 * Indicates whether the web JSON ITD should introduce any required layer
-	 * components (services, repositories, etc.). This information is necessary 
+	 * components (services, repositories, etc.). This information is necessary
 	 * for so long as AspectJ does not allow the same field to be introduced
 	 * into a given Java class by more than one ITD.
-	 * 
+	 *
 	 * @param governor the governor, i.e. the controller (required)
 	 * @return see above
 	 */
@@ -175,21 +176,23 @@ public class WebJsonMetadataProviderImpl extends AbstractMemberDiscoveringItdMet
 		// If no MVC ITD is going to be created, we have to introduce any required layer components
 		return MemberFindingUtils.getAnnotationOfType(governor.getMemberHoldingTypeDetails().getAnnotations(), ROO_WEB_SCAFFOLD) == null;
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Controller_Json";
 	}
-	
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebJsonMetadata.getJavaType(metadataIdentificationString);
 		Path path = WebJsonMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
-	
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return WebJsonMetadata.createIdentifier(javaType, path);
 	}
-	
+
 	public String getProvidesType() {
 		return WebJsonMetadata.getMetadataIdentiferType();
 	}

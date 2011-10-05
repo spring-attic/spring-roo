@@ -9,17 +9,17 @@ import org.springframework.roo.addon.serializable.RooSerializable;
 
 /**
  * Provides identifier services related to JPA.
- * 
+ *
  * <p>
  * Using this annotation also triggers {@link RooSerializable}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooIdentifier {
-	
+
 	/**
 	 * @return whether to delete the database-managed identifier (defaults to false).
 	 */

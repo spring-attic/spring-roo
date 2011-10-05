@@ -34,18 +34,18 @@ public abstract class AnnotationValuesTestCase<A, V extends AbstractAnnotationVa
 			assertNotNull("Value field " + valueField + " is not auto-populated", valueField.getAnnotation(AutoPopulate.class));
 		}
 	}
-	
+
 	/**
 	 * Subclasses must return the class of annotation whose value class is being
 	 * tested
-	 * 
+	 *
 	 * @return a non-<code>null</code> annotation type
 	 */
 	protected abstract Class<A> getAnnotationClass();
-	
+
 	/**
 	 * Subclasses must return the values class being tested
-	 * 
+	 *
 	 * @return a non-<code>null</code> class
 	 */
 	protected abstract Class<V> getValuesClass();

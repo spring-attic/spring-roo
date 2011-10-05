@@ -10,37 +10,37 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for addon-git.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component 
-@Service 
+@Component
+@Service
 public class GitCommands implements CommandMarker {
 	@Reference private GitOperations gitOperations;
 
-	@CliAvailabilityIndicator({ "git config", "git commit all", "git revert last", "git revert commit", "git log" }) 
+	@CliAvailabilityIndicator({ "git config", "git commit all", "git revert last", "git revert commit", "git log" })
 	public boolean isCommandAvailable() {
 		return gitOperations.isGitCommandAvailable();
 	}
 
-	@CliAvailabilityIndicator("git setup") 
+	@CliAvailabilityIndicator("git setup")
 	public boolean isSetupCommandAvailable() {
 		return gitOperations.isSetupCommandAvailable();
 	}
 
-	@CliCommand(value = "git setup", help = "Setup Git revision control") 
+	@CliCommand(value = "git setup", help = "Setup Git revision control")
 	public void config() {
 		gitOperations.setup();
 	}
 
-	@CliCommand(value = "git config", help = "Git revision control configuration (.git/config)") 
+	@CliCommand(value = "git config", help = "Git revision control configuration (.git/config)")
 	public void config(
-		@CliOption(key = { "userName" }, mandatory = false, help = "The user name") String userName, 
-		@CliOption(key = { "email" }, mandatory = false, help = "The user email") String email, 
-		@CliOption(key = { "repoUrl" }, mandatory = false, help = "The URL of the remote repository") String repoUrl, 
-		@CliOption(key = { "colorCoding" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Enable color coding of commands in OS shell") boolean color,
-		@CliOption(key = { "automaticCommit" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Enable automatic commit after successful execution of Roo shell command") Boolean automaticCommit) {
+		@CliOption(key = { "userName" }, mandatory = false, help = "The user name") final String userName,
+		@CliOption(key = { "email" }, mandatory = false, help = "The user email") final String email,
+		@CliOption(key = { "repoUrl" }, mandatory = false, help = "The URL of the remote repository") final String repoUrl,
+		@CliOption(key = { "colorCoding" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Enable color coding of commands in OS shell") final boolean color,
+		@CliOption(key = { "automaticCommit" }, mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "true", help = "Enable automatic commit after successful execution of Roo shell command") final Boolean automaticCommit) {
 
 		if (userName != null && userName.length() > 0) {
 			gitOperations.setConfig("user", "name", userName);
@@ -59,43 +59,43 @@ public class GitCommands implements CommandMarker {
 		gitOperations.setConfig("roo", "automaticCommit", automaticCommit.toString());
 	}
 
-	@CliCommand(value = "git commit all", help = "Trigger a commit manually for the project") 
+	@CliCommand(value = "git commit all", help = "Trigger a commit manually for the project")
 	public void config(
-		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		
+		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") final String message) {
+
 		gitOperations.commitAllChanges(message);
 	}
-	
-	@CliCommand(value = "git reset", help = "Reset (hard) last (x) commit(s)") 
+
+	@CliCommand(value = "git reset", help = "Reset (hard) last (x) commit(s)")
 	public void resetLast(
-		@CliOption(key = { "commitCount" }, mandatory = false, help = "Number of commits to reset") Integer history, 
-		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		
+		@CliOption(key = { "commitCount" }, mandatory = false, help = "Number of commits to reset") final Integer history,
+		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") final String message) {
+
 		gitOperations.reset(history == null ? 0 : history, message);
 	}
 
-	@CliCommand(value = "git revert last", help = "Revert last commit") 
-	public void revertLast(@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
+	@CliCommand(value = "git revert last", help = "Revert last commit")
+	public void revertLast(@CliOption(key = { "message" }, mandatory = true, help = "The commit message") final String message) {
 		gitOperations.revertLastCommit(message);
 	}
 
-	@CliCommand(value = "git revert commit", help = "Roll project back to a specific commit") 
+	@CliCommand(value = "git revert commit", help = "Roll project back to a specific commit")
 	public void revertCommit(
-		@CliOption(key = { "revString" }, mandatory = true, help = "Commit id") String revstr, 
-		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") String message) {
-		
+		@CliOption(key = { "revString" }, mandatory = true, help = "Commit id") final String revstr,
+		@CliOption(key = { "message" }, mandatory = true, help = "The commit message") final String message) {
+
 		gitOperations.revertCommit(revstr, message);
 	}
-	
-	@CliCommand(value = "git push", help = "Roll project back to a specific commit") 
+
+	@CliCommand(value = "git push", help = "Roll project back to a specific commit")
 	public void push() {
 		gitOperations.push();
 	}
 
-	@CliCommand(value = "git log", help = "Commit log") 
+	@CliCommand(value = "git log", help = "Commit log")
 	public void log(
-		@CliOption(key = { "maxMessages" }, mandatory = false, help = "Number of commit messages to display") Integer count) {
-		
+		@CliOption(key = { "maxMessages" }, mandatory = false, help = "Number of commit messages to display") final Integer count) {
+
 		gitOperations.log(count == null ? Integer.MAX_VALUE : count);
 	}
 }

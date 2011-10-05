@@ -9,17 +9,17 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents an array of annotation attribute values.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  *
  * @param <Y> the type of each {@link AnnotationAttributeValue}
  */
 public class ArrayAttributeValue<Y extends AnnotationAttributeValue<?>> extends AbstractAnnotationAttributeValue<List<Y>> {
-	
+
 	// Fields
 	private final List<Y> value;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -39,6 +39,7 @@ public class ArrayAttributeValue<Y extends AnnotationAttributeValue<?>> extends 
 		return Collections.unmodifiableList(value);
 	}
 
+	@Override
 	public String toString() {
 		return getName() + " -> {" + StringUtils.collectionToCommaDelimitedString(value) + "}";
 	}

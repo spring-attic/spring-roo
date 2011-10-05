@@ -6,19 +6,19 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a {@link Class} annotation attribute value.
- * 
+ *
  * <p>
  * Source code parsers should treat any non-quoted string ending in ".class" as a class name,
  * and then use normal package resolution techniques to determine the fully-qualified class.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class ClassAttributeValue extends AbstractAnnotationAttributeValue<JavaType> {
-	
+
 	// Fields
 	private final JavaType value;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -34,7 +34,8 @@ public class ClassAttributeValue extends AbstractAnnotationAttributeValue<JavaTy
 	public JavaType getValue() {
 		return value;
 	}
-	
+
+	@Override
 	public String toString() {
 		return getName() + " -> " + value.getNameIncludingTypeParameters();
 	}

@@ -30,12 +30,12 @@ import org.springframework.roo.project.Path;
 
 /**
  * Implementation of {@link JsfConverterMetadataProvider}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
-@Component(immediate = true) 
-@Service 
+@Component(immediate = true)
+@Service
 public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements JsfConverterMetadataProvider {
 
 	// Constants
@@ -98,7 +98,7 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(persistenceMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataId);
-	
+
 		// Remember that this entity JavaType matches up with this metadata identification string
 		// Start by clearing any previous association
 		final JavaType oldEntity = converterMidToEntityMap.get(metadataId);
@@ -125,7 +125,7 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 			return null;
 		}
 		metadataDependencyRegistry.registerDependency(identifierField.getDeclaredByMetadataId(), metadataId);
-		
+
 		return layerService.getMemberTypeAdditions(metadataId, FIND_ALL_METHOD.name(), entity, identifierType, LAYER_POSITION);
 	}
 

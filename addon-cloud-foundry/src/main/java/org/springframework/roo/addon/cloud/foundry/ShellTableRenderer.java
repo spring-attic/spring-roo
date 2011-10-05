@@ -12,10 +12,10 @@ import java.util.Map;
  * @since 1.1.3
  */
 public class ShellTableRenderer {
-	
+
 	// Constants
 	private static final int COLUMN_PADDING = 5;
-	
+
 	// Fields
 	private final Map<Integer, List<String>> columnMap = new HashMap<Integer, List<String>>();
 	private final String title;
@@ -26,14 +26,14 @@ public class ShellTableRenderer {
 	 * @param title
 	 * @param headings
 	 */
-	public ShellTableRenderer(String title, String... headings) {
+	public ShellTableRenderer(final String title, final String... headings) {
 		this.title = title;
 		for (String heading : headings) {
 			addColumn(heading);
 		}
 	}
 
-	public void addColumn(String heading) {
+	public void addColumn(final String heading) {
 		int position = columnMap.isEmpty() ? 0 : columnMap.size();
 		List<String> list = new ArrayList<String>();
 		list.add(heading);
@@ -41,7 +41,7 @@ public class ShellTableRenderer {
 		columnMap.put(position, list);
 	}
 
-	public void addRow(String... values) {
+	public void addRow(final String... values) {
 		for (int i = 0; i < columnMap.size(); i++) {
 			String value = values[i];
 			List<String> list = columnMap.get(i);
@@ -49,7 +49,7 @@ public class ShellTableRenderer {
 		}
 	}
 
-	public int getColumnWidth(int columnNumber) {
+	public int getColumnWidth(final int columnNumber) {
 		List<String> stringList = columnMap.get(columnNumber);
 		if (stringList == null) {
 			return 0;
@@ -111,15 +111,15 @@ public class ShellTableRenderer {
 		return titleBuilder.toString();
 	}
 
-	private String getPadding(int paddingRequired) {
+	private String getPadding(final int paddingRequired) {
 		return getRepeatingChars(' ', paddingRequired);
 	}
 
-	private String getUnderline(int underlineRequired) {
+	private String getUnderline(final int underlineRequired) {
 		return getRepeatingChars('-', underlineRequired);
 	}
 
-	private String getRepeatingChars(char c, int repeat) {
+	private String getRepeatingChars(final char c, final int repeat) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < repeat; i++) {
 			sb.append(c);

@@ -20,11 +20,11 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.2.0
  */
 enum EntityLayerMethod {
-	
+
 	// The names of these enum constants are arbitrary
 
 	CLEAR (CustomDataKeys.CLEAR_METHOD, true) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getClearMethod())) {
@@ -38,9 +38,9 @@ enum EntityLayerMethod {
 			return Collections.emptyList();
 		}
 	},
-	
+
 	COUNT_ALL (CustomDataKeys.COUNT_ALL_METHOD, true) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getCountMethod())) {
@@ -54,9 +54,9 @@ enum EntityLayerMethod {
 			return Collections.emptyList();
 		}
 	},
-	
+
 	FIND (CustomDataKeys.FIND_METHOD, true) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindMethod())) {
@@ -64,15 +64,15 @@ enum EntityLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(idType);
 		}
 	},
-	
+
 	FIND_ALL (CustomDataKeys.FIND_ALL_METHOD, true) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindAllMethod())) {
@@ -80,15 +80,15 @@ enum EntityLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
 		}
 	},
-	
+
 	FIND_ENTRIES (CustomDataKeys.FIND_ENTRIES_METHOD, true) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getFindEntriesMethod())) {
@@ -102,7 +102,7 @@ enum EntityLayerMethod {
 			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
 		}
 	},
-	
+
 	FLUSH (CustomDataKeys.FLUSH_METHOD, false) {
 
 		@Override
@@ -112,15 +112,15 @@ enum EntityLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	},
-	
+
 	MERGE (CustomDataKeys.MERGE_METHOD, false) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getMergeMethod())) {
@@ -128,15 +128,15 @@ enum EntityLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	},
-	
+
 	PERSIST (CustomDataKeys.PERSIST_METHOD, false) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getPersistMethod())) {
@@ -144,15 +144,15 @@ enum EntityLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	},
-	
+
 	REMOVE (CustomDataKeys.REMOVE_METHOD, false) {
-		
+
 		@Override
 		public String getName(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural) {
 			if (StringUtils.hasText(annotationValues.getRemoveMethod())) {
@@ -160,7 +160,7 @@ enum EntityLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
@@ -170,7 +170,7 @@ enum EntityLayerMethod {
 	/**
 	 * Returns the {@link EntityLayerMethod} with the given ID and parameter
 	 * types
-	 * 
+	 *
 	 * @param methodIdentifier the ID to seek; will not match if blank
 	 * @param callerParameters will not match if <code>null</code>
 	 * @param targetEntity
@@ -189,7 +189,7 @@ enum EntityLayerMethod {
 
 	/**
 	 * Returns the type of parameters taken by this method
-	 * 
+	 *
 	 * @param targetEntity the type of entity being managed
 	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list
@@ -215,7 +215,7 @@ enum EntityLayerMethod {
 	/**
 	 * Returns the desired name of this method based on the given annotation
 	 * values
-	 * 
+	 *
 	 * @param annotationValues the values of the {@link RooEntity} annotation
 	 * on the entity type
 	 * @param targetEntity the entity type (required)
@@ -227,7 +227,7 @@ enum EntityLayerMethod {
 	/**
 	 * Returns the Java snippet that invokes this method, including the target
 	 * if any
-	 * 
+	 *
 	 * @param annotationValues the CRUD-related values of the {@link RooEntity}
 	 * annotation
 	 * on the entity type
@@ -237,7 +237,7 @@ enum EntityLayerMethod {
 	 * (required, must be modifiable)
 	 * @return a non-blank Java snippet
 	 */
-	public String getCall(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, String plural, final List<JavaSymbolName> parameterNames) {
+	public String getCall(final JpaCrudAnnotationValues annotationValues, final JavaType targetEntity, final String plural, final List<JavaSymbolName> parameterNames) {
 		final String target;
 		if (this.isStatic) {
 			target = targetEntity.getSimpleTypeName();
@@ -248,10 +248,10 @@ enum EntityLayerMethod {
 		}
 		return getCall(target, getName(annotationValues, targetEntity, plural), parameterNames.iterator());
 	}
-	
+
 	/**
 	 * Generates a method call from the given inputs
-	 * 
+	 *
 	 * @param targetName the name of the target on which the method is being invoked (required)
 	 * @param methodName the name of the method being invoked (required)
 	 * @param parameterNames the names of the parameters (from the caller's POV)
@@ -272,11 +272,11 @@ enum EntityLayerMethod {
 		methodCall.append(")");
 		return methodCall.toString();
 	}
-	
+
 	/**
 	 * Indicates whether this method is static; only for use of unit tests, as
 	 * it breaks encapsulation
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isStatic() {

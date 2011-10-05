@@ -23,7 +23,7 @@ class AntPatchStringMatcher {
 	private final Map<String, String> uriTemplateVariables;
 
 	/** Constructs a new instance of the <code>AntPatchStringMatcher</code>. */
-	AntPatchStringMatcher(String pattern, String str, Map<String, String> uriTemplateVariables) {
+	AntPatchStringMatcher(final String pattern, final String str, final Map<String, String> uriTemplateVariables) {
 		patArr = pattern.toCharArray();
 		strArr = str.toCharArray();
 		this.uriTemplateVariables = uriTemplateVariables;
@@ -31,7 +31,7 @@ class AntPatchStringMatcher {
 		strIdxEnd = strArr.length - 1;
 	}
 
-	private void addTemplateVariable(int curlyIdxStart, int curlyIdxEnd, int valIdxStart, int valIdxEnd) {
+	private void addTemplateVariable(final int curlyIdxStart, final int curlyIdxEnd, final int valIdxStart, final int valIdxEnd) {
 		if (uriTemplateVariables != null) {
 			String varName = new String(patArr, curlyIdxStart + 1, curlyIdxEnd - curlyIdxStart - 1);
 			String varValue = new String(strArr, valIdxStart, valIdxEnd - valIdxStart + 1);
@@ -111,7 +111,7 @@ class AntPatchStringMatcher {
 		return onlyStarsLeft();
 	}
 
-	private boolean consecutiveStars(int patIdxTmp) {
+	private boolean consecutiveStars(final int patIdxTmp) {
 		if (patIdxTmp == patIdxStart + 1 && patArr[patIdxStart] == '*' && patArr[patIdxTmp] == '*') {
 			// Two stars next to each other, skip the first one.
 			patIdxStart++;

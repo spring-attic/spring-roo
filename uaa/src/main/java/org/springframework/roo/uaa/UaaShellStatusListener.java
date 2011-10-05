@@ -15,24 +15,24 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 /**
  * Provides a startup-time reminder of the 'uaa status' command if the user hasn't indicated a
  * UAA Terms of Use acceptance or rejection.
- * 
+ *
  * <p>
  * This class is separate from the other {@link ShellStatusListener} in the UAA module due to
  * of lifecycle timing reasons. It needs minimal dependencies on other SCR components.
- * 
+ *
  * @author Ben Alex
  * @since 1.1.1
  */
 @Service
 @Component(immediate = true)
 public class UaaShellStatusListener implements ShellStatusListener {
-	
+
 	// Fields
 	@Reference UaaService uaaService;
 	@Reference Shell shell;
 	private boolean startupMessageConsidered = false;
 
-	protected void activate(ComponentContext componentContext) {
+	protected void activate(final ComponentContext componentContext) {
 		shell.addShellStatusListener(this);
 		String originalThreadName = Thread.currentThread().getName();
 		try {
@@ -43,11 +43,11 @@ public class UaaShellStatusListener implements ShellStatusListener {
 		}
 	}
 
-	protected void deactivate(ComponentContext componentContext) {
+	protected void deactivate(final ComponentContext componentContext) {
 		shell.removeShellStatusListener(this);
 	}
 
-	public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
+	public void onShellStatusChange(final ShellStatus oldStatus, final ShellStatus newStatus) {
 		if (!startupMessageConsidered && newStatus.getStatus() == Status.USER_INPUT) {
 			startupMessageConsidered = true;
 			if (uaaService.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU) {

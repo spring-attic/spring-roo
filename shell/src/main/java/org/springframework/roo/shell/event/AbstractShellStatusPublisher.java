@@ -9,24 +9,24 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides a convenience superclass for those shells wishing to publish status messages.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public abstract class AbstractShellStatusPublisher implements ShellStatusProvider {
-	
+
 	// Fields
 	protected Set<ShellStatusListener> shellStatusListeners = new CopyOnWriteArraySet<ShellStatusListener>();
 	protected ShellStatus shellStatus = new ShellStatus(Status.STARTING);
-	
-	public final void addShellStatusListener(ShellStatusListener shellStatusListener) {
+
+	public final void addShellStatusListener(final ShellStatusListener shellStatusListener) {
 		Assert.notNull(shellStatusListener, "Status listener required");
 		synchronized (shellStatus) {
 			shellStatusListeners.add(shellStatusListener);
 		}
 	}
 
-	public final void removeShellStatusListener(ShellStatusListener shellStatusListener) {
+	public final void removeShellStatusListener(final ShellStatusListener shellStatusListener) {
 		Assert.notNull(shellStatusListener, "Status listener required");
 		synchronized (shellStatus) {
 			shellStatusListeners.remove(shellStatusListener);
@@ -38,14 +38,14 @@ public abstract class AbstractShellStatusPublisher implements ShellStatusProvide
 			return shellStatus;
 		}
 	}
-	
-	protected void setShellStatus(Status shellStatus) {
+
+	protected void setShellStatus(final Status shellStatus) {
 		setShellStatus(shellStatus, null, null);
 	}
-	
-	protected void setShellStatus(Status shellStatus, String msg, ParseResult parseResult) {
+
+	protected void setShellStatus(final Status shellStatus, final String msg, final ParseResult parseResult) {
 		Assert.notNull(shellStatus, "Shell status required");
-		
+
 		synchronized (this.shellStatus) {
 			ShellStatus st;
 			if (msg == null || msg.length() == 0) {
@@ -53,11 +53,11 @@ public abstract class AbstractShellStatusPublisher implements ShellStatusProvide
 			} else {
 				st = new ShellStatus(shellStatus, msg, parseResult);
 			}
-			
+
 			if (this.shellStatus.equals(st)) {
 				return;
 			}
-			
+
 			for (ShellStatusListener listener : shellStatusListeners) {
 				listener.onShellStatusChange(this.shellStatus, st);
 			}

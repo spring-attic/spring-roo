@@ -45,7 +45,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Utilities related to XML usage.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
@@ -53,16 +53,16 @@ import org.xml.sax.SAXException;
  * @since 1.0
  */
 public final class XmlUtils {
-	
+
 	// Constants
 	private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
 	private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	private static final XPath xpath = XPathFactory.newInstance().newXPath();
-	
+
 	/**
 	 * Returns the given XML as the root {@link Element} of a new {@link Document}
-	 * 
+	 *
 	 * @param xml the XML to convert; can be blank
 	 * @return <code>null</code> if the given XML is blank
 	 * @throws IOException
@@ -76,10 +76,10 @@ public final class XmlUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Creates an {@link Element} containing the given text
-	 * 
+	 *
 	 * @param document the document to contain the new element
 	 * @param tagName the element's tag name (required)
 	 * @param text the text to set; can be <code>null</code> for none
@@ -94,7 +94,7 @@ public final class XmlUtils {
 
 	/**
 	 * Read an XML document from the supplied input stream and return a document.
-	 *  
+	 *
 	 * @param inputStream the input stream to read from (required).  The stream is closed upon completion.
 	 * @return a document.
 	 */
@@ -111,10 +111,10 @@ public final class XmlUtils {
 			IOUtils.closeQuietly(inputStream);
 		}
 	}
-	
+
 	/**
 	 * Write an XML document to the OutputStream provided. This will use the pre-configured Roo provided Transformer.
-	 * 
+	 *
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
 	 */
@@ -124,7 +124,7 @@ public final class XmlUtils {
 
 	/**
 	 * Write an XML document to the OutputStream provided. This will use the provided Transformer.
-	 * 
+	 *
 	 * @param transformer the transformer (can be obtained from XmlUtils.createIndentingTransformer())
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
@@ -133,7 +133,7 @@ public final class XmlUtils {
 		Assert.notNull(transformer, "Transformer required");
 		Assert.notNull(outputStream, "OutputStream required");
 		Assert.notNull(document, "Document required");
-		
+
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 		try {
 			if (!(outputStream instanceof BufferedOutputStream)) {
@@ -147,12 +147,12 @@ public final class XmlUtils {
 			IOUtils.closeQuietly(outputStream);
 		}
 	}
-	
+
 	/**
 	 * Write an XML document to the OutputStream provided. This method will detect if the JDK supports the
-	 * DOM Level 3 "format-pretty-print" configuration and make use of it. If not found it will fall back to 
-	 * using formatting offered by TrAX. 
-	 * 
+	 * DOM Level 3 "format-pretty-print" configuration and make use of it. If not found it will fall back to
+	 * using formatting offered by TrAX.
+	 *
 	 * @param outputStream the output stream to write to. The stream is closed upon completion.
 	 * @param document the document to write.
 	 */
@@ -208,7 +208,7 @@ public final class XmlUtils {
 			writeXml(outputStream, document);
 		}
 	}
-	
+
 	/**
 	 * Compares two DOM {@link Node nodes} by comparing the representations of the nodes as XML strings
 	 *
@@ -251,12 +251,12 @@ public final class XmlUtils {
 
 	/**
 	 * Creates a {@link StreamResult} by wrapping the given outputStream in an
-	 * {@link OutputStreamWriter} that transforms Windows line endings (\r\n) 
-	 * into Unix line endings (\n) on Windows for consistency with Roo's templates.  
-	 * 
+	 * {@link OutputStreamWriter} that transforms Windows line endings (\r\n)
+	 * into Unix line endings (\n) on Windows for consistency with Roo's templates.
+	 *
 	 * @param outputStream
-	 * @return StreamResult 
-	 * @throws UnsupportedEncodingException 
+	 * @return StreamResult
+	 * @throws UnsupportedEncodingException
 	 */
 	private static StreamResult createUnixStreamResultForEntry(final OutputStream outputStream) throws UnsupportedEncodingException {
 		final Writer writer;
@@ -275,7 +275,7 @@ public final class XmlUtils {
 				public void write(final int c) throws IOException {
 					if (c != '\r') super.write(c);
 				}
-				
+
 				@Override
 				public void write(final String str, final int off, final int len) throws IOException {
 					final String orig = str.substring(off, off + len);
@@ -297,11 +297,11 @@ public final class XmlUtils {
 	/**
 	 * Searches the given parent element for a child element matching the given
 	 * XPath expression.
-	 * 
+	 *
 	 * Please note that the XPath parser used is NOT namespace aware. So if you
 	 * want to find an element <code>&lt;beans&gt;&lt;sec:http&gt;</code>, you
 	 * need to use the following XPath expression '/beans/http'.
-	 * 
+	 *
 	 * @param xPathExpression the xPathExpression (required)
 	 * @param parent the parent DOM element (required)
 	 * @return the Element if discovered (null if no such {@link Element} found)
@@ -313,16 +313,16 @@ public final class XmlUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Checks in under a given root element whether it can find a child node
 	 * which matches the XPath expression supplied. Returns {@link Node} if
 	 * exists.
-	 * 
+	 *
 	 * Please note that the XPath parser used is NOT namespace aware. So if you
 	 * want to find a element <code>&lt;beans&gt;&lt;sec:http&gt;</code>, you
 	 * need to use the XPath expression '<code>/beans/http</code>'.
-	 * 
+	 *
 	 * @param xPathExpression the XPath expression (required)
 	 * @param root the parent DOM element (required)
 	 * @return the Node if discovered (null if not found)
@@ -348,11 +348,11 @@ public final class XmlUtils {
 	 * Checks in under a given root element whether it can find a child element
 	 * which matches the XPath expression supplied. The {@link Element} must
 	 * exist. Returns {@link Element} if exists.
-	 * 
+	 *
 	 * Please note that the XPath parser used is NOT namespace aware. So if you
 	 * want to find a element <beans><sec:http> you need to use the following
 	 * XPath expression '/beans/http'.
-	 * 
+	 *
 	 * @param xPathExpression the XPath expression (required)
 	 * @param root the parent DOM element (required)
 	 * @return the Element if discovered (never null; an exception is thrown if cannot be found)
@@ -369,11 +369,11 @@ public final class XmlUtils {
 	 * Checks in under a given root element whether it can find a child elements
 	 * which match the XPath expression supplied. Returns a {@link List} of
 	 * {@link Element} if they exist.
-	 * 
+	 *
 	 * Please note that the XPath parser used is NOT namespace aware. So if you
 	 * want to find a element <beans><sec:http> you need to use the following
 	 * XPath expression '/beans/http'.
-	 * 
+	 *
 	 * @param xPathExpression the xPathExpression
 	 * @param root the parent DOM element
 	 * @return a {@link List} of type {@link Element} if discovered, otherwise an empty list (never null)
@@ -398,11 +398,11 @@ public final class XmlUtils {
 		}
 		return elements;
 	}
-	
+
 	/**
-	 * Checks for a given element whether it can find an attribute which matches the 
+	 * Checks for a given element whether it can find an attribute which matches the
 	 * XPath expression supplied. Returns {@link Node} if exists.
-	 * 
+	 *
 	 * @param xPathExpression the xPathExpression (required)
 	 * @param element (required)
 	 * @return the Node if discovered (null if not found)
@@ -449,10 +449,10 @@ public final class XmlUtils {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	/**
 	 * Returns the root element of the given XML file.
-	 * 
+	 *
 	 * @param clazz the class from whose package to open the file (required)
 	 * @param xmlFilePath the path of the XML file relative to the given class'
 	 * package (required)
@@ -464,39 +464,39 @@ public final class XmlUtils {
 		Assert.notNull(inputStream, "Could not open the file '" + xmlFilePath + "'");
 		return readXml(inputStream).getDocumentElement();
 	}
-	
+
 	/**
 	 * Returns the root element of an addon's configuration file.
-	 * 
+	 *
 	 * @param clazz which owns the configuration
-	 * @return the configuration root element 
+	 * @return the configuration root element
 	 */
 	public static Element getConfiguration(final Class<?> clazz) {
 		return getRootElement(clazz, "configuration.xml");
 	}
-	
+
 	/**
 	 * Converts a XHTML compliant id (used in jspx) to a CSS3 selector spec compliant id. In that
 	 * it will replace all '.,:,-' to '_'
-	 * 
+	 *
 	 * @param proposed Id
 	 * @return cleaned up Id
 	 */
 	public static String convertId(final String proposed) {
 		return proposed.replaceAll("[:\\.-]", "_");
 	}
-	
+
 	/**
 	 * Checks the presented element for illegal characters that could cause malformed XML.
-	 * 
+	 *
 	 * @param element the content of the XML element
-	 * @throws IllegalArgumentException if the element is null, has no text or contains illegal characters 
+	 * @throws IllegalArgumentException if the element is null, has no text or contains illegal characters
 	 */
 	public static void assertElementLegal(final String element) {
 		if (!StringUtils.hasText(element)) {
 			throw new IllegalArgumentException("Element required");
 		}
-		
+
 		// Note regular expression for legal characters found to be x5 slower in profiling than this approach
 		final char[] value = element.toCharArray();
 		for (int i = 0; i < value.length; i++) {
@@ -508,7 +508,7 @@ public final class XmlUtils {
 			}
 		}
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

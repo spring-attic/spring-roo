@@ -11,19 +11,19 @@ import org.springframework.roo.shell.Shell;
 
 /**
  * Commands related to file system monitoring and process management.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
 public class ProcessManagerCommands implements CommandMarker {
-	
+
 	// Fields
 	@Reference private ProcessManager processManager;
-	@Reference private Shell shell; 
-	
-	protected void activate(ComponentContext context) {
+	@Reference private Shell shell;
+
+	protected void activate(final ComponentContext context) {
 		if (!"false".equals(System.getProperty("developmentMode", "false").toLowerCase())) {
 			developmentMode(true);
 		}
@@ -31,12 +31,12 @@ public class ProcessManagerCommands implements CommandMarker {
 
 	@CliCommand(value="development mode", help="Switches the system into development mode (greater diagnostic information)")
 	public String developmentMode(
-			@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Activates development mode") boolean enabled) {
+			@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Activates development mode") final boolean enabled) {
 		processManager.setDevelopmentMode(enabled);
 		shell.setDevelopmentMode(enabled);
 		return "Development mode set to " + enabled;
 	}
-	
+
 	@CliCommand(value="poll status", help="Display file system polling information")
 	public String pollingInfo() {
 		StringBuilder sb = new StringBuilder("File system polling ");
@@ -56,13 +56,13 @@ public class ProcessManagerCommands implements CommandMarker {
 		}
 		return sb.toString();
 	}
-	
+
 	@CliCommand(value="poll speed", help="Changes the file system polling speed")
-	public String pollingSpeed(@CliOption(key={"","ms"}, mandatory=true, help="The number of milliseconds between each poll") long minimumDelayBetweenPoll) {
+	public String pollingSpeed(@CliOption(key={"","ms"}, mandatory=true, help="The number of milliseconds between each poll") final long minimumDelayBetweenPoll) {
 		processManager.setMinimumDelayBetweenPoll(minimumDelayBetweenPoll);
 		return pollingInfo();
 	}
-	
+
 	@CliCommand(value="poll now", help="Perform a manual file system poll")
 	public String poll() {
 		long originalSetting = processManager.getMinimumDelayBetweenPoll();

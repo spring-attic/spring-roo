@@ -32,14 +32,14 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link DataOnDemandOperations}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.3
  */
 @Component
 @Service
 public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
-	
+
 	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
@@ -50,7 +50,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 		return projectOperations.isProjectAvailable();
 	}
 
-	public void newDod(JavaType entity, JavaType name, Path path) {
+	public void newDod(final JavaType entity, final JavaType name, final Path path) {
 		Assert.notNull(entity, "Entity to produce a data on demand provider for is required");
 		Assert.notNull(name, "Name of the new data on demand provider is required");
 		Assert.notNull(path, "Location of the new data on demand provider is required");
@@ -72,7 +72,7 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 			// The file already exists
 			return;
 		}
-		
+
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> dodConfig = new ArrayList<AnnotationAttributeValue<?>>();
 		dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
@@ -80,15 +80,15 @@ public class DataOnDemandOperationsImpl implements DataOnDemandOperations {
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
-		
+
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
-		
+
 	/**
-	 * @param entity the entity to lookup required 
+	 * @param entity the entity to lookup required
 	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)
 	 */
-	private ClassOrInterfaceTypeDetails getEntity(JavaType entity) {
+	private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));

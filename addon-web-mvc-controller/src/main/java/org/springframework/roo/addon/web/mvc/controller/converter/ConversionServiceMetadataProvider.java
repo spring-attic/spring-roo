@@ -45,7 +45,7 @@ import org.springframework.roo.support.util.Assert;
  * notifications for {@link RooConversionService} and {@link RooWebScaffold}
  * annotated types. Also listens for changes to the scaffolded domain types and
  * their associated domain types.
- * 
+ *
  * @author Rossen Stoyanchev
  * @author Stefan Schmidt
  * @since 1.1.1
@@ -53,28 +53,28 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvider {
-	
+
 	// Fields
 	@Reference private LayerService layerService;
 	@Reference private TypeLocationService typeLocationService;
-	
+
 	// Stores the MID (as accepted by this ConversionServiceMetadataProvider) for the one (and only one) application-wide conversion service
 	private String applicationConversionServiceFactoryBeanMid;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_CONVERSION_SERVICE);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_CONVERSION_SERVICE);
 	}
 
 	@Override
-	protected String resolveDownstreamDependencyIdentifier(String upstreamDependency) {
+	protected String resolveDownstreamDependencyIdentifier(final String upstreamDependency) {
 		if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType()))) {
 			// A WebScaffoldMetadata upstream MID has changed or become available for the first time
 			// It's OK to return null if we don't yet know the MID because its JavaType has never been found
@@ -87,7 +87,7 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		applicationConversionServiceFactoryBeanMid = metadataIdentificationString;
 
 		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
@@ -120,8 +120,8 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, findMethods, idTypes, relevantDomainTypes, compositePrimaryKeyTypes);
 	}
-	
-	private Map<JavaType, Map<Object, JavaSymbolName>> findCompositePrimaryKeyTypesRequiringAConverter(Set<JavaType> controllers) {
+
+	private Map<JavaType, Map<Object, JavaSymbolName>> findCompositePrimaryKeyTypesRequiringAConverter(final Set<JavaType> controllers) {
 		Map<JavaType, Map<Object, JavaSymbolName>> types = new TreeMap<JavaType, Map<Object,JavaSymbolName>>();
 		for (JavaType controller : controllers) {
 			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
@@ -161,12 +161,12 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 	}
 
 	@Override
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(ConversionServiceMetadata.class.getName(), javaType, path);
 	}
 
 	@Override
-	protected String getGovernorPhysicalTypeIdentifier(String metadataId) {
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataId) {
 		JavaType javaType = PhysicalTypeIdentifierNamingUtils.getJavaType(ConversionServiceMetadata.class.getName(), metadataId);
 		Path path = PhysicalTypeIdentifierNamingUtils.getPath(ConversionServiceMetadata.class.getName(), metadataId);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);

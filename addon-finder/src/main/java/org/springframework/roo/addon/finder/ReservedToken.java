@@ -4,36 +4,36 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * A reserved token is a reserved word which is used as part of a JPA compliant SQL query.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
  */
 public class ReservedToken implements Token, Comparable<ReservedToken> {
-	
+
 	// Fields
-	private String value;
-	
+	private final String value;
+
 	/**
-	 * Create an instance of the {@link ReservedToken} 
-	 * 
+	 * Create an instance of the {@link ReservedToken}
+	 *
 	 * @param token the String token.
 	 */
-	public ReservedToken(String token) {
+	public ReservedToken(final String token) {
 		Assert.hasText(token, "Reserved token required");
 		this.value = token;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}
 
-	public int compareTo(ReservedToken o) {
+	public int compareTo(final ReservedToken o) {
 		int l = o.getValue().length() - this.getValue().length();
 		return l == 0 ? -1 : l;
 	}
 
-	@Override 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -41,8 +41,8 @@ public class ReservedToken implements Token, Comparable<ReservedToken> {
 		return result;
 	}
 
-	@Override 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

@@ -7,7 +7,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 public class GwtLocatorMetadata extends AbstractMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = GwtLocatorMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -15,12 +15,12 @@ public class GwtLocatorMetadata extends AbstractMetadataItem {
 	// Fields
 	private final String proxyTypeContents;
 
-	public GwtLocatorMetadata(String id, String proxyTypeContents) {
+	public GwtLocatorMetadata(final String id, final String proxyTypeContents) {
 		super(id);
 		this.proxyTypeContents = proxyTypeContents;
 	}
 
-	public GwtLocatorMetadata(JavaType javaType, String proxyTypeContents) {
+	public GwtLocatorMetadata(final JavaType javaType, final String proxyTypeContents) {
 		super(createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		this.proxyTypeContents = proxyTypeContents;
 	}
@@ -29,20 +29,20 @@ public class GwtLocatorMetadata extends AbstractMetadataItem {
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		GwtLocatorMetadata that = (GwtLocatorMetadata) o;

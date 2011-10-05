@@ -4,21 +4,22 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a schema in the database model.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class Schema {
-	private String name;
+	private final String name;
 
-	public Schema(String name) {
+	public Schema(final String name) {
 		this.name = StringUtils.defaultIfEmpty(name, DbreModelService.NO_SCHEMA_REQUIRED);
 	}
 
 	public String getName() {
 		return name;
 	}
-	
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -26,7 +27,8 @@ public class Schema {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -47,6 +49,7 @@ public class Schema {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return name;
 	}

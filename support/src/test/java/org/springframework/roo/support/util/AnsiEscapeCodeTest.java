@@ -20,26 +20,26 @@ public class AnsiEscapeCodeTest {
 	public void testCodesAreUnique() {
 		// Set up
 		final Set<Object> codes = new HashSet<Object>();
-		
+
 		// Invoke
 		for (final AnsiEscapeCode escapeCode : AnsiEscapeCode.values()) {
 			codes.add(escapeCode.code);
 		}
-		
+
 		// Check
 		assertEquals(AnsiEscapeCode.values().length, codes.size());
 	}
-	
+
 	@Test
 	public void testDecorateNullText() {
 		assertNull(AnsiEscapeCode.decorate(null, AnsiEscapeCode.values()[0]));
 	}
-	
+
 	@Test
 	public void testDecorateEmptyText() {
 		assertEquals("", AnsiEscapeCode.decorate("", AnsiEscapeCode.values()[0]));
 	}
-	
+
 	@Test
 	public void testDecorateWhitespace() {
 		final AnsiEscapeCode effect = AnsiEscapeCode.values()[0]; // Arbitrary

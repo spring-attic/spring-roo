@@ -7,23 +7,23 @@ import java.util.Set;
 
 /**
  * Builder for {@link CustomData}.
- * 
+ *
  * <p>
  * Can be used to create new instances from scratch, or based on an existing {@link CustomData} instance.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public class CustomDataBuilder implements Builder<CustomData> {
 
 	// Fields
-	private Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
-	
+	private final Map<Object, Object> customData = new LinkedHashMap<Object, Object>();
+
 	/**
 	 * Constructor for an empty builder
 	 */
 	public CustomDataBuilder() {}
-	
+
 	/**
 	 * Constructor for a builder initialised with the given contents
 	 *
@@ -32,7 +32,7 @@ public class CustomDataBuilder implements Builder<CustomData> {
 	public CustomDataBuilder(final CustomData existing) {
 		append(existing);
 	}
-	
+
 	public CustomData build() {
 		return new CustomDataImpl(customData);
 	}
@@ -43,7 +43,7 @@ public class CustomDataBuilder implements Builder<CustomData> {
 
 	/**
 	 * Appends the given custom data to this builder
-	 * 
+	 *
 	 * @param customData the custom data to append; can be <code>null</code> to
 	 * make no changes
 	 */
@@ -54,8 +54,8 @@ public class CustomDataBuilder implements Builder<CustomData> {
 			}
 		}
 	}
-	
-	public Object get(Object key) {
+
+	public Object get(final Object key) {
 		return customData.get(key);
 	}
 
@@ -63,11 +63,11 @@ public class CustomDataBuilder implements Builder<CustomData> {
 		return customData.keySet();
 	}
 
-	public Object put(Object key, Object value) {
+	public Object put(final Object key, final Object value) {
 		return customData.put(key, value);
 	}
 
-	public Object remove(Object key) {
+	public Object remove(final Object key) {
 		return customData.remove(key);
 	}
 

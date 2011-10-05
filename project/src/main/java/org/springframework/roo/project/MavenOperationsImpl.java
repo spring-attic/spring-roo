@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link MavenOperations}.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
@@ -33,7 +33,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
 	// Constants
 	private static final Logger LOGGER = HandlerUtils.getLogger(MavenOperationsImpl.class);
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProcessManager processManager;
@@ -41,20 +41,20 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	public boolean isCreateProjectAvailable() {
 		return !isProjectAvailable();
 	}
-	
+
 	public String getProjectRoot() {
 		return pathResolver.getRoot(Path.ROOT);
 	}
-	
+
 	public void createProject(final JavaPackage topLevelPackage, final String projectName, final Integer majorJavaVersion, final GAV parentPom, final PackagingType packagingType) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
 		final String javaVersion = getJavaVersion(majorJavaVersion);
 		packagingType.createArtifacts(topLevelPackage, projectName, javaVersion, parentPom);
 	}
-	
+
 	/**
 	 * Returns the project's target Java version in POM format
-	 * 
+	 *
 	 * @param majorJavaVersion the major version provided by the user; can be
 	 * <code>null</code> to auto-detect it
 	 * @return a non-blank string
@@ -63,7 +63,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		if (majorJavaVersion != null && majorJavaVersion >= 5 && majorJavaVersion <= 7) {
 			return "1." + majorJavaVersion;
 		}
-		
+
 		// No valid version given; detect the major Java version to use
 		final String ver = System.getProperty("java.version");
 		if (ver.contains("1.7.")) {
@@ -99,7 +99,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	private static class LoggingInputStream extends Thread {
 
 		// Fields
@@ -159,7 +159,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		focus(module);
 		packagingType.createArtifacts(topLevelPackage, name, "${java.version}", parent);
 	}
-	
+
 	public void focus(final GAV module) {
 		Assert.notNull(module, "Specify the module to focus on");
 		throw new UnsupportedOperationException("Module focussing not implemented yet");	// TODO by JTT for ROO-120

@@ -28,10 +28,10 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
  * Processes <code>httppgp://</code> URLs. Does not handle HTTPS URLs.
- * 
+ *
  * <p>
  * This implementation offers two main features:
- * 
+ *
  * <ul>
  * <li>It delegates the downloading process to {@link UrlInputStreamService} so that an
  * alternate implementation can be added that may offer more advanced capabilities or
@@ -41,11 +41,11 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * signature, as produced via "gpg --armor --detach-sign file_to_sign.ext")</li>
  * </li>
  * </ul>
- * 
+ *
  * <p>
  * As such this module simplifies security management and proxy server compatibility for
  * Spring Roo.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -55,19 +55,19 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 
 	// Constants
 	private static final Logger LOGGER = HandlerUtils.getLogger(HttpPgpUrlStreamHandlerServiceImpl.class);
-	
+
 	// Fields
 	@Reference private UrlInputStreamService urlInputStreamService;
 	@Reference private PgpService pgpService;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		Hashtable<String,String> dict = new Hashtable<String,String>();
 		dict.put(URLConstants.URL_HANDLER_PROTOCOL, "httppgp");
 		context.getBundleContext().registerService(URLStreamHandlerService.class.getName(), this, dict);
 	}
-	
+
 	@Override
-	public URLConnection openConnection(URL u) throws IOException {
+	public URLConnection openConnection(final URL u) throws IOException {
 		// Convert httppgp:// URL into a standard http:// URL
 		URL resourceUrl = new URL(u.toExternalForm().replace("httppgp", "http"));
 		// Add .asc to the end of the standard resource URL
@@ -108,7 +108,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 			resource = new FileInputStream(resourceFile);
 			signature = new FileInputStream(ascUrlFile);
 			Assert.isTrue(pgpService.isResourceSignedBySignature(resource, signature), "PGP signature illegal for URL '" + resourceUrl.toExternalForm() + "'");
-			
+
 			// Excellent it worked! We don't need the ASC file anymore, so get rid of it
 			ascUrlFile.delete();
 

@@ -20,12 +20,12 @@ import org.springframework.roo.shell.MethodTarget;
 public class PgpKeyIdConverter implements Converter<PgpKeyId> {
 
 	@Reference private PgpService pgpService;
-	
-	public PgpKeyId convertFromText(String value, Class<?> requiredType, String optionContext) {
+
+	public PgpKeyId convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		return new PgpKeyId(value.trim());
 	}
-	
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String originalUserInput, String optionContext, MethodTarget target) {
+
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
 		for (PgpKeyId candidate : pgpService.getDiscoveredKeyIds()) {
 			String id = candidate.getId();
 			if (id.toUpperCase().startsWith(originalUserInput.toUpperCase())) {
@@ -36,7 +36,7 @@ public class PgpKeyIdConverter implements Converter<PgpKeyId> {
 		return false;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return PgpKeyId.class.isAssignableFrom(requiredType);
 	}
 }

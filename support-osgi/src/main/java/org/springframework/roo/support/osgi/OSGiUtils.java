@@ -25,12 +25,12 @@ public final class OSGiUtils {
 	 * The root path within an OSGi bundle
 	 */
 	public static final String ROOT_PATH = "/";
-	
+
 	private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
-	
+
 	/**
 	 * Searches the bundles in the given context for entries with the given path.
-	 * 
+	 *
 	 * @param context that can be used to obtain bundles to search (can be <code>null</code>)
 	 * @param path the path of the resource to locate (as per {@link Bundle#getEntry},
 	 * e.g. "/foo.txt" will find foo.txt in the root of each bundle)
@@ -65,14 +65,14 @@ public final class OSGiUtils {
 				},
 				context
 		);
-		
+
 		return urls;
 	}
 
 	/**
 	 * Returns the URIs of any entries among the given bundles whose URLs match
 	 * the given Ant-style path.
-	 * 
+	 *
 	 * @param context the context whose bundles to search (can be <code>null</code>)
 	 * @param antPathExpression the pattern for matching URLs against (required)
 	 * @return <code>null</code> if the search can't be performed, otherwise a
@@ -113,10 +113,10 @@ public final class OSGiUtils {
 		}, context);
 		return urls;
 	}
-	
+
 	/**
 	 * Executes the given callback on any bundles in the given context
-	 * 
+	 *
 	 * @param callback can be <code>null</code> to do nothing
 	 * @param context can be <code>null</code> to do nothing
 	 */

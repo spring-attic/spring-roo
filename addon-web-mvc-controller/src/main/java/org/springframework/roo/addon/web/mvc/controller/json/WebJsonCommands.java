@@ -12,43 +12,43 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands which provide JSON functionality through Spring MVC controllers.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
 public class WebJsonCommands implements CommandMarker {
-	
+
 	@Reference private WebJsonOperations operations;
 
-	@CliAvailabilityIndicator({ "web mvc json add", "web mvc json all" }) 
+	@CliAvailabilityIndicator({ "web mvc json add", "web mvc json all" })
 	public boolean isCommandAvailable() {
 		return operations.isCommandAvailable();
 	}
-	
-	@CliAvailabilityIndicator({ "web mvc json setup" }) 
+
+	@CliAvailabilityIndicator({ "web mvc json setup" })
 	public boolean isSetupAvailable() {
 		return operations.isSetupAvailable();
 	}
-	
+
 	@CliCommand(value = "web mvc json setup", help = "Setup Spring MVC for Json support.")
 	public void setup() {
 		operations.setup();
 	}
 
-	@CliCommand(value = "web mvc json add", help = "Adds @RooJson annotation to target type") 
+	@CliCommand(value = "web mvc json add", help = "Adds @RooJson annotation to target type")
 	public void add(
-		@CliOption(key = "jsonObject", mandatory = true, help = "The JSON-enabled object which backs this Spring MVC controller.") JavaType jsonObject,
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply this annotation to") JavaType target) {		
-		
+		@CliOption(key = "jsonObject", mandatory = true, help = "The JSON-enabled object which backs this Spring MVC controller.") final JavaType jsonObject,
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply this annotation to") final JavaType target) {
+
 		operations.annotateType(target, jsonObject);
 	}
-	
-	@CliCommand(value = "web mvc json all", help = "Adds or creates MVC controllers annotated with @RooWebJson annotation") 
+
+	@CliCommand(value = "web mvc json all", help = "Adds or creates MVC controllers annotated with @RooWebJson annotation")
 	public void all(
-		@CliOption(key = "package", mandatory = false, optionContext = "update", help = "The package in which new controllers will be placed") JavaPackage javaPackage) {
-		
+		@CliOption(key = "package", mandatory = false, optionContext = "update", help = "The package in which new controllers will be placed") final JavaPackage javaPackage) {
+
 		operations.annotateAll(javaPackage);
 	}
 }

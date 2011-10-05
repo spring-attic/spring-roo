@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Interface for {@link SimpleParser}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */

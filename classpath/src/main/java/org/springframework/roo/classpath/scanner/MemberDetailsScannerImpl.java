@@ -26,61 +26,61 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MemberDetailsScanner}.
- * 
+ *
  * <p>
  * Automatically detects all {@link MemberDetailsDecorator} instances in the OSGi container and will delegate to them
  * during execution of the {@link #getMemberDetails(String, ClassOrInterfaceTypeDetails)} method.
- * 
+ *
  * <p>
  * While internally this implementation will visit {@link MetadataProvider}s and {@link MemberDetailsDecorator}s in the order
  * of their type name, it is essential an add-on developer does not rely on this behaviour. Correct use of the metadata
  * infrastructure does not require special type naming approaches to be employed. The ordering behaviour exists solely
  * to simplify debugging for add-on developers and log comparison between invocations.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 @References(
-	value = { 
-		@Reference(name = "memberHoldingDecorator", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MemberDetailsDecorator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE), 
-		@Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) 
+	value = {
+		@Reference(name = "memberHoldingDecorator", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MemberDetailsDecorator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+		@Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 	}
 )
 public class MemberDetailsScannerImpl implements MemberDetailsScanner {
-	
+
 	// Fields
 	@Reference protected MetadataService metadataService;
 
 	// Mutex
 	private final Object lock = new Object();
 
-	private SortedSet<MetadataProvider> providers = new TreeSet<MetadataProvider>(new Comparator<MetadataProvider>() {
-		public int compare(MetadataProvider o1, MetadataProvider o2) {
+	private final SortedSet<MetadataProvider> providers = new TreeSet<MetadataProvider>(new Comparator<MetadataProvider>() {
+		public int compare(final MetadataProvider o1, final MetadataProvider o2) {
 			return o1.getClass().getName().compareTo(o2.getClass().getName());
 		}
 	});
-	
-	private SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(new Comparator<MemberDetailsDecorator>() {
-		public int compare(MemberDetailsDecorator o1, MemberDetailsDecorator o2) {
+
+	private final SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(new Comparator<MemberDetailsDecorator>() {
+		public int compare(final MemberDetailsDecorator o1, final MemberDetailsDecorator o2) {
 			return o1.getClass().getName().compareTo(o2.getClass().getName());
 		}
 	});
-	
-	protected void bindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
+
+	protected void bindMemberHoldingDecorator(final MemberDetailsDecorator decorator) {
 		synchronized (lock) {
 			decorators.add(decorator);
 		}
 	}
 
-	protected void unbindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
+	protected void unbindMemberHoldingDecorator(final MemberDetailsDecorator decorator) {
 		synchronized (lock) {
 			decorators.remove(decorator);
 		}
 	}
 
-	protected void bindMetadataProvider(MetadataProvider mp) {
+	protected void bindMetadataProvider(final MetadataProvider mp) {
 		synchronized (lock) {
 			Assert.notNull(mp, "Metadata provider required");
 			String mid = mp.getProvidesType();
@@ -88,15 +88,15 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 			providers.add(mp);
 		}
 	}
-	
-	protected void unbindMetadataProvider(MetadataProvider mp) {
+
+	protected void unbindMetadataProvider(final MetadataProvider mp) {
 		synchronized (lock) {
 			Assert.notNull(mp, "Metadata provider required");
 			providers.remove(mp);
 		}
 	}
 
-	protected void deactivate(ComponentContext componentContext) {
+	protected void deactivate(final ComponentContext componentContext) {
 		// Empty
 	}
 
@@ -107,30 +107,30 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 		synchronized (lock) {
 			// Create a list of discovered members
 			List<MemberHoldingTypeDetails> memberHoldingTypeDetails = new ArrayList<MemberHoldingTypeDetails>();
-			
+
 			// Build a List representing the class hierarchy, where the first element is the absolute superclass
 			List<ClassOrInterfaceTypeDetails> cidHierarchy = new ArrayList<ClassOrInterfaceTypeDetails>();
 			while (cid != null) {
 				cidHierarchy.add(0, cid);  // Note to the top of the list
 				cid = cid.getSuperclass();
 			}
-			
+
 			// Now we add this governor, plus all of its superclasses
 			for (ClassOrInterfaceTypeDetails currentClass : cidHierarchy) {
 				memberHoldingTypeDetails.add(currentClass);
-				
+
 				// Locate all MetadataProvider instances that provide ITDs and thus MemberHoldingTypeDetails information
 				for (MetadataProvider mp : providers) {
 					// Skip non-ITD providers
 					if (!(mp instanceof ItdMetadataProvider)) {
 						continue;
 					}
-					
+
 					// Skip myself
 					if (mp.getClass().getName().equals(requestingClass)) {
 						continue;
 					}
-					
+
 					// Determine the key the ITD provider uses for this particular type
 					String key = ((ItdMetadataProvider) mp).getIdForPhysicalJavaType(currentClass.getDeclaredByMetadataId());
 					Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(key), "ITD metadata provider '" + mp + "' returned an illegal key ('" + key + "'");
@@ -145,7 +145,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 					if (itdTypeDetailsMd.getMemberHoldingTypeDetails() == null) {
 						continue;
 					}
-		
+
 					// Capture the member details
 					memberHoldingTypeDetails.add(itdTypeDetailsMd.getMemberHoldingTypeDetails());
 				}
@@ -153,7 +153,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 
 			// Turn out list of discovered members into a result
 			MemberDetails result = new MemberDetailsImpl(memberHoldingTypeDetails);
-			
+
 			// Loop until such time as we complete a full loop where no changes are made to the result
 			boolean additionalLoopRequired = true;
 			while (additionalLoopRequired) {
@@ -167,7 +167,7 @@ public class MemberDetailsScannerImpl implements MemberDetailsScanner {
 					result = newResult;
 				}
 			}
-			
+
 			return result;
 		}
 	}

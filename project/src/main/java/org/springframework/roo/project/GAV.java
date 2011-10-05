@@ -12,10 +12,10 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.2.0
  */
 public class GAV {
-	
+
 	/**
 	 * Returns an instance based on the given concatenated Maven coordinates
-	 * 
+	 *
 	 * @param coordinates the groupId, artifactId, and version, separated by
 	 * {@link MavenUtils#COORDINATE_SEPARATOR}
 	 * @return a non-blank instance
@@ -32,7 +32,7 @@ public class GAV {
 	private final String groupId;
 	private final String artifactId;
 	private final String version;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -40,26 +40,26 @@ public class GAV {
 	 * @param artifactId
 	 * @param version
 	 */
-	public GAV(String groupId, String artifactId, String version) {
+	public GAV(final String groupId, final String artifactId, final String version) {
 		// Check
 		Assert.isTrue(MavenUtils.isValidMavenId(groupId), "Invalid groupId '" + groupId + "'");
 		Assert.isTrue(MavenUtils.isValidMavenId(artifactId), "Invalid artifactId '" + artifactId + "'");
 		Assert.hasText(version, "Version is required");
-		
+
 		// Assign
 		this.groupId = groupId;
 		this.artifactId = artifactId;
 		this.version = version;
 	}
-	
+
 	public String getArtifactId() {
 		return artifactId;
 	}
-	
+
 	public String getGroupId() {
 		return groupId;
 	}
-	
+
 	public String getVersion() {
 		return version;
 	}

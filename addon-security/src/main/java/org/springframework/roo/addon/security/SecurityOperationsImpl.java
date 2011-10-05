@@ -27,19 +27,19 @@ import org.w3c.dom.Element;
 
 /**
  * Provides security installation services.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
  */
-@Component 
-@Service 
+@Component
+@Service
 public class SecurityOperationsImpl implements SecurityOperations {
-	
+
 	// Constants
 	private static final String SECURITY_VERSION = "3.0.5.RELEASE";
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -62,7 +62,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		updateDependencies(configuration);
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		
+
 		// Copy the template across
 		String destination = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
 		if (!fileManager.exists(destination)) {
@@ -102,14 +102,14 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		fileManager.createOrUpdateTextFileIfRequired(webConfigPath, XmlUtils.nodeToString(webConfigDocument), false);
 	}
 
-	private void updatePomProperties(Element configuration) {
+	private void updatePomProperties(final Element configuration) {
 		List<Element> databaseProperties = XmlUtils.findElements("/configuration/spring-security/properties/*", configuration);
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(new Property(property));
 		}
 	}
 
-	private void updateDependencies(Element configuration) {
+	private void updateDependencies(final Element configuration) {
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 		List<Element> securityDependencies = XmlUtils.findElements("/configuration/spring-security/dependencies/dependency", configuration);
 		for (Element dependencyElement : securityDependencies) {

@@ -17,33 +17,33 @@ public class PairTest {
 	public void testConstructWithNullKey() {
 		new Pair<Object, Object>(null, "");
 	}
-	
+
 	@Test
 	public void testConstructWithNullValue() {
 		new Pair<Object, Object>("", null);
 	}
-	
+
 	@Test
 	public void testInstanceEqualsItself() {
 		final Pair<Integer, String> pair = new Pair<Integer, String>(1, "a");
 		assertEquals(pair, pair);
 	}
-	
+
 	@Test
 	public void testEqualKeyAndValueAreEqual() {
 		assertEquals(new Pair<Integer, String>(1, "a"), new Pair<Integer, String>(1, "a"));
 	}
-	
+
 	@Test
 	public void testUnequalKeyIsNotEqual() {
 		assertFalse(new Pair<Integer, String>(1, "a").equals(new Pair<Integer, String>(2, "a")));
 	}
-	
+
 	@Test
 	public void testUnequalValueIsNotEqual() {
 		assertFalse(new Pair<Integer, String>(1, "a").equals(new Pair<Integer, String>(1, "b")));
 	}
-	
+
 	@Test
 	public void testOtherClassIsNotAPair() {
 		assertFalse(new Pair<Integer, String>(1, "a").equals("foo"));

@@ -62,15 +62,15 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 	@Reference TypeLocationService typeLocationService;
 	@Reference TypeManagementService typeManagementService;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	public MetadataItem get(String metadataIdentificationString) {
+	public MetadataItem get(final String metadataIdentificationString) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return null;
@@ -101,7 +101,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		if (identifierAccessor == null || versionAccessor == null) {
 			return null;
 		}
-		
+
 		final JavaType identifierType = GwtUtils.convertPrimitiveType(identifierAccessor.getReturnType(), true);
 		String locatorIdentifier = PhysicalTypeIdentifier.createIdentifier(new JavaType(locatorType));
 		ClassOrInterfaceTypeDetailsBuilder locatorBuilder = new ClassOrInterfaceTypeDetailsBuilder(locatorIdentifier);
@@ -120,19 +120,19 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		locatorBuilder.addMethod(getIdMethod(locatorIdentifier, entity.getName(), identifierAccessor));
 		locatorBuilder.addMethod(getIdTypeMethod(locatorIdentifier, entity.getName(), identifierType));
 		locatorBuilder.addMethod(getVersionMethod(locatorIdentifier, entity.getName(), versionAccessor));
-		
+
 		typeManagementService.createOrUpdateTypeOnDisk(locatorBuilder.build());
 		return null;
 	}
 
-	private MethodMetadataBuilder getDomainTypeMethod(String declaredById, JavaType targetType) {
+	private MethodMetadataBuilder getDomainTypeMethod(final String declaredById, final JavaType targetType) {
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return " + targetType.getSimpleTypeName() + ".class;");
 		JavaType returnType = new JavaType(CLASS.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(targetType));
 		return new MethodMetadataBuilder(declaredById, Modifier.PUBLIC, new JavaSymbolName("getDomainType"), returnType, invocableMemberBodyBuilder);
 	}
 
-	private MethodMetadataBuilder getIdMethod(String declaredById, JavaType targetType, MethodMetadata idAccessor) {
+	private MethodMetadataBuilder getIdMethod(final String declaredById, final JavaType targetType, final MethodMetadata idAccessor) {
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return " + StringUtils.uncapitalize(targetType.getSimpleTypeName()) + "." + idAccessor.getMethodName() + "();");
 		MethodMetadataBuilder getIdMethod = new MethodMetadataBuilder(declaredById, Modifier.PUBLIC, new JavaSymbolName("getId"), GwtUtils.convertPrimitiveType(idAccessor.getReturnType(), true), invocableMemberBodyBuilder);
@@ -140,7 +140,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		return getIdMethod;
 	}
 
-	private MethodMetadataBuilder getVersionMethod(String declaredById, JavaType targetType, MethodMetadata versionAccessor) {
+	private MethodMetadataBuilder getVersionMethod(final String declaredById, final JavaType targetType, final MethodMetadata versionAccessor) {
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return " + StringUtils.uncapitalize(targetType.getSimpleTypeName()) + "." + versionAccessor.getMethodName() + "();");
 		MethodMetadataBuilder getIdMethodBuilder = new MethodMetadataBuilder(declaredById, Modifier.PUBLIC, new JavaSymbolName("getVersion"), JavaType.OBJECT, invocableMemberBodyBuilder);
@@ -148,14 +148,14 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		return getIdMethodBuilder;
 	}
 
-	private MethodMetadataBuilder getIdTypeMethod(String declaredById, JavaType targetType, JavaType idType) {
+	private MethodMetadataBuilder getIdTypeMethod(final String declaredById, final JavaType targetType, final JavaType idType) {
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return " + idType.getSimpleTypeName() + ".class;");
 		JavaType returnType = new JavaType(JavaType.CLASS.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(idType));
 		return new MethodMetadataBuilder(declaredById, Modifier.PUBLIC, new JavaSymbolName("getIdType"), returnType, invocableMemberBodyBuilder);
 	}
 
-	private MethodMetadataBuilder getFindMethod(ClassOrInterfaceTypeDetailsBuilder locatorBuilder, String declaredById, JavaType targetType, JavaType idType) {
+	private MethodMetadataBuilder getFindMethod(final ClassOrInterfaceTypeDetailsBuilder locatorBuilder, final String declaredById, final JavaType targetType, final JavaType idType) {
 		MemberTypeAdditions findMethodAdditions = layerService.getMemberTypeAdditions(declaredById, CustomDataKeys.FIND_METHOD.name(), targetType, idType, LAYER_POSITION, new MethodParameter(idType, "id"));
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return ").append(findMethodAdditions.getMethodCall()).append(";");
@@ -168,7 +168,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		return findMethodBuilder;
 	}
 
-	private MethodMetadataBuilder getCreateMethod(String declaredById, JavaType targetType) {
+	private MethodMetadataBuilder getCreateMethod(final String declaredById, final JavaType targetType) {
 		InvocableMemberBodyBuilder invocableMemberBodyBuilder = InvocableMemberBodyBuilder.getInstance();
 		invocableMemberBodyBuilder.append("return new " + targetType.getSimpleTypeName() + "();");
 		MethodMetadataBuilder createMethodBuilder = new MethodMetadataBuilder(declaredById, Modifier.PUBLIC, new JavaSymbolName("create"), targetType, invocableMemberBodyBuilder);
@@ -178,7 +178,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		return createMethodBuilder;
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
+	public void notify(final String upstreamDependency, String downstreamDependency) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
 			return;
@@ -246,7 +246,7 @@ public class GwtLocatorMetadataProviderImpl implements GwtLocatorMetadataProvide
 		return GwtLocatorMetadata.getMetadataIdentifierType();
 	}
 
-	private ClassOrInterfaceTypeDetails getGovernor(String metadataIdentificationString) {
+	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtLocatorMetadata.getJavaType(metadataIdentificationString);
 		Path governorTypePath = GwtLocatorMetadata.getPath(metadataIdentificationString);
 

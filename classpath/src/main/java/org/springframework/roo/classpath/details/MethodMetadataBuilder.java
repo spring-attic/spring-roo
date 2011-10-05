@@ -11,26 +11,26 @@ import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Builder for {@link MethodMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilder<MethodMetadata> {
-	
+
 	// Fields
 	private JavaSymbolName methodName;
 	private JavaType returnType;
-	
-	public MethodMetadataBuilder(String declaredbyMetadataId) {
+
+	public MethodMetadataBuilder(final String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
-	
-	public MethodMetadataBuilder(MethodMetadata existing) {
+
+	public MethodMetadataBuilder(final MethodMetadata existing) {
 		super(existing);
 		init(existing.getMethodName(), existing.getReturnType());
 	}
-	
-	public MethodMetadataBuilder(String declaredbyMetadataId, MethodMetadata existing) {
+
+	public MethodMetadataBuilder(final String declaredbyMetadataId, final MethodMetadata existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing.getMethodName(), existing.getReturnType());
 	}
@@ -46,7 +46,7 @@ public class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilde
 	 * @param parameterNames
 	 * @param bodyBuilder
 	 */
-	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, InvocableMemberBodyBuilder bodyBuilder) {
+	public MethodMetadataBuilder(final String declaredbyMetadataId, final int modifier, final JavaSymbolName methodName, final JavaType returnType, final List<AnnotatedJavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final InvocableMemberBodyBuilder bodyBuilder) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
 		setParameterTypes(parameterTypes);
@@ -64,7 +64,7 @@ public class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilde
 	 * @param returnType
 	 * @param bodyBuilder
 	 */
-	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, InvocableMemberBodyBuilder bodyBuilder) {
+	public MethodMetadataBuilder(final String declaredbyMetadataId, final int modifier, final JavaSymbolName methodName, final JavaType returnType, final InvocableMemberBodyBuilder bodyBuilder) {
 		this(declaredbyMetadataId, modifier, methodName, returnType, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 	}
 
@@ -81,7 +81,7 @@ public class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilde
 		return methodName;
 	}
 
-	public void setMethodName(JavaSymbolName methodName) {
+	public void setMethodName(final JavaSymbolName methodName) {
 		this.methodName = methodName;
 	}
 
@@ -89,7 +89,7 @@ public class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilde
 		return returnType;
 	}
 
-	public void setReturnType(JavaType returnType) {
+	public void setReturnType(final JavaType returnType) {
 		this.returnType = returnType;
 	}
 

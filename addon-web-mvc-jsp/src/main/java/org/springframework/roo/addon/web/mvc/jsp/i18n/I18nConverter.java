@@ -19,13 +19,13 @@ import org.springframework.roo.shell.MethodTarget;
 @Component(immediate = true)
 @Service
 public class I18nConverter implements Converter<I18n> {
-	
+
 	// Fields
 	@Reference private I18nSupport i18nSupport;
 
-	public I18n convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public I18n convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value.length() == 2) {
-			return i18nSupport.getLanguage(new Locale(value,"","")); 
+			return i18nSupport.getLanguage(new Locale(value,"",""));
 			// Disabled due to ROO-1584
 			// } else if (value.length() == 5) {
 			// String[] split = value.split("_");
@@ -34,7 +34,7 @@ public class I18nConverter implements Converter<I18n> {
 		return null;
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		for(I18n i18n: i18nSupport.getSupportedLanguages()) {
 			Locale locale = i18n.getLocale();
 			StringBuffer localeString = new StringBuffer(locale.getLanguage());
@@ -46,7 +46,7 @@ public class I18nConverter implements Converter<I18n> {
 		return true;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return I18n.class.isAssignableFrom(requiredType);
 	}
 }

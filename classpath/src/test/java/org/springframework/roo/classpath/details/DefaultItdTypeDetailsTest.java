@@ -47,10 +47,10 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		when(mockAspectType.isDefaultPackage()).thenReturn(false);
 		when(mockAspectType.getSimpleTypeName()).thenReturn("Person_Roo_Extra");
 		final String declaredByMetadataId = "MID:foo#bar";
-		
+
 		// Invoke
 		final DefaultItdTypeDetails itd = new DefaultItdTypeDetails(mockCustomData, declaredByMetadataId, modifier, mockGovernor, mockAspectType, privilegedAspect, null, null, null, null, null, null, null, null, null, null);
-		
+
 		// Check
 		assertEquals(0, itd.getAnnotations().size());
 		assertEquals(0, itd.getDeclaredConstructors().size());
@@ -64,7 +64,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		assertEquals(0, itd.getInnerTypes().size());
 		assertEquals(0, itd.getMethodAnnotations().size());
 		assertEquals(0, itd.getRegisteredImports().size());
-		
+
 		assertEquals(mockAspectType, itd.getAspect());
 		assertEquals(mockCustomData, itd.getCustomData());
 		assertEquals(declaredByMetadataId, itd.getDeclaredByMetadataId());
@@ -74,7 +74,7 @@ public class DefaultItdTypeDetailsTest extends ItdTypeDetailsTestCase {
 		assertEquals(privilegedAspect, itd.isPrivilegedAspect());
 		assertEquals(mockGovernor, itd.getGovernor());
 		assertFalse(itd.extendsType(mock(JavaType.class)));
-		
+
 		assertOutput(MINIMAL_ITD, itd);
 	}
 }

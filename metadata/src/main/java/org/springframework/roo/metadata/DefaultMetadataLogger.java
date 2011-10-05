@@ -15,37 +15,37 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MetadataLogger}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1.2
  */
 @Service
 @Component
 public class DefaultMetadataLogger implements MetadataLogger {
-	
+
 	// Fields
 	private int traceLevel = 0;
 	private long eventNumber = 0;
 	private FileWriter fileLog;
-	private Stack<Long> eventStack = new Stack<Long>();
-	private Stack<TimerEntry> timerStack = new Stack<TimerEntry>();
+	private final Stack<Long> eventStack = new Stack<Long>();
+	private final Stack<TimerEntry> timerStack = new Stack<TimerEntry>();
 	/** key: responsible class, value: nanos occupied */
-	private Map<String, Long> timings = new HashMap<String, Long>();
+	private final Map<String, Long> timings = new HashMap<String, Long>();
 	/** key: responsible class, value: number of times a timing record was created for the responsible class */
-	private Map<String, Long> invocations = new HashMap<String, Long>();
+	private final Map<String, Long> invocations = new HashMap<String, Long>();
 	private final Class<DefaultMetadataLogger> mutex = DefaultMetadataLogger.class;
-	
+
 	public DefaultMetadataLogger() {
 		if (System.getProperty("roo.metadata.trace") != null) {
 			traceLevel = 2;
 		}
 	}
-	
+
 	public int getTraceLevel() {
 		return traceLevel;
 	}
 
-	public void setTraceLevel(int trace) {
+	public void setTraceLevel(final int trace) {
 		this.traceLevel = trace;
 	}
 
@@ -63,13 +63,13 @@ public class DefaultMetadataLogger implements MetadataLogger {
 		eventNumber++;
 		eventStack.push(eventNumber);
 	}
-	
+
 	public void stopEvent() {
 		Assert.isTrue(eventStack.size() > 0, "Event stack is empty, indicating a mismatched number of timer start/stop calls");
 		eventStack.pop();
 	}
-	
-	public void log(String message) {
+
+	public void log(final String message) {
 		Assert.hasText(message, "Message to log required");
 		Assert.isTrue(eventStack.size() > 0, "Event stack is empty, so no logging should have been requested at this time");
 		StringBuilder sb = new StringBuilder("00000000");
@@ -85,8 +85,8 @@ public class DefaultMetadataLogger implements MetadataLogger {
 		sb.append(message);
 		logToFile(sb.toString());
 	}
-	
-	public void startTimer(String responsibleClass) {
+
+	public void startTimer(final String responsibleClass) {
 		Assert.hasText(responsibleClass, "Responsible class required");
 		long now = System.nanoTime();
 		if (timerStack.size() > 0) {
@@ -102,14 +102,14 @@ public class DefaultMetadataLogger implements MetadataLogger {
 		timerEntry.clockStartedOrResumed = now;
 		timerStack.push(timerEntry);
 	}
-	
+
 	public void stopTimer() {
 		Assert.isTrue(timerStack.size() > 0, "Timer stack is empty, indicating a mismatched number of timer start/stop calls");
 		long now = System.nanoTime();
 		TimerEntry timerEntry = timerStack.pop();
 		timerEntry.duration = timerEntry.duration + (now - timerEntry.clockStartedOrResumed);
 		String responsibleClass = timerEntry.responsibleClass;
-		
+
 		// Update the timings summary
 		synchronized (mutex) {
 			Long existingSummary = timings.get(responsibleClass);
@@ -119,7 +119,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
 				existingSummary = existingSummary + timerEntry.duration;
 			}
 			timings.put(responsibleClass, existingSummary);
-			
+
 			// Update the invocation count
 			Long existingInvocations = invocations.get(responsibleClass);
 			if (existingInvocations == null) {
@@ -129,8 +129,8 @@ public class DefaultMetadataLogger implements MetadataLogger {
 			invocations.put(responsibleClass, existingInvocations);
 		}
 	}
-	
-	private void logToFile(String line) {
+
+	private void logToFile(final String line) {
 		if (fileLog == null) {
 			try {
 				fileLog = new FileWriter("metadata.log", false); // Overwrite existing (don't append)
@@ -145,7 +145,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
 			fileLog.flush(); // So tail -f will show it's working
 		} catch (IOException ignoreIt) {}
 	}
-	
+
 	private static class TimerEntry {
 		String responsibleClass;
 		long clockStartedOrResumed; // nanos

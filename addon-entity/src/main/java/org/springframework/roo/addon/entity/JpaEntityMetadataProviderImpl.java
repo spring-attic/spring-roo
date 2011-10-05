@@ -62,14 +62,14 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * The {@link JpaEntityMetadataProvider} implementation.
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
 public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements JpaEntityMetadataProvider {
-	
+
 	// JPA-related field matchers
 	private static final FieldMatcher JPA_COLUMN_FIELD_MATCHER = new FieldMatcher(COLUMN_FIELD, AnnotationMetadataBuilder.getInstance(COLUMN));
 	private static final FieldMatcher JPA_EMBEDDED_FIELD_MATCHER = new FieldMatcher(EMBEDDED_FIELD, AnnotationMetadataBuilder.getInstance(EMBEDDED));
@@ -96,12 +96,12 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
 	private static final String PROVIDES_TYPE_STRING = JpaEntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
+
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	
+
 	// ------------- Mandatory AbstractItdMetadataProvider methods -------------
-	
+
 	@Override
 	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
@@ -121,11 +121,11 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	public String getItdUniquenessFilenameSuffix() {
 		return "Jpa_Entity";
 	}
-	
+
 	public String getProvidesType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	// ------------- Optional AbstractItdMetadataProvider methods --------------
 
 	protected void activate(final ComponentContext context) {
@@ -133,13 +133,13 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		addMetadataTriggers(TRIGGER_ANNOTATIONS);
 		registerMatchers();
 	}
-	
+
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
 		removeMetadataTriggers(TRIGGER_ANNOTATIONS);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void registerMatchers() {
 		customDataKeyDecorator.registerMatchers(
@@ -167,21 +167,21 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 			new MethodMatcher(Arrays.asList(JPA_VERSION_FIELD_MATCHER), VERSION_MUTATOR_METHOD, false)
 		);
 	}
-	
+
 	// ---------------- The meat of this provider starts here ------------------
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
 		// Find out the entity-level JPA details from the trigger annotation
 		final JpaEntityAnnotationValues jpaEntityAnnotationValues = getJpaEntityAnnotationValues(governorPhysicalType);
-		
+
 		/*
 		 * Walk the inheritance hierarchy for any existing JpaEntityMetadata. We
 		 * don't need to monitor any such parent, as any changes to its Java
 		 * type will trickle down to the governing java type.
 		 */
 		final JpaEntityMetadata parentEntity = getParentMetadata((ClassOrInterfaceTypeDetails) governorPhysicalType.getMemberHoldingTypeDetails());
-		
+
 		// Get the governor's members
 		final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalType);
 
@@ -204,7 +204,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
 	/**
 	 * Returns the {@link JpaEntityAnnotationValues} for the given domain type
-	 * 
+	 *
 	 * @param governorPhysicalType (required)
 	 * @return a non-<code>null</code> instance
 	 */
@@ -217,10 +217,10 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 		}
 		throw new IllegalStateException(getClass().getSimpleName() + " was triggered but not by any of " + Arrays.toString(TRIGGER_ANNOTATIONS));
 	}
-	
+
 	/**
 	 * Returns the {@link Identifier} for the entity identified by the given metadata ID.
-	 * 
+	 *
 	 * @param metadataId
 	 * @return <code>null</code> if there isn't one
 	 */

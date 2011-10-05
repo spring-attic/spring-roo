@@ -49,7 +49,7 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 @Component
 @Service
 public class CloudFoundrySessionImpl implements CloudFoundrySession, TransmissionEventListener {
-	
+
 	// Constants
 	private static final Logger logger = Logger.getLogger(CloudFoundryOperationsImpl.class.getName());
 	private static final String EMPTY_STRING = "";
@@ -61,16 +61,16 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 
 	// Fields
 	@Reference private UaaService uaaService;
-	private Preferences preferences = getPreferencesFor(CloudFoundrySessionImpl.class);
+	private final Preferences preferences = getPreferencesFor(CloudFoundrySessionImpl.class);
 	UaaClient.Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
 	private UaaAwareAppCloudClient client;
-	private List<String> appNames = new ArrayList<String>();
-	private List<String> provisionedServices = new ArrayList<String>();
-	private List<String> serviceTypes = new ArrayList<String>();
+	private final List<String> appNames = new ArrayList<String>();
+	private final List<String> provisionedServices = new ArrayList<String>();
+	private final List<String> serviceTypes = new ArrayList<String>();
 	private Map<String, List<String>> boundUrlMap = new HashMap<String, List<String>>();
-	private List<Integer> memoryOptions = new ArrayList<Integer>();
+	private final List<Integer> memoryOptions = new ArrayList<Integer>();
 
-	protected void deactivate(ComponentContext cc) {
+	protected void deactivate(final ComponentContext cc) {
 		if (uaaService instanceof TransmissionAwareUaaService) {
 			((TransmissionAwareUaaService) uaaService).removeTransmissionEventListener(this);
 		}
@@ -85,7 +85,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 	}
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		// TODO: Replace with call to VersionHelper.getProductFromDictionary(..) available in UAA 1.0.3
 		@SuppressWarnings("rawtypes")
 		Dictionary d = context.getBundleContext().getBundle().getHeaders();
@@ -97,13 +97,13 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 	}
 
-	public void beforeTransmission(TransmissionType type) {
+	public void beforeTransmission(final TransmissionType type) {
 		if (client != null) {
 			client.beforeTransmission(type);
 		}
 	}
 
-	public void afterTransmission(TransmissionType type, boolean successful) {
+	public void afterTransmission(final TransmissionType type, final boolean successful) {
 		if (client != null) {
 			client.afterTransmission(type, successful);
 		}
@@ -179,7 +179,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 	}
 
-	public void putPreference(String prefKey, byte[] prefValue) {
+	public void putPreference(final String prefKey, final byte[] prefValue) {
 		try {
 			preferences.putByteArray(prefKey, prefValue);
 			preferences.flush();
@@ -188,7 +188,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 	}
 
-	public byte[] getPreference(String prefKey) {
+	public byte[] getPreference(final String prefKey) {
 		try {
 			return preferences.getByteArray(prefKey, EMPTY_STRING.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
@@ -220,11 +220,11 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		return memoryOptions;
 	}
 
-	public CloudService getProvisionedService(String provisionedServiceName) {
+	public CloudService getProvisionedService(final String provisionedServiceName) {
 		return client.getService(provisionedServiceName);
 	}
 
-	public ServiceConfiguration getService(String serviceVendor) {
+	public ServiceConfiguration getService(final String serviceVendor) {
 		for (ServiceConfiguration serviceConfiguration : client.getServiceConfigurations()) {
 			if (serviceConfiguration.getVendor().equals(serviceVendor)) {
 				return serviceConfiguration;
@@ -264,7 +264,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 	}
 
-	private List<CloudCredentials> getStoredEmailsForUrl(String url) {
+	private List<CloudCredentials> getStoredEmailsForUrl(final String url) {
 		Set<CloudCredentials> cloudCredentialsList = getStoredLoginPrefs();
 		List<CloudCredentials> found = new ArrayList<CloudCredentials>();
 		for (CloudCredentials cloudCredentials : cloudCredentialsList) {
@@ -292,15 +292,15 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		return decoded;
 	}
 
-	private String encodeLoginPrefEntry(CloudCredentials cloudCredentials) {
+	private String encodeLoginPrefEntry(final CloudCredentials cloudCredentials) {
 		return cloudCredentials.encode();
 	}
 
-	private CloudCredentials decodeLoginPrefEntry(String encodedEntry) {
+	private CloudCredentials decodeLoginPrefEntry(final String encodedEntry) {
 		return CloudCredentials.decode(encodedEntry);
 	}
 
-	private String encodeLoginPrefEntries(List<String> entries) {
+	private String encodeLoginPrefEntries(final List<String> entries) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < entries.size(); i++) {
 			sb.append(entries.get(i));
@@ -311,7 +311,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		return sb.toString();
 	}
 
-	private Set<CloudCredentials> decodeLoginPrefEntries(String entries) {
+	private Set<CloudCredentials> decodeLoginPrefEntries(final String entries) {
 		if (!StringUtils.hasText(entries)) {
 			return new HashSet<CloudCredentials>();
 		}
@@ -323,7 +323,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		return set;
 	}
 
-	private byte[] crypt(byte[] input, int opmode) {
+	private byte[] crypt(final byte[] input, final int opmode) {
 		Cipher cipher = getCipher(opmode);
 		try {
 			return cipher.doFinal(input);
@@ -332,7 +332,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 	}
 
-	private Cipher getCipher(int opmode) {
+	private Cipher getCipher(final int opmode) {
 		try {
 			DESKeySpec keySpec = new DESKeySpec(ROO_KEY.getBytes("UTF-8"));
 			SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
@@ -391,7 +391,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	}
 
 	// TODO: Switch to UAA's PreferencesUtils (but must wait for UAA 1.0.3 due to bug in UAA 1.0.2 and earlier)
-	private Preferences getPreferencesFor(Class<?> clazz) {
+	private Preferences getPreferencesFor(final Class<?> clazz) {
 		// Create the Preferences object, suppressing "Created user preferences directory" messages if there is no Java preferences directory
 		Logger l = Logger.getLogger("java.util.prefs");
 		Level original = l.getLevel();
@@ -404,17 +404,17 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 	}
 
 	public static class CloudCredentials {
-		private String email;
-		private String password;
-		private String url;
+		private final String email;
+		private final String password;
+		private final String url;
 
-		public CloudCredentials(String email, String password, String url) {
+		public CloudCredentials(final String email, final String password, final String url) {
 			this.email = email;
 			this.password = password;
 			this.url = url;
 		}
 
-		public CloudCredentials(Map<String, String> properties) {
+		public CloudCredentials(final Map<String, String> properties) {
 			email = properties.get(EMAIL_KEY);
 			password = properties.get(PASSWORD_KEY);
 			url = properties.get(URL_KEY);
@@ -451,7 +451,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 			return sb.toString();
 		}
 
-		public static CloudCredentials decode(String encoded) {
+		public static CloudCredentials decode(final String encoded) {
 			if (!StringUtils.hasText(encoded)) {
 				throw new IllegalStateException("Stored login invalid; cannot continue");
 			}
@@ -471,7 +471,7 @@ public class CloudFoundrySessionImpl implements CloudFoundrySession, Transmissio
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(final Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 

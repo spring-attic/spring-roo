@@ -39,7 +39,7 @@ public class DefaultToStringStyler implements ToStringStyler {
 	 * Create a new DefaultToStringStyler.
 	 * @param valueStyler the ValueStyler to use
 	 */
-	public DefaultToStringStyler(ValueStyler valueStyler) {
+	public DefaultToStringStyler(final ValueStyler valueStyler) {
 		Assert.notNull(valueStyler, "ValueStyler must not be null");
 		this.valueStyler = valueStyler;
 	}
@@ -51,7 +51,7 @@ public class DefaultToStringStyler implements ToStringStyler {
 		return this.valueStyler;
 	}
 
-	public void styleStart(StringBuilder buffer, Object obj) {
+	public void styleStart(final StringBuilder buffer, final Object obj) {
 		if (!obj.getClass().isArray()) {
 			buffer.append('[').append(ClassUtils.getShortName(obj.getClass()));
 			styleIdentityHashCode(buffer, obj);
@@ -64,33 +64,33 @@ public class DefaultToStringStyler implements ToStringStyler {
 		}
 	}
 
-	private void styleIdentityHashCode(StringBuilder buffer, Object obj) {
+	private void styleIdentityHashCode(final StringBuilder buffer, final Object obj) {
 		buffer.append('@');
 		buffer.append(ObjectUtils.getIdentityHexString(obj));
 	}
 
-	public void styleEnd(StringBuilder buffer, Object o) {
+	public void styleEnd(final StringBuilder buffer, final Object o) {
 		buffer.append(']');
 	}
 
-	public void styleField(StringBuilder buffer, String fieldName, Object value) {
+	public void styleField(final StringBuilder buffer, final String fieldName, final Object value) {
 		styleFieldStart(buffer, fieldName);
 		styleValue(buffer, value);
 		styleFieldEnd(buffer, fieldName);
 	}
 
-	protected void styleFieldStart(StringBuilder buffer, String fieldName) {
+	protected void styleFieldStart(final StringBuilder buffer, final String fieldName) {
 		buffer.append(' ').append(fieldName).append(" = ");
 	}
 
-	protected void styleFieldEnd(StringBuilder buffer, String fieldName) {
+	protected void styleFieldEnd(final StringBuilder buffer, final String fieldName) {
 	}
 
-	public void styleValue(StringBuilder buffer, Object value) {
+	public void styleValue(final StringBuilder buffer, final Object value) {
 		buffer.append(this.valueStyler.style(value));
 	}
 
-	public void styleFieldSeparator(StringBuilder buffer) {
+	public void styleFieldSeparator(final StringBuilder buffer) {
 		buffer.append(',');
 	}
 }

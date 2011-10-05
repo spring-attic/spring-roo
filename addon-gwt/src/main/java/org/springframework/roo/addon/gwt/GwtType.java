@@ -20,7 +20,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 
 public enum GwtType {
-	
+
 	// Represents mirror types classes. There are one of these for each entity mirrored by Roo.
 	PROXY(GwtPath.MANAGED_REQUEST, true, "Proxy", "proxy", null, false, false, true),
 	REQUEST(GwtPath.MANAGED_REQUEST, true, "Request", "request", null, false, false, true),
@@ -61,7 +61,7 @@ public enum GwtType {
 	private final boolean createUiXml;
 	private boolean mirrorType = false;
 
-	private GwtType(GwtPath path, boolean mirrorType, String suffix, String name, String template, boolean createUiXml, boolean createAbstract, boolean overwriteConcrete) {
+	private GwtType(final GwtPath path, final boolean mirrorType, final String suffix, final String name, final String template, final boolean createUiXml, final boolean createAbstract, final boolean overwriteConcrete) {
 		this.path = path;
 		this.mirrorType = mirrorType;
 		this.suffix = suffix;
@@ -72,7 +72,7 @@ public enum GwtType {
 		this.overwriteConcrete = overwriteConcrete;
 	}
 
-	private List<GwtType> resolveReferences(GwtType type) {
+	private List<GwtType> resolveReferences(final GwtType type) {
 		switch (type) {
 			case ACTIVITIES_MAPPER:
 				return Arrays.asList(GwtType.APP_REQUEST_FACTORY, GwtType.SCAFFOLD_APP, GwtType.DETAIL_ACTIVITY, GwtType.EDIT_ACTIVITY_WRAPPER,
@@ -102,7 +102,7 @@ public enum GwtType {
 
 	}
 
-	public List<JavaSymbolName> resolveWatchedFieldNames(GwtType type) {
+	public List<JavaSymbolName> resolveWatchedFieldNames(final GwtType type) {
 		watchedFieldNames = new ArrayList<JavaSymbolName>();
 		switch (type) {
 			case ACTIVITIES_MAPPER:
@@ -135,7 +135,7 @@ public enum GwtType {
 		return watchedFieldNames;
 	}
 
-	public Map<JavaSymbolName, List<JavaType>> resolveMethodsToWatch(GwtType type) {
+	public Map<JavaSymbolName, List<JavaType>> resolveMethodsToWatch(final GwtType type) {
 		watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
 		switch (type) {
 			case EDIT_ACTIVITY_WRAPPER:
@@ -164,7 +164,7 @@ public enum GwtType {
 		return watchedMethods;
 	}
 
-	public void dynamicallyResolveMethodsToWatch(JavaType proxy, Map<JavaSymbolName, GwtProxyProperty> proxyFieldTypeMap, ProjectMetadata projectMetadata) {
+	public void dynamicallyResolveMethodsToWatch(final JavaType proxy, final Map<JavaSymbolName, GwtProxyProperty> proxyFieldTypeMap, final ProjectMetadata projectMetadata) {
 		watchedMethods = resolveMethodsToWatch(this);
 		switch (this) {
 			case DETAILS_VIEW:
@@ -217,7 +217,7 @@ public enum GwtType {
 		}
 	}
 
-	public void dynamicallyResolveFieldsToWatch(Map<JavaSymbolName, GwtProxyProperty> proxyFieldTypeMap) {
+	public void dynamicallyResolveFieldsToWatch(final Map<JavaSymbolName, GwtProxyProperty> proxyFieldTypeMap) {
 		watchedFieldNames = resolveWatchedFieldNames(this);
 		switch (this) {
 			case DETAILS_VIEW:
@@ -237,7 +237,7 @@ public enum GwtType {
 		}
 	}
 
-	private List<JavaType> resolveInnerTypesToWatch(GwtType type) {
+	private List<JavaType> resolveInnerTypesToWatch(final GwtType type) {
 		switch (type) {
 			case EDIT_ACTIVITY_WRAPPER:
 				return Arrays.asList(new JavaType("View"));
@@ -246,7 +246,7 @@ public enum GwtType {
 		}
 	}
 
-	private List<JavaSymbolName> convertToJavaSymbolNames(String... names) {
+	private List<JavaSymbolName> convertToJavaSymbolNames(final String... names) {
 		List<JavaSymbolName> javaSymbolNames = new ArrayList<JavaSymbolName>();
 		for (String name : names) {
 			if (!javaSymbolNames.contains(new JavaSymbolName(name))) {
@@ -290,7 +290,7 @@ public enum GwtType {
 		return watchedMethods;
 	}
 
-	public void setWatchedMethods(Map<JavaSymbolName, List<JavaType>> watchedMethods) {
+	public void setWatchedMethods(final Map<JavaSymbolName, List<JavaType>> watchedMethods) {
 		this.watchedMethods = watchedMethods;
 	}
 

@@ -7,13 +7,13 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default {@link FilenameResolver} that simply returns canonical file paths.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DefaultFilenameResolver implements FilenameResolver {
 
-	public String getMeaningfulName(File file) {
+	public String getMeaningfulName(final File file) {
 		Assert.notNull(file, "File required");
 		try {
 			return file.getCanonicalPath();

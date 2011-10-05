@@ -10,13 +10,13 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooWebScaffold} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
  */
 public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate boolean create = true;
 	@AutoPopulate boolean delete = true;
@@ -32,7 +32,7 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public WebScaffoldAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public WebScaffoldAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_SCAFFOLD);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

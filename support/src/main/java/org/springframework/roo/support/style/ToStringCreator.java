@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.Assert;
  * Utility class that builds pretty-printing <code>toString()</code> methods
  * with pluggable styling conventions. By default, ToStringCreator adheres
  * to Spring's <code>toString()</code> styling conventions.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
@@ -38,35 +38,35 @@ public class ToStringCreator {
 	private final StringBuilder buffer = new StringBuilder(512);
 	private final ToStringStyler styler;
 	private final Object object;
-	
+
 	private boolean styledFirstField;
 
 	/**
 	 * Create a ToStringCreator for the given object.
-	 * 
+	 *
 	 * @param obj the object to be stringified
 	 */
-	public ToStringCreator(Object obj) {
+	public ToStringCreator(final Object obj) {
 		this(obj, (ToStringStyler) null);
 	}
 
 	/**
 	 * Create a ToStringCreator for the given object, using the provided style.
-	 * 
+	 *
 	 * @param obj the object to be stringified
 	 * @param styler the ValueStyler encapsulating pretty-print instructions
 	 */
-	public ToStringCreator(Object obj, ValueStyler styler) {
+	public ToStringCreator(final Object obj, final ValueStyler styler) {
 		this(obj, new DefaultToStringStyler(styler != null ? styler : StylerUtils.DEFAULT_VALUE_STYLER));
 	}
 
 	/**
 	 * Create a ToStringCreator for the given object, using the provided style.
-	 * 
+	 *
 	 * @param obj the object to be stringified
 	 * @param styler the ToStringStyler encapsulating pretty-print instructions
 	 */
-	public ToStringCreator(Object obj, ToStringStyler styler) {
+	public ToStringCreator(final Object obj, final ToStringStyler styler) {
 		Assert.notNull(obj, "The object to be styled must not be null");
 		this.object = obj;
 		this.styler = (styler != null ? styler : DEFAULT_TO_STRING_STYLER);
@@ -75,89 +75,89 @@ public class ToStringCreator {
 
 	/**
 	 * Append a byte field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, byte value) {
+	public ToStringCreator append(final String fieldName, final byte value) {
 		return append(fieldName, Byte.valueOf(value));
 	}
 
 	/**
 	 * Append a short field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, short value) {
+	public ToStringCreator append(final String fieldName, final short value) {
 		return append(fieldName, Short.valueOf(value));
 	}
 
 	/**
 	 * Append a integer field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, int value) {
+	public ToStringCreator append(final String fieldName, final int value) {
 		return append(fieldName, Integer.valueOf(value));
 	}
 
 	/**
 	 * Append a long field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, long value) {
+	public ToStringCreator append(final String fieldName, final long value) {
 		return append(fieldName, Long.valueOf(value));
 	}
 
 	/**
 	 * Append a float field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, float value) {
+	public ToStringCreator append(final String fieldName, final float value) {
 		return append(fieldName, new Float(value));
 	}
 
 	/**
 	 * Append a double field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, double value) {
+	public ToStringCreator append(final String fieldName, final double value) {
 		return append(fieldName, new Double(value));
 	}
 
 	/**
 	 * Append a boolean field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, boolean value) {
+	public ToStringCreator append(final String fieldName, final boolean value) {
 		return append(fieldName, Boolean.valueOf(value));
 	}
 
 	/**
 	 * Append a field value.
-	 * 
+	 *
 	 * @param fieldName the name of the field, usually the member variable name
 	 * @param value the field value; can be <code>null</code>
 	 * @return this, to support call-chaining
 	 */
-	public ToStringCreator append(String fieldName, Object value) {
+	public ToStringCreator append(final String fieldName, final Object value) {
 		printFieldSeparatorIfNecessary();
 		this.styler.styleField(this.buffer, fieldName, value);
 		return this;
@@ -174,11 +174,11 @@ public class ToStringCreator {
 
 	/**
 	 * Append the provided value.
-	 * 
+	 *
 	 * @param value The value to append
 	 * @return this, to support call-chaining.
 	 */
-	public ToStringCreator append(Object value) {
+	public ToStringCreator append(final Object value) {
 		this.styler.styleValue(this.buffer, value);
 		return this;
 	}

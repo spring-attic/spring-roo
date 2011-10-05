@@ -25,29 +25,29 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 
 	// Fields
 	private BundleContext bundleContext;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		bundleContext = context.getBundleContext();
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		bundleContext = null;
 	}
-	
-	public Driver loadDriver(String driverClassName) throws RuntimeException {
+
+	public Driver loadDriver(final String driverClassName) throws RuntimeException {
 		// Try a search
 		Class<?> clazz = BundleFindingUtils.findFirstBundleWithType(bundleContext, driverClassName);
-		
+
 		if (clazz == null) {
 			// Let's give up given it doesn't seem to be loadable
 			return null;
 		}
-		
+
 		if (!Driver.class.isAssignableFrom(clazz)) {
 			// That's weird, it doesn't seem to be a driver
 			return null;
 		}
-		
+
 		// Time to create it and register etc
 		try {
 			Driver result = (Driver) clazz.newInstance();

@@ -41,38 +41,38 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides convenience methods that can be used to create mock tests.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component
 @Service
 public class IntegrationTestOperationsImpl implements IntegrationTestOperations {
-	
+
 	// Fields
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeManagementService typeManagementService;
-	
+
 	public boolean isPersistentClassAvailable() {
 		return projectOperations.isProjectAvailable();
 	}
 
-	public void newIntegrationTest(JavaType entity) {
+	public void newIntegrationTest(final JavaType entity) {
 		newIntegrationTest(entity, true);
 	}
-	
-	public void newIntegrationTest(JavaType entity, boolean transactional) {
+
+	public void newIntegrationTest(final JavaType entity, final boolean transactional) {
 		Assert.notNull(entity, "Entity to produce an integration test for is required");
 
 		// Verify the requested entity actually exists as a class and is not abstract
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getEntity(entity);
 		Assert.isTrue(!Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
-		
+
 		dataOnDemandOperations.newDod(entity, new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand"), Path.SRC_TEST_JAVA);
-		
+
 		JavaType name = new JavaType(entity + "IntegrationTest");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
 
@@ -99,37 +99,37 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		typeDetailsBuilder.setDeclaredMethods(methods);
-		
+
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
 	/**
 	 * Creates a mock test for the entity. Silently returns if the mock test file already exists.
-	 * 
+	 *
 	 * @param entity to produce a mock test for (required)
 	 */
-	public void newMockTest(JavaType entity) {
+	public void newMockTest(final JavaType entity) {
 		Assert.notNull(entity, "Entity to produce a mock test for is required");
-		
+
 		JavaType name = new JavaType(entity + "Test");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
-		
+
 		if (metadataService.get(declaredByMetadataId) != null) {
 			// The file already exists
 			return;
 		}
-		
+
 		// Determine if the mocking infrastructure needs installing
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.junit.runners.JUnit4")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"), config));
 		annotations.add(new AnnotationMetadataBuilder(MOCK_STATIC_ENTITY_METHODS));
-		
+
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		methodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.Test")));
-		
+
 		// Get the entity so we can hopefully make a demo method that will be usable
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA));
@@ -148,19 +148,19 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 				}
 			}
 		}
-		
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMethod"), JavaType.VOID_PRIMITIVE, bodyBuilder);
 		methodBuilder.setAnnotations(methodAnnotations);
 		methods.add(methodBuilder);
-		
+
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		typeDetailsBuilder.setDeclaredMethods(methods);
-		
+
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
-	
-	public void newTestStub(JavaType javaType) {
+
+	public void newTestStub(final JavaType javaType) {
 		Assert.notNull(javaType, "Class to produce a test stub for is required");
 
 		JavaType name = new JavaType(javaType + "Test");
@@ -207,7 +207,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		// Only create test class if there are test methods present
 		if (!methods.isEmpty()) {
 			ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
-			
+
 			// Create instance of entity to test
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(pid);
 			fieldBuilder.setModifier(Modifier.PRIVATE);
@@ -217,18 +217,18 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 			fields.add(fieldBuilder);
 			typeDetailsBuilder.setDeclaredFields(fields);
-			
+
 			typeDetailsBuilder.setDeclaredMethods(methods);
 
 			typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 		}
 	}
-	
+
 	/**
-	 * @param entity the entity to lookup required 
+	 * @param entity the entity to lookup required
 	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)
 	 */
-	private ClassOrInterfaceTypeDetails getEntity(JavaType entity) {
+	private ClassOrInterfaceTypeDetails getEntity(final JavaType entity) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));

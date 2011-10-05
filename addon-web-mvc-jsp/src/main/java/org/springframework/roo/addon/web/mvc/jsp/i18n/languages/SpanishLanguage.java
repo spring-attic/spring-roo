@@ -25,7 +25,7 @@ public class SpanishLanguage extends AbstractLanguage {
 	public String getLanguage() {
 		return "Espanol";
 	}
-	
+
 	public InputStream getFlagGraphic() {
 		return TemplateUtils.getTemplate(getClass(), "es.png");
 	}

@@ -14,27 +14,27 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Represents a project.
- * 
+ *
  * <p>
  * Each ROO instance has a single project active at any time. Different project add-ons are expected
  * to subclass this {@link ProjectMetadata} and implement the abstract methods.
- * 
+ *
  * <p>
  * The {@link ProjectMetadata} offers convenience methods for acquiring the project name,
  * top level project package name, registered dependencies and path name resolution services.
- * 
+ *
  * <p>
  * Concrete subclasses should register the correct dependencies the particular project build
  * system requires, plus read those files whenever they change. Subclasses should also provide a valid
  * {@link PathResolver} implementation that understands the target project layout.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
  */
 public class ProjectMetadata extends AbstractMetadataItem {
-	
+
 	// Constants
 	/**
 	 * The MID for the project-level metadata. Is a constant because each
@@ -46,13 +46,13 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Returns the metadata ID for the project-level metadata. Is static because
 	 * each running instance of Roo only ever manages one project at a time.
-	 * 
+	 *
 	 * @return a non-blank MID
 	 */
 	public static String getProjectIdentifier() {
 		return PROJECT_IDENTIFIER;
 	}
-	
+
 	// Fields
 	private final JavaPackage topLevelPackage;
 	private final ProjectType type;
@@ -91,7 +91,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		Assert.notNull(resources, "Resources required");
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(type, "Project type required");
-		
+
 		this.buildPlugins = buildPlugins;
 		this.dependencies = dependencies;
 		this.filters = filters;
@@ -103,9 +103,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		this.topLevelPackage = topLevelPackage;
 		this.type = type;
 	}
-	
+
 	/**
-	 * Indicates whether all of the given dependencies are registered, using 
+	 * Indicates whether all of the given dependencies are registered, using
 	 * {@link Dependency#equals(Object)} to evaluate each one against the
 	 * existing dependencies.
 	 *
@@ -118,7 +118,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Convenience method for determining whether any of the presented dependencies are registered. 
+	 * Convenience method for determining whether any of the presented dependencies are registered.
 	 *
 	 * @param dependencies the dependencies to check (required)
 	 * @return whether any of the dependencies are currently registered or not
@@ -129,7 +129,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Convenience method for determining whether a particular dependency is registered. 
+	 * Convenience method for determining whether a particular dependency is registered.
 	 *
 	 * @param dependency the dependency to check (can be <code>null</code>)
 	 * @return <code>false</code> if a <code>null</code> dependency is given
@@ -137,9 +137,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public boolean isDependencyRegistered(final Dependency dependency) {
 		return dependency != null && dependencies.contains(dependency);
 	}
-	
+
 	/**
-	 * Convenience method for determining whether all presented repositories are registered. 
+	 * Convenience method for determining whether all presented repositories are registered.
 	 *
 	 * @param repositories the repositories to check (required)
 	 * @return whether all the repositories are currently registered or not
@@ -152,7 +152,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Convenience method for determining whether a particular repository
 	 * is registered.
-	 * 
+	 *
 	 * @param repository to check (required)
 	 * @return whether the repository is currently registered or not
 	 */
@@ -162,7 +162,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 
 	/**
-	 * Convenience method for determining whether all presented plugin repositories are registered. 
+	 * Convenience method for determining whether all presented plugin repositories are registered.
 	 *
 	 * @param repositories the plugin repositories to check (required)
 	 * @return whether all the plugin repositories are currently registered or not
@@ -175,7 +175,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Convenience method for determining whether a particular plugin repository
 	 * is registered.
-	 * 
+	 *
 	 * @param repository repository to check (required)
 	 * @return whether the plugin repository is currently registered or not
 	 */
@@ -222,7 +222,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Convenience method for determining whether a particular build plugin
 	 * is registered based on the groupId, artifactId, and version.
-	 * 
+	 *
 	 * @param plugin to check (required)
 	 * @return whether the build plugin is currently registered or not
 	 */
@@ -238,11 +238,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Convenience method for determining whether a particular pom property
 	 * is registered.
-	 * 
+	 *
 	 * @param property to check (required)
 	 * @return whether the property is currently registered or not
 	 */
@@ -250,11 +250,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		Assert.notNull(property, "Property to check is required");
 		return pomProperties.contains(property);
 	}
-	
+
 	/**
 	 * Convenience method for determining whether a particular filter
 	 * is registered.
-	 * 
+	 *
 	 * @param filter to check (required)
 	 * @return whether the filter is currently registered or not
 	 */
@@ -262,11 +262,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		Assert.notNull(filter, "Filter to check is required");
 		return filters.contains(filter);
 	}
-	
+
 	/**
 	 * Convenience method for determining whether a particular resource
 	 * is registered.
-	 * 
+	 *
 	 * @param resource to check (required)
 	 * @return whether the resource is currently registered or not
 	 */
@@ -285,18 +285,18 @@ public class ProjectMetadata extends AbstractMetadataItem {
 
 	/**
 	 * Returns an unmodifiable set of the project's dependencies.
-	 * 
+	 *
 	 * @return an unmodifiable representation of the dependencies (never null, but may be empty)
 	 */
 	public Set<Dependency> getDependencies() {
 		return Collections.unmodifiableSet(dependencies);
 	}
-	
+
 	/**
 	 * Locates any dependencies which match the presented dependency, excluding the version number.
 	 * This is useful for upgrade use cases, where it is necessary to locate any dependencies with
 	 * the same group, artifact and type identifications so that they can be removed.
-	 * 
+	 *
 	 * @param dependency to locate (required; note the version number is ignored in comparisons)
 	 * @return any matching dependencies (never returns null, but may return an empty {@link Set})
 	 */
@@ -310,7 +310,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * @return an unmodifiable collection of the build plugins (never null, but may be empty).
 	 */
@@ -321,7 +321,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Returns any build plugins with the same groupId and artifactId as the
 	 * given plugin. This is useful for upgrade cases.
-	 * 
+	 *
 	 * @param plugin to locate (required; note the version number is ignored in comparisons)
 	 * @return any matching plugins (never returns null, but may return an empty {@link Set})
 	 */
@@ -340,7 +340,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * Locates any properties which match the presented property, excluding the value.
 	 * This is useful for upgrade use cases, where it is necessary to locate any properties with
 	 * the name so that they can be removed.
-	 * 
+	 *
 	 * @param property to locate (required; note the value is ignored in comparisons)
 	 * @return any matching properties (never returns null, but may return an empty {@link Set})
 	 */
@@ -354,10 +354,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Locates the first occurrence of a property for a given name and returns it.
-	 * 
+	 *
 	 * @param name the property name (required)
 	 * @return the property if found otherwise null
 	 */
@@ -370,14 +370,14 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return an unmodifiable representation of the filters (never null, but may be empty)
 	 */
 	public Set<Filter> getFilters() {
 		return Collections.unmodifiableSet(filters);
 	}
-	
+
 	/**
 	 * @return an unmodifiable representation of the resources (never null, but may be empty)
 	 */
@@ -387,7 +387,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 
 	/**
 	 * Determines whether the GWT Maven plugin exists in the pom.
-	 * 
+	 *
 	 * @return true if the gwt-maven-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isGwtEnabled() {
@@ -399,10 +399,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return false;
 	}
 
-	
+
 	/**
 	 * Determines whether the Google App Engine Maven plugin exists in the pom.
-	 * 
+	 *
 	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isGaeEnabled() {
@@ -413,10 +413,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Determines whether the DataNucleus Maven plugin exists in the pom.
-	 * 
+	 *
 	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
 	 */
 	public boolean isDataNucleusEnabled() {
@@ -427,10 +427,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Determines whether the Database.com Maven dependency exists in the pom.
-	 * 
+	 *
 	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
 	 */
 	public boolean isDatabaseDotComEnabled() {
@@ -461,7 +461,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 
 	/**
 	 * Returns the type of this project or module
-	 * 
+	 *
 	 * @return a non-<code>null</code> type
 	 */
 	public ProjectType getType() {

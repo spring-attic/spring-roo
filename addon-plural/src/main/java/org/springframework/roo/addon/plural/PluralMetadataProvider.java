@@ -4,7 +4,7 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Provides {@link PluralMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */

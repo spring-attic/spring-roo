@@ -6,7 +6,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract class for {@link IdentifiableJavaStructure} subclasses.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -15,7 +15,7 @@ public abstract class AbstractIdentifiableJavaStructureProvider extends Abstract
 	// Fields
 	private final String declaredByMetadataId;
 	private final int modifier;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -33,7 +33,7 @@ public abstract class AbstractIdentifiableJavaStructureProvider extends Abstract
 	public final String getDeclaredByMetadataId() {
 		return declaredByMetadataId;
 	}
-	
+
 	public final int getModifier() {
 		return modifier;
 	}

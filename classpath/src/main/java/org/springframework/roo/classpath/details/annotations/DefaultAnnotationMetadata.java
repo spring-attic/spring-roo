@@ -12,17 +12,17 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link AnnotationMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DefaultAnnotationMetadata implements AnnotationMetadata {
-	
+
 	// Fields
 	private final JavaType annotationType;
 	private final List<AnnotationAttributeValue<?>> attributes;
 	private final Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -42,7 +42,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 			}
 		}
 	}
-	
+
 	public AnnotationAttributeValue<?> getAttribute(final JavaSymbolName attributeName) {
 		Assert.notNull(attributeName, "Attribute name required");
 		return attributeMap.get(attributeName);
@@ -52,7 +52,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 	public AnnotationAttributeValue<?> getAttribute(final String attributeName) {
 		return getAttribute(new JavaSymbolName(attributeName));
 	}
-	
+
 	public List<JavaSymbolName> getAttributeNames() {
 		final List<JavaSymbolName> result = new ArrayList<JavaSymbolName>();
 		for (AnnotationAttributeValue<?> value : attributes) {
@@ -65,6 +65,7 @@ public class DefaultAnnotationMetadata implements AnnotationMetadata {
 		return annotationType;
 	}
 
+	@Override
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("annotationType", annotationType);

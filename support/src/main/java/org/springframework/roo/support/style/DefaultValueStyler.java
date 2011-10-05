@@ -46,7 +46,7 @@ public class DefaultValueStyler implements ValueStyler {
 	private static final String MAP = "map";
 	private static final String ARRAY = "array";
 
-	public String style(Object value) {
+	public String style(final Object value) {
 		if (value == null) {
 			return NULL;
 		} else if (value instanceof String) {
@@ -69,7 +69,7 @@ public class DefaultValueStyler implements ValueStyler {
 		}
 	}
 
-	private String style(Map<?, ?> value) {
+	private String style(final Map<?, ?> value) {
 		StringBuilder result = new StringBuilder(value.size() * 8 + 16);
 		result.append(MAP + "[");
 		for (Iterator<?> it = value.entrySet().iterator(); it.hasNext();) {
@@ -86,11 +86,11 @@ public class DefaultValueStyler implements ValueStyler {
 		return result.toString();
 	}
 
-	private String style(Map.Entry<?, ?> value) {
+	private String style(final Map.Entry<?, ?> value) {
 		return style(value.getKey()) + " -> " + style(value.getValue());
 	}
 
-	private String style(Collection<?> value) {
+	private String style(final Collection<?> value) {
 		StringBuilder result = new StringBuilder(value.size() * 8 + 16);
 		result.append(getCollectionTypeString(value)).append('[');
 		for (Iterator<?> i = value.iterator(); i.hasNext();) {
@@ -106,7 +106,7 @@ public class DefaultValueStyler implements ValueStyler {
 		return result.toString();
 	}
 
-	private String getCollectionTypeString(Collection<?> value) {
+	private String getCollectionTypeString(final Collection<?> value) {
 		if (value instanceof List<?>) {
 			return LIST;
 		} else if (value instanceof Set<?>) {
@@ -116,7 +116,7 @@ public class DefaultValueStyler implements ValueStyler {
 		}
 	}
 
-	private String styleArray(Object[] array) {
+	private String styleArray(final Object[] array) {
 		StringBuilder result = new StringBuilder(array.length * 8 + 16);
 		result.append(ARRAY + "<").append(ClassUtils.getShortName(array.getClass().getComponentType())).append(">[");
 		for (int i = 0; i < array.length - 1; i++) {

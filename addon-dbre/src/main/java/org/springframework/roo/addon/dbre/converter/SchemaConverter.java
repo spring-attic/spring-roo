@@ -15,22 +15,22 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from database schemas.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 @Component
 @Service
 public class SchemaConverter implements Converter<Set<Schema>> {
-	
+
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return Set.class.isAssignableFrom(requiredType) && optionContext.contains("schema");
 	}
 
-	public Set<Schema> convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Set<Schema> convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		Set<Schema> schemas = new HashSet<Schema>();
 		for (String schemaName : StringUtils.delimitedListToStringArray(value, " ")) {
 			schemas.add(new Schema(schemaName));
@@ -38,7 +38,7 @@ public class SchemaConverter implements Converter<Set<Schema>> {
 		return schemas;
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		try {
 			if (dbreModelService.supportsSchema(false)) {
 				Set<Schema> schemas = dbreModelService.getSchemas(false);

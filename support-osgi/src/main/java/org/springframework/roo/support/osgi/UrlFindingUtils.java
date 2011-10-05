@@ -15,14 +15,14 @@ import org.springframework.roo.support.util.Assert;
  * Utility methods for locating resources within OSGi bundles.
  */
 public final class UrlFindingUtils {
-	
+
 	// Constants
 	private static final String ROOT_PATH = "/";
 	private static final PathMatcher PATH_MATCHER = new AntPathMatcher();
 
 	/**
 	 * Searches the bundles in the given context for the given resource.
-	 * 
+	 *
 	 * @param context that can be used to obtain bundles to search (can be <code>null</code>)
 	 * @param resourceName the path of the resource to locate (as per
 	 * {@link Bundle#getEntry}, e.g. "/foo.txt" will find foo.txt in the root of each bundle)
@@ -53,7 +53,7 @@ public final class UrlFindingUtils {
 	/**
 	 * Returns the URLs of any entries among the given bundles whose URLs match
 	 * the given Ant-style path.
-	 * 
+	 *
 	 * @param context the context whose bundles to search (can be <code>null</code>)
 	 * @param antPathExpression the pattern for matching URLs against (required)
 	 * @return <code>null</code> if the search can't be performed, otherwise a
@@ -86,7 +86,7 @@ public final class UrlFindingUtils {
 		}, context);
 		return results;
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

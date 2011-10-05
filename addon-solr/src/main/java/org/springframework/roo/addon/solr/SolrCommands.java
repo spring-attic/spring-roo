@@ -11,17 +11,17 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the 'solr search' add-on to be used by the ROO shell.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component
 @Service
 public class SolrCommands implements CommandMarker {
-	
+
 	// Fields
 	@Reference private SolrOperations searchOperations;
-	
+
 	@CliAvailabilityIndicator({ "solr setup" })
 	public boolean setupCommandAvailable() {
 		return searchOperations.isInstallSearchAvailable();
@@ -34,14 +34,14 @@ public class SolrCommands implements CommandMarker {
 
 	@CliCommand(value = "solr setup", help = "Install a support for Solr search integration")
 	public void setup(
-		@CliOption(key = { "searchServerUrl" }, mandatory = false, unspecifiedDefaultValue = "http://localhost:8983/solr", specifiedDefaultValue = "http://localhost:8983/solr", help = "The Url of the Solr search server") String searchServerUrl) {
-		
+		@CliOption(key = { "searchServerUrl" }, mandatory = false, unspecifiedDefaultValue = "http://localhost:8983/solr", specifiedDefaultValue = "http://localhost:8983/solr", help = "The Url of the Solr search server") final String searchServerUrl) {
+
 		searchOperations.setupConfig(searchServerUrl);
 	}
 
 	@CliCommand(value = "solr add", help = "Make target type searchable")
 	public void setup(
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The target type which is made searchable") JavaType javaType) {
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The target type which is made searchable") final JavaType javaType) {
 		 searchOperations.addSearch(javaType);
 	}
 

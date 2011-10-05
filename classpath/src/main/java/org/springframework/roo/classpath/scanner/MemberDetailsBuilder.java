@@ -31,21 +31,21 @@ import org.springframework.roo.model.CustomDataKey;
  * @since 1.1.3
  */
 public class MemberDetailsBuilder {
-	
+
 	// Fields
-	private Map<String, MemberHoldingTypeDetails> memberHoldingTypeDetailsMap = new LinkedHashMap<String, MemberHoldingTypeDetails>();
-	private Map<String, TypeDetailsBuilder> typeDetailsBuilderMap = new LinkedHashMap<String, TypeDetailsBuilder>();
-	private MemberDetails originalMemberDetails;
+	private final Map<String, MemberHoldingTypeDetails> memberHoldingTypeDetailsMap = new LinkedHashMap<String, MemberHoldingTypeDetails>();
+	private final Map<String, TypeDetailsBuilder> typeDetailsBuilderMap = new LinkedHashMap<String, TypeDetailsBuilder>();
+	private final MemberDetails originalMemberDetails;
 	private boolean changed = false;
 
-	public MemberDetailsBuilder(MemberDetails memberDetails) {
+	public MemberDetailsBuilder(final MemberDetails memberDetails) {
 		this.originalMemberDetails = memberDetails;
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			memberHoldingTypeDetailsMap.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), memberHoldingTypeDetails);
 		}
 	}
 
-	public MemberDetailsBuilder(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+	public MemberDetailsBuilder(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
 		this.originalMemberDetails = new MemberDetailsImpl(memberHoldingTypeDetailsList);
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : originalMemberDetails.getDetails()) {
 			memberHoldingTypeDetailsMap.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), memberHoldingTypeDetails);
@@ -62,7 +62,7 @@ public class MemberDetailsBuilder {
 		return originalMemberDetails;
 	}
 
-	public <T> void tag(T toModify, CustomDataKey<T> key, Object value) {
+	public <T> void tag(final T toModify, final CustomDataKey<T> key, final Object value) {
 		if (toModify instanceof FieldMetadata) {
 			CustomDataBuilder customDataBuilder = new CustomDataBuilder();
 			customDataBuilder.put(key, value);
@@ -82,7 +82,7 @@ public class MemberDetailsBuilder {
 		}
 	}
 
-	private void doModification(FieldMetadata field, CustomData customData) {
+	private void doModification(final FieldMetadata field, final CustomData customData) {
 		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(field.getDeclaredByMetadataId());
 		if (memberHoldingTypeDetails != null) {
 			FieldMetadata matchedField = memberHoldingTypeDetails.getField(field.getFieldName());
@@ -94,7 +94,7 @@ public class MemberDetailsBuilder {
 		}
 	}
 
-	private void doModification(MethodMetadata method, CustomData customData) {
+	private void doModification(final MethodMetadata method, final CustomData customData) {
 		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(method.getDeclaredByMetadataId());
 		if (memberHoldingTypeDetails != null) {
 			MethodMetadata matchedMethod = memberHoldingTypeDetails.getMethod(method.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes()));
@@ -106,7 +106,7 @@ public class MemberDetailsBuilder {
 		}
 	}
 
-	private void doModification(ConstructorMetadata constructor, CustomData customData) {
+	private void doModification(final ConstructorMetadata constructor, final CustomData customData) {
 		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(constructor.getDeclaredByMetadataId());
 		if (memberHoldingTypeDetails != null) {
 			ConstructorMetadata matchedConstructor = memberHoldingTypeDetails.getDeclaredConstructor(AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()));
@@ -118,7 +118,7 @@ public class MemberDetailsBuilder {
 		}
 	}
 
-	private void doModification(MemberHoldingTypeDetails type, CustomData customData) {
+	private void doModification(final MemberHoldingTypeDetails type, final CustomData customData) {
 		MemberHoldingTypeDetails memberHoldingTypeDetails = memberHoldingTypeDetailsMap.get(type.getDeclaredByMetadataId());
 		if (memberHoldingTypeDetails != null) {
 			if (memberHoldingTypeDetails.getName().equals(type.getName()) && !memberHoldingTypeDetails.getCustomData().keySet().containsAll(customData.keySet())) {
@@ -129,7 +129,7 @@ public class MemberDetailsBuilder {
 		}
 	}
 
-	private TypeDetailsBuilder getTypeDetailsBuilder(MemberHoldingTypeDetails memberHoldingTypeDetails) {
+	private TypeDetailsBuilder getTypeDetailsBuilder(final MemberHoldingTypeDetails memberHoldingTypeDetails) {
 		if (typeDetailsBuilderMap.containsKey(memberHoldingTypeDetails.getDeclaredByMetadataId())) {
 			return typeDetailsBuilderMap.get(memberHoldingTypeDetails.getDeclaredByMetadataId());
 		}
@@ -139,9 +139,9 @@ public class MemberDetailsBuilder {
 	}
 
 	static class TypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<MemberHoldingTypeDetails> {
-		private MemberHoldingTypeDetails existing;
+		private final MemberHoldingTypeDetails existing;
 
-		protected TypeDetailsBuilder(MemberHoldingTypeDetails existing) {
+		protected TypeDetailsBuilder(final MemberHoldingTypeDetails existing) {
 			super(existing);
 			this.existing = existing;
 		}
@@ -180,7 +180,7 @@ public class MemberDetailsBuilder {
 			}
 		}
 
-		public void addDataToField(FieldMetadata replacement, CustomData customData) {
+		public void addDataToField(final FieldMetadata replacement, final CustomData customData) {
 			// If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
@@ -195,7 +195,7 @@ public class MemberDetailsBuilder {
 			}
 		}
 
-		public void addDataToMethod(MethodMetadata replacement, CustomData customData) {
+		public void addDataToMethod(final MethodMetadata replacement, final CustomData customData) {
 			// If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;
@@ -212,7 +212,7 @@ public class MemberDetailsBuilder {
 			}
 		}
 
-		public void addDataToConstructor(ConstructorMetadata replacement, CustomData customData) {
+		public void addDataToConstructor(final ConstructorMetadata replacement, final CustomData customData) {
 			// If the MIDs don't match then the proposed can't be a replacement
 			if (!replacement.getDeclaredByMetadataId().equals(getDeclaredByMetadataId())) {
 				return;

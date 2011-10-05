@@ -19,10 +19,10 @@ public class JavaPackageTest {
 	public void testGetElementsOfMultiLevelPackage() {
 		// Set up
 		final JavaPackage javaPackage = new JavaPackage("com.foo.bar");
-		
+
 		// Invoke
 		final List<String> elements = javaPackage.getElements();
-		
+
 		// Check
 		assertEquals(Arrays.asList("com", "foo", "bar"), elements);
 		assertEquals("bar", javaPackage.getLastElement());
@@ -33,10 +33,10 @@ public class JavaPackageTest {
 	public void testGetElementsOfSingleLevelPackage() {
 		// Set up
 		final JavaPackage javaPackage = new JavaPackage("me");
-		
+
 		// Invoke
 		final List<String> elements = javaPackage.getElements();
-		
+
 		// Check
 		assertEquals(Arrays.asList("me"), elements);
 		assertEquals("me", javaPackage.getLastElement());

@@ -24,11 +24,11 @@ public class JavaTypeMetadataDetailsTest {
 		final JavaTypeMetadataDetails javaTypeMetadataDetails = getTestInstance(mockJavaType1);
 		final JavaTypeMetadataDetails otherJavaTypeMetadataDetails = mock(JavaTypeMetadataDetails.class);
 		when(otherJavaTypeMetadataDetails.getJavaType()).thenReturn(mockJavaType2);
-		
+
 		// Invoke and check
 		assertFalse(javaTypeMetadataDetails.equals(otherJavaTypeMetadataDetails));
 	}
-	
+
 	@Test
 	public void testInstancesWithSameJavaTypesAreEqual() {
 		// Set up
@@ -36,14 +36,14 @@ public class JavaTypeMetadataDetailsTest {
 		final JavaTypeMetadataDetails javaTypeMetadataDetails = getTestInstance(mockJavaType);
 		final JavaTypeMetadataDetails otherJavaTypeMetadataDetails = mock(JavaTypeMetadataDetails.class);
 		when(otherJavaTypeMetadataDetails.getJavaType()).thenReturn(mockJavaType);
-		
+
 		// Invoke and check
 		assertTrue(javaTypeMetadataDetails.equals(otherJavaTypeMetadataDetails));
 	}
-	
+
 	/**
 	 * Creates a test instance with the given {@link JavaType}
-	 * 
+	 *
 	 * @param javaType
 	 * @return a non-<code>null</code> instance
 	 */

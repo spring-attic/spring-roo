@@ -6,7 +6,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Constants for Spring-specific {@link JavaType}s.
- * 
+ *
  * Use them in preference to creating new instances of these types.
  *
  * @author Andrew Swan
@@ -52,10 +52,10 @@ public final class SpringJavaType {
 	public static final JavaType URI_UTILS = new JavaType("org.springframework.web.util.UriUtils");
 	public static final JavaType VALUE = new JavaType("org.springframework.beans.factory.annotation.Value");
 	public static final JavaType WEB_UTILS = new JavaType("org.springframework.web.util.WebUtils");
-	
+
 	/**
 	 * Returns the {@link JavaType} for a Spring converter
-	 * 
+	 *
 	 * @param fromType the type being converted from (required)
 	 * @param toType the type being converted to (required)
 	 * @return a non-<code>null</code> type
@@ -65,7 +65,7 @@ public final class SpringJavaType {
 		Assert.notNull(toType, "'To' type is required");
 		return new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, Arrays.asList(fromType, toType));
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

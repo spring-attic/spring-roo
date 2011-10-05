@@ -15,34 +15,34 @@ import org.springframework.roo.shell.event.ShellStatusListener;
 
 /**
  * Listener for Shell events to support automatic Git repository commits.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class GitShellEventListener implements ShellStatusListener {
-	
+
 	// Fields
 	@Reference private GitOperations gitOperations;
 	@Reference private Shell shell;
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		shell.addShellStatusListener(this);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		shell.removeShellStatusListener(this);
 	}
 
-	public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
+	public void onShellStatusChange(final ShellStatus oldStatus, final ShellStatus newStatus) {
 		if (newStatus.getStatus().equals(Status.EXECUTION_SUCCESS) && isGitEnabled() && gitOperations.isAutomaticCommit()) {
 			gitOperations.commitAllChanges(newStatus.getMessage());
 		}
 	}
-	
+
 	private boolean isGitEnabled() {
 		return fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
 	}

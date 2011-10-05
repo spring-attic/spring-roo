@@ -8,21 +8,21 @@ import org.springframework.roo.shell.SimpleParser;
 
 /**
  * Available commands converter.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class AvailableCommandsConverter implements Converter<String> {
 
-	public String convertFromText(String text, Class<?> requiredType, String optionContext) {
+	public String convertFromText(final String text, final Class<?> requiredType, final String optionContext) {
 		return text;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return String.class.isAssignableFrom(requiredType) && "availableCommands".equals(optionContext);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		if (target.getTarget() instanceof SimpleParser) {
 			SimpleParser cmd = (SimpleParser) target.getTarget();
 

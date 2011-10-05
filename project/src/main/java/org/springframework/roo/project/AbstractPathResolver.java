@@ -11,28 +11,28 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Abstract {@link PathResolver} implementation.
- * 
+ *
  * <p>
  * Subclasses should be created for common build system structures.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public abstract class AbstractPathResolver implements PathResolver {
 
 	/** Paths provided to constructor */
-	private List<PathInformation> pathOrder = new ArrayList<PathInformation>();
-	
+	private final List<PathInformation> pathOrder = new ArrayList<PathInformation>();
+
 	/** Cached map of the paths */
-	private Map<Path, PathInformation> pathCache = new LinkedHashMap<Path, PathInformation>();
-	
+	private final Map<Path, PathInformation> pathCache = new LinkedHashMap<Path, PathInformation>();
+
 	/**
 	 * Called by the {@link #init()} method when it wishes to obtain a list of paths to register.
-	 * 
-	 * @return an unmodifiable list of path (required) 
+	 *
+	 * @return an unmodifiable list of path (required)
 	 */
 	protected abstract List<PathInformation> getPathInformation();
-	
+
 	/**
 	 * Called by the subclass when they are ready to complete initialization. This means their
 	 * {@link #getPathInformation()} method is ready to be called.
@@ -46,8 +46,8 @@ public abstract class AbstractPathResolver implements PathResolver {
 			pathCache.put(pi.getPath(), pi);
 		}
 	}
-	
-	public String getFriendlyName(String identifier) {
+
+	public String getFriendlyName(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
 		Path p = getPath(identifier);
 		if (p == null) {
@@ -56,21 +56,21 @@ public abstract class AbstractPathResolver implements PathResolver {
 		return p.getName() + getRelativeSegment(identifier);
 	}
 
-	public String getRoot(Path path) {
+	public String getRoot(final Path path) {
 		Assert.notNull(path, "Path required");
 		PathInformation pathInfo = pathCache.get(path);
 		Assert.notNull(pathInfo, "Unable to determine information for path '" + path + "'");
 		File root = pathInfo.getLocation();
 		return FileDetails.getCanonicalPath(root);
 	}
-	
+
 	/**
 	 * Obtains the {@link Path}s.
-	 * 
+	 *
 	 * @param requireSource true if the path is source, false if the path is NOT source, or null if source is ignored
 	 * @return a list of the matching paths (never null)
 	 */
-	private List<Path> getPaths(Boolean requireSource) {
+	private List<Path> getPaths(final Boolean requireSource) {
 		List<Path> result = new ArrayList<Path>();
 		for (PathInformation pi : pathOrder) {
 			if (requireSource == null) {
@@ -99,11 +99,11 @@ public abstract class AbstractPathResolver implements PathResolver {
 	/**
 	 * Locates the first {@link PathInformation} which can be construed as a parent
 	 * of the presented identifier.
-	 * 
+	 *
 	 * @param identifier to locate the parent of (required)
 	 * @return the first matching parent, or null if not found
 	 */
-	private PathInformation getApplicablePathInformation(String identifier) {
+	private PathInformation getApplicablePathInformation(final String identifier) {
 		Assert.notNull(identifier, "Identifier required");
 		for (PathInformation pi : pathOrder) {
 			FileDetails possibleParent = new FileDetails(pi.getLocation(), null);
@@ -113,8 +113,8 @@ public abstract class AbstractPathResolver implements PathResolver {
 		}
 		return null;
 	}
-	
-	public Path getPath(String identifier) {
+
+	public Path getPath(final String identifier) {
 		PathInformation parent = getApplicablePathInformation(identifier);
 		if (parent == null) {
 			return null;
@@ -122,7 +122,7 @@ public abstract class AbstractPathResolver implements PathResolver {
 		return parent.getPath();
 	}
 
-	public String getRelativeSegment(String identifier) {
+	public String getRelativeSegment(final String identifier) {
 		PathInformation parent = getApplicablePathInformation(identifier);
 		if (parent == null) {
 			return null;
@@ -131,7 +131,7 @@ public abstract class AbstractPathResolver implements PathResolver {
 		return parentFileDetails.getRelativeSegment(identifier);
 	}
 
-	public String getIdentifier(Path path, String relativePath) {
+	public String getIdentifier(final Path path, final String relativePath) {
 		Assert.notNull(path, "Path required");
 		Assert.notNull(relativePath, "Relative path cannot be null, although it can be empty");
 		PathInformation pi = pathCache.get(path);

@@ -31,7 +31,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides conversion to and from {@link JavaType}, with full support for using "~" as denoting the user's top-level package.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -40,17 +40,17 @@ import org.springframework.roo.support.util.StringUtils;
 public class JavaTypeConverter implements Converter<JavaType> {
 
 	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
-	
+
 	// Fields
 	@Reference protected LastUsed lastUsed;
 	@Reference protected FileManager fileManager;
 	@Reference protected ProjectOperations projectOperations;
 
-	public JavaType convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public JavaType convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
-		
+
 		// Check for number primitives
 		if (NUMBER_PRIMITIVES.contains(value)) {
 			return getNumberPrimitiveType(value);
@@ -100,11 +100,11 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		return result;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return JavaType.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
 		if (existingData == null) {
 			existingData = "";
 		}
@@ -123,7 +123,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 	/**
 	 * Adds common "java." types to the completions. For now we just provide them statically.
 	 */
-	private void completeJavaSpecificPaths(List<String> completions, String existingData, String optionContext) {
+	private void completeJavaSpecificPaths(final List<String> completions, final String existingData, String optionContext) {
 		SortedSet<String> types = new TreeSet<String>();
 
 		if (optionContext == null || "".equals(optionContext)) {
@@ -182,7 +182,7 @@ public class JavaTypeConverter implements Converter<JavaType> {
 		}
 	}
 
-	private void completeProjectSpecificPaths(List<String> completions, String existingData) {
+	private void completeProjectSpecificPaths(final List<String> completions, final String existingData) {
 		String topLevelPath = "";
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 
@@ -246,8 +246,8 @@ public class JavaTypeConverter implements Converter<JavaType> {
 			}
 		}
 	}
-	
-	private JavaType getNumberPrimitiveType(String value) {
+
+	private JavaType getNumberPrimitiveType(final String value) {
 		if ("byte".equals(value)) {
 			return JavaType.BYTE_PRIMITIVE;
 		} else if ("short".equals(value)) {

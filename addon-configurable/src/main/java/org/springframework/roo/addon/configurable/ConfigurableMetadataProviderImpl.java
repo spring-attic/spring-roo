@@ -13,39 +13,42 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 /**
  * Implementation of {@link ConfigurableMetadataProvider}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
 public class ConfigurableMetadataProviderImpl extends AbstractItdMetadataProvider implements ConfigurableMetadataProvider {
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_CONFIGURABLE);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_CONFIGURABLE);
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		return new ConfigurableMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Configurable";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = ConfigurableMetadata.getJavaType(metadataIdentificationString);
 		Path path = ConfigurableMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return ConfigurableMetadata.createIdentifier(javaType, path);
 	}
 

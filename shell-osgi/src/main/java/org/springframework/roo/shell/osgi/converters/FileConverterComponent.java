@@ -23,5 +23,5 @@ public class FileConverterComponent extends FileConverter {
 	protected File getWorkingDirectory() {
 		return shell.getHome();
 	}
-	
+
 }

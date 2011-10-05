@@ -28,7 +28,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
 
 
-	public void addItdTypeDetails(ItdTypeDetails itdTypeDetails) {
+	public void addItdTypeDetails(final ItdTypeDetails itdTypeDetails) {
 		if (itdTypeDetails == null || itdTypeDetails.getGovernor() == null) {
 			return;
 		}
@@ -40,7 +40,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 		updateChanges(itdTypeDetails.getGovernor().getName(), false);
 	}
 
-	public void removeItdTypeDetails(String itdTypeDetailsId) {
+	public void removeItdTypeDetails(final String itdTypeDetailsId) {
 		if (!StringUtils.hasText(itdTypeDetailsId)) {
 			return;
 		}
@@ -54,7 +54,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 		}
 	}
 
-	public boolean haveItdsChanged(String requestingClass, JavaType javaType) {
+	public boolean haveItdsChanged(final String requestingClass, final JavaType javaType) {
 		Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
 		if (changesSinceLastRequest == null) {
 			changesSinceLastRequest = new LinkedHashSet<String>(typeMap.keySet());
@@ -69,7 +69,7 @@ public class ItdDiscoveryServiceImpl implements ItdDiscoveryService {
 		return false;
 	}
 
-	private void updateChanges(JavaType javaType, boolean remove) {
+	private void updateChanges(final JavaType javaType, final boolean remove) {
 		for (String requestingClass : changeMap.keySet()) {
 			if (remove) {
 				changeMap.get(requestingClass).remove(javaType.getFullyQualifiedTypeName());

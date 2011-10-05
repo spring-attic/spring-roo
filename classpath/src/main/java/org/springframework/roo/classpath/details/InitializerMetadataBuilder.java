@@ -6,7 +6,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 
 /**
  * Builder for {@link InitializerMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1.1
  */

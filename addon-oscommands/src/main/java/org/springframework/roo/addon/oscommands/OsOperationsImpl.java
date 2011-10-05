@@ -35,10 +35,10 @@ public class OsOperationsImpl implements OsOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private ProcessManager processManager;
 
-	public void executeCommand(String command) throws IOException {
+	public void executeCommand(final String command) throws IOException {
 		File root = new File(getProjectRoot());
 		Assert.isTrue(root.isDirectory() && root.exists(), "Project root does not currently exist as a directory ('" + root.getCanonicalPath() + "')");
-		
+
 		Thread.currentThread().setName(""); // Prevent thread name from being presented in Roo shell
 		Process p = Runtime.getRuntime().exec(command, null, root);
 		// Ensure separate threads are used for logging, as per ROO-652
@@ -57,16 +57,16 @@ public class OsOperationsImpl implements OsOperations {
 			throw new IllegalStateException(e);
 		}
 	}
-	
+
 	private String getProjectRoot() {
 		return pathResolver.getRoot(Path.ROOT);
 	}
-	
-	private static class LoggingInputStream extends Thread {
-		private BufferedReader reader;
-		private ProcessManager processManager;
 
-		public LoggingInputStream(InputStream inputStream, ProcessManager processManager) {
+	private static class LoggingInputStream extends Thread {
+		private final BufferedReader reader;
+		private final ProcessManager processManager;
+
+		public LoggingInputStream(final InputStream inputStream, final ProcessManager processManager) {
 			this.reader = new BufferedReader(new InputStreamReader(inputStream));
 			this.processManager = processManager;
 		}

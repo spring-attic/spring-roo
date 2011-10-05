@@ -2,9 +2,9 @@ package org.springframework.roo.model;
 
 /**
  * Constants for JSR303-specific {@link JavaType}s.
- * 
+ *
  * Use them in preference to creating new instances of these types.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */

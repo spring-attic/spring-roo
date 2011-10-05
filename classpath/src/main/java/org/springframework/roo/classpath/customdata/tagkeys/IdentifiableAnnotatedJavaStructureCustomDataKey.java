@@ -14,7 +14,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 public abstract class IdentifiableAnnotatedJavaStructureCustomDataKey<T extends IdentifiableAnnotatedJavaStructure> extends IdentifiableJavaStructureCustomDataKey<T> {
 	private List<AnnotationMetadata> annotations;
 
-	protected IdentifiableAnnotatedJavaStructureCustomDataKey(Integer modifier, List<AnnotationMetadata> annotations) {
+	protected IdentifiableAnnotatedJavaStructureCustomDataKey(final Integer modifier, final List<AnnotationMetadata> annotations) {
 		super(modifier);
 		this.annotations = annotations;
 	}
@@ -27,7 +27,8 @@ public abstract class IdentifiableAnnotatedJavaStructureCustomDataKey<T extends 
 		return annotations;
 	}
 
-	public boolean meets(T identifiableAnnotatedJavaStructure) throws IllegalStateException {
+	@Override
+	public boolean meets(final T identifiableAnnotatedJavaStructure) throws IllegalStateException {
 		// TODO: Add in validation logic for annotations
 		return super.meets(identifiableAnnotatedJavaStructure);
 	}

@@ -17,25 +17,25 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Default implementation of {@link MemberDetails}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public class MemberDetailsImpl implements MemberDetails {
-	
+
 	// Fields
-	private  List<MemberHoldingTypeDetails> details;
+	private final  List<MemberHoldingTypeDetails> details;
 
 	/**
 	 * Constructs a new instance.
-	 * 
+	 *
 	 * @param details the member holders that should be stored in this instance (cannot be null or empty)
 	 */
-	MemberDetailsImpl(List<MemberHoldingTypeDetails> details) {
+	MemberDetailsImpl(final List<MemberHoldingTypeDetails> details) {
 		Assert.notEmpty(details, "Member holding details required");
 		this.details = details;
 	}
-	
+
 	public AnnotationMetadata getAnnotation(final JavaType type) {
 		Assert.notNull(type, "Annotation type to locate required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
@@ -46,7 +46,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return null;
 	}
-	
+
 	public List<ConstructorMetadata> getConstructors() {
 		final List<ConstructorMetadata> result = new ArrayList<ConstructorMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
@@ -58,7 +58,7 @@ public class MemberDetailsImpl implements MemberDetails {
 	public List<MemberHoldingTypeDetails> getDetails() {
 		return Collections.unmodifiableList(details);
 	}
-	
+
 	public List<String> getDynamicFinderNames() {
 		final List<String> dynamicFinderNames = new ArrayList<String>();
 		for (final MemberHoldingTypeDetails mhtd : this.details) {
@@ -66,7 +66,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return dynamicFinderNames;
 	}
-	
+
 	public List<FieldMetadata> getFields() {
 		final List<FieldMetadata> result = new ArrayList<FieldMetadata>();
 		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
@@ -74,7 +74,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return result;
 	}
-	
+
 	public MethodMetadata getMethod(final JavaSymbolName methodName) {
 		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
 			final MethodMetadata md = MemberFindingUtils.getDeclaredMethod(memberHoldingTypeDetails, methodName);
@@ -84,7 +84,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return null;
 	}
-	
+
 	public MethodMetadata getMethod(final JavaSymbolName methodName, final List<JavaType> parameters) {
 		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
 			MethodMetadata md = MemberFindingUtils.getDeclaredMethod(memberHoldingTypeDetails, methodName, parameters);
@@ -94,7 +94,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return null;
 	}
-	
+
 	public MethodMetadata getMethod(final JavaSymbolName methodName, final List<JavaType> parameters, final String excludingMid) {
 		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
 			MethodMetadata method = MemberFindingUtils.getDeclaredMethod(memberHoldingTypeDetails, methodName, parameters);
@@ -104,7 +104,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return null;
 	}
-	
+
 	public List<MethodMetadata> getMethods() {
 		final List<MethodMetadata> result = new ArrayList<MethodMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
@@ -112,7 +112,7 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return result;
 	}
-	
+
 	public List<MethodMetadata> getMethodsWithTag(final Object tagKey) {
 		Assert.notNull(tagKey, "Custom data key required");
 		final List<MethodMetadata> result = new ArrayList<MethodMetadata>();
@@ -123,16 +123,16 @@ public class MemberDetailsImpl implements MemberDetails {
 		}
 		return result;
 	}
-	
+
 	public MethodMetadata getMostConcreteMethodWithTag(final Object tagKey) {
 		return CollectionUtils.firstElementOf(getMethodsWithTag(tagKey));
 	}
-	
+
 	public boolean isMethodDeclaredByAnother(final JavaSymbolName methodName, final List<JavaType> parameterTypes, final String declaredByMetadataId) {
 		final MethodMetadata method = getMethod(methodName, parameterTypes);
 		return method != null && !method.getDeclaredByMetadataId().equals(declaredByMetadataId);
 	}
-	
+
 	public boolean isRequestingAnnotatedWith(final AnnotationMetadata annotationMetadata, final String requestingMid) {
 		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : this.details) {
 			if (MemberFindingUtils.getAnnotationOfType(memberHoldingTypeDetails.getAnnotations(), annotationMetadata.getAnnotationType()) != null) {

@@ -9,12 +9,12 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooIntegrationTest} annotation.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate private JavaType entity;
 	@AutoPopulate private boolean count = true; 
@@ -28,7 +28,7 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private boolean merge = true; 
 	@AutoPopulate private boolean transactional = true; 
 
-	public IntegrationTestAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public IntegrationTestAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_INTEGRATION_TEST);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
@@ -72,7 +72,7 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 	public boolean isMerge() {
 		return merge;
 	}
-	
+
 	public boolean isTransactional() {
 		return transactional;
 	}

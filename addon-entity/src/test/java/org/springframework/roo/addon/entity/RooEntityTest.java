@@ -34,7 +34,7 @@ public class RooEntityTest {
 	 * Asserts that a method with the same name, return type, and default value
 	 * as the given target method exists within the given candidate methods.
 	 * This is less strict than calling {@link Method#equals(Object)}.
-	 * 
+	 *
 	 * @param targetMethod
 	 * @param candidateMethods
 	 */

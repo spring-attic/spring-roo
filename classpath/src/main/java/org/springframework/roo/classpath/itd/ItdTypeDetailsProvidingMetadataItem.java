@@ -5,7 +5,7 @@ import org.springframework.roo.metadata.MetadataItem;
 
 /**
  * Indicates a {@link MetadataItem} implementation that can provide {@link ItdTypeDetails}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */

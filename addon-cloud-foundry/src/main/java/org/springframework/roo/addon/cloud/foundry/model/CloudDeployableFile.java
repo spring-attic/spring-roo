@@ -3,9 +3,9 @@ package org.springframework.roo.addon.cloud.foundry.model;
 import org.springframework.roo.file.monitor.event.FileDetails;
 
 public class CloudDeployableFile {
-	private FileDetails fileDetails;
+	private final FileDetails fileDetails;
 
-	public CloudDeployableFile(FileDetails fileDetails) {
+	public CloudDeployableFile(final FileDetails fileDetails) {
 		this.fileDetails = fileDetails;
 	}
 

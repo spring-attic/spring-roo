@@ -37,12 +37,12 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooIntegrationTest}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = IntegrationTestMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -57,8 +57,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private String transactionManager;
 	private boolean hasEmbeddedIdentifier;
 	private boolean entityHasSuperclass;
-	
-	public IntegrationTestMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, IntegrationTestAnnotationValues annotationValues, DataOnDemandMetadata dataOnDemandMetadata, MethodMetadata identifierAccessorMethod, MethodMetadata versionAccessorMethod, MemberTypeAdditions countMethod, MemberTypeAdditions findMethod, MemberTypeAdditions findAllMethod, MemberTypeAdditions findEntriesMethod, MemberTypeAdditions flushMethod, MemberTypeAdditions mergeMethod, MemberTypeAdditions persistMethod, MemberTypeAdditions removeMethod, String transactionManager, boolean hasEmbeddedIdentifier, boolean entityHasSuperclass, boolean isGaeEnabled) {
+
+	public IntegrationTestMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final IntegrationTestAnnotationValues annotationValues, final DataOnDemandMetadata dataOnDemandMetadata, final MethodMetadata identifierAccessorMethod, final MethodMetadata versionAccessorMethod, final MemberTypeAdditions countMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions findAllMethod, final MemberTypeAdditions findEntriesMethod, final MemberTypeAdditions flushMethod, final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod, final MemberTypeAdditions removeMethod, final String transactionManager, final boolean hasEmbeddedIdentifier, final boolean entityHasSuperclass, final boolean isGaeEnabled) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -73,7 +73,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		this.transactionManager = transactionManager;
 		this.hasEmbeddedIdentifier = hasEmbeddedIdentifier;
 		this.entityHasSuperclass = entityHasSuperclass;
-		
+
 		addRequiredIntegrationTestClassIntroductions(DataOnDemandMetadata.getJavaType(dataOnDemandMetadata.getId()));
 
 		// Add GAE LocalServiceTestHelper instance and @BeforeClass/@AfterClass methods if GAE is enabled
@@ -81,7 +81,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			isGaeSupported = true;
 			addOptionalIntegrationTestClassIntroductions();
 		}
-		
+
 		builder.addMethod(getCountMethodTest(countMethod));
 		builder.addMethod(getFindMethodTest(findMethod, identifierAccessorMethod));
 		builder.addMethod(getFindAllMethodTest(findAllMethod, countMethod));
@@ -92,28 +92,28 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		builder.addMethod(getMergeMethodTest(mergeMethod, findMethod, flushMethod, versionAccessorMethod, identifierAccessorMethod));
 		builder.addMethod(getPersistMethodTest(persistMethod, flushMethod, identifierAccessorMethod));
 		builder.addMethod(getRemoveMethodTest(removeMethod, findMethod, flushMethod, identifierAccessorMethod));
-		
+
 		itdTypeDetails = builder.build();
 	}
-	
+
 	/**
 	 * Adds the JUnit and Spring type level annotations if needed
 	 */
-	private void addRequiredIntegrationTestClassIntroductions(JavaType dodGovernor) {
+	private void addRequiredIntegrationTestClassIntroductions(final JavaType dodGovernor) {
 		// Add an @RunWith(SpringJunit4ClassRunner) annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.junit.runner.RunWith")) == null) {
 			AnnotationMetadataBuilder runWithBuilder = new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"));
 			runWithBuilder.addClassAttribute("value", "org.springframework.test.context.junit4.SpringJUnit4ClassRunner");
 			builder.addAnnotation(runWithBuilder);
 		}
-		
+
 		// Add an @ContextConfiguration("classpath:/applicationContext.xml") annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), CONTEXT_CONFIGURATION) == null) {
 			AnnotationMetadataBuilder contextConfigurationBuilder = new AnnotationMetadataBuilder(CONTEXT_CONFIGURATION);
 			contextConfigurationBuilder.addStringAttribute("locations", "classpath:/META-INF/spring/applicationContext*.xml");
 			builder.addAnnotation(contextConfigurationBuilder);
 		}
-		
+
 		// Add an @Transactional, if the user did not define it on the governor directly
 		if (annotationValues.isTransactional() && MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), TRANSACTIONAL) == null) {
 			AnnotationMetadataBuilder transactionalBuilder = new AnnotationMetadataBuilder(TRANSACTIONAL);
@@ -122,7 +122,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			}
 			builder.addAnnotation(transactionalBuilder);
 		}
-	
+
 		// Add the data on demand field if the user did not define it on the governor directly
 		FieldMetadata field = governorTypeDetails.getField(new JavaSymbolName("dod"));
 		if (field != null) {
@@ -135,7 +135,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("dod"), dodGovernor);
 			builder.addField(fieldBuilder.build());
 		}
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType("org.junit.Assert"));
 	}
@@ -193,7 +193,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the count method, if available and requested (may return null)
 	 */
-	private MethodMetadata getCountMethodTest(MemberTypeAdditions countMethod) {
+	private MethodMetadata getCountMethodTest(final MemberTypeAdditions countMethod) {
 		if (!annotationValues.isCount() || countMethod == null) {
 			// User does not want this method
 			return null;
@@ -207,7 +207,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		if (method != null) {
 			return method;
 		}
-		
+
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
@@ -222,11 +222,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
-	
+
 	/**
 	 * @return a test for the find (by ID) method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFindMethodTest(MemberTypeAdditions findMethod, MethodMetadata identifierAccessorMethod) {
+	private MethodMetadata getFindMethodTest(final MemberTypeAdditions findMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isFind() || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method
 			return null;
@@ -265,7 +265,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the find all  method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFindAllMethodTest(MemberTypeAdditions findAllMethod, MemberTypeAdditions countMethod) {
+	private MethodMetadata getFindAllMethodTest(final MemberTypeAdditions findAllMethod, final MemberTypeAdditions countMethod) {
 		if (!annotationValues.isFindAll() || findAllMethod == null || countMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -304,7 +304,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the find entries method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFindEntriesMethodTest(MemberTypeAdditions countMethod, MemberTypeAdditions findEntriesMethod) {
+	private MethodMetadata getFindEntriesMethodTest(final MemberTypeAdditions countMethod, final MemberTypeAdditions findEntriesMethod) {
 		if (!annotationValues.isFindEntries() || countMethod == null || findEntriesMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -317,7 +317,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		if (method != null) {
 			return method;
 		}
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(LIST);
 
@@ -345,7 +345,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the flush method, if available and requested (may return null)
 	 */
-	private MethodMetadata getFlushMethodTest(MethodMetadata versionAccessorMethod, MethodMetadata identifierAccessorMethod, MemberTypeAdditions flushMethod, MemberTypeAdditions findMethod) {
+	private MethodMetadata getFlushMethodTest(final MethodMetadata versionAccessorMethod, final MethodMetadata identifierAccessorMethod, final MemberTypeAdditions flushMethod, final MemberTypeAdditions findMethod) {
 		if (!annotationValues.isFlush() || versionAccessorMethod == null || identifierAccessorMethod == null || flushMethod == null || findMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -358,7 +358,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		if (method != null) {
 			return method;
 		}
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
 		JavaType versionType = versionAccessorMethod.getReturnType();
@@ -375,7 +375,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("obj = " + findMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
 		bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
-		
+
 		bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getSimpleTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
 		if (JdkJavaType.isDateField(versionType)) {
@@ -394,7 +394,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the merge method, if available and requested (may return null)
 	 */
-	private MethodMetadata getMergeMethodTest(MemberTypeAdditions mergeMethod, MemberTypeAdditions findMethod, MemberTypeAdditions flushMethod, MethodMetadata versionAccessorMethod, MethodMetadata identifierAccessorMethod) {
+	private MethodMetadata getMergeMethodTest(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions flushMethod, final MethodMetadata versionAccessorMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isMerge() || mergeMethod == null || versionAccessorMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method, or core dependencies are missing
 			return null;
@@ -407,12 +407,12 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		if (method != null) {
 			return method;
 		}
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(identifierAccessorMethod.getReturnType());
 		JavaType versionType = versionAccessorMethod.getReturnType();
 		imports.addImport(versionType);
-		
+
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(TEST));
 
@@ -435,7 +435,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
 			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		
+
 		bodyBuilder.appendFormalLine("Assert.assertEquals(\"Identifier of merged object not the same as identifier of original object\", merged." + identifierAccessorMethod.getMethodName().getSymbolName() + "(), id);");
 		if (JdkJavaType.isDateField(versionType)) {
 			bodyBuilder.appendFormalLine("Assert.assertTrue(\"Version for '" + entityName + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion)) || !modified);");
@@ -453,7 +453,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
-	private MethodMetadata getPersistMethodTest(MemberTypeAdditions persistMethod, MemberTypeAdditions flushMethod, MethodMetadata identifierAccessorMethod) {
+	private MethodMetadata getPersistMethodTest(final MemberTypeAdditions persistMethod, final MemberTypeAdditions flushMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isPersist() || persistMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method
 			return null;
@@ -484,7 +484,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine(flushMethod.getMethodCall() + ";");
 			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		
+
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		persistMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -493,11 +493,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
-	
+
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
-	private MethodMetadata getRemoveMethodTest(MemberTypeAdditions removeMethod, MemberTypeAdditions findMethod, MemberTypeAdditions flushMethod, MethodMetadata identifierAccessorMethod) {
+	private MethodMetadata getRemoveMethodTest(final MemberTypeAdditions removeMethod, final MemberTypeAdditions findMethod, final MemberTypeAdditions flushMethod, final MethodMetadata identifierAccessorMethod) {
 		if (!annotationValues.isRemove() || removeMethod == null || findMethod == null || identifierAccessorMethod == null) {
 			// User does not want this method or one of its core dependencies
 			return null;
@@ -510,7 +510,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		if (method != null) {
 			return method;
 		}
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName()));
 
@@ -532,12 +532,12 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		bodyBuilder.appendFormalLine("Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide an identifier\", id);");
 		bodyBuilder.appendFormalLine("obj = " + findMethod.getMethodCall() + ";");
 		bodyBuilder.appendFormalLine(removeMethod.getMethodCall() + ";");
-		
+
 		if (flushMethod != null) {
 			bodyBuilder.appendFormalLine( flushMethod.getMethodCall() + ";");
 			flushMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		
+
 		bodyBuilder.appendFormalLine("Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + findMethod.getMethodCall() + ");");
 
 		removeMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -548,6 +548,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		return methodBuilder.build();
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -562,20 +563,20 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
-	public static String createIdentifier(JavaType javaType, Path path) {
+
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }

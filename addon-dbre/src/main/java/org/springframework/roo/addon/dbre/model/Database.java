@@ -14,30 +14,30 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents the database model, ie. the tables in the database.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class Database {
 
 	/** All tables. */
-	private Set<Table> tables;
+	private final Set<Table> tables;
 
 	/** The JavaPackage where entities are created */
 	private JavaPackage destinationPackage;
-	
+
 	/** Whether to create integration tests */
 	private boolean testAutomatically;
-	
+
 	/** Whether or not to included non-portable JPA attributes in the @Column annotation */
 	private boolean includeNonPortableAttributes;
-	
+
 	/** Whether or not this database has multiple schemas */
 	private boolean multipleSchemas;
 
 	// Whether to generate active record CRUD methods for each entity
 	private boolean activeRecord;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -57,7 +57,7 @@ public class Database {
 		return !tables.isEmpty();
 	}
 
-	public Table getTable(String name, String schemaName) {
+	public Table getTable(final String name, final String schemaName) {
 		for (Table table : tables) {
 			if (table.getName().equals(name)) {
 				if (!StringUtils.hasText(schemaName) || DbreModelService.NO_SCHEMA_REQUIRED.equals(schemaName) || table.getSchema().getName().equals(schemaName)) {
@@ -67,10 +67,10 @@ public class Database {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Indicates whether active record CRUD methods should be generated for each entity
-	 * 
+	 *
 	 * @return see above
 	 * @since 1.2.0
 	 */
@@ -80,19 +80,19 @@ public class Database {
 
 	/**
 	 * Sets whether active record CRUD methods should be generated for each entity
-	 * 
+	 *
 	 * @param activeRecord
 	 * @since 1.2.0
 	 */
 	public void setActiveRecord(final boolean activeRecord) {
 		this.activeRecord = activeRecord;
 	}
-	
+
 	public JavaPackage getDestinationPackage() {
 		return destinationPackage;
 	}
 
-	public void setDestinationPackage(JavaPackage destinationPackage) {
+	public void setDestinationPackage(final JavaPackage destinationPackage) {
 		this.destinationPackage = destinationPackage;
 	}
 
@@ -100,7 +100,7 @@ public class Database {
 		return testAutomatically;
 	}
 
-	public void setTestAutomatically(boolean testAutomatically) {
+	public void setTestAutomatically(final boolean testAutomatically) {
 		this.testAutomatically = testAutomatically;
 	}
 
@@ -108,7 +108,7 @@ public class Database {
 		return includeNonPortableAttributes;
 	}
 
-	public void setIncludeNonPortableAttributes(boolean includeNonPortableAttributes) {
+	public void setIncludeNonPortableAttributes(final boolean includeNonPortableAttributes) {
 		this.includeNonPortableAttributes = includeNonPortableAttributes;
 	}
 
@@ -131,7 +131,7 @@ public class Database {
 		multipleSchemas = schemas.size() > 1;
 	}
 
-	private void initializeImportedKeys(Table table) {
+	private void initializeImportedKeys(final Table table) {
 		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
 		Short keySequence = null;
 		Map<Column, Set<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, Set<ForeignKey>>();
@@ -189,7 +189,7 @@ public class Database {
 		}
 	}
 
-	private void initializeExportedKeys(Table table) {
+	private void initializeExportedKeys(final Table table) {
 		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
 		Short keySequence = null;
 
@@ -230,7 +230,7 @@ public class Database {
 		}
 	}
 
-	private void initializeIndices(Table table) {
+	private void initializeIndices(final Table table) {
 		for (Index index : table.getIndices()) {
 			for (IndexColumn indexColumn : index.getColumns()) {
 				Column column = table.findColumn(indexColumn.getName());
@@ -244,11 +244,11 @@ public class Database {
 	/**
 	 * Determines if a table is a many-to-many join table.
 	 * <p>
-	 * To be identified as a many-to-many join table, the table must have have exactly 
-	 * two primary keys and have exactly two foreign-keys pointing to other 
+	 * To be identified as a many-to-many join table, the table must have have exactly
+	 * two primary keys and have exactly two foreign-keys pointing to other
 	 * entity tables and have no other columns.
 	 */
-	private void initializeJoinTable(Table table) {
+	private void initializeJoinTable(final Table table) {
 		boolean equals = table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getImportedKeyCount() == 2 && table.getPrimaryKeyCount() == table.getImportedKeyCount();
 		Iterator<Column> iter = table.getColumns().iterator();
 		while (equals && iter.hasNext()) {
@@ -260,6 +260,7 @@ public class Database {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -267,7 +268,8 @@ public class Database {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -283,6 +285,7 @@ public class Database {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return String.format("Database [tables=%s, destinationPackage=%s, testAutomatically=%s, includeNonPortableAttributes=%s]", tables, destinationPackage, testAutomatically, includeNonPortableAttributes);
 	}

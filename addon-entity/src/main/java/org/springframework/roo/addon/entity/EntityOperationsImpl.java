@@ -30,14 +30,14 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link EntityOperations}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.2
  */
 @Component
 @Service
 public class EntityOperationsImpl implements EntityOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -50,14 +50,14 @@ public class EntityOperationsImpl implements EntityOperations {
 
 	public void newEntity(final JavaType name, final boolean createAbstract, final JavaType superclass, final List<AnnotationMetadataBuilder> annotations) {
 		Assert.notNull(name, "Entity name required");
-		
+
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
-		
+
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
 			modifier |= Modifier.ABSTRACT;
 		}
-		
+
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 
 		if (!superclass.equals(OBJECT)) {
@@ -66,23 +66,23 @@ public class EntityOperationsImpl implements EntityOperations {
 				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
 			}
 		}
-		
+
 		typeDetailsBuilder.setExtendsTypes(Arrays.asList(superclass));
 		typeDetailsBuilder.setAnnotations(annotations);
 
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
-	public void newEmbeddableClass(JavaType name, boolean serializable) {
+	public void newEmbeddableClass(final JavaType name, final boolean serializable) {
 		Assert.notNull(name, "Embeddable name required");
-		
+
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
 
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
 		annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
 		annotations.add(new AnnotationMetadataBuilder(EMBEDDABLE));
-		
+
 		if (serializable) {
 			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
 		}
@@ -90,18 +90,18 @@ public class EntityOperationsImpl implements EntityOperations {
 		int modifier = Modifier.PUBLIC;
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
-		
+
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 
-	public void newIdentifier(JavaType identifierType, String identifierField, String identifierColumn) {
+	public void newIdentifier(final JavaType identifierType, final String identifierField, final String identifierColumn) {
 		Assert.notNull(identifierType, "Identifier type required");
-		
+
 		final String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 		final List<AnnotationMetadataBuilder> identifierAnnotations = Arrays.asList(new AnnotationMetadataBuilder(ROO_TO_STRING), new AnnotationMetadataBuilder(ROO_IDENTIFIER));
 		final ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(identifierAnnotations);
-		
+
 		typeManagementService.createOrUpdateTypeOnDisk(typeDetailsBuilder.build());
 	}
 }

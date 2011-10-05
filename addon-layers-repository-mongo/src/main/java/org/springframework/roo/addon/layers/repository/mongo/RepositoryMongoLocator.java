@@ -15,7 +15,7 @@ public interface RepositoryMongoLocator {
 
 	/**
 	 * Returns the repositories that support the given domain type
-	 * 
+	 *
 	 * @param domainType the domain type for which to find the repositories; can
 	 * be <code>null</code>
 	 * @return a non-<code>null</code> collection

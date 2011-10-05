@@ -18,7 +18,7 @@ public class MethodParameter extends Pair<JavaType, JavaSymbolName> {
 
 	/**
 	 * Converts the given list of pairs to a list of {@link MethodParameter}s
-	 * 
+	 *
 	 * @param parameters the pairs to convert (can be <code>null</code>)
 	 * @return
 	 */
@@ -31,7 +31,7 @@ public class MethodParameter extends Pair<JavaType, JavaSymbolName> {
 		}
 		return list;
 	}
-	
+
 	/**
 	 * Constructor
 	 *
@@ -41,7 +41,7 @@ public class MethodParameter extends Pair<JavaType, JavaSymbolName> {
 	public MethodParameter(final JavaType type, final String name) {
 		this(type, new JavaSymbolName(name));
 	}
-	
+
 	/**
 	 * Constructor
 	 *

@@ -7,16 +7,16 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents an index definition for a table which may be either unique or non-unique.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class Index{
 	private String name;
 	private boolean unique;
-	private Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();
+	private final Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();
 
-	Index(String name) {
+	Index(final String name) {
 		this.name = name;
 	}
 
@@ -24,7 +24,7 @@ public class Index{
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -32,7 +32,7 @@ public class Index{
 		return unique;
 	}
 
-	public void setUnique(boolean unique) {
+	public void setUnique(final boolean unique) {
 		this.unique = unique;
 	}
 
@@ -40,11 +40,12 @@ public class Index{
 		return columns;
 	}
 
-	public boolean addColumn(IndexColumn indexColumn) {
+	public boolean addColumn(final IndexColumn indexColumn) {
 		Assert.notNull(indexColumn, "Column required");
 		return columns.add(indexColumn);
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -52,7 +53,8 @@ public class Index{
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -73,6 +75,7 @@ public class Index{
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return String.format("Index [name=%s, unique=%s, columns=%s]", name, unique, columns);
 	}

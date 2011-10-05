@@ -15,15 +15,15 @@ import org.w3c.dom.Element;
 
 /**
  * Provider to embed photo galleries via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		// Expected http://picasaweb.google.com.au/stsmedia/SydneyByNight
 		if (url.contains("picasaweb.google.")) {
 			String [] split = url.split("/");
@@ -48,9 +48,9 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
-		if (options == null || options.size() != 3 || !options.containsKey("provider") || !options.containsKey("userId") || !options.containsKey("albumId")) { 
+
+	public boolean install(final String viewName, final Map<String, String> options) {
+		if (options == null || options.size() != 3 || !options.containsKey("provider") || !options.containsKey("userId") || !options.containsKey("albumId")) {
 			return false;
 		}
 		String provider = options.get("provider");
@@ -66,19 +66,20 @@ public class PhotoEmbeddedProvider extends AbstractEmbeddedProvider {
 		return true;
 	}
 
-	private String getPicasaId(String url) {
+	private String getPicasaId(final String url) {
 		String json = sendHttpGetRequest("http://api.embed.ly/v1/api/oembed?url=" + url);
 		if (json != null) {
 			String subDoc = json.substring(json.indexOf("albumid%2F") + 10);
 			return subDoc.substring(0, subDoc.indexOf("%") == 1 ? subDoc.length() : subDoc.indexOf("%"));
-		}	
+		}
 		return null;
 	}
-	
+
 	public enum PhotoProvider implements EmbeddedCompletor {
 		PICASA,
 		FLIKR;
-		
+
+		@Override
 		public String toString() {
 			ToStringCreator tsc = new ToStringCreator(this);
 			tsc.append("provider", name());

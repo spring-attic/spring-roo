@@ -6,15 +6,15 @@ import java.util.TreeSet;
 
 /**
  * Contains utility methods to return {@link SortedSet}s of {@link ReservedToken}s.
- * 
+ *
  * <p>
  * Collections available through this class are immutable (non-modifiable).
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0;
  */
 public abstract class ReservedTokenHolder {
-	
+
 	// Constants
 	public static final SortedSet<ReservedToken> NUMERIC_TOKENS;
 	public static final SortedSet<ReservedToken> BOOLEAN_TOKENS;

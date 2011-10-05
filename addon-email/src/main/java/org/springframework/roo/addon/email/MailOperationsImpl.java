@@ -47,14 +47,14 @@ import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link MailOperationsImpl}.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component 
-@Service 
+@Component
+@Service
 public class MailOperationsImpl implements MailOperations {
-	
+
 	// Constants
 	private static final int PRIVATE_TRANSIENT = Modifier.PRIVATE | Modifier.TRANSIENT;
 	private static final AnnotatedJavaType STRING = new AnnotatedJavaType(JavaType.STRING);
@@ -63,7 +63,7 @@ public class MailOperationsImpl implements MailOperations {
 	private static final String SPRING_TASK_XSD = "http://www.springframework.org/schema/task/spring-task-3.0.xsd";
 	private static final String TEMPLATE_MESSAGE_FIELD = "templateMessage";
 	private static final Logger log = HandlerUtils.getLogger(MailOperationsImpl.class);
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -82,7 +82,7 @@ public class MailOperationsImpl implements MailOperations {
 	/**
 	 * Returns the canonical path of the user project's applicationContext.xml
 	 * file.
-	 * 
+	 *
 	 * @return a non-blank path
 	 */
 	private String getApplicationContextPath() {
@@ -175,7 +175,7 @@ public class MailOperationsImpl implements MailOperations {
 		DomUtils.removeTextNodes(root);
 
 		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
-		
+
 		if (installDependencies) {
 			updateConfiguration();
 		}
@@ -183,7 +183,7 @@ public class MailOperationsImpl implements MailOperations {
 		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, true);
 	}
 
-	public void configureTemplateMessage(final String from, final String subject) {		
+	public void configureTemplateMessage(final String from, final String subject) {
 		final String contextPath = getApplicationContextPath();
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(contextPath));
 		final Element root = document.getDocumentElement();
@@ -223,9 +223,9 @@ public class MailOperationsImpl implements MailOperations {
 			}
 
 			root.appendChild(smmBean);
-			
+
 			DomUtils.removeTextNodes(root);
-			
+
 			fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(document), false);
 		}
 
@@ -237,7 +237,7 @@ public class MailOperationsImpl implements MailOperations {
 	/**
 	 * Finds the SimpleMailMessage bean in the Spring XML file with the given
 	 * root element
-	 * 
+	 *
 	 * @param root
 	 * @return <code>null</code> if there is no such bean
 	 */
@@ -272,7 +272,7 @@ public class MailOperationsImpl implements MailOperations {
 
 	/**
 	 * Generates the "send email" method to be added to the domain type
-	 * 
+	 *
 	 * @param mailSenderName the name of the MailSender field (required)
 	 * @param async whether to send the email asynchronously
 	 * @param targetClassMID the MID of the class to receive the method
@@ -320,7 +320,7 @@ public class MailOperationsImpl implements MailOperations {
 		bodyBuilder.appendFormalLine(mailSenderName + ".send(" + LOCAL_MESSAGE_VARIABLE + ");");
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(targetClassMID, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, parameters.getKeys(), parameters.getValues(), bodyBuilder);
-		
+
 		if (async) {
 			if (DomUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 				// Add asynchronous email support to the application

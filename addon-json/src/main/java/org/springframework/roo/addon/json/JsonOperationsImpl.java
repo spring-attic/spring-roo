@@ -19,12 +19,12 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of addon-json operations interface.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component 
-@Service 
+@Component
+@Service
 public class JsonOperationsImpl implements JsonOperations {
 
 	// Fields
@@ -36,7 +36,7 @@ public class JsonOperationsImpl implements JsonOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 
-	public void annotateType(JavaType javaType, String rootName, boolean deepSerialize) {
+	public void annotateType(final JavaType javaType, final String rootName, final boolean deepSerialize) {
 		Assert.notNull(javaType, "Java type required");
 
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
@@ -57,17 +57,17 @@ public class JsonOperationsImpl implements JsonOperations {
 			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		}
 	}
-	
-	public void annotateType(JavaType javaType, String rootName) {
+
+	public void annotateType(final JavaType javaType, final String rootName) {
 		annotateType(javaType, rootName, false);
 	}
-	
+
 	public void annotateAll(final boolean deepSerialize) {
 		for (final JavaType type : typeLocationService.findTypesWithAnnotation(ROO_JAVA_BEAN)) {
 			annotateType(type, "", deepSerialize);
 		}
 	}
-	
+
 	public void annotateAll() {
 		annotateAll(false);
 	}

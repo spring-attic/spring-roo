@@ -15,31 +15,32 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Extra validation properties specified to String properties.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class StringField extends StringOrNumericField {
-	
+
 	/** Whether the JSR 303 @Size annotation will be added; provides the "min" attribute (defaults to 0) */
 	private Integer sizeMin;
-	
+
 	/** Whether the JSR 303 @Size annotation will be added; provides the "max" attribute (defaults to {@link Integer#MAX_VALUE}) */
 	private Integer sizeMax;
 
 	/** Whether the JSR 3030 @Pattern annotation will be added */
 	private String regexp;
-	
+
 	@Deprecated
-	public StringField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
+	public StringField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
-	public StringField(String physicalTypeIdentifier, JavaSymbolName fieldName) {
+	public StringField(final String physicalTypeIdentifier, final JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, JavaType.STRING, fieldName);
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
+	@Override
+	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (sizeMin != null || sizeMax != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
@@ -62,7 +63,7 @@ public class StringField extends StringOrNumericField {
 		return sizeMin;
 	}
 
-	public void setSizeMin(Integer sizeMin) {
+	public void setSizeMin(final Integer sizeMin) {
 		this.sizeMin = sizeMin;
 	}
 
@@ -70,7 +71,7 @@ public class StringField extends StringOrNumericField {
 		return sizeMax;
 	}
 
-	public void setSizeMax(Integer sizeMax) {
+	public void setSizeMax(final Integer sizeMax) {
 		this.sizeMax = sizeMax;
 	}
 
@@ -78,7 +79,7 @@ public class StringField extends StringOrNumericField {
 		return regexp;
 	}
 
-	public void setRegexp(String regexp) {
+	public void setRegexp(final String regexp) {
 		this.regexp = regexp;
-	}	
+	}
 }

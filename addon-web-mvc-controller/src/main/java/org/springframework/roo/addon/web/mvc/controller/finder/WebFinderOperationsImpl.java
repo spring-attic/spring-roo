@@ -24,20 +24,20 @@ import org.springframework.uaa.client.util.Assert;
 
 /**
  * Implements {@link WebFinderOperations}
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
 public class WebFinderOperationsImpl implements WebFinderOperations {
-	
+
 	// Fields
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private ControllerOperations controllerOperations;
-	
+
 	public boolean isCommandAvailable() {
 		return controllerOperations.isScaffoldAvailable();
 	}
@@ -50,7 +50,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 				finderEntities.add(cod.getName());
 			}
 		}
-		
+
 		// Second, find controllers for those entities.
 		for (ClassOrInterfaceTypeDetails cod : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_WEB_SCAFFOLD)) {
 			PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(typeLocationService.findIdentifier(cod.getName()));
@@ -68,7 +68,7 @@ public class WebFinderOperationsImpl implements WebFinderOperations {
 	public void annotateType(final JavaType controllerType, final JavaType entityType) {
 		Assert.notNull(controllerType, "Controller type required");
 		Assert.notNull(entityType, "Entity type required");
-		
+
 		String id = typeLocationService.findIdentifier(controllerType);
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + controllerType.getFullyQualifiedTypeName() + "'");

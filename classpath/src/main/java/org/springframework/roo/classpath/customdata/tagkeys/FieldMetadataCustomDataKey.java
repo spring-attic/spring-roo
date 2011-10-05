@@ -19,23 +19,24 @@ public class FieldMetadataCustomDataKey extends IdentifiableAnnotatedJavaStructu
 	private String fieldInitializer;
 	private String name;
 
-	public FieldMetadataCustomDataKey(Integer modifier, List<AnnotationMetadata> annotations, JavaType fieldType, JavaSymbolName fieldName, String fieldInitializer) {
+	public FieldMetadataCustomDataKey(final Integer modifier, final List<AnnotationMetadata> annotations, final JavaType fieldType, final JavaSymbolName fieldName, final String fieldInitializer) {
 		super(modifier, annotations);
 		this.fieldType = fieldType;
 		this.fieldName = fieldName;
 		this.fieldInitializer = fieldInitializer;
 	}
 
-	public FieldMetadataCustomDataKey(Integer modifier, List<AnnotationMetadata> annotations) {
+	public FieldMetadataCustomDataKey(final Integer modifier, final List<AnnotationMetadata> annotations) {
 		super(modifier, annotations);
 	}
 
-	public FieldMetadataCustomDataKey(String name) {
+	public FieldMetadataCustomDataKey(final String name) {
 		super(null, null);
 		this.name = name;
 	}
 
-	public boolean meets(FieldMetadata fieldMetadata) {
+	@Override
+	public boolean meets(final FieldMetadata fieldMetadata) {
 		// TODO: Add in validation logic for fieldType, fieldName, fieldInitializer
 		return super.meets(fieldMetadata);
 	}
@@ -52,6 +53,7 @@ public class FieldMetadataCustomDataKey extends IdentifiableAnnotatedJavaStructu
 		return fieldInitializer;
 	}
 
+	@Override
 	public String toString() {
 		return name;
 	}

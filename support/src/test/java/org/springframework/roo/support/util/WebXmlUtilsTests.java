@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
 
 /**
  * Unit tests for {@link WebXmlUtils}
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1.1
  */
@@ -33,7 +33,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testSetDisplayName() {
 		WebXmlUtils.setDisplayName("display", webXml, null);
-		
+
 		Element display = XmlUtils.findFirstElement("display-name", webXml.getDocumentElement());
 		assertNotNull(display);
 		assertEquals("display", display.getTextContent());
@@ -42,7 +42,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testSetDescription() {
 		WebXmlUtils.setDescription("test desc", webXml, null);
-		
+
 		Element desc = XmlUtils.findFirstElement("description", webXml.getDocumentElement());
 		assertNotNull(desc);
 		assertEquals("test desc", desc.getTextContent());
@@ -51,7 +51,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddContextParam() {
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("key", "value"), webXml, null);
-		
+
 		Element ctxp = XmlUtils.findFirstElement("context-param", webXml.getDocumentElement());
 		assertNotNull(ctxp);
 		assertEquals(2, ctxp.getChildNodes().getLength());
@@ -62,7 +62,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddFilter() {
 		WebXmlUtils.addFilter("filter1", String.class.getName(), "/*", webXml, null, new WebXmlUtils.WebXmlParam("key", "value"), new WebXmlUtils.WebXmlParam("key2", "value2"));
-		
+
 		Element filter = XmlUtils.findFirstElement("filter", webXml.getDocumentElement());
 		assertNotNull(filter);
 		assertEquals("filter1", XmlUtils.findFirstElement("filter-name", filter).getTextContent());
@@ -83,7 +83,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddFilterAtPositionWithDispatcher() {
 		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BEFORE, null, "filter1", "filter2", Object.class.getName(), "/test", webXml, null, null, Arrays.asList(WebXmlUtils.Dispatcher.ERROR, WebXmlUtils.Dispatcher.INCLUDE, WebXmlUtils.Dispatcher.FORWARD, WebXmlUtils.Dispatcher.REQUEST));
-		
+
 		Element filter = XmlUtils.findFirstElement("filter", webXml.getDocumentElement());
 		assertNotNull(filter);
 		assertEquals("filter2", XmlUtils.findFirstElement("filter-name", filter).getTextContent());
@@ -103,7 +103,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddFilterAtPosition() {
 		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN, "filter2", "filter1", "filter3", Integer.class.getName(), "/test2", webXml, null, (WebXmlParam[]) null);
-	
+
 		List<Element> filters = XmlUtils.findElements("filter", webXml.getDocumentElement());
 		assertEquals(3, filters.size());
 		assertEquals("filter2", XmlUtils.findFirstElement("filter-name", filters.get(0)).getTextContent());
@@ -121,7 +121,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddListener() {
 		WebXmlUtils.addListener(String.class.getName(), webXml, null);
-		
+
 		Element listener = XmlUtils.findFirstElement("listener", webXml.getDocumentElement());
 		assertNotNull(listener);
 		assertEquals(String.class.getName(), XmlUtils.findFirstElement("listener-class", listener).getTextContent());
@@ -130,7 +130,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddServlet() {
 		WebXmlUtils.addServlet("servlet1", Object.class.getName(), "/servlet1", 1, webXml, null, new WebXmlUtils.WebXmlParam("key1", "value1"), new WebXmlUtils.WebXmlParam("key2", "value2"));
-		
+
 		Element servlet = XmlUtils.findFirstElement("servlet", webXml.getDocumentElement());
 		assertNotNull(servlet);
 		assertEquals("servlet1", XmlUtils.findFirstElement("servlet-name", servlet).getTextContent());
@@ -151,7 +151,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testSetSessionTimeout() {
 		WebXmlUtils.setSessionTimeout(1000, webXml, null);
-		
+
 		Element time = XmlUtils.findFirstElement("session-config/session-timeout", webXml.getDocumentElement());
 		assertNotNull(time);
 		assertEquals("1000", time.getTextContent());
@@ -160,7 +160,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddWelcomeFile() {
 		WebXmlUtils.addWelcomeFile("/welcome", webXml, null);
-		
+
 		Element welcomeFile = XmlUtils.findFirstElement("welcome-file-list/welcome-file", webXml.getDocumentElement());
 		assertNotNull(welcomeFile);
 		assertEquals("/welcome", welcomeFile.getTextContent());
@@ -169,7 +169,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddExceptionType() {
 		WebXmlUtils.addExceptionType(IllegalStateException.class.getName(), "/illegal", webXml, null);
-		
+
 		Element errorPage = XmlUtils.findFirstElement("error-page", webXml.getDocumentElement());
 		assertNotNull(errorPage);
 		assertEquals(2, errorPage.getChildNodes().getLength());
@@ -180,7 +180,7 @@ public class WebXmlUtilsTests {
 	@Test
 	public void testAddErrorCode() {
 		WebXmlUtils.addErrorCode(404, "/404", webXml, null);
-		
+
 		Element errorPage = (Element) webXml.getDocumentElement().getChildNodes().item(webXml.getDocumentElement().getChildNodes().getLength() - 1);
 		assertNotNull(errorPage);
 		assertEquals(2, errorPage.getChildNodes().getLength());
@@ -190,10 +190,10 @@ public class WebXmlUtilsTests {
 
 	@Test
 	public void testAddSecurityConstraint() {
-		WebXmlUtils.addSecurityConstraint("displayName", 
-				Arrays.asList(new WebXmlUtils.WebResourceCollection("web-resource-name", "description", Arrays.asList("/", "/2"), Arrays.asList("POST", "GET"))), 
+		WebXmlUtils.addSecurityConstraint("displayName",
+				Arrays.asList(new WebXmlUtils.WebResourceCollection("web-resource-name", "description", Arrays.asList("/", "/2"), Arrays.asList("POST", "GET"))),
 				Arrays.asList("user", "supervisor"), "transportGuarantee", webXml, null);
-		
+
 		Element secConstraint = XmlUtils.findFirstElement("security-constraint", webXml.getDocumentElement());
 		assertNotNull(secConstraint);
 		assertEquals("displayName", XmlUtils.findFirstElement("display-name", secConstraint).getTextContent());
@@ -209,42 +209,42 @@ public class WebXmlUtilsTests {
 		assertNotNull(userDataConstraint);
 		assertEquals("transportGuarantee", userDataConstraint.getElementsByTagName("transport-guarantee").item(0).getTextContent());
 	}
-	
+
 	@Test
 	public void validateElementSequence() {
 		List<Element> contents = XmlUtils.findElements("/web-app/*", webXml.getDocumentElement());
-		
+
 		assertEquals(17, contents.size());
-		
+
 		assertEquals("display-name", contents.get(0).getNodeName());
-		
+
 		assertEquals("description", contents.get(1).getNodeName());
-		
+
 		assertEquals("context-param", contents.get(2).getNodeName());
-		
+
 		// filters
 		assertEquals("filter2", contents.get(3).getChildNodes().item(0).getTextContent());
 		assertEquals("filter3", contents.get(4).getChildNodes().item(0).getTextContent());
 		assertEquals("filter1", contents.get(5).getChildNodes().item(0).getTextContent());
-		
+
 		// filter-mappings
 		assertEquals("filter2", contents.get(6).getChildNodes().item(0).getTextContent());
 		assertEquals("filter3", contents.get(7).getChildNodes().item(0).getTextContent());
 		assertEquals("filter1", contents.get(8).getChildNodes().item(0).getTextContent());
-		
+
 		assertEquals("listener", contents.get(9).getNodeName());
-		
+
 		assertEquals("servlet", contents.get(10).getNodeName());
 		assertEquals("servlet-mapping", contents.get(11).getNodeName());
-		
+
 		assertEquals("session-config", contents.get(12).getNodeName());
-		
+
 		assertEquals("welcome-file-list", contents.get(13).getNodeName());
-		
+
 		assertEquals("error-page", contents.get(14).getNodeName());
-		
+
 		assertEquals("error-page", contents.get(15).getNodeName());
-		
+
 		assertEquals("security-constraint", contents.get(16).getNodeName());
 	}
 }

@@ -9,23 +9,23 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Immutable representation of the outcome of parsing a given shell line.
- * 
+ *
  * <p>
  * Note that contained objects (the instance and the arguments) may be mutable, as the shell infrastructure
  * has no way of restricting which methods can be the target of CLI commands and nor the arguments
  * they will accept via the {@link Converter} infrastructure.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class ParseResult {
 
 	// Fields
-	private Method method;
-	private Object instance;
-	private Object[] arguments; // may be null if no arguments needed
+	private final Method method;
+	private final Object instance;
+	private final Object[] arguments; // may be null if no arguments needed
 
-	public ParseResult(Method method, Object instance, Object[] arguments) {
+	public ParseResult(final Method method, final Object instance, final Object[] arguments) {
 		Assert.notNull(method, "Method required");
 		Assert.notNull(instance, "Instance required");
 		int length = arguments == null ? 0 : arguments.length;
@@ -46,7 +46,7 @@ public class ParseResult {
 	public Object[] getArguments() {
 		return arguments;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -58,7 +58,7 @@ public class ParseResult {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

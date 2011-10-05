@@ -21,35 +21,35 @@ import org.w3c.dom.Document;
 
 /**
  * Abstract base class for operations classes. Contains common methods.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
 @Component(componentAbstract = true)
 public abstract class AbstractOperations {
-	
+
 	// Constants
 	protected static Logger logger = HandlerUtils.getLogger(AbstractOperations.class);
-	
+
 	// Fields
 	@Reference protected FileManager fileManager;
 	protected ComponentContext context;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		this.context = context;
 	}
-	
-	public Document getDocumentTemplate(String templateName) {
+
+	public Document getDocumentTemplate(final String templateName) {
 		return XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), templateName));
 	}
 
 	/**
 	 * This method will copy the contents of a directory to another if the resource does not already exist in the target directory
-	 * 
+	 *
 	 * @param sourceAntPath the source path
 	 * @param targetDirectory the target directory
 	 */
-	public void copyDirectoryContents(String sourceAntPath, String targetDirectory, boolean replace) {
+	public void copyDirectoryContents(final String sourceAntPath, String targetDirectory, final boolean replace) {
 		Assert.hasText(sourceAntPath, "Source path required");
 		Assert.hasText(targetDirectory, "Target directory required");
 

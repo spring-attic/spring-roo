@@ -22,14 +22,14 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Provides methods to find types based on table names and to suggest type and field 
+ * Provides methods to find types based on table names and to suggest type and field
  * names from table and column names respectively.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public abstract class DbreTypeUtils {
-	
+
 	// Constants
 	private static final JavaSymbolName NAME_ATTRIBUTE = new JavaSymbolName("name");
 	private static final JavaSymbolName SCHEMA_ATTRIBUTE = new JavaSymbolName("schema");
@@ -43,7 +43,7 @@ public abstract class DbreTypeUtils {
 		TABLE_ATTRIBUTES.put(ROO_JPA_ENTITY, TABLE_ATTRIBUTE);
 		TABLE_ATTRIBUTES.put(ROO_ENTITY, TABLE_ATTRIBUTE);
 	}
-	
+
 	// The annotation attributes from which to read the db schema name
 	// Linked to preserve the iteration order below
 	private static final Map<JavaType, JavaSymbolName> SCHEMA_ATTRIBUTES = new LinkedHashMap<JavaType, JavaSymbolName>();
@@ -55,13 +55,13 @@ public abstract class DbreTypeUtils {
 
 	/**
 	 * Locates the type associated with the presented table name.
-	 * 
+	 *
 	 * @param managedEntities a set of database-managed entities to search (required)
 	 * @param tableName the table to locate (required)
 	 * @param schemaName the table's schema name
 	 * @return the type (if known) or null (if not found)
 	 */
-	public static JavaType findTypeForTableName(Iterable<ClassOrInterfaceTypeDetails> managedEntities, String tableName, String schemaName) {
+	public static JavaType findTypeForTableName(final Iterable<ClassOrInterfaceTypeDetails> managedEntities, final String tableName, final String schemaName) {
 		Assert.notNull(managedEntities, "Set of managed entities required");
 		Assert.hasText(tableName, "Table name required");
 
@@ -77,31 +77,31 @@ public abstract class DbreTypeUtils {
 
 	/**
 	 * Locates the type associated with the presented table.
-	 * 
+	 *
 	 * @param managedEntities a set of database-managed entities to search (required)
 	 * @param table the table to locate (required)
 	 * @return the type (if known) or null (if not found)
 	 */
-	public static JavaType findTypeForTable(Iterable<ClassOrInterfaceTypeDetails> managedEntities, Table table) {
+	public static JavaType findTypeForTable(final Iterable<ClassOrInterfaceTypeDetails> managedEntities, final Table table) {
 		Assert.notNull(managedEntities, "Set of managed entities required");
 		Assert.notNull(table, "Table required");
 		return findTypeForTableName(managedEntities, table.getName(), table.getSchema().getName());
 	}
-	
+
 	/**
 	 * Returns the database schema for the given entity.
-	 * 
-	 * @param entityDetails the type to search (required) 
+	 *
+	 * @param entityDetails the type to search (required)
 	 * @return the schema name (if known) or null (if not found)
 	 */
 	public static String getSchemaName(final MemberHoldingTypeDetails entityDetails) {
 		Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
 		return getFirstNonBlankAttributeValue(entityDetails, SCHEMA_ATTRIBUTES);
 	}
-	
+
 	/**
 	 * Returns the database table for the given entity.
-	 * 
+	 *
 	 * @param entityDetails the type to search (required)
 	 * @return the table (if known) or null (if not found)
 	 */
@@ -109,11 +109,11 @@ public abstract class DbreTypeUtils {
 		Assert.notNull(entityDetails, "MemberHoldingTypeDetails type required");
 		return getFirstNonBlankAttributeValue(entityDetails, TABLE_ATTRIBUTES);
 	}
-	
+
 	/**
 	 * Reads the given attributes of the given annotations on the given type,
 	 * returning the first non-blank one found.
-	 * 
+	 *
 	 * @param annotatedType the type for which to read the annotations (required)
 	 * @param annotationAttributes the annotation/attribute pairs to read for that type
 	 * @return <code>null</code> if none of those annotations provide a non-blank schema name
@@ -127,11 +127,11 @@ public abstract class DbreTypeUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the value of the given attribute of the given annotation on the
 	 * given type
-	 * 
+	 *
 	 * @param <T> the expected annotation value type
 	 * @param type the type whose annotations to read (required)
 	 * @param annotationType the annotation to read (required)
@@ -150,15 +150,15 @@ public abstract class DbreTypeUtils {
 		}
 		return (T) attributeValue.getValue();
 	}
-	
+
 	/**
 	 * Returns a JavaType given a table identity.
-	 * 
+	 *
 	 * @param tableName the table name to convert (required)
 	 * @param javaPackage the Java package to use for the type
 	 * @return a new JavaType
 	 */
-	public static JavaType suggestTypeNameForNewTable(String tableName, JavaPackage javaPackage) {
+	public static JavaType suggestTypeNameForNewTable(final String tableName, final JavaPackage javaPackage) {
 		Assert.hasText(tableName, "Table name required");
 
 		StringBuilder result = new StringBuilder();
@@ -172,27 +172,27 @@ public abstract class DbreTypeUtils {
 
 	/**
 	 * Returns a field name for a given database table or column name;
-	 * 
+	 *
 	 * @param name the name of the table or column (required)
 	 * @return a String representing the table or column
 	 */
-	public static String suggestFieldName(String name) {
+	public static String suggestFieldName(final String name) {
 		Assert.hasText(name, "Table or column name required");
 		return getName(name, true);
 	}
 
 	/**
 	 * Returns a field name for a given database table;
-	 * 
+	 *
 	 * @param table the the table (required)
 	 * @return a String representing the table or column.
 	 */
-	public static String suggestFieldName(Table table) {
+	public static String suggestFieldName(final Table table) {
 		Assert.notNull(table, "Table required");
 		return getName(table.getName(), true);
 	}
-	
-	public static String suggestPackageName(String str) {
+
+	public static String suggestPackageName(final String str) {
 		StringBuilder result = new StringBuilder();
 		char[] value = str.toCharArray();
 		for (int i = 0; i < value.length; i++) {
@@ -211,7 +211,7 @@ public abstract class DbreTypeUtils {
 		return result.toString();
 	}
 
-	private static String getName(String str, boolean isField) {
+	private static String getName(final String str, final boolean isField) {
 		StringBuilder result = new StringBuilder();
 		boolean isDelimChar = false;
 		for (int i = 0; i < str.length(); i++) {
@@ -228,7 +228,7 @@ public abstract class DbreTypeUtils {
 				isDelimChar = true;
 				continue;
 			}
-			
+
 			if (isDelimChar) {
 				result.append(Character.toUpperCase(c));
 				isDelimChar = false;

@@ -17,14 +17,14 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
 
 /**
  * Regularly polls {@link MetadataLogger#getTimings()} and incorporates all timings into UAA
- * feature use statistics. 
- * 
+ * feature use statistics.
+ *
  * @author Ben Alex
  * @since 1.1.1
  */
 @Component(enabled = true)
 public class MetadataPollingUaaRegistrationFacility {
-	
+
 	// Constants
 	private static final String NOT_FOUND = "___NOT_FOUND___";
 
@@ -32,19 +32,19 @@ public class MetadataPollingUaaRegistrationFacility {
 	@Reference private MetadataLogger metadataLogger;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	private BundleContext bundleContext;
-	private Timer timer = new Timer();
-	private Set<String> previouslyNotifiedBsns = new HashSet<String>();
-	private Map<String, String> typeToBsnMap = new HashMap<String, String>();
-	
-	protected void activate(ComponentContext context) {
+	private final Timer timer = new Timer();
+	private final Set<String> previouslyNotifiedBsns = new HashSet<String>();
+	private final Map<String, String> typeToBsnMap = new HashMap<String, String>();
+
+	protected void activate(final ComponentContext context) {
 		this.bundleContext = context.getBundleContext();
 		timer.scheduleAtFixedRate(new MetadataTimerTask(), 0, 5 * 1000);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		timer.cancel();
 	}
-	
+
 	private class MetadataTimerTask extends TimerTask {
 		@Override
 		public void run() {
@@ -63,18 +63,18 @@ public class MetadataPollingUaaRegistrationFacility {
 						// Cache to avoid the lookup cost in the future
 						typeToBsnMap.put(typeName, bundleSymbolicName);
 					}
-					
+
 					if (NOT_FOUND.equals(bundleSymbolicName)) {
 						continue;
 					}
-					
+
 					// Only notify the UAA service if we haven't previously told it about this BSN (UAA service handles buffering internally)
 					if (!previouslyNotifiedBsns.contains(bundleSymbolicName)) {
 						// UaaRegistrationService deals with determining if the BSN is public (non-public BSNs are not registered)
 						uaaRegistrationService.registerBundleSymbolicNameUse(bundleSymbolicName, null);
 						previouslyNotifiedBsns.add(bundleSymbolicName);
 					}
-					
+
 				}
 			} catch (RuntimeException ignored) {}
 		}

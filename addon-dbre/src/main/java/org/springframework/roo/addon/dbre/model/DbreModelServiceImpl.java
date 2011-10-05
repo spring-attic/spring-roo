@@ -32,7 +32,7 @@ import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link DbreModelService}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -46,9 +46,9 @@ public class DbreModelServiceImpl implements DbreModelService {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	private Database lastDatabase;
-	private Set<Database> cachedIntrospections = new HashSet<Database>();
+	private final Set<Database> cachedIntrospections = new HashSet<Database>();
 
-	public boolean supportsSchema(boolean displayAddOns) throws RuntimeException {
+	public boolean supportsSchema(final boolean displayAddOns) throws RuntimeException {
 		Connection connection = null;
 		try {
 			connection = getConnection(displayAddOns);
@@ -62,7 +62,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		}
 	}
 
-	public Set<Schema> getSchemas(boolean displayAddOns) {
+	public Set<Schema> getSchemas(final boolean displayAddOns) {
 		Connection connection = null;
 		try {
 			connection = getConnection(displayAddOns);
@@ -75,7 +75,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		}
 	}
 
-	public Database getDatabase(boolean evictCache) {
+	public Database getDatabase(final boolean evictCache) {
 		if (!evictCache && cachedIntrospections.contains(lastDatabase)) {
 			for (Database database : cachedIntrospections) {
 				if (database.equals(lastDatabase)) {
@@ -87,7 +87,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 		if (evictCache && cachedIntrospections.contains(lastDatabase)) {
 			cachedIntrospections.remove(lastDatabase);
 		}
-		
+
 		String dbreXmlPath = getDbreXmlPath();
 		if (!StringUtils.hasText(dbreXmlPath) || !fileManager.exists(dbreXmlPath)) {
 			return null;
@@ -111,12 +111,12 @@ public class DbreModelServiceImpl implements DbreModelService {
 		Document document = DatabaseXmlUtils.getDatabaseDocument(database);
 		fileManager.createOrUpdateTextFileIfRequired(getDbreXmlPath(), XmlUtils.nodeToString(document), true);
 	}
-	
+
 	public String getDbreXmlPath() {
 		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbreModelService.DBRE_XML) : null;
 	}
 
-	public Database refreshDatabase(Set<Schema> schemas, boolean view, Set<String> includeTables, Set<String> excludeTables) {
+	public Database refreshDatabase(final Set<Schema> schemas, final boolean view, final Set<String> includeTables, final Set<String> excludeTables) {
 		Assert.notNull(schemas, "Schemas required");
 
 		Connection connection = null;
@@ -132,20 +132,20 @@ public class DbreModelServiceImpl implements DbreModelService {
 			connectionProvider.closeConnection(connection);
 		}
 	}
-	
-	private void cacheDatabase(Database database) {
+
+	private void cacheDatabase(final Database database) {
 		if (database != null) {
 			lastDatabase = database;
 			cachedIntrospections.add(database);
 		}
 	}
-	
-	private Connection getConnection(boolean displayAddOns) {
+
+	private Connection getConnection(final boolean displayAddOns) {
 		if (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
 			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 			return connectionProvider.getConnection(connectionProperties, displayAddOns);
 		}
-		
+
 		Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
 		return connectionProvider.getConnection(connectionProperties, displayAddOns);
 	}
@@ -186,7 +186,7 @@ public class DbreModelServiceImpl implements DbreModelService {
 			if ("datanucleus.ConnectionPassword".equals(key)) {
 				properties.put("database.password", value);
 			}
-			
+
 			if (properties.size() == 4) {
 				// All required properties have been found so ignore rest of elements
 				break;

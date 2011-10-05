@@ -10,7 +10,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Represents a parsed {@link RooJsfManagedBean} annotation.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -19,7 +19,7 @@ public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private JavaType entity;
 	@AutoPopulate private boolean includeOnMenu = true;
 
-	public JsfManagedBeanAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public JsfManagedBeanAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, ROO_JSF_MANAGED_BEAN);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

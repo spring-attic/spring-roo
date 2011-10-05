@@ -4,7 +4,7 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Provides {@link DisplayNameMetadata}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */

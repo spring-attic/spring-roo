@@ -10,13 +10,13 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Abstract {@link Builder} to assist building {@link MemberHoldingTypeDetails} implementations.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  * @param <T> the type of {@link MemberHoldingTypeDetails} being built
  */
 public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
-	
+
 	// Fields
 	private final List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>();
 	private final List<ConstructorMetadataBuilder> declaredConstructors = new ArrayList<ConstructorMetadataBuilder>();
@@ -82,7 +82,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Sets the builders for the constructors that are to be declared
-	 * 
+	 *
 	 * @param declaredConstructors can be <code>null</code> for none
 	 */
 	public final void setDeclaredConstructors(final Collection<? extends ConstructorMetadataBuilder> declaredConstructors) {
@@ -98,7 +98,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Sets the builders for the fields to be declared by the type being built
-	 * 
+	 *
 	 * @param declaredFields the builders to set (can be <code>null</code> for none)
 	 */
 	public final void setDeclaredFields(final Collection<? extends FieldMetadataBuilder> declaredFields) {
@@ -110,7 +110,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Returns the declared methods in this builder
-	 * 
+	 *
 	 * @return an unmodifiable copy of this list
 	 */
 	public final List<MethodMetadataBuilder> getDeclaredMethods() {
@@ -120,9 +120,9 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	/**
 	 * Sets the declared methods for this builder; equivalent to calling
 	 * {@link #addMethod(MethodMetadataBuilder)} once for each item of the
-	 * given {@link Iterable}. 
-	 * 
-	 * @param declaredMethods the methods to set; can be <code>null</code> for 
+	 * given {@link Iterable}.
+	 *
+	 * @param declaredMethods the methods to set; can be <code>null</code> for
 	 * none, otherwise the {@link Iterable} is defensively copied
 	 */
 	public final void setDeclaredMethods(final Iterable<? extends MethodMetadataBuilder> declaredMethods) {
@@ -140,7 +140,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Sets the builders for the inner types of the type being built
-	 * 
+	 *
 	 * @param declaredInnerTypes the builders to set; can be <code>null</code> for none
 	 */
 	public void setDeclaredInnerTypes(final Collection<? extends ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes) {
@@ -156,7 +156,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Sets the builders for the initializers of the type being built
-	 * 
+	 *
 	 * @param declaredInitializers the builders to set; can be <code>null</code> for none
 	 */
 	public void setDeclaredInitializers(final Collection<? extends InitializerMetadataBuilder> declaredInitializers) {
@@ -169,10 +169,10 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	/**
 	 * Returns the types that the built instance will extend, if any. Does not
 	 * return a copy, i.e. modifying the returned list will modify this builder!
-	 * 
+	 *
 	 * TODO improve encapsulation by returning a defensive copy and
 	 * <em>updating callers accordingly</em>
-	 * 
+	 *
 	 * @return a non-<code>null</code> list
 	 */
 	public final List<JavaType> getExtendsTypes() {
@@ -181,7 +181,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Sets the types that the built instance will extend
-	 * 
+	 *
 	 * @param extendsTypes can be <code>null</code> for none
 	 */
 	public final void setExtendsTypes(final Collection<? extends JavaType> extendsTypes) {
@@ -197,7 +197,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Sets the types to be implemented by the type being built
-	 * 
+	 *
 	 * @param implementsTypes can be <code>null</code> for none
 	 */
 	public final void setImplementsTypes(final Collection<? extends JavaType> implementsTypes) {
@@ -216,7 +216,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	}
 
 	protected void onAddConstructor(final ConstructorMetadataBuilder constructor) {}
-	
+
 	public final boolean addField(final FieldMetadataBuilder field) {
 		if (field == null || !getDeclaredByMetadataId().equals(field.getDeclaredByMetadataId())) {
 			return false;
@@ -229,7 +229,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Adds the given method to this builder
-	 * 
+	 *
 	 * @param method the method builder to add; ignored if <code>null</code> or
 	 * if its MID doesn't match this builder's MID
 	 * @return true if the state of this builder changed
@@ -245,7 +245,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	/**
 	 * Subclasses can perform their own actions upon a method builder being
 	 * added. This implementation does nothing.
-	 * 
+	 *
 	 * @param method the method being added; never <code>null</code>
 	 */
 	protected void onAddMethod(final MethodMetadataBuilder method) {}
@@ -266,7 +266,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
 	/**
 	 * Adds the given method to this builder
-	 * 
+	 *
 	 * @param method the method to add; can be <code>null</code>
 	 * @return <code>true</code> if the state of this builder changed
 	 */
@@ -314,9 +314,9 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		onAddImplementType(implementsType);
 		return implementsTypes.add(implementsType);
 	}
-	
+
 	protected void onAddImplementType(final JavaType implementsType) {}
-	
+
 	public final boolean addExtendsTypes(final JavaType extendsType) {
 		if (extendsType == null) return false;
 		onAddExtendsTypes(extendsType);
@@ -367,7 +367,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 
     /**
      * Removes the given methods from this builder
-     * 
+     *
      * @param methodsToRemove can be <code>null</code> for none
      * @return true if this builder changed as a result
      * @see List#removeAll(Collection)
@@ -378,7 +378,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		}
 		return this.declaredMethods.removeAll(methodsToRemove);
 	}
-	
+
 	/**
 	 * Removes all declared methods from this builder
 	 */

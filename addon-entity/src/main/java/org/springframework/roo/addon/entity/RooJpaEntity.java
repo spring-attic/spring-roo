@@ -15,20 +15,20 @@ public @interface RooJpaEntity {
 	String ID_FIELD_DEFAULT = "id";
 	String VERSION_COLUMN_DEFAULT = "version";
 	String VERSION_FIELD_DEFAULT = "version";
-	
+
 	/**
-	 * Specifies the database catalog name that should be used for the entity. 
-	 * 
+	 * Specifies the database catalog name that should be used for the entity.
+	 *
 	 * @return the name of the catalog to use (defaults to "")
 	 */
 	String catalog() default "";
-	
+
 	/**
-	 * Specifies the name used to refer to the entity in queries. 
-	 * 
+	 * Specifies the name used to refer to the entity in queries.
+	 *
 	 * <p>
-	 * The name must not be a reserved literal in JPQL. 
-	 * 
+	 * The name must not be a reserved literal in JPQL.
+	 *
 	 * @return the name given to the entity (defaults to "")
 	 */
 	String entityName() default "";
@@ -37,7 +37,7 @@ public @interface RooJpaEntity {
 	 * Specifies the column name that should be used for the identifier field. By default this is generally
 	 * made identical to the {@link #identifierField()}, although it will be made unique as required for
 	 * the particular entity fields present.
-	 * 
+	 *
 	 * @return the name of the identifier column to use (defaults to ""; in this case it is automatic)
 	 */
 	String identifierColumn() default "";
@@ -47,24 +47,24 @@ public @interface RooJpaEntity {
 	 * in a superclass (either written in normal Java source ,or introduced by a
 	 * superclass that is annotated with either {@link RooEntity} or
 	 * {@link RooJpaEntity}.
-	 * 
+	 *
 	 * <p>
 	 * If you annotate a field with JPA's @Id annotation, it is required that you provide a public accessor
 	 * for that field.
-	 * 
+	 *
 	 * @return the name of the identifier field to use (defaults to {@value #ID_FIELD_DEFAULT}; must be provided)
 	 */
 	String identifierField() default ID_FIELD_DEFAULT;
 
 	/**
-	 * 
+	 *
 	 * @return the class of identifier that should be used (defaults to {@link Long}; must be provided)
 	 */
 	Class<? extends Serializable> identifierType() default Long.class;
 
 	/**
-	 * Specifies the JPA inheritance type that should be used for the entity. 
-	 * 
+	 * Specifies the JPA inheritance type that should be used for the entity.
+	 *
 	 * @return the inheritance type to use (defaults to "")
 	 */
 	String inheritanceType() default "";
@@ -75,43 +75,43 @@ public @interface RooJpaEntity {
 	boolean mappedSuperclass() default false;
 
 	/**
-	 * Specifies the database schema name that should be used for the entity. 
-	 * 
+	 * Specifies the database schema name that should be used for the entity.
+	 *
 	 * @return the name of the schema to use (defaults to "")
 	 */
 	String schema() default "";
 
 	/**
-	 * Specifies the table name that should be used for the entity. 
-	 * 
+	 * Specifies the table name that should be used for the entity.
+	 *
 	 * @return the name of the table to use (defaults to "")
 	 */
 	String table() default "";
-	
+
 	/**
 	 * Specifies the column name that should be used for the version field. By default this is generally
 	 * made identical to the {@link #versionField()}, although it will be made unique as required for
 	 * the particular entity fields present.
-	 * 
+	 *
 	 * @return the name of the version column to use (defaults to {@value #VERSION_COLUMN_DEFAULT}; in this case it is automatic)
 	 */
 	String versionColumn() default VERSION_COLUMN_DEFAULT;
-	
+
 	/**
 	 * Creates an optimistic locking version field, unless there is already a
 	 * JPA @Version field annotation in a superclass (either written in normal
 	 * Java source, or introduced by a superclass annotated with
 	 * {@link RooEntity} or {@link RooJpaEntity}. The produced field will be of
 	 * the type specified by {@link #versionType()}.
-	 * 
+	 *
 	 * <p>
 	 * If you annotate a field with JPA's @Version annotation, it is required
 	 * that you provide a public accessor for that field.
-	 * 
+	 *
 	 * @return the name of the version field to use (defaults to {@value #VERSION_FIELD_DEFAULT}; must be provided)
 	 */
 	String versionField() default VERSION_FIELD_DEFAULT;
-	
+
 	/**
 	 * @return the class of version that should be used (defaults to {@link Integer}; must be provided)
 	 */

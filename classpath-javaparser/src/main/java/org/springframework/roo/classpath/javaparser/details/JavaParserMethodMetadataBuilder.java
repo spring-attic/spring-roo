@@ -38,26 +38,26 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link MethodMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
-	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
-	private JavaType returnType;
-	private JavaSymbolName methodName;
+	private final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+	private final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+	private final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+	private final List<JavaType> throwsTypes = new ArrayList<JavaType>();
+	private final JavaType returnType;
+	private final JavaSymbolName methodName;
 	private String body;
-	private String declaredByMetadataId;
-	private int modifier;
+	private final String declaredByMetadataId;
+	private final int modifier;
 
-	public static JavaParserMethodMetadataBuilder getInstance(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+	public static JavaParserMethodMetadataBuilder getInstance(final String declaredByMetadataId, final MethodDeclaration methodDeclaration, final CompilationUnitServices compilationUnitServices, final Set<JavaSymbolName> typeParameters) {
 		return new JavaParserMethodMetadataBuilder(declaredByMetadataId, methodDeclaration, compilationUnitServices, typeParameters);
 	}
-	
-	private JavaParserMethodMetadataBuilder(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+
+	private JavaParserMethodMetadataBuilder(final String declaredByMetadataId, final MethodDeclaration methodDeclaration, final CompilationUnitServices compilationUnitServices, final Set<JavaSymbolName> typeParameters) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(methodDeclaration, "Method declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
@@ -66,7 +66,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 
 		// Convert Java Parser modifier into JDK modifier
 		this.modifier = JavaParserUtils.getJdkModifier(methodDeclaration.getModifiers());
-		
+
 		// Add method-declared type parameters (if any) to the list of type parameters
 		Set<JavaSymbolName> fullTypeParameters = new HashSet<JavaSymbolName>();
 		fullTypeParameters.addAll(typeParameters);
@@ -77,14 +77,14 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 				fullTypeParameters.add(currentTypeParam);
 			}
 		}
-		
+
 		// Compute the return type
 		Type rt = methodDeclaration.getType();
 		this.returnType = JavaParserUtils.getJavaType(compilationUnitServices, rt, fullTypeParameters);
-		
+
 		// Compute the method name
 		this.methodName = new JavaSymbolName(methodDeclaration.getName());
-		
+
 		// Get the body
 		this.body = methodDeclaration.getBody() == null ? null : methodDeclaration.getBody().toString();
 
@@ -112,14 +112,14 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 				parameterNames.add(new JavaSymbolName(p.getId().getName()));
 			}
 		}
-		
+
 		if (methodDeclaration.getThrows() != null) {
 			for (NameExpr throwsType: methodDeclaration.getThrows()) {
 				JavaType throwing = JavaParserUtils.getJavaType(compilationUnitServices, throwsType, fullTypeParameters);
 				throwsTypes.add(throwing);
 			}
 		}
-		
+
 		if (methodDeclaration.getAnnotations() != null) {
 			for (AnnotationExpr annotation : methodDeclaration.getAnnotations()) {
 				this.annotations.add(JavaParserAnnotationMetadataBuilder.getInstance(annotation, compilationUnitServices).build());
@@ -140,15 +140,15 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 		return methodMetadataBuilder.build();
 	}
 
-	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, Set<JavaSymbolName> typeParameters) {
+	public static void addMethod(final CompilationUnitServices compilationUnitServices, final List<BodyDeclaration> members, final MethodMetadata method, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(compilationUnitServices, "Flushable compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(method, "Method required");
-		
+
 		if (typeParameters == null) {
 			typeParameters = new HashSet<JavaSymbolName>();
 		}
-		
+
 		// Create the return type we should use
 		Type returnType = null;
 		if (method.getReturnType().isPrimitive()) {
@@ -156,7 +156,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 		} else {
 			NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), method.getReturnType());
 			ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
-			
+
 			// Add any type arguments presented for the return type
 			if (method.getReturnType().getParameters().size() > 0) {
 				List<Type> typeArgs = new ArrayList<Type>();
@@ -165,7 +165,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 					typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 				}
 			}
-			
+
 			// Handle arrays
 			if (method.getReturnType().isArray()) {
 				ReferenceType rt = new ReferenceType();
@@ -176,20 +176,20 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 				returnType = cit;
 			}
 		}
-		
+
 		// Start with the basic method
 		MethodDeclaration d = new MethodDeclaration();
 		d.setModifiers(JavaParserUtils.getJavaParserModifier(method.getModifier()));
 		d.setName(method.getMethodName().getSymbolName());
 		d.setType(returnType);
-		
+
 		// Add any method-level annotations (not parameter annotations)
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		d.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : method.getAnnotations()) {
 			JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
-	
+
 		// Add any method parameters, including their individual annotations and type parameters
 		List<Parameter> parameters = new ArrayList<Parameter>();
 		d.setParameters(parameters);
@@ -200,14 +200,14 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 
 			// Add the parameter annotations applicable for this parameter type
 			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
-	
+
 			for (AnnotationMetadata parameterAnnotation : methodParameter.getAnnotations()) {
 				JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
 			}
-			
+
 			// Compute the parameter name
 			String parameterName = method.getParameterNames().get(index).getSymbolName();
-			
+
 			// Compute the parameter type
 			Type parameterType = null;
 			if (methodParameter.getJavaType().isPrimitive()) {
@@ -242,7 +242,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 			p.setAnnotations(parameterAnnotations);
 			parameters.add(p);
 		}
-		
+
 		// Add exceptions which the method my throw
 		if (method.getThrowsTypes().size() > 0) {
 			List<NameExpr> throwsTypes = new ArrayList<NameExpr>();
@@ -252,7 +252,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 			}
 			d.setThrows(throwsTypes);
 		}
-		
+
 		// Set the body
 		if (!StringUtils.hasText(method.getBody())) {
 			// Never set the body if an abstract method
@@ -293,7 +293,7 @@ public class JavaParserMethodMetadataBuilder implements Builder<MethodMetadata>{
 			MethodDeclaration md = (MethodDeclaration) bd;
 			d.setBody(md.getBody());
 		}
-	
+
 		// Locate where to add this method; also verify if this method already exists
 		for (BodyDeclaration bd : members) {
 			if (bd instanceof MethodDeclaration) {

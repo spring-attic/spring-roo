@@ -13,18 +13,18 @@ import static org.springframework.roo.model.JavaType.SHORT_PRIMITIVE;
 
 /**
  * Constants for JDK {@link JavaType}s.
- * 
+ *
  * Use them in preference to creating new instances of these types.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
 public final class JdkJavaType {
 
-	// java.math 
+	// java.math
 	public static final JavaType BIG_DECIMAL = new JavaType("java.math.BigDecimal");
 	public static final JavaType BIG_INTEGER = new JavaType("java.math.BigInteger");
-	
+
 	// java.security
 	public static final JavaType SECURE_RANDOM = new JavaType("java.security.SecureRandom");
 
@@ -34,7 +34,7 @@ public final class JdkJavaType {
 	public static final JavaType CLOB = new JavaType("java.sql.Clob");
 	public static final JavaType REF = new JavaType("java.sql.Ref");
 	public static final JavaType STRUCT = new JavaType("java.sql.Struct");
-	
+
 	// java.util
 	public static final JavaType ARRAY_LIST = new JavaType("java.util.ArrayList");
 	public static final JavaType ARRAYS = new JavaType("java.util.Arrays");
@@ -48,16 +48,16 @@ public final class JdkJavaType {
 	public static final JavaType RANDOM = new JavaType("java.util.Random");
 	public static final JavaType SET = new JavaType("java.util.Set");
 	public static final JavaType SUPPRESS_WARNINGS = new JavaType("java.lang.SuppressWarnings");
-	
-	// javax.annotation 
+
+	// javax.annotation
 	public static final JavaType POST_CONSTRUCT = new JavaType("javax.annotation.PostConstruct");
-	
+
 	// Static methods
-	
+
 	public static boolean isIntegerType(final JavaType javaType) {
 		return javaType.equals(BIG_INTEGER) || javaType.equals(INT_PRIMITIVE) || javaType.equals(INT_OBJECT) || javaType.equals(LONG_PRIMITIVE) || javaType.equals(LONG_OBJECT) || javaType.equals(SHORT_PRIMITIVE) || javaType.equals(SHORT_OBJECT);
 	}
-	
+
 	public static boolean isDecimalType(final JavaType javaType) {
 		return javaType.equals(BIG_DECIMAL) || isDoubleOrFloat(javaType);
 	}
@@ -65,7 +65,7 @@ public final class JdkJavaType {
 	public static boolean isDoubleOrFloat(final JavaType javaType) {
 		return javaType.equals(DOUBLE_OBJECT) || javaType.equals(DOUBLE_PRIMITIVE) || javaType.equals(FLOAT_OBJECT) || javaType.equals(FLOAT_PRIMITIVE);
 	}
-	
+
 	public static boolean isDateField(final JavaType javaType) {
 		return javaType.equals(DATE) || javaType.equals(CALENDAR);
 	}

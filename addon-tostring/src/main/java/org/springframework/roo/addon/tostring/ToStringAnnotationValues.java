@@ -8,12 +8,12 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooToString} annotation.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class ToStringAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
 	@AutoPopulate private String[] excludeFields;
@@ -23,7 +23,7 @@ public class ToStringAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public ToStringAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public ToStringAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_TO_STRING);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

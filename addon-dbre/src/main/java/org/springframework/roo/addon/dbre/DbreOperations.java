@@ -8,7 +8,7 @@ import org.springframework.roo.model.JavaPackage;
 
 /**
  * Provides database reverse engineering operations.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -16,24 +16,24 @@ public interface DbreOperations {
 
 	/**
 	 * Returns whether or not the DBRE commands can be executed.
-	 * 
+	 *
 	 * @return true if the DBRE commands are available to use, otherwise false
 	 */
 	boolean isDbreAvailable();
-	
+
 	/**
 	 * Displays the metadata for the indicated schema on the screen, or writes it to
 	 * the given file if a filename is specified.
-	 * 
+	 *
 	 * @param schemas the schema(s) to introspect (required)
 	 * @param file to write to (can be null, in which case the output will appear on-screen)
 	 * @param view true if database views are displayed, otherwise false
 	 */
 	void displayDatabaseMetadata(Set<Schema> schemas, File file, boolean view);
-	
+
 	/**
 	 * Introspects the database schema and causes the related entities on disk to be created, updated and deleted.
-	 * 
+	 *
 	 * @param schemas the schema(s) to reverse engineer (required)
 	 * @param destinationPackage the package in which all entities will be stored (if not
 	 * given, the project's top level package)

@@ -21,11 +21,11 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * @since 1.1
  */
 public class TemplateResourceLoader implements TemplateLoader {
-	
+
 	// Constants
 	private static final String TEMPLATE_DIR = "org/springframework/roo/addon/gwt/scaffold/templates/";
 	private static final Map<String, Template> cache = new HashMap<String, Template>();
-	
+
 	// Fields
 	protected final String baseDir;
 	protected final TemplateParser parser;
@@ -40,22 +40,22 @@ public class TemplateResourceLoader implements TemplateLoader {
 	/**
 	 * Creates a TemplateLoader for CTemplate language
 	 */
-	public static TemplateLoader create(String base_path) {
+	public static TemplateLoader create(final String base_path) {
 		return new TemplateResourceLoader(base_path);
 	}
 
 	/**
 	 * Creates a TemplateLoader using the argument parser.
 	 */
-	public static TemplateLoader createForParser(String base_path, TemplateParser parser) {
+	public static TemplateLoader createForParser(final String base_path, final TemplateParser parser) {
 		return new TemplateResourceLoader(base_path, parser);
 	}
 
-	public TemplateResourceLoader(String baseDir) {
+	public TemplateResourceLoader(final String baseDir) {
 		this(baseDir, null);
 	}
 
-	public TemplateResourceLoader(String baseDir, TemplateParser parser) {
+	public TemplateResourceLoader(final String baseDir, final TemplateParser parser) {
 		this.baseDir = baseDir;
 		this.parser = parser;
 	}
@@ -64,11 +64,11 @@ public class TemplateResourceLoader implements TemplateLoader {
 		return this.baseDir;
 	}
 
-	public Template getTemplate(String resource) throws TemplateException {
+	public Template getTemplate(final String resource) throws TemplateException {
 		return getTemplate(new TemplateLoader.Context(this, baseDir), resource);
 	}
 
-	public Template getTemplate(TemplateLoader context, String resource) throws TemplateException {
+	public Template getTemplate(final TemplateLoader context, String resource) throws TemplateException {
 		if (!resource.endsWith(".xtm")) {
 			resource += ".xtm";
 		}

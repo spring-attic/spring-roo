@@ -9,15 +9,15 @@ import org.springframework.roo.model.JavaType;
  * {@link MemberTypeAdditions} they need to make to their source code in order
  * to invoke persistence-related operations such as <code>persist</code> and
  * <code>find</code>.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public interface LayerService {
-	
+
 	/**
 	 * Returns source code modifications for a requested operation offered by a layer provider
-	 * 
+	 *
 	 * @param metadataId Id of calling metadata provider (required)
 	 * @param methodIdentifier specifies the method which is being requested (required)
 	 * @param targetEntity specifies the target entity  (required)
@@ -27,10 +27,10 @@ public interface LayerService {
 	 * @return {@link MemberTypeAdditions} if a layer provider can offer this functionality, <code>null</code> otherwise
 	 */
 	MemberTypeAdditions getMemberTypeAdditions(String metadataId, String methodIdentifier, JavaType targetEntity, JavaType idType, int layerPosition, MethodParameter... methodParameters);
-	
+
 	/**
 	 * Returns source code modifications for a requested operation offered by a layer provider
-	 * 
+	 *
 	 * @param metadataId Id of calling metadata provider (required)
 	 * @param methodIdentifier specifies the method which is being requested (required)
 	 * @param targetEntity specifies the target entity  (required)

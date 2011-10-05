@@ -21,16 +21,16 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
 
 /**
- * This implementation of {@link PersistenceMemberLocator} scans for the presence of 
+ * This implementation of {@link PersistenceMemberLocator} scans for the presence of
  * persistence ID tags for {@link MemberDetails} for a given domain type.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
 public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
-	
+
 	// Fields
 	@Reference private ItdDiscoveryService itdDiscoveryService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
@@ -50,7 +50,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 		}
 		return new ArrayList<FieldMetadata>();
 	}
-	
+
 	public JavaType getIdentifierType(final JavaType domainType) {
 		updateCache(domainType);
 		if (domainTypeIdCache.containsKey(domainType)) {
@@ -58,12 +58,12 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 		}
 		return null;
 	}
-	
+
 	public MethodMetadata getIdentifierAccessor(final JavaType domainType) {
 		updateCache(domainType);
 		return domainTypeIdAccessorCache.get(domainType);
 	}
-	
+
 	public List<FieldMetadata> getIdentifierFields(final JavaType domainType) {
 		updateCache(domainType);
 		if (domainTypeIdFieldsCache.containsKey(domainType)) {
@@ -74,7 +74,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 
 		return new ArrayList<FieldMetadata>();
 	}
-	
+
 	public MethodMetadata getVersionAccessor(final JavaType domainType) {
 		updateCache(domainType);
 		return domainTypeVersionAccessorCache.get(domainType);
@@ -163,7 +163,7 @@ public class PersistenceMemberLocatorImpl implements PersistenceMemberLocator {
 			domainTypeIdCache.remove(type);
 		}
 	}
-	
+
 	private void populateIdFields(final MemberDetails details, final JavaType type) {
 		final List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.IDENTIFIER_FIELD);
 		final List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithTag(details, CustomDataKeys.EMBEDDED_ID_FIELD);

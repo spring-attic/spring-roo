@@ -9,48 +9,48 @@ import org.springframework.roo.file.monitor.event.FileEventListener;
 
 /**
  * Provides a mechanism to monitor disk locations and publish events when those disk locations change.
- * 
+ *
  * <p>
  * Implementations are required to monitor the locations expressed via the methods on this interface.
  * The mechanism used for monitoring is an implementation choice. The order in which notifications must
  * be published is unspecified.
- * 
+ *
  * <p>
  * This API is provided as an interim measure until <a href="http://jcp.org/en/jsr/detail?id=203">JSR 203</a>
  * (to be included in Java Standard Edition, version 7 AKA "Dolphin") is widely available. Several useful
- * prior works in the area of file monitoring includes <a href="http://jnotify.sourceforge.net/">JNotify</a> and 
+ * prior works in the area of file monitoring includes <a href="http://jnotify.sourceforge.net/">JNotify</a> and
  * <a href="http://mark.heily.com/pnotify/">PNotify</a>.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public interface FileMonitorService {
-	
+
 	/**
 	 * @param request a monitoring request
 	 * @return true if the monitor did not already contain the specified request
 	 */
 	boolean add(MonitoringRequest request);
-	
+
 	/**
 	 * @param request a monitoring request
 	 * @return true if this set contained the specified element
 	 */
 	boolean remove(MonitoringRequest request);
-	
+
 	/**
 	 * Execute a scan of all monitored locations.
-	 * 
+	 *
 	 * @return the number of changes detected during this invocation (can be 0 or above)
 	 */
 	int scanAll();
-	
+
 	/**
 	 * Indicates on a best-efforts basis whether there are known changes to the disk which would be
 	 * reported should {@link #scanAll()} be invoked. This method is not required to return a
 	 * guaranteed outcome of what will happen should {@link #scanAll()} be invoked, but
 	 * callers may rely on this method to assist with optimisations where applicable.
-	 * 
+	 *
 	 * @return true if there are known changes to be notified during the next {@link #scanAll}
 	 */
 	boolean isDirty();
@@ -58,14 +58,14 @@ public interface FileMonitorService {
 	/**
 	 * Indicates the files currently being monitored, which is potentially useful for newly-registered
 	 * {@link FileEventListener} instances that may have missed previous events.
-	 * 
+	 *
 	 * @return every file currently being monitored (never null, but may be empty if there are no files being monitored)
 	 */
 	List<FileDetails> getMonitored();
 
 	/**
 	 * Locates all {@link FileDetails} which match the presented Ant path.
-	 * 
+	 *
 	 * @param antPath the Ant path to evaluate, as per the canonical file path format (required)
 	 * @return all matching identifiers (may be empty, but never null)
 	 */

@@ -26,24 +26,24 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * A simple polling-based {@link FileMonitorService}.
- * 
+ *
  * <p>
  * This implementation iterates over each of the {@link MonitoringRequest} instances,
  * building an active file index at the time of execution. It then compares this active file
  * index with the last time it was executed for that particular {@link MonitoringRequest}.
  * Events are then fired, and only when the event firing process has completed is the next
  * {@link MonitoringRequest} examined.
- * 
+ *
  * <p>
  * This implementation does not recognize {@link FileOperation#RENAMED} events. This implementation
  * will ignore any monitored files with a filename starting with a period (ie hidden files).
- * 
+ *
  * <p>
  * In the case of {@link FileOperation#DELETED} events, this implementation will present in the
  * {@link FileEvent} times equal to the last time a deleted file was
  * modified. The time does NOT represent the deletion time nor the time the deletion was first
  * detected.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -59,14 +59,14 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	// Mutex
 	private final Object lock = new Object();
-	
-	public final void add(FileEventListener e) {
+
+	public final void add(final FileEventListener e) {
 		synchronized (lock) {
 			fileEventListeners.add(e);
 		}
 	}
 
-	public final void remove(FileEventListener e) {
+	public final void remove(final FileEventListener e) {
 		synchronized (lock) {
 			fileEventListeners.remove(e);
 		}
@@ -87,7 +87,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					}
 				}
 			}
-			
+
 			return monitored;
 		}
 	}
@@ -98,7 +98,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public Set<String> getDirtyFiles(String requestingClass) {
+	public Set<String> getDirtyFiles(final String requestingClass) {
 		synchronized (lock) {
 			Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
 			if (changesSinceLastRequest == null) {
@@ -112,8 +112,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			return changesSinceLastRequest;
 		}
 	}
-	
-	private boolean isWithin(MonitoringRequest request, String filePath) {
+
+	private boolean isWithin(final MonitoringRequest request, final String filePath) {
 		String requestCanonicalPath;
 		try {
 			requestCanonicalPath = request.getFile().getCanonicalPath();
@@ -138,14 +138,14 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 		return true;
 	}
-	
+
 	public int scanNotified() {
 		synchronized (lock) {
 			if (requests.isEmpty() || !isDirty()) {
 				// There are no changes we can notify, so immediately return
 				return 0;
 			}
-			
+
 			int changes = 0;
 
 			for (MonitoringRequest request : requests) {
@@ -153,7 +153,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				if (priorExecution.containsKey(request)) {
 					// Need to perform a comparison, as we have data from a previous execution
 					Map<File,Long> priorFiles = priorExecution.get(request);
-					
+
 					// Handle files apparently updated since last execution
 					Set<String> toRemove = new HashSet<String>();
 					for (String filePath : notifyChanged) {
@@ -203,7 +203,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					for (String remove : toRemove) {
 						notifyCreated.remove(remove);
 					}
-					
+
 					// Handle files apparently deleted since last execution
 					toRemove = new HashSet<String>();
 					for (String filePath : notifyDeleted) {
@@ -229,10 +229,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				}
 
 				publish(eventsToPublish);
-				
+
 				changes += eventsToPublish.size();
 			}
-			
+
 			return changes;
 		}
 	}
@@ -250,21 +250,21 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				if (request instanceof DirectoryMonitoringRequest) {
 					includeSubtree = ((DirectoryMonitoringRequest)request).isWatchSubtree();
 				}
-				
+
 				if (!request.getFile().exists()) {
 					continue;
 				}
-				
+
 				// Build contents of the monitored location
 				Map<File,Long> currentExecution = new HashMap<File,Long>();
 				computeEntries(currentExecution, request.getFile(), includeSubtree);
-				
+
 				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
 
 				if (priorExecution.containsKey(request)) {
 					// Need to perform a comparison, as we have data from a previous execution
 					Map<File,Long> priorFiles = priorExecution.get(request);
-					
+
 					// Locate created and modified files
 					for (final Entry<File, Long> entry : currentExecution.entrySet()) {
 						final File thisFile = entry.getKey();
@@ -277,8 +277,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 								notifyCreated.remove(thisFile.getCanonicalPath());
 							} catch (IOException ignored) {}
 							continue;
-						} 
-						
+						}
+
 						Long previousTimestamp = priorFiles.get(thisFile);
 						if (!currentTimestamp.equals(previousTimestamp)) {
 							// Modified
@@ -289,7 +289,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 							} catch (IOException ignored) {}
 						}
 					}
-					
+
 					// Now locate deleted files
 					priorFiles.keySet().removeAll(currentExecution.keySet());
 					for (final Entry<File, Long> entry : priorFiles.entrySet()) {
@@ -306,10 +306,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 						eventsToPublish.add(new FileEvent(new FileDetails(entry.getKey(), entry.getValue()), FileOperation.MONITORING_START, null));
 					}
 				}
-				
+
 				// Record the monitored location's contents, ready for next execution
 				priorExecution.put(request, currentExecution);
-				
+
 				// We can discard the created and deleted notifications, as they would have been correctly discovered in the above loop
 				notifyCreated.clear();
 				notifyDeleted.clear();
@@ -321,23 +321,23 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				}
 				notifyChanged.clear();
 				publish(eventsToPublish);
-				
+
 				changes += eventsToPublish.size();
 			}
-			
+
 			return changes;
 		}
 	}
 
 	/**
 	 * Publish the events, if needed.
-	 * 
+	 *
 	 * <p>
 	 * This method assumes the caller has already acquired a synchronisation lock.
-	 * 
+	 *
 	 * @param eventsToPublish to publish (not null, but can be empty)
 	 */
-	private void publish(List<FileEvent> eventsToPublish) {
+	private void publish(final List<FileEvent> eventsToPublish) {
 		if (eventsToPublish.isEmpty()) {
 			return;
 		}
@@ -351,22 +351,22 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			}
 		}
 	}
-	
+
 	/**
 	 * Adds one or more entries into the Map. The key of the Map is the File object, and the value
 	 * is the {@link File#lastModified()} time.
-	 * 
+	 *
 	 * <p>
 	 * Specifically:
-	 * 
+	 *
 	 * <ul>
 	 * <li>If invoked with a File that is actually a File, only the file is added.</li>
 	 * <li>If invoked with a File that is actually a Directory, all files and directories are added.</li>
-	 * <li>If invoked with a File that is actually a Directory, subdirectories will be added only if 
+	 * <li>If invoked with a File that is actually a Directory, subdirectories will be added only if
 	 * "includeSubtree" is true.</li>
 	 * </ul>
 	 */
-	private void computeEntries(Map<File, Long> map, File currentFile, boolean includeSubtree) {
+	private void computeEntries(final Map<File, Long> map, final File currentFile, final boolean includeSubtree) {
 		Assert.notNull(map, "Map required");
 		Assert.notNull(currentFile, "Current file is required");
 
@@ -391,10 +391,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public boolean add(MonitoringRequest request) {
+	public boolean add(final MonitoringRequest request) {
 		synchronized (lock) {
 			Assert.notNull(request, "MonitoringRequest required");
-			
+
 			// Ensure existing monitoring requests don't overlap with this new request;
 			// amend existing requests or ignore new request as appropriate
 			if (request instanceof DirectoryMonitoringRequest) {
@@ -427,15 +427,15 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					}
 				}
 			}
-			
+
 			return requests.add(request);
 		}
 	}
 
-	public boolean remove(MonitoringRequest request) {
+	public boolean remove(final MonitoringRequest request) {
 		synchronized (lock) {
 			Assert.notNull(request, "MonitoringRequest required");
-			
+
 			// Advise of the cessation to monitoring
 			if (priorExecution.containsKey(request)) {
 				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
@@ -450,12 +450,12 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			}
 
 			priorExecution.remove(request);
-			
+
 			return requests.remove(request);
 		}
 	}
 
-	public SortedSet<FileDetails> findMatchingAntPath(String antPath) {
+	public SortedSet<FileDetails> findMatchingAntPath(final String antPath) {
 		Assert.hasText(antPath, "Ant path required");
 		SortedSet<FileDetails> result = new TreeSet<FileDetails>();
 		// Now we need to compute the starting directory by reference to the first * in the Ant Path
@@ -475,20 +475,20 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		recursiveAntMatch(antPath, somePath, result);
 		return result;
 	}
-	
+
 	/**
 	 * Locates all files under the specified current directory which patch the given Ant Path.
-	 * 
+	 *
 	 * @param antPath to match (required)
 	 * @param currentDirectory an existing directory to search from (required)
 	 * @param result to append located files into (required)
 	 */
-	private void recursiveAntMatch(String antPath, File currentDirectory, SortedSet<FileDetails> result) {
+	private void recursiveAntMatch(final String antPath, final File currentDirectory, final SortedSet<FileDetails> result) {
 		Assert.notNull(currentDirectory, "Current directory required");
 		Assert.isTrue(currentDirectory.exists() && currentDirectory.isDirectory(), "Path '" + currentDirectory + "' does not exist or is not a directory");
 		Assert.hasText(antPath, "Ant path required");
 		Assert.notNull(result, "Result required");
-		
+
 		File[] listFiles = currentDirectory.listFiles();
 		if (listFiles == null || listFiles.length == 0) {
 			return;
@@ -509,11 +509,11 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	/**
 	 * Decides whether we want to store this notification. This only happens if a monitoring request
 	 * has indicated it is interested in this request. See ROO-794 for details.
-	 * 
+	 *
 	 * @param fileCanonicalPath to potentially keep
 	 * @return true if the notification is able to be kept
 	 */
-	private boolean isNotificationUnderKnownMonitoringRequest(String fileCanonicalPath) {
+	private boolean isNotificationUnderKnownMonitoringRequest(final String fileCanonicalPath) {
 		synchronized (lock) {
 			for (MonitoringRequest request : requests) {
 				if (isWithin(request, fileCanonicalPath)) {
@@ -524,7 +524,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		return false;
 	}
 
-	private void updateChanges(String fileCanonicalPath, boolean remove) {
+	private void updateChanges(final String fileCanonicalPath, final boolean remove) {
 		for (String requestingClass : changeMap.keySet()) {
 			if (remove) {
 				changeMap.get(requestingClass).remove(fileCanonicalPath);
@@ -539,7 +539,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	private void updateAllFiles(String fileCanonicalPath, boolean remove) {
+	private void updateAllFiles(final String fileCanonicalPath, final boolean remove) {
 		if (remove) {
 			allFiles.remove(fileCanonicalPath);
 			updateChanges(fileCanonicalPath, remove);
@@ -550,8 +550,8 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			}
 		}
 	}
-	
-	public void notifyChanged(String fileCanonicalPath) {
+
+	public void notifyChanged(final String fileCanonicalPath) {
 		synchronized (lock) {
 			updateChanges(fileCanonicalPath, false);
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
@@ -560,7 +560,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public void notifyCreated(String fileCanonicalPath) {
+	public void notifyCreated(final String fileCanonicalPath) {
 		synchronized (lock) {
 			updateChanges(fileCanonicalPath, false);
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
@@ -569,7 +569,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public void notifyDeleted(String fileCanonicalPath) {
+	public void notifyDeleted(final String fileCanonicalPath) {
 		synchronized (lock) {
 			updateChanges(fileCanonicalPath, true);
 			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {

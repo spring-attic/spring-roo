@@ -12,11 +12,11 @@ import org.springframework.roo.shell.MethodTarget;
 @Component
 public class StringListConverter implements Converter<List<String>> {
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return List.class.isAssignableFrom(requiredType);
 	}
 
-	public List<String> convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public List<String> convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null) {
 			return null;
 		}
@@ -28,7 +28,7 @@ public class StringListConverter implements Converter<List<String>> {
 		return tokenList;
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		return false;
 	}
 }

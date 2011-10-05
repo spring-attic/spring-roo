@@ -1,9 +1,9 @@
 package org.springframework.roo.addon.cloud.foundry.model;
 
 public class CloudControllerUrl {
-	private String url;
+	private final String url;
 
-	public CloudControllerUrl(String url) {
+	public CloudControllerUrl(final String url) {
 		this.url = url;
 	}
 

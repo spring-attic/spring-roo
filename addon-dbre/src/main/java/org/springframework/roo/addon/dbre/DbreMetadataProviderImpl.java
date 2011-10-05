@@ -24,7 +24,7 @@ import org.springframework.roo.project.Path;
 
 /**
  * Implementation of  {@link DbreMetadataProvider}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -37,27 +37,30 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_DB_MANAGED);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_DB_MANAGED);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return DbreMetadata.createIdentifier(javaType, path);
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = DbreMetadata.getJavaType(metadataIdentificationString);
 		Path path = DbreMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final DbManagedAnnotationValues annotationValues = new DbManagedAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {
@@ -103,19 +106,19 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		return dbreMetadata;
 	}
 
-	private IdentifierHolder getIdentifierHolder(JavaType javaType) {
+	private IdentifierHolder getIdentifierHolder(final JavaType javaType) {
 		List<FieldMetadata> identifierFields = persistenceMemberLocator.getIdentifierFields(javaType);
 		if (identifierFields.isEmpty()) {
 			return null;
 		}
-		
+
 		FieldMetadata identifierField = identifierFields.get(0);
 		boolean embeddedIdField = identifierField.getCustomData().get(CustomDataKeys.EMBEDDED_ID_FIELD) != null;
 		List<FieldMetadata> embeddedIdFields = persistenceMemberLocator.getEmbeddedIdentifierFields(javaType);
 		return new IdentifierHolder(identifierField, embeddedIdField, embeddedIdFields);
 	}
 
-	private FieldMetadata getVersionField(JavaType domainType, String metadataIdentificationString) {
+	private FieldMetadata getVersionField(final JavaType domainType, final String metadataIdentificationString) {
 		return persistenceMemberLocator.getVersionField(domainType);
 	}
 

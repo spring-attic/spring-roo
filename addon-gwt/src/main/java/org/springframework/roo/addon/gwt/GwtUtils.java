@@ -28,7 +28,7 @@ import org.springframework.roo.project.ProjectMetadata;
 public final class GwtUtils {
 
 	public static final String PROXY_REQUEST_WARNING = "// WARNING: THIS FILE IS MANAGED BY SPRING ROO.\n\n";
-	
+
 	// JavaTypes
 	public static final JavaType ACCEPTS_ONE_WIDGET = new JavaType("com.google.gwt.user.client.ui.AcceptsOneWidget");
 	public static final JavaType ENTITY_PROXY = new JavaType("com.google.web.bindery.requestfactory.shared.EntityProxy");
@@ -45,7 +45,7 @@ public final class GwtUtils {
 	public static final JavaType REQUEST_CONTEXT = new JavaType("com.google.web.bindery.requestfactory.shared.RequestContext");
 	public static final JavaType SERVICE = new JavaType("com.google.web.bindery.requestfactory.shared.Service");
 	public static final JavaType SERVICE_NAME = new JavaType("com.google.web.bindery.requestfactory.shared.ServiceName");
-	
+
 	public static final JavaType[] PROXY_ANNOTATIONS = { PROXY_FOR, PROXY_FOR_NAME };
 	public static final JavaType[] REQUEST_ANNOTATIONS = { SERVICE, SERVICE_NAME };
 	public static final JavaType[] ROO_PROXY_REQUEST_ANNOTATIONS = {RooJavaType.ROO_GWT_PROXY, RooJavaType.ROO_GWT_REQUEST, RooJavaType.ROO_GWT_MIRRORED_FROM};
@@ -53,15 +53,15 @@ public final class GwtUtils {
 	/**
 	 * Returns the {@link #WEB_RECEIVER} Java type, generically typed to the
 	 * given type.
-	 * 
+	 *
 	 * @param genericType (required)
 	 * @return a non-<code>null</code> type
 	 */
 	public static JavaType getReceiverType(final JavaType genericType) {
 		return new JavaType(RECEIVER.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Collections.singletonList(genericType));
-	}	
+	}
 
-	public static Map<GwtType, JavaType> getMirrorTypeMap(ProjectMetadata projectMetadata, JavaType governorType) {
+	public static Map<GwtType, JavaType> getMirrorTypeMap(final ProjectMetadata projectMetadata, final JavaType governorType) {
 		Map<GwtType, JavaType> mirrorTypeMap = new HashMap<GwtType, JavaType>();
 		for (GwtType mirrorType : GwtType.values()) {
 			mirrorTypeMap.put(mirrorType, convertGovernorTypeNameIntoKeyTypeName(governorType, mirrorType, projectMetadata));
@@ -69,7 +69,7 @@ public final class GwtUtils {
 		return mirrorTypeMap;
 	}
 
-	public static JavaType convertGovernorTypeNameIntoKeyTypeName(JavaType governorType, GwtType type, ProjectMetadata projectMetadata) {
+	public static JavaType convertGovernorTypeNameIntoKeyTypeName(final JavaType governorType, final GwtType type, final ProjectMetadata projectMetadata) {
 		String destinationPackage = type.getPath().packageName(projectMetadata);
 		String typeName;
 		if (type.isMirrorType()) {
@@ -81,15 +81,15 @@ public final class GwtUtils {
 		return new JavaType(typeName);
 	}
 
-	public static JavaType lookupProxyTargetType(ClassOrInterfaceTypeDetails cid) {
+	public static JavaType lookupProxyTargetType(final ClassOrInterfaceTypeDetails cid) {
 		return lookupTargetType(cid, true);
 	}
 
-	public static JavaType lookupRequestTargetType(ClassOrInterfaceTypeDetails cid) {
+	public static JavaType lookupRequestTargetType(final ClassOrInterfaceTypeDetails cid) {
 		return lookupTargetType(cid, false);
 	}
 
-	public static JavaType lookupTargetType(ClassOrInterfaceTypeDetails cid, boolean proxy) {
+	public static JavaType lookupTargetType(final ClassOrInterfaceTypeDetails cid, final boolean proxy) {
 		JavaType stringBasedAnnotation = SERVICE_NAME;
 		JavaType classBasedAnnotation = SERVICE;
 		if (proxy) {
@@ -115,7 +115,7 @@ public final class GwtUtils {
 		return null;
 	}
 
-	public static List<String> getAnnotationValues(ClassOrInterfaceTypeDetails target, JavaType annotationType, String attributeName) {
+	public static List<String> getAnnotationValues(final ClassOrInterfaceTypeDetails target, final JavaType annotationType, final String attributeName) {
 		List<String> values = new ArrayList<String>();
 		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(target.getAnnotations(), annotationType);
 		if (annotation == null) {
@@ -135,7 +135,7 @@ public final class GwtUtils {
 		return values;
 	}
 
-	public static boolean getBooleanAnnotationValue(ClassOrInterfaceTypeDetails target, JavaType annotationType, String attributeName, boolean valueIfNull) {
+	public static boolean getBooleanAnnotationValue(final ClassOrInterfaceTypeDetails target, final JavaType annotationType, final String attributeName, final boolean valueIfNull) {
 		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(target.getAnnotations(), annotationType);
 		if (annotation == null) {
 			return valueIfNull;
@@ -148,11 +148,11 @@ public final class GwtUtils {
 		return valueIfNull;
 	}
 
-	public static boolean scaffoldProxy(ClassOrInterfaceTypeDetails proxy) {
+	public static boolean scaffoldProxy(final ClassOrInterfaceTypeDetails proxy) {
 		return GwtUtils.getBooleanAnnotationValue(proxy, RooJavaType.ROO_GWT_PROXY, "scaffold", false);
 	}
 
-	public static AnnotationMetadata getFirstAnnotation(ClassOrInterfaceTypeDetails cid, JavaType... annotationTypes) {
+	public static AnnotationMetadata getFirstAnnotation(final ClassOrInterfaceTypeDetails cid, final JavaType... annotationTypes) {
 		for (JavaType annotationType : annotationTypes) {
 			AnnotationMetadata annotationMetadata = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), annotationType);
 			if (annotationMetadata != null) {
@@ -162,7 +162,7 @@ public final class GwtUtils {
 		return null;
 	}
 
-	public static String getStringValue(AnnotationAttributeValue<?> attributeValue) {
+	public static String getStringValue(final AnnotationAttributeValue<?> attributeValue) {
 		if (attributeValue instanceof StringAttributeValue) {
 			return ((StringAttributeValue)attributeValue).getValue();
 		} else if (attributeValue instanceof ClassAttributeValue) {
@@ -171,7 +171,7 @@ public final class GwtUtils {
 		return null;
 	}
 
-	public static JavaType convertPrimitiveType(JavaType type, boolean convertVoid) {
+	public static JavaType convertPrimitiveType(final JavaType type, final boolean convertVoid) {
 		if (!convertVoid && JavaType.VOID_PRIMITIVE.equals(type)) {
 			return type;
 		}

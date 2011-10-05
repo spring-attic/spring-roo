@@ -47,7 +47,7 @@ public class JpaOperationsImplTest {
 	private static final String PERSISTENCE_UNIT = "myPersistenceUnit";
 	private static final String POM_PATH = "/path/to/the/pom";
 	private static final String TRANSACTION_MANAGER = "myTransactionManager";
-	
+
 	// Fixture
 	private JpaOperationsImpl jpaOperations;
 	private Properties dialects;
@@ -55,26 +55,26 @@ public class JpaOperationsImplTest {
 	@Mock private PathResolver mockPathResolver;
 	@Mock private ProjectOperations mockProjectOperations;
 	@Mock private PropFileOperations mockPropFileOperations;
-	
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		
+
 		// Mocks
 		when(mockProjectOperations.getPathResolver()).thenReturn(mockPathResolver);
 		when(mockPathResolver.getIdentifier(Path.ROOT, JpaOperationsImpl.POM_XML)).thenReturn(POM_PATH);
 		when(mockPathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, JpaOperationsImpl.APPLICATION_CONTEXT_XML)).thenReturn(APPLICATION_CONTEXT_PATH);
-		
+
 		// Object under test
 		this.jpaOperations = new JpaOperationsImpl();
 		this.jpaOperations.fileManager = mockFileManager;
 		this.jpaOperations.projectOperations = mockProjectOperations;
 		this.jpaOperations.propFileOperations = mockPropFileOperations;
-		
+
 		// Things that are too hard or ugly to mock
 		this.dialects = new Properties();
 	}
-	
+
 	private static final String POM =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 		"<project>" +
@@ -92,16 +92,16 @@ public class JpaOperationsImplTest {
 		"        </plugins>" +
 		"    </build>" +
 		"</project>";
-	
+
 	private static final String APP_CONTEXT =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 		"<beans>" +
 		"</beans>";
 
 	/**
-	 * Creates a new {@link InputStream} each time we need to read from the 
+	 * Creates a new {@link InputStream} each time we need to read from the
 	 * Spring application context
-	 * 
+	 *
 	 * @param pom the application context XML as a String (required)
 	 * @return a fresh stream
 	 */
@@ -111,14 +111,14 @@ public class JpaOperationsImplTest {
 
 	/**
 	 * Creates a new {@link InputStream} each time we need to read from the POM
-	 * 
+	 *
 	 * @param pom the POM XML as a String (required)
 	 * @return a fresh stream
 	 */
 	private ByteArrayInputStream getPomInputStream(final String pom) {
 		return new ByteArrayInputStream(pom.getBytes());
 	}
-	
+
 	private static final String EXPECTED_APPLICATION_CONTEXT =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
 		"<beans>\n" +
@@ -132,7 +132,7 @@ public class JpaOperationsImplTest {
 		"        <property name=\"dataSource\" ref=\"dataSource\"/>\n" +
 		"    </bean>\n" +
 		"</beans>\n";
-	
+
 	private static final String EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
 		"<persistence xmlns=\"http://java.sun.com/xml/ns/persistence\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"2.0\" xsi:schemaLocation=\"http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd\">\n" +
@@ -150,7 +150,7 @@ public class JpaOperationsImplTest {
 		"        </properties>\n" +
 		"    </persistence-unit>\n" +
 		"</persistence>\n";
-	
+
 	@Test
 	public void testConfigureJpaForH2InMemoryAndHibernateForNewProject() {
 		// Set up
@@ -161,23 +161,23 @@ public class JpaOperationsImplTest {
 		when(mockPropFileOperations.loadProperties(JPA_DIALECTS_FILE, JpaOperationsImpl.class)).thenReturn(dialects);
 		final ProjectMetadata mockProjectMetadata = mock(ProjectMetadata.class);
 		when(mockProjectOperations.getProjectMetadata()).thenReturn(mockProjectMetadata);
-		
+
 		final OrmProvider ormProvider = HIBERNATE;
 		final JdbcDatabase jdbcDatabase = H2_IN_MEMORY;
 		dialects.put(ormProvider.name() + "." + jdbcDatabase.name(), DB_DIALECT);
-		
+
 		// Invoke
 		this.jpaOperations.configureJpa(ormProvider, jdbcDatabase, DB_JNDI_NAME, null, DB_HOST_NAME, DB_NAME, DB_USER_NAME, DB_PASSWORD, TRANSACTION_MANAGER, PERSISTENCE_UNIT);
-		
+
 		// Check
 		verifyFileUpdate(EXPECTED_APPLICATION_CONTEXT, APPLICATION_CONTEXT_PATH);
 		verifyFileUpdate(EXPECTED_PERSISTENCE_XML_FOR_H2_IN_MEMORY_AND_HIBERNATE, PERSISTENCE_PATH);
 	}
-	
+
 	/**
 	 * Verifies that the mock {@link FileManager} was asked to write the given
 	 * contents to the given file
-	 *  
+	 *
 	 * @param expectedContents the contents we expect to be written
 	 * @param filename the file we expect to be written to
 	 */

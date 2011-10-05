@@ -19,7 +19,7 @@ public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMe
 	private List<JavaSymbolName> parameterNames;
 	private List<JavaType> throwsTypes;
 
-	protected InvocableMemberMetadataCustomDataKey(Integer modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes) {
+	protected InvocableMemberMetadataCustomDataKey(final Integer modifier, final List<AnnotationMetadata> annotations, final List<AnnotatedJavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final List<JavaType> throwsTypes) {
 		super(modifier, annotations);
 		this.parameterTypes = parameterTypes;
 		this.parameterNames = parameterNames;
@@ -30,7 +30,8 @@ public abstract class InvocableMemberMetadataCustomDataKey<T extends InvocableMe
 		super();
 	}
 
-	public boolean meets(T invocableMemberMetadata) throws IllegalStateException {
+	@Override
+	public boolean meets(final T invocableMemberMetadata) throws IllegalStateException {
 		// TODO: Add in validation logic for parameterTypes, parameterNames, throwsTypes
 		return super.meets(invocableMemberMetadata);
 	}

@@ -35,7 +35,7 @@ public class ServiceLayerMethodTest {
 	private static final JavaType TARGET_ENTITY = new JavaType("com.example.Person");
 	private static final JavaType ID_TYPE = LONG_OBJECT;
 	private static final String PLURAL = "People";
-	
+
 	@Test
 	public void testValueOfMethodUsingWrongName() {
 		assertNull(valueOf("x", Arrays.<JavaType>asList(), TARGET_ENTITY, ID_TYPE));
@@ -52,7 +52,7 @@ public class ServiceLayerMethodTest {
 			assertEquals(method, valueOf(method.getKey(), method.getParameterTypes(TARGET_ENTITY, ID_TYPE), TARGET_ENTITY, ID_TYPE));
 		}
 	}
-	
+
 	@Test
 	public void testEachMethodHasSameNumberOfParameterTypesAndNames() {
 		for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
@@ -64,7 +64,7 @@ public class ServiceLayerMethodTest {
 			assertEquals(parameterNames, parameters.getValues());
 		}
 	}
-	
+
 	@Test
 	public void testEachMethodHasUniqueParameterNames() {
 		for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
@@ -73,14 +73,14 @@ public class ServiceLayerMethodTest {
 			assertEquals(allParameterNames.size(), distinctNames.size());
 		}
 	}
-	
+
 	@Test
 	public void testEachMethodHasNonNullReturnType() {
 		for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 			assertNotNull(method.getReturnType(TARGET_ENTITY));
 		}
 	}
-	
+
 	@Test
 	public void testGetBodyWhenLowerLayerImplementsMethod() {
 		final MemberTypeAdditions mockLowerLayerAdditions = mock(MemberTypeAdditions.class);
@@ -93,14 +93,14 @@ public class ServiceLayerMethodTest {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testGetBodyWhenLowerLayerDoesNotImplementMethod() {
 		for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
 			assertEquals("throw new UnsupportedOperationException(\"Implement me!\");", method.getBody(null));
 		}
 	}
-	
+
 	@Test
 	public void testGetNameWhenAnnotationHasBlankName() {
 		final ServiceAnnotationValues mockAnnotationValues = mock(ServiceAnnotationValues.class);
@@ -109,7 +109,7 @@ public class ServiceLayerMethodTest {
 			assertNull(method.getSymbolName(mockAnnotationValues, TARGET_ENTITY, "x"));
 		}
 	}
-	
+
 	@Test
 	public void testGetNameOfFindAllMethodWhenAnnotationHasNonBlankName() {
 		final ServiceAnnotationValues mockAnnotationValues = mock(ServiceAnnotationValues.class);
@@ -117,21 +117,21 @@ public class ServiceLayerMethodTest {
 		assertEquals("getAllPeople", FIND_ALL.getName(mockAnnotationValues, TARGET_ENTITY, PLURAL));
 		assertEquals("getAllPeople", FIND_ALL.getSymbolName(mockAnnotationValues, TARGET_ENTITY, PLURAL).getSymbolName());
 	}
-	
+
 	@Test
 	public void testGetNameOfFindEntriesMethodWhenAnnotationHasNonBlankName() {
 		final ServiceAnnotationValues mockAnnotationValues = mock(ServiceAnnotationValues.class);
 		when(mockAnnotationValues.getFindEntriesMethod()).thenReturn("get");
 		assertEquals("getPersonEntries", FIND_ENTRIES.getName(mockAnnotationValues, TARGET_ENTITY, PLURAL));
 	}
-	
+
 	@Test
 	public void testGetNameOfSaveMethodWhenAnnotationHasNonBlankName() {
 		final ServiceAnnotationValues mockAnnotationValues = mock(ServiceAnnotationValues.class);
 		when(mockAnnotationValues.getSaveMethod()).thenReturn("store");
 		assertEquals("storePerson", SAVE.getName(mockAnnotationValues, TARGET_ENTITY, PLURAL));
 	}
-	
+
 	@Test
 	public void testGetNameOfUpdateMethodWhenAnnotationHasNonBlankName() {
 		final ServiceAnnotationValues mockAnnotationValues = mock(ServiceAnnotationValues.class);

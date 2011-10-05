@@ -43,21 +43,21 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooJsfApplicationBean}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = JsfApplicationBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaSymbolName MENU_MODEL = new JavaSymbolName("menuModel");
-	
+
 	// Fields
 	private Set<ClassOrInterfaceTypeDetails> managedBeans;
 
-	public JsfApplicationBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Set<ClassOrInterfaceTypeDetails> managedBeans, String projectName) {
+	public JsfApplicationBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final Set<ClassOrInterfaceTypeDetails> managedBeans, final String projectName) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(managedBeans, "Managed beans required");
@@ -90,22 +90,22 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	private AnnotationMetadata getManagedBeanAnnotation() {
 		return getTypeAnnotation(MANAGED_BEAN);
 	}
 
 	private AnnotationMetadata getScopeAnnotation() {
-		if (hasScopeAnnotation()) { 
+		if (hasScopeAnnotation()) {
 			return null;
 		}
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(SESSION_SCOPED);
 		return annotationBuilder.build();
 	}
-	
+
 	private boolean hasScopeAnnotation() {
-		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null 
-			|| governorTypeDetails.getAnnotation(VIEW_SCOPED) != null 
+		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null
+			|| governorTypeDetails.getAnnotation(VIEW_SCOPED) != null
 			|| governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null);
 	}
 
@@ -124,7 +124,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		imports.addImport(PRIMEFACES_DEFAULT_MENU_MODEL);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		
+
 		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
 		bodyBuilder.appendFormalLine("ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();");
 		bodyBuilder.appendFormalLine("ELContext elContext = facesContext.getELContext();");
@@ -133,13 +133,13 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		bodyBuilder.appendFormalLine("menuModel = new DefaultMenuModel();");
 		bodyBuilder.appendFormalLine("Submenu submenu;");
 		bodyBuilder.appendFormalLine("MenuItem item;");
-		
+
 		for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(managedBean.getAnnotations(), ROO_JSF_MANAGED_BEAN);
 			if (annotation ==  null) {
 				continue;
 			}
-			
+
 			AnnotationAttributeValue<?> includeOnMenuValue = annotation.getAttribute(new JavaSymbolName("includeOnMenu"));
 			if (includeOnMenuValue != null && !((Boolean) includeOnMenuValue.getValue()).booleanValue()) {
 				continue;
@@ -180,6 +180,7 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 		return methodBuilder.build();
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -194,20 +195,20 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
-	public static String createIdentifier(JavaType javaType, Path path) {
+
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }

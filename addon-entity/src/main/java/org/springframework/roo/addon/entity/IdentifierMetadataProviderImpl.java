@@ -20,14 +20,14 @@ import org.springframework.roo.project.ProjectOperations;
 
 /**
  * Implementation of {@link IdentifierMetadataProvider}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements IdentifierMetadataProvider {
-	
+
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
@@ -35,21 +35,22 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 
 	private boolean noArgConstructor = true;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
 		serializableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
 		addMetadataTrigger(ROO_IDENTIFIER);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
 		serializableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
 		removeMetadataTrigger(ROO_IDENTIFIER);
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 		JavaType javaType = IdentifierMetadata.getJavaType(metadataIdentificationString);
 		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
@@ -66,13 +67,15 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 		return "Identifier";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = IdentifierMetadata.getJavaType(metadataIdentificationString);
 		Path path = IdentifierMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return IdentifierMetadata.createIdentifier(javaType, path);
 	}
 
@@ -82,11 +85,11 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 
 	/**
 	 * Allows disabling the automated creation of no arg constructors. This might be appropriate, for example, if another add-on is providing more sophisticated constructor creation facilities.
-	 * 
+	 *
 	 * @param noArgConstructor automatically causes any {@link EntityMetadata} to have a no-arg constructor added if there are zero no-arg constructors defined in the {@link PhysicalTypeMetadata}
 	 * (defaults to true).
 	 */
-	public void setNoArgConstructor(boolean noArgConstructor) {
+	public void setNoArgConstructor(final boolean noArgConstructor) {
 		this.noArgConstructor = noArgConstructor;
 	}
 }

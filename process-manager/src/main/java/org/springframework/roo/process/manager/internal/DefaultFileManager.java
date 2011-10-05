@@ -34,14 +34,14 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link FileManager}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component
 @Service
 public class DefaultFileManager implements FileManager, UndoListener {
-	
+
 	// Fields
 	@Reference private FilenameResolver filenameResolver;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
@@ -54,24 +54,24 @@ public class DefaultFileManager implements FileManager, UndoListener {
 	/** key: file identifier, value: new description of change */
 	private final Map<String, String> deferredDescriptionOfChanges = new LinkedHashMap<String, String>();
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		undoManager.addUndoListener(this);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		undoManager.removeUndoListener(this);
 	}
-	
-	public boolean exists(String fileIdentifier) {
+
+	public boolean exists(final String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "File identifier required");
 		return new File(fileIdentifier).exists();
 	}
 
-	public InputStream getInputStream(String fileIdentifier) {
+	public InputStream getInputStream(final String fileIdentifier) {
 		if (deferredFileWrites.containsKey(fileIdentifier)) {
 			return new BufferedInputStream(new ByteArrayInputStream(deferredFileWrites.get(fileIdentifier).getBytes()));
 		}
-		
+
 		File file = new File(fileIdentifier);
 		Assert.isTrue(file.exists(), "File '" + fileIdentifier + "' does not exist");
 		Assert.isTrue(file.isFile(), "Path '" + fileIdentifier + "' is not a file");
@@ -82,7 +82,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		}
 	}
 
-	public FileDetails createDirectory(String fileIdentifier) {
+	public FileDetails createDirectory(final String fileIdentifier) {
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(!actual.exists(), "File '" + fileIdentifier + "' already exists");
@@ -93,7 +93,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		return new FileDetails(actual, actual.lastModified());
 	}
 
-	public FileDetails readFile(String fileIdentifier) {
+	public FileDetails readFile(final String fileIdentifier) {
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File f = new File(fileIdentifier);
 		if (!f.exists()) {
@@ -102,7 +102,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		return new FileDetails(f, f.lastModified());
 	}
 
-	public MutableFile createFile(String fileIdentifier) {
+	public MutableFile createFile(final String fileIdentifier) {
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(!actual.exists(), "File '" + fileIdentifier + "' already exists");
@@ -127,7 +127,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		if (!StringUtils.hasText(fileIdentifier)) {
 			return;
 		}
-		
+
 		// TODO Auto-generated method stub
 		final File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
@@ -140,8 +140,8 @@ public class DefaultFileManager implements FileManager, UndoListener {
 			new DeleteFile(undoManager, filenameResolver, actual, reasonForDeletion);
 		}
 	}
-	
-	public MutableFile updateFile(String fileIdentifier) {
+
+	public MutableFile updateFile(final String fileIdentifier) {
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
@@ -151,24 +151,24 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		return new DefaultMutableFile(actual, fileMonitorService, renderer);
 	}
 
-	public SortedSet<FileDetails> findMatchingAntPath(String antPath) {
+	public SortedSet<FileDetails> findMatchingAntPath(final String antPath) {
 		return fileMonitorService.findMatchingAntPath(antPath);
 	}
 
-	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately) {
+	public void createOrUpdateTextFileIfRequired(final String fileIdentifier, final String newContents, final boolean writeImmediately) {
 		createOrUpdateTextFileIfRequired(fileIdentifier, newContents, "", writeImmediately);
 	}
-	
-	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, String descriptionOfChange, boolean writeImmediately) {
+
+	public void createOrUpdateTextFileIfRequired(final String fileIdentifier, final String newContents, final String descriptionOfChange, final boolean writeImmediately) {
 		if (writeImmediately) {
 			createOrUpdateTextFileIfRequired(fileIdentifier, newContents, descriptionOfChange);
 		} else {
 			deferredFileWrites.put(fileIdentifier, newContents);
-			
+
 			String deferredDescriptionOfChange = StringUtils.defaultIfEmpty(deferredDescriptionOfChanges.get(fileIdentifier), "");
 			if (StringUtils.hasText(deferredDescriptionOfChange) && !deferredDescriptionOfChange.trim().endsWith(";")) {
 				deferredDescriptionOfChange += "; ";
-			} 
+			}
 			deferredDescriptionOfChanges.put(fileIdentifier, deferredDescriptionOfChange + StringUtils.trimToEmpty(descriptionOfChange));
 		}
 	}
@@ -189,7 +189,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 			clear();
 		}
 	}
-	
+
 	public void clear() {
 		deferredFileWrites.clear();
 		deferredDescriptionOfChanges.clear();
@@ -199,7 +199,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		return fileMonitorService.scanNotified();
 	}
 
-	public void onUndoEvent(UndoEvent event) {
+	public void onUndoEvent(final UndoEvent event) {
 		if (event.isUndoing()) {
 			clear();
 		} else {
@@ -208,7 +208,7 @@ public class DefaultFileManager implements FileManager, UndoListener {
 		}
 	}
 
-	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, String descriptionOfChange) {
+	private void createOrUpdateTextFileIfRequired(final String fileIdentifier, final String newContents, final String descriptionOfChange) {
 		MutableFile mutableFile = null;
 		if (exists(fileIdentifier)) {
 			// First verify if the file has even changed

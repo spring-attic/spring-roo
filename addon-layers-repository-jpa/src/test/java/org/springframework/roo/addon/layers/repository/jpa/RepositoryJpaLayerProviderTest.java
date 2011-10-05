@@ -32,20 +32,20 @@ public class RepositoryJpaLayerProviderTest {
 
 	// Constants
 	private static final String CALLER_MID = "MID:anything#com.example.PetService";
-	
+
 	// Fixture
 	private RepositoryJpaLayerProvider layerProvider;
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
 	@Mock private RepositoryJpaLocator mockRepositoryLocator;
-	
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		this.layerProvider = new RepositoryJpaLayerProvider();
 		this.layerProvider.setRepositoryLocator(mockRepositoryLocator);
 	}
-	
+
 	/**
 	 * Sets up the mock {@link RepositoryJpaLocator} and {@link PersistenceMemberLocator} to return a mock repository
 	 * for our test entity.
@@ -60,29 +60,29 @@ public class RepositoryJpaLayerProviderTest {
 		when(mockFieldMetadata.getFieldType()).thenReturn(mockIdType);
 		when(mockRepositoryLocator.getRepositories(mockTargetEntity)).thenReturn(Arrays.asList(mockRepositoryDetails));
 	}
-	
+
 	@Test
 	public void testGetAdditionsForNonRepositoryLayerMethod() {
 		// Invoke
 		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertNull(additions);
 	}
-	
+
 	@Test
 	public void testGetAdditionsWhenNoRepositoriesExist() {
 		// Invoke
 		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertNull(additions);
 	}
-	
+
 	/**
 	 * Asserts that the {@link RepositoryJpaLayerProvider} generates the
 	 * expected call for the given method with the given parameters
-	 * 
+	 *
 	 * @param expectedMethodCall
 	 * @param methodKey
 	 * @param callerParameters
@@ -90,19 +90,19 @@ public class RepositoryJpaLayerProviderTest {
 	private void assertMethodCall(final String expectedMethodCall, final MethodMetadataCustomDataKey methodKey, final MethodParameter... callerParameters) {
 		// Set up
 		setUpMockRepository();
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = this.layerProvider.getMemberTypeAdditions(CALLER_MID, methodKey.name(), mockTargetEntity, mockIdType, callerParameters);
-		
+
 		// Check
 		assertEquals(expectedMethodCall, additions.getMethodCall());
 	}
-	
+
 	@Test
 	public void testGetFindAllAdditions() {
 		assertMethodCall("clinicRepo.findAll()", FIND_ALL_METHOD);
 	}
-	
+
 	@Test
 	public void testGetFlushAdditions() {
 		final MethodParameter entityParameter = new MethodParameter(mockTargetEntity, "anything");

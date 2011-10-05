@@ -40,23 +40,23 @@ import org.w3c.dom.Element;
 
 /**
  * Default implementation of {@link Parser}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class SimpleParser implements Parser {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
 	private static final Comparator<String> comparator = new NaturalOrderComparator<String>();
-	
+
 	// Fields
 	private final Object mutex = this;
 	private final Set<Converter<?>> converters = new HashSet<Converter<?>>();
-	private Set<CommandMarker> commands = new HashSet<CommandMarker>();
-	private Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
-	
-	private MethodTarget getAvailabilityIndicator(String command) {
+	private final Set<CommandMarker> commands = new HashSet<CommandMarker>();
+	private final Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
+
+	private MethodTarget getAvailabilityIndicator(final String command) {
 		return availabilityIndicators.get(command);
 	}
 
@@ -102,8 +102,8 @@ public class SimpleParser implements Parser {
 				logger.warning(ExceptionUtils.extractRootCause(e).getMessage());
 				return null;
 			}
-			
-			final Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);	
+
+			final Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);
 			for (CliOption cliOption : cliOptions) {
 				Class<?> requiredType = methodTarget.getMethod().getParameterTypes()[arguments.size()];
 
@@ -187,7 +187,7 @@ public class SimpleParser implements Parser {
 						// SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
 						// result = simpleTypeConverter.convertIfNecessary(value, requiredType, mp);
 					}
-					
+
 					// Use the converter
 					result = c.convertFromText(value, requiredType, cliOption.optionContext());
 
@@ -228,7 +228,7 @@ public class SimpleParser implements Parser {
 
 	/**
 	 * Normalises the given raw user input string ready for parsing
-	 * 
+	 *
 	 * @param rawInput the string to normalise; can't be <code>null</code>
 	 * @return a non-<code>null</code> string
 	 */
@@ -237,12 +237,12 @@ public class SimpleParser implements Parser {
 		return rawInput.replaceAll(" +", " ").trim();
 	}
 
-	private Set<String> getSpecifiedUnavailableOptions(Set<CliOption> cliOptions, Map<String, String> options) {
+	private Set<String> getSpecifiedUnavailableOptions(final Set<CliOption> cliOptions, final Map<String, String> options) {
 		Set<String> cliOptionKeySet = new LinkedHashSet<String>();
 		for (CliOption cliOption : cliOptions) {
 			for (String key : cliOption.key()) {
 				cliOptionKeySet.add(key.toLowerCase());
-			}			
+			}
 		}
 		Set<String> unavailableOptions = new LinkedHashSet<String>();
 		for (String suppliedOption : options.keySet()) {
@@ -252,8 +252,8 @@ public class SimpleParser implements Parser {
 		}
 		return unavailableOptions;
 	}
-	
-	private Set<CliOption> getCliOptions(Annotation[][] parameterAnnotations) {
+
+	private Set<CliOption> getCliOptions(final Annotation[][] parameterAnnotations) {
 		Set<CliOption> cliOptions = new LinkedHashSet<CliOption>();
 		for (Annotation[] annotations : parameterAnnotations) {
 			for (Annotation a : annotations) {
@@ -266,11 +266,11 @@ public class SimpleParser implements Parser {
 		return cliOptions;
 	}
 
-	protected void commandNotFound(Logger logger, String buffer) {
+	protected void commandNotFound(final Logger logger, final String buffer) {
 		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 	}
 
-	private Set<MethodTarget> locateTargets(String buffer, boolean strictMatching, boolean checkAvailabilityIndicators) {
+	private Set<MethodTarget> locateTargets(final String buffer, final boolean strictMatching, final boolean checkAvailabilityIndicators) {
 		Assert.notNull(buffer, "Buffer required");
 		Set<MethodTarget> result = new HashSet<MethodTarget>();
 
@@ -314,7 +314,7 @@ public class SimpleParser implements Parser {
 		return result;
 	}
 
-	static String isMatch(String buffer, String command, boolean strictMatching) {
+	static String isMatch(final String buffer, final String command, final boolean strictMatching) {
 		if ("".equals(buffer.trim())) {
 			return "";
 		}
@@ -389,7 +389,7 @@ public class SimpleParser implements Parser {
 		return null; // Not a match
 	}
 
-	public int complete(String buffer, int cursor, List<String> candidates) {
+	public int complete(String buffer, int cursor, final List<String> candidates) {
 		synchronized (mutex) {
 			Assert.notNull(buffer, "Buffer required");
 			Assert.notNull(candidates, "Candidates list required");
@@ -422,13 +422,13 @@ public class SimpleParser implements Parser {
 				for (MethodTarget target : targets) {
 					// Calculate the correct starting position
 					int startAt = translated.length();
-					
+
 					// Only add the first word of each target
 					int stopAt = target.getKey().indexOf(" ", startAt);
 					if (stopAt == -1) {
 						stopAt = target.getKey().length();
 					}
-					
+
 					results.add(target.getKey().substring(0, stopAt) + " ");
 				}
 				candidates.addAll(results);
@@ -757,7 +757,7 @@ public class SimpleParser implements Parser {
 		synchronized (mutex) {
 			File f = new File(".");
 			File[] existing = f.listFiles(new FileFilter() {
-				public boolean accept(File pathname) {
+				public boolean accept(final File pathname) {
 					return pathname.getName().startsWith("appendix_");
 				}
 			});
@@ -1022,7 +1022,7 @@ public class SimpleParser implements Parser {
 		}
 	}
 
-	public final void add(CommandMarker command) {
+	public final void add(final CommandMarker command) {
 		synchronized (mutex) {
 			commands.add(command);
 			for (final Method method : command.getClass().getMethods()) {
@@ -1039,7 +1039,7 @@ public class SimpleParser implements Parser {
 		}
 	}
 
-	public final void remove(CommandMarker command) {
+	public final void remove(final CommandMarker command) {
 		synchronized (mutex) {
 			commands.remove(command);
 			for (Method m : command.getClass().getMethods()) {
@@ -1053,13 +1053,13 @@ public class SimpleParser implements Parser {
 		}
 	}
 
-	public final void add(Converter<?> converter) {
+	public final void add(final Converter<?> converter) {
 		synchronized (mutex) {
 			converters.add(converter);
 		}
 	}
 
-	public final void remove(Converter<?> converter) {
+	public final void remove(final Converter<?> converter) {
 		synchronized (mutex) {
 			converters.remove(converter);
 		}

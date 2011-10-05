@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  *  Indicates a type that requires ROO JSF application bean support.
- *  
+ *
  *  @author Alan Stewart
  * 	@since 1.2.0
  */

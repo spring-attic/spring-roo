@@ -12,19 +12,19 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link FieldMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DefaultFieldMetadata extends AbstractIdentifiableAnnotatedJavaStructureProvider implements FieldMetadata {
-	
+
 	// Fields
-	private String fieldInitializer;
-	private JavaSymbolName fieldName;
-	private JavaType fieldType;
-	
+	private final String fieldInitializer;
+	private final JavaSymbolName fieldName;
+	private final JavaType fieldType;
+
 	// Package protected to mandate the use of FieldMetadataBuilder
-	DefaultFieldMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer) {
+	DefaultFieldMetadata(final CustomData customData, final String declaredByMetadataId, final int modifier, final List<AnnotationMetadata> annotations, final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
 		super(customData, declaredByMetadataId, modifier, annotations);
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldName, "Field name required");
@@ -33,19 +33,20 @@ public class DefaultFieldMetadata extends AbstractIdentifiableAnnotatedJavaStruc
 		this.fieldType = fieldType;
 		this.fieldInitializer = fieldInitializer;
 	}
-	
+
 	public String getFieldInitializer() {
 		return fieldInitializer;
 	}
-	
+
 	public JavaSymbolName getFieldName() {
 		return fieldName;
 	}
-	
+
 	public JavaType getFieldType() {
 		return fieldType;
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());

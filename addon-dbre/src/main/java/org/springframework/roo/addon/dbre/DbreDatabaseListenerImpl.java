@@ -65,13 +65,13 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements IdentifierService, FileEventListener {
-	
+
 	// Constants
 	private static final String IDENTIFIER_TYPE = "identifierType";
 	private static final String VERSION_FIELD = "versionField";
 	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
-	
+
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
@@ -168,7 +168,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	/**
 	 * Indicates whether active record CRUD methods should be generated for the
 	 * given entities (this being an all or nothing decision)
-	 * 
+	 *
 	 * @param database the database being reverse-engineered (required)
 	 * @param managedEntities any existing DB-managed entities in the user
 	 * project (can be <code>null</code> or empty)
@@ -239,7 +239,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Update the attributes of the existing JPA-related annotation
 		final AnnotationMetadata jpaAnnotation = getJpaAnnotation(managedEntity);
 		Assert.state(jpaAnnotation != null, "Neither " + ROO_ENTITY.getSimpleTypeName() + " nor " + ROO_JPA_ENTITY.getSimpleTypeName() + " found on existing DBRE-managed entity " + managedEntity.getName().getFullyQualifiedTypeName());
-		
+
 		// Find table in database using 'table' and 'schema' attributes from the JPA annotation
 		final AnnotationAttributeValue<?> tableAttribute = jpaAnnotation.getAttribute(new JavaSymbolName("table"));
 		final String errMsg = "Unable to maintain database-managed entity " + managedEntity.getName().getFullyQualifiedTypeName() + " because its associated table could not be found";
@@ -251,7 +251,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		final String schemaName = schemaAttribute != null ? (String) schemaAttribute.getValue() : null;
 
 		final Table table = database.getTable(tableName, schemaName);
-		if (table == null) { 
+		if (table == null) {
 			// Table is missing and probably has been dropped so delete managed type and its identifier if applicable
 			deleteManagedType(managedEntity, "no database table called '" + tableName + "'");
 			return null;
@@ -285,10 +285,10 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 		return table;
 	}
-	
+
 	/**
 	 * Returns the JPA-related annotation on the given managed entity
-	 * 
+	 *
 	 * @param managedEntity an existing DBRE-managed entity (required)
 	 * @return <code>null</code> if there isn't one
 	 */
@@ -303,7 +303,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	/**
 	 * Creates a new DBRE-managed entity from the given table
-	 * 
+	 *
 	 * @param javaType the name of the entity to be created (required)
 	 * @param table the table from which to create the entity (required)
 	 * @param activeRecord whether to create "active record" CRUD methods in the
@@ -323,7 +323,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		if (!hasVersionField(table)) {
 			jpaAnnotationBuilder.addStringAttribute(VERSION_FIELD, "");
 		}
-		
+
 		jpaAnnotationBuilder.addStringAttribute("table", table.getName());
 		if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(table.getSchema().getName())) {
 			jpaAnnotationBuilder.addStringAttribute("schema", table.getSchema().getName());
@@ -478,11 +478,11 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Finally, check for added constructors, fields and methods
 		return managedEntity.getDeclaredConstructors().isEmpty() && managedEntity.getDeclaredFields().isEmpty() && managedEntity.getDeclaredMethods().isEmpty();
 	}
-	
+
 	/**
 	 * Indicates whether the given entity has the standard annotations applied
 	 * by Roo, and no others.
-	 * 
+	 *
 	 * @param entity the entity to check (required)
 	 * @return <code>false</code> if any of the standard ones are missing or any
 	 * extra ones have been added
@@ -517,7 +517,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	/**
 	 * Deletes the given {@link JavaType} for the given reason
-	 * 
+	 *
 	 * @param javaType the type to be deleted (required)
 	 * @param reason the reason for deletion (can be blank)
 	 */
@@ -536,7 +536,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	/**
 	 * Returns the type of ID that DBRE should use for the given entity
-	 * 
+	 *
 	 * @param entity the entity for which to get the ID type (required)
 	 * @return a non-<code>null</code> ID type
 	 */

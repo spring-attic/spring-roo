@@ -10,24 +10,24 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link CustomData}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public class CustomDataImpl implements CustomData {
-	
+
 	// Constants
 	public static final CustomData NONE = new CustomDataImpl(new LinkedHashMap<Object, Object>());
-	
+
 	// Fields
-	private Map<Object, Object> customData;
-	
-	public CustomDataImpl(Map<Object, Object> customData) {
+	private final Map<Object, Object> customData;
+
+	public CustomDataImpl(final Map<Object, Object> customData) {
 		Assert.notNull(customData, "Custom data required");
 		this.customData = Collections.unmodifiableMap(customData);
 	}
-	
-	public Object get(Object key) {
+
+	public Object get(final Object key) {
 		return customData.get(key);
 	}
 
@@ -47,7 +47,7 @@ public class CustomDataImpl implements CustomData {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -63,6 +63,7 @@ public class CustomDataImpl implements CustomData {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return customData.toString();
 	}

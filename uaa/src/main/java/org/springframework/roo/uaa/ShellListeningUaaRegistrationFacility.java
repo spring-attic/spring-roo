@@ -14,30 +14,30 @@ import org.springframework.uaa.client.UaaService;
 /**
  * A {@link ShellStatusListener} which determines the bundle symbolic name an executed shell command
  * was provided by and registers the use of that feature in UAA.
- * 
+ *
  * @author Ben Alex
  * @since 1.1.1
  *
  */
 @Component(immediate = true)
 public class ShellListeningUaaRegistrationFacility implements ShellStatusListener {
-	
+
 	// Fields
 	@Reference private Shell shell;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference UaaService uaaService;
 	private BundleContext bundleContext;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		this.bundleContext = context.getBundleContext();
 		shell.addShellStatusListener(this);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		shell.removeShellStatusListener(this);
 	}
 
-	public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
+	public void onShellStatusChange(final ShellStatus oldStatus, final ShellStatus newStatus) {
 		// Handle registering use of a BSN
 		ParseResult parseResult = newStatus.getParseResult();
 		if (parseResult == null) {

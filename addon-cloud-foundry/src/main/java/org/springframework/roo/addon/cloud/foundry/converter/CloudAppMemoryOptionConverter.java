@@ -23,18 +23,18 @@ public class CloudAppMemoryOptionConverter implements Converter<CloudAppMemoryOp
 	private static final String MEMORY_OPTION_SUFFIX = "MB";
 	@Reference private CloudFoundrySession session;
 
-	public CloudAppMemoryOption convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public CloudAppMemoryOption convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
 		return new CloudAppMemoryOption(Integer.valueOf(value.replaceAll(MEMORY_OPTION_SUFFIX, "")));
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return CloudAppMemoryOption.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (Integer memoryOption : session.getApplicationMemoryOptions()) {
 			completions.add(memoryOption + MEMORY_OPTION_SUFFIX);
 		}

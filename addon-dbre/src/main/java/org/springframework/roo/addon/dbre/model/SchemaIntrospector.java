@@ -8,13 +8,13 @@ import java.util.Set;
 
 /**
  * Returns database schemas from a live database connection using JDBC.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.2
  */
 public class SchemaIntrospector extends AbstractIntrospector {
-	
-	public SchemaIntrospector(Connection connection) throws SQLException {
+
+	public SchemaIntrospector(final Connection connection) throws SQLException {
 		super(connection);
 	}
 

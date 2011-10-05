@@ -16,15 +16,15 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a column in the database model.
- * 
+ *
  * @author Alan Stewart.
  * @since 1.1
  */
 public class Column {
-	private String name;
-	private int dataType;
-	private String typeName;
-	private int columnSize;
+	private final String name;
+	private final int dataType;
+	private final String typeName;
+	private final int columnSize;
 	private int scale = 0;
 	private String description;
 	private boolean primaryKey;
@@ -35,7 +35,7 @@ public class Column {
 	private JavaType javaType;
 	private String defaultValue;
 
-	Column(String name, int dataType, String typeName, int columnSize, int scale) {
+	Column(final String name, final int dataType, final String typeName, final int columnSize, final int scale) {
 		Assert.hasText(name, "Column name required");
 		this.name = name;
 		this.dataType = dataType;
@@ -171,7 +171,7 @@ public class Column {
 				jdbcType = "VARCHAR";
 				javaType = JavaType.STRING;
 				break;
-		}	
+		}
 	}
 
 	public String getName() {
@@ -202,7 +202,7 @@ public class Column {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(final String description) {
 		this.description = description;
 	}
 
@@ -210,7 +210,7 @@ public class Column {
 		return primaryKey;
 	}
 
-	public void setPrimaryKey(boolean primaryKey) {
+	public void setPrimaryKey(final boolean primaryKey) {
 		this.primaryKey = primaryKey;
 	}
 
@@ -218,7 +218,7 @@ public class Column {
 		return required;
 	}
 
-	public void setRequired(boolean required) {
+	public void setRequired(final boolean required) {
 		this.required = required;
 	}
 
@@ -226,7 +226,7 @@ public class Column {
 		return unique;
 	}
 
-	public void setUnique(boolean unique) {
+	public void setUnique(final boolean unique) {
 		this.unique = unique;
 	}
 
@@ -234,7 +234,7 @@ public class Column {
 		return autoIncrement;
 	}
 
-	public void setAutoIncrement(boolean autoIncrement) {
+	public void setAutoIncrement(final boolean autoIncrement) {
 		this.autoIncrement = autoIncrement;
 	}
 
@@ -250,10 +250,11 @@ public class Column {
 		return defaultValue;
 	}
 
-	public void setDefaultValue(String defaultValue) {
+	public void setDefaultValue(final String defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -261,7 +262,8 @@ public class Column {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -277,6 +279,7 @@ public class Column {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return String.format("Column [name=%s, dataType=%s, typeName=%s, columnSize=%s, scale=%s, description=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, jdbcType=%s, javaType=%s, defaultValue=%s]", name, dataType, typeName, columnSize, scale, description, primaryKey, required, unique, autoIncrement, jdbcType, javaType, defaultValue);
 	}

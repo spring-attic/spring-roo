@@ -21,23 +21,23 @@ import org.springframework.uaa.client.util.Assert;
 
 /**
  * The metadata about a service interface within a user project
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final int PUBLIC_ABSTRACT = Modifier.PUBLIC | Modifier.ABSTRACT;
 	private static final String PROVIDES_TYPE_STRING = ServiceInterfaceMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final InvocableMemberBodyBuilder BODY = new InvocableMemberBodyBuilder();
-	
+
 	// Fields
 	private final MemberDetails governorDetails;
 	private final ServiceAnnotationValues annotationValues;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -47,15 +47,15 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	 * @param governorDetails (required)
 	 * @param domainTypeToIdTypeMap (required)
 	 * @param annotationValues (required)
-	 * @param domainTypePlurals 
+	 * @param domainTypePlurals
 	 */
-	public ServiceInterfaceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MemberDetails governorDetails, Map<JavaType, JavaType> domainTypeToIdTypeMap, ServiceAnnotationValues annotationValues, Map<JavaType, String> domainTypePlurals) {
+	public ServiceInterfaceMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final MemberDetails governorDetails, final Map<JavaType, JavaType> domainTypeToIdTypeMap, final ServiceAnnotationValues annotationValues, final Map<JavaType, String> domainTypePlurals) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(governorDetails, "Governor member details required");
 		Assert.notNull(domainTypeToIdTypeMap, "Domain type to ID type map required required");
 		Assert.notNull(domainTypePlurals, "Domain type plural values required");
-		
+
 		this.annotationValues = annotationValues;
 		this.governorDetails = governorDetails;
 
@@ -70,10 +70,10 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	/**
 	 * Returns the metadata for declaring the given method in the service interface
-	 * 
+	 *
 	 * @param method the method to declare
 	 * @param domainType the domain type being managed
 	 * @param idType
@@ -101,27 +101,28 @@ public class ServiceInterfaceMetadata extends AbstractItdTypeDetailsProvidingMet
 	public ServiceAnnotationValues getServiceAnnotationValues() {
 		return annotationValues;
 	}
-	
+
 	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-	
+
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

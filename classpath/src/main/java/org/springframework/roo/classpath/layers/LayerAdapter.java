@@ -2,7 +2,7 @@ package org.springframework.roo.classpath.layers;
 
 /**
  * Convenience class for addon developers wishing to implement their own {@link LayerProvider}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -15,7 +15,7 @@ public abstract class LayerAdapter implements LayerProvider {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}

@@ -7,18 +7,18 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a {@link CommandCallback} to start or stop monitoring a particular file path.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class MonitoringRequestCommand implements CommandCallback<Boolean> {
 
 	// Fields
-	private FileMonitorService fileMonitorService;
-	private MonitoringRequest monitoringRequest;
-	private boolean add;
-	
-	public MonitoringRequestCommand(FileMonitorService fileMonitorService, MonitoringRequest monitoringRequest, boolean add) {
+	private final FileMonitorService fileMonitorService;
+	private final MonitoringRequest monitoringRequest;
+	private final boolean add;
+
+	public MonitoringRequestCommand(final FileMonitorService fileMonitorService, final MonitoringRequest monitoringRequest, final boolean add) {
 		Assert.notNull(fileMonitorService, "File monitor service required");
 		Assert.notNull(monitoringRequest, "Request required");
 		this.fileMonitorService = fileMonitorService;

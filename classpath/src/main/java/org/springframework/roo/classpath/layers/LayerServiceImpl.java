@@ -18,18 +18,18 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * The {@link LayerService} implementation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
-@Reference(name = "layerProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = LayerProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE) 
+@Reference(name = "layerProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = LayerProvider.class, cardinality = ReferenceCardinality.MANDATORY_MULTIPLE)
 public class LayerServiceImpl implements LayerService {
-	
+
 	// Fields
 	private final Set<LayerProvider> providers = new TreeSet<LayerProvider>(new DescendingLayerComparator());
-	
+
 	// Mutex
 	private final Object mutex = new Object();
 
@@ -37,7 +37,7 @@ public class LayerServiceImpl implements LayerService {
 		final MethodParameter[] methodParametersArray = methodParameters.toArray(new MethodParameter[methodParameters.size()]);
 		return getMemberTypeAdditions(metadataId, methodIdentifier, targetEntity, idType, layerPosition, methodParametersArray);
 	}
-	
+
 	public MemberTypeAdditions getMemberTypeAdditions(final String metadataId, final String methodIdentifier, final JavaType targetEntity, final JavaType idType, final int layerPosition,	final MethodParameter... methodParameters) {
 		Assert.hasText(metadataId, "metadataId is required");
 		Assert.hasText(methodIdentifier, "methodIdentifier is required");
@@ -54,13 +54,13 @@ public class LayerServiceImpl implements LayerService {
 		return null;
 	}
 
-	protected void bindLayerProvider(LayerProvider provider) {
+	protected void bindLayerProvider(final LayerProvider provider) {
 		synchronized (mutex) {
 			providers.add(provider);
 		}
 	}
 
-	protected void unbindLayerProvider(LayerProvider provider) {
+	protected void unbindLayerProvider(final LayerProvider provider) {
 		synchronized (mutex) {
 			if (providers.contains(provider)) {
 				providers.remove(provider);
@@ -76,10 +76,10 @@ public class LayerServiceImpl implements LayerService {
 	 * @since 1.2.0
 	 */
 	static class DescendingLayerComparator implements Comparator<LayerProvider>, Serializable {
-		
+
 		// Constants
 		private static final long serialVersionUID = 1L;
-		
+
 		public int compare(final LayerProvider provider1, final LayerProvider provider2) {
 			if (provider1.equals(provider2)) {
 				return 0;

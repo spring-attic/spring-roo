@@ -8,16 +8,16 @@ import org.springframework.roo.addon.web.mvc.embedded.AbstractEmbeddedProvider;
 
 /**
  * Provider to embed finance charts via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class FinanceEmbeddedProvider extends AbstractEmbeddedProvider {
-	
+
 	// TODO : disabled due to ROO-2562
-	public boolean embed(String url, String viewName) {
+	public boolean embed(final String url, final String viewName) {
 //		if (url.contains("wikinvest.com")) {
 //			// Expected format http://www.wikinvest.com/wiki/Vmw
 //			Map<String, String> options = new HashMap<String, String>();
@@ -27,10 +27,10 @@ public class FinanceEmbeddedProvider extends AbstractEmbeddedProvider {
 //		}
 		return false;
 	}
-	
+
 	// TODO : disabled due to ROO-2562
-	public boolean install(String viewName, Map<String, String> options) {
-//		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("finances") || !options.containsKey("stockSymbol")) { 
+	public boolean install(final String viewName, final Map<String, String> options) {
+//		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("finances") || !options.containsKey("stockSymbol")) {
 //			return false;
 //		}
 //		String stockSymbol = options.get("stockSymbol");

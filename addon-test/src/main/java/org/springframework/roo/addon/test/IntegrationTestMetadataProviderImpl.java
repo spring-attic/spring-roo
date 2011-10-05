@@ -53,17 +53,17 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link IntegrationTestMetadataProvider}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
 public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProvider implements IntegrationTestMetadataProvider {
-	
+
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-	
+
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
@@ -81,14 +81,14 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		configurableMetadataProvider.addMetadataTrigger(ROO_INTEGRATION_TEST);
 		addMetadataTrigger(ROO_INTEGRATION_TEST);
 	}
-	
+
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(ROO_INTEGRATION_TEST);
 		removeMetadataTrigger(ROO_INTEGRATION_TEST);
 	}
-	
+
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
 	@Override
 	protected void notifyForGenericListener(final String upstreamDependency) {
@@ -96,7 +96,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
 			return;
 		}
-		
+
 		// We do need to be informed if a new layer is available to see if we should use that
 		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
 			final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(PhysicalTypeIdentifier.getJavaType(upstreamDependency));
@@ -109,7 +109,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 				}
 			}
 		}
-		
+
 		// If the upstream dependency isn't ProjectMetadata do not continue
 		if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
 			final ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
@@ -128,7 +128,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 			}
 		}
 	}
-	
+
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
@@ -137,7 +137,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		if (!annotationValues.isAnnotationFound() || entity == null) {
 			return null;
 		}
-		
+
 		final JavaType dataOnDemandType = getDataOnDemandType(entity);
 		final String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dataOnDemandType, Path.SRC_TEST_JAVA);
 		final DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
@@ -148,7 +148,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
 			return null;
 		}
-		
+
 		final MemberDetails memberDetails = getMemberDetails(entity);
 		if (memberDetails == null) {
 			return null;
@@ -158,7 +158,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		if (identifierType == null) {
 			return null;
 		}
-		
+
 		final MethodParameter firstResultParameter = new MethodParameter(INT_PRIMITIVE, "firstResult");
 		final MethodParameter maxResultsParameter = new MethodParameter(INT_PRIMITIVE, "maxResults");
 
@@ -176,7 +176,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		if (persistMethodAdditions == null || findMethodAdditions == null || identifierAccessorMethod == null) {
 			return null;
 		}
-	
+
 		String transactionManager = null;
 		final AnnotationMetadata rooEntityAnnotation = memberDetails.getAnnotation(ROO_ENTITY);
 		if (rooEntityAnnotation != null) {
@@ -185,7 +185,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 				transactionManager = transactionManagerAttr.getValue();
 			}
 		}
-		
+
 		final boolean hasEmbeddedIdentifier = dataOnDemandMetadata.hasEmbeddedIdentifier();
 		final boolean entityHasSuperclass  = getEntitySuperclass(entity) != null;
 
@@ -198,7 +198,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 
 		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
 		producedMids.add(metadataIdentificationString);
-		
+
 		// Maintain a list of entities that are being tested
 		managedEntityTypes.put(entity, metadataIdentificationString);
 
@@ -214,7 +214,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 
 	/**
 	 * Returns the {@link JavaType} for the given entity's "data on demand" class.
-	 * 
+	 *
 	 * @param entity the entity for which to get the DoD type
 	 * @return a non-<code>null</code> type (which may or may not exist yet)
 	 */
@@ -224,7 +224,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		if (typeLocationService.getClassOrInterface(defaultDodType) != null) {
 			return defaultDodType;
 		}
-		
+
 		// Otherwise we look through all DoD-annotated classes for this entity's one
 		for (final ClassOrInterfaceTypeDetails dodType : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_DATA_ON_DEMAND)) {
 			final AnnotationMetadata dodAnnotation = MemberFindingUtils.getFirstAnnotation(dodType, ROO_DATA_ON_DEMAND);
@@ -232,11 +232,11 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 				return dodType.getName();
 			}
 		}
-		
+
 		// No existing DoD class was found for this entity, so use the default name
 		return defaultDodType;
 	}
-	
+
 	private ClassOrInterfaceTypeDetails getEntitySuperclass(final JavaType entity) {
 		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
 		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
@@ -247,7 +247,7 @@ public class IntegrationTestMetadataProviderImpl extends AbstractItdMetadataProv
 		final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 		return classOrInterfaceTypeDetails.getSuperclass();
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "IntegrationTest";
 	}

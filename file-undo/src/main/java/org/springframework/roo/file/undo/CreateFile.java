@@ -9,20 +9,20 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * {@link UndoableOperation} to create a file.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class CreateFile implements UndoableOperation {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(CreateFile.class);
 
 	// Fields
-	private FilenameResolver filenameResolver;
-	private File actual;
-	
-	public CreateFile(UndoManager undoManager, FilenameResolver filenameResolver, File actual) {
+	private final FilenameResolver filenameResolver;
+	private final File actual;
+
+	public CreateFile(final UndoManager undoManager, final FilenameResolver filenameResolver, final File actual) {
 		Assert.notNull(undoManager, "Undo manager required");
 		Assert.notNull(actual, "Actual file required");
 		Assert.notNull(filenameResolver, "Filename resolver required");
@@ -36,7 +36,7 @@ public class CreateFile implements UndoableOperation {
 		}
 		undoManager.add(this);
 	}
-	
+
 	public void reset() {}
 
 	public boolean undo() {

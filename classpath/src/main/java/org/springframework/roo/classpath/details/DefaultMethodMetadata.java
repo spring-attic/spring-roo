@@ -13,25 +13,25 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MethodMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata implements MethodMetadata {
-	
+
 	// Fields
-	private JavaSymbolName methodName;
-	private JavaType returnType;
+	private final JavaSymbolName methodName;
+	private final JavaType returnType;
 
 	// Package protected to mandate the use of MethodMetadataBuilder
-	DefaultMethodMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, String body) {
+	DefaultMethodMetadata(final CustomData customData, final String declaredByMetadataId, final int modifier, final List<AnnotationMetadata> annotations, final JavaSymbolName methodName, final JavaType returnType, final List<AnnotatedJavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final List<JavaType> throwsTypes, final String body) {
 		super(customData, declaredByMetadataId, modifier, annotations, parameterTypes, parameterNames, throwsTypes, body);
 		Assert.notNull(methodName, "Method name required");
 		Assert.notNull(returnType, "Return type required");
 		this.methodName = methodName;
 		this.returnType = returnType;
 	}
-	
+
 	public boolean hasSameName(final MethodMetadata... otherMethods) {
 		for (final MethodMetadata otherMethod : otherMethods) {
 			if (otherMethod != null && this.methodName.equals(otherMethod.getMethodName())) {
@@ -49,6 +49,7 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
 		return returnType;
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());

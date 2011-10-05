@@ -47,18 +47,18 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * Stores the user's PGP information in the <code>~/.spring_roo_pgp.bpg<code> file. Every key in this
  * file is considered trusted by the user. Expiration times of keys are ignored. Default keys that
  * ship with Roo are added to this file automatically when the file is not present on disk.
- * 
+ *
  * <p>
  * This implementation will only verify "detached armored signatures". Produce such a file via
  * "gpg --armor --detach-sign file_to_sign.ext".
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
 public class PgpServiceImpl implements PgpService {
-	
+
 	// Constants
 	private static final int BUFFER_SIZE = 1024;
 	private static final File ROO_PGP_FILE = new File(System.getProperty("user.home") + File.separatorChar + ".spring_roo_pgp.bpg");
@@ -77,7 +77,7 @@ public class PgpServiceImpl implements PgpService {
 	private BundleContext context;
 	private final SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		this.context = context.getBundleContext();
 		String keyserver = context.getBundleContext().getProperty("pgp.keyserver.url");
 		if (StringUtils.hasText(keyserver)) {
@@ -127,7 +127,7 @@ public class PgpServiceImpl implements PgpService {
 		return automaticTrust;
 	}
 
-	public void setAutomaticTrust(boolean automaticTrust) {
+	public void setAutomaticTrust(final boolean automaticTrust) {
 		this.automaticTrust = automaticTrust;
 	}
 
@@ -155,7 +155,7 @@ public class PgpServiceImpl implements PgpService {
 		}
 	}
 
-	public PGPPublicKeyRing trust(PgpKeyId keyId) {
+	public PGPPublicKeyRing trust(final PgpKeyId keyId) {
 		Assert.notNull(keyId, "Key ID required");
 		PGPPublicKeyRing keyRing = getPublicKey(keyId);
 		return trust(keyRing);
@@ -186,7 +186,7 @@ public class PgpServiceImpl implements PgpService {
 	}
 
 	@SuppressWarnings("unchecked")
-	public PGPPublicKeyRing untrust(PgpKeyId keyId) {
+	public PGPPublicKeyRing untrust(final PgpKeyId keyId) {
 		Assert.notNull(keyId, "Key ID required");
 		// Get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
@@ -275,7 +275,7 @@ public class PgpServiceImpl implements PgpService {
 		return result;
 	}
 
-	public PGPPublicKeyRing getPublicKey(PgpKeyId keyId) {
+	public PGPPublicKeyRing getPublicKey(final PgpKeyId keyId) {
 		Assert.notNull(keyId, "Key ID required");
 		InputStream in = null;
 		try {
@@ -289,7 +289,7 @@ public class PgpServiceImpl implements PgpService {
 		}
 	}
 
-	public PGPPublicKeyRing getPublicKey(InputStream in) {
+	public PGPPublicKeyRing getPublicKey(final InputStream in) {
 		Object obj;
 		try {
 			PGPObjectFactory pgpFact = new PGPObjectFactory(PGPUtil.getDecoderStream(in));
@@ -309,14 +309,14 @@ public class PgpServiceImpl implements PgpService {
 
 	/**
 	 * Obtains a URL that should allow the download of the specified public key.
-	 * 
+	 *
 	 * <p>
 	 * The key server may not contain the specified public key if it has never been uploaded.
-	 * 
+	 *
 	 * @param keyId hex-encoded key ID to download (required)
 	 * @return the URL (never null)
 	 */
-	private URL getKeyServerUrlToRetrieveKeyId(PgpKeyId keyId) {
+	private URL getKeyServerUrlToRetrieveKeyId(final PgpKeyId keyId) {
 		try {
 			return new URL(defaultKeyServerUrl + keyId);
 		} catch (MalformedURLException e) {
@@ -324,7 +324,7 @@ public class PgpServiceImpl implements PgpService {
 		}
 	}
 
-	public URL getKeyServerUrlToRetrieveKeyInformation(PgpKeyId keyId) {
+	public URL getKeyServerUrlToRetrieveKeyInformation(final PgpKeyId keyId) {
 		Assert.notNull(keyId, "Key ID required");
 		URL keyUrl = getKeyServerUrlToRetrieveKeyId(keyId);
 		try {
@@ -335,7 +335,7 @@ public class PgpServiceImpl implements PgpService {
 		}
 	}
 
-	public SignatureDecision isSignatureAcceptable(InputStream signature) throws IOException {
+	public SignatureDecision isSignatureAcceptable(final InputStream signature) throws IOException {
 		Assert.notNull(signature, "Signature input stream required");
 		PGPObjectFactory factory = new PGPObjectFactory(PGPUtil.getDecoderStream(signature));
 		Object obj = factory.nextObject();
@@ -352,7 +352,7 @@ public class PgpServiceImpl implements PgpService {
 		} else {
 			p3 = (PGPSignatureList) obj;
 		}
-		
+
 		PGPSignature pgpSignature = p3.get(0);
 		Assert.notNull(pgpSignature, "Unable to retrieve signature from stream");
 
@@ -381,7 +381,7 @@ public class PgpServiceImpl implements PgpService {
 		return new SignatureDecision(pgpSignature, keyIdInHex, signatureAcceptable);
 	}
 
-	public boolean isResourceSignedBySignature(InputStream resource, InputStream signature) {
+	public boolean isResourceSignedBySignature(final InputStream resource, InputStream signature) {
 		PGPPublicKey publicKey = null;
 		PGPSignature pgpSignature = null;
 
@@ -422,14 +422,14 @@ public class PgpServiceImpl implements PgpService {
 	/**
 	 * Simply stores the key ID in {@link #discoveredKeyIds} for future reference of all Key IDs we've come across. This method uses a {@link PGPPublicKeyRing} to ensure the input is actually a valid
 	 * key, plus locating any key IDs that have signed the key.
-	 * 
+	 *
 	 * <p>
 	 * Please note {@link #discoveredKeyIds} is not used for any key functions of this class. It is simply for user interface convenience.
-	 * 
+	 *
 	 * @param keyRing the key ID to store (required)
 	 */
 	@SuppressWarnings("unchecked")
-	private void rememberKey(PGPPublicKeyRing keyRing) {
+	private void rememberKey(final PGPPublicKeyRing keyRing) {
 		PGPPublicKey key = keyRing.getPublicKey();
 		if (key != null) {
 			PgpKeyId keyId = new PgpKeyId(key);

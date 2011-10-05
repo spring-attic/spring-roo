@@ -14,12 +14,12 @@ public class Bundle {
 	private List<BundleVersion> versions;
 	private List<Comment> comments;
 
-	public Bundle(String symbolicName, float ranking, List<Comment> inComments) {
+	public Bundle(final String symbolicName, final float ranking, final List<Comment> inComments) {
 		super();
 		this.symbolicName = symbolicName;
 		this.ranking = ranking;
 		Collections.sort(inComments, new Comparator<Comment>() {
-			public int compare(Comment o1, Comment o2) {
+			public int compare(final Comment o1, final Comment o2) {
 				return o1.getDate().compareTo(o2.getDate());
 			}
 		});
@@ -31,7 +31,7 @@ public class Bundle {
 		return searchRelevance;
 	}
 
-	public void setSearchRelevance(float searchRelevance) {
+	public void setSearchRelevance(final float searchRelevance) {
 		this.searchRelevance = searchRelevance;
 	}
 
@@ -51,11 +51,11 @@ public class Bundle {
 		return comments;
 	}
 
-	public void addComment(Comment comment) {
+	public void addComment(final Comment comment) {
 		comments.add(comment);
 	}
 
-	public void addVersion(BundleVersion bundleVersion) {
+	public void addVersion(final BundleVersion bundleVersion) {
 		versions.add(bundleVersion);
 	}
 
@@ -67,7 +67,7 @@ public class Bundle {
 		return null;
 	}
 
-	public BundleVersion getBundleVersion(String bundleKey) {
+	public BundleVersion getBundleVersion(final String bundleKey) {
 		Assert.hasText(bundleKey, "Bundle key required");
 		if (bundleKey.contains(";")) {
 			String[] split = bundleKey.split(";");
@@ -83,6 +83,7 @@ public class Bundle {
 		return getLatestVersion();
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -90,7 +91,8 @@ public class Bundle {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -105,27 +107,27 @@ public class Bundle {
 			return false;
 		return true;
 	}
-	
-	public static List<Bundle> orderByRanking(List<Bundle> bundles) {
+
+	public static List<Bundle> orderByRanking(final List<Bundle> bundles) {
 		Collections.sort(bundles, new Comparator<Bundle>() {
-			public int compare(Bundle o1, Bundle o2) {
+			public int compare(final Bundle o1, final Bundle o2) {
 				if (o1.getRanking() == o2.getRanking()) return 0;
 				else if (o1.getRanking() < o2.getRanking()) return 1;
 				else return -1;
 			}});
 		return Collections.unmodifiableList(bundles);
 	}
-	
-	public static List<Bundle> orderBySearchRelevance(List<Bundle> bundles) {
+
+	public static List<Bundle> orderBySearchRelevance(final List<Bundle> bundles) {
 		Collections.sort(bundles, new Comparator<Bundle>() {
-			public int compare(Bundle o1, Bundle o2) {
+			public int compare(final Bundle o1, final Bundle o2) {
 				if (o1.getSearchRelevance() < o2.getSearchRelevance()) return -1;
 				else if (o1.getSearchRelevance() > o2.getSearchRelevance()) return 1;
 				// Order by ranking if search relevance is equal
 				else {
 					if (o1.getRanking() == o2.getRanking()) return 0;
 					else if (o1.getRanking() < o2.getRanking()) return 1;
-					else return -1;	
+					else return -1;
 				}
 			}});
 		return Collections.unmodifiableList(bundles);

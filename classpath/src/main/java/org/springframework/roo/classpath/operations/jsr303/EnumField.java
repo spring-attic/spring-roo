@@ -23,7 +23,7 @@ import org.springframework.roo.model.JavaType;
 public class EnumField extends FieldDetails {
 	private EnumType enumType;
 
-	public EnumField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {		
+	public EnumField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
@@ -31,14 +31,15 @@ public class EnumField extends FieldDetails {
 		return enumType;
 	}
 
-	public void setEnumType(EnumType enumType) {
+	public void setEnumType(final EnumType enumType) {
 		this.enumType = enumType;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
+	@Override
+	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		
+
 		if (enumType != null) {
 			JavaSymbolName value = new JavaSymbolName("ORDINAL");
 			if (enumType == EnumType.STRING) {
@@ -46,7 +47,7 @@ public class EnumField extends FieldDetails {
 			}
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(ENUM_TYPE, value)));
 		}
-		
+
 		annotations.add(new AnnotationMetadataBuilder(ENUMERATED, attributes));
 	}
 }

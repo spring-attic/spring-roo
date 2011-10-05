@@ -16,11 +16,12 @@ import org.springframework.roo.model.JavaType;
  */
 public class EmbeddedField extends FieldDetails {
 
-	public EmbeddedField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
+	public EmbeddedField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
+	@Override
+	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		annotations.add(new AnnotationMetadataBuilder(EMBEDDED));
 	}

@@ -16,22 +16,22 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.uaa.client.util.Assert;
 
 /**
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
  */
 public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = RepositoryJpaMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final String SPRING_JPA_REPOSITORY = "org.springframework.data.jpa.repository.JpaRepository";
 	private static final String SPRING_JPA_SPECIFICATION_EXECUTOR = "org.springframework.data.jpa.repository.JpaSpecificationExecutor";
-	
+
 	// Fields
 	private final RepositoryJpaAnnotationValues annotationValues;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -41,25 +41,25 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 	 * @param idType the type of the entity's identifier field (required)
 	 * @param annotationValues (required)
 	 */
-	public RepositoryJpaMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType idType, RepositoryJpaAnnotationValues annotationValues) {
+	public RepositoryJpaMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType idType, final RepositoryJpaAnnotationValues annotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(idType, "Id type required");
-		
+
 		this.annotationValues = annotationValues;
-		
+
 		// Make the user's Repository interface extend Spring Data's JpaRepository interface if it doesn't already
 		ensureGovernorExtends(new JavaType(SPRING_JPA_REPOSITORY, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType(), idType)));
-		
+
 		// ... and likewise extend JpaSpecificationExecutor<Foo>, to allow query by specification
 		ensureGovernorExtends(new JavaType(SPRING_JPA_SPECIFICATION_EXECUTOR, 0, DataType.TYPE, null, Arrays.asList(annotationValues.getDomainType())));
-		
+
 		builder.addAnnotation(new AnnotationMetadataBuilder(SpringJavaType.REPOSITORY));
-		
+
 		// Build the ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	public RepositoryJpaAnnotationValues getAnnotationValues() {
 		return annotationValues;
 	}
@@ -68,22 +68,23 @@ public class RepositoryJpaMetadata extends AbstractItdTypeDetailsProvidingMetada
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-	
+
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

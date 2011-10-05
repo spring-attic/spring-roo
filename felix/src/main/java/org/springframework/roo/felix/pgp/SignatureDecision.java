@@ -7,16 +7,16 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents the result of a signature verification via {@link PgpService#isSignatureAcceptable(InputStream)}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public class SignatureDecision {
-	private PGPSignature pgpSignature;
-	private PgpKeyId signatureAsHex;
-	private boolean signatureAcceptable;
-	
-	public SignatureDecision(PGPSignature pgpSignature, PgpKeyId signatureAsHex, boolean signatureAcceptable) {
+	private final PGPSignature pgpSignature;
+	private final PgpKeyId signatureAsHex;
+	private final boolean signatureAcceptable;
+
+	public SignatureDecision(final PGPSignature pgpSignature, final PgpKeyId signatureAsHex, final boolean signatureAcceptable) {
 		Assert.notNull(pgpSignature, "PGP Signature required");
 		Assert.notNull(signatureAsHex, "PGP Key ID required");
 		this.pgpSignature = pgpSignature;
@@ -35,5 +35,5 @@ public class SignatureDecision {
 	public boolean isSignatureAcceptable() {
 		return signatureAcceptable;
 	}
-	
+
 }

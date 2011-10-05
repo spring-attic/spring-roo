@@ -30,7 +30,7 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class Op4jOperationsImpl implements Op4jOperations{
-	
+
 	// Fields
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
@@ -40,7 +40,7 @@ public class Op4jOperationsImpl implements Op4jOperations{
 		return projectOperations.isProjectAvailable();
 	}
 
-	public void annotateType(JavaType javaType) {
+	public void annotateType(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
@@ -55,7 +55,7 @@ public class Op4jOperationsImpl implements Op4jOperations{
 			typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 		}
 	}
-	
+
 	public void setup() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 

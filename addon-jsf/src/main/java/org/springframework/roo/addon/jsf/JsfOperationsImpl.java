@@ -62,10 +62,10 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JsfOperationsImpl extends AbstractOperations implements JsfOperations {
-	
+
 	// Constants
 	private static final String PRIMEFACES_XPATH = "/configuration/jsf-libraries/jsf-library[@id = 'PRIMEFACES']";
-	
+
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
@@ -82,7 +82,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return hasWebXml();
 	}
 
-	public void setup(JsfImplementation jsfImplementation, Theme theme) {
+	public void setup(JsfImplementation jsfImplementation, final Theme theme) {
 		if (jsfImplementation == null) {
 			jsfImplementation = JsfImplementation.ORACLE_MOJARRA;
 		}
@@ -98,20 +98,20 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		copyDirectoryContents("resources/js/*.js", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "resources/js"), false);
 		copyDirectoryContents("templates/*.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "templates"), false);
 		copyDirectoryContents("pages/main.xhtml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "pages"), false);
-		
+
 		projectOperations.updateProjectType(ProjectType.WAR);
 
 		fileManager.scan();
 	}
 
-	public void generateAll(JavaPackage destinationPackage) {
+	public void generateAll(final JavaPackage destinationPackage) {
 		Assert.notNull(destinationPackage, "Destination package required");
-		
+
 		// Create JSF managed bean for each entity
 		generateManagedBeans(destinationPackage);
 	}
 
-	public void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu, boolean createConverter) {
+	public void createManagedBean(final JavaType managedBean, final JavaType entity, final boolean includeOnMenu, final boolean createConverter) {
 		installFacesConfig(managedBean.getPackage());
 		installI18n(managedBean.getPackage());
 		installBean("ApplicationBean-template.java", managedBean.getPackage());
@@ -121,9 +121,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 		if (fileManager.exists(typeLocationService.getPhysicalTypeCanonicalPath(managedBean, Path.SRC_MAIN_JAVA))) {
 			// Type exists already - nothing to do
-			return; 
+			return;
 		}
-		
+
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity));
 		if (pluralMetadata == null) {
 			return;
@@ -152,7 +152,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 	}
 
-	public void addFileUploadField(JavaSymbolName fieldName, JavaType typeName, String fileName, String contentType, String column, Boolean notNull, boolean permitReservedWords) {
+	public void addFileUploadField(final JavaSymbolName fieldName, final JavaType typeName, final String fileName, final String contentType, final String column, final Boolean notNull, final boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		JavaType fieldType = JavaType.BYTE_ARRAY_PRIMITIVE;
 		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, fieldType, fieldName);
@@ -167,50 +167,50 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(annotationBuilder);
 		annotations.add(new AnnotationMetadataBuilder(LOB));
-		
+
 		fieldDetails.decorateAnnotationsList(annotations);
-		
+
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
 			if (fieldDetails.getColumn() != null) {
 				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
 			}
 		}
-		
+
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
-		
+
 		typeManagementService.addField(fieldBuilder.build());
 	}
 
-	private void generateManagedBeans(JavaPackage destinationPackage) {
+	private void generateManagedBeans(final JavaPackage destinationPackage) {
 		for (ClassOrInterfaceTypeDetails cid : typeLocationService.findClassesOrInterfaceDetailsWithTag(CustomDataKeys.PERSISTENT_TYPE)) {
 			if (Modifier.isAbstract(cid.getModifier())) {
 				continue;
 			}
-			
+
 			JavaType entity = cid.getName();
 			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-			
+
 			// Check to see if this persistent type has a JSF metadata listening to it
 			String downstreamJsfMetadataId = JsfManagedBeanMetadata.createIdentifier(entity, path);
 			if (metadataDependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamJsfMetadataId)) {
 				// There is already a JSF managed bean for this entity
 				continue;
 			}
-			
+
 			// To get here, there is no listening managed bean, so add one
 			JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
 			createManagedBean(managedBean, entity, true, true);
 		}
 	}
 
-	private void installI18n(JavaPackage destinationPackage) {
+	private void installI18n(final JavaPackage destinationPackage) {
 		String packagePath = destinationPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar);
 		String i18nDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/i18n");
 		copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
 	}
-	
-	private void copyEntityTypePage(JavaType entity, String plural) {
+
+	private void copyEntityTypePage(final JavaType entity, final String plural) {
 		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
 		try {
 			InputStream inputStream = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
@@ -226,7 +226,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 	}
 
-	private void createConverter(JavaPackage javaPackage, JavaType entity) {
+	private void createConverter(final JavaPackage javaPackage, final JavaType entity) {
 		// Create type annotation for new converter class
 		JavaType converterType = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Converter");
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_CONVERTER);
@@ -244,18 +244,18 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 	private boolean hasWebXml() {
 		return fileManager.exists(getWebXmlFile());
 	}
-	
+
 	private String getWebXmlFile() {
 		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 	}
 
-	private void createOrUpdateWebXml(Theme theme) {
+	private void createOrUpdateWebXml(final Theme theme) {
 		String webXmlPath = getWebXmlFile();
 		boolean hasWebXml = hasWebXml();
 		if (hasWebXml && theme == null) {
 			return;
 		}
-		
+
 		Document document;
 		if (!hasWebXml) {
 			document = getDocumentTemplate("WEB-INF/web-template.xml");
@@ -268,29 +268,29 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		if (theme != null) {
 			changeTheme(theme, document);
 		}
-		
+
 		fileManager.createOrUpdateTextFileIfRequired(getWebXmlFile(), XmlUtils.nodeToString(document), false);
 	}
 
-	private void changeTheme(Theme theme, Document document) {
+	private void changeTheme(final Theme theme, final Document document) {
 		Assert.notNull(theme, "Theme required");
 		Assert.notNull(document, "web.xml document required");
-		
+
 		// Add theme to the pom if not already there
 		String themeName = StringUtils.toLowerCase(theme.name().replace("_", "-"));
 		projectOperations.addDependency("org.primefaces.themes", themeName, "1.0.1");
-		
+
 		// Update the web.xml primefaces.THEME content-param
 		Element root = document.getDocumentElement();
-		
+
 		Element contextParamElement = XmlUtils.findFirstElement("/web-app/context-param[param-name = 'primefaces.THEME']", root);
 		Assert.notNull(contextParamElement, "The web.xml primefaces.THEME context param element required");
 		Element paramValueElement =  XmlUtils.findFirstElement("param-value", contextParamElement);
 		Assert.notNull(paramValueElement, "primefaces.THEME param-value element required");
 		paramValueElement.setTextContent(themeName);
 	}
-	
-	private void installFacesConfig(JavaPackage destinationPackage) {
+
+	private void installFacesConfig(final JavaPackage destinationPackage) {
 		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
 		if (hasFacesConfig()) {
 			return;
@@ -308,7 +308,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			IOUtils.closeQuietly(inputStream);
 		}
 	}
-	
+
 	private boolean hasFacesConfig() {
 		return fileManager.exists(getFacesConfigFile());
 	}
@@ -317,16 +317,16 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml");
 	}
 
-	private void updateConfiguration(JsfImplementation jsfImplementation) {
+	private void updateConfiguration(final JsfImplementation jsfImplementation) {
 		// Update pom.xml with JSF/Primefaces dependencies and repositories
 		Element configuration = XmlUtils.getConfiguration(getClass());
 		final String jsfImplementationXPath = getJsfImplementationXPath(getUnwantedJsfImplementations(jsfImplementation));
-		
+
 		updateDependencies(configuration, jsfImplementation, jsfImplementationXPath);
 		updateRepositories(configuration, jsfImplementation, jsfImplementationXPath);
 	}
-	
-	private List<Dependency> getDependencies(String xPathExpression, Element configuration) {
+
+	private List<Dependency> getDependencies(final String xPathExpression, final Element configuration) {
 		final List<Dependency> dependencies = new ArrayList<Dependency>();
 		for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
 			dependencies.add(new Dependency(dependencyElement));
@@ -334,19 +334,19 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		return dependencies;
 	}
 
-	private void updateDependencies(Element configuration, JsfImplementation jsfImplementation, String jsfImplementationXPath) {
+	private void updateDependencies(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
 		final List<Dependency> requiredDependencies = new ArrayList<Dependency>();
 
 		final List<Element> jsfImplementationDependencies = XmlUtils.findElements(getJsfImplementationXPath(jsfImplementation) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : jsfImplementationDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
-		
+
 		final List<Element> jsfLibraryDependencies = XmlUtils.findElements(PRIMEFACES_XPATH + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : jsfLibraryDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
 		}
-		
+
 		final List<Element> jsfDependencies = XmlUtils.findElements("/configuration/jsf/dependencies/dependency", configuration);
 		for (Element dependencyElement : jsfDependencies) {
 			requiredDependencies.add(new Dependency(dependencyElement));
@@ -363,7 +363,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		projectOperations.removeDependencies(redundantDependencies);
 	}
 
-	private void updateRepositories(Element configuration, JsfImplementation jsfImplementation, String jsfImplementationXPath) {
+	private void updateRepositories(final Element configuration, final JsfImplementation jsfImplementation, final String jsfImplementationXPath) {
 		List<Repository> repositories = new ArrayList<Repository>();
 
 		List<Element> jsfRepositories = XmlUtils.findElements(getJsfImplementationXPath(jsfImplementation) +"/repositories/repository", configuration);
@@ -384,7 +384,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		unwantedJsfImplementations.remove(jsfImplementation);
 		return unwantedJsfImplementations;
 	}
-	
+
 	private void installBean(final String templateName, final JavaPackage destinationPackage) {
 		String beanName = templateName.substring(0, templateName.indexOf("-template"));
 		JavaType javaType = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + beanName);
@@ -392,14 +392,14 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}
-		
+
 		InputStream inputStream = null;
 		try {
 			inputStream = TemplateUtils.getTemplate(getClass(), templateName);
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
 			input = input.replace("__PACKAGE__", destinationPackage.getFullyQualifiedPackageName());
 			fileManager.createOrUpdateTextFileIfRequired(physicalPath, input, false);
-			
+
 			shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 			shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 		} catch (IOException e) {
@@ -408,7 +408,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			IOUtils.closeQuietly(inputStream);
 		}
 	}
-	
+
 	private String getJsfImplementationXPath(final List<JsfImplementation> jsfImplementations) {
 		StringBuilder builder = new StringBuilder("/configuration/jsf-implementations/jsf-implementation[");
 		for (int i = 0, n = jsfImplementations.size(); i < n; i++) {
@@ -422,7 +422,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		builder.append("]");
 		return builder.toString();
 	}
-	
+
 	private String getJsfImplementationXPath(final JsfImplementation jsfImplementation) {
 		return "/configuration/jsf-implementations/jsf-implementation[@id = '" + jsfImplementation.name() + "']";
 	}

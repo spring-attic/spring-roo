@@ -17,7 +17,7 @@
 package org.springframework.roo.support.style;
 
 /**
- * Simple utility class to allow for convenient access to value 
+ * Simple utility class to allow for convenient access to value
  * styling logic, mainly to support descriptive logging messages.
  *
  * <p>For more sophisticated needs, use the {@link ValueStyler} abstraction
@@ -30,7 +30,7 @@ package org.springframework.roo.support.style;
  * @see DefaultValueStyler
  */
 public abstract class StylerUtils {
-	
+
 	/**
 	 * Default ValueStyler instance used by the <code>style</code> method.
 	 * Also available for the {@link ToStringCreator} class in this package.
@@ -43,7 +43,7 @@ public abstract class StylerUtils {
 	 * @return the styled String
 	 * @see DefaultValueStyler
 	 */
-	public static String style(Object value) {
+	public static String style(final Object value) {
 		return DEFAULT_VALUE_STYLER.style(value);
 	}
 }

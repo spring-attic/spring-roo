@@ -9,32 +9,32 @@ import org.springframework.roo.support.util.FileUtils;
 
 /**
  * {@link UndoableOperation} to create a directory, including any parents.
- * 
+ *
  * <p>
  * Note that the created instance will internally track the uppermost directory it created,
  * and remove that directory during any undo operation.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class CreateDirectory implements UndoableOperation {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(CreateDirectory.class);
 
 	// Fields
-	private FilenameResolver filenameResolver;
-	private File actual;
+	private final FilenameResolver filenameResolver;
+	private final File actual;
 	private File deleteFrom;
-	
-	public CreateDirectory(UndoManager undoManager, FilenameResolver filenameResolver, File actual) {
+
+	public CreateDirectory(final UndoManager undoManager, final FilenameResolver filenameResolver, final File actual) {
 		Assert.notNull(undoManager, "Undo manager required");
 		Assert.notNull(actual, "Actual file required");
 		Assert.notNull(filenameResolver, "Filename resolver required");
 		Assert.isTrue(!actual.exists(), "Actual file '" + actual + "' cannot exist");
 		this.filenameResolver = filenameResolver;
 		this.actual = actual;
-		
+
 		// Figure out the first directory we should delete from
 		deleteFrom = actual;
 		while (true) {
@@ -45,12 +45,12 @@ public class CreateDirectory implements UndoableOperation {
 				break;
 			}
 		}
-		
+
 		Assert.state(this.actual.mkdirs(), "Could not create directory '" + actual + "'");
 		undoManager.add(this);
 		logger.fine("Created " + filenameResolver.getMeaningfulName(actual));
 	}
-	
+
 	public void reset() {}
 
 	public boolean undo() {

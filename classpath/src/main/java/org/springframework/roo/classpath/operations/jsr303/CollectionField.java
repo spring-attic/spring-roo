@@ -13,23 +13,24 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
 public abstract class CollectionField extends FieldDetails {
-	
+
 	/** Whether the JSR 303 @Size annotation will be added; provides the "min" attribute (defaults to 0) */
 	private Integer sizeMin;
-	
+
 	/** Whether the JSR 303 @Size annotation will be added; provides the "max" attribute (defaults to {@link Integer#MAX_VALUE}) */
 	private Integer sizeMax;
-	
+
 	/** The generic type that will be used within the collection */
 	private JavaType genericParameterTypeName;
-	
-	public CollectionField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, JavaType genericParameterTypeName) {
+
+	public CollectionField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName, final JavaType genericParameterTypeName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 		Assert.notNull(genericParameterTypeName, "Generic parameter type name is required");
-		this.genericParameterTypeName = genericParameterTypeName;		
+		this.genericParameterTypeName = genericParameterTypeName;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
+	@Override
+	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (sizeMin != null || sizeMax != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
@@ -44,12 +45,12 @@ public abstract class CollectionField extends FieldDetails {
 	}
 
 	public abstract JavaType getInitializer();
-	
+
 	public Integer getSizeMin() {
 		return sizeMin;
 	}
 
-	public void setSizeMin(Integer sizeMin) {
+	public void setSizeMin(final Integer sizeMin) {
 		this.sizeMin = sizeMin;
 	}
 
@@ -57,7 +58,7 @@ public abstract class CollectionField extends FieldDetails {
 		return sizeMax;
 	}
 
-	public void setSizeMax(Integer sizeMax) {
+	public void setSizeMax(final Integer sizeMax) {
 		this.sizeMax = sizeMax;
 	}
 
@@ -65,7 +66,7 @@ public abstract class CollectionField extends FieldDetails {
 		return genericParameterTypeName;
 	}
 
-	public void setGenericParameterTypeName(JavaType genericParameterTypeName) {
+	public void setGenericParameterTypeName(final JavaType genericParameterTypeName) {
 		this.genericParameterTypeName = genericParameterTypeName;
-	}	
+	}
 }

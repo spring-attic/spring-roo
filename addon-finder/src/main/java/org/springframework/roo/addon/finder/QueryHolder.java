@@ -9,22 +9,22 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Bean to hold the JPA query string, the method parameter types and parameter names.
- * 
+ *
  * <p>
  * Immutable once constructed.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.2
  */
 public class QueryHolder {
-	
-	// Fields
-	private String jpaQuery;
-	private List<JavaType> parameterTypes;
-	private List<JavaSymbolName> parameterNames;
-	private List<Token> tokens;
 
-	public QueryHolder(String jpaQuery, List<JavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<Token> tokens) {
+	// Fields
+	private final String jpaQuery;
+	private final List<JavaType> parameterTypes;
+	private final List<JavaSymbolName> parameterNames;
+	private final List<Token> tokens;
+
+	public QueryHolder(final String jpaQuery, final List<JavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final List<Token> tokens) {
 		Assert.hasText(jpaQuery, "JPA query required");
 		Assert.notNull(parameterTypes, "Parameter types required");
 		Assert.notNull(parameterNames, "Parameter names required");
@@ -49,7 +49,7 @@ public class QueryHolder {
 
 	/**
 	 * Package protected as it is only intended for internal use.
-	 * 
+	 *
 	 * @return the tokens used to process this query (used internally; immutable)
 	 */
 	List<Token> getTokens() {

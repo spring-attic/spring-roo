@@ -40,18 +40,18 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Uses the feature-rich <a href="http://sourceforge.net/projects/jline/">JLine</a> library to provide an interactive shell.
- * 
+ *
  * <p>
  * Due to Windows' lack of color ANSI services out-of-the-box, this implementation automatically detects the classpath
- * presence of <a href="http://jansi.fusesource.org/">Jansi</a> and uses it if present. This library is not necessary 
- * for *nix machines, which support colour ANSI without any special effort. This implementation has been written to 
+ * presence of <a href="http://jansi.fusesource.org/">Jansi</a> and uses it if present. This library is not necessary
+ * for *nix machines, which support colour ANSI without any special effort. This implementation has been written to
  * use reflection in order to avoid hard dependencies on Jansi.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public abstract class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
-	
+
 	// Constants
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
@@ -63,12 +63,12 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	private ConsoleReader reader;
 	private boolean developmentMode = false;
 	private FileWriter fileLog;
-	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected ShellStatusListener statusListener; // ROO-836
 	/** key: slot name, value: flashInfo instance */
-	private Map<String, FlashInfo> flashInfoMap = new HashMap<String, FlashInfo>();
+	private final Map<String, FlashInfo> flashInfoMap = new HashMap<String, FlashInfo>();
 	/** key: row number, value: eraseLineFromPosition */
-	private Map<Integer, Integer> rowErasureMap = new HashMap<Integer, Integer>();
+	private final Map<Integer, Integer> rowErasureMap = new HashMap<Integer, Integer>();
 	private boolean shutdownHookFired = false; // ROO-1599
 
 	public void run() {
@@ -163,7 +163,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		return null;
 	}
 
-	private void removeHandlers(Logger l) {
+	private void removeHandlers(final Logger l) {
 		Handler[] handlers = l.getHandlers();
 		if (handlers != null && handlers.length > 0) {
 			for (Handler h : handlers) {
@@ -173,7 +173,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 
 	@Override
-	public void setPromptPath(String path) {
+	public void setPromptPath(final String path) {
 		if (reader.getTerminal().isANSISupported()) {
 			ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
 			if ("".equals(path) || path == null) {
@@ -194,6 +194,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		// Get decorated OutputStream that parses ANSI-codes
 		final PrintStream ansiOut = (PrintStream) ClassUtils.forName(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader()).getMethod("out").invoke(null);
 		WindowsTerminal ansiTerminal = new WindowsTerminal() {
+			@Override
 			public boolean isANSISupported() {
 				return true;
 			}
@@ -201,14 +202,14 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		ansiTerminal.initializeTerminal();
 		// Make sure to reset the original shell's colors on shutdown by closing the stream
 		statusListener = new ShellStatusListener() {
-			public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
+			public void onShellStatusChange(final ShellStatus oldStatus, final ShellStatus newStatus) {
 				if (newStatus.getStatus().equals(Status.SHUTTING_DOWN)) {
 					ansiOut.close();
 				}
 			}
 		};
 		addShellStatusListener(statusListener);
-		
+
 		return new ConsoleReader(new FileInputStream(FileDescriptor.in), new PrintWriter(new OutputStreamWriter(ansiOut,
 		// Default to Cp850 encoding for Windows console output (ROO-439)
 			System.getProperty("jline.WindowsTerminal.output.encoding", "Cp850"))), null, ansiTerminal);
@@ -252,7 +253,8 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		t.start();
 	}
 
-	public void flash(Level level, String message, String slot) {
+	@Override
+	public void flash(final Level level, final String message, final String slot) {
 		Assert.notNull(level, "Level is required for a flash message");
 		Assert.notNull(message, "Message is required for a flash message");
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
@@ -322,7 +324,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 
 	// Externally synchronized via the two calling methods having a mutex on flashInfoMap
-	private void doAnsiFlash(int row, Level level, String message) {
+	private void doAnsiFlash(final int row, final Level level, final String message) {
 		ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
 		if (APPLE_TERMINAL) {
 			buff.append(ESCAPE + "7");
@@ -398,7 +400,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		setShellStatus(Status.SHUTTING_DOWN);
 	}
 
-	public void setDevelopmentMode(boolean developmentMode) {
+	public void setDevelopmentMode(final boolean developmentMode) {
 		JLineLogHandler.setIncludeThreadName(developmentMode);
 		JLineLogHandler.setSuppressDuplicateMessages(!developmentMode); // We want to see duplicate messages during development time (ROO-1873)
 		this.developmentMode = developmentMode;
@@ -419,7 +421,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 
 	@Override
-	protected void logCommandToOutput(String processedLine) {
+	protected void logCommandToOutput(final String processedLine) {
 		if (fileLog == null) {
 			openFileLogIfPossible();
 			if (fileLog == null) {
@@ -442,7 +444,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 
 	/**
 	 * Obtains the "roo.home" from the system property, falling back to the current working directory if missing.
-	 * 
+	 *
 	 * @return the 'roo.home' system property
 	 */
 	@Override

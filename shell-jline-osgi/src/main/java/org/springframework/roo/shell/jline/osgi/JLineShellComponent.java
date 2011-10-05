@@ -50,17 +50,17 @@ public class JLineShellComponent extends JLineShell {
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private ComponentContext context;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		this.context = context;
 		Thread thread = new Thread(this, "Spring Roo JLine Shell");
 		thread.start();
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		this.context = null;
 		closeShell();
 	}
-	
+
 	@Override
 	protected Collection<URL> findResources(final String path) {
 		// For an OSGi bundle search, we add the root prefix to the given path
@@ -132,11 +132,11 @@ public class JLineShellComponent extends JLineShell {
 	}
 
 	// TODO: This should probably be moved to a HTTP service of some sort - JTT 29/08/11
-	private String sendGetRequest(String endpoint, String requestParameters) {
+	private String sendGetRequest(final String endpoint, final String requestParameters) {
 		if (!(endpoint.startsWith("http://") || endpoint.startsWith("https://"))) {
 			return null;
 		}
-		
+
 		// Send a GET request to the servlet
 		InputStream inputStream = null;
 		BufferedReader reader = null;

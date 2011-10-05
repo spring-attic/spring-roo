@@ -21,21 +21,21 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooSerializable}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType SERIALIZABLE = new JavaType("java.io.Serializable");
 
 	// From annotation
-	@AutoPopulate private String serialVersionUIDField = "serialVersionUID";
+	@AutoPopulate private final String serialVersionUIDField = "serialVersionUID";
 
-	public SerializableMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public SerializableMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -48,10 +48,10 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}
-		
+
 		// Generate "implements Serializable"
 		ensureGovernorImplements(SERIALIZABLE);
-		
+
 		// Generate the serialVersionUID field
 		builder.addField(getSerialVersionUIDField());
 
@@ -61,10 +61,10 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	/**
 	 * Obtains the "serialVersionUID" field for this type, if available.
-	 * 
+	 *
 	 * <p>
 	 * If the user provided a "serialVersionUID" field, that field will be returned.
-	 * 
+	 *
 	 * @return the "serialVersionUID" field declared on this type or that will be introduced (or null if undeclared and not introduced)
 	 */
 	private FieldMetadata getSerialVersionUIDField() {
@@ -73,7 +73,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		if (!this.serialVersionUIDField.equals("")) {
 			fieldName = new JavaSymbolName(this.serialVersionUIDField);
 		}
-	
+
 		// See if the type itself declared the field
 		FieldMetadata result = governorTypeDetails.getDeclaredField(fieldName);
 		if (result != null) {
@@ -81,12 +81,13 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			field.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);
 			return field.build();
 		}
-		
+
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, fieldName, JavaType.LONG_PRIMITIVE, "1L");
 		fieldBuilder.putCustomData(CustomDataSerializableTags.SERIAL_VERSION_UUID_FIELD.name(), null);
 		return fieldBuilder.build();
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -102,19 +103,19 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }

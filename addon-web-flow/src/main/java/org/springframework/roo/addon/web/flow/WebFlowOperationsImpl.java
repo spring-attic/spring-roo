@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
 
 /**
  * Provides Web Flow configuration operations.
- * 
+ *
  * @author Stefan Schmidt
  * @author Rossen Stoyanchev
  * @since 1.0
@@ -36,7 +36,7 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class WebFlowOperationsImpl implements WebFlowOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -56,7 +56,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	/**
 	 * See {@link WebFlowOperations#installWebFlow(String)}.
 	 */
-	public void installWebFlow(String flowName) {
+	public void installWebFlow(final String flowName) {
 		installWebFlowConfiguration();
 
 		final String flowId = getFlowId(flowName);
@@ -75,7 +75,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		copyTemplate("end-state.jspx", resolvedFlowPath);
 
 		new XmlTemplate(fileManager).update(resolvedFlowDefinitionPath, new DomElementCallback() {
-			public boolean doWithElement(Document document, Element root) {
+			public boolean doWithElement(final Document document, final Element root) {
 				List<Element> states = XmlUtils.findElements("/flow/view-state|end-state", root);
 				for (Element state : states) {
 					state.setAttribute("view", flowId + "/" + state.getAttribute("id"));
@@ -106,11 +106,11 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		if (!fileManager.exists(webMvcConfigPath)) {
 			webMvcOperations.installAllWebMvcArtifacts();
 		}
-		
+
 		jspOperations.installCommonViewArtefacts();
 
 		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
-			public boolean doWithElement(Document document, Element root) {
+			public boolean doWithElement(final Document document, final Element root) {
 				if (null == XmlUtils.findFirstElement("/beans/import[@resource='webflow-config.xml']", root)) {
 					Element importSWF = document.createElement("import");
 					importSWF.setAttribute("resource", "webflow-config.xml");
@@ -131,7 +131,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 			dependencies.add(new Dependency(d));
 		}
 		projectOperations.addDependencies(dependencies);
-		
+
 		List<Element> repositories = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration);
 		for (Element r : repositories) {
 			projectOperations.addRepository(new Repository(r));
@@ -147,7 +147,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		return flowName.replaceAll("[^a-zA-Z/_]", "");
 	}
 
-	private void copyTemplate(String templateFileName, String resolvedTargetDirectoryPath) {
+	private void copyTemplate(final String templateFileName, final String resolvedTargetDirectoryPath) {
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), templateFileName), fileManager.createFile(resolvedTargetDirectoryPath + "/" + templateFileName).getOutputStream());
 		} catch (IOException e) {

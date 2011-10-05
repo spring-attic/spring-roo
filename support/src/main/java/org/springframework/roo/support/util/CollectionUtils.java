@@ -39,7 +39,7 @@ public final class CollectionUtils {
 	/**
 	 * Return <code>true</code> if the supplied Collection is <code>null</code>
 	 * or empty. Otherwise, return <code>false</code>.
-	 * 
+	 *
 	 * @param collection the Collection to check
 	 * @return whether the given Collection is empty
 	 */
@@ -50,7 +50,7 @@ public final class CollectionUtils {
 	/**
 	 * Return <code>true</code> if the supplied Map is <code>null</code>
 	 * or empty. Otherwise, return <code>false</code>.
-	 * 
+	 *
 	 * @param map the Map to check
 	 * @return whether the given Map is empty
 	 */
@@ -63,7 +63,7 @@ public final class CollectionUtils {
 	 * converted into a List of the appropriate wrapper type.
 	 * <p>A <code>null</code> source value will be converted to an
 	 * empty List.
-	 * 
+	 *
 	 * @param source the (potentially primitive) array
 	 * @return the converted List result
 	 * @see ObjectUtils#toObjectArray(Object)
@@ -74,7 +74,7 @@ public final class CollectionUtils {
 
 	/**
 	 * Merge the given array into the given Collection.
-	 * 
+	 *
 	 * @param array the array to merge (may be <code>null</code>)
 	 * @param collection the target Collection to merge the array into
 	 */
@@ -93,7 +93,7 @@ public final class CollectionUtils {
 	 * copying all properties (key-value pairs) over.
 	 * <p>Uses <code>Properties.propertyNames()</code> to even catch
 	 * default properties linked into the original Properties instance.
-	 * 
+	 *
 	 * @param props the Properties instance to merge (may be <code>null</code>)
 	 * @param map the target Map to merge the properties into
 	 */
@@ -111,7 +111,7 @@ public final class CollectionUtils {
 
 	/**
 	 * Check whether the given Iterator contains the given element.
-	 * 
+	 *
 	 * @param iterator the Iterator to check
 	 * @param element the element to look for
 	 * @return <code>true</code> if found, <code>false</code> else
@@ -130,7 +130,7 @@ public final class CollectionUtils {
 
 	/**
 	 * Check whether the given Enumeration contains the given element.
-	 * 
+	 *
 	 * @param enumeration the Enumeration to check
 	 * @param element the element to look for
 	 * @return <code>true</code> if found, <code>false</code> else
@@ -151,7 +151,7 @@ public final class CollectionUtils {
 	 * Check whether the given Collection contains the given element instance.
 	 * <p>Enforces the given instance to be present, rather than returning
 	 * <code>true</code> for an equal element as well.
-	 * 
+	 *
 	 * @param collection the Collection to check
 	 * @param element the element to look for
 	 * @return <code>true</code> if found, <code>false</code> else
@@ -170,7 +170,7 @@ public final class CollectionUtils {
 	/**
 	 * Return <code>true</code> if any element in '<code>candidates</code>' is
 	 * contained in '<code>source</code>'; otherwise returns <code>false</code>.
-	 * 
+	 *
 	 * @param source the source Collection
 	 * @param candidates the candidates to search for
 	 * @return whether any of the candidates has been found
@@ -192,7 +192,7 @@ public final class CollectionUtils {
 	 * '<code>source</code>'. If no element in '<code>candidates</code>' is present in
 	 * '<code>source</code>' returns <code>null</code>. Iteration order is
 	 * {@link Collection} implementation specific.
-	 * 
+	 *
 	 * @param source the source Collection
 	 * @param candidates the candidates to search for
 	 * @return the first present object, or <code>null</code> if not found
@@ -211,7 +211,7 @@ public final class CollectionUtils {
 
 	/**
 	 * Find a single value of the given type in the given Collection.
-	 * 
+	 *
 	 * @param collection the Collection to search
 	 * @param type the type to look for
 	 * @return a value of the given type found if there is a clear match,
@@ -239,7 +239,7 @@ public final class CollectionUtils {
 	 * Find a single value of one of the given types in the given Collection:
 	 * searching the Collection for a value of the first type, then
 	 * searching for a value of the second type, etc.
-	 * 
+	 *
 	 * @param collection the collection to search
 	 * @param types the types to look for, in prioritized order
 	 * @return a value of one of the given types found if there is a clear match,
@@ -260,7 +260,7 @@ public final class CollectionUtils {
 
 	/**
 	 * Determine whether the given Collection only contains a single unique object.
-	 * 
+	 *
 	 * @param collection the Collection to check
 	 * @return <code>true</code> if the collection contains a single reference or
 	 * multiple references to the same instance, <code>false</code> else
@@ -287,7 +287,7 @@ public final class CollectionUtils {
 	/**
 	 * Filters (removes elements from) the given {@link Iterable} using the
 	 * given filter.
-	 * 
+	 *
 	 * @param <T> the type of object being filtered
 	 * @param unfiltered the iterable to filter; can be <code>null</code>
 	 * @param filter the filter to apply; can be <code>null</code> for none
@@ -304,10 +304,10 @@ public final class CollectionUtils {
 		}
 		return filtered;
 	}
-	
+
 	/**
 	 * Adds the given items to the given collection
-	 * 
+	 *
 	 * @param <T> the type of item in the collection being updated
 	 * @param newItems the items being added; can be <code>null</code> for none
 	 * @param existingItems the items being added to; must be modifiable
@@ -322,11 +322,11 @@ public final class CollectionUtils {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Populates the given collection by replacing any existing contents with
 	 * the given elements, in a null-safe way.
-	 * 
+	 *
 	 * @param <T> the type of element in the collection
 	 * @param collection the collection to populate (can be <code>null</code>)
 	 * @param items the items with which to populate the collection (can be
@@ -342,10 +342,10 @@ public final class CollectionUtils {
 		}
 		return collection;
 	}
-	
+
 	/**
 	 * Returns the first element of the given collection
-	 * 
+	 *
 	 * @param <T>
 	 * @param collection
 	 * @return <code>null</code> if the first element is <code>null</code> or
@@ -357,10 +357,10 @@ public final class CollectionUtils {
 		}
 		return collection.iterator().next();
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
-	 * 
+	 *
 	 * @since 1.2.0
 	 */
 	private CollectionUtils() {}

@@ -15,19 +15,19 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Creates a {@link Database database} model from a live database using JDBC.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class DatabaseIntrospector extends AbstractIntrospector {
 
 	// Fields
-	private Set<Schema> schemas;
-	private boolean view;
-	private Set<String> includeTables;
-	private Set<String> excludeTables;
+	private final Set<Schema> schemas;
+	private final boolean view;
+	private final Set<String> includeTables;
+	private final Set<String> excludeTables;
 
-	public DatabaseIntrospector(Connection connection, Set<Schema> schemas, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
+	public DatabaseIntrospector(final Connection connection, final Set<Schema> schemas, final boolean view, final Set<String> includeTables, final Set<String> excludeTables) throws SQLException {
 		super(connection);
 		this.schemas = schemas;
 		this.view = view;
@@ -43,7 +43,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return new Database(tables);
 	}
 
-	private Set<Table> getTables(Schema schema) throws SQLException {
+	private Set<Table> getTables(final Schema schema) throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
 
 		String[] types = view ? new String[] { TableType.TABLE.name(), TableType.VIEW.name() } : new String[] { TableType.TABLE.name() };
@@ -84,7 +84,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return tables;
 	}
 
-	private boolean ignoreTables(String tableName) {
+	private boolean ignoreTables(final String tableName) {
 		boolean ignore = false;
 		try {
 			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableName.startsWith("BIN$")) {
@@ -94,7 +94,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return ignore;
 	}
 
-	private void readColumns(Table table) throws SQLException {
+	private void readColumns(final Table table) throws SQLException {
 		ResultSet rs = databaseMetaData.getColumns(table.getCatalog(), table.getSchema().getName(), table.getName(), null);
 		try {
 			while (rs.next()) {
@@ -110,7 +110,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		}
 	}
 
-	private void readForeignKeys(Table table, boolean exported) throws SQLException {
+	private void readForeignKeys(final Table table, final boolean exported) throws SQLException {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
 		ResultSet rs;
@@ -158,7 +158,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		}
 	}
 
-	private CascadeAction getCascadeAction(Short actionValue) {
+	private CascadeAction getCascadeAction(final Short actionValue) {
 		CascadeAction cascadeAction;
 		switch (actionValue.intValue()) {
 			case DatabaseMetaData.importedKeyCascade:
@@ -182,21 +182,21 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return cascadeAction;
 	}
 
-	private boolean hasIncludedTable(String tableName) {
+	private boolean hasIncludedTable(final String tableName) {
 		if (includeTables == null || includeTables.isEmpty()) {
 			return true;
 		}
 		return hasTable(includeTables, tableName);
 	}
 
-	private boolean hasExcludedTable(String tableName) {
+	private boolean hasExcludedTable(final String tableName) {
 		if (excludeTables == null || excludeTables.isEmpty()) {
 			return false;
 		}
 		return hasTable(excludeTables, tableName);
 	}
 
-	private boolean hasTable(Set<String> tables, String tableName) {
+	private boolean hasTable(final Set<String> tables, final String tableName) {
 		for (String table : tables) {
 			String regex = table.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
 			Pattern pattern = Pattern.compile(regex);
@@ -207,7 +207,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return false;
 	}
 
-	private void readIndices(Table table) throws SQLException {
+	private void readIndices(final Table table) throws SQLException {
 		Set<Index> indices = new LinkedHashSet<Index>();
 
 		ResultSet rs;
@@ -250,7 +250,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		}
 	}
 
-	private Index findIndex(String name, Set<Index> indices) {
+	private Index findIndex(final String name, final Set<Index> indices) {
 		for (Index index : indices) {
 			if (index.getName().equalsIgnoreCase(name)) {
 				return index;
@@ -259,7 +259,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return null;
 	}
 
-	private Set<String> readPrimaryKeyNames(Table table) throws SQLException {
+	private Set<String> readPrimaryKeyNames(final Table table) throws SQLException {
 		Set<String> columnNames = new LinkedHashSet<String>();
 
 		ResultSet rs = databaseMetaData.getPrimaryKeys(table.getCatalog(), table.getSchema().getName(), table.getName());
@@ -274,7 +274,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		return columnNames;
 	}
 
-	private String getArtifact(String artifactName) throws SQLException {
+	private String getArtifact(final String artifactName) throws SQLException {
 		if (databaseMetaData.storesLowerCaseIdentifiers()) {
 			return StringUtils.toLowerCase(artifactName);
 		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
@@ -284,7 +284,7 @@ public class DatabaseIntrospector extends AbstractIntrospector {
 		}
 	}
 
-	@SuppressWarnings("unused") 
+	@SuppressWarnings("unused")
 	private Dialect getDialect() {
 		try {
 			String productName = databaseMetaData.getDatabaseProductName();

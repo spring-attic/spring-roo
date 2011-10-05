@@ -8,7 +8,7 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooSolrSearchable} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -21,13 +21,13 @@ public class SolrSearchAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate String preRemoveMethod = "preRemove";
 	@AutoPopulate String searchMethod = "search";
 	@AutoPopulate String simpleSearchMethod = "search";
-	
+
 	/**
 	 * Constructor
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public SolrSearchAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public SolrSearchAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_SOLR_SEARCHABLE);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

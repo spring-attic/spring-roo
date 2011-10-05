@@ -33,27 +33,27 @@ import org.springframework.roo.support.util.Assert;
 @Service
 @Reference(name = "jdbcDriverProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = JdbcDriverProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class PollingJdbcDriverManager implements JdbcDriverManager {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(PollingJdbcDriverManager.class);
-	
+
 	// Fields
 	@Reference private AddOnSearch addOnSearch;
-	private Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
-	
-	protected void bindJdbcDriverProvider(JdbcDriverProvider listener) {
+	private final Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
+
+	protected void bindJdbcDriverProvider(final JdbcDriverProvider listener) {
 		synchronized (providers) {
 			providers.add(listener);
 		}
 	}
 
-	protected void unbindJdbcDriverProvider(JdbcDriverProvider listener) {
+	protected void unbindJdbcDriverProvider(final JdbcDriverProvider listener) {
 		synchronized (providers) {
 			providers.remove(listener);
 		}
 	}
 
-	public Driver loadDriver(String driverClassName, boolean displayAddOns) throws RuntimeException {
+	public Driver loadDriver(final String driverClassName, final boolean displayAddOns) throws RuntimeException {
 		Assert.hasText(driverClassName, "Driver class name required");
 		synchronized (providers) {
 			for (JdbcDriverProvider provider : providers) {
@@ -62,17 +62,17 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
 					return driver;
 				}
 			}
-			
+
 			if (!displayAddOns) {
 				// Caller requested add-on information not be displayed (might be in a TAB assist section etc)
 				return null;
 			}
-			
+
 			// No implementation could provide it
-			
+
 			// Compute a suitable search term for a JDBC driver
 			String searchTerms = "#jdbcdriver,driverclass:" + driverClassName;
-			
+
 			// Do a silent (console message free) lookup of matches
 			Integer matches = addOnSearch.searchAddOns(false, searchTerms, false, 1, 99, false, false, false, null);
 

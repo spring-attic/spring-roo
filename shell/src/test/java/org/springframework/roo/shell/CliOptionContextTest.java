@@ -20,24 +20,24 @@ public class CliOptionContextTest {
 	public void testGetOptionContextWhenNoneSet() {
 		assertNull(CliOptionContext.getOptionContext());
 	}
-	
+
 	@Test
 	public void testSetAndGetOptionContext() {
 		// Set up
 		CliOptionContext.setOptionContext(OPTION_CONTEXT);
-		
+
 		// Invoke and check
 		assertEquals(OPTION_CONTEXT, CliOptionContext.getOptionContext());
 	}
-	
+
 	@Test
 	public void testResetOptionContext() {
 		// Set up
 		CliOptionContext.setOptionContext(OPTION_CONTEXT);
-		
+
 		// Invoke
 		CliOptionContext.resetOptionContext();
-		
+
 		// Check
 		assertNull(CliOptionContext.getOptionContext());
 	}

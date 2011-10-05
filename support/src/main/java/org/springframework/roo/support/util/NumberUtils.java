@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 /**
  * Provides extra functionality for Java Number classes.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -13,17 +13,17 @@ public final class NumberUtils {
 
 	/**
 	 * Returns the minimum value in the array.
-	 * 
+	 *
 	 * @param array an array of Numbers (can be <code>null</code>)
 	 * @return the minimum value in the array, or null if all the elements are null
 	 */
 	public static BigDecimal min(final Number... array) {
 		return minOrMax(true, array);
 	}
-	
+
 	/**
 	 * Returns the maximum value in the array.
-	 * 
+	 *
 	 * @param array an array of Numbers (can be <code>null</code>)
 	 * @return the maximum value in the array, or null if all the elements are null
 	 */
@@ -34,7 +34,7 @@ public final class NumberUtils {
 	/**
 	 * Finds the minimum or maxiumum value contained in the given array,
 	 * ignoring any <code>null</code> elements
-	 * 
+	 *
 	 * @param findMinimum <code>false</code> to get the maximum
 	 * @param numbers can be <code>null</code>, empty, or contain <code>null</code>
 	 * elements
@@ -57,10 +57,10 @@ public final class NumberUtils {
 		}
 		return extreme;
 	}
-	
+
 	/**
 	 * Converts the given number to a {@link BigDecimal}
-	 * 
+	 *
 	 * @param number the number to convert (can be <code>null</code>)
 	 * @return <code>null</code> if the given number was <code>null</code>
 	 */
@@ -73,7 +73,7 @@ public final class NumberUtils {
 		}
 		return new BigDecimal(number.toString());
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

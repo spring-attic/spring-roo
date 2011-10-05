@@ -32,11 +32,11 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link TypeLocationService}.
- * 
+ *
  * <p>
  * For performance reasons automatically caches the queries. The cache is invalidated on
  * changes to the file system.
- * 
+ *
  * @author Alan Stewart
  * @author Ben Alex
  * @author Stefan Schmidt
@@ -44,9 +44,9 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 @Component(immediate = true)
-@Service 
+@Service
 public class TypeLocationServiceImpl implements TypeLocationService {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private FileMonitorService fileMonitorService;
@@ -57,19 +57,19 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	private final Map<Object, Set<String>> tagToMidMap = new HashMap<Object, Set<String>>();
 	private final Map<String, ClassOrInterfaceTypeDetails> typeMap = new LinkedHashMap<String, ClassOrInterfaceTypeDetails>();
 	private final Map<String, String> pathCacheMap = new HashMap<String, String>();
-	private Map<JavaType, String> javaTypeIdentifierCache = new HashMap<JavaType, String>();
+	private final Map<JavaType, String> javaTypeIdentifierCache = new HashMap<JavaType, String>();
 	private final Map<String, Set<String>> changeMap = new HashMap<String, Set<String>>();
-	private Map<String, Set<JavaType>> typeAnnotationMap = new HashMap<String, Set<JavaType>>();
-	private Map<String, Set<Object>> typeCustomDataMap = new HashMap<String, Set<Object>>();
+	private final Map<String, Set<JavaType>> typeAnnotationMap = new HashMap<String, Set<JavaType>>();
+	private final Map<String, Set<Object>> typeCustomDataMap = new HashMap<String, Set<Object>>();
 
-	public String getPhysicalTypeCanonicalPath(JavaType javaType, Path path) {
+	public String getPhysicalTypeCanonicalPath(final JavaType javaType, final Path path) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType);
 		return getPhysicalTypeCanonicalPath(physicalTypeIdentifier);
 	}
-	
-	public String getPhysicalTypeCanonicalPath(String physicalTypeIdentifier) {
+
+	public String getPhysicalTypeCanonicalPath(final String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
 		if (!pathCacheMap.containsKey(physicalTypeIdentifier)) {
 			JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
@@ -80,12 +80,12 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return pathCacheMap.get(physicalTypeIdentifier);
 	}
 
-	public ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface) {
+	public ClassOrInterfaceTypeDetails getClassOrInterface(final JavaType requiredClassOrInterface) {
 		// The cached is used so update it
 		return findClassOrInterface(requiredClassOrInterface);
 	}
 
-	public ClassOrInterfaceTypeDetails findClassOrInterface(JavaType requiredClassOrInterface) {
+	public ClassOrInterfaceTypeDetails findClassOrInterface(final JavaType requiredClassOrInterface) {
 		updateCache();
 		String metadataIdentificationString = findIdentifier(requiredClassOrInterface);
 		if (metadataIdentificationString == null) {
@@ -106,7 +106,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 	}
 
-	public void processTypesWithTag(Object tag, LocatedTypeCallback callback) {
+	public void processTypesWithTag(final Object tag, final LocatedTypeCallback callback) {
 		// If the cache doesn't yet contain the tag it should be added
 		if (!tagToMidMap.containsKey(tag)) {
 			tagToMidMap.put(tag, new HashSet<String>());
@@ -121,7 +121,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	public String findIdentifier(JavaType javaType) {
+	public String findIdentifier(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type to locate is required");
 		String result = javaTypeIdentifierCache.get(javaType);
 		if (result != null) {
@@ -142,7 +142,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return null;
 	}
 
-	public String findIdentifier(String fileIdentifier) {
+	public String findIdentifier(final String fileIdentifier) {
 		if (doesPathIndicateJavaType(fileIdentifier)) {
 			PathResolver pathResolver = getPathResolver();
 			Path sourcePath = null;
@@ -172,7 +172,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return null;
 	}
 
-	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
+	public void processTypesWithAnnotation(final List<JavaType> annotationsToDetect, final LocatedTypeCallback callback) {
 		// If the cache doesn't yet contain the annotation to be found it should be added
 		for (JavaType annotationType : annotationsToDetect) {
 			if (!annotationToMidMap.containsKey(annotationType)) {
@@ -191,10 +191,10 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	public Set<JavaType> findTypesWithAnnotation(List<JavaType> annotationsToDetect) {
+	public Set<JavaType> findTypesWithAnnotation(final List<JavaType> annotationsToDetect) {
 		final Set<JavaType> types = new LinkedHashSet<JavaType>();
 		processTypesWithAnnotation(annotationsToDetect, new LocatedTypeCallback() {
-			public void process(ClassOrInterfaceTypeDetails located) {
+			public void process(final ClassOrInterfaceTypeDetails located) {
 				if (located != null) {
 					types.add(located.getName());
 				}
@@ -203,14 +203,14 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return Collections.unmodifiableSet(types);
 	}
 
-	public Set<JavaType> findTypesWithAnnotation(JavaType... annotationsToDetect) {
+	public Set<JavaType> findTypesWithAnnotation(final JavaType... annotationsToDetect) {
 		return findTypesWithAnnotation(Arrays.asList(annotationsToDetect));
 	}
 
-	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect) {
+	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(final JavaType... annotationsToDetect) {
 		final List<ClassOrInterfaceTypeDetails> types = new ArrayList<ClassOrInterfaceTypeDetails>();
 		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
-			public void process(ClassOrInterfaceTypeDetails located) {
+			public void process(final ClassOrInterfaceTypeDetails located) {
 				if (located != null) {
 					types.add(located);
 				}
@@ -218,7 +218,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		});
 		Collections.sort(types, new NaturalOrderComparator<ClassOrInterfaceTypeDetails>() {
 			@Override
-			protected String stringify(ClassOrInterfaceTypeDetails object) {
+			protected String stringify(final ClassOrInterfaceTypeDetails object) {
 				return object.getName().getSimpleTypeName();
 			}
 		});
@@ -226,10 +226,10 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return Collections.unmodifiableSet(new LinkedHashSet<ClassOrInterfaceTypeDetails>(types));
 	}
 
-	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(Object tag) {
+	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithTag(final Object tag) {
 		final Set<ClassOrInterfaceTypeDetails> types = new LinkedHashSet<ClassOrInterfaceTypeDetails>();
 		processTypesWithTag(tag, new LocatedTypeCallback() {
-			public void process(ClassOrInterfaceTypeDetails located) {
+			public void process(final ClassOrInterfaceTypeDetails located) {
 				if (located != null) {
 					types.add(located);
 				}
@@ -238,13 +238,13 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return Collections.unmodifiableSet(types);
 	}
 
-	public ClassOrInterfaceTypeDetails getTypeForIdentifier(String physicalTypeIdentifier) {
+	public ClassOrInterfaceTypeDetails getTypeForIdentifier(final String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Metadata identification string '" + physicalTypeIdentifier + "' is not valid for this metadata provider");
 		updateCache();
 		return typeMap.get(physicalTypeIdentifier);
 	}
 
-	public List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(Path path) {
+	public List<ClassOrInterfaceTypeDetails> getProjectJavaTypes(final Path path) {
 		// Before processing the call, any changes to the project should be processed and the cache updated accordingly
 		updateCache();
 
@@ -267,7 +267,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	 * @param physicalTypeMid to lookup (required)
 	 * @return the details (or null if unavailable)
 	 */
-	private ClassOrInterfaceTypeDetails getCachedClassOrInterfaceTypeDetails(String physicalTypeMid) {
+	private ClassOrInterfaceTypeDetails getCachedClassOrInterfaceTypeDetails(final String physicalTypeMid) {
 		return typeMap.get(physicalTypeMid);
 	}
 
@@ -278,7 +278,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	 * @param physicalTypeMid to lookup (required)
 	 * @return the details (or null if unavailable)
 	 */
-	private ClassOrInterfaceTypeDetails lookupClassOrInterfaceTypeDetails(String physicalTypeMid) {
+	private ClassOrInterfaceTypeDetails lookupClassOrInterfaceTypeDetails(final String physicalTypeMid) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid, true);
 		if (physicalTypeMetadata != null && physicalTypeMetadata.getMemberHoldingTypeDetails() != null && physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			return (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
@@ -290,11 +290,11 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return projectOperations.getPathResolver();
 	}
 
-	private boolean doesPathIndicateJavaType(String filePath) {
+	private boolean doesPathIndicateJavaType(final String filePath) {
 		return filePath.endsWith(".java") && !filePath.endsWith("package-info.java");
 	}
 
-	private void cacheType(String fileCanonicalPath) {
+	private void cacheType(final String fileCanonicalPath) {
 		if (doesPathIndicateJavaType(fileCanonicalPath)) {
 			String id = findIdentifier(fileCanonicalPath);
 			if (id != null && PhysicalTypeIdentifier.isValid(id)) {
@@ -315,7 +315,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	private void updateAttributeCache(MemberHoldingTypeDetails cid) {
+	private void updateAttributeCache(final MemberHoldingTypeDetails cid) {
 		if (!typeAnnotationMap.containsKey(cid.getDeclaredByMetadataId())) {
 			typeAnnotationMap.put(cid.getDeclaredByMetadataId(), new HashSet<JavaType>());
 		}
@@ -369,7 +369,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	private void updateChanges(String physicalTypeIdentifier, boolean remove) {
+	private void updateChanges(final String physicalTypeIdentifier, final boolean remove) {
 		for (String requestingClass : changeMap.keySet()) {
 			if (remove) {
 				changeMap.get(requestingClass).remove(physicalTypeIdentifier);
@@ -379,7 +379,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		}
 	}
 
-	public boolean hasTypeChanged(String requestingClass, JavaType javaType) {
+	public boolean hasTypeChanged(final String requestingClass, final JavaType javaType) {
 		updateCache();
 		Set<String> changesSinceLastRequest = changeMap.get(requestingClass);
 		if (changesSinceLastRequest == null) {

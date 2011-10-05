@@ -16,7 +16,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * {@link ContentHandler} implementation for converting the DBRE XML file into a {@link Database} object.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -43,9 +43,9 @@ public class DatabaseContentHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+	public void startElement(final String uri, final String localName, final String qName, final Attributes attributes) throws SAXException {
 		if (qName.equals("database")) {
-			stack.push(new Object()); 
+			stack.push(new Object());
 			if (StringUtils.hasText(attributes.getValue("package"))) {
 				destinationPackage = new JavaPackage(attributes.getValue("package"));
 			}
@@ -69,7 +69,7 @@ public class DatabaseContentHandler extends DefaultHandler {
 	}
 
 	@Override
-	public void endElement(String uri, String localName, String qName) throws SAXException {
+	public void endElement(final String uri, final String localName, final String qName) throws SAXException {
 		Object tmp = stack.pop();
 
 		if (qName.equals("option")) {
@@ -120,7 +120,7 @@ public class DatabaseContentHandler extends DefaultHandler {
 		}
 	}
 
-	private Table getTable(Attributes attributes) {
+	private Table getTable(final Attributes attributes) {
 		Table table = new Table(attributes.getValue(DatabaseXmlUtils.NAME), new Schema(attributes.getValue("alias")));
 		if (StringUtils.hasText(attributes.getValue(DatabaseXmlUtils.DESCRIPTION))) {
 			table.setDescription(DatabaseXmlUtils.DESCRIPTION);
@@ -128,13 +128,13 @@ public class DatabaseContentHandler extends DefaultHandler {
 		return table;
 	}
 
-	private Column getColumn(Attributes attributes) {
+	private Column getColumn(final Attributes attributes) {
 		String type = attributes.getValue("type");
 		String[] dataTypeAndName = StringUtils.split(type, ",");
 		Assert.notNull(dataTypeAndName, "The 'type' attribute of the column element must contain a comma separated value pair, eg, type=\"12,varchar\"." + getErrorMessage());
 		int dataType = Integer.parseInt(dataTypeAndName[0]);
 		String typeName = dataTypeAndName[1];
-		
+
 		int columnSize;
 		int scale = 0;
 		String size = attributes.getValue("size");
@@ -145,7 +145,7 @@ public class DatabaseContentHandler extends DefaultHandler {
 		} else {
 			columnSize = Integer.parseInt(size);
 		}
-		
+
 		if (StringUtils.hasText(attributes.getValue("scale"))) {
 			scale = Integer.parseInt(attributes.getValue("scale"));
 		}
@@ -162,24 +162,24 @@ public class DatabaseContentHandler extends DefaultHandler {
 		return "Your DBRE XML file may be not be in the current format. Delete the file and execute the database reverse engineer command again.";
 	}
 
-	private ForeignKey getForeignKey(Attributes attributes) {
+	private ForeignKey getForeignKey(final Attributes attributes) {
 		ForeignKey foreignKey = new ForeignKey(attributes.getValue(DatabaseXmlUtils.NAME), attributes.getValue(DatabaseXmlUtils.FOREIGN_TABLE));
 		foreignKey.setOnDelete(CascadeAction.getCascadeAction(attributes.getValue(DatabaseXmlUtils.ON_DELETE)));
 		foreignKey.setOnUpdate(CascadeAction.getCascadeAction(attributes.getValue(DatabaseXmlUtils.ON_UPDATE)));
 		return foreignKey;
 	}
 
-	private Reference getReference(Attributes attributes) {
+	private Reference getReference(final Attributes attributes) {
 		return new Reference(attributes.getValue(DatabaseXmlUtils.LOCAL), attributes.getValue(DatabaseXmlUtils.FOREIGN));
 	}
 
-	private Index getIndex(Attributes attributes, IndexType indexType) {
+	private Index getIndex(final Attributes attributes, final IndexType indexType) {
 		Index index = new Index(attributes.getValue(DatabaseXmlUtils.NAME));
 		index.setUnique(indexType == IndexType.UNIQUE);
 		return index;
 	}
 
-	private IndexColumn getIndexColumn(Attributes attributes) {
+	private IndexColumn getIndexColumn(final Attributes attributes) {
 		return new IndexColumn(attributes.getValue(DatabaseXmlUtils.NAME));
 	}
 

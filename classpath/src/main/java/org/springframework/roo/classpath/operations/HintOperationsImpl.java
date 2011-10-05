@@ -19,23 +19,23 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Base implementation of {@link HintOperations}.
- * 
+ *
  * <p>
  * This implementation relies on a predefined resource bundle containing all of this hints.
  * This is likely to be replaced in the future with a more extensible implementation so
- * third-party add-ons can provide their own hints (see ROO-610 for details). 
- * 
+ * third-party add-ons can provide their own hints (see ROO-610 for details).
+ *
  * @author Ben Alex
  * @since 1.1
  */
 @Service
 @Component
 public class HintOperationsImpl implements HintOperations {
-	
+
 	// Constants
 	private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator + "**" + File.separator;
 	private static ResourceBundle bundle = ResourceBundle.getBundle(HintCommands.class.getName());
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -72,7 +72,7 @@ public class HintOperationsImpl implements HintOperations {
 		}
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		
+
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
 			return "jpa";
 		}

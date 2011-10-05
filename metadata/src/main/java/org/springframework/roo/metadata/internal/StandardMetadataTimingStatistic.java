@@ -5,17 +5,17 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Standard implementation of {@link MetadataTimingStatistic}.
- * 
+ *
  * @author Ben Alex
  *
  */
 public class StandardMetadataTimingStatistic implements MetadataTimingStatistic {
 
-	private String name;
-	private long time;
-	private long invocations;
-	
-	public StandardMetadataTimingStatistic(String name, long time, long invocations) {
+	private final String name;
+	private final long time;
+	private final long invocations;
+
+	public StandardMetadataTimingStatistic(final String name, final long time, final long invocations) {
 		Assert.hasText(name, "Name required");
 		this.name = name;
 		this.time = time;
@@ -34,7 +34,7 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 		return invocations;
 	}
 
-	public int compareTo(MetadataTimingStatistic o) {
+	public int compareTo(final MetadataTimingStatistic o) {
 		int result = Long.valueOf(time).compareTo(o.getTime());
 		if (result == 0) {
 			result = Long.valueOf(invocations).compareTo(o.getInvocations());
@@ -46,7 +46,7 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		return obj instanceof MetadataTimingStatistic && this.compareTo((MetadataTimingStatistic) obj) == 0;
 	}
 

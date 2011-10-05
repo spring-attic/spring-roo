@@ -11,7 +11,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a {@link JavaType} with zero or more annotations.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -21,7 +21,7 @@ public class AnnotatedJavaType {
 	 * Converts a non-null bag of {@link JavaType}s into a {@link List} of equivalent {@link AnnotatedJavaType}s.
 	 * Note that each returned {@link AnnotatedJavaType} will have no annotation metadata, as the input {@link JavaType}s
 	 * cannot store any such metadata.
-	 * 
+	 *
 	 * @param javaTypes to convert (can be <code>null</code> for none)
 	 * @return the equivalent {@link AnnotatedJavaType}s (never returns null)
 	 */
@@ -39,7 +39,7 @@ public class AnnotatedJavaType {
 	 * Converts a non-null bag of {@link JavaType}s into a {@link List} of equivalent {@link AnnotatedJavaType}s.
 	 * Note that each returned {@link AnnotatedJavaType} will have no annotation metadata, as the input {@link JavaType}s
 	 * cannot store any such metadata.
-	 * 
+	 *
 	 * @param javaTypes to convert
 	 * @return the equivalent {@link AnnotatedJavaType}s (never returns null)
 	 * @since 1.2.0
@@ -64,7 +64,7 @@ public class AnnotatedJavaType {
 	/**
 	 * Converts a non-null {@link List} of {@link AnnotatedJavaType}s into a {@link List} of equivalent {@link JavaType}s.
 	 * Note the annotation metadata will be discarded, as it cannot be stored inside a {@link JavaType}.
-	 * 
+	 *
 	 * @param annotatedJavaTypes to convert (required)
 	 * @return the equivalent {@link AnnotatedJavaType}s, but without any actual annotations (never returns null)
 	 */
@@ -88,12 +88,12 @@ public class AnnotatedJavaType {
 		Assert.notNull(annotatedJavaType, "Annotated Java types required");
 		return annotatedJavaType.getJavaType();
 	}
-	
+
 	// Fields
 	private final JavaType javaType;
 	private final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
     private boolean isVarArgs;
-    
+
     /**
      * Constructor that accepts a vararg array of annotations
      *
@@ -104,10 +104,10 @@ public class AnnotatedJavaType {
     public AnnotatedJavaType(final JavaType javaType, final AnnotationMetadata... annotations) {
     	this(javaType, Arrays.asList(annotations));
     }
-	
+
 	/**
 	 * Constructor that accepts an optional list of annotations
-	 * 
+	 *
 	 * @param javaType the type (required)
 	 * @param annotations any annotations for the type (defensively copied,
 	 * <code>null</code> is acceptable)
@@ -119,7 +119,7 @@ public class AnnotatedJavaType {
 			this.annotations.addAll(annotations);
 		}
 	}
-	
+
 	/**
 	 * @return the type (never returns null)
 	 */
@@ -129,7 +129,7 @@ public class AnnotatedJavaType {
 
 	/**
 	 * Returns the annotations on this type
-	 * 
+	 *
 	 * @return a copy of this list (never <code>null</code>, but may be empty)
 	 */
 	public List<AnnotationMetadata> getAnnotations() {
@@ -146,7 +146,7 @@ public class AnnotatedJavaType {
 		sb.append(javaType.getNameIncludingTypeParameters());
 		return sb.toString();
 	}
-	
+
     public boolean isVarArgs() {
         return isVarArgs;
     }

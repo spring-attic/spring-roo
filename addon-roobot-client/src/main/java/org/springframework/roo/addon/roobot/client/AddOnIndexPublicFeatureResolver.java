@@ -7,23 +7,23 @@ import org.springframework.roo.uaa.PublicFeatureResolver;
 
 /**
  * Resolves public features by reference to the RooBot add-on index.
- * 
+ *
  * <p>
  * Any item in the RooBot add-on index is considered a public feature. In addition,
  * any item starting with "org.springframework.roo" is considered a public feature.
  * All other items are considered private features.
- * 
+ *
  * @author Ben Alex
  * @since 1.1.1
  */
 @Component
 @Service
 public class AddOnIndexPublicFeatureResolver implements PublicFeatureResolver {
-	
+
 	// Fields
 	@Reference AddOnRooBotOperations rooBotOperations;
-	
-	public boolean isPublic(String bundleSymbolicNameOrTypeName) {
+
+	public boolean isPublic(final String bundleSymbolicNameOrTypeName) {
 		if (bundleSymbolicNameOrTypeName.startsWith("org.springframework.roo")) {
 			return true;
 		}

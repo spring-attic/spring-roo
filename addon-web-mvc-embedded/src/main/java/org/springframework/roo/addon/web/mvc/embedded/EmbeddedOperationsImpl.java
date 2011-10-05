@@ -24,22 +24,22 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Service
 @Component
-@Reference(name = "embeddedProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = EmbeddedProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) 
+@Reference(name = "embeddedProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = EmbeddedProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class EmbeddedOperationsImpl implements EmbeddedOperations {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(EmbeddedOperationsImpl.class);
-	
+
 	// Fields
 	@Reference private MetadataService metadataService;
-	private Object mutex = new Object();
-	private Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
-	
+	private final Object mutex = new Object();
+	private final Set<EmbeddedProvider> providers = new HashSet<EmbeddedProvider>();
+
 	public boolean isCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		for (EmbeddedProvider provider: getEmbeddedProviders()) {
 			if (provider.embed(url, viewName)) {
 				return true;
@@ -48,8 +48,8 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 		logger.warning("Could not find a matching provider for this URL");
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
+
+	public boolean install(final String viewName, final Map<String, String> options) {
 		for (EmbeddedProvider provider: getEmbeddedProviders()) {
 			if (provider.install(viewName, options)) {
 				return true;
@@ -58,19 +58,19 @@ public class EmbeddedOperationsImpl implements EmbeddedOperations {
 		logger.warning("Could not find a matching implementation for this 'web mvc embed' type");
 		return false;
 	}
-	
+
 	private Set<EmbeddedProvider> getEmbeddedProviders() {
 		synchronized (mutex) {
 			return Collections.unmodifiableSet(providers);
 		}
 	}
-	protected void bindEmbeddedProvider(EmbeddedProvider provider) {
+	protected void bindEmbeddedProvider(final EmbeddedProvider provider) {
 		synchronized (mutex) {
 			providers.add(provider);
 		}
 	}
-	
-	protected void unbindEmbeddedProvider(EmbeddedProvider provider) {
+
+	protected void unbindEmbeddedProvider(final EmbeddedProvider provider) {
 		synchronized (mutex) {
 			if (providers.contains(provider)) {
 				providers.remove(provider);

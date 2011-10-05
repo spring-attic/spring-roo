@@ -10,7 +10,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Represents a parsed {@link RooJsfConverter} annotation.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
@@ -18,7 +18,7 @@ public class JsfConverterAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
 	@AutoPopulate private JavaType entity;
 
-	public JsfConverterAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public JsfConverterAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, ROO_JSF_CONVERTER);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

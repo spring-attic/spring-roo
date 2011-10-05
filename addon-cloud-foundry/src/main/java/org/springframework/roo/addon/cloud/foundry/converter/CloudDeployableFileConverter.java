@@ -35,7 +35,7 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 
-	public CloudDeployableFile convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public CloudDeployableFile convertFromText(String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
@@ -71,11 +71,11 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 		return new CloudDeployableFile(fileToDeploy);
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return CloudDeployableFile.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		if (projectOperations.getPathResolver() == null) {
 			logger.warning("A project has not been created please specify the full path of the file you wish to deploy");
 			return false;
@@ -104,7 +104,7 @@ public class CloudDeployableFileConverter implements Converter<CloudDeployableFi
 		throw new IllegalStateException("Unexpected file separator character encountered; cannot continue");
 	}
 
-	public static String escapeString(String toEscape) {
+	public static String escapeString(final String toEscape) {
 		final StringBuilder result = new StringBuilder();
 		final StringCharacterIterator iterator = new StringCharacterIterator(toEscape);
 		char character = iterator.current();

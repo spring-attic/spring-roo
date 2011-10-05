@@ -18,7 +18,7 @@ import org.springframework.uaa.client.UaaService;
 
 /**
  * Simple implementation of {@link UrlInputStreamService} that uses the JDK.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -29,18 +29,18 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 	// Fields
 	@Reference private UaaService uaaService;
 	@Reference private ProxyService proxyService;
-	
-	public InputStream openConnection(URL httpUrl) throws IOException {
+
+	public InputStream openConnection(final URL httpUrl) throws IOException {
 		Assert.notNull(httpUrl, "HTTP URL is required");
 		Assert.isTrue(httpUrl.getProtocol().equals("http"), "Only HTTP is supported (not " + httpUrl + ")");
-		
+
 		// Fail if we're banned from accessing this domain
 		Assert.isNull(getUrlCannotBeOpenedMessage(httpUrl), UrlInputStreamUtils.SETUP_UAA_REQUIRED);
 		HttpURLConnection connection = proxyService.prepareHttpUrlConnection(httpUrl);
 		return new ProgressIndicatingInputStream(connection);
 	}
-	
-	public String getUrlCannotBeOpenedMessage(URL httpUrl) {
+
+	public String getUrlCannotBeOpenedMessage(final URL httpUrl) {
 		if (uaaService.isCommunicationRestricted(httpUrl)) {
 			if (!uaaService.isUaaTermsOfUseAccepted()) {
 				return UrlInputStreamUtils.SETUP_UAA_REQUIRED;
@@ -51,22 +51,22 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 	}
 
 	private class ProgressIndicatingInputStream extends InputStream {
-		
+
 		// Fields
-		private InputStream delegate;
-		private float totalSize;
+		private final InputStream delegate;
+		private final float totalSize;
 		private float readSoFar;
 		private int lastPercentageIndicated = -1;
 		private long lastNotified;
 		private String text;
-		
+
 		/**
 		 * Constructor
 		 *
 		 * @param connection
 		 * @throws IOException
 		 */
-		public ProgressIndicatingInputStream(HttpURLConnection connection) throws IOException {
+		public ProgressIndicatingInputStream(final HttpURLConnection connection) throws IOException {
 			Assert.notNull(connection, "URL Connection required");
 			this.totalSize = connection.getContentLength();
 			this.delegate = connection.getInputStream();
@@ -103,7 +103,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 					lastNotified = System.currentTimeMillis();
 				}
 			}
-			
+
 			int result = delegate.read();
 			if (result == -1) {
 				if (totalSize > 0) {
@@ -113,7 +113,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 				}
 				flash(Level.FINE, "", MY_SLOT);
 			}
-			
+
 			return result;
 		}
 

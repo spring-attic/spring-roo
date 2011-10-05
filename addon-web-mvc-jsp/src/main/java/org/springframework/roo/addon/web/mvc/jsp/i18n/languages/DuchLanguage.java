@@ -25,7 +25,7 @@ public class DuchLanguage extends AbstractLanguage {
 	public String getLanguage() {
 		return "Dutch";
 	}
-	
+
 	public InputStream getFlagGraphic() {
 		return TemplateUtils.getTemplate(getClass(), "nl.png");
 	}

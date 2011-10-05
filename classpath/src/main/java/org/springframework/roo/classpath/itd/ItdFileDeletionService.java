@@ -16,24 +16,24 @@ import org.springframework.roo.support.util.Assert;
  * Automatically deletes any ITD that should not exist
  * due to the non-existence of the {@link PhysicalTypeMetadata} that the ITD would have been
  * introduced into.
- * 
+ *
  * <p>
  * This service will only delete files matching the syntax *_Roo_*.aj, and then only if the
  * leftmost wildcard represents a filename that does not have a .java file in the same directory.
  * For example, if the file src/main/java/com/foo/Bar_Roo_Hello.aj was detected as existing,
  * it will be deleted unless src/main/java/com/foo/Bar.java also presently exists.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component
 @Service
 public class ItdFileDeletionService implements FileEventListener {
-	
+
 	// Constants
 	private static String ANT_PATH_ALL_ITD_SOURCE = "**" + File.separator + "*_Roo_*.aj";
 	private static String ANT_PATH_ALL_JAVA_SOURCE = "**" + File.separator + "*.java";
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 
@@ -75,5 +75,5 @@ public class ItdFileDeletionService implements FileEventListener {
 				}
 			}
 		}
-	}	
+	}
 }

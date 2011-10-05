@@ -9,12 +9,12 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 
 /**
  * Represents a parsed {@link RooDisplayName} annotation.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class DisplayNameAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate private String methodName = "getDisplayName";
 	@AutoPopulate private String[] fields;
@@ -25,7 +25,7 @@ public class DisplayNameAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public DisplayNameAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public DisplayNameAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, ROO_DISPLAY_NAME);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

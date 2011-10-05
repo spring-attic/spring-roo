@@ -42,14 +42,14 @@ import org.w3c.dom.Element;
 
 /**
  * Implements {@link WebJsonOperations}.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
 public class WebJsonOperationsImpl implements WebJsonOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
@@ -80,16 +80,16 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", document, null);
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", document, "Creates the Spring Container shared by all Servlets and Filters");
 		WebXmlUtils.addServlet("app", "org.springframework.web.servlet.DispatcherServlet", "/", 1, document, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
-		
+
 		fileManager.createOrUpdateTextFileIfRequired(webXmlPath, XmlUtils.nodeToString(document), false);
-		
+
 		updateConfiguration();
 	}
-	
-	public void annotateType(JavaType type, JavaType jsonEntity) {
+
+	public void annotateType(final JavaType type, final JavaType jsonEntity) {
 		Assert.notNull(type, "Target type required");
 		Assert.notNull(jsonEntity, "Json entity required");
-		
+
 		String id = typeLocationService.findIdentifier(type);
 		if (id == null) {
 			createNewType(type, jsonEntity);
@@ -125,8 +125,8 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 			}
 		}
 	}
-	
-	private void appendToExistingType(JavaType type, JavaType jsonEntity) {
+
+	private void appendToExistingType(final JavaType type, final JavaType jsonEntity) {
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(type);
 		if (classOrInterfaceTypeDetails == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + type.getFullyQualifiedTypeName() + "'");
@@ -140,8 +140,8 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(getAnnotation(jsonEntity));
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
-	
-	private void createNewType(JavaType type, JavaType jsonEntity) {
+
+	private void createNewType(final JavaType type, final JavaType jsonEntity) {
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(jsonEntity));
 		if (pluralMetadata == null) {
 			return;
@@ -156,13 +156,13 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
-	private AnnotationMetadataBuilder getAnnotation(JavaType type) {
+	private AnnotationMetadataBuilder getAnnotation(final JavaType type) {
 		// Create annotation @RooWebJson(jsonObject = MyObject.class)
 		List<AnnotationAttributeValue<?>> rooJsonAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		rooJsonAttributes.add(new ClassAttributeValue(new JavaSymbolName("jsonObject"), type));
 		return new AnnotationMetadataBuilder(RooJavaType.ROO_WEB_JSON, rooJsonAttributes);
 	}
-	
+
 	private void updateConfiguration() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
@@ -172,7 +172,7 @@ public class WebJsonOperationsImpl implements WebJsonOperations {
 			dependencies.add(new Dependency(dependencyElement));
 		}
 		projectOperations.addDependencies(dependencies);
-		
+
 		projectOperations.updateProjectType(ProjectType.WAR);
 	}
 }

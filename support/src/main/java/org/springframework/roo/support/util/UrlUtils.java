@@ -15,7 +15,7 @@ public final class UrlUtils {
 	/**
 	 * Converts the given URI to a URL; equivalent to {@link URI#toURL()}
 	 * except that it throws a runtime exception.
-	 * 
+	 *
 	 * @param uri
 	 * @return a non-<code>null</code> URL
 	 * @throws IllegalArgumentException if the conversion is not possible
@@ -27,7 +27,7 @@ public final class UrlUtils {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

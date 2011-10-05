@@ -53,18 +53,18 @@ import org.springframework.roo.support.util.XmlUtils;
 
 /**
  * Listens for {@link WebScaffoldMetadata} and produces JSPs when requested by that metadata.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
  */
-@Component(immediate = true) 
-@Service 
+@Component(immediate = true)
+@Service
 public class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
-	
+
 	// Constants
 	private static final String WEB_INF_VIEWS = "/WEB-INF/views/";
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private JspOperations jspOperations;
@@ -77,21 +77,21 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 	@Reference private WebMetadataService webMetadataService;
 	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
-	private Map<JavaType, String> formBackingObjectTypesToLocalMids = new HashMap<JavaType, String>();
+	private final Map<JavaType, String> formBackingObjectTypesToLocalMids = new HashMap<JavaType, String>();
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(WebFinderMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.addNotificationListener(this);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.deregisterDependency(WebFinderMetadata.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
-	public MetadataItem get(String metadataIdentificationString) {
+	public MetadataItem get(final String metadataIdentificationString) {
 		// Work out the MIDs of the other metadata we depend on
 		// NB: The JavaType and Path are to the corresponding web scaffold controller class
 
@@ -101,14 +101,14 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			// Can't get the corresponding scaffold, so we certainly don't need to manage any JSPs at this time
 			return null;
 		}
-		
+
 		JavaType formBackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 		MemberDetails memberDetails = webMetadataService.getMemberDetails(formBackingType);
 		JavaTypeMetadataDetails formBackingTypeMetadataDetails = webMetadataService.getJavaTypeMetadataDetails(formBackingType, memberDetails, metadataIdentificationString);
 		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formBackingType.getFullyQualifiedTypeName());
-		
+
 		formBackingObjectTypesToLocalMids.put(formBackingType, metadataIdentificationString);
-		
+
 		SortedMap<JavaType, JavaTypeMetadataDetails> relatedTypeMd = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, memberDetails, metadataIdentificationString);
 		JavaTypeMetadataDetails formbackingTypeMetadata = relatedTypeMd.get(formBackingType);
 		Assert.notNull(formbackingTypeMetadata, "Form backing type metadata required");
@@ -118,7 +118,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		}
 
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA), JspMetadata.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
-		
+
 		// Install web artifacts only if Spring MVC config is missing
 		// TODO: Remove this call when 'controller' commands are gone
 		PathResolver pathResolver = projectOperations.getPathResolver();
@@ -144,7 +144,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		if (controllerPath.startsWith("/")) {
 			controllerPath = controllerPath.substring(1);
 		}
-		
+
 		// Make the holding directory for this controller
 		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, WEB_INF_VIEWS + controllerPath);
 		if (!fileManager.exists(destinationDirectory)) {
@@ -167,7 +167,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 
 		Map<String, String> properties = new LinkedHashMap<String, String>();
 		properties.put("menu_category_" + categoryName.getSymbolName().toLowerCase() + "_label", categoryName.getReadableSymbolName());
-		
+
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			xmlRoundTripFileManager.writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
@@ -187,23 +187,23 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath);
 		}
-		
+
 		// Setup labels for i18n support
 		String resourceId = XmlUtils.convertId("label." + formBackingType.getFullyQualifiedTypeName().toLowerCase());
 		properties.put(resourceId, new JavaSymbolName(formBackingType.getSimpleTypeName()).getReadableSymbolName());
 
 		String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
 		properties.put(pluralResourceId, new JavaSymbolName(formBackingTypeMetadataDetails.getPlural()).getReadableSymbolName());
-		
+
 		if (formBackingTypeMetadataDetails.getPersistenceDetails() != null && !formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields().isEmpty()) {
 			for (FieldMetadata idField: formBackingTypeMetadataDetails.getPersistenceDetails().getRooIdentifierFields()) {
 				properties.put(XmlUtils.convertId(resourceId + "." + formBackingTypeMetadataDetails.getPersistenceDetails().getIdentifierField().getFieldName().getSymbolName() + "." + idField.getFieldName().getSymbolName().toLowerCase()), idField.getFieldName().getReadableSymbolName());
 			}
 		}
-		
+
 		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = formBackingTypeMetadataDetails.getPersistenceDetails();
 		Assert.notNull(javaTypePersistenceMetadataDetails, "Unable to determine persistence metadata for type " + formBackingType.getFullyQualifiedTypeName());
-		
+
 		for (MethodMetadata method : memberDetails.getMethods()) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
@@ -211,7 +211,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			JavaSymbolName fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
 			if (field == null) {
-				continue; 
+				continue;
 			}
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
 			if (webMetadataService.isApplicationType(method.getReturnType()) && webMetadataService.isRooIdentifier(method.getReturnType(), webMetadataService.getMemberDetails(method.getReturnType()))) {
@@ -236,7 +236,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		} else {
 			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("list"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 		}
-		
+
 		List<String> allowedMenuItems = new ArrayList<String>();
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(JspMetadata.getJavaType(metadataIdentificationString), JspMetadata.getPath(metadataIdentificationString)));
 		if (ptm != null) {
@@ -263,7 +263,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 				}
 			}
 		}
-		
+
 		propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", properties, true, false);
 
 		// Clean up links to finders which are removed by now
@@ -271,8 +271,8 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 
 		return new JspMetadata(metadataIdentificationString, webScaffoldMetadata);
 	}
-	
-	public void notify(String upstreamDependency, String downstreamDependency) {
+
+	public void notify(final String upstreamDependency, String downstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			if (WebScaffoldMetadata.isValid(upstreamDependency)) {
@@ -292,16 +292,16 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 			}
 		} else {
 			// This is the generic fallback listener, ie from MetadataDependencyRegistry.addListener(this) in the activate() method
-			
+
 			// Get the metadata that just changed
 			MetadataItem metadataItem = metadataService.get(upstreamDependency);
-			
+
 			// We don't have to worry about physical type metadata, as we monitor the relevant .java once the DOD governor is first detected
 			if (metadataItem == null || !metadataItem.isValid() || !(metadataItem instanceof ItdTypeDetailsProvidingMetadataItem)) {
 				// There's something wrong with it or it's not for an ITD, so let's gracefully abort
 				return;
 			}
-			
+
 			// Let's ensure we have some ITD type details to actually work with
 			ItdTypeDetailsProvidingMetadataItem itdMetadata = (ItdTypeDetailsProvidingMetadataItem) metadataItem;
 			ItdTypeDetails itdTypeDetails = itdMetadata.getMemberHoldingTypeDetails();
@@ -323,7 +323,7 @@ public class JspMetadataListener implements MetadataProvider, MetadataNotificati
 		return JspMetadata.getMetadataIdentiferType();
 	}
 
-	private void installImage(String imagePath) {
+	private void installImage(final String imagePath) {
 		PathResolver pathResolver = projectOperations.getPathResolver();
 		String imageFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, imagePath);
 		if (!fileManager.exists(imageFile)) {

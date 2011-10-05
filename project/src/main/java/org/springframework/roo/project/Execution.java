@@ -17,14 +17,14 @@ import org.w3c.dom.Node;
 
 /**
  * Immutable representation of an execution specification for a (Maven) build plugin
- * 
+ *
  * @author Adrian Colyer
  * @author Alan Stewart
  * @author Andrew Swan
  * @since 1.0
  */
 public class Execution implements Comparable<Execution> {
-	
+
 	// Fields
 	private final Configuration configuration;
 	private final List<String> goals;
@@ -63,7 +63,7 @@ public class Execution implements Comparable<Execution> {
 
 	/**
 	 * Returns the Maven lifecycle phase to which this execution is bound
-	 * 
+	 *
 	 * @return a non-blank phase name
 	 */
 	public String getPhase() {
@@ -72,7 +72,7 @@ public class Execution implements Comparable<Execution> {
 
 	/**
 	 * Returns the unique ID of this execution
-	 * 
+	 *
 	 * @return a non-blank ID
 	 */
 	public String getId() {
@@ -81,17 +81,17 @@ public class Execution implements Comparable<Execution> {
 
 	/**
 	 * Returns the goals this execution will execute
-	 * 
+	 *
 	 * @return a non-empty list
 	 */
 	public List<String> getGoals() {
 		return this.goals;
 	}
-	
+
 	/**
 	 * Returns this execution's configuration, if any; this is separate from any
 	 * configuration defined at the plugin level
-	 * 
+	 *
 	 * @return <code>null</code> if there is none
 	 * @since 1.2.0
 	 */
@@ -99,6 +99,7 @@ public class Execution implements Comparable<Execution> {
 		return this.configuration;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -109,7 +110,8 @@ public class Execution implements Comparable<Execution> {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		return obj instanceof Execution && this.compareTo((Execution) obj) == 0;
 	}
 
@@ -133,7 +135,7 @@ public class Execution implements Comparable<Execution> {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public String toString() {
 		final ToStringCreator toStringCreator = new ToStringCreator(this, new DefaultValueStyler());
@@ -143,38 +145,38 @@ public class Execution implements Comparable<Execution> {
 		toStringCreator.append("configuration", this.configuration);
 		return toStringCreator.toString();
 	}
-	
+
 	/**
 	 * Returns the XML element for this execution within the given Maven POM
-	 * 
+	 *
 	 * @param document the Maven POM to which to add the element (required)
 	 * @return a non-<code>null</code> element
 	 */
 	public Element getElement(final Document document) {
 		final Element executionElement = document.createElement("execution");
-		
+
 		// ID
 		if (StringUtils.hasText(this.id)) {
 			executionElement.appendChild(XmlUtils.createTextElement(document, "id", this.id));
 		}
-		
+
 		// Phase
 		if (StringUtils.hasText(this.phase)) {
 			executionElement.appendChild(XmlUtils.createTextElement(document, "phase", this.phase));
 		}
-		
+
 		// Goals
 		final Element goalsElement = DomUtils.createChildElement("goals", executionElement, document);
 		for (final String goal : this.goals) {
 			goalsElement.appendChild(XmlUtils.createTextElement(document, "goal", goal));
 		}
-		
+
 		// Configuration
 		if (this.configuration != null) {
 			final Node configurationNode = document.importNode(this.configuration.getConfiguration(), true);
 			executionElement.appendChild(configurationNode);
 		}
-		
+
 		return executionElement;
 	}
 }

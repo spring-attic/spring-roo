@@ -5,17 +5,17 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a {@link String} annotation attribute value.
- * 
+ *
  * <p>
  * Source code parsers should treat any quoted string as a {@link StringAttributeValue}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class StringAttributeValue extends AbstractAnnotationAttributeValue<String> {
-	private String value;
-	
-	public StringAttributeValue(JavaSymbolName name, String value) {
+	private final String value;
+
+	public StringAttributeValue(final JavaSymbolName name, final String value) {
 		super(name);
 		Assert.notNull(value, "Value required");
 		this.value = value;
@@ -25,6 +25,7 @@ public class StringAttributeValue extends AbstractAnnotationAttributeValue<Strin
 		return value;
 	}
 
+	@Override
 	public String toString() {
 		return getName() + " -> " + value;
 	}

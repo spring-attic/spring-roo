@@ -5,7 +5,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Interface for {@link LastUsedImpl}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */

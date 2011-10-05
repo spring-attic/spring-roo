@@ -12,7 +12,7 @@ import org.springframework.roo.model.CustomDataKey;
 public abstract class IdentifiableJavaStructureCustomDataKey<T extends IdentifiableJavaStructure> implements CustomDataKey<T> {
 	private Integer modifier;
 
-	public IdentifiableJavaStructureCustomDataKey(Integer modifier) {
+	public IdentifiableJavaStructureCustomDataKey(final Integer modifier) {
 		this.modifier = modifier;
 	}
 
@@ -22,7 +22,7 @@ public abstract class IdentifiableJavaStructureCustomDataKey<T extends Identifia
 		return modifier;
 	}
 
-	public boolean meets(T identifiableJavaStructure) throws IllegalStateException {
+	public boolean meets(final T identifiableJavaStructure) throws IllegalStateException {
 		// TODO: Add in validation logic for modifier
 		return true;
 	}

@@ -14,6 +14,7 @@ public abstract class AbstractLanguage implements I18n {
 	/**
 	 * hashCode uses locale only!
 	 */
+	@Override
 	public int hashCode() {
 		Locale locale = getLocale();
 		final int prime = 31;
@@ -21,18 +22,19 @@ public abstract class AbstractLanguage implements I18n {
 		result = prime * result + ((locale == null) ? 0 : locale.hashCode());
 		return result;
 	}
-	
+
 	/**
 	 * equals compares locale only!
 	 */
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
 		if (!(obj instanceof I18n))
 			return false;
-		
+
 		Locale thisLocale = getLocale();
 		Locale other = ((I18n) obj).getLocale();
 		if (thisLocale == null) {
@@ -43,6 +45,7 @@ public abstract class AbstractLanguage implements I18n {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Locale: ").append(getLocale());

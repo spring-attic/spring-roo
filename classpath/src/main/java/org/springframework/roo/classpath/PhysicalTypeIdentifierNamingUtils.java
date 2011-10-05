@@ -6,22 +6,22 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Produces metadata identification strings that represent a {@link JavaType} 
+ * Produces metadata identification strings that represent a {@link JavaType}
  * located in a particular {@link ClassloaderInclusivePath}.
- * 
+ *
  * <p>
  * The metadata identification strings separate the path name from the fully qualified
  * type name via the presence of a question mark character ("?"). A question mark is used
  * given it is reserved by {@link Path}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public abstract class PhysicalTypeIdentifierNamingUtils {
-	
+
 	/**
 	 * Creates an identifier from the given arguments
-	 * 
+	 *
 	 * @param providesType (required)
 	 * @param javaType (required)
 	 * @param path (required)
@@ -33,14 +33,14 @@ public abstract class PhysicalTypeIdentifierNamingUtils {
 		return MetadataIdentificationUtils.create(providesType, path.getName() + "?" + javaType.getFullyQualifiedTypeName());
 	}
 
-	public static JavaType getJavaType(String providesType, String metadataIdentificationString) {
+	public static JavaType getJavaType(final String providesType, final String metadataIdentificationString) {
 		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");
 		return new JavaType(instance.substring(index+1));
 	}
 
-	public static Path getPath(String providesType, String metadataIdentificationString) {
+	public static Path getPath(final String providesType, final String metadataIdentificationString) {
 		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
 		int index = instance.indexOf("?");
@@ -49,12 +49,12 @@ public abstract class PhysicalTypeIdentifierNamingUtils {
 
 	/**
 	 * Indicates whether the presented metadata identification string appears to be valid.
-	 * 
+	 *
 	 * @param providesType to verify the presented type (required)
 	 * @param metadataIdentificationString to evaluate (can be null or empty)
 	 * @return true only if the string appears to be valid
 	 */
-	public static boolean isValid(String providesType, String metadataIdentificationString) {
+	public static boolean isValid(final String providesType, final String metadataIdentificationString) {
 		if (!MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString)) {
 			return false;
 		}

@@ -20,7 +20,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 
 	/**
 	 * Returns the given array of pairs as a modifiable list
-	 * 
+	 *
 	 * @param <K> the type of key
 	 * @param <V> the type of value
 	 * @param pairs the pairs to put in a list
@@ -29,7 +29,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 	public PairList(final Pair<K, V>... pairs) {
 		addAll(Arrays.asList(pairs));
 	}
-	
+
 	/**
 	 * Constructor for building a list of the given key-value pairs
 	 *
@@ -60,7 +60,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 
 	/**
 	 * Returns the keys of each {@link Pair} in this list
-	 * 
+	 *
 	 * @return a non-<code>null</code> list
 	 */
 	public List<K> getKeys() {
@@ -70,10 +70,10 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 		}
 		return keys;
 	}
-	
+
 	/**
 	 * Returns the values of each {@link Pair} in this list
-	 * 
+	 *
 	 * @return a non-<code>null</code> modifiable copy of this list
 	 */
 	public List<V> getValues() {
@@ -83,10 +83,10 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 		}
 		return values;
 	}
-	
+
 	/**
 	 * Adds a new pair to this list with the given key and value
-	 * 
+	 *
 	 * @param key the key to add; can be <code>null</code>
 	 * @param value the value to add; can be <code>null</code>
 	 * @return true (as specified by Collection.add(E))
@@ -94,7 +94,7 @@ public class PairList<K, V> extends ArrayList<Pair<K, V>> {
 	public boolean add(final K key, final V value) {
 		return add(new Pair<K, V>(key, value));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Pair<K, V>[] toArray() {

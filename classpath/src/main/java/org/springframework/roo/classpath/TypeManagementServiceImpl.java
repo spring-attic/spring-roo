@@ -15,14 +15,14 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link TypeManagementService}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.2
  */
 @Component
-@Service 
+@Service
 public class TypeManagementServiceImpl implements TypeManagementService {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
@@ -31,15 +31,15 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	@Reference private TypeParsingService typeParsingService;
 
 	@Deprecated
-	public void generateClassFile(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	public void generateClassFile(final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetails);
 	}
-	
-	public void addEnumConstant(String physicalTypeIdentifier, JavaSymbolName constantName) {
+
+	public void addEnumConstant(final String physicalTypeIdentifier, final JavaSymbolName constantName) {
 		Assert.isTrue(projectOperations.isProjectAvailable(), "Cannot add a constant at this time");
 		Assert.hasText(physicalTypeIdentifier, "Type identifier not provided");
 		Assert.notNull(constantName, "Constant name required");
-		
+
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
@@ -53,18 +53,18 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		classOrInterfaceTypeDetailsBuilder.addEnumConstant(constantName);
 		createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
-	
-	public void addField(FieldMetadata fieldMetadata) {
+
+	public void addField(final FieldMetadata fieldMetadata) {
 		Assert.isTrue(projectOperations.isProjectAvailable(), "Field cannot be added at this time");
 		Assert.notNull(fieldMetadata, "Field metadata not provided");
-		
+
 		// Obtain the physical type and ITD mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(fieldMetadata.getDeclaredByMetadataId());
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
 		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
 		ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder((ClassOrInterfaceTypeDetails) ptd);
-		
+
 		// Automatically add JSR 303 (Bean Validation API) support if there is no current JSR 303 support but a JSR 303 annotation is present
 		boolean jsr303Required = false;
 		for (AnnotationMetadata annotation : fieldMetadata.getAnnotations()) {
@@ -73,7 +73,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 				break;
 			}
 		}
-		
+
 		if (jsr303Required) {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
 			projectOperations.addDependency("javax.validation", "validation-api", "1.0.0.GA");

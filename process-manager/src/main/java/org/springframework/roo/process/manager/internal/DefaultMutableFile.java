@@ -15,22 +15,22 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MutableFile}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DefaultMutableFile implements MutableFile {
-	
+
 	// Fields
-	private File file;
-	private NotifiableFileMonitorService fileMonitorService;
-	private ManagedMessageRenderer managedMessageRenderer;
-	
-	public void setDescriptionOfChange(String message) {
+	private final File file;
+	private final NotifiableFileMonitorService fileMonitorService;
+	private final ManagedMessageRenderer managedMessageRenderer;
+
+	public void setDescriptionOfChange(final String message) {
 		this.managedMessageRenderer.setDescriptionOfChange(message);
 	}
 
-	public DefaultMutableFile(File file, NotifiableFileMonitorService fileMonitorService, ManagedMessageRenderer managedMessageRenderer) {
+	public DefaultMutableFile(final File file, final NotifiableFileMonitorService fileMonitorService, final ManagedMessageRenderer managedMessageRenderer) {
 		Assert.notNull(file, "File required");
 		Assert.notNull(managedMessageRenderer, "Message renderer required");
 		Assert.isTrue(file.isFile(), "A mutable file must actually be a file (not a directory)");
@@ -68,6 +68,7 @@ public class DefaultMutableFile implements MutableFile {
 		}
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("file", getCanonicalPath());

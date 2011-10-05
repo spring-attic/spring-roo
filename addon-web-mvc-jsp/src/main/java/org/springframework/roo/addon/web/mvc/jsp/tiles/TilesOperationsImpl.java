@@ -28,7 +28,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Provides operations to manage tiles view definitions.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -40,7 +40,7 @@ public class TilesOperationsImpl implements TilesOperations {
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 
-	public void addViewDefinition(String folderName, String tilesViewName, String tilesTemplateName, String viewLocation) {
+	public void addViewDefinition(String folderName, String tilesViewName, final String tilesTemplateName, final String viewLocation) {
 		Assert.hasText(tilesViewName, "View name required");
 		Assert.hasText(tilesTemplateName, "Template name required");
 		Assert.hasText(viewLocation, "View location required");
@@ -67,23 +67,23 @@ public class TilesOperationsImpl implements TilesOperations {
 
 		writeToDiskIfNecessary(folderName, root);
 	}
-	
-	public void removeViewDefinition(String name, String folderName) {
+
+	public void removeViewDefinition(final String name, final String folderName) {
 		Assert.hasText(name, "View name required");
-		
+
 		Element root = getRootElement(folderName);
-		
-		// Find menu item under this category if exists 
+
+		// Find menu item under this category if exists
 		Element element = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + name + "']", root);
 		if (element == null) {
 			return;
 		}
 		element.getParentNode().removeChild(element);
-		
+
 		writeToDiskIfNecessary(folderName, root);
 	}
-	
-	private boolean writeToDiskIfNecessary(String folderName, Element body) {
+
+	private boolean writeToDiskIfNecessary(final String folderName, final Element body) {
 		// Build a string representation of the JSP
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		Transformer transformer = XmlUtils.createIndentingTransformer();
@@ -91,8 +91,8 @@ public class TilesOperationsImpl implements TilesOperations {
 		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN");
 		XmlUtils.writeXml(transformer, byteArrayOutputStream, body.getOwnerDocument());
 		String viewContent = byteArrayOutputStream.toString();
-		String tilesDefinition = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + folderName + "/views.xml"); 
-		
+		String tilesDefinition = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + folderName + "/views.xml");
+
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
 		MutableFile mutableFile = null;
 		if (fileManager.exists(tilesDefinition)) {
@@ -102,7 +102,7 @@ public class TilesOperationsImpl implements TilesOperations {
 			try {
 				existing = FileCopyUtils.copyToString(f);
 			} catch (IOException ignored) {}
-			
+
 			if (!viewContent.equals(existing)) {
 				mutableFile = fileManager.updateFile(tilesDefinition);
 			}
@@ -110,7 +110,7 @@ public class TilesOperationsImpl implements TilesOperations {
 			mutableFile = fileManager.createFile(tilesDefinition);
 			Assert.notNull(mutableFile, "Could not create tiles view definition '" + tilesDefinition + "'");
 		}
-		
+
 		if (mutableFile != null) {
 			try {
 				// We need to write the file out (it's a new file, or the existing file has different contents)
@@ -121,12 +121,12 @@ public class TilesOperationsImpl implements TilesOperations {
 				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 			}
 		}
-		
+
 		// A file existed, but it contained the same content, so we return false
 		return false;
 	}
-	
-	private Element getRootElement(String folderName) {
+
+	private Element getRootElement(final String folderName) {
 		Document tilesView;
 		String viewFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views" + folderName + "/views.xml");
 		if (!fileManager.exists(viewFile)) {
@@ -147,7 +147,7 @@ public class TilesOperationsImpl implements TilesOperations {
 	}
 
 	private static class TilesDtdResolver implements EntityResolver {
-		public InputSource resolveEntity(String publicId, String systemId) {
+		public InputSource resolveEntity(final String publicId, final String systemId) {
 			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {
 				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
 			}

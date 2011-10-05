@@ -11,12 +11,12 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * {@link UndoableOperation} to delete a directory.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DeleteDirectory implements UndoableOperation {
-	
+
 	// Constants
 	private static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
 	private static final Logger LOGGER = HandlerUtils.getLogger(DeleteDirectory.class);
@@ -25,7 +25,7 @@ public class DeleteDirectory implements UndoableOperation {
 	private final File actual;
 	private final File backup;
 	private final FilenameResolver filenameResolver;
-	
+
 	/**
 	 * Constructor that doesn't allow a reason to be given
 	 *
@@ -39,7 +39,7 @@ public class DeleteDirectory implements UndoableOperation {
 	public DeleteDirectory(final UndoManager undoManager, final FilenameResolver filenameResolver, final File directory) {
 		this(undoManager, filenameResolver, directory, null);
 	}
-	
+
 	/**
 	 * Constructor that allows a reason to be given
 	 *
@@ -73,7 +73,7 @@ public class DeleteDirectory implements UndoableOperation {
 		}
 		LOGGER.fine(deletionMessage);
 	}
-	
+
 	public void reset() {
 		// Fix for ROO-1555
 		try {

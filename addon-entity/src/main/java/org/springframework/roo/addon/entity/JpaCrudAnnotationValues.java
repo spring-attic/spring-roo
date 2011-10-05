@@ -19,7 +19,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * The purely CRUD-related values of a parsed {@link RooEntity} annotation.
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -38,7 +38,7 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate private String removeMethod = REMOVE_METHOD_DEFAULT;
 	@AutoPopulate private String transactionManager = "";
 	@AutoPopulate private String[] finders;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -48,11 +48,11 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 		super(annotatedType, ROO_ENTITY);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
-	
+
 	public String getClearMethod() {
 		return StringUtils.defaultIfEmpty(clearMethod, CLEAR_METHOD_DEFAULT);
 	}
-	
+
 	public String getCountMethod() {
 		return StringUtils.defaultIfEmpty(countMethod, COUNT_METHOD_DEFAULT);
 	}
@@ -60,38 +60,38 @@ public class JpaCrudAnnotationValues extends AbstractAnnotationValues {
 	public String getFindAllMethod() {
 		return StringUtils.defaultIfEmpty(findAllMethod, FIND_ALL_METHOD_DEFAULT);
 	}
-	
+
 	/**
 	 * Returns the prefix for the "find entries" method, e.g. the "find" part
 	 * of "findFooEntries"
-	 * 
+	 *
 	 * @return
 	 */
 	public String getFindEntriesMethod() {
 		return findEntriesMethod;
 	}
-	
+
 	/**
 	 * Returns the custom finder names specified by the annotation
-	 * 
+	 *
 	 * @return
 	 */
 	public String[] getFinders() {
 		return finders;
 	}
-	
+
 	public String getFindMethod() {
 		return StringUtils.defaultIfEmpty(findMethod, FIND_METHOD_DEFAULT);
 	}
-	
+
 	public String getFlushMethod() {
 		return StringUtils.defaultIfEmpty(flushMethod, FLUSH_METHOD_DEFAULT);
 	}
-	
+
 	public String getMergeMethod() {
 		return StringUtils.defaultIfEmpty(mergeMethod, MERGE_METHOD_DEFAULT);
 	}
-	
+
 	public String getPersistenceUnit() {
 		return persistenceUnit;
 	}

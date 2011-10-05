@@ -67,13 +67,13 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooWebScaffold}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.0
  */
 public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = WebScaffoldMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -111,7 +111,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!isValid()) {
 			return;
 		}
-		
+
 		this.annotationValues = annotationValues;
 		this.controllerPath = annotationValues.getPath();
 		this.dateTypes = dateTypes;
@@ -119,7 +119,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.entityName = JavaSymbolName.getReservedWordSafeName(formBackingType).getSymbolName();
 		this.javaTypeMetadataHolder = specialDomainTypes.get(formBackingType);
 		this.specialDomainTypes = specialDomainTypes;
-		
+
 		Assert.notNull(javaTypeMetadataHolder, "Metadata holder required for form backing type: " + formBackingType);
 
 		if (javaTypeMetadataHolder.getPersistenceDetails() != null && !javaTypeMetadataHolder.getPersistenceDetails().getRooIdentifierFields().isEmpty()) {
@@ -134,7 +134,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getCreateFormMethod(dependentTypes));
 			persistMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		
+
 		// "list" method
 		final MemberTypeAdditions countAllMethod = crudAdditions.get(COUNT_ALL_METHOD);
 		final MemberTypeAdditions findMethod = crudAdditions.get(FIND_METHOD);
@@ -145,14 +145,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getShowMethod(findMethod));
 			findMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		
+
 		if (countAllMethod != null && findAllMethod != null && findEntriesMethod != null) {
 			builder.addMethod(getListMethod(findAllMethod, countAllMethod, findEntriesMethod));
 			countAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 			findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
 			findEntriesMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		
+
 		// "update" method
 		final MemberTypeAdditions updateMethod = crudAdditions.get(MERGE_METHOD);
 		if (annotationValues.isUpdate() && updateMethod != null && findMethod != null) {
@@ -160,7 +160,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getUpdateFormMethod(findMethod));
 			updateMethod.copyAdditionsTo(builder, governorTypeDetails);
 		}
-		
+
 		final MemberTypeAdditions deleteMethod = crudAdditions.get(REMOVE_METHOD);
 		if (annotationValues.isDelete() && deleteMethod != null && findMethod != null) {
 			builder.addMethod(getDeleteMethod(deleteMethod, findMethod));
@@ -177,23 +177,23 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (annotationValues.isCreate() || annotationValues.isUpdate()) {
 			builder.addMethod(getEncodeUrlPathSegmentMethod());
 		}
-		
+
 		this.itdTypeDetails = builder.build();
 	}
 
 	public WebScaffoldAnnotationValues getAnnotationValues() {
 		return annotationValues;
 	}
-	
+
 	private ConstructorMetadata getConstructor() {
 		final ConstructorMetadata constructor = governorTypeDetails.getDeclaredConstructor(Arrays.asList(CONVERSION_SERVICE));
 		if (constructor != null) {
 			return constructor;
 		}
-		
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + CS_FIELD + " = " + CS_FIELD + ";");
-		
+
 		final ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
 		final AnnotationMetadataBuilder autowired = new AnnotationMetadataBuilder(AUTOWIRED);
 		constructorBuilder.addAnnotation(autowired.build());
@@ -203,7 +203,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		return constructorBuilder.build();
 	}
-	
+
 	private MethodMetadata getDeleteMethod(final MemberTypeAdditions deleteMethodAdditions, final MemberTypeAdditions findMethod) {
 		final JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataHolder = javaTypeMetadataHolder.getPersistenceDetails();
 		if (javaTypePersistenceMetadataHolder == null) {
@@ -238,7 +238,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
-		
+
 		final String formBackingTypeName = formBackingType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -257,7 +257,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	/**
 	 * Returns the metadata for the "list" method that this ITD introduces into
 	 * the controller.
-	 * 
+	 *
 	 * @param findAllAdditions
 	 * @param countAllAdditions
 	 * @param findEntriesAdditions
@@ -361,11 +361,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (methodExists(methodName)) {
 			return null;
 		}
-		
+
 		final AnnotationMetadataBuilder validAnnotation = new AnnotationMetadataBuilder(VALID);
 
 		final List<AnnotatedJavaType> parameterTypes = Arrays.asList(new AnnotatedJavaType(formBackingType, validAnnotation.build()), new AnnotatedJavaType(BINDING_RESULT), new AnnotatedJavaType(MODEL), new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
-		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(entityName), new JavaSymbolName("bindingResult"), new JavaSymbolName("uiModel"), new JavaSymbolName("httpServletRequest")); 
+		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName(entityName), new JavaSymbolName("bindingResult"), new JavaSymbolName("uiModel"), new JavaSymbolName("httpServletRequest"));
 
 		final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("POST"))));
@@ -421,13 +421,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 			if (!listAdded) {
 				final JavaType stringArrayType = new JavaType(STRING.getFullyQualifiedTypeName(), 1, DataType.TYPE, null, null);
-				
+
 				final JavaType listType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(stringArrayType));
 				final String listShort = listType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-				
+
 				final JavaType arrayListType = new JavaType(ARRAY_LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(stringArrayType));
 				final String arrayListShort = arrayListType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-				
+
 				bodyBuilder.appendFormalLine(listShort + " dependencies = new " + arrayListShort + "();");
 				listAdded = true;
 			}
@@ -502,7 +502,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "id"));
 		final AnnotationMetadataBuilder pathVariableAnnotation = new AnnotationMetadataBuilder(PATH_VARIABLE, attributes);
 
-		final List<AnnotatedJavaType> parameterTypes = Arrays.asList(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()), new AnnotatedJavaType(MODEL)); 
+		final List<AnnotatedJavaType> parameterTypes = Arrays.asList(new AnnotatedJavaType(javaTypePersistenceMetadataHolder.getIdentifierType(), pathVariableAnnotation.build()), new AnnotatedJavaType(MODEL));
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("id"), new JavaSymbolName("uiModel"));
 
 		final List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -554,23 +554,23 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			annotations.add(new AnnotationMetadataBuilder(MODEL_ATTRIBUTE, attributes));
 
 			final JavaType returnType = new JavaType(COLLECTION.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(type));
-			
+
 			final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, bodyBuilder);
 			methodBuilder.setAnnotations(annotations);
 			methods.add(methodBuilder.build());
 		}
 		return methods;
 	}
-	
+
 	private MethodMetadata getEncodeUrlPathSegmentMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("encodeUrlPathSegment");
 		if (methodExists(methodName)) {
 			return null;
 		}
-		
+
 		final List<JavaType> parameterTypes = Arrays.asList(JavaType.STRING, new JavaType("javax.servlet.http.HttpServletRequest"));
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("pathSegment"), new JavaSymbolName("httpServletRequest"));
-		
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("String enc = httpServletRequest.getCharacterEncoding();");
 		bodyBuilder.appendFormalLine("if (enc == null) {");
@@ -584,10 +584,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (" + new JavaType("java.io.UnsupportedEncodingException").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " uee) {}");
 		bodyBuilder.appendFormalLine("return pathSegment;");
-		
+
 		return new MethodMetadataBuilder(getId(), 0, methodName, JavaType.STRING, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder).build();
 	}
-	
+
 	private MethodMetadata getDateTimeFormatHelperMethod() {
 		final JavaSymbolName methodName = new JavaSymbolName("addDateTimeFormatPatterns");
 		if (methodExists(methodName)) {
@@ -614,11 +614,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	private boolean methodExists(final JavaSymbolName methodName) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName) != null;
 	}
 
+	@Override
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

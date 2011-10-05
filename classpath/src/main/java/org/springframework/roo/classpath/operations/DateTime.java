@@ -8,20 +8,20 @@ import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Provides date format options for {@link Date} and {@link Calendar} types.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
 public enum DateTime {
-	SHORT('S'), 
-	MEDIUM('M'), 
+	SHORT('S'),
+	MEDIUM('M'),
 	NONE('-');
 	// Disabled due to incompatibility between Dojo and JDK dateformat handling
 	// LONG('L'), FULL('F');
-	
+
 	private char shortKey;
 
-	private DateTime(char shortKey) {
+	private DateTime(final char shortKey) {
 		this.shortKey = shortKey;
 	}
 
@@ -30,13 +30,13 @@ public enum DateTime {
 	}
 
 	/**
-	 * This method will return the DateTime style for the character of the style argument. If no style 
+	 * This method will return the DateTime style for the character of the style argument. If no style
 	 * is recognized it will return DateFormat.SHORT.
-	 * 
+	 *
 	 * @param style the date or time style, ie 'S'
 	 * @return the DateTime style.
 	 */
-	public static int parseDateFormat(char style) {
+	public static int parseDateFormat(final char style) {
 		switch (style) {
 		case 'M':
 			return DateFormat.MEDIUM;
@@ -50,13 +50,13 @@ public enum DateTime {
 	}
 
 	/**
-	 * This method will return the DateTime style for the character of the style argument. 
+	 * This method will return the DateTime style for the character of the style argument.
 	 * For example style of '-' will return DateTime.NULL.
-	 * 
+	 *
 	 * @param style the date or time style, ie 'S'
 	 * @return the DateTime style for the provided style argument
 	 */
-	public static DateTime parseDateTimeFormat(char style) {
+	public static DateTime parseDateTimeFormat(final char style) {
 		switch (style) {
 		case 'S':
 			return DateTime.SHORT;
@@ -69,6 +69,7 @@ public enum DateTime {
 		return DateTime.NONE;
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("name", name());

@@ -19,7 +19,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
  * Implementation of {@link AddOnFeedbackOperations}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.1
@@ -35,24 +35,24 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 	@Reference private UaaRegistrationService registrationService;
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private BundleContext bundleContext;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		this.bundleContext = context.getBundleContext();
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		this.bundleContext = null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public void feedbackBundle(BundleSymbolicName bsn, Rating rating, String comment) {
+	public void feedbackBundle(final BundleSymbolicName bsn, final Rating rating, String comment) {
 		Assert.notNull(bsn, "Bundle symbolic name required");
 		Assert.notNull(rating, "Rating required");
 		Assert.isTrue(comment == null || comment.length() <= 140, "Comment must be under 140 characters");
 		if ("".equals(comment)) {
 			comment = null;
 		}
-		
+
 		// Figure out the HTTP URL we'll get "GET"ing in order to submit the user's feedback
 		URL httpUrl;
 		try {
@@ -60,14 +60,14 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		} catch (MalformedURLException shouldNeverHappen) {
 			throw new IllegalStateException(shouldNeverHappen);
 		}
-		
+
 		// Fail early if we're not allowed GET this URL due to UAA restrictions
 		String failureMessage = urlInputStreamService.getUrlCannotBeOpenedMessage(httpUrl);
 		if (failureMessage != null) {
 			logger.warning(failureMessage);
 			return;
 		}
-		
+
 		// To get this far, there is no reason we shouldn't be able to store this user's feedback
 		JSONObject o = new JSONObject();
 		o.put("version", UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getPatchVersion());
@@ -76,14 +76,14 @@ public class AddOnFeedbackOperationsImpl implements AddOnFeedbackOperations {
 		o.put("rating", rating.getKey());
 		o.put("comment", comment == null ? "" : JSONObject.escape(comment));
 		String customJson = o.toJSONString();
-		
+
 		// Register the feedback. Note we record all feedback against the BSN for the RooBot client add-on to assist simple server-side detection.
 		// We do NOT record feedback against the BSN that is receiving the feedback (as the BSN receiving the feedback is stored inside the custom JSON).
 		registrationService.registerBundleSymbolicNameUse(BundleFindingUtils.findFirstBundleForTypeName(bundleContext, AddOnRooBotOperations.class.getName()), customJson);
-		
+
 		// Push the feedback up to the server now if possible
 		registrationService.requestTransmission();
-		
+
 		logger.info("Thanks for sharing your feedback.");
 	}
 }

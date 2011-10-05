@@ -13,37 +13,37 @@ import org.springframework.roo.support.util.IOUtils;
 /**
  * Wraps an {@link OutputStream} and automatically passes each line to the {@link Logger}
  * when {@link OutputStream#flush()} or {@link OutputStream#close()} is called.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public class LoggingOutputStream extends OutputStream {
-	
+
 	// Constants
 	protected static final Logger LOGGER = HandlerUtils.getLogger(LoggingOutputStream.class);
-	
+
 	// Fields
 	private final Level level;
 	private String sourceClassName = LoggingOutputStream.class.getName();
 	private int count;
 	private ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	
+
 	/**
 	 * Constructor
 	 *
 	 * @param level the level at which to log (required)
 	 */
-	public LoggingOutputStream(Level level) {
+	public LoggingOutputStream(final Level level) {
 		Assert.notNull(level, "A logging level is required");
 		this.level = level;
 	}
-	
+
 	@Override
-	public void write(int b) throws IOException {
+	public void write(final int b) throws IOException {
 		baos.write(b);
 		count++;
 	}
-	
+
 	@Override
 	public void flush() throws IOException {
 		if (count > 0) {
@@ -69,7 +69,7 @@ public class LoggingOutputStream extends OutputStream {
 		return sourceClassName;
 	}
 
-	public void setSourceClassName(String sourceClassName) {
+	public void setSourceClassName(final String sourceClassName) {
 		this.sourceClassName = sourceClassName;
 	}
 }

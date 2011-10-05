@@ -15,12 +15,12 @@ public class GwtRequestMetadata extends AbstractMetadataItem{
 	// Fields
 	private final String requestTypeContents;
 
-	public GwtRequestMetadata(String id, String requestTypeContents) {
+	public GwtRequestMetadata(final String id, final String requestTypeContents) {
 		super(id);
 		this.requestTypeContents = requestTypeContents;
 	}
 
-	public GwtRequestMetadata(JavaType javaType, String requestTypeContents) {
+	public GwtRequestMetadata(final JavaType javaType, final String requestTypeContents) {
 		super(createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		this.requestTypeContents = requestTypeContents;
 	}
@@ -29,20 +29,20 @@ public class GwtRequestMetadata extends AbstractMetadataItem{
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(final Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		GwtRequestMetadata that = (GwtRequestMetadata) o;

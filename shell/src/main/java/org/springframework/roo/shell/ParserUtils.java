@@ -7,33 +7,33 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Utilities for parsing.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class ParserUtils {
-	
+
 	private ParserUtils() {}
-	
+
 	/**
 	 * Converts a particular buffer into a tokenized structure.
-	 * 
+	 *
 	 * <p>
 	 * Properly treats double quotes (") as option delimiters.
-	 * 
+	 *
 	 * <p>
 	 * Expects option names to be preceded by a single or double dash. We call this an "option marker".
-	 * 
+	 *
 	 * <p>
 	 * Treats spaces as the default option tokenizer.
-	 * 
+	 *
 	 * <p>
 	 * Any token without an option marker is considered the default. The default is returned in the Map as an element with an empty string key (""). There can only be a single default.
-	 * 
+	 *
 	 * @param remainingBuffer to tokenize
 	 * @return a Map where keys are the option names (minus any dashes) and values are the option values (any double-quotes are removed)
 	 */
-	public static Map<String, String> tokenize(String remainingBuffer) {
+	public static Map<String, String> tokenize(final String remainingBuffer) {
 		Assert.notNull(remainingBuffer, "Remaining buffer cannot be null, although it can be empty");
 		Map<String, String> result = new LinkedHashMap<String, String>();
 		StringBuilder currentOption = new StringBuilder();
@@ -62,13 +62,13 @@ public class ParserUtils {
 				String tokenLessDelimiters = currentToken.substring(1, currentToken.length() - 1);
 				currentValue.append(tokenLessDelimiters);
 
-				// Store this token 
+				// Store this token
 				store(result, currentOption, currentValue);
 				currentOption = new StringBuilder();
 				currentValue = new StringBuilder();
 				continue;
 			}
-			
+
 			if (inQuotes) {
 				// We're only interested in this token series ending
 				if (currentToken.endsWith("\"")) {
@@ -165,8 +165,8 @@ public class ParserUtils {
 
 		return result;
 	}
-	
-	private static void store(Map<String, String> results, StringBuilder currentOption, StringBuilder currentValue) {
+
+	private static void store(final Map<String, String> results, final StringBuilder currentOption, final StringBuilder currentValue) {
 		if (currentOption.length() > 0) {
 			// There is an option marker
 			String option = currentOption.toString();

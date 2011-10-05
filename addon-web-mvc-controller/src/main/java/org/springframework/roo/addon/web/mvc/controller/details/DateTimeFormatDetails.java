@@ -2,7 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller.details;
 
 /**
  * Simple detail holder for date formats.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 1.1.2
  */
@@ -10,7 +10,7 @@ public class DateTimeFormatDetails {
 
 	/**
 	 * Factory method for a {@link DateTimeFormatDetails} with the given style
-	 * 
+	 *
 	 * @param style the style to set (can be <code>null</code>)
 	 * @return a non-<code>null</code> instance
 	 */
@@ -22,7 +22,7 @@ public class DateTimeFormatDetails {
 
 	/**
 	 * Factory method for a {@link DateTimeFormatDetails} with the given pattern
-	 * 
+	 *
 	 * @param the pattern to set (can be <code>null</code>)
 	 * @return a non-<code>null</code> instance
 	 */
@@ -31,11 +31,11 @@ public class DateTimeFormatDetails {
 		instance.pattern = pattern;
 		return instance;
 	}
-	
+
 	// Fields
 	public String style;
 	public String pattern;
-	
+
 	@Override
 	public String toString() {
 		// For debugging

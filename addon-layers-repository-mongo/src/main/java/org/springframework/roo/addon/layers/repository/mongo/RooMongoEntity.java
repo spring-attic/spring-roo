@@ -8,22 +8,22 @@ import java.math.BigInteger;
 
 /**
  * Marks the annotated type as a Spring Data Mongo domain entity.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooMongoEntity {
-	
+
 	/**
 	 * The name of this annotation's attribute that specifies the managed domain
 	 * type.
 	 */
 	String ID_TYPE_ATTRIBUTE = "identifierType";
-	
+
 	/**
-	 * 
+	 *
 	 * @return the class of identifier that should be used (defaults to {@link BigInteger}; must be provided)
 	 */
 	Class<?> identifierType() default BigInteger.class;

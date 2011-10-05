@@ -36,13 +36,13 @@ import org.springframework.roo.model.JavaType;
  * @since 1.2.0
  */
 public class EntityLayerProviderTest {
-	
+
 	// Constants
 	private static final String CALLER_MID = "MID:caller#com.example.MyService";
-	
+
 	// Maps the supported entity methods to their test parameter names
 	private static final Map<MethodMetadataCustomDataKey, List<String>> METHODS = new HashMap<MethodMetadataCustomDataKey, List<String>>();
-	
+
 	static {
 		METHODS.put(CLEAR_METHOD, Collections.<String>emptyList());
 		METHODS.put(COUNT_ALL_METHOD, Collections.<String>emptyList());
@@ -65,14 +65,14 @@ public class EntityLayerProviderTest {
 	@Mock private JpaCrudAnnotationValues mockAnnotationValues;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private PluralMetadata mockPluralMetadata;
-	
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		when(mockTargetEntity.getFullyQualifiedTypeName()).thenReturn("com.example.Pizza");
 		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 		this.pluralId = PluralMetadata.createIdentifier(mockTargetEntity);
-		
+
 		this.layerProvider = new EntityLayerProvider();
 		this.layerProvider.setEntityMetadataProvider(mockEntityMetadataProvider);
 		this.layerProvider.setMetadataService(mockMetadataService);
@@ -86,81 +86,81 @@ public class EntityLayerProviderTest {
 		when(mockMetadataService.get(pluralId)).thenReturn(mockPluralMetadata);
 		when(mockPluralMetadata.getPlural()).thenReturn(plural);
 	}
-	
+
 	@Test
 	public void testGetAdditionsWhenEntityAnnotationValuesNotAvailable() {
 		// Set up
 		when(mockEntityMetadataProvider.getAnnotationValues(mockTargetEntity)).thenReturn(null);
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertNull(additions);
 	}
-	
+
 	@Test
 	public void testGetAdditionsWhenGovernorPluralMetadataIsNull() {
 		setUpMockAnnotationValues();
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertNull(additions);
 	}
-	
+
 	@Test
 	public void testGetAdditionsWhenGovernorPluralIsEmpty() {
 		// Set up
 		setUpMockAnnotationValues();
 		setUpPlural("");
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertNull(additions);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForBogusMethod() {
 		// Set up
 		setUpMockAnnotationValues();
 		setUpPlural("anything");
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, "bogus", mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertNull(additions);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForMethodAnnotatedWithEmptyName() {
 		// Set up
 		setUpMockAnnotationValues();
 		when(mockAnnotationValues.getFindAllMethod()).thenReturn("");
 		setUpPlural("anything");
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertNull(additions);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForMethodAnnotatedWithNonEmptyName() {
 		// Set up
 		setUpMockAnnotationValues();
 		when(mockAnnotationValues.getFindAllMethod()).thenReturn("getAll");
 		setUpPlural("Pizzas");
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = layerProvider.getMemberTypeAdditions(CALLER_MID, FIND_ALL_METHOD.name(), mockTargetEntity, mockIdType);
-		
+
 		// Check
 		assertEquals("getAllPizzas", additions.getMethodName());
 	}

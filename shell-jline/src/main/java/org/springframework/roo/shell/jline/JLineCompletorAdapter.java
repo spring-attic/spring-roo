@@ -10,22 +10,22 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * An implementation of JLine's {@link Completor} interface that delegates to ROO's {@link SimpleParser}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class JLineCompletorAdapter implements Completor {
-	
+
 	// Fields
-	private Parser simpleParser;
-	
-	public JLineCompletorAdapter(Parser simpleParser) {
+	private final Parser simpleParser;
+
+	public JLineCompletorAdapter(final Parser simpleParser) {
 		Assert.notNull(simpleParser, "Simple Parser required");
 		this.simpleParser = simpleParser;
 	}
 
 	@SuppressWarnings("all")
-	public int complete(String buffer, int cursor, List candidates) {
+	public int complete(final String buffer, final int cursor, final List candidates) {
 		int result;
 		try {
 			JLineLogHandler.cancelRedrawProhibition();

@@ -77,7 +77,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 	public FieldMatcher(final CustomDataKey<FieldMetadata> customDataKey, final AnnotationMetadata... annotations) {
 		this(customDataKey, Arrays.asList(annotations));
 	}
-	
+
 	/**
 	 * Constructor for matching on any of the given annotations
 	 *
@@ -93,7 +93,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 		}
 	}
 
-	public List<FieldMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+	public List<FieldMetadata> matches(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
 			for (FieldMetadata field : memberHoldingTypeDetails.getDeclaredFields()) {
@@ -105,11 +105,11 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 		return fields;
 	}
 
-	public Object getTagValue(FieldMetadata field) {
+	public Object getTagValue(final FieldMetadata field) {
 		return getAttributeMap(field);
 	}
 
-	private Map<String, Object> getAttributeMap(FieldMetadata field) {
+	private Map<String, Object> getAttributeMap(final FieldMetadata field) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		AnnotationMetadata annotationMetadata = getMatchingAnnotation(field);
 		if (annotationMetadata != null) {
@@ -123,7 +123,7 @@ public class FieldMatcher implements Matcher<FieldMetadata> {
 	/**
 	 * Returns the first annotation of the given field that matches any of this
 	 * matcher's target annotations
-	 * 
+	 *
 	 * @param field the field whose annotations are to be checked (required)
 	 * @return
 	 */

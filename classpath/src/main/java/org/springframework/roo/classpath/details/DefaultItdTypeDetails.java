@@ -20,12 +20,12 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Default representation of an {@link ItdTypeDetails}.
- * 
+ *
  * <p>
  * Provides a basic {@link #hashCode()} that is used for detecting significant
  * changes in {@link AbstractItdMetadataProvider} and avoiding downstream
  * notifications accordingly.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
@@ -34,7 +34,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 
 	// Constants
 	static final PhysicalTypeCategory PHYSICAL_TYPE_CATEGORY = PhysicalTypeCategory.ITD;
-	
+
 	// Fields
 	private final boolean privilegedAspect;
 	private final ClassOrInterfaceTypeDetails governor;
@@ -48,7 +48,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 	private final List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private final List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
 	private final Set<JavaType> registeredImports = new HashSet<JavaType>();
-	
+
 	/**
 	 * Constructor (package protected to enforce the use of the corresponding builder)
 	 *
@@ -86,15 +86,15 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 		final Collection<? extends DeclaredFieldAnnotationDetails> fieldAnnotations,
 		final Collection<? extends DeclaredMethodAnnotationDetails> methodAnnotations,
 		final Collection<ClassOrInterfaceTypeDetails> innerTypes) {
-		
+
 		super(customData, declaredByMetadataId, modifier, typeAnnotations);
 		Assert.notNull(aspect, "Aspect required");
 		Assert.notNull(governor, "Governor (to receive the introductions) required");
-		
+
 		this.aspect = aspect;
 		this.governor = governor;
 		this.privilegedAspect = privilegedAspect;
-		
+
 		CollectionUtils.populate(this.declaredConstructors, declaredConstructors);
 		CollectionUtils.populate(this.declaredFields, declaredFields);
 		CollectionUtils.populate(this.declaredMethods, declaredMethods);
@@ -105,7 +105,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 		CollectionUtils.populate(this.methodAnnotations, methodAnnotations);
 		CollectionUtils.populate(this.registeredImports, registeredImports);
 	}
-	
+
 	public Set<JavaType> getRegisteredImports() {
 		return Collections.unmodifiableSet(registeredImports);
 	}
@@ -117,11 +117,11 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 	public JavaType getName() {
 		return governor.getName();
 	}
-	
+
 	public ClassOrInterfaceTypeDetails getGovernor() {
 		return governor;
 	}
-	
+
 	public JavaType getAspect() {
 		return aspect;
 	}
@@ -133,11 +133,11 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 	public List<? extends ConstructorMetadata> getDeclaredConstructors() {
 		return Collections.unmodifiableList(declaredConstructors);
 	}
-	
+
 	public List<FieldMetadata> getDeclaredFields() {
 		return Collections.unmodifiableList(declaredFields);
 	}
-	
+
 	public List<MethodMetadata> getDeclaredMethods() {
 		return Collections.unmodifiableList(declaredMethods);
 	}
@@ -173,7 +173,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 	public boolean extendsType(final JavaType type) {
 		return this.extendsTypes.contains(type);
 	}
-	
+
 	public boolean implementsAny(final JavaType... types) {
 		for (final JavaType type : types) {
 			if (this.implementsTypes.contains(type)) {
@@ -192,7 +192,7 @@ public class DefaultItdTypeDetails extends AbstractMemberHoldingTypeDetails impl
 		hash *= new ItdSourceFileComposer(this).getOutput().hashCode();
 		return hash;
 	}
-	
+
 	private int includeCustomDataHash(final Collection<? extends CustomDataAccessor> coll) {
 		int result = 1;
 		for (final CustomDataAccessor accessor : coll) {

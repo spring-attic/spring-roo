@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Creates JavaBean accessors and mutators for fields declared against this type.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */

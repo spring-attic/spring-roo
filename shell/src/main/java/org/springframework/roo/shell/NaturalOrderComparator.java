@@ -25,17 +25,17 @@ import java.util.Comparator;
  * 3. This notice may not be removed or altered from any source distribution.
  */
 public class NaturalOrderComparator<E> implements Comparator<E> {
-	
+
 	/**
 	 * Returns the character at the given position of the given string;
 	 * equivalent to {@link String#charAt(int)}, but handles overly large
 	 * indices.
-	 * 
+	 *
 	 * @param s the string to read (can't be <code>null</code>)
 	 * @param i the index at which to read (zero-based)
 	 * @return 0 if the given index is beyond the end of the string
 	 */
-	static char charAt(String s, int i) {
+	static char charAt(final String s, final int i) {
 		if (i >= s.length()) {
 			return 0;
 		}
@@ -44,11 +44,11 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 
 	/**
 	 * Indicates whether the given character is whitespace
-	 * 
+	 *
 	 * @param c the character to check
 	 * @return see above
 	 */
-	public static boolean isSpace(char c) {
+	public static boolean isSpace(final char c) {
 		switch (c) {
 			case ' ':
 				return true;
@@ -64,8 +64,8 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 				return false;
 		}
 	}
-	
-	int compareRight(String a, String b) {
+
+	int compareRight(final String a, final String b) {
 		int bias = 0;
 		int ia = 0;
 		int ib = 0;
@@ -97,11 +97,11 @@ public class NaturalOrderComparator<E> implements Comparator<E> {
 		}
 	}
 
-	protected String stringify(E object) {
+	protected String stringify(final E object) {
 		return object.toString();
 	}
 
-	public int compare(E o1, E o2) {
+	public int compare(final E o1, final E o2) {
 		if (o1 == null && o2 == null) {
 			return 1;
 		}

@@ -17,20 +17,20 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class RepositoryJpaCommands implements CommandMarker {
-	
+
 	@Reference private RepositoryJpaOperations repositoryJpaOperations;
-	
+
 	@CliAvailabilityIndicator("repository jpa")
 	public boolean isRepositoryCommandAvailable() {
 		return repositoryJpaOperations.isRepositoryCommandAvailable();
 	}
-	
-	@CliCommand(value = "repository jpa", help = "Adds @RooRepositoryJpa annotation to target type") 
+
+	@CliCommand(value = "repository jpa", help = "Adds @RooRepositoryJpa annotation to target type")
 	public void repository(
-		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") JavaType interfaceType,
+		@CliOption(key = "interface", mandatory = true, help = "The java interface to apply this annotation to") final JavaType interfaceType,
 		@CliOption(key = "class", mandatory = false, help = "Implementation class for the specified interface") JavaType classType,
-		@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this repository should expose") JavaType domainType) {
-		
+		@CliOption(key = "entity", unspecifiedDefaultValue = "*", optionContext = "update,project", mandatory = false, help = "The domain entity this repository should expose") final JavaType domainType) {
+
 		if (classType == null) {
 			classType = new JavaType(interfaceType.getFullyQualifiedTypeName() + "Impl");
 		}

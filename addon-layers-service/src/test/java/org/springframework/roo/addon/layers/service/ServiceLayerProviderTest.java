@@ -38,20 +38,20 @@ public class ServiceLayerProviderTest {
 	private static final String BOGUS_METHOD = "bogus";
 	private static final String CALLER_MID = "MID:anything#com.example.web.PersonController";
 	private static final String SERVICE_MID = "MID:anything#com.example.serv.PersonService";
-	
+
 	// Fixture
-	
+
 	// -- Mocks
 	@Mock private JavaType mockTargetType;
 	@Mock private JavaType mockIdType;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private ServiceAnnotationValuesFactory mockServiceAnnotationValuesFactory;
 	@Mock private ServiceInterfaceLocator mockServiceInterfaceLocator;
-	
+
 	// -- Others
 	private ServiceLayerProvider provider;
 	private String pluralId;
-	
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -59,18 +59,18 @@ public class ServiceLayerProviderTest {
 		this.provider.setMetadataService(mockMetadataService);
 		this.provider.setServiceAnnotationValuesFactory(mockServiceAnnotationValuesFactory);
 		this.provider.setServiceInterfaceLocator(mockServiceInterfaceLocator);
-		
+
 		when(mockTargetType.getFullyQualifiedTypeName()).thenReturn("com.example.domain.Person");
 		when(mockIdType.getFullyQualifiedTypeName()).thenReturn(Long.class.getName());
 		when(mockTargetType.getSimpleTypeName()).thenReturn("Person");
 		this.pluralId = PluralMetadata.createIdentifier(mockTargetType);
 	}
-	
+
 	/**
 	 * Sets up a mock {@link ClassOrInterfaceTypeDetails} for a service
 	 * interface whose {@link RooService} annotation specifies the following
 	 * method names
-	 * 
+	 *
 	 * @param findAllMethod can be blank
 	 * @param saveMethod can be blank
 	 * @param updateMethod can be blank
@@ -81,7 +81,7 @@ public class ServiceLayerProviderTest {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
 		final JavaType mockServiceType = mock(JavaType.class);
 		final ServiceAnnotationValues mockServiceAnnotationValues = mock(ServiceAnnotationValues.class);
-		
+
 		when(mockServiceType.getSimpleTypeName()).thenReturn("PersonService");
 		when(mockServiceInterface.getName()).thenReturn(mockServiceType);
 		when(mockServiceInterface.getDeclaredByMetadataId()).thenReturn(SERVICE_MID);
@@ -90,14 +90,14 @@ public class ServiceLayerProviderTest {
 		when(mockServiceAnnotationValues.getSaveMethod()).thenReturn(saveMethod);
 		when(mockServiceAnnotationValues.getUpdateMethod()).thenReturn(updateMethod);
 		when(mockServiceAnnotationValuesFactory.getInstance(mockServiceInterface)).thenReturn(mockServiceAnnotationValues);
-		
+
 		return mockServiceInterface;
 	}
-	
+
 	/**
 	 * Sets up the mock {@link MetadataService} to return the given plural text
 	 * for our test entity type.
-	 * 
+	 *
 	 * @param plural can be <code>null</code>
 	 */
 	private void setUpPluralMetadata(final String plural) {
@@ -105,11 +105,11 @@ public class ServiceLayerProviderTest {
 		when(mockPluralMetadata.getPlural()).thenReturn(plural);
 		when(mockMetadataService.get(pluralId)).thenReturn(mockPluralMetadata);
 	}
-	
+
 	/**
 	 * Asserts that asking the {@link ServiceLayerProvider} for a method with
 	 * the given name and parameters results in the given method signature
-	 * 
+	 *
 	 * @param plural
 	 * @param mockServiceInterfaces can be empty
 	 * @param methodId
@@ -120,10 +120,10 @@ public class ServiceLayerProviderTest {
 		// Set up
 		setUpPluralMetadata(plural);
 		when(mockServiceInterfaceLocator.getServiceInterfaces(mockTargetType)).thenReturn(mockServiceInterfaces);
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, methodId, mockTargetType, mockIdType, methodParameters);
-		
+
 		// Check
 		if (expectedMethodSignature == null) {
 			assertNull("Expected no additions but found: " + additions, additions);
@@ -132,90 +132,90 @@ public class ServiceLayerProviderTest {
 			assertEquals(expectedMethodSignature, additions.getMethodCall());
 		}
 	}
-	
+
 	@Test
 	public void testGetAdditionsForEntityWithNullPluralMetadata() {
 		// Set up
 		when(mockMetadataService.get(pluralId)).thenReturn(null);
-		
+
 		// Invoke
 		final MemberTypeAdditions additions = this.provider.getMemberTypeAdditions(CALLER_MID, BOGUS_METHOD, mockTargetType, mockIdType);
-		
+
 		// Check
-		assertNull(additions);		
+		assertNull(additions);
 	}
 
 	@Test
 	public void testGetAdditionsForEntityWithNullPluralText() {
 		assertAdditions(null, Arrays.<ClassOrInterfaceTypeDetails>asList(), FIND_ALL.getKey(), null);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForEntityWithNoServices() {
 		assertAdditions("x", Arrays.<ClassOrInterfaceTypeDetails>asList(), BOGUS_METHOD, null);
 	}
-	
+
 	@Test
 	public void testGetAdditionsWhenServiceAnnotationValuesUnavailable() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
 		assertAdditions("anything", Arrays.asList(mockServiceInterface), BOGUS_METHOD, null);
-	}	
-	
+	}
+
 	@Test
 	public void testGetAdditionsForBogusMethod() {
-		final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);		
+		final ClassOrInterfaceTypeDetails mockServiceInterface = mock(ClassOrInterfaceTypeDetails.class);
 		assertAdditions("x", Arrays.asList(mockServiceInterface), BOGUS_METHOD, null);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForFindAllMethodWhenServiceProvidesIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("findPerson", "", "x", "x");
-		assertAdditions("s", Arrays.asList(mockServiceInterface), FIND_ALL.getKey(), "personService.findPersons()");		
+		assertAdditions("s", Arrays.asList(mockServiceInterface), FIND_ALL.getKey(), "personService.findPersons()");
 	}
-	
+
 	@Test
 	public void testGetAdditionsForFindAllMethodWhenServiceDoesNotProvideIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("", "x", "x", "x");
 		assertAdditions("x", Arrays.asList(mockServiceInterface), FIND_ALL.getKey(), null);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForSaveMethodWhenServiceProvidesIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "save", "x", "x");
 		final MethodParameter methodParameter = new MethodParameter(mockTargetType, "user");
 		assertAdditions("x", Arrays.asList(mockServiceInterface), SAVE.getKey(), "personService.savePerson(user)", methodParameter);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForSaveMethodWhenServiceDoesNotProvideIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", null, "x", "x");
 		final MethodParameter methodParameter = new MethodParameter(mockTargetType, "anything");
 		assertAdditions("x", Arrays.asList(mockServiceInterface), SAVE.getKey(), null, methodParameter);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForUpdateMethodWhenServiceProvidesIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "change", "x");
 		final MethodParameter methodParameter = new MethodParameter(mockTargetType, "bob");
 		assertAdditions("x", Arrays.asList(mockServiceInterface), UPDATE.getKey(), "personService.changePerson(bob)", methodParameter);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForUpdateMethodWhenServiceDoesNotProvideIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "", "x");
 		final MethodParameter methodParameter = new MethodParameter(mockTargetType, "employee");
 		assertAdditions("x", Arrays.asList(mockServiceInterface), UPDATE.getKey(), null, methodParameter);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForFindEntriesMethodWhenServiceProvidesIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "x", "locate");
 		assertAdditions("z", Arrays.asList(mockServiceInterface), FIND_ENTRIES.getKey(), "personService.locatePersonEntries(start, count)", START_PARAMETER, SIZE_PARAMETER);
 	}
-	
+
 	@Test
 	public void testGetAdditionsForFindEntriesMethodWhenServiceDoesNotProvideIt() {
 		final ClassOrInterfaceTypeDetails mockServiceInterface = getMockService("x", "x", "x", "");
 		assertAdditions("x", Arrays.asList(mockServiceInterface), FIND_ENTRIES.getKey(), null, START_PARAMETER, SIZE_PARAMETER);
-	}	
+	}
 }

@@ -12,7 +12,7 @@ import org.springframework.roo.shell.MethodTarget;
 
 /**
  * Provides conversion to and from {@link Path}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -21,8 +21,8 @@ import org.springframework.roo.shell.MethodTarget;
 public class PathConverter implements Converter<Path> {
 
 	// Fields
-	private SortedSet<String> legalValues = new TreeSet<String>();
-	
+	private final SortedSet<String> legalValues = new TreeSet<String>();
+
 	public PathConverter() {
 		legalValues.add(Path.ROOT.getName());
 		legalValues.add(Path.SRC_MAIN_JAVA.getName());
@@ -32,21 +32,21 @@ public class PathConverter implements Converter<Path> {
 		legalValues.add(Path.SRC_TEST_RESOURCES.getName());
 		legalValues.add(Path.SPRING_CONFIG_ROOT.getName());
 	}
-	
-	// TODO: Allow context to limit to source paths only, limit to resource paths only 
-	public Path convertFromText(String value, Class<?> requiredType, String optionContext) {
+
+	// TODO: Allow context to limit to source paths only, limit to resource paths only
+	public Path convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value) || !legalValues.contains(value)) {
 			return null;
 		}
-		
+
 		return new Path(value);
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return Path.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		for (String candidate : legalValues) {
 			if ("".equals(existingData) || candidate.startsWith(existingData)) {
 				completions.add(candidate);

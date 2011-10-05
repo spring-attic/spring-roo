@@ -19,19 +19,19 @@ public class MethodMetadataCustomDataKey extends InvocableMemberMetadataCustomDa
 	private JavaSymbolName methodName;
 	private String name;
 
-	public MethodMetadataCustomDataKey(Integer modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, JavaType returnType, JavaSymbolName methodName) {
+	public MethodMetadataCustomDataKey(final Integer modifier, final List<AnnotationMetadata> annotations, final List<AnnotatedJavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final List<JavaType> throwsTypes, final JavaType returnType, final JavaSymbolName methodName) {
 		super(modifier, annotations, parameterTypes, parameterNames, throwsTypes);
 		this.returnType = returnType;
 		this.methodName = methodName;
 	}
 
-	public MethodMetadataCustomDataKey(String tag) {
+	public MethodMetadataCustomDataKey(final String tag) {
 		super();
 		this.name = tag;
 	}
 
 	@Override
-	public boolean meets(MethodMetadata methodMetadata) throws IllegalStateException {
+	public boolean meets(final MethodMetadata methodMetadata) throws IllegalStateException {
 		// TODO: Add in validation logic for returnType, methodName
 		return super.meets(methodMetadata);
 	}

@@ -29,13 +29,13 @@ import org.springframework.roo.support.util.Assert;
 /**
  * Abstract implementation of {@link ItdTypeDetailsProvidingMetadataItem}, which assumes the subclass will require
  * a non-null {@link ClassOrInterfaceTypeDetails} representing the governor and wishes to build an ITD via the
- * {@link ItdTypeDetailsBuilder} mechanism. 
- * 
+ * {@link ItdTypeDetailsBuilder} mechanism.
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadataItem implements ItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Fields
 	protected ClassOrInterfaceTypeDetails governorTypeDetails;
 	protected ItdTypeDetails itdTypeDetails;
@@ -43,27 +43,27 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected JavaType destination;
 	protected JavaType aspectName;
 	protected PhysicalTypeMetadata governorPhysicalTypeMetadata;
-	
+
 	/**
 	 * Validates input and constructs a superclass that implements {@link ItdTypeDetailsProvidingMetadataItem}.
-	 * 
+	 *
 	 * <p>
 	 * Exposes the {@link ClassOrInterfaceTypeDetails} of the governor, if available. If they are not available, ensures
 	 * {@link #isValid()} returns false.
-	 * 
+	 *
 	 * <p>
 	 * Subclasses should generally return immediately if {@link #isValid()} is false. Subclasses should also attempt to set the
 	 * {@link #itdTypeDetails} to contain the output of their ITD where {@link #isValid()} is true.
-	 * 
+	 *
 	 * @param identifier the identifier for this item of metadata (required)
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
 	 */
-	public AbstractItdTypeDetailsProvidingMetadataItem(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public AbstractItdTypeDetailsProvidingMetadataItem(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier);
 		Assert.notNull(aspectName, "Aspect name required");
 		Assert.notNull(governorPhysicalTypeMetadata, "Governor physical type metadata required");
-		
+
 		this.aspectName = aspectName;
 		this.governorPhysicalTypeMetadata = governorPhysicalTypeMetadata;
 
@@ -77,19 +77,19 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		}
 
 		this.destination = governorTypeDetails.getName();
-		
+
 		// Provide the subclass a builder, to make preparing an ITD even easier
 		this.builder = new ItdTypeDetailsBuilder(getId(), governorTypeDetails, aspectName, true);
 	}
-	
+
 	public final ItdTypeDetails getMemberHoldingTypeDetails() {
 		return itdTypeDetails;
 	}
-	
+
 	/**
 	 * Returns the metadata for an annotation of the given type if the governor
 	 * does not already have one.
-	 * 
+	 *
 	 * @param annotationType the type of annotation to generate (required)
 	 * @return <code>null</code> if the governor already has that annotation
 	 */
@@ -102,7 +102,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 
 	/**
 	 * Determines if the presented class (or any of its superclasses) implements the target interface.
-	 * 
+	 *
 	 * @param clazz the cid to search
 	 * @param interfaceTarget the interface to locate
 	 * @return true if the class or any of its superclasses contains the specified interface
@@ -116,10 +116,10 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns the given method of the governor.
-	 * 
+	 *
 	 * @param methodName the name of the method for which to search
 	 * @param parameterTypes the method's parameter types
 	 * @return null if there was no such method
@@ -129,10 +129,10 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName, final JavaType... parameterTypes) {
 		return getGovernorMethod(methodName, Arrays.asList(parameterTypes));
 	}
-	
+
 	/**
 	 * Returns the given method of the governor.
-	 * 
+	 *
 	 * @param methodName the name of the method for which to search
 	 * @param parameterTypes the method's parameter types
 	 * @return null if there was no such method
@@ -142,14 +142,14 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName, final List<JavaType> parameterTypes) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, parameterTypes);
 	}
-	
+
 	protected FieldMetadata getField(final JavaSymbolName fieldName, final JavaType fieldType) {
 		return getField(PRIVATE, fieldName, fieldType, null);
 	}
 
 	/**
 	 * Convenience method for returning a simple private field based on the field name, type, and initializer.
-	 * 
+	 *
 	 * @param fieldName the field name
 	 * @param fieldType the field type
 	 * @param fieldInitializer the string to initialize the field with
@@ -158,7 +158,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected FieldMetadata getField(final int modifier, final JavaSymbolName fieldName, final JavaType fieldType, final String fieldInitializer) {
 		final FieldMetadata field = governorTypeDetails.getField(fieldName);
 		if (field != null) return null;
-		
+
 		addToImports(Arrays.asList(fieldType));
 		final FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), modifier, fieldName, fieldType, fieldInitializer);
 		return fieldBuilder.build();
@@ -167,11 +167,11 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType) {
 		return getAccessorMethod(fieldName, fieldType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("return " + fieldName.getSymbolName() + ";"));
 	}
-	
+
 	protected MethodMetadata getAccessorMethod(final JavaSymbolName fieldName, final JavaType fieldType, final InvocableMemberBodyBuilder bodyBuilder) {
 		return getMethod(PUBLIC, BeanInfoUtils.getAccessorMethodName(fieldName, fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)), fieldType, null, null, bodyBuilder);
 	}
-	
+
 	protected MethodMetadata getMutatorMethod(final JavaSymbolName fieldName, final JavaType parameterType) {
 		return getMutatorMethod(fieldName, parameterType, InvocableMemberBodyBuilder.getInstance().appendFormalLine("this." + fieldName.getSymbolName() + " = " + fieldName.getSymbolName() + ";"));
 	}
@@ -182,7 +182,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 
 	/**
 	 * Returns a public method given the method name, return type, parameter types, parameter names, and method body.
-	 * 
+	 *
 	 * @param methodName the method name
 	 * @param returnType the return type
 	 * @param parameterTypes a list of parameter types
@@ -193,7 +193,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected MethodMetadata getMethod(final int modifier, final JavaSymbolName methodName, final JavaType returnType, final List<JavaType> parameterTypes, final List<JavaSymbolName> parameterNames, final InvocableMemberBodyBuilder bodyBuilder) {
 		final MethodMetadata method = getGovernorMethod(methodName, parameterTypes);
 		if (method != null) return null;
-		
+
 		addToImports(parameterTypes);
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
@@ -209,11 +209,11 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 			}
 		}
 	}
-	
+
 	/**
 	 * Ensures that the governor extends the given type, i.e. introduces that
 	 * type as a supertype iff it's not already one
-	 * 
+	 *
 	 * @param javaType the type to extend (required)
 	 * @since 1.2.0
 	 */
@@ -222,10 +222,10 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 			builder.addExtendsTypes(javaType);
 		}
 	}
-	
+
 	/**
 	 * Ensures that the governor implements the given type.
-	 * 
+	 *
 	 * @param javaType the type to implement (required)
 	 * @since 1.2.0
 	 */
@@ -234,12 +234,13 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 			builder.addImplementsType(javaType);
 		}
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return builder.build().hashCode();
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

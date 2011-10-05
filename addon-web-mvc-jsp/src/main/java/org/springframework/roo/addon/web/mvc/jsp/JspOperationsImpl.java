@@ -55,15 +55,15 @@ import org.w3c.dom.Node;
 
 /**
  * Provides operations to create various view layer resources.
- * 
+ *
  * @author Stefan Schmidt
  * @author Jeremy Grelle
  * @since 1.0
  */
-@Component 
-@Service 
+@Component
+@Service
 public class JspOperationsImpl extends AbstractOperations implements JspOperations {
-	
+
 	// Fields
 	@Reference private BackupOperations backupOperations;
 	@Reference private I18nSupport i18nSupport;
@@ -75,7 +75,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference private WebMvcOperations webMvcOperations;
-	
+
 	public boolean isControllerAvailable() {
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views")) && !fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/faces-config.xml"));
 	}
@@ -83,7 +83,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	private boolean isProjectAvailable() {
 		return projectOperations.isProjectAvailable();
 	}
-	
+
 	public boolean isSetupAvailable() {
 		return isProjectAvailable() && !isControllerAvailable();
 	}
@@ -94,11 +94,11 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 
 	public void installCommonViewArtefacts() {
 		Assert.isTrue(isProjectAvailable(), "Project metadata required");
-		
+
 		if (!isControllerAvailable()) {
 			webMvcOperations.installAllWebMvcArtifacts();
 		}
-		
+
 		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Install tiles config
@@ -142,15 +142,15 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		}
 	}
 
-	public void installView(String path, String viewName, String title, String category) {
+	public void installView(final String path, final String viewName, final String title, final String category) {
 		installView(path, viewName, title, category, null, true);
 	}
 
-	public void installView(String path, String viewName, String title, String category, Document document) {
+	public void installView(final String path, final String viewName, final String title, final String category, final Document document) {
 		installView(path, viewName, title, category, document, true);
 	}
 
-	private void installView(String path, String viewName, String title, String category, Document document, boolean registerStaticController) {
+	private void installView(String path, String viewName, final String title, final String category, Document document, final boolean registerStaticController) {
 		Assert.hasText(path, "Path required");
 		Assert.hasText(viewName, "View name required");
 		Assert.hasText(title, "Title required");
@@ -174,16 +174,16 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 
 	/**
 	 * Creates a new Spring MVC static view.
-	 * 
+	 *
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
 	 * @param folderName the folder name
 	 * @param category the category
 	 * @param registerStaticController whether to register a static controller
 	 */
-	private void installView(JavaSymbolName viewName, String folderName, String title, String category, boolean registerStaticController) {
+	private void installView(final JavaSymbolName viewName, final String folderName, final String title, final String category, final boolean registerStaticController) {
 		// Probe if common web artifacts exist, and install them if needed
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		
+
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/layouts/default.jspx"))) {
 			installCommonViewArtefacts();
 		}
@@ -208,8 +208,8 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 			}
 		}
 	}
-	
-	public void updateTags(boolean backup) {
+
+	public void updateTags(final boolean backup) {
 		if (backup) {
 			backupOperations.backup();
 		}
@@ -226,11 +226,11 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 	 * <p>
 	 * Request mappings assigned by this method will always commence with "/" and end with "/**". You may present this prefix and/or this suffix if you wish, although it will automatically be added
 	 * should it not be provided.
-	 * 
+	 *
 	 * @param controller the controller class to create (required)
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
 	 */
-	public void createManualController(JavaType controller, String preferredMapping) {
+	public void createManualController(final JavaType controller, String preferredMapping) {
 		Assert.notNull(controller, "Controller Java Type required");
 
 		String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
@@ -261,16 +261,16 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		} else {
 			folderName = folderName.replace("/**", "");
 		}
-		
+
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		
+
 		// Add HTTP get method
 		methods.add(getHttpGetMethod(declaredByMetadataId));
 
 		// Add HTTP post method
 		methods.add(getHttpPostMethod(declaredByMetadataId));
-		
+
 		// Add index method
 		methods.add(getIndexMethod(folderName, declaredByMetadataId));
 
@@ -285,7 +285,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		AnnotationMetadataBuilder controllerAnnotation = new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes);
 		typeAnnotations.add(controllerAnnotation);
-		
+
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(typeAnnotations);
 		typeDetailsBuilder.setDeclaredMethods(methods);
@@ -294,7 +294,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false);
 	}
 
-	private MethodMetadataBuilder getIndexMethod(String folderName, String declaredByMetadataId) {
+	private MethodMetadataBuilder getIndexMethod(final String folderName, final String declaredByMetadataId) {
 		List<AnnotationMetadataBuilder> indexMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		indexMethodAnnotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, new ArrayList<AnnotationAttributeValue<?>>()));
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -304,7 +304,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		return indexMethodBuilder;
 	}
 
-	private MethodMetadataBuilder getHttpPostMethod(String declaredByMetadataId) {
+	private MethodMetadataBuilder getHttpPostMethod(final String declaredByMetadataId) {
 		List<AnnotationMetadataBuilder> postMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> postMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		postMethodAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(REQUEST_METHOD, new JavaSymbolName("POST"))));
@@ -317,7 +317,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		postParamTypes.add(new AnnotatedJavaType(MODEL_MAP));
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
-		
+
 		List<JavaSymbolName> postParamNames = new ArrayList<JavaSymbolName>();
 		postParamNames.add(new JavaSymbolName("id"));
 		postParamNames.add(new JavaSymbolName("modelMap"));
@@ -329,16 +329,16 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		return postMethodBuilder;
 	}
 
-	private MethodMetadataBuilder getHttpGetMethod(String declaredByMetadataId) {
+	private MethodMetadataBuilder getHttpGetMethod(final String declaredByMetadataId) {
 		List<AnnotationMetadataBuilder> getMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> getMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		getMethodAnnotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, getMethodAttributes));
-		
+
 		List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
 		getParamTypes.add(new AnnotatedJavaType(MODEL_MAP));
 		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest")));
 		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse")));
-		
+
 		List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
 		getParamNames.add(new JavaSymbolName("modelMap"));
 		getParamNames.add(new JavaSymbolName("request"));
@@ -371,7 +371,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		if (XmlUtils.findFirstElement("/beans/bean[@id = 'tilesViewResolver']", beans) != null || XmlUtils.findFirstElement("/beans/bean[@id = 'tilesConfigurer']", beans) != null) {
 			return; // Tiles is already configured, nothing to do
 		}
-		
+
 		Document configDoc = getDocumentTemplate("tiles/tiles-mvc-config-template.xml");
 		Element configElement = configDoc.getDocumentElement();
 		List<Element> tilesConfig = XmlUtils.findElements("/config/bean", configElement);
@@ -382,7 +382,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		fileManager.createOrUpdateTextFileIfRequired(mvcConfig, XmlUtils.nodeToString(mvcConfigDocument), true);
 	}
 
-	public void installI18n(I18n i18n) {
+	public void installI18n(final I18n i18n) {
 		Assert.notNull(i18n, "Language choice required");
 
 		if (i18n.getLocale() == null) {
@@ -391,7 +391,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		}
 
 		String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "");
-		
+
 		// Install message bundle
 		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + i18n.getLocale().getLanguage() /*+ country*/ + ".properties";
 		// Special case for english locale (default)
@@ -425,7 +425,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().getLanguage()).addAttribute("label", i18n.getLanguage()).build());
 			fileManager.createOrUpdateTextFileIfRequired(footerFileLocation, XmlUtils.nodeToString(footer), false);
 		}
-		
+
 		// Record use of add-on (most languages are implemented via public add-ons)
 		String bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(context.getBundleContext(), i18n.getClass().getName());
 		if (bundleSymbolicName != null) {

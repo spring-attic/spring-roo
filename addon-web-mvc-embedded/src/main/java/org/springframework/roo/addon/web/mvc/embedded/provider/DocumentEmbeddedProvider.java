@@ -15,15 +15,15 @@ import org.w3c.dom.Element;
 
 /**
  * Provider to embed documents via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		if (url.contains("slideshare.net")) {
 			// Expected format http://www.slideshare.net/schmidtstefan/spring-one2-gx-slides-stefan-schmidt
 			Map<String, String> options = new HashMap<String, String>();
@@ -50,9 +50,9 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
-		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.containsKey("id")) { 
+
+	public boolean install(final String viewName, final Map<String, String> options) {
+		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.containsKey("id")) {
 			return false;
 		}
 		String provider = options.get("provider");
@@ -69,21 +69,22 @@ public class DocumentEmbeddedProvider extends AbstractEmbeddedProvider {
 		installJspx(getViewName(viewName, provider.toLowerCase()), null, document);
 		return true;
 	}
-	
-	private String getSlideShareId(String url) {
+
+	private String getSlideShareId(final String url) {
 		String json = sendHttpGetRequest("http://oohembed.com/oohembed/?url=" + url.replace(":", "%3A"));
 		if (json != null) {
 			String subDoc = json.substring(json.indexOf("doc=") + 4);
 			return subDoc.substring(0, subDoc.indexOf("&") == -1 ? subDoc.length() : subDoc.indexOf("&"));
-		}	
+		}
 		return null;
 	}
-	
+
 	public enum DocumentProvider implements EmbeddedCompletor {
 		GOOGLE_PRESENTATION,
 		SCRIBD,
 		SLIDESHARE;
-		
+
+		@Override
 		public String toString() {
 			ToStringCreator tsc = new ToStringCreator(this);
 			tsc.append("provider", name());

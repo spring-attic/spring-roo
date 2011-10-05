@@ -35,22 +35,22 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MenuOperationsImpl implements MenuOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private XmlRoundTripFileManager xmlRoundTripFileManager;
 
-	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix) {
+	public void addMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemId, final String globalMessageCode, final String link, final String idPrefix) {
 		addMenuItem(menuCategoryName, menuItemId, "", globalMessageCode, link, idPrefix, false);
 	}
 
-	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix) {
+	public void addMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemId, final String menuItemLabel, final String globalMessageCode, final String link, final String idPrefix) {
 		addMenuItem(menuCategoryName, menuItemId, menuItemLabel, globalMessageCode, link, idPrefix, true);
 	}
 
-	private void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix, boolean writeProps) {
+	private void addMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemId, final String menuItemLabel, final String globalMessageCode, final String link, String idPrefix, final boolean writeProps) {
 		Assert.notNull(menuCategoryName, "Menu category name required");
 		Assert.notNull(menuItemId, "Menu item name required");
 		Assert.hasText(link, "Link required");
@@ -94,7 +94,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		xmlRoundTripFileManager.writeToDiskIfNecessary(getMenuFileName(), document);
 	}
 
-	public void cleanUpFinderMenuItems(JavaSymbolName menuCategoryName, List<String> allowedFinderMenuIds) {
+	public void cleanUpFinderMenuItems(final JavaSymbolName menuCategoryName, final List<String> allowedFinderMenuIds) {
 		Assert.notNull(menuCategoryName, "Menu category identifier required");
 		Assert.notNull(allowedFinderMenuIds, "List of allowed menu items required");
 
@@ -115,12 +115,12 @@ public class MenuOperationsImpl implements MenuOperations {
 
 	/**
 	 * Attempts to locate a menu item and remove it.
-	 * 
+	 *
 	 * @param menuCategoryName the identifier for the menu category (required)
 	 * @param menuItemName the menu item identifier (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	public void cleanUpMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String idPrefix) {
+	public void cleanUpMenuItem(final JavaSymbolName menuCategoryName, final JavaSymbolName menuItemName, String idPrefix) {
 		Assert.notNull(menuCategoryName, "Menu category identifier required");
 		Assert.notNull(menuItemName, "Menu item id required");
 

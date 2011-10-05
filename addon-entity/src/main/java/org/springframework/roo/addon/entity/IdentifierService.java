@@ -6,7 +6,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Provides a list of identifier fields that a given {@link JavaType} may require.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -19,7 +19,7 @@ public interface IdentifierService {
 	 * implementation is authoritative for determining identifier fields for the type.
 	 * It is legal to return a non-null list, which would denote an authoritative implementation
 	 * but the type simply has no identifier field requirement.
-	 * 
+	 *
 	 * @param pkType the PK class type for which identifier information is desired (required)
 	 * @return null if the implementation is non-authoritative for the type, otherwise zero
 	 * or more identifiers that the type should have

@@ -18,12 +18,12 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooWebJson} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class WebJsonAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate JavaType jsonObject;
 	@AutoPopulate String showJsonMethod = SHOW_JSON;
@@ -40,7 +40,7 @@ public class WebJsonAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public WebJsonAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public WebJsonAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_WEB_JSON);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

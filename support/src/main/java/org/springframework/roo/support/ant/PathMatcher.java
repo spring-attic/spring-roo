@@ -4,7 +4,7 @@ import java.util.Map;
 
 /**
  * Strategy interface for <code>String</code>-based path matching.
- * 
+ *
  * <p>The default implementation is {@link AntPathMatcher}, supporting the
  * Ant-style pattern syntax.
  *

@@ -60,10 +60,10 @@ import org.w3c.dom.Node;
 @Component
 @Service
 public class SeleniumOperationsImpl implements SeleniumOperations {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
@@ -72,18 +72,18 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMetadataService webMetadataService;
 	@Reference private PersistenceMemberLocator persistenceMemberLocator;
-	
+
 	public boolean isProjectAvailable() {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
 	}
 
 	/**
 	 * Creates a new Selenium testcase
-	 * 
+	 *
 	 * @param controller the JavaType of the controller under test (required)
 	 * @param name the name of the test case (optional)
 	 */
-	public void generateTest(JavaType controller, String name, String serverURL) {
+	public void generateTest(final JavaType controller, String name, String serverURL) {
 		Assert.notNull(controller, "Controller type required");
 
 		String webScaffoldMetadataIdentifier = WebScaffoldMetadata.createIdentifier(controller, Path.SRC_MAIN_JAVA);
@@ -161,7 +161,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		installMavenPlugin();
 	}
 
-	private void manageTestSuite(String testPath, String name, String serverURL) {
+	private void manageTestSuite(final String testPath, final String name, final String serverURL) {
 		String relativeTestFilePath = "selenium/test-suite.xhtml";
 		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 
@@ -203,7 +203,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 				return;
 			}
 		}
-		
+
 		Element configuration = XmlUtils.getConfiguration(getClass());
 		Element plugin = XmlUtils.findFirstElement("/configuration/selenium/plugin", configuration);
 
@@ -213,7 +213,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		}
 	}
 
-	private Node clickAndWaitCommand(Document document, String linkTarget) {
+	private Node clickAndWaitCommand(final Document document, final String linkTarget) {
 		Node tr = document.createElement("tr");
 
 		Node td1 = tr.appendChild(document.createElement("td"));
@@ -228,7 +228,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return tr;
 	}
 
-	private Node typeCommand(Document document, FieldMetadata field) {
+	private Node typeCommand(final Document document, final FieldMetadata field) {
 		Node tr = document.createElement("tr");
 
 		Node td1 = tr.appendChild(document.createElement("td"));
@@ -243,7 +243,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return tr;
 	}
 
-	private Node verifyTextCommand(Document document, JavaType formBackingType, FieldMetadata field) {
+	private Node verifyTextCommand(final Document document, final JavaType formBackingType, final FieldMetadata field) {
 		Node tr = document.createElement("tr");
 
 		Node td1 = tr.appendChild(document.createElement("td"));
@@ -258,7 +258,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return tr;
 	}
 
-	private String convertToInitializer(FieldMetadata field) {
+	private String convertToInitializer(final FieldMetadata field) {
 		String initializer = " ";
 		short index = 1;
 		AnnotationMetadata min = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
@@ -322,7 +322,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return initializer;
 	}
 
-	private Node openCommand(Document document, String linkTarget) {
+	private Node openCommand(final Document document, final String linkTarget) {
 		Node tr = document.createElement("tr");
 
 		Node td1 = tr.appendChild(document.createElement("td"));
@@ -337,7 +337,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		return tr;
 	}
 
-	private boolean isSpecialType(JavaType javaType) {
+	private boolean isSpecialType(final JavaType javaType) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		// We are only interested if the type is part of our application and if no editor exists for it already
 		if (metadataService.get(physicalTypeIdentifier) != null) {

@@ -15,9 +15,9 @@ import org.springframework.roo.support.util.StringUtils;
 /**
  * The required additions to a given type in order to invoke a given
  * application layer method, e.g. <code>findAll()</code>.
- * 
+ *
  * Instances are immutable.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -28,7 +28,7 @@ public class MemberTypeAdditions {
 	private final ClassOrInterfaceTypeDetailsBuilder classOrInterfaceDetailsBuilder;
 	private final String methodName;
 	private final String methodCall;
-	
+
 	/**
 	 * Factory method that builds the method call for you from the given target,
 	 * method, and array of parameter names.
@@ -42,10 +42,10 @@ public class MemberTypeAdditions {
 	 * @param parameterNames the names of any parameters passed to the method
 	 * (required)
 	 */
-	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, JavaSymbolName... parameterNames) {
+	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, final JavaSymbolName... parameterNames) {
 		return getInstance(builder, targetName, methodName, Arrays.asList(parameterNames));
 	}
-	
+
 	/**
 	 * Factory method that builds the method call for you from the given target,
 	 * method, and list of parameter names.
@@ -62,10 +62,10 @@ public class MemberTypeAdditions {
 	public static MemberTypeAdditions getInstance(final ClassOrInterfaceTypeDetailsBuilder builder, final String targetName, final String methodName, final List<JavaSymbolName> parameterNames) {
 		return new MemberTypeAdditions(builder, methodName, buildMethodCall(targetName, methodName, parameterNames.iterator()));
 	}
-	
+
 	/**
 	 * Builds the code snippet for a method call with the given properties
-	 * 
+	 *
 	 * @param targetName the name of the object or class on which the method is
 	 * being invoked (if not blank, must be a valid Java name)
 	 * @param methodName the name of the method being invoked (must be a valid
@@ -92,7 +92,7 @@ public class MemberTypeAdditions {
 		methodCall.append(")");
 		return methodCall.toString();
 	}
-	
+
 	/**
 	 * Constructor that accepts a pre-built method call
 	 *
@@ -112,32 +112,32 @@ public class MemberTypeAdditions {
 		this.methodName = methodName;
 		this.methodCall = methodCall;
 	}
-	
+
 	/**
 	 * Copies this instance's additions (if any) into the given builder
-	 * 
+	 *
 	 * @param targetBuilder the ITD builder to receive the additions (required)
 	 * @param governorClassOrInterfaceTypeDetails the {@link ClassOrInterfaceTypeDetails} of the governor (required)
 	 */
-	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, ClassOrInterfaceTypeDetails governorClassOrInterfaceTypeDetails) {
+	public void copyAdditionsTo(final AbstractMemberHoldingTypeDetailsBuilder<?> targetBuilder, final ClassOrInterfaceTypeDetails governorClassOrInterfaceTypeDetails) {
 		if (this.classOrInterfaceDetailsBuilder != null) {
 			this.classOrInterfaceDetailsBuilder.copyTo(targetBuilder, governorClassOrInterfaceTypeDetails);
 		}
 	}
-	
+
 	/**
 	 * Returns the bare name of the invoked method
-	 * 
+	 *
 	 * @return a non-blank name
 	 */
 	public String getMethodName() {
 		return methodName;
 	}
-	
+
 	/**
 	 * Returns the snippet of Java code that calls the method in question, for
 	 * example "<code>personService.findAll()</code>".
-	 * 
+	 *
 	 * @return a non-blank String
 	 */
 	public String getMethodCall() {

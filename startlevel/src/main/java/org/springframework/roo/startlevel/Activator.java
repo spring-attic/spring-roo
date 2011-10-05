@@ -24,31 +24,31 @@ import org.w3c.dom.NodeList;
 /**
  * Changes the OSGi framework to start level 99 once all the services marked with "immediate" are
  * activated.
- * 
+ *
  * <p>
  * The OSGi Declarative Service Specification ensures services are only loaded when required. While
  * the "immediate" attribute ensures they are loaded eagerly, it is impossible to receive a callback when
  * all "immediate" services have finished loading. This {@link BundleActivator} resolves this issue
  * by discovering all enabled service components with an "immediate" flag and monitoring their startup.
  * Once all are started, the OSGi framework is set to start level 99, which enables other classes
- * that depend on the activation of such services to react to the start level change. 
- * 
+ * that depend on the activation of such services to react to the start level change.
+ *
  * <p>
  * Note that this functionality is only provided for services (simple components are insufficient).
  * Services must be defined in the XML file indicated by the "Service-Component" manifest header.
- * 
+ *
  * @author Ben Alex
  */
 public class Activator implements BundleActivator {
-	
+
 	// Fields
 	private ServiceReference startLevelServiceReference;
 	private StartLevel startLevel;
 	/** key: required class, any one of its services interfaces */
-	private SortedMap<String, String> requiredImplementations = new TreeMap<String, String>();
-	private SortedSet<String> runningImplementations = new TreeSet<String>();
-	
-	public void start(BundleContext context) throws Exception {
+	private final SortedMap<String, String> requiredImplementations = new TreeMap<String, String>();
+	private final SortedSet<String> runningImplementations = new TreeSet<String>();
+
+	public void start(final BundleContext context) throws Exception {
 		startLevelServiceReference = context.getServiceReference(StartLevel.class.getName());
 		startLevel = (StartLevel) context.getService(startLevelServiceReference);
 		for (Bundle bundle : context.getBundles()) {
@@ -58,11 +58,11 @@ public class Activator implements BundleActivator {
 				process(url);
 			}
 		}
-		
+
 		// Ensure I'm notified of other services changes
 		final BundleContext myContext = context;
 		context.addServiceListener(new ServiceListener() {
-			public void serviceChanged(ServiceEvent event) {
+			public void serviceChanged(final ServiceEvent event) {
 				ServiceReference sr = event.getServiceReference();
 				String className = getClassName(sr, myContext);
 				if (sr != null) {
@@ -85,7 +85,7 @@ public class Activator implements BundleActivator {
 				}
 			}
 		});
-		
+
 		// Now identify if any services I was interested in are already running
 		for (String requiredService : requiredImplementations.keySet()) {
 			String correspondingInterface = requiredImplementations.get(requiredService);
@@ -103,12 +103,12 @@ public class Activator implements BundleActivator {
 				}
 			}
 		}
-		
+
 		// Potentially change the start level, now that we've added all the known started services
 		potentiallyChangeStartLevel();
 	}
-	
-	private String getClassName(ServiceReference sr, BundleContext context) {
+
+	private String getClassName(final ServiceReference sr, final BundleContext context) {
 		if (sr == null) {
 			return null;
 		}
@@ -122,8 +122,8 @@ public class Activator implements BundleActivator {
 				return componentName;
 			}
 		}
-		
-		// To get here we couldn't rely on component name. The following is far less reliable given the 
+
+		// To get here we couldn't rely on component name. The following is far less reliable given the
 		// service may be unavailable by the time we try to do a getService(sr) invocation (ROO-1156).
 		Object obj = context.getService(sr);
 		if (obj == null) {
@@ -143,8 +143,8 @@ public class Activator implements BundleActivator {
 			startLevel.setStartLevel(99);
 		}
 	}
-	
-	public void process(URL url) {
+
+	public void process(final URL url) {
 		Document document;
 		InputStream is = null;
 		try {
@@ -159,13 +159,13 @@ public class Activator implements BundleActivator {
 				}
 			} catch (IOException ignored) {}
 		}
-		
+
 		Element rootElement = (Element) document.getFirstChild();
 		NodeList components = rootElement.getElementsByTagName("scr:component");
 		if (components == null || components.getLength() == 0) {
 			return;
 		}
-		
+
 		for (int i = 0; i < components.getLength(); i++) {
 			Element component = (Element) components.item(i);
 
@@ -180,7 +180,7 @@ public class Activator implements BundleActivator {
 				// Not an immediate starter, so skip it
 				continue;
 			}
-			
+
 			// Calculate implementing class name correctly
 			String componentName = null;
 			NodeList implementation = component.getElementsByTagName("implementation");
@@ -190,7 +190,7 @@ public class Activator implements BundleActivator {
 					componentName = impl.getAttribute("class");
 				}
 			}
-			
+
 			// Get its first implementing service
 			String serviceInterface = null;
 			NodeList service = component.getElementsByTagName("service");
@@ -204,14 +204,14 @@ public class Activator implements BundleActivator {
 					}
 				}
 			}
-			
+
 			if (componentName != null && serviceInterface != null) {
 				requiredImplementations.put(componentName, serviceInterface);
 			}
 		}
 	}
-	
-	public void stop(BundleContext context) throws Exception {
+
+	public void stop(final BundleContext context) throws Exception {
 		context.ungetService(startLevelServiceReference);
 	}
 }

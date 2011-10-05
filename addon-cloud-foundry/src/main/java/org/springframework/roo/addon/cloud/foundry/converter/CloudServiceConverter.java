@@ -23,18 +23,18 @@ import com.vmware.appcloud.client.CloudService;
 public class CloudServiceConverter implements Converter<CloudService> {
 	@Reference private CloudFoundrySession session;
 
-	public CloudService convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public CloudService convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
 		return session.getProvisionedService(value);
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return CloudService.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		completions.addAll(session.getProvisionedServices());
 		return false;
 	}

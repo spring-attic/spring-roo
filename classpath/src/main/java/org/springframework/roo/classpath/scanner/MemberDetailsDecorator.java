@@ -6,16 +6,16 @@ import org.springframework.roo.model.CustomDataAccessor;
 /**
  * Provides the ability to modify or log the result of a {@link MemberDetailsScanner} operation
  * before the method returns. This is useful to customize the results for a particular requesting class.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public interface MemberDetailsDecorator {
-	
+
 	/**
 	 * Evaluates the incoming {@link MemberDetails} and either (a) returns the same instance if no changes
 	 * are necessary or (b) returns a new instance of {@link MemberDetails} if changes are needed.
-	 * 
+	 *
 	 * <p>
 	 * This method will be called repeatedly until such time as every {@link MemberDetailsDecorator}
 	 * returns the same {@link MemberDetails} instance as was passed. <em>It is therefore essential that a
@@ -25,7 +25,7 @@ public interface MemberDetailsDecorator {
 	 * on other decorators populating the {@link MemberDetails} (eg with new {@link CustomDataAccessor} information)
 	 * can be executed in any order whatsoever, as they need only look for the expected data and return the same
 	 * {@link MemberDetails} if it is not found.
-	 * 
+	 *
 	 * @param requestingClass the fully-qualified class name requesting the member details (required)
 	 * @param memberDetails the current member holders (required)
 	 * @return the originally-passed details (where possible) or a replacement details (never returns null)

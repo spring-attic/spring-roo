@@ -2,35 +2,35 @@ package org.springframework.roo.support.util;
 
 /**
  * ANSI escape codes supported by JLine
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
 public enum AnsiEscapeCode {
 
 	// These int literals are non-public constants in ANSIBuffer.ANSICodes
-	BLINK(5), 
-	BOLD(1), 
-	CONCEALED(8), 
-	FG_BLACK(30), 
-	FG_BLUE(34), 
-	FG_CYAN(36), 
-	FG_GREEN(32), 
-	FG_MAGENTA(35), 
-	FG_RED(31), 
-	FG_YELLOW(33), 
-	FG_WHITE(37), 
-	OFF(0), 
-	REVERSE(7), 
+	BLINK(5),
+	BOLD(1),
+	CONCEALED(8),
+	FG_BLACK(30),
+	FG_BLUE(34),
+	FG_CYAN(36),
+	FG_GREEN(32),
+	FG_MAGENTA(35),
+	FG_RED(31),
+	FG_YELLOW(33),
+	FG_WHITE(37),
+	OFF(0),
+	REVERSE(7),
 	UNDERSCORE(4);
-	
+
 	// Constant for the escape character
 	private static final char ESC = 27;
-	
+
 	/**
 	 * Decorates the given text with the given escape codes (turning them off
 	 * afterwards)
-	 * 
+	 *
 	 * @param text the text to decorate; can be <code>null</code>
 	 * @param codes
 	 * @return <code>null</code> if <code>null</code> is passed

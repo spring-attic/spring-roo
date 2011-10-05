@@ -11,7 +11,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Helper util class to allow more convenient handling of web.xml file in Web projects.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
@@ -28,7 +28,7 @@ public final class WebXmlUtils {
 
     /**
 	 * Set the display-name element in the web.xml document.
-	 * 
+	 *
 	 * @param displayName (required)
 	 * @param webXml the web.xml document (required)
 	 * @param comment (optional)
@@ -36,7 +36,7 @@ public final class WebXmlUtils {
 	public static void setDisplayName(final String displayName, final Document webXml, final String comment) {
 		Assert.hasText(displayName, "display name required");
 		Assert.notNull(webXml, "Web XML document required");
-		
+
 		Element displayNameElement = XmlUtils.findFirstElement("/web-app/display-name", webXml.getDocumentElement());
 		if (displayNameElement == null) {
 			displayNameElement = webXml.createElement("display-name");
@@ -47,10 +47,10 @@ public final class WebXmlUtils {
 		}
 		displayNameElement.setTextContent(displayName);
 	}
-	
+
 	/**
 	 * Set the description element in the web.xml document.
-	 * 
+	 *
 	 * @param description (required)
 	 * @param webXml the web.xml document (required)
 	 * @param comment (optional)
@@ -58,7 +58,7 @@ public final class WebXmlUtils {
 	public static void setDescription(final String description, final Document webXml, final String comment) {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.hasText(description, "Description required");
-		
+
 		Element descriptionElement = XmlUtils.findFirstElement("/web-app/description", webXml.getDocumentElement());
 		if (descriptionElement == null) {
 			descriptionElement = webXml.createElement("description");
@@ -69,10 +69,10 @@ public final class WebXmlUtils {
 		}
 		descriptionElement.setTextContent(description);
 	}
-	
+
 	/**
 	 * Add a context param to the web.xml document
-	 * 
+	 *
 	 * @param contextParam (required)
 	 * @param webXml the web.xml document (required)
 	 * @param comment (optional)
@@ -80,23 +80,23 @@ public final class WebXmlUtils {
 	public static void addContextParam(final WebXmlParam contextParam, final Document webXml, final String comment) {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.notNull(contextParam, "Context param required");
-		
+
 		Element contextParamE = XmlUtils.findFirstElement("/web-app/context-param[param-name = '" + contextParam.getName() + "']", webXml.getDocumentElement());
 		if (contextParamE == null) {
 			contextParamE = new XmlElementBuilder("context-param", webXml)
 						.addChild(new XmlElementBuilder("param-name", webXml).setText(contextParam.getName()).build())
 					.build();
-			insertBetween(contextParamE, "description[last()]", "filter", webXml);	
+			insertBetween(contextParamE, "description[last()]", "filter", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(contextParamE, comment, webXml);
 			}
 		}
 		appendChildIfNotPresent(contextParamE, new XmlElementBuilder("param-value", webXml).setText(contextParam.getValue()).build());
 	}
-	
+
 	/**
 	 * Add a new filter definition to web.xml document. The filter will be added AFTER (FilterPosition.LAST) all existing filters.
-	 * 
+	 *
 	 * @param filterName (required)
 	 * @param filterClass the fully qualified name of the filter type (required)
 	 * @param urlPattern (required)
@@ -107,10 +107,10 @@ public final class WebXmlUtils {
 	public static void addFilter(final String filterName, final String filterClass, final String urlPattern, final Document webXml, final String comment, final WebXmlParam... initParams) {
 		addFilterAtPosition(FilterPosition.LAST, null, null, filterName, filterClass, urlPattern, webXml, comment, initParams);
 	}
-	
+
 	/**
 	 * Add a new filter definition to web.xml document. The filter will be added at the FilterPosition specified.
-	 * 
+	 *
 	 * @param filterPosition Filter position (required)
 	 * @param beforeFilterName (optional for filter position FIRST and LAST, required for BEFORE and AFTER)
 	 * @param filterName (required)
@@ -126,7 +126,7 @@ public final class WebXmlUtils {
 
 	/**
 	 * Add a new filter definition to web.xml document. The filter will be added at the FilterPosition specified.
-	 * 
+	 *
 	 * @param filterPosition Filter position (required)
 	 * @param beforeFilterName (optional for filter position FIRST and LAST, required for BEFORE and AFTER)
 	 * @param filterName (required)
@@ -142,11 +142,11 @@ public final class WebXmlUtils {
 		Assert.hasText(filterName, "Filter name required");
 		Assert.hasText(filterClass, "Filter class required");
 		Assert.notNull(urlPattern, "Filter URL mapping pattern required");
-		
+
 		if (initParams == null) {
 			initParams = new ArrayList<WebXmlUtils.WebXmlParam>();
 		}
-		
+
 		// Creating filter
 		Element filter = XmlUtils.findFirstElement("/web-app/filter[filter-name = '" + filterName + "']", webXml.getDocumentElement());
 		if (filter == null) {
@@ -174,7 +174,7 @@ public final class WebXmlUtils {
 		for (final WebXmlParam initParam: initParams) {
 			appendChildIfNotPresent(filter, new XmlElementBuilder("init-param", webXml).addChild(new XmlElementBuilder("param-name", webXml).setText(initParam.getName()).build()).addChild(new XmlElementBuilder("param-value", webXml).setText(initParam.getValue()).build()).build());
 		}
-		
+
 		// Creating filter mapping
 		Element filterMappingE = XmlUtils.findFirstElement("/web-app/filter-mapping[filter-name = '" + filterName + "']", webXml.getDocumentElement());
 		if (filterMappingE == null) {
@@ -196,10 +196,10 @@ public final class WebXmlUtils {
 			appendChildIfNotPresent(filterMappingE, new XmlElementBuilder("dispatcher", webXml).setText(dispatcher.name()).build());
 		}
 	}
-	
+
 	/**
 	 * Add listener element to web.xml document
-	 * 
+	 *
 	 * @param className the fully qualified name of the listener type (required)
 	 * @param webXml (required)
 	 * @param comment (optional)
@@ -207,7 +207,7 @@ public final class WebXmlUtils {
 	public static void addListener(final String className, final Document webXml, final String comment) {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.hasText(className, "Class name required");
-		
+
 		Element listener = XmlUtils.findFirstElement("/web-app/listener[listener-class = '" + className + "']", webXml.getDocumentElement());
 		if (listener == null) {
 			listener = new XmlElementBuilder("listener", webXml).addChild(new XmlElementBuilder("listener-class", webXml).setText(className).build()).build();
@@ -217,10 +217,10 @@ public final class WebXmlUtils {
 			}
 		}
 	}
-	
+
 	/**
 	 * Add servlet element to the web.xml document
-	 *  
+	 *
 	 * @param servletName (required)
 	 * @param className the fully qualified name of the servlet type (required)
 	 * @param urlPattern this can be set to null in which case the servletName will be used for mapping (optional)
@@ -263,10 +263,10 @@ public final class WebXmlUtils {
 			appendChildIfNotPresent(servletMapping, new XmlElementBuilder("servlet-name", webXml).setText(servletName).build());
 		}
 	}
-	
+
 	/**
 	 * Set session timeout in web.xml document
-	 * 
+	 *
 	 * @param timeout
 	 * @param webXml (required)
 	 * @param comment (optional)
@@ -274,10 +274,10 @@ public final class WebXmlUtils {
 	public static void setSessionTimeout(final int timeout, final Document webXml, final String comment) {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.notNull(timeout, "Timeout required");
-		
+
 		Element sessionConfig = XmlUtils.findFirstElement("/web-app/session-config", webXml.getDocumentElement());
 		if (sessionConfig == null) {
-			sessionConfig = webXml.createElement("session-config");			
+			sessionConfig = webXml.createElement("session-config");
 			insertBetween(sessionConfig, "servlet-mapping[last()]", "welcome-file-list", webXml);
 			if (StringUtils.hasText(comment)) {
 				addCommentBefore(sessionConfig, comment, webXml);
@@ -285,10 +285,10 @@ public final class WebXmlUtils {
 		}
 		appendChildIfNotPresent(sessionConfig, new XmlElementBuilder("session-timeout", webXml).setText(String.valueOf(timeout)).build());
 	}
-	
+
 	/**
 	 * Add a welcome file definition to web.xml document
-	 * 
+	 *
 	 * @param path (required)
 	 * @param webXml (required)
 	 * @param comment (optional)
@@ -296,7 +296,7 @@ public final class WebXmlUtils {
 	public static void addWelcomeFile(final String path, final Document webXml, final String comment) {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.hasText("Path required");
-		
+
 		Element welcomeFile = XmlUtils.findFirstElement("/web-app/welcome-file-list", webXml.getDocumentElement());
 		if (welcomeFile == null) {
 			welcomeFile = webXml.createElement("welcome-file-list");
@@ -307,10 +307,10 @@ public final class WebXmlUtils {
 		}
 		appendChildIfNotPresent(welcomeFile, new XmlElementBuilder("welcome-file", webXml).setText(path).build());
 	}
-	
+
 	/**
 	 * Add exception type to web.xml document
-	 * 
+	 *
 	 * @param exceptionType fully qualified exception type name (required)
 	 * @param location (required)
 	 * @param webXml (required)
@@ -320,7 +320,7 @@ public final class WebXmlUtils {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.hasText(exceptionType, "Fully qualified exception type name required");
 		Assert.hasText(location, "location required");
-		
+
 		Element errorPage = XmlUtils.findFirstElement("/web-app/error-page[exception-type = '" + exceptionType + "']", webXml.getDocumentElement());
 		if (errorPage == null) {
 			errorPage = new XmlElementBuilder("error-page", webXml)
@@ -333,10 +333,10 @@ public final class WebXmlUtils {
 		}
 		appendChildIfNotPresent(errorPage, new XmlElementBuilder("location", webXml).setText(location).build());
 	}
-	
+
 	/**
 	 * Add error code to web.xml document
-	 * 
+	 *
 	 * @param errorCode (required)
 	 * @param location (required)
 	 * @param webXml (required)
@@ -360,7 +360,7 @@ public final class WebXmlUtils {
 
 	/**
 	 * Add a security constraint to a web.xml document
-	 * 
+	 *
 	 * @param displayName (optional)
 	 * @param webResourceCollections (required)
 	 * @param roleNames (optional)
@@ -422,7 +422,7 @@ public final class WebXmlUtils {
 			appendChildIfNotPresent(securityConstraint, userDataConstraintBuilder.build());
 		}
 	}
-	
+
 	private static void insertBetween(final Element element, final String afterElementName, final String beforeElementName, final Document doc) {
 		final Element beforeElement = XmlUtils.findFirstElement("/web-app/" + beforeElementName, doc.getDocumentElement());
 		if (beforeElement != null) {
@@ -430,8 +430,8 @@ public final class WebXmlUtils {
 			addLineBreakBefore(element, doc);
 			addLineBreakBefore(element, doc);
 			return;
-		} 
-		
+		}
+
 		final Element afterElement = XmlUtils.findFirstElement("/web-app/" + afterElementName, doc.getDocumentElement());
 		if (afterElement != null && afterElement.getNextSibling() != null && afterElement.getNextSibling() instanceof Element) {
 			doc.getDocumentElement().insertBefore(element, afterElement.getNextSibling());
@@ -439,12 +439,12 @@ public final class WebXmlUtils {
 			addLineBreakBefore(element, doc);
 			return;
 		}
-		
+
 		doc.getDocumentElement().appendChild(element);
 		addLineBreakBefore(element, doc);
 		addLineBreakBefore(element, doc);
 	}
-	
+
 	private static void insertBefore(final Element element, final String beforeElementName, final Document doc) {
 		final Element beforeElement = XmlUtils.findFirstElement("/web-app/" + beforeElementName, doc.getDocumentElement());
 		if (beforeElement != null) {
@@ -452,12 +452,12 @@ public final class WebXmlUtils {
 			addLineBreakBefore(element, doc);
 			addLineBreakBefore(element, doc);
 			return;
-		} 
+		}
 		doc.getDocumentElement().appendChild(element);
 		addLineBreakBefore(element, doc);
 		addLineBreakBefore(element, doc);
 	}
-	
+
 	private static void insertAfter(final Element element, final String afterElementName, final Document doc) {
 		final Element afterElement = XmlUtils.findFirstElement("/web-app/" + afterElementName, doc.getDocumentElement());
 		if (afterElement != null && afterElement.getNextSibling() != null && afterElement.getNextSibling() instanceof Element) {
@@ -473,7 +473,7 @@ public final class WebXmlUtils {
 
 	/**
 	 * Adds the given child to the given parent if it's not already there
-	 * 
+	 *
 	 * @param parent the parent to which to add a child (required)
 	 * @param child the child to add if not present (required)
 	 */
@@ -492,11 +492,11 @@ public final class WebXmlUtils {
 		}
 		parent.appendChild(child);
 	}
-	
+
 	private static void addLineBreakBefore(final Element element, final Document doc) {
 		doc.getDocumentElement().insertBefore(doc.createTextNode("\n    "), element);
 	}
-	
+
 	private static void addCommentBefore(final Element element, final String comment, final Document doc) {
 		if (null == XmlUtils.findNode("//comment()[.=' " + comment + " ']", doc.getDocumentElement())) {
 			doc.getDocumentElement().insertBefore(doc.createComment(" " + comment + " "), element);
@@ -524,17 +524,17 @@ public final class WebXmlUtils {
 
 		/**
 		 * Returns the name of this parameter
-		 * 
+		 *
 		 * @return
 		 */
 		public String getName() {
 			return getKey();
 		}
 	}
-	
+
 	/**
 	 * Enum to define filter position
-	 * 
+	 *
 	 * @author Stefan Schmidt
 	 * @since 1.1
 	 *
@@ -542,10 +542,10 @@ public final class WebXmlUtils {
 	public static enum FilterPosition {
 		FIRST, LAST, BEFORE, AFTER, BETWEEN;
 	}
-	
+
 	/**
 	 * Enum to define dispatcher
-	 * 
+	 *
 	 * @author Stefan Schmidt
 	 * @since 1.1.1
 	 *
@@ -556,7 +556,7 @@ public final class WebXmlUtils {
 
 	/**
 	 * Convenience class for passing a web-resource-collection element's details
-	 * 
+	 *
 	 * @since 1.1.1
 	 */
 	public static class WebResourceCollection {

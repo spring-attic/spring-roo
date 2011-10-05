@@ -21,10 +21,10 @@ public class AbstractShellTest {
 		// Set up
 		final AbstractShell shell = mock(AbstractShell.class);
 		when(shell.props()).thenCallRealMethod();
-		
+
 		// Invoke
 		final String props = shell.props();
-		
+
 		// Check
 		assertNotNull(props);
 	}

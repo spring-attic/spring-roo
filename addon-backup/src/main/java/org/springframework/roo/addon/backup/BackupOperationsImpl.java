@@ -28,19 +28,19 @@ import org.springframework.roo.support.util.IOUtils;
 
 /**
  * Operations for the 'backup' add-on.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
  */
-@Component 
-@Service 
+@Component
+@Service
 public class BackupOperationsImpl implements BackupOperations {
-	
+
 	// Constants
 	private static final Logger LOGGER = HandlerUtils.getLogger(BackupOperationsImpl.class);
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -60,7 +60,7 @@ public class BackupOperationsImpl implements BackupOperations {
 		}
 
 		long start = System.nanoTime();
-		
+
 		ZipOutputStream zos = null;
 		try {
 			File projectDirectory = new File(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "."));
@@ -74,29 +74,29 @@ public class BackupOperationsImpl implements BackupOperations {
 		} finally {
 			IOUtils.closeQuietly(zos);
 		}
-		
+
 		long milliseconds = (System.nanoTime() - start) / 1000000;
 		return "Backup completed in " + milliseconds + " ms";
 	}
 
-	private void zip(File directory, final File base, ZipOutputStream zos) throws IOException {
+	private void zip(final File directory, final File base, final ZipOutputStream zos) throws IOException {
 		File[] files = directory.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
+			public boolean accept(final File dir, final String name) {
 				// Don't use this directory if it's "target" under base
 				if (dir.equals(base) && name.equals("target")) {
 					return false;
 				}
-				
+
 				// Skip existing backup files
 				if (dir.equals(base) && name.endsWith(".zip")) {
 					return false;
 				}
-				
+
 				// Skip files that start with "."
 				return !name.startsWith(".");
 			}
 		});
-		
+
 		byte[] buffer = new byte[8192];
 		int read = 0;
 		for (int i = 0, n = files.length; i < n; i++) {

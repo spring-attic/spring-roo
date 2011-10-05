@@ -20,11 +20,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.3
  */
 public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
-	
+
 	// Fields
 	private final CustomDataKey<ConstructorMetadata> customDataKey;
 	private final List<JavaType> parameterTypes;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -36,7 +36,7 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 	public <T extends JavaType> ConstructorMatcher(final CustomDataKey<ConstructorMetadata> customDataKey, final T... parameterTypes) {
 		this(customDataKey, Arrays.asList(parameterTypes));
 	}
-	
+
 	/**
 	 * Constructor
 	 *
@@ -52,7 +52,7 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 		}
 	}
 
-	public List<ConstructorMetadata> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+	public List<ConstructorMetadata> matches(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
 		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
 			for (ConstructorMetadata constructor : memberHoldingTypeDetails.getDeclaredConstructors()) {
@@ -68,7 +68,7 @@ public class ConstructorMatcher implements Matcher<ConstructorMetadata> {
 		return customDataKey;
 	}
 
-	public Object getTagValue(ConstructorMetadata key) {
+	public Object getTagValue(final ConstructorMetadata key) {
 		return null;
 	}
 }

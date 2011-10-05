@@ -43,7 +43,7 @@ import org.springframework.roo.support.util.Assert;
  *     T            save(T)
  *     *T           saveAndFlush(T)
  * </pre>
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -61,17 +61,17 @@ public enum RepositoryJpaLayerMethod {
 			return Collections.emptyList();
 		}
 	},
-	
+
 	/**
 	 * Deletes the passed-in entity (does not delete by ID).
 	 */
 	DELETE ("delete", REMOVE_METHOD) {
-		
+
 		@Override
 		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "delete(" + parameterNames.get(0).getSymbolName() + ")";
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
@@ -79,7 +79,7 @@ public enum RepositoryJpaLayerMethod {
 	},
 
 	FIND ("find", FIND_METHOD) {
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(idType);
@@ -90,14 +90,14 @@ public enum RepositoryJpaLayerMethod {
 			return "findOne(" + parameterNames.get(0).getSymbolName() + ")";
 		}
 	},
-	
+
 	FIND_ALL ("findAll", FIND_ALL_METHOD) {
-		
+
 		@Override
 		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "findAll()";
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
@@ -124,7 +124,7 @@ public enum RepositoryJpaLayerMethod {
 			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
 		}
 	},
-	
+
 	FLUSH ("flush", FLUSH_METHOD) {
 
 		@Override
@@ -139,27 +139,27 @@ public enum RepositoryJpaLayerMethod {
 			return Arrays.asList(targetEntity);
 		}
 	},
-	
+
 	/**
 	 * Spring Data JPA makes no distinction between create/persist/save/update/merge
 	 */
 	SAVE ("save", MERGE_METHOD, PERSIST_METHOD) {
-		
+
 		@Override
 		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "save(" + parameterNames.get(0).getSymbolName() + ")";
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	};
-	
+
 	/**
 	 * Returns the {@link RepositoryJpaLayerMethod} with the given ID and parameter
 	 * types.
-	 * 
+	 *
 	 * @param methodId the ID to match upon
 	 * @param parameterTypes the parameter types to match upon
 	 * @param targetEntity the entity type being managed by the repository
@@ -174,11 +174,11 @@ public enum RepositoryJpaLayerMethod {
 		}
 		return null;
 	}
-	
+
 	// Fields
 	private final List<String> ids;
 	private final String name;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -194,28 +194,28 @@ public enum RepositoryJpaLayerMethod {
 		}
 		this.name = name;
 	}
-	
+
 	/**
 	 * Returns a Java snippet that invokes this method (minus the target)
-	 * 
+	 *
 	 * @param parameterNames the parameter names used by the caller; can be
 	 * <code>null</code>
 	 * @return a non-blank Java snippet
 	 */
 	public abstract String getCall(List<JavaSymbolName> parameterNames);
-	
+
 	/**
 	 * Returns the name of this method
-	 * 
+	 *
 	 * @return a non-blank name
 	 */
 	public String getName() {
 		return this.name;
 	}
-	
+
 	/**
 	 * Instances must return the types of parameters they take
-	 * 
+	 *
 	 * @param targetEntity the type of entity being managed (required)
 	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list

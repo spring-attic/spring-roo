@@ -13,36 +13,36 @@ public class Pair<K, V> {
 	// Fields
 	private final K key;
 	private final V value;
-	
+
 	/**
 	 * Constructor
 	 *
 	 * @param key can be <code>null</code>
 	 * @param value can be <code>null</code>
 	 */
-	public Pair(K key, V value) {
+	public Pair(final K key, final V value) {
 		this.key = key;
 		this.value = value;
 	}
-	
+
 	/**
 	 * Returns the key
-	 * 
+	 *
 	 * @return <code>null</code> if it is
 	 */
 	public K getKey() {
 		return key;
 	}
-	
+
 	/**
 	 * Returns the value
-	 * 
+	 *
 	 * @return <code>null</code> if it is
 	 */
 	public V getValue() {
 		return value;
 	}
-	
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj == this) {
@@ -54,12 +54,12 @@ public class Pair<K, V> {
 		final Pair<?, ?> otherPair = (Pair<?, ?>) obj;
 		return ObjectUtils.nullSafeEquals(key, otherPair.getKey()) && ObjectUtils.nullSafeEquals(value, otherPair.getValue());
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return ObjectUtils.nullSafeHashCode(new Object[] {getKey(), getValue()});
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

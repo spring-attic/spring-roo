@@ -35,17 +35,17 @@ import org.w3c.dom.Element;
 
 /**
  * Provides Search configuration operations.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component 
-@Service 
+@Component
+@Service
 public class SolrOperationsImpl implements SolrOperations {
-	
+
 	// Constants
 	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.1");
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -55,16 +55,16 @@ public class SolrOperationsImpl implements SolrOperations {
 	public boolean isInstallSearchAvailable() {
 		return projectOperations.isProjectAvailable() && !solrPropsInstalled() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
-	
+
 	public boolean isSearchAvailable() {
 		return solrPropsInstalled();
 	}
-	
+
 	private boolean solrPropsInstalled() {
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/spring/solr.properties"));
 	}
 
-	public void setupConfig(String solrServerUrl) {
+	public void setupConfig(final String solrServerUrl) {
 		projectOperations.addDependency(SOLRJ);
 
 		updateSolrProperties(solrServerUrl);
@@ -89,14 +89,14 @@ public class SolrOperationsImpl implements SolrOperations {
 
 		root.appendChild(new XmlElementBuilder("bean", appCtx).addAttribute("id", "solrServer").addAttribute("class", "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer").addChild(new XmlElementBuilder("constructor-arg", appCtx).addAttribute("value", "${solr.serverUrl}").build()).build());
 		DomUtils.removeTextNodes(root);
-		
+
 		fileManager.createOrUpdateTextFileIfRequired(contextPath, XmlUtils.nodeToString(appCtx), false);
 	}
 
-	private void updateSolrProperties(String solrServerUrl) {
+	private void updateSolrProperties(final String solrServerUrl) {
 		String solrPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties");
 		boolean solrExists = fileManager.exists(solrPath);
-		
+
 		Properties props = new Properties();
 		InputStream inputStream = null;
 		try {
@@ -134,7 +134,7 @@ public class SolrOperationsImpl implements SolrOperations {
 		}
 	}
 
-	public void addSearch(JavaType javaType) {
+	public void addSearch(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.findClassOrInterface(javaType);
@@ -148,7 +148,7 @@ public class SolrOperationsImpl implements SolrOperations {
 		addSolrSearchableAnnotation(classOrInterfaceTypeDetails);
 	}
 
-	private void addSolrSearchableAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+	private void addSolrSearchableAnnotation(final ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		if (classOrInterfaceTypeDetails.getTypeAnnotation(ROO_SOLR_SEARCHABLE) == null) {
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_SOLR_SEARCHABLE);
 			ClassOrInterfaceTypeDetailsBuilder classOrInterfaceTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(classOrInterfaceTypeDetails);

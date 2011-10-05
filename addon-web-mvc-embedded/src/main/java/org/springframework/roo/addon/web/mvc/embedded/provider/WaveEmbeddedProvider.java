@@ -13,17 +13,17 @@ import org.w3c.dom.Element;
 
 /**
  * Provider to embed a Google wave via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class WaveEmbeddedProvider extends AbstractEmbeddedProvider {
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		// Expected format https://wave.google.com/wave/#restored:wave:googlewave.com%252Fw%252B8Hj0sgUxC
-		if (url.contains("wave.google.")) {			
+		if (url.contains("wave.google.")) {
 			String qStart = url.substring(url.indexOf("%252B") + 5);
 			Map<String, String> options = new HashMap<String, String>();
 			options.put("provider", "GOOGLE_WAVE");
@@ -32,9 +32,9 @@ public class WaveEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
-		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("GOOGLE_WAVE") || !options.containsKey("id")) { 
+
+	public boolean install(final String viewName, final Map<String, String> options) {
+		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("GOOGLE_WAVE") || !options.containsKey("id")) {
 			return false;
 		}
 		String id = options.get("id");

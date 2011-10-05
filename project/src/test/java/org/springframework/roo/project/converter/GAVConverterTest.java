@@ -25,51 +25,51 @@ public class GAVConverterTest {
 
 	// Fixture
 	private GAVConverter converter;
-	
+
 	@Before
 	public void setUp() {
 		this.converter = new GAVConverter();
 	}
-	
+
 	@Test
 	public void testSupportsGAVs() {
 		assertTrue(converter.supports(GAV.class, null));
 	}
-	
+
 	@Test
 	public void testSupportsSubclassOfGAV() {
 		// Set up
 		final Class<? extends GAV> subclass = new GAV("a", "b", "c") {}.getClass();
-		
+
 		// Invoke and check
 		assertTrue(converter.supports(subclass, null));
 	}
-	
+
 	@Test
 	public void testDoesNotSupportObjects() {
 		assertFalse(converter.supports(Object.class, null));
 	}
-	
+
 	@Test
 	public void testConvertFromNull() {
 		assertInvalidString(null, "Expected three coordinates, but found 0: []; did you use the ':' separator?");
 	}
-	
+
 	@Test
 	public void testConvertFromEmptyString() {
 		assertInvalidString("", "Expected three coordinates, but found 0: []; did you use the ':' separator?");
 	}
-	
+
 	@Test
 	public void testConvertFromOneTooFewCoordinates() {
 		assertInvalidString("foo:bar", "Expected three coordinates, but found 2: [foo, bar]; did you use the ':' separator?");
 	}
-	
+
 	@Test
 	public void testConvertFromOneTooManyCoordinates() {
 		assertInvalidString("foo:bar:baz:bop", "Expected three coordinates, but found 4: [foo, bar, baz, bop]; did you use the ':' separator?");
 	}
-	
+
 	private void assertInvalidString(final String string, final String expectedMessage) {
 		try {
 			converter.convertFromText(string, GAV.class, null);
@@ -78,7 +78,7 @@ public class GAVConverterTest {
 			assertEquals(expectedMessage, e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testConvertFromValidCoordinates() {
 		// Set up
@@ -86,36 +86,36 @@ public class GAVConverterTest {
 		final String artifactId = "addon-gradle";
 		final String version = "-0.1";
 		final String coordinates = StringUtils.collectionToDelimitedString(Arrays.asList(groupId, artifactId, version), MavenUtils.COORDINATE_SEPARATOR);
-		
+
 		// Invoke
 		final GAV gav = converter.convertFromText(coordinates, GAV.class, null);
-		
+
 		// Check
 		assertEquals(groupId, gav.getGroupId());
 		assertEquals(artifactId, gav.getArtifactId());
 		assertEquals(version, gav.getVersion());
 	}
-	
+
 	@Test
 	public void testGetAllPossibleValuesForNullInput() {
 		assertPossibleValues(null, true);
 	}
-	
+
 	/**
 	 * Asserts the expected completions for the given input string
-	 * 
+	 *
 	 * @param existingData
 	 * @param expectedComplete whether we expect the converter to report the
 	 * conversion as complete
 	 * @param expectedCompletions
 	 */
-	private void assertPossibleValues(final String existingData, boolean expectedComplete, final String... expectedCompletions) {
+	private void assertPossibleValues(final String existingData, final boolean expectedComplete, final String... expectedCompletions) {
 		// Set up
 		final List<String> completions = new ArrayList<String>();
-		
+
 		// Invoke
 		final boolean complete = converter.getAllPossibleValues(completions, null, existingData, null, null);
-		
+
 		// Check
 		assertEquals(expectedComplete, complete);
 		assertEquals(Arrays.asList(expectedCompletions), completions);

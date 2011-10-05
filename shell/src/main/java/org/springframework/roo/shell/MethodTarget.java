@@ -17,7 +17,7 @@ public class MethodTarget implements Comparable<MethodTarget> {
 	private final Object target;
 	private final String remainingBuffer;
 	private final String key;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -35,7 +35,7 @@ public class MethodTarget implements Comparable<MethodTarget> {
 		this.remainingBuffer = remainingBuffer;
 		this.target = target;
 	}
-	
+
 	@Override
 	public boolean equals(final Object other) {
 		return other == this || (other instanceof MethodTarget && compareTo((MethodTarget) other) == 0);
@@ -50,7 +50,8 @@ public class MethodTarget implements Comparable<MethodTarget> {
 		}
 		return this.remainingBuffer.compareTo(other.remainingBuffer);
 	}
-	
+
+	@Override
 	public final String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("target", target);
@@ -59,14 +60,14 @@ public class MethodTarget implements Comparable<MethodTarget> {
 		tsc.append("key", key);
 		return tsc.toString();
 	}
-	
+
 	/**
 	 * @since 1.2.0
 	 */
 	public String getKey() {
 		return this.key;
 	}
-	
+
 	/**
 	 * @return a non-<code>null</code> method
 	 * @since 1.2.0
@@ -81,7 +82,7 @@ public class MethodTarget implements Comparable<MethodTarget> {
 	public String getRemainingBuffer() {
 		return this.remainingBuffer;
 	}
-	
+
 	/**
 	 * @return a non-<code>null</code> Object
 	 * @since 1.2.0

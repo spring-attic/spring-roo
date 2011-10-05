@@ -21,10 +21,10 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.2.0
  */
 enum ServiceLayerMethod {
-	
+
 	// The names of these enum constants are arbitrary; calling code refers to
 	// these methods by their String key.
-	
+
 	COUNT (CustomDataKeys.COUNT_ALL_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
@@ -49,7 +49,7 @@ enum ServiceLayerMethod {
 			return JavaType.LONG_PRIMITIVE;
 		}
 	},
-	
+
 	DELETE (CustomDataKeys.REMOVE_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
@@ -74,7 +74,7 @@ enum ServiceLayerMethod {
 			return JavaType.VOID_PRIMITIVE;
 		}
 	},
-	
+
 	FIND (CustomDataKeys.FIND_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
@@ -108,7 +108,7 @@ enum ServiceLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Collections.emptyList();
@@ -124,7 +124,7 @@ enum ServiceLayerMethod {
 			return JavaType.listOf(entityType);
 		}
 	},
-	
+
 	FIND_ENTRIES (CustomDataKeys.FIND_ENTRIES_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
@@ -133,7 +133,7 @@ enum ServiceLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
@@ -149,7 +149,7 @@ enum ServiceLayerMethod {
 			return JavaType.listOf(entityType);
 		}
 	},
-	
+
 	SAVE (CustomDataKeys.PERSIST_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
@@ -158,7 +158,7 @@ enum ServiceLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaSymbolName.getReservedWordSafeName(entityType));
@@ -174,7 +174,7 @@ enum ServiceLayerMethod {
 			return JavaType.VOID_PRIMITIVE;
 		}
 	},
-	
+
 	UPDATE (CustomDataKeys.MERGE_METHOD) {
 		@Override
 		public String getName(final ServiceAnnotationValues annotationValues, final JavaType entityType, final String plural) {
@@ -183,7 +183,7 @@ enum ServiceLayerMethod {
 			}
 			return null;
 		}
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaSymbolName.getReservedWordSafeName(entityType));
@@ -199,10 +199,10 @@ enum ServiceLayerMethod {
 			return entityType;
 		}
 	};
-	
+
 	/**
 	 * Returns the {@link ServiceLayerMethod} with the given properties, if any
-	 * 
+	 *
 	 * @param methodIdentifier the internal ID of the method (can be blank)
 	 * @param callerParameters the types of parameter to be passed to the method (required)
 	 * @param targetEntity the type of entity being managed (required)
@@ -218,10 +218,10 @@ enum ServiceLayerMethod {
 		}
 		return null;
 	}
-	
+
 	// Fields
 	private final MethodMetadataCustomDataKey key;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -231,10 +231,10 @@ enum ServiceLayerMethod {
 		Assert.notNull(key, "Method key is required");
 		this.key = key;
 	}
-	
+
 	/**
 	 * Returns the line(s) of Java code that implement this method
-	 * 
+	 *
 	 * @param lowerLayerAdditions the details of a call to a lower layer, if any
 	 * @return a non-blank string
 	 */
@@ -242,7 +242,7 @@ enum ServiceLayerMethod {
 		if (lowerLayerAdditions == null) {
 			// No lower layer implements this method; so we stub it
 			return "throw new UnsupportedOperationException(\"Implement me!\");";
-		} 
+		}
 		// A lower layer implements it; generate a delegation call
 		String line = "";
 		if (!isVoid()) {
@@ -251,10 +251,10 @@ enum ServiceLayerMethod {
 		line += lowerLayerAdditions.getMethodCall() + ";";
 		return line;
 	}
-	
+
 	/**
 	 * Returns the key identifying this method
-	 * 
+	 *
 	 * @return a non-blank string that's unique within this enum
 	 */
 	public String getKey() {
@@ -263,7 +263,7 @@ enum ServiceLayerMethod {
 
 	/**
 	 * Returns the name of this method, based on the given inputs
-	 * 
+	 *
 	 * @param annotationValues the values of the {@link RooService} annotation
 	 * on the service
 	 * @param entityType the type of domain entity managed by the service
@@ -271,10 +271,10 @@ enum ServiceLayerMethod {
 	 * @return <code>null</code> if the method is not implemented
 	 */
 	public abstract String getName(ServiceAnnotationValues annotationValues, JavaType entityType, String plural);
-	
+
 	/**
 	 * Returns the names of this method's declared parameters
-	 * 
+	 *
 	 * @param entityType the type of domain entity managed by the service (required)
 	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list (might be empty)
@@ -284,7 +284,7 @@ enum ServiceLayerMethod {
 	/**
 	 * Returns the types and names of the parameters declared by this method for
 	 * the given domain type
-	 * 
+	 *
 	 * @param domainType the domain type to which the method applies (required)
 	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list
@@ -292,10 +292,10 @@ enum ServiceLayerMethod {
 	public PairList<JavaType, JavaSymbolName> getParameters(final JavaType domainType, final JavaType idType) {
 		return new PairList<JavaType, JavaSymbolName>(getParameterTypes(domainType, idType), getParameterNames(domainType, idType));
 	}
-	
+
 	/**
 	 * Returns the types of parameters taken by this method
-	 * 
+	 *
 	 * @param entityType the type of entity to which this method applies (required)
 	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> copy of list (might be empty)
@@ -304,15 +304,15 @@ enum ServiceLayerMethod {
 
 	/**
 	 * Returns this method's return type
-	 * 
+	 *
 	 * @param entityType the type of entity being managed
 	 * @return a non-<code>null</code> type
 	 */
 	public abstract JavaType getReturnType(JavaType entityType);
-	
+
 	/**
 	 * Returns the name of this method, based on the given inputs
-	 * 
+	 *
 	 * @param annotationValues the values of the {@link RooService} annotation
 	 * on the service
 	 * @param entityType the type of domain entity managed by the service
@@ -326,10 +326,10 @@ enum ServiceLayerMethod {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Indicates whether this method is void, i.e. returns nothing
-	 * 
+	 *
 	 * @return see above
 	 */
 	boolean isVoid() {

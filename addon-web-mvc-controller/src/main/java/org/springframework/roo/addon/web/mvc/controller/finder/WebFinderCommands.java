@@ -11,7 +11,7 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands which provide finder functionality through Spring MVC controllers.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -21,20 +21,20 @@ public class WebFinderCommands implements CommandMarker {
 
 	@Reference private WebFinderOperations operations;
 
-	@CliAvailabilityIndicator({ "web mvc finder add", "web mvc finder all" }) 
+	@CliAvailabilityIndicator({ "web mvc finder add", "web mvc finder all" })
 	public boolean isCommandAvailable() {
 		return operations.isCommandAvailable();
 	}
 
-	@CliCommand(value = "web mvc finder add", help = "Adds @RooWebFinder annotation to MVC controller type") 
+	@CliCommand(value = "web mvc finder add", help = "Adds @RooWebFinder annotation to MVC controller type")
 	public void add(
-		@CliOption(key = "formBackingType", mandatory = true, help = "The finder-enabled type") JavaType finderType,
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller java type to apply this annotation to") JavaType controllerType) {		
-		
+		@CliOption(key = "formBackingType", mandatory = true, help = "The finder-enabled type") final JavaType finderType,
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The controller java type to apply this annotation to") final JavaType controllerType) {
+
 		operations.annotateType(controllerType, finderType);
 	}
-	
-	@CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers") 
+
+	@CliCommand(value = "web mvc finder all", help = "Adds  @RooWebFinder annotation to existing MVC controllers")
 	public void all() {
 		operations.annotateAll();
 	}

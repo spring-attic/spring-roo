@@ -45,60 +45,60 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class CreatorOperationsImpl implements CreatorOperations {
-	
+
 	/**
 	 * The types of project that can be created
 	 */
 	private enum Type {
-		
+
 		/**
 		 * A simple addon
 		 */
 		SIMPLE,
-		
+
 		/**
 		 * An advanced addon
 		 */
 		ADVANCED,
-		
+
 		/**
 		 * A language bundle
 		 */
 		I18N,
-		
+
 		/**
 		 * An OSGi wrapper for a non-OSGi library
 		 */
 		WRAPPER
 	};
-	
+
 	// Constants
 	private static final String ICON_SET_URL = "http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip";
 	private static final String POM_XML = "pom.xml";
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlInputStreamService httpService;
 
 	private String iconSetUrl;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		iconSetUrl = context.getBundleContext().getProperty("creator.i18n.iconset.url");
 		if (!StringUtils.hasText(iconSetUrl)) {
 			iconSetUrl = ICON_SET_URL;
 		}
 	}
-	
+
 	public boolean isCommandAvailable() {
 		return !projectOperations.isProjectAvailable();
 	}
-	
-	public void createAdvancedAddon(JavaPackage topLevelPackage, String description, String projectName) {
+
+	public void createAdvancedAddon(final JavaPackage topLevelPackage, final String description, final String projectName) {
 		Assert.notNull(topLevelPackage, "Top-level package required");
-		
+
 		createProject(topLevelPackage, Type.ADVANCED, description, projectName);
-		
+
 		install("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
 		install("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
 		install("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
@@ -108,12 +108,12 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		install("assembly.xml", topLevelPackage, Path.ROOT, Type.ADVANCED, projectName);
 		install("configuration.xml", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.ADVANCED, projectName);
 	}
-	
-	public void createSimpleAddon(JavaPackage topLevelPackage, String description, String projectName) {
+
+	public void createSimpleAddon(final JavaPackage topLevelPackage, final String description, final String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
-		
+
 		createProject(topLevelPackage, Type.SIMPLE, description, projectName);
-		
+
 		install("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE, projectName);
 		install("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE, projectName);
 		install("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE, projectName);
@@ -122,15 +122,15 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		install("info.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE, projectName);
 		install("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE, projectName);
 	}
-	
-	public void createWrapperAddon(JavaPackage topLevelPackage, String groupId, String artifactId, String version, String vendorName, String lincenseUrl, String docUrl, String osgiImports, String description, String projectName) {
+
+	public void createWrapperAddon(final JavaPackage topLevelPackage, final String groupId, final String artifactId, final String version, final String vendorName, final String lincenseUrl, final String docUrl, final String osgiImports, final String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
 		Element root = pom.getDocumentElement();
-		
+
 		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
 		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/dependencies/dependency/groupId", root).setTextContent(groupId);
@@ -152,11 +152,11 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			Element descriptionE = XmlUtils.findRequiredElement("/project/description", root);
 			descriptionE.setTextContent(description + " " + descriptionE.getTextContent());
 		}
-		
+
 		writePomFile(pom);
 	}
 
-	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName) {
+	public void createI18nAddon(final JavaPackage topLevelPackage, String language, final Locale locale, final File messageBundle, final File flagGraphic, String description, final String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
 		Assert.notNull(locale, "Locale required");
 		Assert.notNull(messageBundle, "Message Bundle required");
@@ -167,11 +167,11 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			BufferedReader br = new BufferedReader(is);
 			String line;
 			try {
-				while((line = br.readLine()) != null) { 
+				while((line = br.readLine()) != null) {
 					String[] split = line.split(";");
 					if (split[1].startsWith(locale.getCountry().toUpperCase())) {
 						if (split[0].contains(",")) {
-							split[0] = split[0].substring(0, split[0].indexOf(",") - 1); 
+							split[0] = split[0].substring(0, split[0].indexOf(",") - 1);
 						}
 						String[] langWords = split[0].split("\\s");
 						StringBuffer b = new StringBuffer();
@@ -187,7 +187,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				IOUtils.closeQuietly(br, is);
 			}
 		}
-		
+
 		String[] langWords = language.split("\\s");
 		StringBuffer b = new StringBuffer();
 		for (String word: langWords) {
@@ -195,7 +195,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 		String languageName = b.toString();
 		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', separatorChar);
-		
+
 		if (!StringUtils.hasText(description)) {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
 		}
@@ -207,20 +207,20 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N, projectName);
 
 		PathResolver pathResolver = projectOperations.getPathResolver();
-		
+
 		try {
 			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + messageBundle.getName())).getOutputStream());
 			if (flagGraphic != null) {
 				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separatorChar + flagGraphic.getName())).getOutputStream());
 			} else {
 				installFlagGraphic(locale, packagePath);
-			} 
+			}
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not copy addon resources into project", e);
 		}
-		
+
 		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separatorChar + languageName + "Language.java");
-		
+
 		if (!fileManager.exists(destinationFile)) {
 			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/Language.java-template");
 			try {
@@ -236,7 +236,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 					input = input.replace("__FLAG_FILE__", locale.getCountry().toLowerCase() + ".png");
 				}
 				input = input.replace("__MESSAGE_BUNDLE__", messageBundle.getName());
-				
+
 				// Output the file for the user
 				MutableFile mutableFile = fileManager.createFile(destinationFile);
 				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
@@ -252,7 +252,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	 * <li>Maven POM</li>
 	 * <li>readme.txt</li>
 	 * <li>
-	 * 
+	 *
 	 * @param topLevelPackage the top-level package of the project being created (required)
 	 * @param type the type of project being created (required)
 	 * @param description the description to put into the POM (can be blank)
@@ -263,12 +263,12 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
-		
+
 		// Load the POM template
 		final String pomTemplate = type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml";
 		final Document pom = XmlUtils.readXml(TemplateUtils.getTemplate(getClass(), pomTemplate));
 		final Element root = pom.getDocumentElement();
-		
+
 		// Populate it from the given inputs
 		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
@@ -290,7 +290,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 	/**
 	 * Writes the given Maven POM to disk
-	 * 
+	 *
 	 * @param pom the POM to write (required)
 	 */
 	private void writePomFile(final Document pom) {
@@ -298,7 +298,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		XmlUtils.writeXml(pomFile.getOutputStream(), pom);
 	}
 
-	private void install(String targetFilename, JavaPackage topLevelPackage, Path path, Type type, String projectName) {
+	private void install(final String targetFilename, final JavaPackage topLevelPackage, final Path path, final Type type, String projectName) {
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
@@ -311,14 +311,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		} else {
 			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + targetFilename);
 		}
-		
+
 		// Different destination for assembly.xml
 		if ("assembly.xml".equals(targetFilename)) {
 			destinationFile = pathResolver.getIdentifier(path, "src" + separatorChar + "main" + separatorChar + "assembly" + separatorChar + targetFilename);
 		} else if (targetFilename.startsWith("RooAnnotation")) { // Adjust name for Roo Annotation
 			destinationFile = pathResolver.getIdentifier(path, packagePath + separatorChar + "Roo" + StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)) + ".java");
 		}
-		
+
 		if (!fileManager.exists(destinationFile)) {
 			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/" + targetFilename + "-template");
 			try {
@@ -328,7 +328,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				input = input.replace("__APP_NAME__", StringUtils.capitalize(topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1)));
 				input = input.replace("__APP_NAME_LWR_CASE__", topLevelPackageName.substring(topLevelPackageName.lastIndexOf(".") + 1).toLowerCase());
 				input = input.replace("__PROJECT_NAME__", projectName.toLowerCase());
-				
+
 				// Output the file for the user
 				MutableFile mutableFile = fileManager.createFile(destinationFile);
 				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
@@ -337,8 +337,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			}
 		}
 	}
-	
-	private void writeTextFile(String fullPathFromRoot, String message) {
+
+	private void writeTextFile(final String fullPathFromRoot, final String message) {
 		Assert.hasText(fullPathFromRoot, "Text file name to write is required");
 		Assert.hasText(message, "Message required");
 		String path = projectOperations.getPathResolver().getIdentifier(Path.ROOT, fullPathFromRoot);
@@ -350,8 +350,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			throw new IllegalStateException(ioe);
 		}
 	}
-	
-	private void installFlagGraphic(Locale locale, String packagePath) {
+
+	private void installFlagGraphic(final Locale locale, final String packagePath) {
 		boolean success = false;
 		String countryCode = locale.getCountry().toLowerCase();
 
@@ -385,13 +385,13 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		} finally {
 			IOUtils.closeQuietly(zis, bis);
 		}
-		
+
 		if (!success) {
 			throw new IllegalStateException(getErrorMsg(locale.toString()));
 		}
 	}
 
-	private String getErrorMsg(String localeStr) {
+	private String getErrorMsg(final String localeStr) {
 		return "Could not acquire flag icon for locale " + localeStr + " please use --flagGraphic to specify the flag manually";
 	}
 }

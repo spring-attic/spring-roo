@@ -35,7 +35,7 @@ public enum GwtPath {
 	private final String segmentName;
 	private final String sourceAntPath;
 
-	GwtPath(String segmentName, String sourceAntPath) {
+	GwtPath(final String segmentName, final String sourceAntPath) {
 		this.segmentName = segmentName;
 		this.sourceAntPath = sourceAntPath;
 	}
@@ -48,7 +48,7 @@ public enum GwtPath {
 		return sourceAntPath;
 	}
 
-	public String canonicalFileSystemPath(ProjectOperations projectOperations) {
+	public String canonicalFileSystemPath(final ProjectOperations projectOperations) {
 		String packagePath = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName().replace('.', File.separatorChar) + getSegmentName().replace('/', File.separatorChar);
 		if (WEB.equals(this)) {
 			return projectOperations.getPathResolver().getRoot(Path.SRC_MAIN_WEBAPP);
@@ -63,7 +63,7 @@ public enum GwtPath {
 		return getSegmentName().substring(1).replace('/', '.');
 	}
 
-	public String packageName(ProjectMetadata projectMetadata) {
+	public String packageName(final ProjectMetadata projectMetadata) {
 		if (WEB.equals(this)) {
 			return "";
 		}

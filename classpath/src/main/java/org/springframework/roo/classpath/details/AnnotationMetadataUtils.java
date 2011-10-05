@@ -21,7 +21,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Utilities to use with {@link AnnotationMetadata}.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
@@ -30,22 +30,22 @@ public abstract class AnnotationMetadataUtils {
 
 	/**
 	 * Converts the annotation into a string-based form.
-	 * 
+	 *
 	 * @param annotation to covert (required)
 	 * @return a string-based representation (never null)
 	 */
-	public static String toSourceForm(AnnotationMetadata annotation) {
+	public static String toSourceForm(final AnnotationMetadata annotation) {
 		return toSourceForm(annotation, null);
 	}
 
 	/**
 	 * Converts the annotation into a string-based form.
-	 * 
+	 *
 	 * @param annotation to covert (required)
 	 * @param resolver to use for automatic addition of used types (may be null)
 	 * @return a string-based representation (never null)
 	 */
-	public static String toSourceForm(AnnotationMetadata annotation, ImportRegistrationResolver resolver) {
+	public static String toSourceForm(final AnnotationMetadata annotation, final ImportRegistrationResolver resolver) {
 		Assert.notNull(annotation, "Annotation required");
 
 		StringBuilder sb = new StringBuilder();
@@ -93,7 +93,7 @@ public abstract class AnnotationMetadataUtils {
 		return sb.toString();
 	}
 
-	private static String computeAttributeValue(AnnotationAttributeValue<?> value, ImportRegistrationResolver resolver) {
+	private static String computeAttributeValue(final AnnotationAttributeValue<?> value, final ImportRegistrationResolver resolver) {
 		String attributeValue = null;
 		if (value instanceof BooleanAttributeValue) {
 			attributeValue = ((BooleanAttributeValue) value).getValue().toString();

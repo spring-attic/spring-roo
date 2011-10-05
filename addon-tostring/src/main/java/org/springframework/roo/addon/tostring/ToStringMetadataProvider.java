@@ -25,27 +25,28 @@ import org.springframework.roo.project.Path;
 
 /**
  * Provides {@link ToStringMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
 public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_TO_STRING);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_TO_STRING);
 	}
-	
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final ToStringAnnotationValues annotationValues = new ToStringAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {
 			return null;
@@ -62,7 +63,7 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 		}
 
 		final SortedSet<MethodMetadata> locatedAccessors = new TreeSet<MethodMetadata>(new Comparator<MethodMetadata>() {
-			public int compare(MethodMetadata l, MethodMetadata r) {
+			public int compare(final MethodMetadata l, final MethodMetadata r) {
 				return l.getMethodName().compareTo(r.getMethodName());
 			}
 		});
@@ -80,8 +81,9 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 
 		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, new ArrayList<MethodMetadata>(locatedAccessors));
 	}
-	
-	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+
+	@Override
+	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		return getLocalMid(itdTypeDetails);
 	}
 
@@ -89,13 +91,15 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 		return "ToString";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = ToStringMetadata.getJavaType(metadataIdentificationString);
 		Path path = ToStringMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return ToStringMetadata.createIdentifier(javaType, path);
 	}
 

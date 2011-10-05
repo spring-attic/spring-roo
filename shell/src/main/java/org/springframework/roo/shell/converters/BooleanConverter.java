@@ -13,7 +13,7 @@ import org.springframework.roo.shell.MethodTarget;
  */
 public class BooleanConverter implements Converter<Boolean> {
 
-	public Boolean convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Boolean convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if ("true".equalsIgnoreCase(value) || "1".equals(value) || "yes".equalsIgnoreCase(value)) {
 			return true;
 		} else if ("false".equalsIgnoreCase(value) || "0".equals(value) || "no".equalsIgnoreCase(value)) {
@@ -23,17 +23,17 @@ public class BooleanConverter implements Converter<Boolean> {
 		}
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		completions.add("true");
 		completions.add("false");
 		completions.add("yes");
-		completions.add("no");		
+		completions.add("no");
 		completions.add("1");
 		completions.add("0");
 		return false;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return Boolean.class.isAssignableFrom(requiredType) || boolean.class.isAssignableFrom(requiredType);
 	}
 }

@@ -45,12 +45,12 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooIdentifier}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = IdentifierMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -61,13 +61,13 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private List<FieldMetadata> fields;
 
 	// From annotation
-	@AutoPopulate private boolean gettersByDefault = true;
-	@AutoPopulate private boolean settersByDefault = false;
+	@AutoPopulate private final boolean gettersByDefault = true;
+	@AutoPopulate private final boolean settersByDefault = false;
 
 	/** See {@link IdentifierService} for further information (populated via {@link IdentifierMetadataProviderImpl}); may be null */
 	private List<Identifier> identifierServiceResult;
 
-	public IdentifierMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, boolean noArgConstructor, List<Identifier> identifierServiceResult) {
+	public IdentifierMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final boolean noArgConstructor, final List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -83,16 +83,16 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}
-		
+
 		// Add @Embeddable annotation
 		builder.addAnnotation(getEmbeddableAnnotation());
-		
+
 		// Add declared fields and accessors and mutators
 		fields = getFields();
 		for (FieldMetadata field : fields) {
 			builder.addField(field);
 		}
-		
+
 		// Obtain an parameterised constructor,
 		builder.addConstructor(getParameterizedConstructor());
 
@@ -115,7 +115,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Add equals and hashCode methods
 		builder.addMethod(getEqualsMethod());
 		builder.addMethod(getHashCodeMethod());
-		
+
 		// Add custom data tag for Roo Identifier type
 		builder.putCustomData(IDENTIFIER_TYPE, null);
 
@@ -133,14 +133,14 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 	/**
 	 * Locates declared fields.
-	 * 
+	 *
 	 * <p>
 	 * If no parent is defined, one will be located or created. All declared fields will be returned.
-	 * 
+	 *
 	 * @return fields (never returns null)
 	 */
 	public List<FieldMetadata> getFields() {
-		// Locate all declared fields 
+		// Locate all declared fields
 		List<? extends FieldMetadata> declaredFields = governorTypeDetails.getDeclaredFields();
 
 		// Add fields to ITD from annotation
@@ -152,17 +152,17 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				if (identifier.getFieldType().equals(DATE)) {
 					setDateAnnotations(identifier.getColumnDefinition(), annotations);
 				}
-				
+
 				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType());
 				FieldMetadata idField = fieldBuilder.build();
-				
+
 				// Only add field to ITD if not declared on governor
 				if (!hasField(declaredFields, idField)) {
 					fields.add(idField);
 				}
 			}
 		}
-		
+
 		fields.addAll(declaredFields);
 
 		// Remove fields with static and transient modifiers
@@ -194,11 +194,11 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("id"), LONG_OBJECT);
 		fields.add(fieldBuilder.build());
-		
+
 		return fields;
 	}
-	
-	private AnnotationMetadataBuilder getColumnBuilder(Identifier identifier) {
+
+	private AnnotationMetadataBuilder getColumnBuilder(final Identifier identifier) {
 		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 		columnBuilder.addStringAttribute("name", identifier.getColumnName());
 		if (StringUtils.hasText(identifier.getColumnDefinition())) {
@@ -219,8 +219,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		return columnBuilder;
 	}
-	
-	private void setDateAnnotations(String columnDefinition, List<AnnotationMetadataBuilder> annotations) {
+
+	private void setDateAnnotations(final String columnDefinition, final List<AnnotationMetadataBuilder> annotations) {
 		// Add JSR 220 @Temporal annotation to date fields
 		String temporalType = StringUtils.defaultIfEmpty(StringUtils.toUpperCase(columnDefinition), "DATE");
 		if ("DATETIME".equals(temporalType)) {
@@ -235,7 +235,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		annotations.add(dateTimeFormatBuilder);
 	}
 
-	private boolean hasField(List<? extends FieldMetadata> declaredFields, FieldMetadata idField) {
+	private boolean hasField(final List<? extends FieldMetadata> declaredFields, final FieldMetadata idField) {
 		for (FieldMetadata declaredField : declaredFields) {
 			if (declaredField.getFieldName().equals(idField.getFieldName())) {
 				return true;
@@ -246,10 +246,10 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 	/**
 	 * Locates the accessor methods.
-	 * 
+	 *
 	 * <p>
 	 * If {@link #getFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class.
-	 * 
+	 *
 	 * @return the accessors (never returns null)
 	 */
 	public List<MethodMetadata> getAccessors() {
@@ -273,10 +273,10 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 	/**
 	 * Locates the mutator methods.
-	 * 
+	 *
 	 * <p>
 	 * If {@link #getFields()} returns fields created by this ITD, public mutators will automatically be produced in the declaring class.
-	 * 
+	 *
 	 * @return the mutators (never returns null)
 	 */
 	public List<MethodMetadata> getMutators() {
@@ -298,10 +298,10 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		return mutators;
 	}
-	
+
 	/**
 	 * Locates the parameterised constructor consisting of the id fields for this class.
-	 *  
+	 *
 	 * @return the constructor, never null.
 	 */
 	public ConstructorMetadata getParameterizedConstructor() {
@@ -311,7 +311,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		for (FieldMetadata field : fields) {
 			parameterTypes.add(field.getFieldType());
 		}
-		
+
 		ConstructorMetadata result = governorTypeDetails.getDeclaredConstructor(parameterTypes);
 		if (result != null) {
 			// Found an existing no-arg constructor on this class, so return it
@@ -340,16 +340,16 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 	/**
 	 * Locates the no-arg constructor for this class, if available.
-	 * 
+	 *
 	 * <p>
 	 * If a class defines a no-arg constructor, it is returned (irrespective of access modifiers).
-	 * 
+	 *
 	 * <p>
 	 * If a class does not define a no-arg constructor, one might be created. It
 	 * will only be created if the {@link #noArgConstructor} is true AND there
 	 * is at least one other constructor declared in the source file. If a
 	 * constructor is created, it will have a private access modifier.
-	 * 
+	 *
 	 * @return the constructor (may return null if no constructor is to be produced)
 	 */
 	public ConstructorMetadata getNoArgConstructor() {
@@ -441,7 +441,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Create the method
 		String primeStr = "prime";
 		String resultStr = "result";
-		
+
 		// Check field names for the same variable names used in the hashCode method
 		for (FieldMetadata field : fields) {
 			if (primeStr.equals(field.getFieldName().getSymbolName())) {
@@ -455,7 +455,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				break;
 			}
 		}
-		
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("final int " + primeStr + " = 31;");
 		bodyBuilder.appendFormalLine("int " + resultStr + " = 17;");
@@ -488,19 +488,19 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }

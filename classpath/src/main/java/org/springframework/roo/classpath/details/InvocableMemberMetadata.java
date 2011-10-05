@@ -8,12 +8,12 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Metadata concerning an invocable member, namely a method or constructor.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public interface InvocableMemberMetadata extends IdentifiableAnnotatedJavaStructure {
-	
+
 	/**
 	 * @return the parameter types (never null, but may be an empty)
 	 */

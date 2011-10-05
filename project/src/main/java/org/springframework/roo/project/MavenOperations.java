@@ -7,7 +7,7 @@ import org.springframework.roo.project.packaging.PackagingType;
 
 /**
  * Provides Maven project operations.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -15,7 +15,7 @@ public interface MavenOperations extends ProjectOperations {
 
 	/**
 	 * Indicates whether the "create project" command is available
-	 * 
+	 *
 	 * @return see above
 	 */
 	boolean isCreateProjectAvailable();
@@ -24,7 +24,7 @@ public interface MavenOperations extends ProjectOperations {
 
 	/**
 	 * Creates a Maven-based project
-	 * 
+	 *
 	 * @param topLevelPackage the top-level Java package (required)
 	 * @param projectName the name of the project (can be blank to infer it from the top-level package)
 	 * @param majorJavaVersion the major Java version for which this project is targetted (can be <code>null</code> to autodetect)
@@ -35,7 +35,7 @@ public interface MavenOperations extends ProjectOperations {
 
 	/**
 	 * Executes the given Maven command
-	 * 
+	 *
 	 * @param command the options and arguments to pass to the Maven executable (required)
 	 * @throws IOException
 	 */
@@ -43,14 +43,14 @@ public interface MavenOperations extends ProjectOperations {
 
 	/**
 	 * Indicates whether new modules can be created in the current project
-	 * 
+	 *
 	 * @return see above
 	 */
 	boolean isCreateModuleAvailable();
 
 	/**
 	 * Creates a module within an existing multi-module Maven project
-	 * 
+	 *
 	 * @param topLevelPackage the top-level Java package (required)
 	 * @param name the name of the project (can be blank to infer it from the top-level package)
 	 * @param parent the Maven coordinates of the parent POM (can be <code>null</code> for none)
@@ -60,7 +60,7 @@ public interface MavenOperations extends ProjectOperations {
 
 	/**
 	 * Changes the focus to the given module (or root) of the project.
-	 * 
+	 *
 	 * @param module the module to focus on (required)
 	 */
 	void focus(final GAV module);

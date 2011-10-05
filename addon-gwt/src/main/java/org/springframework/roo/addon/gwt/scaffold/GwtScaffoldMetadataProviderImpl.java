@@ -76,15 +76,15 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 	@Reference protected ProjectOperations projectOperations;
 	@Reference protected TypeLocationService typeLocationService;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	public MetadataItem get(String metadataIdentificationString) {
+	public MetadataItem get(final String metadataIdentificationString) {
 		// Abort early if we can't continue
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		if (projectMetadata == null) {
@@ -137,7 +137,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 			if (propertyType.isCommonCollectionType() && !propertyType.getParameters().isEmpty()) {
 				ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(propertyType.getParameters().get(0), Path.SRC_MAIN_JAVA));
 			}
-			
+
 			FieldMetadata field = proxy.getDeclaredField(propertyName);
 			List<AnnotationMetadata> annotations = field != null ? field.getAnnotations() : Collections.<AnnotationMetadata> emptyList();
 
@@ -189,7 +189,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		return gwtScaffoldMetadata;
 	}
 
-	private ClassOrInterfaceTypeDetails getGovernor(String metadataIdentificationString) {
+	private ClassOrInterfaceTypeDetails getGovernor(final String metadataIdentificationString) {
 		JavaType governorTypeName = GwtScaffoldMetadata.getJavaType(metadataIdentificationString);
 		Path governorTypePath = GwtScaffoldMetadata.getPath(metadataIdentificationString);
 
@@ -197,7 +197,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		return typeLocationService.getTypeForIdentifier(physicalTypeId);
 	}
 
-	private void buildType(GwtType type) {
+	private void buildType(final GwtType type) {
 		gwtTypeService.buildType(type, gwtTemplateService.getStaticTemplateTypeDetails(type));
 	}
 
@@ -247,7 +247,7 @@ public class GwtScaffoldMetadataProviderImpl implements GwtScaffoldMetadataProvi
 		metadataService.get(downstreamDependency, true);
 	}
 
-	private String createLocalIdentifier(JavaType javaType, Path path) {
+	private String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return GwtScaffoldMetadata.createIdentifier(javaType, path);
 	}
 

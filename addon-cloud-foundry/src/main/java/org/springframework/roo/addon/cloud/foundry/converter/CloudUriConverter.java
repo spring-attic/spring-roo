@@ -22,18 +22,18 @@ import org.springframework.roo.shell.MethodTarget;
 public class CloudUriConverter implements Converter<CloudUri> {
 	@Reference private CloudFoundrySession session;
 
-	public CloudUri convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public CloudUri convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
 		return new CloudUri(value);
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return CloudUri.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		final String appName = ConverterUtils.getOptionValue("appName", target.getRemainingBuffer());
 		final List<String> uris = session.getBoundUrlMap().get(appName);
 		if (uris != null) {

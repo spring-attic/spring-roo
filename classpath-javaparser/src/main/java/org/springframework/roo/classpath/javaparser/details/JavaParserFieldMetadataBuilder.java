@@ -32,53 +32,53 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link FieldMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  *
  */
 public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
-	
+
 	// Fields
 	private JavaType fieldType;
 	private String fieldInitializer;
-	private JavaSymbolName fieldName;
-	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-	private String declaredByMetadataId;
-	private int modifier;
+	private final JavaSymbolName fieldName;
+	private final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+	private final String declaredByMetadataId;
+	private final int modifier;
 
-	public static JavaParserFieldMetadataBuilder getInstance(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+	public static JavaParserFieldMetadataBuilder getInstance(final String declaredByMetadataId, final FieldDeclaration fieldDeclaration, final VariableDeclarator var, final CompilationUnitServices compilationUnitServices, final Set<JavaSymbolName> typeParameters) {
 		return new JavaParserFieldMetadataBuilder(declaredByMetadataId, fieldDeclaration, var, compilationUnitServices, typeParameters);
 	}
 
-	private JavaParserFieldMetadataBuilder(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+	private JavaParserFieldMetadataBuilder(final String declaredByMetadataId, final FieldDeclaration fieldDeclaration, final VariableDeclarator var, final CompilationUnitServices compilationUnitServices, final Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldDeclaration, "Field declaration is mandatory");
 		Assert.notNull(var, "Variable declarator required");
 		Assert.isTrue(fieldDeclaration.getVariables().contains(var), "Cannot request a variable not already in the field declaration");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
-		
+
 		// Convert Java Parser modifier into JDK modifier
 		this.modifier = JavaParserUtils.getJdkModifier(fieldDeclaration.getModifiers());
-		
+
 		this.declaredByMetadataId = declaredByMetadataId;
-		
+
 		Type type = fieldDeclaration.getType();
 		this.fieldType = JavaParserUtils.getJavaType(compilationUnitServices, type, typeParameters);
-		
+
 		// Convert into an array if this variable ID uses array notation
 		if (var.getId().getArrayCount() > 0) {
 			this.fieldType = new JavaType(fieldType.getFullyQualifiedTypeName(), var.getId().getArrayCount() + fieldType.getArray(), fieldType.getDataType(), fieldType.getArgName(), fieldType.getParameters());
 		}
-		
+
 		this.fieldName = new JavaSymbolName(var.getId().getName());
-		
+
 		// Lookup initializer, if one was requested and easily determinable
 		Expression e = var.getInit();
 		if (e != null) {
 			this.fieldInitializer = e.toString();
 		}
-		
+
 		List<AnnotationExpr> annotations = fieldDeclaration.getAnnotations();
 		if (annotations != null) {
 			for (AnnotationExpr annotation : annotations) {
@@ -97,16 +97,16 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 		return fieldMetadataBuilder.build();
 	}
 
-	public static void addField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, FieldMetadata field) {
+	public static void addField(final CompilationUnitServices compilationUnitServices, final List<BodyDeclaration> members, final FieldMetadata field) {
 		Assert.notNull(compilationUnitServices, "Flushable compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(field, "Field required");
-		
+
 		JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
 		ClassOrInterfaceType initType = JavaParserUtils.getResolvedName(compilationUnitServices.getEnclosingTypeName(), field.getFieldType(), compilationUnitServices);
-		
+
 		FieldDeclaration newField = ASTHelper.createFieldDeclaration(JavaParserUtils.getJavaParserModifier(field.getModifier()), initType, field.getFieldName().getSymbolName());
-		
+
 		// Add parameterized types for the field type (not initializer)
 		if (field.getFieldType().getParameters().size() > 0) {
 			List<Type> fieldTypeArgs = new ArrayList<Type>();
@@ -116,7 +116,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 				fieldTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 			}
 		}
-		
+
 		List<VariableDeclarator> vars = newField.getVariables();
 		Assert.notEmpty(vars, "Expected ASTHelper to have provided a single VariableDeclarator");
 		Assert.isTrue(vars.size() == 1, "Expected ASTHelper to have provided a single VariableDeclarator");
@@ -154,7 +154,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 			if (fd.getVariables() == null || fd.getVariables().size() != 1) {
 				throw new IllegalStateException("Illegal state: JavaParser did not return a field declaration correctly");
 			}
-			
+
 			Expression init = fd.getVariables().get(0).getInit();
 
 			// Resolve imports (ROO-1505)
@@ -164,7 +164,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 				NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), typeToImport);
 				ClassOrInterfaceType classOrInterfaceType = JavaParserUtils.getClassOrInterfaceType(nameExpr);
 				ocr.setType(classOrInterfaceType);
-				
+
 				if (typeToImport.getParameters().size() > 0) {
 					List<Type> initTypeArgs = new ArrayList<Type>();
 					initType.setTypeArgs(initTypeArgs);
@@ -178,7 +178,7 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 
 			vd.setInit(init);
 		}
-		
+
 		// Add annotations
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		newField.setAnnotations(annotations);
@@ -204,12 +204,12 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 		// Add the field to the compilation unit
 		members.add(nextFieldIndex, newField);
 	}
-	
-	public static void removeField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, JavaSymbolName fieldName) {
+
+	public static void removeField(final CompilationUnitServices compilationUnitServices, final List<BodyDeclaration> members, final JavaSymbolName fieldName) {
 		Assert.notNull(compilationUnitServices, "Flushable compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(fieldName, "Field name to remove is required");
-		
+
 		// Locate the field
 		int i = -1;
 		int toDelete = -1;
@@ -225,9 +225,9 @@ public class JavaParserFieldMetadataBuilder implements Builder<FieldMetadata> {
 				}
 			}
 		}
-		
+
 		Assert.isTrue(toDelete > -1, "Could not locate field '" + fieldName + "' to delete");
-		
+
 		// Do removal outside iteration of body declaration members, to avoid concurrent modification exceptions
 		members.remove(toDelete);
 	}

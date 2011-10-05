@@ -43,19 +43,19 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides Controller configuration operations.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component 
-@Service 
+@Component
+@Service
 public class ControllerOperationsImpl implements ControllerOperations {
-	
+
 	// Constants
 	private static final JavaSymbolName PATH = new JavaSymbolName("path");
 	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 	private static final Logger LOG = HandlerUtils.getLogger(ControllerOperationsImpl.class);
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
@@ -64,15 +64,15 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-	
+
 	public boolean isNewControllerAvailable() {
 		return projectOperations.isProjectAvailable();
 	}
-	
+
 	public boolean isScaffoldAvailable() {
 		return fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
 	}
-	
+
 	public void setup() {
 		webMvcOperations.installAllWebMvcArtifacts();
 	}
@@ -82,56 +82,56 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			if (Modifier.isAbstract(cid.getModifier())) {
 				continue;
 			}
-			
+
 			JavaType javaType = cid.getName();
 			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
-			
+
 			// Check to see if this persistent type has a web scaffold metadata listening to it
 			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(javaType, path);
 			if (dependencyRegistry.getDownstream(cid.getDeclaredByMetadataId()).contains(downstreamWebScaffoldMetadataId)) {
 				// There is already a controller for this entity
 				continue;
 			}
-			
+
 			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
 			if (pluralMetadata == null) {
 				continue;
 			}
-			
+
 			// To get here, there is no listening controller, so add one
 			JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Controller");
 			createAutomaticController(controller, javaType, new HashSet<String>(), pluralMetadata.getPlural().toLowerCase());
 		}
 	}
 
-	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path) {
+	public void createAutomaticController(final JavaType controller, final JavaType entity, final Set<String> disallowedOperations, final String path) {
 		Assert.notNull(controller, "Controller Java Type required");
 		Assert.notNull(entity, "Entity Java Type required");
 		Assert.notNull(disallowedOperations, "Set of disallowed operations required");
 		Assert.hasText(path, "Controller base path required");
-		
+
 		// Look for an existing controller mapped to this path
 		final ClassOrInterfaceTypeDetails existingController = getExistingController(path);
-		
+
 		webMvcOperations.installConversionService(controller.getPackage());
-		
+
 		List<AnnotationMetadataBuilder> annotations = null;
-		
+
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = null;
 		if (existingController == null) {
 			String resourceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
-			
+
 			// Create annotation @RequestMapping("/myobject/**")
 			List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			requestMappingAttributes.add(new StringAttributeValue(VALUE, "/" + path));
 			annotations = new ArrayList<AnnotationMetadataBuilder>();
 			annotations.add(new AnnotationMetadataBuilder(REQUEST_MAPPING, requestMappingAttributes));
-			
+
 			// Create annotation @Controller
 			List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			annotations.add(new AnnotationMetadataBuilder(CONTROLLER, controllerAttributes));
-			
+
 			// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
 			annotations.add(getRooWebScaffoldAnnotation(entity, disallowedOperations, path, PATH));
 			typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
@@ -148,7 +148,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
 	/**
 	 * Looks for an existing controller mapped to the given path
-	 * 
+	 *
 	 * @param path (required)
 	 * @return <code>null</code> if there is no such controller
 	 */
@@ -166,7 +166,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		return null;
 	}
 
-	private AnnotationMetadataBuilder getRooWebScaffoldAnnotation(JavaType entity, Set<String> disallowedOperations, String path, JavaSymbolName pathName) {
+	private AnnotationMetadataBuilder getRooWebScaffoldAnnotation(final JavaType entity, final Set<String> disallowedOperations, final String path, final JavaSymbolName pathName) {
 		List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		rooWebScaffoldAttributes.add(new StringAttributeValue(pathName, path));
 		rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));

@@ -27,7 +27,7 @@ public class RepositoryLayerMethodTest {
 	// Fixture
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
-	
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -43,19 +43,19 @@ public class RepositoryLayerMethodTest {
 		}
 		assertEquals(RepositoryJpaLayerMethod.values().length, names.size());
 	}
-	
+
 	@Test
 	public void testParameterTypesAreNotNull() {
 		for (final RepositoryJpaLayerMethod method : RepositoryJpaLayerMethod.values()) {
 			assertNotNull(method.getParameterTypes(mockTargetEntity, mockIdType));
 		}
 	}
-	
+
 	@Test
 	public void testCallFlushMethod() {
 		// Invoke
 		final String methodCall = RepositoryJpaLayerMethod.FLUSH.getCall(Collections.<JavaSymbolName>emptyList());
-		
+
 		// Check
 		assertEquals("flush()", methodCall);
 	}

@@ -20,15 +20,15 @@ import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * A default implementation of {@link ConversionServiceOperations}.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 1.1.1
  */
 @Deprecated
-@Component 
+@Component
 @Service
 public class ConversionServiceOperationsImpl implements ConversionServiceOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private TypeLocationService typeLocationService;
@@ -36,19 +36,19 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 
 	public ConversionServiceOperationsImpl() {}
 
-	public ConversionServiceOperationsImpl(FileManager fileManager, TypeLocationService typeLocationService) {
+	public ConversionServiceOperationsImpl(final FileManager fileManager, final TypeLocationService typeLocationService) {
 		// For testing
 		this.fileManager = fileManager;
 		this.typeLocationService = typeLocationService;
 	}
 
-	public void installConversionService(JavaPackage thePackage) {
+	public void installConversionService(final JavaPackage thePackage) {
 		installJavaClass(thePackage);
 		webMvcOperations.installConversionService(thePackage);
 		fileManager.scan();
 	}
 
-	void installJavaClass(JavaPackage thePackage) {
+	void installJavaClass(final JavaPackage thePackage) {
 		JavaType javaType = new JavaType(thePackage.getFullyQualifiedPackageName() + "." + CONVERSION_SERVICE_SIMPLE_TYPE);
 		String physicalPath = typeLocationService.getPhysicalTypeCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(physicalPath)) {

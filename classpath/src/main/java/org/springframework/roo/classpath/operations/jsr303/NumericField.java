@@ -20,21 +20,22 @@ public class NumericField extends StringOrNumericField {
 
 	/** Whether the JSR 303 @Min annotation will be added */
 	private Long min;
-	
+
 	/** Whether the JSR 303 @Max annotation will be added */
 	private Long max;
-	
+
 	/** Whether the JSR 303 @Digits annotation will be added (you must also set digitsFractional) */
 	private Integer digitsInteger;
-	
+
 	/** Whether the JSR 303 @Digits annotation will be added (you must also set digitsInteger) */
 	private Integer digitsFraction;
 
-	public NumericField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
+	public NumericField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
+	@Override
+	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (min != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
@@ -54,7 +55,7 @@ public class NumericField extends StringOrNumericField {
 			annotations.add(new AnnotationMetadataBuilder(DIGITS, attrs));
 		}
 	}
-	
+
 	public boolean isDigitsSetCorrectly() {
 		return (digitsInteger == null && digitsFraction == null) || (digitsInteger != null && digitsFraction != null);
 	}
@@ -63,7 +64,7 @@ public class NumericField extends StringOrNumericField {
 		return digitsInteger;
 	}
 
-	public void setDigitsInteger(Integer digitsInteger) {
+	public void setDigitsInteger(final Integer digitsInteger) {
 		this.digitsInteger = digitsInteger;
 	}
 
@@ -71,7 +72,7 @@ public class NumericField extends StringOrNumericField {
 		return digitsFraction;
 	}
 
-	public void setDigitsFraction(Integer digitsFractional) {
+	public void setDigitsFraction(final Integer digitsFractional) {
 		this.digitsFraction = digitsFractional;
 	}
 
@@ -79,7 +80,7 @@ public class NumericField extends StringOrNumericField {
 		return min;
 	}
 
-	public void setMin(Long min) {
+	public void setMin(final Long min) {
 		if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
 			LOGGER.warning("@Min constraint is not supported for double or float fields");
 		}
@@ -90,7 +91,7 @@ public class NumericField extends StringOrNumericField {
 		return max;
 	}
 
-	public void setMax(Long max) {
+	public void setMax(final Long max) {
 		if (JdkJavaType.isDoubleOrFloat(getFieldType())) {
 			LOGGER.warning("@Max constraint is not supported for double or float fields");
 		}

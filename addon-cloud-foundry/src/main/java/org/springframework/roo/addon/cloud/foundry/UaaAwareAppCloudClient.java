@@ -37,27 +37,27 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 import com.vmware.appcloud.client.UploadStatusCallback;
 
 public class UaaAwareAppCloudClient extends AppCloudClient implements TransmissionEventListener {
-	
+
 	// Constants
 	public final static String CLOUD_FOUNDRY_URL = "http://api.cloudfoundry.com";
 	private final static int HTTP_SUCCESS_CODE = 200;
-	
+
 	// Fields
-	private UaaService uaaService;
-	private Set<String> discoveredAppNames = new HashSet<String>();
-	private URL cloudControllerUrl;
-	
+	private final UaaService uaaService;
+	private final Set<String> discoveredAppNames = new HashSet<String>();
+	private final URL cloudControllerUrl;
+
 	/**
 	 * key: method name, value: sorted map of HTTP response code keys to count of that response code
 	 */
-	private Map<String, SortedMap<Integer, Integer>> methodToResponses = new HashMap<String, SortedMap<Integer, Integer>>();
-	
-	private Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
-	private int cloudMajorVersion = 0;
-	private int cloudMinorVersion = 0;
-	private int cloudPatchVersion = 0;
+	private final Map<String, SortedMap<Integer, Integer>> methodToResponses = new HashMap<String, SortedMap<Integer, Integer>>();
 
-	public UaaAwareAppCloudClient(Product product, UaaService _uaaService, String email, String password, String token, URL cloudControllerUrl, ClientHttpRequestFactory requestFactory) {
+	private Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
+	private final int cloudMajorVersion = 0;
+	private final int cloudMinorVersion = 0;
+	private final int cloudPatchVersion = 0;
+
+	public UaaAwareAppCloudClient(final Product product, final UaaService _uaaService, final String email, final String password, final String token, final URL cloudControllerUrl, final ClientHttpRequestFactory requestFactory) {
 		super(email, password, token, cloudControllerUrl, requestFactory);
 		this.uaaService = _uaaService;
 		this.cloudControllerUrl = cloudControllerUrl;
@@ -70,14 +70,14 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 		flushToUaa();
 	}
 
-	public void afterTransmission(TransmissionType type, boolean successful) {
+	public void afterTransmission(final TransmissionType type, final boolean successful) {
 		if (type == TransmissionType.UPLOAD && successful) {
 			discoveredAppNames.clear();
 			methodToResponses.clear();
 		}
 	}
 
-	public void beforeTransmission(TransmissionType type) {
+	public void beforeTransmission(final TransmissionType type) {
 		if (type == TransmissionType.UPLOAD) {
 			flushToUaa();
 		}
@@ -118,7 +118,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 		}
 	}
 
-	private void registerFeatureUse(String featureName, Map<String, Object> jsonPayload) {
+	private void registerFeatureUse(final String featureName, final Map<String, Object> jsonPayload) {
 		jsonPayload.put("version", product.getMajorVersion() + "." + product.getMinorVersion() + "." + product.getPatchVersion());
 		String jsonAsString = JSONObject.toJSONString(jsonPayload);
 		FeatureUse featureToRegister = FeatureUse.newBuilder().setName(featureName).setDateLastUsed(System.currentTimeMillis()).setMajorVersion(cloudMajorVersion).setMinorVersion(cloudMinorVersion).setPatchVersion(cloudPatchVersion).build();
@@ -127,7 +127,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 		} catch (UnsupportedEncodingException ignore) {}
 	}
 
-	private String sha256(String input) {
+	private String sha256(final String input) {
 		try {
 			MessageDigest sha1 = MessageDigest.getInstance("SHA-256");
 			byte[] digest = sha1.digest(input.getBytes("UTF-8"));
@@ -140,11 +140,11 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 		return null;
 	}
 
-	private void recordHttpResult(String methodName, int resultCode) {
+	private void recordHttpResult(final String methodName, final int resultCode) {
 		recordHttpResult(methodName, resultCode, null);
 	}
 
-	private void recordHttpResult(String methodName, int resultCode, String appName) {
+	private void recordHttpResult(final String methodName, final int resultCode, final String appName) {
 		if (appName != null) {
 			discoveredAppNames.add(appName);
 		}
@@ -161,7 +161,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void bindService(String appName, String serviceName) {
+	public void bindService(final String appName, final String serviceName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.bindService(appName, serviceName);
@@ -174,7 +174,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void createAndUploadAndStartApplication(String appName, String framework, int memory, File warFile, List<String> uris, List<String> serviceNames) throws IOException {
+	public void createAndUploadAndStartApplication(final String appName, final String framework, final int memory, final File warFile, final List<String> uris, final List<String> serviceNames) throws IOException {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.createAndUploadAndStartApplication(appName, framework, memory, warFile, uris, serviceNames);
@@ -187,7 +187,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void createApplication(String appName, String framework, int memory, List<String> uris, List<String> serviceNames, boolean checkExists) {
+	public void createApplication(final String appName, final String framework, final int memory, final List<String> uris, final List<String> serviceNames, final boolean checkExists) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.createApplication(appName, framework, memory, uris, serviceNames, checkExists);
@@ -200,7 +200,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void createApplication(String appName, String framework, int memory, List<String> uris, List<String> serviceNames) {
+	public void createApplication(final String appName, final String framework, final int memory, final List<String> uris, final List<String> serviceNames) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.createApplication(appName, framework, memory, uris, serviceNames);
@@ -213,7 +213,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void createService(CloudService service) {
+	public void createService(final CloudService service) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.createService(service);
@@ -252,7 +252,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void deleteApplication(String appName) {
+	public void deleteApplication(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.deleteApplication(appName);
@@ -265,7 +265,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void deleteService(String service) {
+	public void deleteService(final String service) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.deleteService(service);
@@ -278,7 +278,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public CloudApplication getApplication(String appName) {
+	public CloudApplication getApplication(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getApplication(appName);
@@ -291,7 +291,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public InstancesInfo getApplicationInstances(String appName) {
+	public InstancesInfo getApplicationInstances(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getApplicationInstances(appName);
@@ -330,7 +330,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public ApplicationStats getApplicationStats(String appName) {
+	public ApplicationStats getApplicationStats(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getApplicationStats(appName);
@@ -369,7 +369,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public CrashesInfo getCrashes(String appName) {
+	public CrashesInfo getCrashes(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getCrashes(appName);
@@ -382,7 +382,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public int getDefaultApplicationMemory(String framework) {
+	public int getDefaultApplicationMemory(final String framework) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getDefaultApplicationMemory(framework);
@@ -395,7 +395,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public <T> T getFile(String appName, int instanceIndex, String filePath, RequestCallback requestCallback, ResponseExtractor<T> responseHandler) {
+	public <T> T getFile(final String appName, final int instanceIndex, final String filePath, final RequestCallback requestCallback, final ResponseExtractor<T> responseHandler) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getFile(appName, instanceIndex, filePath, requestCallback, responseHandler);
@@ -408,7 +408,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public String getFile(String appName, int instanceIndex, String filePath) {
+	public String getFile(final String appName, final int instanceIndex, final String filePath) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getFile(appName, instanceIndex, filePath);
@@ -421,7 +421,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public CloudService getService(String service) {
+	public CloudService getService(final String service) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			return super.getService(service);
@@ -486,7 +486,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void register(String email, String password) {
+	public void register(final String email, final String password) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.register(email, password);
@@ -499,7 +499,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void rename(String appName, String newName) {
+	public void rename(final String appName, final String newName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.rename(appName, newName);
@@ -512,7 +512,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void restartApplication(String appName) {
+	public void restartApplication(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.restartApplication(appName);
@@ -525,7 +525,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void startApplication(String appName) {
+	public void startApplication(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.startApplication(appName);
@@ -538,7 +538,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void stopApplication(String appName) {
+	public void stopApplication(final String appName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.stopApplication(appName);
@@ -551,7 +551,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void unbindService(String appName, String serviceName) {
+	public void unbindService(final String appName, final String serviceName) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.unbindService(appName, serviceName);
@@ -577,7 +577,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void updateApplicationInstances(String appName, int instances) {
+	public void updateApplicationInstances(final String appName, final int instances) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.updateApplicationInstances(appName, instances);
@@ -590,7 +590,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void updateApplicationMemory(String appName, int memory) {
+	public void updateApplicationMemory(final String appName, final int memory) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.updateApplicationMemory(appName, memory);
@@ -603,7 +603,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void updateApplicationServices(String appName, List<String> services) {
+	public void updateApplicationServices(final String appName, final List<String> services) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.updateApplicationServices(appName, services);
@@ -616,7 +616,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void updateApplicationUris(String appName, List<String> uris) {
+	public void updateApplicationUris(final String appName, final List<String> uris) {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.updateApplicationUris(appName, uris);
@@ -629,7 +629,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void uploadApplication(String appName, File warFile, UploadStatusCallback callback) throws IOException {
+	public void uploadApplication(final String appName, final File warFile, final UploadStatusCallback callback) throws IOException {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.uploadApplication(appName, warFile, callback);
@@ -642,7 +642,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void uploadApplication(String appName, File warFile) throws IOException {
+	public void uploadApplication(final String appName, final File warFile) throws IOException {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.uploadApplication(appName, warFile);
@@ -655,7 +655,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	}
 
 	@Override
-	public void uploadApplication(String appName, String warFilePath) throws IOException {
+	public void uploadApplication(final String appName, final String warFilePath) throws IOException {
 		int resultCode = HTTP_SUCCESS_CODE;
 		try {
 			super.uploadApplication(appName, warFilePath);

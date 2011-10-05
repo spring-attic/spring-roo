@@ -12,23 +12,23 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link ImportRegistrationResolver}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class ImportRegistrationResolverImpl implements ImportRegistrationResolver {
-	
+
 	// Constants
 	private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
-	
+
 	// Fields
-	private JavaPackage compilationUnitPackage;
-	private SortedSet<JavaType> registeredImports = new TreeSet<JavaType>(new Comparator<JavaType>() {
-		public int compare(JavaType o1, JavaType o2) {
+	private final JavaPackage compilationUnitPackage;
+	private final SortedSet<JavaType> registeredImports = new TreeSet<JavaType>(new Comparator<JavaType>() {
+		public int compare(final JavaType o1, final JavaType o2) {
 			return o1.getFullyQualifiedTypeName().compareTo(o2.getFullyQualifiedTypeName());
 		}
 	});
-	
+
 	static {
 		javaLangSimpleTypeNames.add("Appendable");
 		javaLangSimpleTypeNames.add("CharSequence");
@@ -119,13 +119,13 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		javaLangSimpleTypeNames.add("VerifyError");
 		javaLangSimpleTypeNames.add("VirtualMachineError");
 	}
-	
-	public ImportRegistrationResolverImpl(JavaPackage compilationUnitPackage) {
+
+	public ImportRegistrationResolverImpl(final JavaPackage compilationUnitPackage) {
 		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
 		this.compilationUnitPackage = compilationUnitPackage;
 	}
 
-	public void addImport(JavaType javaType) {
+	public void addImport(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		registeredImports.add(javaType);
 	}
@@ -138,19 +138,19 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		return Collections.unmodifiableSet(registeredImports);
 	}
 
-	public boolean isAdditionLegal(JavaType javaType) {
+	public boolean isAdditionLegal(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
-		
+
 		if (javaType.getDataType() != DataType.TYPE) {
 			// It's a type variable or primitive
 			return false;
 		}
-		
+
 		if (javaType.isDefaultPackage()) {
 			// Cannot import types from the default package
 			return false;
 		}
-		
+
 		// Must be a class, so it's legal if there isn't an existing registration that conflicts
 		for (JavaType candidate : registeredImports) {
 			if (candidate.getSimpleTypeName().equals(javaType.getSimpleTypeName())) {
@@ -161,10 +161,10 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 
 		return true;
 	}
-	
-	public boolean isFullyQualifiedFormRequired(JavaType javaType) {
+
+	public boolean isFullyQualifiedFormRequired(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
-		
+
 		if (javaType.getDataType() == DataType.PRIMITIVE || javaType.getDataType() == DataType.VARIABLE) {
 			// Primitives and type variables do not need to be used in fully-qualified form
 			return false;
@@ -174,35 +174,35 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 			// Already know about this one
 			return false;
 		}
-		
+
 		if (compilationUnitPackage.equals(javaType.getPackage())) {
 			// No need for an explicit registration, given it's in the same package
 			return false;
 		}
-		
+
 		// To get this far, it must need a fully-qualified name
 		return true;
 	}
-	
-	public boolean isFullyQualifiedFormRequiredAfterAutoImport(JavaType javaType) {
+
+	public boolean isFullyQualifiedFormRequiredAfterAutoImport(final JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
-		
+
 		// Try to add import if possible
 		if (isAdditionLegal(javaType)) {
 			addImport(javaType);
 		}
-		
+
 		// Indicate whether we can use in a simple or need a fully-qualified form
 		return isFullyQualifiedFormRequired(javaType);
 	}
 
 	/**
 	 * Determines whether the presented simple type name is part of java.lang or not.
-	 *  
+	 *
 	 * @param simpleTypeName the simple type name (required)
 	 * @return whether the type is declared as part of java.lang
 	 */
-	public static boolean isPartOfJavaLang(String simpleTypeName) {
+	public static boolean isPartOfJavaLang(final String simpleTypeName) {
 		Assert.hasText(simpleTypeName, "Simple type name required");
 		return javaLangSimpleTypeNames.contains(simpleTypeName);
 	}

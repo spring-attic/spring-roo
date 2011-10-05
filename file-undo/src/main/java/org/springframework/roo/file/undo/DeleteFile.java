@@ -11,12 +11,12 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * {@link UndoableOperation} to delete a file.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DeleteFile implements UndoableOperation {
-	
+
 	// Constants
 	private static final Logger LOGGER = HandlerUtils.getLogger(DeleteFile.class);
 
@@ -27,7 +27,7 @@ public class DeleteFile implements UndoableOperation {
 
 	/**
 	 * Constructor that doesn't allow a reason to be given
-	 * 
+	 *
 	 * @param undoManager cannot be <code>null</code>
 	 * @param filenameResolver cannot be <code>null</code>
 	 * @param actual the file to delete; must be an existing file (not a directory)
@@ -37,10 +37,10 @@ public class DeleteFile implements UndoableOperation {
 	public DeleteFile(final UndoManager undoManager, final FilenameResolver filenameResolver, final File actual) {
 		this(undoManager, filenameResolver, actual, null);
 	}
-	
+
 	/**
 	 * Constructor that allows a reason to be given
-	 * 
+	 *
 	 * @param undoManager cannot be <code>null</code>
 	 * @param filenameResolver cannot be <code>null</code>
 	 * @param actual the file to delete; must be an existing file (not a directory)
@@ -53,7 +53,7 @@ public class DeleteFile implements UndoableOperation {
 		Assert.notNull(filenameResolver, "Filename resolver required");
 		Assert.isTrue(actual.exists(), "File '" + actual + "' must exist");
 		Assert.isTrue(actual.isFile(), "Path '" + actual + "' must be a file (not a directory)");
-		
+
 		try {
 			this.backup = File.createTempFile("DeleteFile", "tmp");
 			FileCopyUtils.copy(actual, backup);
@@ -96,5 +96,5 @@ public class DeleteFile implements UndoableOperation {
 			return false;
 		}
 	}
-	
+
 }

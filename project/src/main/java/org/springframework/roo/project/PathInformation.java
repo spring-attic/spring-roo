@@ -7,18 +7,18 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Used by {@link AbstractPathResolver} to permit subclasses to register path details.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class PathInformation {
-	
+
 	// Fields
-	private Path path;
-	private boolean source;
-	private File location;
-	
-	public PathInformation(Path path, boolean source, File location) {
+	private final Path path;
+	private final boolean source;
+	private final File location;
+
+	public PathInformation(final Path path, final boolean source, final File location) {
 		Assert.notNull(path, "Path required");
 		Assert.notNull(location, "Location required");
 		this.path = path;
@@ -37,7 +37,8 @@ public class PathInformation {
 	public File getLocation() {
 		return location;
 	}
-	
+
+	@Override
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("path", path);

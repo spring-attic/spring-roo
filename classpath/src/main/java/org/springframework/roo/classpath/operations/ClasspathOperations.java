@@ -6,7 +6,7 @@ import org.springframework.roo.project.Path;
 
 /**
  * Classpath-related operations
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -14,14 +14,14 @@ public interface ClasspathOperations {
 
 	/**
 	 * Changes the focus to the given type.
-	 * 
+	 *
 	 * @param type the type to focus on (required)
 	 */
 	void focus(final JavaType type);
 
 	/**
 	 * Creates a new Java class source file in any project path.
-	 * 
+	 *
 	 * @param name the name of the class to create
 	 * @param rooAnnotations whether the generated class should have common Roo annotations
 	 * @param path the source directory in which to create the class
@@ -33,7 +33,7 @@ public interface ClasspathOperations {
 
 	/**
 	 * Creates a new Java interface source file in any project path.
-	 * 
+	 *
 	 * @param name the name of the interface to create
 	 * @param path the source directory in which to create the interface
 	 * @param permitReservedWords whether reserved words are ignored by Roo
@@ -42,7 +42,7 @@ public interface ClasspathOperations {
 
 	/**
 	 * Creates a new Java enum source file in any project path.
-	 * 
+	 *
 	 * @param name the name of the enum to create
 	 * @param path the source directory in which to create the enum
 	 * @param permitReservedWords whether reserved words are ignored by Roo
@@ -51,7 +51,7 @@ public interface ClasspathOperations {
 
 	/**
 	 * Inserts a new enum constant into an enum.
-	 * 
+	 *
 	 * @param name the enum class to receive this field
 	 * @param fieldName the name of the constant
 	 * @param permitReservedWords whether reserved words are ignored by Roo

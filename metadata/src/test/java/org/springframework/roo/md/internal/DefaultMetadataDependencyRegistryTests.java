@@ -14,11 +14,11 @@ public class DefaultMetadataDependencyRegistryTests {
 	private static final String MVC_CONTROLLER = MetadataIdentificationUtils.create("com.Test", "mvc ctrl");
 	private static final String JSP_PAGE_1 = MetadataIdentificationUtils.create("com.Test", "jsp 1");
 	private static final String JSP_PAGE_2 = MetadataIdentificationUtils.create("com.Test", "jsp 2");
-	
+
 	@Test
 	public void testRegistration() {
 		DefaultMetadataDependencyRegistry reg = new DefaultMetadataDependencyRegistry();
-		
+
 		// Verify simple registration
 		reg.registerDependency(DISK_FILE, JAVA_TYPE_OBJECT);
 		Assert.assertEquals(1, reg.getDownstream(DISK_FILE).size());
@@ -34,15 +34,15 @@ public class DefaultMetadataDependencyRegistryTests {
 		reg.registerDependency(MVC_CONTROLLER, JSP_PAGE_1);
 		reg.registerDependency(MVC_CONTROLLER, JSP_PAGE_2);
 		Assert.assertEquals(2, reg.getDownstream(MVC_CONTROLLER).size());
-		
+
 		// Can't create circular dependencies
 		Assert.assertTrue(!reg.isValidDependency(JSP_PAGE_2, MVC_CONTROLLER));
 		Assert.assertTrue(!reg.isValidDependency(JAVA_TYPE_PERSON, JAVA_TYPE_OBJECT));
-		
+
 		// Ensure individual deregistration works
 		reg.deregisterDependency(DISK_FILE, JAVA_TYPE_OBJECT);
 		Assert.assertEquals(0, reg.getDownstream(DISK_FILE).size());
-		
+
 		// Ensure bulk deregistration works
 		Assert.assertEquals(1, reg.getDownstream(JAVA_TYPE_PERSON).size());
 		Assert.assertEquals(2, reg.getDownstream(MVC_CONTROLLER).size());

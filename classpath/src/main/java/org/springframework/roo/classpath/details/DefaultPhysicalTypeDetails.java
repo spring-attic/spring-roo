@@ -10,17 +10,17 @@ import org.springframework.roo.support.util.Assert;
 /**
  * Simple implementation of {@link PhysicalTypeDetails} that is suitable for {@link PhysicalTypeCategory#OTHER}
  * or sub-classing by category-specific implementations.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DefaultPhysicalTypeDetails extends AbstractCustomDataAccessorProvider implements PhysicalTypeDetails {
 
 	// Fields
-	private PhysicalTypeCategory physicalTypeCategory;
-	private JavaType name;
-	
-	public DefaultPhysicalTypeDetails(PhysicalTypeCategory physicalTypeCategory, JavaType name) {
+	private final PhysicalTypeCategory physicalTypeCategory;
+	private final JavaType name;
+
+	public DefaultPhysicalTypeDetails(final PhysicalTypeCategory physicalTypeCategory, final JavaType name) {
 		super(CustomDataImpl.NONE);
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
 		Assert.notNull(name, "Name required");

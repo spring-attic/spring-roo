@@ -9,12 +9,12 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 
 /**
  * Represents a parsed {@link RooDbManaged} annotation.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.4
  */
 public class DbManagedAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate private boolean automaticallyDelete = true;
 
@@ -23,7 +23,7 @@ public class DbManagedAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public DbManagedAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public DbManagedAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, ROO_DB_MANAGED);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

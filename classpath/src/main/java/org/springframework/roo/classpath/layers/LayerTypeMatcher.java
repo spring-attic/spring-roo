@@ -21,16 +21,16 @@ import org.springframework.roo.support.util.Assert;
  * (services, repositories, etc) by the presence of a given tag, and sets each
  * such component's {@link CustomDataKeys#LAYER_TYPE} tag to a list of the
  * domain types managed by that component (as a <code>List&lt;{@link JavaType}&gt;</code>).
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class LayerTypeMatcher extends AnnotatedTypeMatcher {
-	
+
 	// Fields
 	private final JavaSymbolName domainTypesAttribute;
 	private final JavaType layerAnnotationType;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -45,7 +45,7 @@ public class LayerTypeMatcher extends AnnotatedTypeMatcher {
 		this.domainTypesAttribute = domainTypesAttribute;
 		this.layerAnnotationType = layerAnnotation;
 	}
-	
+
 	@Override
 	public Object getTagValue(final MemberHoldingTypeDetails type) {
 		final AnnotationMetadata layerAnnotation = MemberFindingUtils.getAnnotationOfType(type.getAnnotations(), layerAnnotationType);

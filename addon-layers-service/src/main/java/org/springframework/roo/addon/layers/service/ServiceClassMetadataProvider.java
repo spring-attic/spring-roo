@@ -29,7 +29,7 @@ import org.springframework.roo.project.Path;
 /**
  * Provides {@link ServiceClassMetadata} for building the ITD for the
  * implementation class of a user project's service.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -37,27 +37,27 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service
 public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
-	
+
 	// Constants
 	private static final int LAYER_POSITION = LayerType.SERVICE.getPosition();
 	private static final Path SRC = Path.SRC_MAIN_JAVA;
-	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
-	
+	private final Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
+
 	// Fields
 	@Reference private LayerService layerService;
 	@Reference private TypeLocationService typeLocationService;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		setIgnoreTriggerAnnotations(true);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
-	
+
 	@Override
 	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		// Determine the governor for this ITD, and whether any metadata is even hoping to hear about changes to that JavaType and its ITDs
@@ -66,7 +66,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		if (localMid != null) {
 			return localMid;
 		}
-		
+
 		final MemberHoldingTypeDetails memberHoldingTypeDetails = typeLocationService.findClassOrInterface(governor);
 		if (memberHoldingTypeDetails != null) {
 			for (final JavaType type : memberHoldingTypeDetails.getLayerEntities()) {
@@ -76,11 +76,11 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 				}
 			}
 		}
-		return null;	
+		return null;
 	}
-	
+
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final ClassOrInterfaceTypeDetails serviceClass = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (serviceClass == null) {
 			return null;
@@ -96,10 +96,10 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		if (serviceInterfaceMetadata == null || !serviceInterfaceMetadata.isValid()) {
 			return null;
 		}
-		
+
 		// Register this provider for changes to the service interface // TODO move this down in case we return null early below?
 		metadataDependencyRegistry.registerDependency(serviceInterfaceMetadata.getId(), metadataIdentificationString);
-		
+
 		final ServiceAnnotationValues serviceAnnotationValues = serviceInterfaceMetadata.getServiceAnnotationValues();
 		final JavaType[] domainTypes = serviceAnnotationValues.getDomainTypes();
 		if (domainTypes == null) {
@@ -118,7 +118,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 		// Collect the additions for each method for each supported domain type
 		final Map<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>> allCrudAdditions = new LinkedHashMap<JavaType, Map<ServiceLayerMethod, MemberTypeAdditions>>();
 		for (final JavaType domainType : domainTypes) {
-			
+
 			final JavaType idType = persistenceMemberLocator.getIdentifierType(domainType);
 			if (idType == null) {
 				return null;
@@ -131,10 +131,10 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 				return null;
 			}
 			domainTypePlurals.put(domainType, pluralMetadata.getPlural());
-			
+
 			// Maintain a list of entities that are being handled by this layer
 			managedEntityTypes.put(domainType, metadataIdentificationString);
-			
+
 			// Collect the additions the service class needs in order to invoke each service layer method
 			final Map<ServiceLayerMethod, MemberTypeAdditions> methodAdditions = new LinkedHashMap<ServiceLayerMethod, MemberTypeAdditions>();
 			for (final ServiceLayerMethod method : ServiceLayerMethod.values()) {
@@ -146,7 +146,7 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 				}
 			}
 			allCrudAdditions.put(domainType, methodAdditions);
-			
+
 			// Register this provider for changes to the domain type or its plural
 			metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, SRC), metadataIdentificationString);
 			metadataDependencyRegistry.registerDependency(pluralId, metadataIdentificationString);
@@ -164,12 +164,12 @@ public class ServiceClassMetadataProvider extends AbstractMemberDiscoveringItdMe
 	}
 
 	@Override
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return ServiceClassMetadata.createIdentifier(javaType, path);
 	}
 
 	@Override
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = ServiceClassMetadata.getJavaType(metadataIdentificationString);
 		Path path = ServiceClassMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);

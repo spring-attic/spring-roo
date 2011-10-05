@@ -30,12 +30,12 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
-	
+
 	// Fields
 	private final Map<String, Matcher<? extends CustomDataAccessor>> taggerMap = new HashMap<String, Matcher<? extends CustomDataAccessor>>();
 	private final Map<String, String> pluralMap = new HashMap<String, String>();
 
-	public MemberDetails decorate(String requestingClass, MemberDetails memberDetails) {
+	public MemberDetails decorate(final String requestingClass, final MemberDetails memberDetails) {
 		MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(memberDetails);
 
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
@@ -74,7 +74,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		return memberDetailsBuilder.build();
 	}
 
-	public MemberDetails decorateTypes(String requestingClass,  MemberDetails memberDetails) {
+	public MemberDetails decorateTypes(final String requestingClass,  final MemberDetails memberDetails) {
 		MemberDetailsBuilder memberDetailsBuilder = new MemberDetailsBuilder(memberDetails);
 		for (TypeMatcher typeTagger : getTypeTaggers()) {
 			for (MemberHoldingTypeDetails typeDetails : typeTagger.matches(memberDetails.getDetails())) {
@@ -86,12 +86,12 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 
 	/**
 	 * This method returns the plural term as per inflector. ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
-	 * 
+	 *
 	 * @param term The term to be pluralized
 	 * @param locale Locale
 	 * @return pluralized term
 	 */
-	public String getInflectorPlural(String term, Locale locale) {
+	public String getInflectorPlural(final String term, final Locale locale) {
 		try {
 			return Noun.pluralOf(term, locale);
 		} catch (RuntimeException re) {
@@ -100,7 +100,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		}
 	}
 
-	public void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher) {
+	public void registerMatcher(final String addingClass, final Matcher<? extends CustomDataAccessor> matcher) {
 		Assert.notNull(addingClass, "The calling class must be specified");
 		Assert.notNull(matcher, "The matcher must be specified");
 		taggerMap.put(addingClass + matcher.getCustomDataKey(), matcher);
@@ -115,7 +115,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 		}
 	}
 
-	public void unregisterMatchers(String addingClass) {
+	public void unregisterMatchers(final String addingClass) {
 		Set<String> toRemove = new HashSet<String>();
 		for (String taggerKey : taggerMap.keySet()) {
 			if (taggerKey.startsWith(addingClass)) {
@@ -126,7 +126,7 @@ public class CustomDataKeyDecoratorImpl implements CustomDataKeyDecorator {
 			taggerMap.remove(taggerKey);
 		}
 	}
-	
+
 	public void unregisterMatchers(final Class<?> addingClass) {
 		unregisterMatchers(addingClass.getName());
 	}

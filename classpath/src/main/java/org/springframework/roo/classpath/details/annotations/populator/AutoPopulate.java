@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 
 /**
- * Identifies a field that can be automatically populated from {@link AnnotationAttributeValue}s. 
- * 
+ * Identifies a field that can be automatically populated from {@link AnnotationAttributeValue}s.
+ *
  * @author Ben Alex
  * @since 1.0
  *

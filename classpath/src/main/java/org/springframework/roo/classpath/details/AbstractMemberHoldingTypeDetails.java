@@ -44,7 +44,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
-	
+
 	public FieldMetadata getDeclaredField(final JavaSymbolName fieldName) {
 		Assert.notNull(fieldName, "Field name required");
 		for (FieldMetadata field : getDeclaredFields()) {
@@ -54,7 +54,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
-	
+
 	public ClassOrInterfaceTypeDetails getDeclaredInnerType(final JavaType typeName) {
 		Assert.notNull(typeName, "Name of inner type required");
 		for (final ClassOrInterfaceTypeDetails coitd : getDeclaredInnerTypes()) {
@@ -64,7 +64,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
-	
+
 	public FieldMetadata getField(final JavaSymbolName fieldName) {
 		Assert.notNull(fieldName, "Field name required");
 		MemberHoldingTypeDetails current = this;
@@ -81,7 +81,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
-	
+
 	public List<FieldMetadata> getFieldsWithAnnotation(final JavaType annotation) {
 		Assert.notNull(annotation, "Annotation required");
 		final List<FieldMetadata> result = new ArrayList<FieldMetadata>();
@@ -119,7 +119,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
-	
+
 	public MethodMetadata getMethod(final JavaSymbolName methodName, List<JavaType> parameters) {
 		Assert.notNull(methodName, "Method name required");
 		if (parameters == null) {
@@ -140,7 +140,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		}
 		return null;
 	}
-	
+
 	public List<MethodMetadata> getMethods() {
 		final List<MethodMetadata> result = new ArrayList<MethodMetadata>();
 		MemberHoldingTypeDetails current = this;
@@ -172,7 +172,7 @@ public abstract class AbstractMemberHoldingTypeDetails extends AbstractIdentifia
 		// We've derived a unique name
 		return new JavaSymbolName(candidateName);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public List<JavaType> getLayerEntities() {
 		final Object entities = getCustomData().get(LAYER_TYPE);

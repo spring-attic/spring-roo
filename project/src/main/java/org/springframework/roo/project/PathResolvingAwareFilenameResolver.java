@@ -18,11 +18,11 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public class PathResolvingAwareFilenameResolver implements FilenameResolver {
-	
+
 	// Fields
 	@Reference private PathResolver pathResolver;
 
-	public String getMeaningfulName(File file) {
+	public String getMeaningfulName(final File file) {
 		Assert.notNull(file, "File required");
 		return pathResolver.getFriendlyName(FileDetails.getCanonicalPath(file));
 	}

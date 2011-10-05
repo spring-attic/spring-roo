@@ -2,19 +2,19 @@ package org.springframework.roo.addon.roobot.client;
 
 /**
  * Indication of stability level for add-ons / components.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1.2
  */
 public enum AddOnStabilityLevel {
-	RELEASE(0), 
-	RELEASE_CANDIDATE(1), 
-	MILESTONE(2), 
+	RELEASE(0),
+	RELEASE_CANDIDATE(1),
+	MILESTONE(2),
 	ANY(3);
-	
+
 	private int level;
 
-	private AddOnStabilityLevel(int level) {
+	private AddOnStabilityLevel(final int level) {
 		this.level = level;
 	}
 
@@ -22,7 +22,7 @@ public enum AddOnStabilityLevel {
 		return level;
 	}
 
-	public static AddOnStabilityLevel fromLevel(int level) {
+	public static AddOnStabilityLevel fromLevel(final int level) {
 		if (level == ANY.getLevel()) {
 			return ANY;
 		} else if (level == RELEASE_CANDIDATE.getLevel()) {
@@ -34,7 +34,7 @@ public enum AddOnStabilityLevel {
 		}
 	}
 
-	public static int getAddOnStabilityLevel(String version) {
+	public static int getAddOnStabilityLevel(final String version) {
 		if (version.endsWith(".RELEASE")) {
 			return RELEASE.getLevel();
 		} else if (version.matches("\\.RC\\d")) {

@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 
 /**
  * Simplified immutable representation of a repository.
- * 
+ *
  * <p>
  * Structured after the model used by Maven and Ivy.
  *
@@ -19,16 +19,16 @@ import org.w3c.dom.Element;
  *
  */
 public class Repository implements Comparable<Repository> {
-	
+
 	// Fields
 	private final boolean enableSnapshots;
 	private final String id;
 	private final String name;
 	private final String url;
-	
+
 	/**
 	 * Constructor for snapshots disabled
-	 * 
+	 *
 	 * @param id the repository id (required)
 	 * @param name the repository name (optional)
 	 * @param url the repository url (required)
@@ -36,10 +36,10 @@ public class Repository implements Comparable<Repository> {
 	public Repository(final String id, final String name, final String url) {
 		this(id, name, url, false);
 	}
-	
+
 	/**
 	 * Constructor for snapshots optionally enabled
-	 * 
+	 *
 	 * @param id the repository id (required)
 	 * @param name the repository name (optional)
 	 * @param url the repository url (required)
@@ -53,10 +53,10 @@ public class Repository implements Comparable<Repository> {
 		this.name = StringUtils.trimToNull(name);
 		this.url = url;
 	}
-	
+
 	/**
 	 * Convenience constructor for creating a repository instance from an XML Element
-	 * 
+	 *
 	 * @param element containing the repository definition (required)
 	 */
 	public Repository(final Element element) {
@@ -71,7 +71,7 @@ public class Repository implements Comparable<Repository> {
 
 	/**
 	 * The id of the repository
-	 * 
+	 *
 	 * @return the id (never null)
 	 */
 	public String getId() {
@@ -80,7 +80,7 @@ public class Repository implements Comparable<Repository> {
 
 	/**
 	 * The name of the repository
-	 * 
+	 *
 	 * @return the name of the repository (null if not exists)
 	 */
 	public String getName() {
@@ -89,22 +89,22 @@ public class Repository implements Comparable<Repository> {
 
 	/**
 	 * The url of the repository
-	 * 
+	 *
 	 * @return the url (never null)
 	 */
 	public String getUrl() {
 		return url;
 	}
-	
+
 	/**
 	 * Indicates if snapshots are enabled
-	 * 
+	 *
 	 * @return enableSnapshots
 	 */
 	public boolean isEnableSnapshots() {
 		return enableSnapshots;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return 11 * this.id.hashCode() * this.url.hashCode();
@@ -125,7 +125,7 @@ public class Repository implements Comparable<Repository> {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public String toString() {
 		final ToStringCreator tsc = new ToStringCreator(this);
@@ -134,10 +134,10 @@ public class Repository implements Comparable<Repository> {
 		tsc.append("url", url);
 		return tsc.toString();
 	}
-	
+
 	/**
 	 * Returns the XML element for this repository
-	 * 
+	 *
 	 * @param document the document in which to create the element (required)
 	 * @param tagName the name of the element to create (required)
 	 * @return a non-<code>null</code> element

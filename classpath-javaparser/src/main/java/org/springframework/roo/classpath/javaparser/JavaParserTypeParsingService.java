@@ -52,7 +52,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 
-@Component(immediate = true) 
+@Component(immediate = true)
 @Service
 public class JavaParserTypeParsingService implements TypeParsingService {
 
@@ -81,7 +81,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		return compilationUnit.toString();
 	}
 
-	public ClassOrInterfaceTypeDetails getTypeAtLocation(String fileIdentifier, String declaredByMetadataId, JavaType typeName) {
+	public ClassOrInterfaceTypeDetails getTypeAtLocation(final String fileIdentifier, final String declaredByMetadataId, final JavaType typeName) {
 		Assert.hasText(fileIdentifier, "Compilation unit path required");
 		Assert.hasText(declaredByMetadataId, "Declaring metadata ID required");
 		Assert.notNull(typeName, "Java type to locate required");
@@ -94,7 +94,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		}
 	}
 
-	public ClassOrInterfaceTypeDetails getTypeFromString(String fileContents, String declaredByMetadataId, JavaType typeName) {
+	public ClassOrInterfaceTypeDetails getTypeFromString(final String fileContents, final String declaredByMetadataId, final JavaType typeName) {
 		if (!StringUtils.hasText(fileContents)) {
 			return null;
 		}
@@ -115,13 +115,13 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 
 	/**
 	 * Appends the presented class to the end of the presented body declarations. The body declarations appear within the presented compilation unit. This is used to progressively build inner types.
-	 * 
+	 *
 	 * @param compilationUnit the work-in-progress compilation unit (required)
 	 * @param enclosingCompilationUnitServices
 	 * @param cit the new class to add (required)
 	 * @param parent the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
 	 */
-	private void updateOutput(final CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, final ClassOrInterfaceTypeDetails cit, List<BodyDeclaration> parent) {
+	private void updateOutput(final CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, final ClassOrInterfaceTypeDetails cit, final List<BodyDeclaration> parent) {
 		// Append the new imports this class declares
 		Assert.notNull(compilationUnit.getImports(), "Compilation unit imports should be non-null when producing type '" + cit.getName() + "'");
 		for (ImportMetadata importType : cit.getRegisteredImports()) {
@@ -332,7 +332,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		}
 
 		Collections.sort(imports, new Comparator<ImportDeclaration>() {
-			public int compare(ImportDeclaration importDeclaration, ImportDeclaration importDeclaration1) {
+			public int compare(final ImportDeclaration importDeclaration, final ImportDeclaration importDeclaration1) {
 				return importDeclaration.getName().toString().compareTo(importDeclaration1.getName().toString());
 			}
 		});
@@ -340,7 +340,7 @@ public class JavaParserTypeParsingService implements TypeParsingService {
 		compilationUnit.setImports(imports);
 	}
 
-	private void addEnumConstant(List<EnumConstantDeclaration> constants, JavaSymbolName name) {
+	private void addEnumConstant(final List<EnumConstantDeclaration> constants, final JavaSymbolName name) {
 		// Determine location to insert
 		for (EnumConstantDeclaration constant : constants) {
 			if (constant.getName().equals(name.getSymbolName())) {

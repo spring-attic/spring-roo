@@ -26,7 +26,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 public class GwtProxyProperty {
-	
+
 	// Fields
 	private final ProjectMetadata projectMetadata;
 	private final PhysicalTypeMetadata ptmd;
@@ -35,14 +35,14 @@ public class GwtProxyProperty {
 	private List<AnnotationMetadata> annotations;
 	private String getter;
 
-	public GwtProxyProperty(ProjectMetadata projectMetadata, PhysicalTypeMetadata ptmd, JavaType type) {
+	public GwtProxyProperty(final ProjectMetadata projectMetadata, final PhysicalTypeMetadata ptmd, final JavaType type) {
 		Assert.notNull(type, "Type required");
 		this.projectMetadata = projectMetadata;
 		this.ptmd = ptmd;
 		this.type = type;
 	}
 
-	public GwtProxyProperty(ProjectMetadata projectMetadata, PhysicalTypeMetadata ptmd, JavaType type, String name, List<AnnotationMetadata> annotations, String getter) {
+	public GwtProxyProperty(final ProjectMetadata projectMetadata, final PhysicalTypeMetadata ptmd, final JavaType type, final String name, final List<AnnotationMetadata> annotations, final String getter) {
 		this(projectMetadata, ptmd, type);
 		this.name = name;
 		this.annotations = annotations;
@@ -184,7 +184,7 @@ public class GwtProxyProperty {
 			if (annotations == null || annotations.isEmpty()) {
 				return formatter;
 			}
-			
+
 			AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(annotations, NUMBER_FORMAT);
 			if (annotation != null) {
 				AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("style"));
@@ -249,7 +249,7 @@ public class GwtProxyProperty {
 		return getProxyRendererType(projectMetadata, isCollectionOfProxy() ? type.getParameters().get(0) : type);
 	}
 
-	public static String getProxyRendererType(ProjectMetadata projectMetadata, JavaType javaType) {
+	public static String getProxyRendererType(final ProjectMetadata projectMetadata, final JavaType javaType) {
 		return GwtType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + javaType.getSimpleTypeName() + "Renderer";
 	}
 
@@ -280,7 +280,7 @@ public class GwtProxyProperty {
 		return String.format("@UiField %s %s %s", getEditor(), getName(), initializer);
 	}
 
-	public String forMobileListView(String rendererName) {
+	public String forMobileListView(final String rendererName) {
 		return new StringBuilder("if (value.").append(getGetter()).append("() != null) {\n\t\t\t\tsb.appendEscaped(").append(rendererName).append(".render(value.").append(getGetter()).append("()));\n\t\t\t}").toString();
 	}
 

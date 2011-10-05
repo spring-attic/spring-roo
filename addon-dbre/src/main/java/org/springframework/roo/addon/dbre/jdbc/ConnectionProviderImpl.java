@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Implementation of {@link ConnectionProvider}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -26,11 +26,11 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	// Constants
 	private static final String USER = "user";
 	private static final String PASSWORD = "password";
-	
+
 	// Fields
 	@Reference private JdbcDriverManager jdbcDriverManager;
 
-	public Connection getConnection(Properties props, boolean displayAddOns) throws RuntimeException {
+	public Connection getConnection(final Properties props, final boolean displayAddOns) throws RuntimeException {
 		Assert.notEmpty(props, "Connection properties must not be null or empty");
 
 		// The properties "user" and "password" are required to make a connection
@@ -51,14 +51,14 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 		}
 	}
 
-	public Connection getConnection(Map<String, String> map, boolean displayAddOns) throws RuntimeException {
+	public Connection getConnection(final Map<String, String> map, final boolean displayAddOns) throws RuntimeException {
 		Assert.isTrue(!CollectionUtils.isEmpty(map), "Connection properties map must not be null or empty");
 		Properties props = new Properties();
 		props.putAll(map);
 		return getConnection(props, displayAddOns);
 	}
 
-	public void closeConnection(Connection connection) {
+	public void closeConnection(final Connection connection) {
 		if (connection != null) {
 			try {
 				connection.close();

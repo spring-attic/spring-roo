@@ -4,12 +4,12 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Assists in the creation of a {@link Builder} for types that eventually implement {@link CustomDataAccessor}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAccessor> implements Builder<T> {
-	
+
 	// Fields
 	private CustomDataBuilder customDataBuilder;
 
@@ -19,7 +19,7 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
 	protected AbstractCustomDataAccessorBuilder() {
 		this.customDataBuilder = new CustomDataBuilder();
 	}
-	
+
 	/**
 	 * Constructor for a builder initialised with the given custom data
 	 *
@@ -29,8 +29,8 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
 		Assert.notNull(existing, "Custom data accessor required");
 		this.customDataBuilder = new CustomDataBuilder(existing.getCustomData());
 	}
-	
-	public Object putCustomData(Object key, Object value) {
+
+	public Object putCustomData(final Object key, final Object value) {
 		return customDataBuilder.put(key, value);
 	}
 
@@ -41,17 +41,17 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
 	/**
 	 * Sets this builder's {@link CustomDataBuilder} to the given one (does not
 	 * take a copy)
-	 * 
+	 *
 	 * @param customDataBuilder the builder to set (required)
 	 */
 	public void setCustomData(final CustomDataBuilder customDataBuilder) {
 		Assert.notNull(customDataBuilder, "Custom data builder required");
 		this.customDataBuilder = customDataBuilder;
 	}
-	
+
 	/**
 	 * Appends the given custom data to this builder
-	 * 
+	 *
 	 * @param customDataBuilder the custom data to append; can be <code>null</code> to
 	 * make no changes
 	 */

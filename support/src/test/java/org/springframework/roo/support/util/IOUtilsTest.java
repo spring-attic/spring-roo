@@ -21,29 +21,29 @@ public class IOUtilsTest {
 	public void testCloseNullCloseable() {
 		IOUtils.closeQuietly((Closeable) null); // Shouldn't throw an exception
 	}
-	
+
 	@Test
 	public void testCloseNonNullCloseableWithoutError() throws Exception {
 		// Set up
 		final Closeable mockCloseable = mock(Closeable.class);
-		
+
 		// Invoke
 		IOUtils.closeQuietly(mockCloseable);
-		
+
 		// Check
 		verify(mockCloseable).close();
 	}
-	
+
 	@Test
 	public void testCloseTwoNonNullCloseableWithErrorOnFirst() throws Exception {
 		// Set up
 		final Closeable mockCloseable1 = mock(Closeable.class);
 		doThrow(new IOException("dummy")).when(mockCloseable1).close();
 		final Closeable mockCloseable2 = mock(Closeable.class);
-		
+
 		// Invoke
 		IOUtils.closeQuietly(mockCloseable1, mockCloseable2);
-		
+
 		// Check
 		verify(mockCloseable1).close();
 		verify(mockCloseable2).close();

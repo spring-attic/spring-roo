@@ -25,14 +25,14 @@ import org.springframework.uaa.client.util.Assert;
 
 /**
  * The {@link ServiceOperations} implementation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component
 @Service
 public class ServiceOperationsImpl implements ServiceOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -43,18 +43,18 @@ public class ServiceOperationsImpl implements ServiceOperations {
 		return projectOperations.isProjectAvailable();
 	}
 
-	public void setupService(JavaType interfaceType, JavaType classType, JavaType domainType) {
+	public void setupService(final JavaType interfaceType, final JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
-		
+
 		String interfaceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(interfaceType, Path.SRC_MAIN_JAVA);
 		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
-		
+
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
-		
+
 		// First build interface type
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_SERVICE);
 		interfaceAnnotationMetadata.addAttribute(new ArrayAttributeValue<ClassAttributeValue>(new JavaSymbolName("domainTypes"), Arrays.asList(new ClassAttributeValue(new JavaSymbolName("foo"), domainType))));
@@ -62,7 +62,7 @@ public class ServiceOperationsImpl implements ServiceOperations {
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
-		
+
 		// Second build the implementing class
 		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);

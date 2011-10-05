@@ -15,7 +15,7 @@ import org.springframework.uaa.client.ProxyService;
 /**
  * Provides the ability to configure a proxy server for usage by
  * {@link JdkUrlInputStreamService}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */

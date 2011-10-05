@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates the lifecycle of the entity is managed by the database reverse engineering process.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */

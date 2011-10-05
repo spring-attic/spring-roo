@@ -36,17 +36,17 @@ import java.util.TreeSet;
  * @see org.apache.commons.lang.StringUtils
  */
 public final class StringUtils {
-	
+
 	// Constants
 	private static final String FOLDER_SEPARATOR = "/";
 	private static final String WINDOWS_FOLDER_SEPARATOR = "\\";
 	private static final String TOP_PATH = "..";
 	private static final String CURRENT_PATH = ".";
 	private static final char EXTENSION_SEPARATOR = '.';
-	
+
 	/**
 	 * The platform-specific line separator.
-	 * 
+	 *
 	 * @since 1.2.0
 	 */
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -68,7 +68,7 @@ public final class StringUtils {
 	 * @return <code>true</code> if the CharSequence is not null and has length
 	 * @see #hasText(String)
 	 */
-	public static boolean hasLength(CharSequence str) {
+	public static boolean hasLength(final CharSequence str) {
 		return (str != null && str.length() > 0);
 	}
 
@@ -79,7 +79,7 @@ public final class StringUtils {
 	 * @return <code>true</code> if the String is not null and has length
 	 * @see #hasLength(CharSequence)
 	 */
-	public static boolean hasLength(String str) {
+	public static boolean hasLength(final String str) {
 		return hasLength((CharSequence) str);
 	}
 
@@ -99,7 +99,7 @@ public final class StringUtils {
 	 * its length is greater than 0, and it does not contain whitespace only
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static boolean hasText(CharSequence str) {
+	public static boolean hasText(final CharSequence str) {
 		if (!hasLength(str)) {
 			return false;
 		}
@@ -121,7 +121,7 @@ public final class StringUtils {
 	 * greater than 0, and it does not contain whitespace only
 	 * @see #hasText(CharSequence)
 	 */
-	public static boolean hasText(String str) {
+	public static boolean hasText(final String str) {
 		return hasText((CharSequence) str);
 	}
 
@@ -132,7 +132,7 @@ public final class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static boolean containsWhitespace(CharSequence str) {
+	public static boolean containsWhitespace(final CharSequence str) {
 		if (!hasLength(str)) {
 			return false;
 		}
@@ -152,7 +152,7 @@ public final class StringUtils {
 	 * contains at least 1 whitespace character
 	 * @see #containsWhitespace(CharSequence)
 	 */
-	public static boolean containsWhitespace(String str) {
+	public static boolean containsWhitespace(final String str) {
 		return containsWhitespace((CharSequence) str);
 	}
 
@@ -162,7 +162,7 @@ public final class StringUtils {
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimWhitespace(String str) {
+	public static String trimWhitespace(final String str) {
 		if (!hasLength(str)) {
 			return str;
 		}
@@ -183,7 +183,7 @@ public final class StringUtils {
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimAllWhitespace(String str) {
+	public static String trimAllWhitespace(final String str) {
 		if (!hasLength(str)) {
 			return str;
 		}
@@ -206,7 +206,7 @@ public final class StringUtils {
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimLeadingWhitespace(String str) {
+	public static String trimLeadingWhitespace(final String str) {
 		if (!hasLength(str)) {
 			return str;
 		}
@@ -223,7 +223,7 @@ public final class StringUtils {
 	 * @return the trimmed String
 	 * @see java.lang.Character#isWhitespace
 	 */
-	public static String trimTrailingWhitespace(String str) {
+	public static String trimTrailingWhitespace(final String str) {
 		if (!hasLength(str)) {
 			return str;
 		}
@@ -240,7 +240,7 @@ public final class StringUtils {
 	 * @param leadingCharacter the leading character to be trimmed
 	 * @return the trimmed String
 	 */
-	public static String trimLeadingCharacter(String str, char leadingCharacter) {
+	public static String trimLeadingCharacter(final String str, final char leadingCharacter) {
 		if (!hasLength(str)) {
 			return str;
 		}
@@ -257,7 +257,7 @@ public final class StringUtils {
 	 * @param trailingCharacter the trailing character to be trimmed
 	 * @return the trimmed String
 	 */
-	public static String trimTrailingCharacter(String str, char trailingCharacter) {
+	public static String trimTrailingCharacter(final String str, final char trailingCharacter) {
 		if (!hasLength(str)) {
 			return str;
 		}
@@ -275,7 +275,7 @@ public final class StringUtils {
 	 * @param prefix the prefix to look for
 	 * @see java.lang.String#startsWith
 	 */
-	public static boolean startsWithIgnoreCase(String str, String prefix) {
+	public static boolean startsWithIgnoreCase(final String str, final String prefix) {
 		if (str == null || prefix == null) {
 			return false;
 		}
@@ -297,7 +297,7 @@ public final class StringUtils {
 	 * @param suffix the suffix to look for
 	 * @see java.lang.String#endsWith
 	 */
-	public static boolean endsWithIgnoreCase(String str, String suffix) {
+	public static boolean endsWithIgnoreCase(final String str, final String suffix) {
 		if (str == null || suffix == null) {
 			return false;
 		}
@@ -320,7 +320,7 @@ public final class StringUtils {
 	 * @param index the index in the original string to start matching against
 	 * @param substring the substring to match at the given index
 	 */
-	public static boolean substringMatch(CharSequence str, int index, CharSequence substring) {
+	public static boolean substringMatch(final CharSequence str, final int index, final CharSequence substring) {
 		for (int j = 0, n = substring.length(); j < n; j++) {
 			int i = index + j;
 			if (i >= str.length() || str.charAt(i) != substring.charAt(j)) {
@@ -335,7 +335,7 @@ public final class StringUtils {
 	 * @param str string to search in. Return 0 if this is null.
 	 * @param sub string to search for. Return 0 if this is null.
 	 */
-	public static int countOccurrencesOf(String str, String sub) {
+	public static int countOccurrencesOf(final String str, final String sub) {
 		if (str == null || sub == null || str.length() == 0 || sub.length() == 0) {
 			return 0;
 		}
@@ -346,10 +346,10 @@ public final class StringUtils {
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Returns the given string repeated the given number of times
-	 * 
+	 *
 	 * @param string the string to repeat (can be null or empty)
 	 * @param times the number of times to repeat it
 	 * @return <code>null</code> if <code>null</code> is given
@@ -367,13 +367,13 @@ public final class StringUtils {
 
 	/**
 	 * Replace all occurrences of a substring within a string with another string.
-	 * 
+	 *
 	 * @param inString String to examine
 	 * @param oldPattern String to replace
 	 * @param newPattern String to insert
 	 * @return a String with the replacements
 	 */
-	public static String replace(String inString, String oldPattern, String newPattern) {
+	public static String replace(final String inString, final String oldPattern, final String newPattern) {
 		if (!hasLength(inString) || !hasLength(oldPattern) || newPattern == null) {
 			return inString;
 		}
@@ -399,7 +399,7 @@ public final class StringUtils {
 	 * @param pattern the pattern to delete all occurrences of
 	 * @return the resulting String
 	 */
-	public static String delete(String inString, String pattern) {
+	public static String delete(final String inString, final String pattern) {
 		return replace(inString, pattern, "");
 	}
 
@@ -410,7 +410,7 @@ public final class StringUtils {
 	 * E.g. "az\n" will delete 'a's, 'z's and new lines.
 	 * @return the resulting String
 	 */
-	public static String deleteAny(String inString, String charsToDelete) {
+	public static String deleteAny(final String inString, final String charsToDelete) {
 		if (!hasLength(inString) || !hasLength(charsToDelete)) {
 			return inString;
 		}
@@ -434,7 +434,7 @@ public final class StringUtils {
 	 * @return the quoted String (e.g. "'myString'"),
 	 * or <code>null<code> if the input was <code>null</code>
 	 */
-	public static String quote(String str) {
+	public static String quote(final String str) {
 		return (str != null ? "'" + str + "'" : null);
 	}
 
@@ -445,7 +445,7 @@ public final class StringUtils {
 	 * @return the quoted String (e.g. "'myString'"),
 	 * or the input object as-is if not a String
 	 */
-	public static Object quoteIfString(Object obj) {
+	public static Object quoteIfString(final Object obj) {
 		return (obj instanceof String ? quote((String) obj) : obj);
 	}
 
@@ -454,7 +454,7 @@ public final class StringUtils {
 	 * "this.name.is.qualified", returns "qualified".
 	 * @param qualifiedName the qualified name
 	 */
-	public static String unqualify(String qualifiedName) {
+	public static String unqualify(final String qualifiedName) {
 		return unqualify(qualifiedName, '.');
 	}
 
@@ -464,7 +464,7 @@ public final class StringUtils {
 	 * @param qualifiedName the qualified name
 	 * @param separator the separator
 	 */
-	public static String unqualify(String qualifiedName, char separator) {
+	public static String unqualify(final String qualifiedName, final char separator) {
 		return qualifiedName.substring(qualifiedName.lastIndexOf(separator) + 1);
 	}
 
@@ -475,7 +475,7 @@ public final class StringUtils {
 	 * @param str the String to capitalize, may be <code>null</code>
 	 * @return the capitalized String, <code>null</code> if null
 	 */
-	public static String capitalize(String str) {
+	public static String capitalize(final String str) {
 		return changeFirstCharacterCase(str, true);
 	}
 
@@ -486,11 +486,11 @@ public final class StringUtils {
 	 * @param str the String to uncapitalize, may be <code>null</code>
 	 * @return the uncapitalized String, <code>null</code> if null
 	 */
-	public static String uncapitalize(String str) {
+	public static String uncapitalize(final String str) {
 		return changeFirstCharacterCase(str, false);
 	}
 
-	private static String changeFirstCharacterCase(String str, boolean capitalize) {
+	private static String changeFirstCharacterCase(final String str, final boolean capitalize) {
 		if (!hasText(str)) {
 			return str;
 		}
@@ -510,7 +510,7 @@ public final class StringUtils {
 	 * @param path the file path (may be <code>null</code>)
 	 * @return the extracted filename, or <code>null</code> if none
 	 */
-	public static String getFilename(String path) {
+	public static String getFilename(final String path) {
 		if (path == null) {
 			return null;
 		}
@@ -524,7 +524,7 @@ public final class StringUtils {
 	 * @param path the file path (may be <code>null</code>)
 	 * @return the extracted filename extension, or <code>null</code> if none
 	 */
-	public static String getFilenameExtension(String path) {
+	public static String getFilenameExtension(final String path) {
 		if (path == null) {
 			return null;
 		}
@@ -539,7 +539,7 @@ public final class StringUtils {
 	 * @return the path with stripped filename extension,
 	 * or <code>null</code> if none
 	 */
-	public static String stripFilenameExtension(String path) {
+	public static String stripFilenameExtension(final String path) {
 		if (path == null) {
 			return null;
 		}
@@ -555,7 +555,7 @@ public final class StringUtils {
 	 * (relative to the full file path above)
 	 * @return the full file path that results from applying the relative path
 	 */
-	public static String applyRelativePath(String path, String relativePath) {
+	public static String applyRelativePath(final String path, final String relativePath) {
 		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
 		if (separatorIndex != -1) {
 			String newPath = path.substring(0, separatorIndex);
@@ -575,7 +575,7 @@ public final class StringUtils {
 	 * @param path the original path
 	 * @return the normalized path
 	 */
-	public static String cleanPath(String path) {
+	public static String cleanPath(final String path) {
 		if (path == null) {
 			return null;
 		}
@@ -633,7 +633,7 @@ public final class StringUtils {
 	 * @param path2 second path for comparison
 	 * @return whether the two paths are equivalent after normalization
 	 */
-	public static boolean pathEquals(String path1, String path2) {
+	public static boolean pathEquals(final String path1, final String path2) {
 		return cleanPath(path1).equals(cleanPath(path2));
 	}
 
@@ -645,7 +645,7 @@ public final class StringUtils {
 	 * also accepts spaces as separators, as an alternative to underscores
 	 * @return a corresponding <code>Locale</code> instance
 	 */
-	public static Locale parseLocaleString(String localeString) {
+	public static Locale parseLocaleString(final String localeString) {
 		String[] parts = tokenizeToStringArray(localeString, "_ ", false, false);
 		String language = (parts.length > 0 ? parts[0] : "");
 		String country = (parts.length > 1 ? parts[1] : "");
@@ -669,7 +669,7 @@ public final class StringUtils {
 	 * @param locale the Locale to transform to a language tag
 	 * @return the RFC 3066 compliant language tag as String
 	 */
-	public static String toLanguageTag(Locale locale) {
+	public static String toLanguageTag(final Locale locale) {
 		return locale.getLanguage() + (hasText(locale.getCountry()) ? "-" + locale.getCountry() : "");
 	}
 
@@ -684,7 +684,7 @@ public final class StringUtils {
 	 * @param str the String to append
 	 * @return the new array (never <code>null</code>)
 	 */
-	public static String[] addStringToArray(String[] array, String str) {
+	public static String[] addStringToArray(final String[] array, final String str) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[] {str};
 		}
@@ -702,7 +702,7 @@ public final class StringUtils {
 	 * @param array2 the second array (can be <code>null</code>)
 	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
 	 */
-	public static String[] concatenateStringArrays(String[] array1, String[] array2) {
+	public static String[] concatenateStringArrays(final String[] array1, final String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
 		}
@@ -725,7 +725,7 @@ public final class StringUtils {
 	 * @param array2 the second array (can be <code>null</code>)
 	 * @return the new array (<code>null</code> if both given arrays were <code>null</code>)
 	 */
-	public static String[] mergeStringArrays(String[] array1, String[] array2) {
+	public static String[] mergeStringArrays(final String[] array1, final String[] array2) {
 		if (ObjectUtils.isEmpty(array1)) {
 			return array2;
 		}
@@ -748,7 +748,7 @@ public final class StringUtils {
 	 * @param array the source array
 	 * @return the sorted array (never <code>null</code>)
 	 */
-	public static String[] sortStringArray(String[] array) {
+	public static String[] sortStringArray(final String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}
@@ -763,7 +763,7 @@ public final class StringUtils {
 	 * @return the String array (<code>null</code> if the passed-in
 	 * Collection was <code>null</code>)
 	 */
-	public static String[] toStringArray(Collection<String> collection) {
+	public static String[] toStringArray(final Collection<String> collection) {
 		if (collection == null) {
 			return null;
 		}
@@ -777,7 +777,7 @@ public final class StringUtils {
 	 * @return the String array (<code>null</code> if the passed-in
 	 * Enumeration was <code>null</code>)
 	 */
-	public static String[] toStringArray(Enumeration<String> enumeration) {
+	public static String[] toStringArray(final Enumeration<String> enumeration) {
 		if (enumeration == null) {
 			return null;
 		}
@@ -791,7 +791,7 @@ public final class StringUtils {
 	 * @param array the original String array
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
-	public static String[] trimArrayElements(String[] array) {
+	public static String[] trimArrayElements(final String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
 			return new String[0];
 		}
@@ -809,7 +809,7 @@ public final class StringUtils {
 	 * @param array the String array
 	 * @return an array without duplicates, in natural sort order
 	 */
-	public static String[] removeDuplicateStrings(String[] array) {
+	public static String[] removeDuplicateStrings(final String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
 			return array;
 		}
@@ -829,7 +829,7 @@ public final class StringUtils {
 	 * index 1 being after the delimiter (neither element includes the delimiter);
 	 * or <code>null</code> if the delimiter wasn't found in the given input String
 	 */
-	public static String[] split(String toSplit, String delimiter) {
+	public static String[] split(final String toSplit, final String delimiter) {
 		if (!hasLength(toSplit) || !hasLength(delimiter)) {
 			return null;
 		}
@@ -853,7 +853,7 @@ public final class StringUtils {
 	 * @return a <code>Properties</code> instance representing the array contents,
 	 * or <code>null</code> if the array to process was null or empty
 	 */
-	public static Properties splitArrayElementsIntoProperties(String[] array, String delimiter) {
+	public static Properties splitArrayElementsIntoProperties(final String[] array, final String delimiter) {
 		return splitArrayElementsIntoProperties(array, delimiter, null);
 	}
 
@@ -872,11 +872,11 @@ public final class StringUtils {
 	 * or <code>null</code> if the array to process was <code>null</code> or empty
 	 */
 	public static Properties splitArrayElementsIntoProperties(
-		String[] array, String delimiter, String charsToDelete) {
+		final String[] array, final String delimiter, final String charsToDelete) {
 		if (ObjectUtils.isEmpty(array)) {
 			return null;
 		}
-		
+
 		Properties result = new Properties();
 		for (int i = 0, n = array.length; i < n; i++) {
 			String element = array[i];
@@ -907,7 +907,7 @@ public final class StringUtils {
 	 * @see java.lang.String#trim()
 	 * @see #delimitedListToStringArray
 	 */
-	public static String[] tokenizeToStringArray(String str, String delimiters) {
+	public static String[] tokenizeToStringArray(final String str, final String delimiters) {
 		return tokenizeToStringArray(str, delimiters, true, true);
 	}
 
@@ -931,11 +931,11 @@ public final class StringUtils {
 	 * @see #delimitedListToStringArray
 	 */
 	public static String[] tokenizeToStringArray(
-		String str, String delimiters, boolean trimTokens, boolean ignoreEmptyTokens) {
+		final String str, final String delimiters, final boolean trimTokens, final boolean ignoreEmptyTokens) {
 		if (str == null) {
 			return null;
 		}
-		
+
 		StringTokenizer st = new StringTokenizer(str, delimiters);
 		List<String> tokens = new ArrayList<String>();
 		while (st.hasMoreTokens()) {
@@ -961,7 +961,7 @@ public final class StringUtils {
 	 * @return an array of the tokens in the list
 	 * @see #tokenizeToStringArray
 	 */
-	public static String[] delimitedListToStringArray(String str, String delimiter) {
+	public static String[] delimitedListToStringArray(final String str, final String delimiter) {
 		return delimitedListToStringArray(str, delimiter, null);
 	}
 
@@ -978,7 +978,7 @@ public final class StringUtils {
 	 * @return an array of the tokens in the list
 	 * @see #tokenizeToStringArray
 	 */
-	public static String[] delimitedListToStringArray(String str, String delimiter, String charsToDelete) {
+	public static String[] delimitedListToStringArray(final String str, final String delimiter, final String charsToDelete) {
 		if (str == null) {
 			return new String[0];
 		}
@@ -1011,7 +1011,7 @@ public final class StringUtils {
 	 * @param str the input String
 	 * @return an array of Strings, or the empty array in case of empty input
 	 */
-	public static String[] commaDelimitedListToStringArray(String str) {
+	public static String[] commaDelimitedListToStringArray(final String str) {
 		return delimitedListToStringArray(str, ",");
 	}
 
@@ -1021,7 +1021,7 @@ public final class StringUtils {
 	 * @param str the input String
 	 * @return a Set of String entries in the list
 	 */
-	public static Set<String> commaDelimitedListToSet(String str) {
+	public static Set<String> commaDelimitedListToSet(final String str) {
 		Set<String> set = new TreeSet<String>();
 		String[] tokens = commaDelimitedListToStringArray(str);
 		for (int i = 0; i < tokens.length; i++) {
@@ -1039,7 +1039,7 @@ public final class StringUtils {
 	 * @param suffix the String to end each element with
 	 * @return the delimited String
 	 */
-	public static String collectionToDelimitedString(Collection<?> coll, String delim, String prefix, String suffix) {
+	public static String collectionToDelimitedString(final Collection<?> coll, final String delim, final String prefix, final String suffix) {
 		if (CollectionUtils.isEmpty(coll)) {
 			return "";
 		}
@@ -1061,7 +1061,7 @@ public final class StringUtils {
 	 * @param delim the delimiter to use (probably a ",")
 	 * @return the delimited String
 	 */
-	public static String collectionToDelimitedString(Collection<?> coll, String delim) {
+	public static String collectionToDelimitedString(final Collection<?> coll, final String delim) {
 		return collectionToDelimitedString(coll, delim, "", "");
 	}
 
@@ -1071,7 +1071,7 @@ public final class StringUtils {
 	 * @param coll the Collection to display
 	 * @return the delimited String
 	 */
-	public static String collectionToCommaDelimitedString(Collection<?> coll) {
+	public static String collectionToCommaDelimitedString(final Collection<?> coll) {
 		return collectionToDelimitedString(coll, ",");
 	}
 
@@ -1082,7 +1082,7 @@ public final class StringUtils {
 	 * @param delim the delimiter to use (probably a ",")
 	 * @return the delimited String
 	 */
-	public static String arrayToDelimitedString(Object[] arr, String delim) {
+	public static String arrayToDelimitedString(final Object[] arr, final String delim) {
 		if (ObjectUtils.isEmpty(arr)) {
 			return "";
 		}
@@ -1102,34 +1102,34 @@ public final class StringUtils {
 	 * @param arr the array to display
 	 * @return the delimited String
 	 */
-	public static String arrayToCommaDelimitedString(Object[] arr) {
+	public static String arrayToCommaDelimitedString(final Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
 	}
 
 	/**
 	 * Converts the given String to uppercase.
-	 * 
+	 *
 	 * @param str the input String (may be <code>null</code>)
 	 * @return the String in uppercase, otherwise null
 	 */
-	public static String toUpperCase(String str) {
+	public static String toUpperCase(final String str) {
 		return str == null ? null : str.toUpperCase();
 	}
 
 	/**
 	 * Converts the given String to lowercase.
-	 * 
+	 *
 	 * @param str the input String (may be <code>null</code>)
 	 * @return the String in lowercase, otherwise null
 	 */
-	public static String toLowerCase(String str) {
+	public static String toLowerCase(final String str) {
 		return str == null ? null : str.toLowerCase();
 	}
-	
+
 	/**
 	 * <p>
 	 * Removes leading and trailing whitespace from both ends of this String returning <code>null</code> if the String is empty ("") after the trim or if it is <code>null</code>.
-	 *  
+	 *
 	 * <pre>
 	 * StringUtils.trimToNull(null) = null
 	 * StringUtils.trimToNull("") = null
@@ -1137,20 +1137,20 @@ public final class StringUtils {
 	 * StringUtils.trimToNull("abc") = "abc"
 	 * StringUtils.trimToNull(" abc ") = "abc"
 	 * </pre>
-	 * 
+	 *
 	 * @param str the String to be trimmed, may be null
 	 * @return the trimmed String, <code>null</code> if only chars &lt;= 32, empty or null String input
 	 * @since 1.1
 	 */
-	public static String trimToNull(String str) {
+	public static String trimToNull(final String str) {
 		String ts = trimWhitespace(str);
 		return !hasText(ts) ? null : ts;
 	}
-	
+
 	/**
 	 * <p>
 	 * Removes leading and trailing whitespace from both ends of this String returning an empty String ("") if the String is empty after the trim or if it is <code>null</code>.
-	 *  
+	 *
 	 * <pre>
 	 * StringUtils.trimToNull(null) = ""
 	 * StringUtils.trimToNull("") = ""
@@ -1158,72 +1158,72 @@ public final class StringUtils {
 	 * StringUtils.trimToNull("abc") = "abc"
 	 * StringUtils.trimToNull(" abc ") = "abc"
 	 * </pre>
-	 * 
+	 *
 	 * @param str the String to be trimmed, may be null
 	 * @return the trimmed String, an empty String("") if only chars &lt;= 32, empty or null String input
 	 * @since 1.1
 	 */
-	public static String trimToEmpty(String str) {
+	public static String trimToEmpty(final String str) {
 		String ts = trimWhitespace(str);
 		return !hasText(ts) ? "" : ts;
 	}
 
 	/**
-	 * Returns either the passed in String, or if the String is empty or null, the value of defaultStr. 
-	 * 
+	 * Returns either the passed in String, or if the String is empty or null, the value of defaultStr.
+	 *
 	 * <ul>
 	 * <li><code>StringUtils.defaultIfEmpty(null, "NULL") = "NULL"</code></li>
 	 * <li><code>StringUtils.defaultIfEmpty("", "NULL") = "NULL"</code></li>
 	 * <li><code>StringUtils.defaultIfEmpty("bat", "NULL") = "bat"</code></li>
 	 * </ul>
-	 * 
+	 *
 	 * @param str the String to check, may be null
-	 * @param defaultStr the default String to return if the input is empty ("") or null, may be null 
+	 * @param defaultStr the default String to return if the input is empty ("") or null, may be null
 	 * @return the passed in String, or the default
 	 */
-	public static String defaultIfEmpty(String str, String defaultStr) {
+	public static String defaultIfEmpty(final String str, final String defaultStr) {
 		return hasText(str) ? str : defaultStr;
 	}
-	
+
 	/**
 	 * Right pads the presented string with the delim character.
-	 * 
+	 *
 	 * @param str the string to pad
 	 * @param size the size to pad to
 	 * @param padChar the padding character
 	 * @return the right padded string
 	 */
-	public static String padRight(String str, int size, char padChar) {
+	public static String padRight(final String str, final int size, final char padChar) {
 		if (str == null) {
 			return null;
 		}
 		int pads = size - str.length();
 		if (pads <= 0) {
-			return str; 
+			return str;
 		}
 		return str.concat(padding(pads, padChar));
 	}
 
 	/**
 	 * Left pads the presented string with the delim character.
-	 * 
+	 *
 	 * @param str the string to pad
 	 * @param size the size to pad to
 	 * @param padChar the padding character
 	 * @return the left padded string
 	 */
-	public static String padLeft(String str, int size, char padChar) {
+	public static String padLeft(final String str, final int size, final char padChar) {
 		if (str == null) {
 			return null;
 		}
 		int pads = size - str.length();
 		if (pads <= 0) {
-			return str;  
+			return str;
 		}
 		return padding(pads, padChar).concat(str);
 	}
-	
-	private static String padding(int repeat, char padChar) throws IndexOutOfBoundsException {
+
+	private static String padding(final int repeat, final char padChar) throws IndexOutOfBoundsException {
 		if (repeat < 0) {
 			throw new IndexOutOfBoundsException("Cannot pad a negative amount: " + repeat);
 		}
@@ -1233,7 +1233,7 @@ public final class StringUtils {
 		}
 		return new String(buf);
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

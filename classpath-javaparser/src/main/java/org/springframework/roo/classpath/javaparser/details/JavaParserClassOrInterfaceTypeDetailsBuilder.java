@@ -47,7 +47,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 
 	/**
 	 * Factory method for this builder class
-	 * 
+	 *
 	 * @param compilationUnit
 	 * @param enclosingCompilationUnitServices
 	 * @param typeDeclaration
@@ -60,7 +60,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 	public static JavaParserClassOrInterfaceTypeDetailsBuilder getInstance(final CompilationUnit compilationUnit, final CompilationUnitServices enclosingCompilationUnitServices, final TypeDeclaration typeDeclaration, final String declaredByMetadataId, final JavaType typeName, final MetadataService metadataService, final TypeLocationService typeLocationService) {
 		return new JavaParserClassOrInterfaceTypeDetailsBuilder(compilationUnit, enclosingCompilationUnitServices, typeDeclaration, declaredByMetadataId, typeName, metadataService, typeLocationService);
 	}
-	
+
 	// Fields
 	private final CompilationUnit compilationUnit;
 	private final CompilationUnitServices compilationUnitServices;
@@ -69,7 +69,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 	private final String declaredByMetadataId;
 	private final TypeDeclaration typeDeclaration;
 	private final TypeLocationService typeLocationService;
-	
+
 	private JavaPackage compilationUnitPackage;
 	private JavaType name;
 	private List<ImportDeclaration> imports = new ArrayList<ImportDeclaration>();
@@ -226,7 +226,7 @@ public class JavaParserClassOrInterfaceTypeDetailsBuilder implements Builder<Cla
 					classOrInterfaceTypeDetailsBuilder.setSuperclass((ClassOrInterfaceTypeDetails) superPtm.getMemberHoldingTypeDetails());
 				}
 			}
-			
+
 			implementsList = clazz.getImplements();
 			if (implementsList != null) {
 				for (final ClassOrInterfaceType candidate : implementsList) {

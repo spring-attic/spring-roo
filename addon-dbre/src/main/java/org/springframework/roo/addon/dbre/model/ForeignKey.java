@@ -9,15 +9,15 @@ import org.springframework.roo.support.util.Assert;
  * Represents a database foreign key.
  * <p>
  * A foreign key is modeled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class ForeignKey {
 
 	/** The name of the foreign key, may be <code>null</code>. */
-	private String name;
-	
+	private final String name;
+
 	/** Whether the foreign key is an imported or exported key */
 	private boolean exported;
 
@@ -25,8 +25,8 @@ public class ForeignKey {
 	private Table foreignTable;
 
 	/** The name of the foreign (target) table. */
-	private String foreignTableName;
-		
+	private final String foreignTableName;
+
 	/** The schema name of the foreign table. */
 	private String foreignSchemaName;
 
@@ -40,9 +40,9 @@ public class ForeignKey {
 	private Short keySequence;
 
 	/** The references between local and remote columns. */
-	private Set<Reference> references = new LinkedHashSet<Reference>();
+	private final Set<Reference> references = new LinkedHashSet<Reference>();
 
-	ForeignKey(String name, String foreignTableName) {
+	ForeignKey(final String name, final String foreignTableName) {
 		this.name = name;
 		this.foreignTableName = foreignTableName;
 	}
@@ -55,7 +55,7 @@ public class ForeignKey {
 		return exported;
 	}
 
-	public void setExported(boolean exported) {
+	public void setExported(final boolean exported) {
 		this.exported = exported;
 	}
 
@@ -63,7 +63,7 @@ public class ForeignKey {
 		return foreignTable;
 	}
 
-	void setForeignTable(Table foreignTable) {
+	void setForeignTable(final Table foreignTable) {
 		this.foreignTable = foreignTable;
 	}
 
@@ -75,7 +75,7 @@ public class ForeignKey {
 		return foreignSchemaName;
 	}
 
-	void setForeignSchemaName(String foreignSchemaName) {
+	void setForeignSchemaName(final String foreignSchemaName) {
 		this.foreignSchemaName = foreignSchemaName;
 	}
 
@@ -83,7 +83,7 @@ public class ForeignKey {
 		return onUpdate;
 	}
 
-	public void setOnUpdate(CascadeAction onUpdate) {
+	public void setOnUpdate(final CascadeAction onUpdate) {
 		this.onUpdate = onUpdate;
 	}
 
@@ -91,7 +91,7 @@ public class ForeignKey {
 		return onDelete;
 	}
 
-	public void setOnDelete(CascadeAction onDelete) {
+	public void setOnDelete(final CascadeAction onDelete) {
 		this.onDelete = onDelete;
 	}
 
@@ -99,7 +99,7 @@ public class ForeignKey {
 		return keySequence;
 	}
 
-	public void setKeySequence(Short keySequence) {
+	public void setKeySequence(final Short keySequence) {
 		this.keySequence = keySequence;
 	}
 
@@ -111,12 +111,12 @@ public class ForeignKey {
 		return references.size();
 	}
 
-	public void addReference(Reference reference) {
+	public void addReference(final Reference reference) {
 		Assert.notNull(reference, "Reference required");
 		references.add(reference);
 	}
 
-	public boolean hasLocalColumn(Column column) {
+	public boolean hasLocalColumn(final Column column) {
 		for (Reference reference : references) {
 			if (reference.getLocalColumn().equals(column)) {
 				return true;
@@ -137,7 +137,7 @@ public class ForeignKey {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

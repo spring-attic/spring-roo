@@ -20,21 +20,21 @@ public class MemberTypeAdditionsTest {
 	public void testGetMethodCallWithBlankTargetAndNoParameters() {
 		assertMethodCall("foo()", null, "foo");
 	}
-	
+
 	@Test
 	public void testGetMethodCallWithTargetAndNoParameters() {
 		assertMethodCall("Foo.bar()", "Foo", "bar");
 	}
-	
+
 	@Test
 	public void testGetMethodCallWithBlankTargetAndTwoParameters() {
 		assertMethodCall("matchmakingService.marry(julia, zemiro)", "matchmakingService", "marry", "julia", "zemiro");
 	}
-	
+
 	/**
 	 * Asserts that {@link MemberTypeAdditions#buildMethodCall(String, String, java.util.Iterator)}
 	 * builds the expected method call from the given parameters
-	 * 
+	 *
 	 * @param expectedMethodCall
 	 * @param target
 	 * @param method

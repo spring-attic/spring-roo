@@ -16,12 +16,12 @@ import org.w3c.dom.Element;
  * Simplified immutable representation of a Maven resource.
  * <p>
  * Structured after the model used by Maven.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class Resource implements Comparable<Resource> {
-	
+
 	// Fields
 	private final Boolean filtering;
 	private final List<String> includes = new ArrayList<String>();
@@ -29,7 +29,7 @@ public class Resource implements Comparable<Resource> {
 
 	/**
 	 * Creates an immutable {@link Resource} with no "includes".
-	 * 
+	 *
 	 * @param directory the {@link Path directory} (required)
 	 * @param filtering whether filtering should occur
 	 */
@@ -39,7 +39,7 @@ public class Resource implements Comparable<Resource> {
 
 	/**
 	 * Creates an immutable {@link Resource} with optional "includes".
-	 * 
+	 *
 	 * @param directory the {@link Path directory} (required)
 	 * @param filtering whether filtering should occur
 	 * @param includes the list of includes; can be <code>null</code>
@@ -55,7 +55,7 @@ public class Resource implements Comparable<Resource> {
 
 	/**
 	 * Convenience constructor when an XML element is available that represents a Maven <resource>.
-	 * 
+	 *
 	 * @param resource to parse (required)
 	 */
 	public Resource(final Element resource) {
@@ -88,7 +88,7 @@ public class Resource implements Comparable<Resource> {
 	public int hashCode() {
 		return getSimpleDescription().hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj)
@@ -107,7 +107,7 @@ public class Resource implements Comparable<Resource> {
 		}
 		return getSimpleDescription().compareTo(o.getSimpleDescription());
 	}
-	
+
 	public String getSimpleDescription() {
 		final StringBuilder builder = new StringBuilder();
 		builder.append("directory ").append(directory.getName());
@@ -128,10 +128,10 @@ public class Resource implements Comparable<Resource> {
 		tsc.append("includes", includes);
 		return tsc.toString();
 	}
-	
+
 	/**
 	 * Returns the Maven POM element for this resource
-	 * 
+	 *
 	 * @param document the POM document (required)
 	 * @return a non-<code>null</code> element
 	 */
@@ -149,7 +149,7 @@ public class Resource implements Comparable<Resource> {
 				includes.appendChild(XmlUtils.createTextElement(document, "include", include));
 			}
 		}
-		
+
 		return resourceElement;
 	}
 }

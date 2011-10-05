@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default implementation of {@link MetadataService}.
- * 
+ *
  * <p>
  * This implementation is not thread safe. It should only be accessed by a single thread at a time.
  * This is enforced by the process manager semantics, so we avoid the cost of re-synchronization here.
@@ -32,7 +32,7 @@ import org.springframework.roo.support.util.Assert;
 @Service
 @Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultMetadataService extends AbstractMetadataCache implements MetadataService {
-	
+
 	// Fields
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataLogger metadataLogger;
@@ -41,18 +41,18 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	private int cachePuts = 0;
 	private int cacheHits = 0;
 	private int cacheMisses = 0;
-	private int cacheEvictions = 0; 
-	private Set<MetadataProvider> providers = new HashSet<MetadataProvider>();
-	private Map<String, MetadataProvider> providerMap = new HashMap<String, MetadataProvider>();
+	private int cacheEvictions = 0;
+	private final Set<MetadataProvider> providers = new HashSet<MetadataProvider>();
+	private final Map<String, MetadataProvider> providerMap = new HashMap<String, MetadataProvider>();
 
 	// Mutex
-	private Object lock = new Object();
+	private final Object lock = new Object();
 
 	// Request control
-	private List<String> activeRequests = new ArrayList<String>(); // List to assist output "stacks" which show the order of requests
-	private List<String> keysToRetry = new ArrayList<String>();  // List to help us verify correct operation through logs (predictable ordering)
-	
-	protected void bindMetadataProvider(MetadataProvider mp) {
+	private final List<String> activeRequests = new ArrayList<String>(); // List to assist output "stacks" which show the order of requests
+	private final List<String> keysToRetry = new ArrayList<String>();  // List to help us verify correct operation through logs (predictable ordering)
+
+	protected void bindMetadataProvider(final MetadataProvider mp) {
 		synchronized (lock) {
 			Assert.notNull(mp, "Metadata provider required");
 			String mid = mp.getProvidesType();
@@ -62,36 +62,36 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			providerMap.put(mid, mp);
 		}
 	}
-	
-	protected void unbindMetadataProvider(MetadataProvider mp) {
+
+	protected void unbindMetadataProvider(final MetadataProvider mp) {
 		synchronized (lock) {
 			String mid = mp.getProvidesType();
 			providers.remove(mp);
 			providerMap.remove(mid);
 		}
 	}
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
-	public MetadataItem get(String metadataIdentificationString, boolean evictCache) {
+	public MetadataItem get(final String metadataIdentificationString, final boolean evictCache) {
 		return getInternal(metadataIdentificationString, evictCache, true);
 	}
-	
-	public MetadataItem getInternal(String metadataIdentificationString, boolean evictCache, boolean cacheRetrievalAllowed) {
+
+	public MetadataItem getInternal(final String metadataIdentificationString, final boolean evictCache, final boolean cacheRetrievalAllowed) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not identify a metadata instance");
-		
+
 		synchronized (lock) {
 			validGets++;
 
 			try {
 				metadataLogger.startEvent();
-				
+
 				// Do some cache eviction if the caller requested it
 				if (evictCache) {
 					evict(metadataIdentificationString);
@@ -100,7 +100,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 					}
 					cacheEvictions++;
 				}
-				
+
 				// We can use the cache even for a recursive get (unless of course the caller has prevented it)
 				if (cacheRetrievalAllowed) {
 					// Try the cache first
@@ -113,7 +113,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 						return result;
 					}
 				}
-				
+
 				if (metadataLogger.getTraceLevel() > 0) {
 					metadataLogger.log("Cache miss " + metadataIdentificationString);
 				}
@@ -150,7 +150,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				} finally {
 					metadataLogger.stopTimer();
 				}
-				
+
 				// If the item isn't available, evict it from the cache (unless we did so at the start of the method already)
 				if (result == null && !evictCache) {
 					if (metadataLogger.getTraceLevel() > 0) {
@@ -159,7 +159,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 					evict(metadataIdentificationString);
 					cacheEvictions++;
 				}
-				
+
 				// Put into the cache, provided it isn't null
 				if (result != null) {
 					if (metadataLogger.getTraceLevel() > 0) {
@@ -168,13 +168,13 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 					super.put(result);
 					cachePuts++;
 				}
-				
+
 				activeRequests.remove(metadataIdentificationString);
 
 				if (metadataLogger.getTraceLevel() > 0) {
 					metadataLogger.log("Returning " + metadataIdentificationString);
 				}
-				
+
 				return result;
 			} catch (Exception e) {
 				activeRequests.remove(metadataIdentificationString);
@@ -208,31 +208,31 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			}
 		}
 	}
-	
+
 	@Override
-	public void put(MetadataItem metadataItem) {
+	public void put(final MetadataItem metadataItem) {
 		super.put(metadataItem);
 		cachePuts++;
 	}
 
-	public MetadataItem get(String metadataIdentificationString) {
+	public MetadataItem get(final String metadataIdentificationString) {
 		return get(metadataIdentificationString, false);
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
+	public void notify(final String upstreamDependency, final String downstreamDependency) {
 		Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency), "Upstream dependency is an invalid metadata identification string ('" + upstreamDependency + "')");
 		Assert.isTrue(MetadataIdentificationUtils.isValid(downstreamDependency), "Downstream dependency is an invalid metadata identification string ('" + downstreamDependency + "')");
-		
+
 		synchronized (lock) {
 			// Get the destination
 			String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(downstreamDependency));
 			MetadataProvider p = providerMap.get(mdClassId);
-			
+
 			if (p == null) {
 				// No known provider that can consume this notification, so just return as per the interface contract
 				return;
 			}
-			
+
 			if (p instanceof MetadataNotificationListener) {
 				// The provider can directly handle this notification, so we just need to delegate directly to it.
 				// We rely on the provider to evict items from the cache if applicable.
@@ -249,11 +249,12 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		}
 	}
 
-	public void evict(String metadataIdentificationString) {
+	@Override
+	public void evict(final String metadataIdentificationString) {
 		synchronized (lock) {
 			// Clear my own cache (which also verifies the argument is valid at the same time)
 			super.evict(metadataIdentificationString);
-			
+
 			// Finally, evict downstream dependencies (ie metadata that previously depended on this now-evicted metadata)
 			for (String downstream : metadataDependencyRegistry.getDownstream(metadataIdentificationString)) {
 				// We only need to evict if it is an instance, as only an instance will ever go into the cache
@@ -264,6 +265,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		}
 	}
 
+	@Override
 	public void evictAll() {
 		synchronized (lock) {
 			// Clear my own cache
@@ -278,6 +280,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		}
 	}
 
+	@Override
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("validGets", validGets);

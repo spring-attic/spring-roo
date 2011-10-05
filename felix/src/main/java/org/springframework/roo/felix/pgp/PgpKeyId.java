@@ -6,29 +6,29 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a 10 digit hexadecimal key ID (always starts with 0x, and the rest of the ID is uppercase).
- * 
+ *
  * @author Ben Alex
  * @since 1.1
- * 
+ *
  */
 public class PgpKeyId implements Comparable<PgpKeyId> {
 	private static final long MASK = 0xFFFFFFFFL;
 	private String id;
 
-    public PgpKeyId(long keyId) {
+    public PgpKeyId(final long keyId) {
 		id = "0x" + String.format("%08X", (MASK & keyId));
 	}
 
-    public PgpKeyId(PGPPublicKey keyId) {
+    public PgpKeyId(final PGPPublicKey keyId) {
     	Assert.notNull(keyId, "Key ID required");
 		id = "0x" + String.format("%08X", (MASK & keyId.getKeyID()));
     }
-    
-    public PgpKeyId(PGPSignature signature) {
+
+    public PgpKeyId(final PGPSignature signature) {
     	Assert.notNull(signature, "Signautre required");
 		id = "0x" + String.format("%08X", (MASK & signature.getKeyID()));
     }
-    
+
     public PgpKeyId(String keyId) {
 		Assert.hasText(keyId, "A key ID is required (eg 00B5050F or 0x00B5050F)");
 		if (keyId.length() == 10) {
@@ -43,9 +43,9 @@ public class PgpKeyId implements Comparable<PgpKeyId> {
 			throw new IllegalStateException("The key ID must be in a valid form (eg 00B5050F or 0x00B5050F)");
 		}
 	}
-    
+
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (obj instanceof PgpKeyId) {
 			return id.equals(((PgpKeyId) obj).id);
 		}
@@ -62,7 +62,7 @@ public class PgpKeyId implements Comparable<PgpKeyId> {
 		return id.toString();
 	}
 
-	public int compareTo(PgpKeyId o) {
+	public int compareTo(final PgpKeyId o) {
 		if (o == null) return -1;
 		return id.compareTo(o.id);
 	}

@@ -21,14 +21,14 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Enables a user to manage the Roo PGP keystore.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 @Service
 @Component
 public class PgpCommands implements CommandMarker {
-	
+
 	// Fields
 	@Reference PgpService pgpService;
 
@@ -79,7 +79,7 @@ public class PgpCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "pgp untrust", help = "Revokes your trust for a particular key ID")
-	public String untrust(@CliOption(key = "keyId", mandatory = true, help = "The key ID to remove trust from (eg 00B5050F or 0x00B5050F)") PgpKeyId keyId) {
+	public String untrust(@CliOption(key = "keyId", mandatory = true, help = "The key ID to remove trust from (eg 00B5050F or 0x00B5050F)") final PgpKeyId keyId) {
 		PGPPublicKeyRing keyRing = pgpService.untrust(keyId);
 		StringBuilder sb = new StringBuilder();
 		appendLine(sb, "Revoked trust from key:");
@@ -88,7 +88,7 @@ public class PgpCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "pgp key view", help = "Downloads a remote key and displays it to the user (does not change any trusts)")
-	public String keyView(@CliOption(key = "keyId", mandatory = true, help = "The key ID to view (eg 00B5050F or 0x00B5050F)") PgpKeyId keyId) {
+	public String keyView(@CliOption(key = "keyId", mandatory = true, help = "The key ID to view (eg 00B5050F or 0x00B5050F)") final PgpKeyId keyId) {
 		PGPPublicKeyRing keyRing = pgpService.getPublicKey(keyId);
 		StringBuilder sb = new StringBuilder();
 		formatKeyRing(sb, keyRing);
@@ -96,7 +96,7 @@ public class PgpCommands implements CommandMarker {
 	}
 
 	@CliCommand(value = "pgp trust", help = "Grants trust to a particular key ID")
-	public String trust(@CliOption(key = "keyId", mandatory = true, help = "The key ID to trust (eg 00B5050F or 0x00B5050F)") PgpKeyId keyId) {
+	public String trust(@CliOption(key = "keyId", mandatory = true, help = "The key ID to trust (eg 00B5050F or 0x00B5050F)") final PgpKeyId keyId) {
 		PGPPublicKeyRing keyRing = pgpService.trust(keyId);
 		StringBuilder sb = new StringBuilder();
 		appendLine(sb, "Added trust for key:");
@@ -105,7 +105,7 @@ public class PgpCommands implements CommandMarker {
 	}
 
 	@SuppressWarnings("unchecked")
-	private String getKeySummaryIfPossible(PgpKeyId keyId) {
+	private String getKeySummaryIfPossible(final PgpKeyId keyId) {
 		List<PGPPublicKeyRing> keyRings = pgpService.getTrustedKeys();
 
 		for (PGPPublicKeyRing keyRing : keyRings) {
@@ -133,7 +133,7 @@ public class PgpCommands implements CommandMarker {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void formatKeyRing(StringBuilder sb, PGPPublicKeyRing keyRing) {
+	private void formatKeyRing(final StringBuilder sb, final PGPPublicKeyRing keyRing) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss Z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -165,7 +165,7 @@ public class PgpCommands implements CommandMarker {
 		}
 	}
 
-	private static String getAlgorithm(int algId) {
+	private static String getAlgorithm(final int algId) {
 		switch (algId) {
 			case PublicKeyAlgorithmTags.RSA_GENERAL:
 				return "RSA_GENERAL";
@@ -189,7 +189,7 @@ public class PgpCommands implements CommandMarker {
 		return "unknown";
 	}
 
-	private void appendLine(StringBuilder sb, String line) {
+	private void appendLine(final StringBuilder sb, final String line) {
 		sb.append(line).append(StringUtils.LINE_SEPARATOR);
 	}
 }

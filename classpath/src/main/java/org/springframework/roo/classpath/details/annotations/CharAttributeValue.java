@@ -4,22 +4,22 @@ import org.springframework.roo.model.JavaSymbolName;
 
 /**
  * Represents a char annotation attribute value.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class CharAttributeValue extends AbstractAnnotationAttributeValue<Character> {
-	
+
 	// Fields
 	private final char value;
-	
+
 	/**
 	 * Constructor
 	 *
 	 * @param name
 	 * @param value
 	 */
-	public CharAttributeValue(JavaSymbolName name, char value) {
+	public CharAttributeValue(final JavaSymbolName name, final char value) {
 		super(name);
 		this.value = value;
 	}
@@ -28,6 +28,7 @@ public class CharAttributeValue extends AbstractAnnotationAttributeValue<Charact
 		return value;
 	}
 
+	@Override
 	public String toString() {
 		return getName() + " -> " + value;
 	}

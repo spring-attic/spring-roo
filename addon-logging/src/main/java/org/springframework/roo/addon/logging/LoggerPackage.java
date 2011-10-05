@@ -6,7 +6,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Provides information related to the configuration of the logger.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -21,15 +21,16 @@ public enum LoggerPackage {
 	WEB("org.springframework.web");
 
 	private String[] packageNames;
-	
-	private LoggerPackage(String... packageNames) {
+
+	private LoggerPackage(final String... packageNames) {
 		this.packageNames = packageNames;
 	}
-	
+
 	public String[] getPackageNames() {
 		return packageNames;
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("layer", name());

@@ -18,17 +18,17 @@ import org.springframework.roo.project.Path;
 
 /**
  * Provides the metadata for an ITD that implements a Spring Data Mongo repository
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
 public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider {
-	
+
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	
+
 	@SuppressWarnings("unchecked")
 	protected void activate(final ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
@@ -50,17 +50,17 @@ public class RepositoryMongoMetadataProvider extends AbstractItdMetadataProvider
 		if (!annotationValues.isAnnotationFound() || domainType == null) {
 			return null;
 		}
-		
+
 		JavaType idType = persistenceMemberLocator.getIdentifierType(domainType);
 		if (idType == null) {
 			return null;
 		}
-		
+
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);
-		
+
 		return new RepositoryMongoMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType, annotationValues);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Mongo_Repository";
 	}

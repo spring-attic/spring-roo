@@ -5,7 +5,7 @@ import org.springframework.roo.project.Dependency;
 /**
  * Dependency listener interface that clients can implement in order
  * to be notified of changes to project dependencies
- * 
+ *
  * @author Adrian Colyer
  * @since 1.0
  *

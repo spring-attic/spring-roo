@@ -17,13 +17,13 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Utils class for solr addon.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 public final class SolrUtils {
-	
-	public static String getSolrDynamicFieldPostFix(JavaType type) {
+
+	public static String getSolrDynamicFieldPostFix(final JavaType type) {
 		if (type.equals(INT_OBJECT) || type.equals(INT_PRIMITIVE)) {
 			return "_i";
 		} else if (type.equals(JavaType.STRING)) {
@@ -42,7 +42,7 @@ public final class SolrUtils {
 			return "_t";
 		}
 	}
-	
+
 	private SolrUtils() {
 	}
 }

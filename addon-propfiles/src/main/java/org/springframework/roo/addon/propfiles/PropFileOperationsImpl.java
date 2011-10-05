@@ -29,19 +29,19 @@ import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * Provides property file configuration operations.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component 
-@Service 
+@Component
+@Service
 public class PropFileOperationsImpl implements PropFileOperations {
-	
+
 	// Constants
 	private static final boolean SORTED = true;
 	private static final boolean CHANGE_EXISTING = true;
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -49,28 +49,28 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	public boolean isPropertiesCommandAvailable() {
 		return projectOperations.isProjectAvailable();
 	}
-	
-	public void addProperties(Path propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
+
+	public void addProperties(final Path propertyFilePath, final String propertyFilename, final Map<String, String> properties, final boolean sorted, final boolean changeExisting) {
 		manageProperty(propertyFilePath, propertyFilename, properties, sorted, changeExisting);
 	}
 
-	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value) {
+	public void addPropertyIfNotExists(final Path propertyFilePath, final String propertyFilename, final String key, final String value) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, !CHANGE_EXISTING);
 	}
 
-	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
+	public void addPropertyIfNotExists(final Path propertyFilePath, final String propertyFilename, final String key, final String value, final boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, !CHANGE_EXISTING);
 	}
 
-	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
+	public void changeProperty(final Path propertyFilePath, final String propertyFilename, final String key, final String value) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, CHANGE_EXISTING);
 	}
 
-	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
+	public void changeProperty(final Path propertyFilePath, final String propertyFilename, final String key, final String value, final boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, CHANGE_EXISTING);
 	}
 
-	private void manageProperty(Path propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
+	private void manageProperty(final Path propertyFilePath, final String propertyFilename, final Map<String, String> properties, final boolean sorted, final boolean changeExisting) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.notNull(properties, "Property map required");
@@ -123,13 +123,13 @@ public class PropFileOperationsImpl implements PropFileOperations {
 				saveNeeded = true;
 			}
 		}
-		
+
 		if (saveNeeded) {
 			storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 		}
 	}
 
-	public void removeProperty(Path propertyFilePath, String propertyFilename, String key) {
+	public void removeProperty(final Path propertyFilePath, final String propertyFilename, final String key) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
@@ -150,7 +150,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 	}
 
-	public String getProperty(Path propertyFilePath, String propertyFilename, String key) {
+	public String getProperty(final Path propertyFilePath, final String propertyFilename, final String key) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
@@ -169,7 +169,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return props.getProperty(key);
 	}
 
-	public SortedSet<String> getPropertyKeys(Path propertyFilePath, String propertyFilename, boolean includeValues) {
+	public SortedSet<String> getPropertyKeys(final Path propertyFilePath, final String propertyFilename, final boolean includeValues) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 
@@ -197,7 +197,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return result;
 	}
 
-	public Map<String, String> getProperties(Path propertyFilePath, String propertyFilename) {
+	public Map<String, String> getProperties(final Path propertyFilePath, final String propertyFilename) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 
@@ -228,8 +228,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		}
 		return properties;
 	}
-	
-	private void loadProperties(Properties props, InputStream inputStream) {
+
+	private void loadProperties(final Properties props, final InputStream inputStream) {
 		try {
 			props.load(inputStream);
 		} catch (IOException e) {
@@ -238,14 +238,14 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			IOUtils.closeQuietly(inputStream);
 		}
 	}
-	
-	private Map<String, String> asMap(String key, String value) {
+
+	private Map<String, String> asMap(final String key, final String value) {
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(key, value);
 		return properties;
 	}
 
-	private void storeProps(Properties props, OutputStream outputStream, String comment) {
+	private void storeProps(final Properties props, final OutputStream outputStream, final String comment) {
 		Assert.notNull(outputStream, "OutputStream required");
 		try {
 			props.store(outputStream, comment);

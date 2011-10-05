@@ -10,12 +10,12 @@ import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * {@link UndoableOperation} to update a file.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class UpdateFile implements UndoableOperation {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(UpdateFile.class);
 
@@ -23,15 +23,15 @@ public class UpdateFile implements UndoableOperation {
 	private final FilenameResolver filenameResolver;
 	private final File actual;
 	private final File backup;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param undoManager cannot be <code>null</code>
 	 * @param filenameResolver cannot be <code>null</code>
 	 * @param actual the file to be updated; must be an existing file (not a directory)
 	 */
-	public UpdateFile(UndoManager undoManager, FilenameResolver filenameResolver, File actual) {
+	public UpdateFile(final UndoManager undoManager, final FilenameResolver filenameResolver, final File actual) {
 		Assert.notNull(undoManager, "Undo manager required");
 		Assert.notNull(actual, "File required");
 		Assert.isTrue(actual.exists(), "File '" + actual + "' must exist");
@@ -47,7 +47,7 @@ public class UpdateFile implements UndoableOperation {
 		this.actual = actual;
 		undoManager.add(this);
 	}
-	
+
 	public void reset() {
 		// Fix for ROO-1555
 		try {

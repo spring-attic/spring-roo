@@ -12,7 +12,7 @@ import org.springframework.roo.shell.MethodTarget;
 
 /**
  * Custom id type converter for {@link MongoIdType} to limit options in {@link MongoCommands}
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -20,22 +20,22 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class MongoIdTypeConverter implements Converter<MongoIdType> {
 
-	public boolean supports(Class<?> type, String optionContext) {
+	public boolean supports(final Class<?> type, final String optionContext) {
 		return MongoIdType.class.isAssignableFrom(type);
 	}
 
-	public MongoIdType convertFromText(String value, Class<?> targetType, String optionContext) {
+	public MongoIdType convertFromText(final String value, final Class<?> targetType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
 		return new MongoIdType(value);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> targetType, final String existingData, final String optionContext, final MethodTarget target) {
 		SortedSet<String> types = new TreeSet<String>();
 		types.add(BigInteger.class.getName());
 		types.add("org.bson.types.ObjectId");
-		
+
 		for (String type : types) {
 			if (type.startsWith(existingData) || existingData.startsWith(type)) {
 				completions.add(type);

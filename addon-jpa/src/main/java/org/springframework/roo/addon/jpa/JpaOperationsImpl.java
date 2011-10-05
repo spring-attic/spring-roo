@@ -44,7 +44,7 @@ import org.w3c.dom.Element;
 
 /**
  * Provides JPA configuration operations.
- * 
+ *
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
@@ -52,7 +52,7 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JpaOperationsImpl implements JpaOperations {
-	
+
 	// Constants
 	private static final Dependency JSTL_IMPL_DEPENDENCY = new Dependency("org.glassfish.web", "jstl-impl", "1.2");
 	private static final Logger LOGGER = HandlerUtils.getLogger(JpaOperationsImpl.class);
@@ -63,18 +63,18 @@ public class JpaOperationsImpl implements JpaOperations {
 	private static final String DEFAULT_PERSISTENCE_UNIT = "persistenceUnit";
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
 	private static final String PERSISTENCE_UNIT = "persistence-unit";
-	
+
 	static final String APPLICATION_CONTEXT_XML = "applicationContext.xml";
 	static final String JPA_DIALECTS_FILE = "jpa-dialects.properties";
 	static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 	static final String POM_XML = "pom.xml";
-	
+
 	// Fields (package access so unit tests can inject mocks)
 	@Reference FileManager fileManager;
 	@Reference MetadataService metadataService;
 	@Reference ProjectOperations projectOperations;
 	@Reference PropFileOperations propFileOperations;
-	
+
 	public boolean isJpaInstallationPossible() {
 		return projectOperations.isProjectAvailable() && !fileManager.exists(getPersistencePath());
 	}
@@ -108,7 +108,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		// Parse the configuration.xml file
 		final Element configuration = XmlUtils.getConfiguration(getClass());
-		
+
 		// Get the first part of the XPath expressions for unwanted databases and ORM providers
 		final String databaseXPath = getDbXPath(getUnwantedDatabases(jdbcDatabase));
 		final String providersXPath = getProviderXPath(getUnwantedOrmProviders(ormProvider));
@@ -206,7 +206,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				dataSource.appendChild(createPropertyElement("validationQuery", validationQuery, appCtx));
 			}
 		}
-		
+
 		transactionManager = StringUtils.defaultIfEmpty(transactionManager, "transactionManager");
 		Element transactionManagerElement = XmlUtils.findFirstElement("/beans/bean[@id = '" + transactionManager + "']", root);
 		if (transactionManagerElement == null) {
@@ -380,13 +380,13 @@ public class JpaOperationsImpl implements JpaOperations {
 						properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "rdbms", persistence));
 				}
 
-			if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) { 
+			if (jdbcDatabase != JdbcDatabase.DATABASE_DOT_COM) {
 				// These are specified in the connection properties file
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", connectionString, persistence));
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", userName, persistence));
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
 			}
-			
+
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateTables", Boolean.toString(!isDbreProject), persistence));
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateColumns", "false", persistence));
 			properties.appendChild(createPropertyElement("datanucleus.autoCreateConstraints", "false", persistence));
@@ -399,7 +399,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		persistenceUnitElement.appendChild(properties);
 
 		fileManager.createOrUpdateTextFileIfRequired(persistencePath, XmlUtils.nodeToString(persistence), false);
-		
+
 		if (jdbcDatabase != JdbcDatabase.GOOGLE_APP_ENGINE && (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2)) {
 			LOGGER.warning("Please update your database details in src/main/resources/META-INF/persistence.xml.");
 		}
@@ -543,7 +543,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		final String connectionString = getConnectionString(jdbcDatabase, hostName, null /*databaseName*/).replace("USER_NAME", StringUtils.defaultIfEmpty(userName, "${userName}")).replace("PASSWORD", StringUtils.defaultIfEmpty(password, "${password}"));
 		final Properties props = getProperties(configPath, configExists, "database-dot-com-template.properties");
-		
+
 		final boolean hasChanged = !props.get("url").equals(StringUtils.trimToEmpty(connectionString));
 		if (!hasChanged) {
 			return;
@@ -625,7 +625,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	/**
 	 * Updates the POM with the dependencies required for the given database and
 	 * ORM provider, removing any other persistence-related dependencies
-	 * 
+	 *
 	 * @param configuration
 	 * @param ormProvider
 	 * @param jdbcDatabase
@@ -662,7 +662,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		redundantDependencies.addAll(getDependencies(providersXPath, configuration));
 		// Don't remove any we actually need
 		redundantDependencies.removeAll(requiredDependencies);
-		
+
 		// Update the POM
 		projectOperations.addDependencies(requiredDependencies);
 		projectOperations.removeDependencies(redundantDependencies);
@@ -719,7 +719,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (final Filter filter : redundantFilters) {
 			projectOperations.removeFilter(filter);
 		}
-		
+
 		// Add required filters
 		final List<Filter> filters = new ArrayList<Filter>();
 
@@ -746,7 +746,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (final Resource resource : redundantResources) {
 			projectOperations.removeResource(resource);
 		}
-		
+
 		// Add required resources
 		final List<Resource> resources = new ArrayList<Resource>();
 
@@ -768,24 +768,24 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateBuildPlugins(final Element configuration, final OrmProvider ormProvider, final JdbcDatabase jdbcDatabase, final String databaseXPath, final String providersXPath) {
 		// Identify the required plugins
 		final List<Plugin> requiredPlugins = new ArrayList<Plugin>();
-		
+
 		final List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/plugins/plugin", configuration);
 		for (final Element pluginElement : databasePlugins) {
 			requiredPlugins.add(new Plugin(pluginElement));
 		}
-		
+
 		final List<Element> ormPlugins = XmlUtils.findElements(getProviderXPath(ormProvider) + "/plugins/plugin", configuration);
 		for (final Element pluginElement : ormPlugins) {
 			requiredPlugins.add(new Plugin(pluginElement));
 		}
-		
+
 		// Identify any redundant plugins
 		final List<Plugin> redundantPlugins = new ArrayList<Plugin>();
 		redundantPlugins.addAll(getPlugins(databaseXPath, configuration));
 		redundantPlugins.addAll(getPlugins(providersXPath, configuration));
 		// Don't remove any that are still required
 		redundantPlugins.removeAll(requiredPlugins);
-		
+
 		// Update the POM
 		projectOperations.addBuildPlugins(requiredPlugins);
 		projectOperations.removeBuildPlugins(redundantPlugins);
@@ -833,7 +833,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			additionalProjectnaturesElement.removeChild(gaeProjectnatureElement);
 			changes.add("removed GAE projectnature from maven-eclipse-plugin");
 		}
-		
+
 		if (!changes.isEmpty()) {
 			final String changesMessage = StringUtils.collectionToDelimitedString(changes, "; ");
 			fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), changesMessage, false);
@@ -844,7 +844,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		final String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, POM_XML);
 		final Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		final Element root = document.getDocumentElement();
-	
+
 		// Manage mappingExcludes
 		final Element configurationElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-datanucleus-plugin']/configuration", root);
 		if (configurationElement == null) {
@@ -864,7 +864,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), descriptionOfChange, false);
 	}
-	
+
 	private List<JdbcDatabase> getUnwantedDatabases(final JdbcDatabase jdbcDatabase) {
 		final List<JdbcDatabase> unwantedDatabases = new ArrayList<JdbcDatabase>();
 		for (final JdbcDatabase database : JdbcDatabase.values()) {
@@ -874,7 +874,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		return unwantedDatabases;
 	}
-	
+
 	private List<OrmProvider> getUnwantedOrmProviders(final OrmProvider ormProvider) {
 		final List<OrmProvider> unwantedOrmProviders = new ArrayList<OrmProvider>(Arrays.asList(OrmProvider.values()));
 		unwantedOrmProviders.remove(ormProvider);

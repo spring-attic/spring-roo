@@ -18,7 +18,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 /**
  * Provides the metadata for an ITD that implements a Spring Data JPA repository
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -26,10 +26,10 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service
 public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
-	
+
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	
+
 	@SuppressWarnings("unchecked")
 	protected void activate(final ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
@@ -62,7 +62,7 @@ public class RepositoryJpaMetadataProvider extends AbstractItdMetadataProvider {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.createIdentifier(domainType, Path.SRC_MAIN_JAVA), metadataId);
 		return new RepositoryJpaMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType, annotationValues);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Jpa_Repository";
 	}

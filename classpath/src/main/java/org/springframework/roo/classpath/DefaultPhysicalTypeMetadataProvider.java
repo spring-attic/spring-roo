@@ -66,19 +66,19 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 	// Mutex
 	private final Object lock = new Object();
 
-	private SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(new Comparator<MemberDetailsDecorator>() {
-		public int compare(MemberDetailsDecorator o1, MemberDetailsDecorator o2) {
+	private final SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(new Comparator<MemberDetailsDecorator>() {
+		public int compare(final MemberDetailsDecorator o1, final MemberDetailsDecorator o2) {
 			return o1.getClass().getName().compareTo(o2.getClass().getName());
 		}
 	});
 
-	protected void bindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
+	protected void bindMemberHoldingDecorator(final MemberDetailsDecorator decorator) {
 		synchronized (lock) {
 			decorators.add(decorator);
 		}
 	}
 
-	protected void unbindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
+	protected void unbindMemberHoldingDecorator(final MemberDetailsDecorator decorator) {
 		synchronized (lock) {
 			decorators.remove(decorator);
 		}
@@ -88,7 +88,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 		return PhysicalTypeIdentifier.getMetadataIdentiferType();
 	}
 
-	public void onFileEvent(FileEvent fileEvent) {
+	public void onFileEvent(final FileEvent fileEvent) {
 		String fileIdentifier = fileEvent.getFileDetails().getCanonicalPath();
 
 		// Check to see if file is of interest
@@ -106,7 +106,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 		}
 	}
 
-	public MetadataItem get(String metadataIdentificationString) {
+	public MetadataItem get(final String metadataIdentificationString) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' is not valid for this metadata provider");
 		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(metadataIdentificationString);
 		metadataDependencyRegistry.deregisterDependencies(metadataIdentificationString);

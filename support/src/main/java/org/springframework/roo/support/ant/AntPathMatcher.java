@@ -26,19 +26,19 @@ public class AntPathMatcher implements PathMatcher {
 	 * Set the path separator to use for pattern parsing.
 	 * Default is "/", as in Ant.
 	 */
-	public void setPathSeparator(String pathSeparator) {
+	public void setPathSeparator(final String pathSeparator) {
 		this.pathSeparator = (pathSeparator != null ? pathSeparator : DEFAULT_PATH_SEPARATOR);
 	}
 
-	public boolean isPattern(String path) {
+	public boolean isPattern(final String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
 	}
 
-	public boolean match(String pattern, String path) {
+	public boolean match(final String pattern, final String path) {
 		return doMatch(pattern, path, true, null);
 	}
 
-	public boolean matchStart(String pattern, String path) {
+	public boolean matchStart(final String pattern, final String path) {
 		return doMatch(pattern, path, false, null);
 	}
 
@@ -51,7 +51,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return <code>true</code> if the supplied <code>path</code> matched,
 	 * <code>false</code> if it didn't
 	 */
-	protected boolean doMatch(String pattern, String path, boolean fullMatch, Map<String, String> uriTemplateVariables) {
+	protected boolean doMatch(final String pattern, final String path, final boolean fullMatch, final Map<String, String> uriTemplateVariables) {
 		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
@@ -183,7 +183,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return <code>true</code> if the string matches against the
 	 * pattern, or <code>false</code> otherwise.
 	 */
-	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
+	private boolean matchStrings(final String pattern, final String str, final Map<String, String> uriTemplateVariables) {
 		AntPatchStringMatcher matcher = new AntPatchStringMatcher(pattern, str, uriTemplateVariables);
 		return matcher.matchStrings();
 	}
@@ -204,7 +204,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>'
 	 * and '<code>path</code>', but does <strong>not</strong> enforce this.
 	 */
-	public String extractPathWithinPattern(String pattern, String path) {
+	public String extractPathWithinPattern(final String pattern, final String path) {
 		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
 		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
 
@@ -234,7 +234,7 @@ public class AntPathMatcher implements PathMatcher {
 		return builder.toString();
 	}
 
-	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
+	public Map<String, String> extractUriTemplateVariables(final String pattern, final String path) {
 		Map<String, String> variables = new LinkedHashMap<String, String>();
 		boolean result = doMatch(pattern, path, true, variables);
 		Assert.state(result, "Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");

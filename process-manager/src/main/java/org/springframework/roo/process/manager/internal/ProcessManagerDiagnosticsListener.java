@@ -17,7 +17,7 @@ import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 
 /**
  * Allows monitoring of {@link ProcessManager} for development mode users.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.1
@@ -29,24 +29,24 @@ public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject im
 	// Fields
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
 	private boolean isDebug = false;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		processManagerStatusProvider.addProcessManagerStatusListener(this);
 		isDebug = System.getProperty("roo-args") != null && isDevelopmentMode();
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		processManagerStatusProvider.removeProcessManagerStatusListener(this);
 	}
 
-	public void onProcessManagerStatusChange(ProcessManagerStatus oldStatus, ProcessManagerStatus newStatus) {
+	public void onProcessManagerStatusChange(final ProcessManagerStatus oldStatus, final ProcessManagerStatus newStatus) {
 		if (isDebug) {
 			flash(Level.FINE, newStatus.name(), MY_SLOT);
 		}
 	}
-	
+
 	@CliCommand(value="process manager debug", help="Indicates if process manager debugging is desired")
-	public void processManagerDebug (@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Activates debug mode") boolean debug) {
+	public void processManagerDebug (@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Activates debug mode") final boolean debug) {
 		this.isDebug = debug;
 	}
 }

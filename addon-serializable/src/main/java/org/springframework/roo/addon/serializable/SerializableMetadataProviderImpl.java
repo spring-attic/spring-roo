@@ -14,25 +14,26 @@ import org.springframework.roo.project.Path;
 
 /**
  * Implementation of {@link SerializableMetadataProvider}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class SerializableMetadataProviderImpl extends AbstractItdMetadataProvider implements SerializableMetadataProvider {
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_SERIALIZABLE);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_SERIALIZABLE);		
+		removeMetadataTrigger(ROO_SERIALIZABLE);
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		return new SerializableMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
 	}
 
@@ -40,13 +41,15 @@ public class SerializableMetadataProviderImpl extends AbstractItdMetadataProvide
 		return "Serializable";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = SerializableMetadata.getJavaType(metadataIdentificationString);
 		Path path = SerializableMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return SerializableMetadata.createIdentifier(javaType, path);
 	}
 

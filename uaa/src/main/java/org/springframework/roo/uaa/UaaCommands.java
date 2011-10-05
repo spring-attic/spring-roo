@@ -21,7 +21,7 @@ import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 /**
  * Provides shell commands for end user interaction with the Spring User Agent Analysis (UAA)
  * system.
- * 
+ *
  * @author Ben Alex
  * @since 1.1.1
  */
@@ -33,12 +33,12 @@ public class UaaCommands implements CommandMarker {
 	@Reference private UaaService uaaService;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	@Reference private StaticFieldConverter staticFieldConverter;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		staticFieldConverter.add(PrivacyLevel.class);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		staticFieldConverter.remove(PrivacyLevel.class);
 	}
 
@@ -53,14 +53,14 @@ public class UaaCommands implements CommandMarker {
 			MessageDisplayUtils.displayFile("status_accepted.txt", UaaCommands.class);
 		}
 	}
-	
+
 	@CliCommand(value="download accept terms of use", help="Accepts the Spring User Agent Analysis (UAA) Terms of Use")
 	public void acceptTou() {
 		uaaService.setPrivacyLevel(PrivacyLevel.ENABLE_UAA);
 		uaaRegistrationService.flushIfPossible();
 		MessageDisplayUtils.displayFile("accepted_tou.txt", UaaCommands.class);
 	}
-	
+
 	@CliCommand(value="download reject terms of use", help="Rejects the Spring User Agent Analysis (UAA) Terms of Use")
 	public void rejectTou() {
 		uaaService.setPrivacyLevel(PrivacyLevel.DECLINE_TOU);
@@ -68,13 +68,13 @@ public class UaaCommands implements CommandMarker {
 	}
 
 	@CliCommand(value="download privacy level", help="Changes the Spring User Agent Analysis (UAA) privacy level")
-	public String privacyLevel(@CliOption(key = "privacyLevel", mandatory = true, help = "The new UAA privacy level to use") PrivacyLevel privacyLevel) {
+	public String privacyLevel(@CliOption(key = "privacyLevel", mandatory = true, help = "The new UAA privacy level to use") final PrivacyLevel privacyLevel) {
 		uaaService.setPrivacyLevel(privacyLevel);
 		return "UAA privacy level updated " + uaaService.getPrivacyLevelLastChanged() + " (use 'download view' to view the new data)";
 	}
-	
+
 	@CliCommand(value="download view", help="Displays the Spring User Agent Analysis (UAA) header content in plain text")
-	public String view(@CliOption(key = "file", mandatory = false, help = "The file to save the UAA JSON content to") File file) {
+	public String view(@CliOption(key = "file", mandatory = false, help = "The file to save the UAA JSON content to") final File file) {
 		String readablePayload = uaaService.getReadablePayload();
 
 		StringBuilder sb = new StringBuilder();
@@ -91,7 +91,7 @@ public class UaaCommands implements CommandMarker {
 				throw new IllegalStateException(ioe);
 			}
 		}
-		
+
 		return sb.toString();
 	}
 }

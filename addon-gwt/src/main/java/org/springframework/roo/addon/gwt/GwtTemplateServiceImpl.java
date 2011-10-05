@@ -79,7 +79,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 	// Constants
 	private static final int LAYER_POSITION = LayerType.HIGHEST.getPosition();
-	
+
 	// Fields
 	@Reference protected MetadataService metadataService;
 	@Reference protected ProjectOperations projectOperations;
@@ -89,7 +89,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 	@Reference protected LayerService layerService;
 	@Reference protected PersistenceMemberLocator persistenceMemberLocator;
 
-	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails mirroredType, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
+	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(final ClassOrInterfaceTypeDetails mirroredType, final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(mirroredType);
 		ClassOrInterfaceTypeDetails request = gwtTypeService.lookupRequestFromEntity(mirroredType);
@@ -152,18 +152,18 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		return new GwtTemplateDataHolder(templateTypeDetailsMap, xmlTemplates, typeDetails, xmlMap);
 	}
 
-	public List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(GwtType type) {
+	public List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(final GwtType type) {
 		List<ClassOrInterfaceTypeDetails> templateTypeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
 		TemplateDataDictionary dataDictionary = buildDictionary(type);
 		templateTypeDetails.add(getTemplateDetails(dataDictionary, type.getTemplate(), getDestinationJavaType(type)));
 		return templateTypeDetails;
 	}
 
-	public String buildUiXml(String templateContents, String destFile, List<MethodMetadata> proxyMethods) {
+	public String buildUiXml(final String templateContents, final String destFile, final List<MethodMetadata> proxyMethods) {
 		try {
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new EntityResolver() {
-				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+				public InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
 					if (systemId.equals("http://dl.google.com/gwt/DTD/xhtml.ent")) {
 						return new InputSource(TemplateUtils.getTemplate(GwtScaffoldMetadata.class, "templates/xhtml.ent"));
 					}
@@ -266,7 +266,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		}
 	}
 
-	private String transformXml(Document document) throws TransformerException {
+	private String transformXml(final Document document) throws TransformerException {
 		Transformer transformer = XmlUtils.createIndentingTransformer();
 		StreamResult result = new StreamResult(new StringWriter());
 		DOMSource source = new DOMSource(document);
@@ -274,7 +274,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		return result.getWriter().toString();
 	}
 
-	private String getTemplateContents(String templateName, TemplateDataDictionary dataDictionary) {
+	private String getTemplateContents(final String templateName, final TemplateDataDictionary dataDictionary) {
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
 			Template template = templateLoader.getTemplate(templateName);
@@ -284,7 +284,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		}
 	}
 
-	public ClassOrInterfaceTypeDetails getTemplateDetails(TemplateDataDictionary dataDictionary, String templateFile, JavaType templateType) {
+	public ClassOrInterfaceTypeDetails getTemplateDetails(final TemplateDataDictionary dataDictionary, final String templateFile, final JavaType templateType) {
 		String templateContents;
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
@@ -297,7 +297,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		}
 	}
 
-	private TemplateDataDictionary buildDictionary(GwtType type) {
+	private TemplateDataDictionary buildDictionary(final GwtType type) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 
 		Set<ClassOrInterfaceTypeDetails> proxies = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(RooJavaType.ROO_GWT_PROXY);
@@ -404,11 +404,11 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 				// Do nothing
 				break;
 		}
-		
+
 		return dataDictionary;
 	}
 
-	private TemplateDataDictionary buildStandardDataDictionary(GwtType type) {
+	private TemplateDataDictionary buildStandardDataDictionary(final GwtType type) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 
 		JavaType javaType = new JavaType(getFullyQualifiedTypeName(type, projectMetadata));
@@ -424,11 +424,11 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		return dataDictionary;
 	}
 
-	private void addImport(TemplateDataDictionary dataDictionary, String simpleName, GwtType gwtType, ProjectMetadata projectMetadata) {
+	private void addImport(final TemplateDataDictionary dataDictionary, final String simpleName, final GwtType gwtType, final ProjectMetadata projectMetadata) {
 		addImport(dataDictionary, gwtType.getPath().packageName(projectMetadata) + "." + simpleName + gwtType.getSuffix());
 	}
 
-	private String getRequestMethodCall(ClassOrInterfaceTypeDetails request, MemberTypeAdditions memberTypeAdditions) {
+	private String getRequestMethodCall(final ClassOrInterfaceTypeDetails request, final MemberTypeAdditions memberTypeAdditions) {
 		String methodName = memberTypeAdditions.getMethodName();
 		MethodMetadata requestMethod = MemberFindingUtils.getMethod(request, methodName);
 		String requestMethodCall = memberTypeAdditions.getMethodName();
@@ -440,7 +440,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		return requestMethodCall;
 	}
 
-	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type, ClassOrInterfaceTypeDetails mirroredType, ClassOrInterfaceTypeDetails proxy, Map<GwtType, JavaType> mirrorTypeMap, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
+	private TemplateDataDictionary buildMirrorDataDictionary(final GwtType type, final ClassOrInterfaceTypeDetails mirroredType, final ClassOrInterfaceTypeDetails proxy, final Map<GwtType, JavaType> mirrorTypeMap, final Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap) {
 		ProjectMetadata projectMetadata = projectOperations.getProjectMetadata();
 		JavaType proxyType = proxy.getName();
 		JavaType javaType = mirrorTypeMap.get(type);
@@ -475,7 +475,7 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(mirroredType.getName()));
 		String plural = pluralMetadata.getPlural();
-		
+
 		String simpleTypeName = mirroredType.getName().getSimpleTypeName();
 
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
@@ -619,49 +619,49 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 		return dataDictionary;
 	}
 
-	private void addReference(TemplateDataDictionary dataDictionary, GwtType type, Map<GwtType, JavaType> mirrorTypeMap) {
+	private void addReference(final TemplateDataDictionary dataDictionary, final GwtType type, final Map<GwtType, JavaType> mirrorTypeMap) {
 		addImport(dataDictionary, mirrorTypeMap.get(type).getFullyQualifiedTypeName());
 		dataDictionary.setVariable(type.getName(), mirrorTypeMap.get(type).getSimpleTypeName());
 	}
 
-	private JavaType getDestinationJavaType(GwtType destType) {
+	private JavaType getDestinationJavaType(final GwtType destType) {
 		return new JavaType(getFullyQualifiedTypeName(destType, projectOperations.getProjectMetadata()));
 	}
 
-	private void addReference(TemplateDataDictionary dataDictionary, GwtType type) {
+	private void addReference(final TemplateDataDictionary dataDictionary, final GwtType type) {
 		addImport(dataDictionary, getDestinationJavaType(type).getFullyQualifiedTypeName());
 		dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
-	private boolean isReadOnly(String name, ClassOrInterfaceTypeDetails governorTypeDetails) {
+	private boolean isReadOnly(final String name, final ClassOrInterfaceTypeDetails governorTypeDetails) {
 		List<String> readOnly = new ArrayList<String>();
 		ClassOrInterfaceTypeDetails proxy = gwtTypeService.lookupProxyFromEntity(governorTypeDetails);
 		if (proxy != null) {
 			readOnly.addAll(GwtUtils.getAnnotationValues(proxy, RooJavaType.ROO_GWT_PROXY, "readOnly"));
 		}
-		
+
 		return readOnly.contains(name);
 	}
 
-	private void addImport(TemplateDataDictionary dataDictionary, String importDeclaration) {
+	private void addImport(final TemplateDataDictionary dataDictionary, final String importDeclaration) {
 		dataDictionary.addSection("imports").setVariable("import", importDeclaration);
 	}
 
-	private void maybeAddImport(TemplateDataDictionary dataDictionary, Set<String> importSet, JavaType type) {
+	private void maybeAddImport(final TemplateDataDictionary dataDictionary, final Set<String> importSet, final JavaType type) {
 		if (!importSet.contains(type.getFullyQualifiedTypeName())) {
 			addImport(dataDictionary, type.getFullyQualifiedTypeName());
 			importSet.add(type.getFullyQualifiedTypeName());
 		}
 	}
 
-	private void addImport(TemplateDataDictionary dataDictionary, JavaType type) {
+	private void addImport(final TemplateDataDictionary dataDictionary, final JavaType type) {
 		dataDictionary.addSection("imports").setVariable("import", type.getFullyQualifiedTypeName());
 		for (JavaType param : type.getParameters()) {
 			addImport(dataDictionary, param);
 		}
 	}
 
-	private JavaType getCollectionImplementation(JavaType javaType) {
+	private JavaType getCollectionImplementation(final JavaType javaType) {
 		if (javaType.equals(SET)) {
 			return new JavaType(HASH_SET.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
 		}
@@ -671,8 +671,8 @@ public class GwtTemplateServiceImpl implements GwtTemplateService {
 
 		return javaType;
 	}
-	
-	private String getFullyQualifiedTypeName(GwtType gwtType, ProjectMetadata projectMetadata) {
+
+	private String getFullyQualifiedTypeName(final GwtType gwtType, final ProjectMetadata projectMetadata) {
 		return gwtType.getPath().packageName(projectMetadata) + "." + gwtType.getTemplate();
 	}
 }

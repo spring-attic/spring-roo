@@ -25,7 +25,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.2.0
  */
 public class MavenProjectMetadataProviderTest {
-	
+
 	// Constants
 	private static final String ARTIFACT_ID = "foo-lib";
 	private static final String CLASSIFIER = "exe";
@@ -33,20 +33,20 @@ public class MavenProjectMetadataProviderTest {
 	private static final String POM_PATH = "/any/old/path";
 	private static final String SIMPLE_DESCRIPTION = "Foo Library";
 	private static final String VERSION = "1.0.Final";
-	
+
 	// Fixture
 	@Mock private FileManager mockFileManager;
 	@Mock private MetadataService mockMetadataService;
 	@Mock private ProjectMetadata mockProjectMetadata;
 	@Mock private PathResolver mockPathResolver;
 	private MavenProjectMetadataProvider metadataProvider;
-	
+
 	@Before
 	public void setUp() {
 		// Mocks
 		MockitoAnnotations.initMocks(this);
 		when(mockPathResolver.getIdentifier(Path.ROOT, MavenProjectMetadataProvider.POM_RELATIVE_PATH)).thenReturn(POM_PATH);
-		
+
 		// Object under test
 		metadataProvider = new MavenProjectMetadataProvider();
 		metadataProvider.fileManager = mockFileManager;
@@ -54,7 +54,7 @@ public class MavenProjectMetadataProviderTest {
 		metadataProvider.pathResolver = mockPathResolver;
 		metadataProvider.activate(null);	// context is ignored
 	}
-	
+
 	private static final String POM_BEFORE_DEPENDENCY_REMOVED =
 		"<project>" +
 		"    <dependencies>" +
@@ -85,7 +85,7 @@ public class MavenProjectMetadataProviderTest {
 		"        </dependency>\n" +
 		"    </dependencies>\n" +
 		"</project>\n";
-	
+
 	@Test
 	public void testRemoveDependencyTwiceWhenItExistsOnce() {
 		// Set up
@@ -99,15 +99,15 @@ public class MavenProjectMetadataProviderTest {
 		when(mockDependency.getSimpleDescription()).thenReturn(SIMPLE_DESCRIPTION);
 		when(mockDependency.getType()).thenReturn(DependencyType.JAR);
 		when(mockDependency.getVersion()).thenReturn(VERSION);
-		
+
 		when(mockMetadataService.get(ProjectMetadata.PROJECT_IDENTIFIER)).thenReturn(mockProjectMetadata);
 		final Collection<Dependency> dependencies = Arrays.asList(mockDependency, mockDependency);
 		when(mockProjectMetadata.isAnyDependenciesRegistered(dependencies)).thenReturn(true);
 		when(mockProjectMetadata.isDependencyRegistered(mockDependency)).thenReturn(true);
-		
+
 		// Invoke
 		metadataProvider.removeDependencies(dependencies);
-		
+
 		// Check
 		final String expectedPom = POM_AFTER_DEPENDENCY_REMOVED.replace("\n", StringUtils.LINE_SEPARATOR);
 		verify(mockFileManager).createOrUpdateTextFileIfRequired(eq(POM_PATH), eq(expectedPom), (String) any(), eq(false));

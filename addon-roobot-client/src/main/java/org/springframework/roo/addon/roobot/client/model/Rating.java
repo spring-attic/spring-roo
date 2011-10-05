@@ -4,7 +4,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Star ratings for the "addon feedback bundle" command.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.1.1
@@ -18,11 +18,11 @@ public enum Rating {
 
 	private Integer key;
 
-	private Rating(Integer key) {
+	private Rating(final Integer key) {
 		this.key = key;
 	}
-	
-	public static Rating fromInt(Integer rating) {
+
+	public static Rating fromInt(final Integer rating) {
 		switch (rating) {
 		case 1: return VERY_BAD;
 		case 2: return BAD;
@@ -36,7 +36,8 @@ public enum Rating {
 	public Integer getKey() {
 		return key;
 	}
-	
+
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("name", name());

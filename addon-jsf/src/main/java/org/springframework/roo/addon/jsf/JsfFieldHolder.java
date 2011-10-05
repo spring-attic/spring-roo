@@ -10,9 +10,9 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
 public class JsfFieldHolder {
-	
+
 	// Fields
-	private FieldMetadata field;
+	private final FieldMetadata field;
 	private boolean enumerated;
 	private boolean commonCollectionType;
 	private boolean applicationType;
@@ -20,7 +20,7 @@ public class JsfFieldHolder {
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
 	private String displayMethod;
 	private Map<JavaType, MemberDetails> collectionGenericTypes;
-	
+
 	public JsfFieldHolder(final FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 		this.field = field;
@@ -29,12 +29,12 @@ public class JsfFieldHolder {
 	public FieldMetadata getField() {
 		return field;
 	}
-	
+
 	public boolean isEnumerated() {
 		return enumerated;
 	}
-	
-	public void setEnumerated(boolean enumerated) {
+
+	public void setEnumerated(final boolean enumerated) {
 		this.enumerated = enumerated;
 	}
 
@@ -59,7 +59,7 @@ public class JsfFieldHolder {
 		return crudAdditions;
 	}
 
-	public void setCrudAdditions(Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
+	public void setCrudAdditions(final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
 		this.crudAdditions = crudAdditions;
 	}
 
@@ -67,7 +67,7 @@ public class JsfFieldHolder {
 		return displayMethod;
 	}
 
-	public void setDisplayMethod(String displayMethod) {
+	public void setDisplayMethod(final String displayMethod) {
 		this.displayMethod = displayMethod;
 	}
 

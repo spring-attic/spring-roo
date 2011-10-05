@@ -17,15 +17,15 @@ import org.w3c.dom.Element;
 
 /**
  * Provider to embed videos via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		if (url.contains("youtube.com")) {
 			// Expected format: http://www.youtube.com/watch?v=Gb1Z0lfl52I
 			Map<String, String> options = new HashMap<String, String>();
@@ -63,9 +63,9 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
-		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.containsKey("id")) { 
+
+	public boolean install(final String viewName, final Map<String, String> options) {
+		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.containsKey("id")) {
 			return false;
 		}
 		String provider = options.get("provider");
@@ -73,7 +73,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 			return false;
 		}
 		String id = options.get("id");
-		
+
 		if (VideoProvider.SCREENR.name().equals(provider)) {
 			id = getScreenrId("http://screenr.com/" + id);
 		}
@@ -86,8 +86,8 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		installJspx(getViewName(viewName, provider.toLowerCase()), null, video);
 		return true;
 	}
-	
-	private String getScreenrId(String url) {
+
+	private String getScreenrId(final String url) {
 		String xml = sendHttpGetRequest("http://screenr.com/api/oembed.xml?url=" + url);
 		if (xml != null) {
 			try {
@@ -103,7 +103,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		return null;
 	}
 
-	private String getViddlerId(String url) {
+	private String getViddlerId(final String url) {
 		String xml = sendHttpGetRequest("http://lab.viddler.com/services/oembed/?url=" + url + "&type=simple&format=xml");
 		if (xml != null) {
 			try {
@@ -117,14 +117,15 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return null;
 	}
-	
+
 	public enum VideoProvider implements EmbeddedCompletor {
 		YOUTUBE,
 		GOOGLE_VIDEO,
 		VIMEO,
 		VIDDLER,
 		SCREENR;
-		
+
+		@Override
 		public String toString() {
 			ToStringCreator tsc = new ToStringCreator(this);
 			tsc.append("provider", name());

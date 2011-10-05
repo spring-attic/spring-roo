@@ -5,23 +5,23 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Builder for {@link ImportMetadata}.
- * 
+ *
  * @author James Tyrrell
  * @since 1.1.1
  */
 public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuilder<ImportMetadata> {
-	
+
 	// Fields
 	private JavaPackage importPackage;
 	private JavaType importType;
 	private boolean isStatic = false;
 	private boolean isAsterisk = false;
 
-	public ImportMetadataBuilder(String declaredbyMetadataId) {
+	public ImportMetadataBuilder(final String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
-	
-	public ImportMetadataBuilder(ImportMetadata existing) {
+
+	public ImportMetadataBuilder(final ImportMetadata existing) {
 		super(existing);
 		this.importPackage = existing.getImportPackage();
 		this.importType = existing.getImportType();
@@ -29,7 +29,7 @@ public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuil
 		this.isAsterisk = existing.isAsterisk();
 	}
 
-	public ImportMetadataBuilder(String declaredbyMetadataId, int modifier, JavaPackage importPackage, JavaType importType, boolean isStatic, boolean isAsterisk) {
+	public ImportMetadataBuilder(final String declaredbyMetadataId, final int modifier, final JavaPackage importPackage, final JavaType importType, final boolean isStatic, final boolean isAsterisk) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
 		this.importPackage = importPackage;
@@ -46,7 +46,7 @@ public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuil
 		return importPackage;
 	}
 
-	public void setImportPackage(JavaPackage importPackage) {
+	public void setImportPackage(final JavaPackage importPackage) {
 		this.importPackage = importPackage;
 	}
 
@@ -54,7 +54,7 @@ public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuil
 		return importType;
 	}
 
-	public void setImportType(JavaType importType) {
+	public void setImportType(final JavaType importType) {
 		this.importType = importType;
 	}
 
@@ -62,7 +62,7 @@ public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuil
 		return isStatic;
 	}
 
-	public void setStatic(boolean aStatic) {
+	public void setStatic(final boolean aStatic) {
 		isStatic = aStatic;
 	}
 
@@ -70,7 +70,7 @@ public class ImportMetadataBuilder extends AbstractIdentifiableJavaStructureBuil
 		return isAsterisk;
 	}
 
-	public void setAsterisk(boolean asterisk) {
+	public void setAsterisk(final boolean asterisk) {
 		isAsterisk = asterisk;
 	}
 }

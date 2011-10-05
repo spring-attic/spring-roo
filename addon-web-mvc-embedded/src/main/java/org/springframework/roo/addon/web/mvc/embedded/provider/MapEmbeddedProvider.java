@@ -15,17 +15,17 @@ import org.w3c.dom.Element;
 
 /**
  * Provider to embed maps via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		 if (url.contains("maps.google")) {
-			// Expected format http://maps.google.com/maps?q=sydney,+Australia&.. the q= param needs to be present 
+			// Expected format http://maps.google.com/maps?q=sydney,+Australia&.. the q= param needs to be present
 			String qStart = url.substring(url.indexOf("q=") + 2);
 
 			Map<String, String> options = new HashMap<String, String>();
@@ -35,9 +35,9 @@ public class MapEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
-		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("GOOGLE_MAPS") || !options.containsKey("location")) { 
+
+	public boolean install(final String viewName, final Map<String, String> options) {
+		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("GOOGLE_MAPS") || !options.containsKey("location")) {
 			return false;
 		}
 		String location = options.get("location");

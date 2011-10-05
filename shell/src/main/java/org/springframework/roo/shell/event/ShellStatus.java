@@ -4,23 +4,23 @@ import org.springframework.roo.shell.ParseResult;
 
 /**
  * Represents the different states that a shell can legally be in.
- * 
+ *
  * <p>
  * There is no "shut down" state because the shell would have been terminated by
  * that stage and potentially garbage collected. There is no guarantee that a
  * shell implementation will necessarily publish every state.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
  */
 public class ShellStatus {
-	
+
 	// Fields
-	private Status status;
+	private final Status status;
 	private String message = "";
 	private ParseResult parseResult;
-	
+
 	public enum Status {
 		STARTING,
 		STARTED,
@@ -32,12 +32,12 @@ public class ShellStatus {
 		EXECUTION_FAILED,
 		SHUTTING_DOWN
 	}
-	
-	ShellStatus(Status status) {
+
+	ShellStatus(final Status status) {
 		this.status = status;
 	}
-	
-	ShellStatus(Status status, String msg, ParseResult parseResult) {
+
+	ShellStatus(final Status status, final String msg, final ParseResult parseResult) {
 		this.status = status;
 		this.message = msg;
 		this.parseResult = parseResult;
@@ -46,11 +46,11 @@ public class ShellStatus {
 	public String getMessage() {
 		return message;
 	}
-	
+
 	public Status getStatus() {
 		return status;
 	}
-	
+
 	public final ParseResult getParseResult() {
 		return parseResult;
 	}
@@ -67,7 +67,7 @@ public class ShellStatus {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

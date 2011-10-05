@@ -8,7 +8,7 @@ import org.springframework.roo.model.CustomData;
 
 /**
  * {@link CustomData} tag definitions.
- * 
+ *
  * @author Stefan Schmidt
  * @author James Tyrrell
  * @author Alan Stewart
@@ -35,7 +35,7 @@ public final class CustomDataKeys {
 	public static final FieldMetadataCustomDataKey MANY_TO_ONE_FIELD = new FieldMetadataCustomDataKey("MANY_TO_ONE_FIELD");
 	public static final FieldMetadataCustomDataKey ONE_TO_ONE_FIELD = new FieldMetadataCustomDataKey("ONE_TO_ONE_FIELD");
 	public static final FieldMetadataCustomDataKey LOB_FIELD = new FieldMetadataCustomDataKey("LOB_FIELD");
-	public static final FieldMetadataCustomDataKey COLUMN_FIELD = new FieldMetadataCustomDataKey("COLUMN_FIELD"); 
+	public static final FieldMetadataCustomDataKey COLUMN_FIELD = new FieldMetadataCustomDataKey("COLUMN_FIELD");
 
 	public static final MethodMetadataCustomDataKey IDENTIFIER_ACCESSOR_METHOD = new MethodMetadataCustomDataKey("IDENTIFIER_ACCESSOR_METHOD");
 	public static final MethodMetadataCustomDataKey IDENTIFIER_MUTATOR_METHOD = new MethodMetadataCustomDataKey("IDENTIFIER_MUTATOR_METHOD");
@@ -53,13 +53,13 @@ public final class CustomDataKeys {
 
 	// Dynamic finder method names; CustomData value expected to be a java.util.List<String> of finder names
 	public static final MethodMetadataCustomDataKey DYNAMIC_FINDER_NAMES = new MethodMetadataCustomDataKey("DYNAMIC_FINDER_NAMES");
-		
+
 	// Layer-related key
 	public static final MemberHoldingTypeDetailsCustomDataKey LAYER_TYPE = new MemberHoldingTypeDetailsCustomDataKey("LAYER_TYPE");
-	
+
 	// Display name key
 	public static final MethodMetadataCustomDataKey DISPLAY_NAME_METHOD = new MethodMetadataCustomDataKey("DISPLAY_NAME_METHOD");
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

@@ -13,33 +13,34 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides a convenient {@link PropertyEditor} for specifying {@link MonitoringRequest}s.
- * 
+ *
  * <p>
  * The syntax expected by the editor is as follows:
- * 
+ *
  * <code>
  * fullyQualifiedName + "," + fileOperationCodes + {"," + "**"}
  * <code>
- * 
+ *
  * <p>
  * Where:
  * <ul>
  * <li>fullyQualifiedName is a {@link File}-resolvable name (required)</li>
- * <li>fileOperationCodes is one or more of characters "C" (for create), "R" (for rename), 
+ * <li>fileOperationCodes is one or more of characters "C" (for create), "R" (for rename),
  * "U" (for update) and "D" (for delete), as per {@link FileOperation} (required)</li>
  * <li>literal "**" indicates to watch the subtree, which is only valid if the
  * fullyQualifiedName related to a {@link File} is resolvable as a directory (optional, but
  * must NOT be specified unless a directory was indicated)</li>
  * </ul>
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class MonitoringRequestEditor extends PropertyEditorSupport {
-	
+
 	/**
 	 * @return this object in accordance with the string specification given in the JavaDocs (or null if the object null)
 	 */
+	@Override
 	public String getAsText() {
 		MonitoringRequest req = (MonitoringRequest) getValue();
 		if (req == null) {
@@ -74,11 +75,11 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 	}
 
 	@Override
-	public void setAsText(String text) throws IllegalArgumentException {
+	public void setAsText(final String text) throws IllegalArgumentException {
 		if (text == null || "".equals(text)) {
 			setValue(null);
 		}
-		
+
 		String[] segments = StringUtils.commaDelimitedListToStringArray(text);
 		if (segments.length < 2) {
 			throw new IllegalArgumentException("Text '" + text + "' is invalid for a MonitoringRequest");
@@ -100,7 +101,7 @@ public class MonitoringRequestEditor extends PropertyEditorSupport {
 			ops.add(FileOperation.DELETED);
 		}
 		Assert.notEmpty(ops, "One or more valid operation codes ('CRUD') required for file '" + file + "'");
-		
+
 		if (file.isFile()) {
 			Assert.isTrue(segments.length == 2, "Can only have two values for file '" + file + "'");
 			setValue(new FileMonitoringRequest(file, ops));

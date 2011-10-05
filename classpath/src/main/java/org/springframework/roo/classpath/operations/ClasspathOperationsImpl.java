@@ -32,7 +32,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * OSGi implementation of {@link ClasspathOperations}.
- * 
+ *
  * @author Andrew Swan
  * @since 1.2.0
  */
@@ -46,11 +46,11 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		staticFieldConverter.add(InheritanceType.class);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		staticFieldConverter.remove(InheritanceType.class);
 	}
 
@@ -58,9 +58,9 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		Assert.notNull(type, "Specify the type to focus on");
 		final String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(type);
 		final PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
-		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");	
+		Assert.notNull(ptm, "Class " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " does not exist");
 	}
-	
+
 	public void createClass(final JavaType name, final boolean rooAnnotations, final Path path, final JavaType superclass, final boolean createAbstract, final boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
@@ -81,7 +81,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 				typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(superclassClassOrInterfaceTypeDetails));
 			}
 		}
-		
+
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
@@ -126,7 +126,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		}
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
-	
+
 		typeManagementService.addEnumConstant(declaredByMetadataId, fieldName);
 	}
 }

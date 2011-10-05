@@ -48,35 +48,35 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Implementation of {@link EntityMetadataProvider}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
 public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider implements EntityMetadataProvider {
-	
+
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_ENTITY);
 		configurableMetadataProvider.addMetadataTrigger(ROO_ENTITY);
 		pluralMetadataProvider.addMetadataTrigger(ROO_ENTITY);
 		registerMatchers();
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_ENTITY);
 		configurableMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
 		pluralMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void registerMatchers() {
 		customDataKeyDecorator.registerMatchers(
@@ -93,6 +93,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		);
 	}
 
+	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalType, final String itdFilename) {
 		// Get the CRUD-related annotation values
 		final JpaCrudAnnotationValues crudAnnotationValues = new JpaCrudAnnotationValues(governorPhysicalType);
@@ -148,13 +149,15 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		return "Entity";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = EntityMetadata.getJavaType(metadataIdentificationString);
 		Path path = EntityMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return EntityMetadata.createIdentifier(javaType, path);
 	}
 

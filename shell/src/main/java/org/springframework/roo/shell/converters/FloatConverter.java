@@ -13,15 +13,15 @@ import org.springframework.roo.shell.MethodTarget;
  */
 public class FloatConverter implements Converter<Float> {
 
-	public Float convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public Float convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		return new Float(value);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		return false;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return Float.class.isAssignableFrom(requiredType) || float.class.isAssignableFrom(requiredType);
 	}
 }

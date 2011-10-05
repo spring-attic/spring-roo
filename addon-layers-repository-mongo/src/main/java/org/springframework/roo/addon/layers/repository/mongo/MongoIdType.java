@@ -4,14 +4,14 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Custom id type to limit options in {@link MongoCommands}
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 public class MongoIdType {
-	private JavaType javaType;
+	private final JavaType javaType;
 
-	public MongoIdType(String type) {
+	public MongoIdType(final String type) {
 		this.javaType = new JavaType(type);
 	}
 

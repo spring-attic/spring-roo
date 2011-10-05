@@ -28,14 +28,14 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Shell commands for creating entities, integration tests, and data-on-demand (DoD) classes.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.2
  */
 @Component
 @Service
 public class EntityCommands implements CommandMarker {
-	
+
 	// Constants
 	private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
 	private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_TO_STRING);
@@ -45,7 +45,7 @@ public class EntityCommands implements CommandMarker {
 	// Fields
 	@Reference private EntityOperations entityOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
-	
+
 	@CliAvailabilityIndicator( { "entity", "embeddable" })
 	public boolean isPersistentClassAvailable() {
 		return entityOperations.isPersistentClassAvailable();
@@ -53,23 +53,23 @@ public class EntityCommands implements CommandMarker {
 
 	@CliCommand(value = "entity", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
 	public void newPersistenceClassJpa(
-		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType name, 
-		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") final JavaType superclass, 
-		@CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") final boolean createAbstract, 
-		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") final boolean testAutomatically, 
-		@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") final String table, 
-		@CliOption(key = "schema", mandatory = false, help = "The JPA table schema name to use for this entity") final String schema, 
-		@CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") final String catalog, 
-		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") final String identifierField, 
-		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") final String identifierColumn, 
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") final JavaType name,
+		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") final JavaType superclass,
+		@CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") final boolean createAbstract,
+		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") final boolean testAutomatically,
+		@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") final String table,
+		@CliOption(key = "schema", mandatory = false, help = "The JPA table schema name to use for this entity") final String schema,
+		@CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") final String catalog,
+		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") final String identifierField,
+		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") final String identifierColumn,
 		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") final JavaType identifierType,
-		@CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") final String versionField, 
-		@CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") final String versionColumn, 
+		@CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") final String versionField,
+		@CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") final String versionColumn,
 		@CliOption(key = "versionType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Integer", help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
-		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") final InheritanceType inheritanceType, 
-		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass, 
-		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable, 
-		@CliOption(key = "displayName", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should provide a pretty-print method") final boolean displayName, 
+		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") final InheritanceType inheritanceType,
+		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass,
+		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
+		@CliOption(key = "displayName", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should provide a pretty-print method") final boolean displayName,
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
 		@CliOption(key = "transactionManager", mandatory = false, help = "The transaction manager name") final String transactionManager,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords,
@@ -111,7 +111,7 @@ public class EntityCommands implements CommandMarker {
 
 		// Produce the entity itself
 		entityOperations.newEntity(name, createAbstract, superclass, annotationBuilder);
-		
+
 		// Create entity identifier class if required
 		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(GAE_DATASTORE_KEY))) {
 			entityOperations.newIdentifier(identifierType, identifierField, identifierColumn);
@@ -125,7 +125,7 @@ public class EntityCommands implements CommandMarker {
 	/**
 	 * Returns a builder for the entity-related annotation to be added to a
 	 * newly created JPA entity
-	 * 
+	 *
 	 * @param table
 	 * @param schema
 	 * @param catalog
@@ -145,7 +145,7 @@ public class EntityCommands implements CommandMarker {
 	 */
 	private AnnotationMetadataBuilder getEntityAnnotationBuilder(final String table, final String schema, final String catalog, final String identifierField, final String identifierColumn, final JavaType identifierType, final String versionField, final String versionColumn, final JavaType versionType, final InheritanceType inheritanceType, final boolean mappedSuperclass, final String persistenceUnit, final String transactionManager, final String entityName, final boolean activeRecord) {
 		final AnnotationMetadataBuilder entityAnnotationBuilder = new AnnotationMetadataBuilder(getEntityAnnotationType(activeRecord));
-		
+
 		// Attributes that apply to all JPA entities (active record or not)
 		if (catalog != null) {
 			entityAnnotationBuilder.addStringAttribute("catalog", catalog);
@@ -161,7 +161,7 @@ public class EntityCommands implements CommandMarker {
 		}
 		if (!LONG_OBJECT.equals(identifierType)) {
 			entityAnnotationBuilder.addClassAttribute("identifierType", identifierType);
-		} 
+		}
 		if (inheritanceType != null) {
 			entityAnnotationBuilder.addStringAttribute("inheritanceType", inheritanceType.name());
 		}
@@ -183,7 +183,7 @@ public class EntityCommands implements CommandMarker {
 		if (!JavaType.INT_OBJECT.equals(versionType)) {
 			entityAnnotationBuilder.addClassAttribute("versionType", versionType);
 		}
-		
+
 		// Attributes that only apply to entities with CRUD active record methods
 		if (activeRecord) {
 			if (persistenceUnit != null) {
@@ -193,13 +193,13 @@ public class EntityCommands implements CommandMarker {
 				entityAnnotationBuilder.addStringAttribute("transactionManager", transactionManager);
 			}
 		}
-		
+
 		return entityAnnotationBuilder;
 	}
 
 	/**
 	 * Returns the type of annotation to put on the entity
-	 * 
+	 *
 	 * @param activeRecord whether the entity is to have CRUD active record
 	 * methods generated
 	 * @return a non-<code>null</code> type
@@ -214,9 +214,9 @@ public class EntityCommands implements CommandMarker {
 	@CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
 	public void createEmbeddableClass(
 		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") final JavaType name,
-		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable, 
+		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
-		
+
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}

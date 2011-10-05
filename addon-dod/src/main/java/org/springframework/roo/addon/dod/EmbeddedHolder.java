@@ -8,17 +8,17 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Holder for embedded attributes
- * 
+ *
  * @author Greg Turnquist
  * @since 1.2.0
  */
 public class EmbeddedHolder {
-	
-	// Fields
-	private FieldMetadata embeddedField;
-	private List<FieldMetadata> fields;
 
-	public EmbeddedHolder(FieldMetadata embeddedField, List<FieldMetadata> fields) {
+	// Fields
+	private final FieldMetadata embeddedField;
+	private final List<FieldMetadata> fields;
+
+	public EmbeddedHolder(final FieldMetadata embeddedField, final List<FieldMetadata> fields) {
 		Assert.notNull(embeddedField, "Identifier type required");
 		Assert.notNull(fields, "Fields for " + embeddedField.getFieldType().getFullyQualifiedTypeName() + " required");
 		this.embeddedField = embeddedField;
@@ -31,7 +31,7 @@ public class EmbeddedHolder {
 	public JavaSymbolName getEmbeddedMutatorMethodName() {
 		return new JavaSymbolName(embeddedField.getFieldName().getSymbolNameTurnedIntoMutatorMethodName());
 	}
-	
+
 	public List<FieldMetadata> getFields() {
 		return fields;
 	}

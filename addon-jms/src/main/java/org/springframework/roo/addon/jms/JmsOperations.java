@@ -5,7 +5,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Interface to {@link JmsOperationsImpl}.
- * 
+ *
  * @author Ben Alex
  */
 public interface JmsOperations {

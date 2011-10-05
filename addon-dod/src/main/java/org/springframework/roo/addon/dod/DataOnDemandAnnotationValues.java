@@ -10,17 +10,17 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Represents a parsed {@link RooDataOnDemand} annotation.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DataOnDemandAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate private JavaType entity;
 	@AutoPopulate private int quantity = 10;
 
-	public DataOnDemandAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public DataOnDemandAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, ROO_DATA_ON_DEMAND);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

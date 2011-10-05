@@ -25,16 +25,16 @@ import org.springframework.roo.support.util.ReflectionUtils;
 public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy {
 
 	// Fields
-	private Class<?> mutex = ProcessManagerHostedExecutionStrategy.class;
+	private final Class<?> mutex = ProcessManagerHostedExecutionStrategy.class;
 	private ProcessManager processManager;
 
-	protected void bindProcessManager(ProcessManager processManager) {
+	protected void bindProcessManager(final ProcessManager processManager) {
 		synchronized (mutex) {
 			this.processManager = processManager;
 		}
 	}
-	
-	protected void unbindProcessManager(ProcessManager processManager) {
+
+	protected void unbindProcessManager(final ProcessManager processManager) {
 		synchronized (mutex) {
 			this.processManager = null;
 		}

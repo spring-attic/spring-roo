@@ -29,7 +29,7 @@ import org.springframework.roo.project.Path;
 
 /**
  * Provides the metadata for an ITD that implements a Spring Data Mongo domain entity
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -42,10 +42,10 @@ public class MongoEntityMetadataProvider extends AbstractItdMetadataProvider {
 	private static final AnnotatedTypeMatcher PERSISTENT_TYPE_MATCHER = new AnnotatedTypeMatcher(PERSISTENT_TYPE, RooJavaType.ROO_MONGO_ENTITY);
 	private static final MethodMatcher ID_ACCESSOR_MATCHER = new MethodMatcher(Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_ACCESSOR_METHOD, true);
 	private static final MethodMatcher ID_MUTATOR_MATCHER = new MethodMatcher(Arrays.asList(ID_FIELD_MATCHER), IDENTIFIER_MUTATOR_METHOD, false);
-	
+
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	
+
 	@SuppressWarnings("unchecked")
 	protected void activate(final ComponentContext context) {
 		super.setDependsOnGovernorBeingAClass(false);
@@ -67,13 +67,13 @@ public class MongoEntityMetadataProvider extends AbstractItdMetadataProvider {
 		if (!annotationValues.isAnnotationFound() || idType == null) {
 			return null;
 		}
-		
+
 		// Get the governor's members
 		final MemberDetails governorMemberDetails = getMemberDetails(governorPhysicalTypeMetadata);
-		
+
 		return new MongoEntityMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, idType, governorMemberDetails);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Mongo_Entity";
 	}

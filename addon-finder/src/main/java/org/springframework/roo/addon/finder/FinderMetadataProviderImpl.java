@@ -25,7 +25,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 /**
  * Implementation of {@link FinderMetadataProvider}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Ben Alex
  * @author Alan Stewart
@@ -38,19 +38,20 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 	// Fields
 	@Reference private DynamicFinderServices dynamicFinderServices;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_ENTITY);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_ENTITY);
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 
 		// Work out the MIDs of the other metadata we depend on
@@ -89,7 +90,7 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 				}
 			}
 		}
-		
+
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 
@@ -104,7 +105,8 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, isDataNucleusEnabled, entityMetadata.getEntityManagerMethod(), Collections.unmodifiableSortedMap(queryHolders));
 	}
 
-	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+	@Override
+	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
 		return getLocalMid(itdTypeDetails);
 	}
 
@@ -112,13 +114,15 @@ public class FinderMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 		return "Finder";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = FinderMetadata.getJavaType(metadataIdentificationString);
 		Path path = FinderMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return FinderMetadata.createIdentifier(javaType, path);
 	}
 

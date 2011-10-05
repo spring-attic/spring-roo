@@ -25,7 +25,7 @@ public class RepositoryMongoLayerMethodTest {
 	// Fixture
 	@Mock private JavaType mockTargetEntity;
 	@Mock private JavaType mockIdType;
-	
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -41,7 +41,7 @@ public class RepositoryMongoLayerMethodTest {
 		}
 		assertEquals(RepositoryMongoLayerMethod.values().length, names.size());
 	}
-	
+
 	@Test
 	public void testParameterTypesAreNotNull() {
 		for (final RepositoryMongoLayerMethod method : RepositoryMongoLayerMethod.values()) {

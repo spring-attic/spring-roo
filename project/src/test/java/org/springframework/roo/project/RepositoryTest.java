@@ -17,7 +17,7 @@ public class RepositoryTest extends XmlTestCase {
 	private static final String NAME = "the_name";
 	private static final String URL = "the-url";
 	private static final String PATH = "pluginRepo";
-	
+
 	private static final String EXPECTED_XML =
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 		"<pluginRepo>\n" +
@@ -28,15 +28,15 @@ public class RepositoryTest extends XmlTestCase {
 		"        <enabled>true</enabled>\n" +
 		"    </snapshots>\n" +
 		"</pluginRepo>";
-	
+
 	@Test
 	public void testGetElement() {
 		// Set up
 		final Repository repository = new Repository(ID, NAME, URL, ENABLE_SNAPSHOTS);
-		
+
 		// Invoke
 		final Element element = repository.getElement(DOCUMENT_BUILDER.newDocument(), PATH);
-		
+
 		// Check
 		assertXmlEquals(EXPECTED_XML, element);
 	}

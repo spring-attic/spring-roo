@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Trigger annotation of Op4J add-on
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */

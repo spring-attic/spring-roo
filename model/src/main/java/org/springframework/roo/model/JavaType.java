@@ -18,24 +18,24 @@ import org.springframework.roo.support.util.StringUtils;
 /**
  * The declaration of a Java type (i.e. contains no details of its members).
  * Instances are immutable.
- * 
+ *
  * <p>
  * Note that a Java type can be contained within a package, but a package is not a type.
- * 
+ *
  * <p>
  * This class is used whenever a formal reference to a Java type is required.
  * It provides convenient ways to determine the type's simple name and package name.
  * A related {@link org.springframework.core.convert.converter.Converter} is also offered.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class JavaType implements Comparable<JavaType> {
-	
+
 	// Constants
 	public static final JavaType CLASS = new JavaType("java.lang.Class");
-	public static final JavaType OBJECT = new JavaType("java.lang.Object"); 
-	public static final JavaType STRING = new JavaType("java.lang.String"); 
+	public static final JavaType OBJECT = new JavaType("java.lang.Object");
+	public static final JavaType STRING = new JavaType("java.lang.String");
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean");
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character");
 	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte");
@@ -55,13 +55,13 @@ public class JavaType implements Comparable<JavaType> {
 	public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
-	
+
 	/**
 	 * @deprecated use {@link #STRING} instead
 	 */
 	@Deprecated
 	public static final JavaType STRING_OBJECT = STRING;
-	
+
 	// Used for wildcard type parameters; it must be one or the other
 	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
@@ -69,7 +69,7 @@ public class JavaType implements Comparable<JavaType> {
 
 	// The fully-qualified names of common collection types
 	private static final Set<String> COMMON_COLLECTION_TYPES = new HashSet<String>();
-	
+
 	static {
 		COMMON_COLLECTION_TYPES.add(ArrayList.class.getName());
 		COMMON_COLLECTION_TYPES.add(Collection.class.getName());
@@ -81,25 +81,25 @@ public class JavaType implements Comparable<JavaType> {
 		COMMON_COLLECTION_TYPES.add(TreeMap.class.getName());
 		COMMON_COLLECTION_TYPES.add(Vector.class.getName());
 	}
-	
+
 	/**
 	 * Returns a {@link JavaType} for a list of the given element type
-	 * 
+	 *
 	 * @param elementType the type of element in the list (required)
 	 * @return a non-<code>null</code> type
 	 */
 	public static JavaType listOf(final JavaType elementType) {
 		return new JavaType(List.class.getName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
 	}
-	
+
 	/**
 	 * Factory method for a {@link JavaType} with full details. Recall that
 	 * {@link JavaType} is immutable and therefore this is the only way of
 	 * setting these non-default values.
-	 * 
+	 *
 	 * This is a factory method rather than a constructor so as not to cause
 	 * ambiguity problems for existing callers of {@link #JavaType(String, int, DataType, JavaSymbolName, List)}
-	 * 
+	 *
 	 * @param fullyQualifiedTypeName the name (as per the rules above)
 	 * @param arrayDimensions the number of array dimensions (0 = not an array, 1 = one-dimensional array, etc.)
 	 * @param dataType the {@link DataType} (required)
@@ -132,7 +132,7 @@ public class JavaType implements Comparable<JavaType> {
 	public static JavaType getInstance(final String fullyQualifiedTypeName, final JavaType enclosingType, final int arrayDimensions, final DataType dataType, final JavaSymbolName argName, final JavaType... parameters) {
 		return new JavaType(fullyQualifiedTypeName, enclosingType, arrayDimensions, dataType, argName, Arrays.asList(parameters));
 	}
-	
+
 	// Fields
 	private final boolean defaultPackage;
 	private final int arrayDimensions;
@@ -153,7 +153,7 @@ public class JavaType implements Comparable<JavaType> {
 	 * </ul>
 	 * <p>
 	 * A fully qualified type name may include or exclude a package designator.
-	 * 
+	 *
 	 * @param fullyQualifiedTypeName the name (as per the above rules; mandatory)
 	 */
 	public JavaType(final String fullyQualifiedTypeName) {
@@ -188,11 +188,11 @@ public class JavaType implements Comparable<JavaType> {
 	public JavaType(final Class<?> type) {
 		this(type.getName());
 	}
-	
+
 	/**
 	 * Construct a {@link JavaType} with full details. Recall that {@link JavaType} is immutable and therefore this is the only way of
 	 * setting these non-default values.
-	 * 
+	 *
 	 * @param fullyQualifiedTypeName the name (as per the rules above)
 	 * @param arrayDimensions the number of array dimensions (0 = not an array, 1 = one-dimensional array, etc.)
 	 * @param dataType the {@link DataType} (required)
@@ -258,7 +258,7 @@ public class JavaType implements Comparable<JavaType> {
 	/**
 	 * Obtains the name of this type, including type parameters. It will be formatted in a manner compatible with non-static use.
 	 * No type name import resolution will take place. This is a side-effect free method.
-	 * 
+	 *
 	 * @return the type name, including parameters, as legal Java code (never null or empty)
 	 */
 	public String getNameIncludingTypeParameters() {
@@ -269,16 +269,16 @@ public class JavaType implements Comparable<JavaType> {
 	 * Obtains the name of this type, including type parameters. It will be formatted in a manner compatible with either static
 	 * or non-static usage, as per the passed argument. Type names will attempt to be resolved (and automatically registered)
 	 * using the passed resolver. This method will have side-effects on the passed resolver.
-	 * 
+	 *
 	 * @param staticForm true if the output should be compatible with static use
 	 * @param resolver the resolver to use (may be null in which case no import resolution will occur)
 	 * @return the type name, including parameters, as legal Java code (never null or empty)
 	 */
-	public String getNameIncludingTypeParameters(boolean staticForm, ImportRegistrationResolver resolver) {
+	public String getNameIncludingTypeParameters(final boolean staticForm, final ImportRegistrationResolver resolver) {
 		return getNameIncludingTypeParameters(staticForm, resolver, new HashMap<String, String>());
 	}
 
-	private String getNameIncludingTypeParameters(boolean staticForm, ImportRegistrationResolver resolver, Map<String, String> types) {
+	private String getNameIncludingTypeParameters(final boolean staticForm, final ImportRegistrationResolver resolver, final Map<String, String> types) {
 		if (DataType.PRIMITIVE == dataType) {
 			Assert.isTrue(parameters.isEmpty(), "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
@@ -381,7 +381,7 @@ public class JavaType implements Comparable<JavaType> {
 			}
 			return enclosingType.getPackage();
 		}
-		
+
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
 		return offset == -1 ? new JavaPackage("") : new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
 	}
@@ -417,6 +417,7 @@ public class JavaType implements Comparable<JavaType> {
 		return arrayDimensions;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -426,23 +427,25 @@ public class JavaType implements Comparable<JavaType> {
 		return result;
 	}
 
+	@Override
 	public boolean equals(final Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
 		return obj != null
-			&& obj instanceof JavaType 
-			&& this.fullyQualifiedTypeName.equals(((JavaType) obj).getFullyQualifiedTypeName()) 
-			&& this.dataType == ((JavaType) obj).getDataType() 
-			&& this.arrayDimensions == ((JavaType) obj).getArray() 
+			&& obj instanceof JavaType
+			&& this.fullyQualifiedTypeName.equals(((JavaType) obj).getFullyQualifiedTypeName())
+			&& this.dataType == ((JavaType) obj).getDataType()
+			&& this.arrayDimensions == ((JavaType) obj).getArray()
 			&& ((JavaType) obj).getParameters().containsAll(this.parameters);
 	}
 
-	public int compareTo(JavaType o) {
+	public int compareTo(final JavaType o) {
 		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly
 		if (o == null) return -1;
 		if (equals(o)) return 0;
 		return toString().compareTo(o.toString());
 	}
 
+	@Override
 	public String toString() {
 		return getNameIncludingTypeParameters();
 	}

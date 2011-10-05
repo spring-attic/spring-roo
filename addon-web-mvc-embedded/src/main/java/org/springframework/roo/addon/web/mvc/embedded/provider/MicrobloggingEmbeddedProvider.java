@@ -15,15 +15,15 @@ import org.w3c.dom.Element;
 
 /**
  * Provider to embed micro blog messages via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class MicrobloggingEmbeddedProvider extends AbstractEmbeddedProvider {
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		// Expected format http://twitter.com/#search?q=@SpringRoo
 		if (url.contains("twitter.com")) {
 			Map<String, String> options = new HashMap<String, String>();
@@ -33,12 +33,12 @@ public class MicrobloggingEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
-		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("TWITTER") || !options.containsKey("searchTerm")) { 
+
+	public boolean install(final String viewName, final Map<String, String> options) {
+		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.get("provider").equalsIgnoreCase("TWITTER") || !options.containsKey("searchTerm")) {
 			return false;
 		}
-		String searchTerm = options.get("searchTerm");	
+		String searchTerm = options.get("searchTerm");
 		try {
 			searchTerm = URLDecoder.decode(searchTerm, "UTF-8");
 		} catch (UnsupportedEncodingException ignore) {}

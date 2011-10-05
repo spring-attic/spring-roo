@@ -5,7 +5,7 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Provides email configuration operations.
- * 
+ *
  * @author Ben Alex
  */
 public interface MailOperations {
@@ -13,14 +13,14 @@ public interface MailOperations {
 	/**
 	 * Indicates whether the command for adding a JavaMailSender to the user's
 	 * project is available.
-	 * 
+	 *
 	 * @return see above
 	 */
 	boolean isInstallEmailAvailable();
 
 	/**
 	 * Indicates whether the commands relating to mail templates are available
-	 * 
+	 *
 	 * @return see above
 	 */
 	boolean isManageEmailAvailable();

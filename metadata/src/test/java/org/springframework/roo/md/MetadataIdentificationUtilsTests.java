@@ -26,7 +26,7 @@ public class MetadataIdentificationUtilsTests {
 		Assert.assertNull(MetadataIdentificationUtils.getMetadataInstance("MID:com.foo.Bar#"));
 		Assert.assertNull(MetadataIdentificationUtils.getMetadataInstance("MID:com.foo.Bar 239"));
 	}
-	
+
 	@Test
 	public void testMetadataIdentifierCreation() {
 		Assert.assertEquals("MID:com.foo.Bar", MetadataIdentificationUtils.create("com.foo.Bar"));

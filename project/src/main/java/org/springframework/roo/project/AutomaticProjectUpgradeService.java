@@ -14,25 +14,25 @@ import org.springframework.roo.metadata.MetadataService;
  * Automatically upgrades a Spring Roo annotation JAR to the current version of Roo.
  * If the annotation JAR is equal to or newer than the version of Roo running, the
  * upgrade service makes no changes.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 public class AutomaticProjectUpgradeService implements MetadataNotificationListener {
-	
+
 	// Constants
 	private static final String MY_BUNDLE_SYMBOLIC_NAME = AutomaticProjectUpgradeService.class.getPackage().getName();
-	
+
 	// Fields
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	private VersionInfo bundleVersionInfo;
-	
+
 	private static final String PROJECT_METADATA_IDENTIFIER = ProjectMetadata.getProjectIdentifier();
-	
-	protected void activate(ComponentContext componentContext) {
+
+	protected void activate(final ComponentContext componentContext) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		for (Bundle b : componentContext.getBundleContext().getBundles()) {
 			if (!MY_BUNDLE_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
@@ -47,21 +47,21 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 		}
 	}
 
-	protected void deactivate(ComponentContext componentContext) {
+	protected void deactivate(final ComponentContext componentContext) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
-	
+
 	/**
 	 * Extracts the version information from the string. Never throws an exception.
-	 * 
+	 *
 	 * @param version to extract from (can be null or empty)
 	 * @return the version information or null if it was not in a normal form
 	 */
-	private VersionInfo extractVersionInfoFromString(String version) {
+	private VersionInfo extractVersionInfoFromString(final String version) {
 		if (version == null || version.length() == 0) {
 			return null;
 		}
-		
+
 		String[] ver = version.split("\\.");
 		try {
 			if (ver.length == 4) {
@@ -78,14 +78,14 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 		return null;
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
+	public void notify(final String upstreamDependency, final String downstreamDependency) {
 		if (bundleVersionInfo != null && upstreamDependency.equals(PROJECT_METADATA_IDENTIFIER)) {
 			// Project Metadata changed.
 			ProjectMetadata md = (ProjectMetadata) metadataService.get(PROJECT_METADATA_IDENTIFIER);
 			if (md == null) {
 				return;
 			}
-			
+
 			Set<Property> results = md.getPropertiesExcludingValue(new Property("roo.version"));
 			for (Property existingProperty : results) {
 				VersionInfo rooVersion = extractVersionInfoFromString(existingProperty.getValue());
@@ -97,19 +97,19 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 					}
 				}
 			}
-			
+
 		}
 	}
-	
+
 	private static class VersionInfo implements Comparable<VersionInfo> {
-		
+
 		// Fields
 		private Integer major = 0;
 		private Integer minor = 0;
 		private Integer patch = 0;
 		private String qualifier = "";
-		
-		public int compareTo(VersionInfo v) {
+
+		public int compareTo(final VersionInfo v) {
 			if (v == null) {
 				throw new NullPointerException();
 			}
@@ -132,6 +132,7 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 			return 0;
 		}
 
+		@Override
 		public String toString() {
 			return major + "." + minor+ "." + patch + "." + qualifier;
 		}

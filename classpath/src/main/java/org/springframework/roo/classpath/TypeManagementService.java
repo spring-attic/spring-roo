@@ -6,7 +6,7 @@ import org.springframework.roo.model.JavaSymbolName;
 
 /**
  * Creates and maintains types.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1.2
  */
@@ -25,7 +25,7 @@ public interface TypeManagementService {
 
 	/**
 	 * Adds a new enum constant to an existing class.
-	 * 
+	 *
 	 * @param physicalTypeIdentifier to add (required)
 	 * @param constantName the name of the constant (required)
 	 */
@@ -33,10 +33,10 @@ public interface TypeManagementService {
 
 	/**
 	 * Adds a new field to an existing class.
-	 * 
+	 *
 	 * <p>
 	 * An exception is thrown if the class does not exist, cannot be modified or a field with the requested name is already declared.
-	 *  
+	 *
 	 * @param fieldMetadata the field to add (required)
 	 */
 	void addField(FieldMetadata fieldMetadata);

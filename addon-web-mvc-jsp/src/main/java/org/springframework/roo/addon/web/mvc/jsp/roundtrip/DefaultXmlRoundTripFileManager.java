@@ -31,8 +31,8 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 
 	// Fields
 	@Reference private FileManager fileManager;
-	private Map<String, String> fileContentsMap = new HashMap<String, String>();
-	
+	private final Map<String, String> fileContentsMap = new HashMap<String, String>();
+
 	private static MessageDigest sha = null;
 	static {
 		try {
@@ -40,7 +40,7 @@ public class DefaultXmlRoundTripFileManager implements XmlRoundTripFileManager {
 		} catch (NoSuchAlgorithmException ignored) {}
 	}
 
-	public void writeToDiskIfNecessary(String filename, Document proposed) {
+	public void writeToDiskIfNecessary(final String filename, final Document proposed) {
 		Assert.notNull(filename, "The file name is required");
 		Assert.notNull(proposed, "The proposed document is required");
 		if (fileManager.exists(filename)) {

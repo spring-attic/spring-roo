@@ -10,7 +10,7 @@ import org.springframework.roo.shell.MethodTarget;
 
 /**
  * Provides conversion to and from {@link JavaSymbolName}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -18,7 +18,7 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class JavaSymbolNameConverter implements Converter<JavaSymbolName> {
 
-	public JavaSymbolName convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public JavaSymbolName convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
@@ -26,11 +26,11 @@ public class JavaSymbolNameConverter implements Converter<JavaSymbolName> {
 		return new JavaSymbolName(value);
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return JavaSymbolName.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		return false;
 	}
 }

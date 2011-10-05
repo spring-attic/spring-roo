@@ -28,17 +28,17 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Metadata for {@link RooEditor}.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
 public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
+
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = EditorMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	public EditorMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType javaType, JavaType idType, MethodMetadata identifierAccessorMethod, MethodMetadata findMethod) {
+	public EditorMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaType javaType, final JavaType idType, final MethodMetadata identifierAccessorMethod, final MethodMetadata findMethod) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(javaType, "Java type required");
@@ -85,7 +85,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return fieldBuilder.build();
 	}
 
-	private MethodMetadata getGetAsTextMethod(JavaType javaType, MethodMetadata identifierAccessorMethod) {
+	private MethodMetadata getGetAsTextMethod(final JavaType javaType, final MethodMetadata identifierAccessorMethod) {
 		JavaType returnType = JavaType.STRING;
 		JavaSymbolName methodName = new JavaSymbolName("getAsText");
 		final JavaType[] parameterTypes = {};
@@ -96,7 +96,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + destination + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
-		
+
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -112,10 +112,10 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getSetAsTextMethod(JavaType javaType, JavaType idType, MethodMetadata findMethod) {
+	private MethodMetadata getSetAsTextMethod(final JavaType javaType, final JavaType idType, final MethodMetadata findMethod) {
 		final JavaType parameterType = JavaType.STRING;
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("text"));
-	
+
 		JavaSymbolName methodName = new JavaSymbolName("setAsText");
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 
@@ -150,6 +150,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return methodBuilder.build();
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -165,19 +166,19 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return PROVIDES_TYPE;
 	}
 
-	public static String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static Path getPath(String metadataIdentificationString) {
+	public static Path getPath(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static boolean isValid(String metadataIdentificationString) {
+	public static boolean isValid(final String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }

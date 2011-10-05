@@ -15,11 +15,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.3
  */
 public class MidTypeMatcher extends TypeMatcher{
-	
+
 	// Fields
 	private final CustomDataKey<MemberHoldingTypeDetails> customDataKey;
 	private final String declaredBy;
-	
+
 	/**
 	 * Constructor
 	 *

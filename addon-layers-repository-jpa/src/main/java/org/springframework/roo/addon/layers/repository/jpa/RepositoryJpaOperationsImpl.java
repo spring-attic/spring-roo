@@ -34,14 +34,14 @@ import org.w3c.dom.Element;
 
 /**
  * The {@link RepositoryJpaOperations} implementation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
 @Component
 @Service
 public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private ProjectOperations projectOperations;
@@ -52,18 +52,18 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 
-	public void setupRepository(JavaType interfaceType, JavaType classType, JavaType domainType) {
+	public void setupRepository(final JavaType interfaceType, final JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
-		
+
 		String interfaceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(interfaceType, Path.SRC_MAIN_JAVA);
 		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
-		
+
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
-		
+
 		// First build interface type
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_JPA);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
@@ -71,13 +71,13 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		ClassOrInterfaceTypeDetailsBuilder interfaceTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(interfaceMdId, Modifier.PUBLIC, interfaceType, PhysicalTypeCategory.INTERFACE);
 		interfaceTypeBuilder.addAnnotation(interfaceAnnotationMetadata.build());
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
-		
+
 		// Second build the implementing class
 		// String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
 		// ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
 		// classTypeBuilder.addImplementsType(interfaceType);
 		// typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
-		
+
 		// Third, take care of project configs
 		configureProject();
 	}
@@ -90,11 +90,11 @@ public class RepositoryJpaOperationsImpl implements RepositoryJpaOperations {
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		
+
 		projectOperations.addDependencies(dependencies);
-		
+
 		String appCtxId = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jpa.xml");
-		
+
 		if (fileManager.exists(appCtxId)) {
 			return;
 		} else {

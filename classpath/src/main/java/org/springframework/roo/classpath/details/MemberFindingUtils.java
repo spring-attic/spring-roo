@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Utility methods for finding members in {@link MemberHoldingTypeDetails} instances.
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Andrew Swan
@@ -25,7 +25,7 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Locates the specified field of the given {@link MemberHoldingTypeDetails}.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
 	 * @param fieldName to locate (required)
 	 * @return the field, or null if not found
@@ -38,7 +38,7 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Locates the specified method.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search; can be <code>null</code>
 	 * @param methodName to locate; can be <code>null</code>
 	 * @param parameters to locate (can be null if there are no parameters)
@@ -85,27 +85,27 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Locates the specified constructor.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
 	 * @param parameters to locate (can be null if there are no parameters)
 	 * @return the constructor, or null if not found
 	 * @deprecated use {@link MemberHoldingTypeDetails#getDeclaredConstructor(List)} instead
 	 */
 	@Deprecated
-	public static ConstructorMetadata getDeclaredConstructor(MemberHoldingTypeDetails memberHoldingTypeDetails, List<JavaType> parameters) {
+	public static ConstructorMetadata getDeclaredConstructor(final MemberHoldingTypeDetails memberHoldingTypeDetails, final List<JavaType> parameters) {
 		return memberHoldingTypeDetails.getDeclaredConstructor(parameters);
 	}
 
 	/**
 	 * Locates the specified type-level annotation.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 * @deprecated use {@link IdentifiableAnnotatedJavaStructure#getAnnotation(JavaType)} instead
 	 */
 	@Deprecated
-	public static AnnotationMetadata getDeclaredTypeAnnotation(IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, JavaType type) {
+	public static AnnotationMetadata getDeclaredTypeAnnotation(final IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, final JavaType type) {
 		return memberHoldingTypeDetails.getAnnotation(type);
 	}
 
@@ -118,27 +118,27 @@ public final class MemberFindingUtils {
 	 * @deprecated use {@link AbstractIdentifiableAnnotatedJavaStructureBuilder#getDeclaredTypeAnnotation(JavaType)} instead
 	 */
 	@Deprecated
-	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure> builder, JavaType type) {
+	public static AnnotationMetadataBuilder getDeclaredTypeAnnotation(final AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure> builder, final JavaType type) {
 		return builder.getDeclaredTypeAnnotation(type);
 	}
 
 	/**
 	 * Locates the specified type-level annotation.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @param type to locate (required)
 	 * @return the annotation, or null if not found
 	 * @deprecated use {@link MemberDetails#getAnnotation(JavaType)} instead
 	 */
 	@Deprecated
-	public static AnnotationMetadata getDeclaredTypeAnnotation(MemberDetails memberDetails, JavaType type) {
+	public static AnnotationMetadata getDeclaredTypeAnnotation(final MemberDetails memberDetails, final JavaType type) {
 		return memberDetails.getAnnotation(type);
 	}
-	
+
 	/**
 	 * Locates a method with the name and parameter signature presented. Searches all {@link MemberDetails} until the first such method is located
 	 * or none can be found.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @param methodName the method name to locate (can be <code>null</code>)
 	 * @param parameters the method parameter signature to locate (can be null
@@ -182,7 +182,7 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Locates a method with the name and parameter signature presented that is not declared by the presented MID.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @param methodName the method name to locate (can be <code>null</code>)
 	 * @param parameters the method parameter signature to locate (can be null
@@ -193,14 +193,14 @@ public final class MemberFindingUtils {
 	 * @deprecated use {@link MemberDetails#getMethod(JavaSymbolName, List, String)} instead
 	 */
 	@Deprecated
-	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName, final List<JavaType> parameters, String excludingMid) {
+	public static MethodMetadata getMethod(final MemberDetails memberDetails, final JavaSymbolName methodName, final List<JavaType> parameters, final String excludingMid) {
 		return memberDetails.getMethod(methodName, parameters, excludingMid);
 	}
 
 	/**
 	 * Locates the metadata for an annotation of the specified type from within
 	 * the given list.
-	 * 
+	 *
 	 * @param annotations the set of annotations to search (may be <code>null</code>)
 	 * @param annotationType the annotation to locate (may be <code>null</code>)
 	 * @return the annotation, or <code>null</code> if not found
@@ -216,11 +216,11 @@ public final class MemberFindingUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the metadata for the annotation of the given type from within the
 	 * given metadata
-	 * 
+	 *
 	 * @param metadata the metadata to search; can be <code>null</code>
 	 * @param annotationType the type of annotation for which to return the metadata; can
 	 * be <code>null</code>
@@ -236,32 +236,32 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Locates an inner type with the specified name.
-	 * 
+	 *
 	 * @param MemberDetails to search (required)
 	 * @param typeName to locate (required)
 	 * @deprecated use {@link MemberHoldingTypeDetails#getDeclaredInnerType(JavaType)} instead
 	 */
 	@Deprecated
-	public static ClassOrInterfaceTypeDetails getDeclaredInnerType(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType typeName) {
+	public static ClassOrInterfaceTypeDetails getDeclaredInnerType(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaType typeName) {
 		return memberHoldingTypeDetails.getDeclaredInnerType(typeName);
 	}
 
 	/**
 	 * Locates an annotation on this class and its superclasses.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails to search (required)
 	 * @param annotationType annotation to locate (required)
 	 * @return the annotation, or null if not found
 	 * @deprecated use {@link IdentifiableAnnotatedJavaStructure#getTypeAnnotation(JavaType)} instead
 	 */
 	@Deprecated
-	public static AnnotationMetadata getTypeAnnotation(IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, JavaType annotationType) {
+	public static AnnotationMetadata getTypeAnnotation(final IdentifiableAnnotatedJavaStructure memberHoldingTypeDetails, final JavaType annotationType) {
 		return memberHoldingTypeDetails.getTypeAnnotation(annotationType);
 	}
 
 	/**
 	 * Locates all methods on this class and its superclasses.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails to search (required)
 	 * @return zero or more methods (never null)
 	 * @deprecated use {@link MemberHoldingTypeDetails#getMethods()} instead
@@ -273,7 +273,7 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Searches up the inheritance hierarchy until the first field with the specified name is located.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails to search (required)
 	 * @param fieldName to locate (required)
 	 * @return the field, or null if not found
@@ -286,7 +286,7 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Searches up the inheritance hierarchy and locates all declared fields which are annotated with the specified annotation.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails to search (required)
 	 * @param annotation to locate (required)
 	 * @return all the located fields (never null, but may be empty)
@@ -299,14 +299,15 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Searches up the inheritance hierarchy until the first method with the specified name and parameters is located.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetails to search (required)
 	 * @param methodName to locate (required)
 	 * @param parameters to locate (can be null if there are no parameters)
 	 * @return the method, or null if not found
 	 * @deprecated use {@link MemberHoldingTypeDetails#getMethod(JavaSymbolName, List)} instead
 	 */
-	public static MethodMetadata getMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+	@Deprecated
+	public static MethodMetadata getMethod(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName methodName, final List<JavaType> parameters) {
 		return memberHoldingTypeDetails.getMethod(methodName, parameters);
 	}
 
@@ -320,7 +321,7 @@ public final class MemberFindingUtils {
 	 * @deprecated use {@link MemberHoldingTypeDetails#getMethod(JavaSymbolName)} instead
 	 */
 	@Deprecated
-	public static MethodMetadata getMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaSymbolName methodName) {
+	public static MethodMetadata getMethod(final MemberHoldingTypeDetails memberHoldingTypeDetails, final JavaSymbolName methodName) {
 		return memberHoldingTypeDetails.getMethod(methodName);
 	}
 
@@ -332,13 +333,13 @@ public final class MemberFindingUtils {
 	 * @param methodName to locate (required)
 	 * @return the method, or null if not found
 	 */
-	public static MethodMetadata getMethod(MemberHoldingTypeDetails memberHoldingTypeDetails, String methodName) {
+	public static MethodMetadata getMethod(final MemberHoldingTypeDetails memberHoldingTypeDetails, final String methodName) {
 		return memberHoldingTypeDetails.getMethod(new JavaSymbolName(methodName));
 	}
-	
+
 	/**
 	 * Searches all {@link MemberDetails} and returns all constructors.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return zero or more constructors (never null)
 	 * @deprecated use {@link MemberDetails#getConstructors()} instead
@@ -350,7 +351,7 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Searches all {@link MemberDetails} and returns all methods.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return zero or more methods (never null)
 	 * @deprecated use {@link MemberDetails#getMethods()} instead
@@ -359,35 +360,36 @@ public final class MemberFindingUtils {
 	public static List<MethodMetadata> getMethods(final MemberDetails memberDetails) {
 		return memberDetails.getMethods();
 	}
-	
+
 	/**
 	 * Searches all {@link MemberDetails} and returns all fields.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return zero or more fields (never null)
 	 * @deprecated use {@link MemberDetails#getFields()} instead
 	 */
 	@Deprecated
-	public static List<FieldMetadata> getFields(MemberDetails memberDetails) {
+	public static List<FieldMetadata> getFields(final MemberDetails memberDetails) {
 		return memberDetails.getFields();
 	}
-	
+
 	/**
 	 * Searches all {@link MemberDetails} and returns all methods which contain a given
 	 * {@link CustomData} tag.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @param tagKey the {@link CustomData} key to search for
 	 * @return zero or more methods (never null)
 	 * @deprecated use {@link MemberDetails#getMethodsWithTag(Object)} instead
 	 */
-	public static List<MethodMetadata> getMethodsWithTag(MemberDetails memberDetails, Object tagKey) {
+	@Deprecated
+	public static List<MethodMetadata> getMethodsWithTag(final MemberDetails memberDetails, final Object tagKey) {
 		return memberDetails.getMethodsWithTag(tagKey);
 	}
-	
+
 	/**
 	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for (required)
 	 * @return the most concrete tagged method or <code>null</code> if not found
@@ -398,11 +400,11 @@ public final class MemberFindingUtils {
 		}
 		return memberDetails.getMostConcreteMethodWithTag(tagKey);
 	}
-	
+
 	/**
 	 * Returns all fields within the given {@link MemberDetails} that contain
 	 * the given {@link CustomData} tag.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for
 	 * @return zero or more fields (never <code>null</code>)
@@ -421,11 +423,11 @@ public final class MemberFindingUtils {
 		}
 		return fields;
 	}
-	
+
 	/**
 	 * Searches all {@link MemberDetails} and returns all {@link MemberHoldingTypeDetails} which contains a given
 	 * {@link CustomData} tag.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tagKey the {@link CustomData} key to search for (required)
 	 * @return zero or more {@link MemberHoldingTypeDetails} (never null)
@@ -442,10 +444,10 @@ public final class MemberFindingUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Determines the most concrete {@link MemberHoldingTypeDetails} in cases where multiple matches are found for a given tag.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (can be <code>null</code>)
 	 * @param tag the {@link CustomData} key to search for (required)
 	 * @return the most concrete tagged type or null if not found
@@ -461,7 +463,7 @@ public final class MemberFindingUtils {
 
 	/**
 	 * Returns the first of the given types of annotation on the given class or interface
-	 * 
+	 *
 	 * @param cid the class or interface to check (can be <code>null</code>)
 	 * @param annotationTypes the types of annotation to look for, in order (can be <code>null</code>)
 	 * @return <code>null</code> if the given type or array of annotations is <code>null</code>, or none were found
@@ -477,10 +479,10 @@ public final class MemberFindingUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Constructor is private to prevent instantiation
-	 * 
+	 *
 	 * @since 1.2.0
 	 */
 	private MemberFindingUtils() {}

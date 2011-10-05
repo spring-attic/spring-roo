@@ -26,34 +26,35 @@ import org.springframework.roo.project.Path;
 
 /**
  * Implementation of {@link WebFinderMetadataProvider}.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1.3
  */
-@Component(immediate = true) 
-@Service 
+@Component(immediate = true)
+@Service
 public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider implements WebFinderMetadataProvider {
 
 	// Fields
 	@Reference private WebMetadataService webMetadataService;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_WEB_FINDER);
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_WEB_FINDER);
 	}
 
+	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		final WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound() || !annotationValues.isExposeFinders() || annotationValues.getFormBackingObject() == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
 			return null;
 		}
-		
+
 		// Lookup the form backing object's metadata
 		final JavaType formBackingType = annotationValues.getFormBackingObject();
 		final PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
@@ -62,10 +63,10 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
 		if (formBackingMemberHoldingTypeDetails == null) {
 			return null;
 		}
-		
+
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(formBackingMemberHoldingTypeDetails.getDeclaredByMetadataId(), metadataIdentificationString);
-		
+
 		final Set<FinderMetadataDetails> dynamicFinderMethods = webMetadataService.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 		final SortedMap<JavaType, JavaTypeMetadataDetails> relatedApplicationTypeMetadata = webMetadataService.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataIdentificationString);
 
@@ -73,21 +74,23 @@ public class WebFinderMetadataProviderImpl extends AbstractItdMetadataProvider i
 
 		return new WebFinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, memberDetails, relatedApplicationTypeMetadata, dynamicFinderMethods);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Controller_Finder";
 	}
-	
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = WebFinderMetadata.getJavaType(metadataIdentificationString);
 		Path path = WebFinderMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
-	
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return WebFinderMetadata.createIdentifier(javaType, path);
 	}
-	
+
 	public String getProvidesType() {
 		return WebFinderMetadata.getMetadataIdentiferType();
 	}

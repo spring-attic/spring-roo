@@ -28,7 +28,7 @@ import org.springframework.roo.support.util.Assert;
 public enum RepositoryMongoLayerMethod {
 
 	COUNT ("count", COUNT_ALL_METHOD) {
-		
+
 		@Override
 		public JavaType getReturnType(final JavaType entityType) {
 			return JavaType.LONG_PRIMITIVE;
@@ -49,12 +49,12 @@ public enum RepositoryMongoLayerMethod {
 			return Collections.emptyList();
 		}
 	},
-	
+
 	/**
 	 * Deletes the passed-in entity (does not delete by ID).
 	 */
 	DELETE ("delete", REMOVE_METHOD) {
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaSymbolName.getReservedWordSafeName(entityType));
@@ -64,12 +64,12 @@ public enum RepositoryMongoLayerMethod {
 		public JavaType getReturnType(final JavaType entityType) {
 			return JavaType.VOID_PRIMITIVE;
 		}
-		
+
 		@Override
 		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "delete(" + parameterNames.get(0).getSymbolName() + ")";
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
@@ -77,7 +77,7 @@ public enum RepositoryMongoLayerMethod {
 	},
 
 	FIND ("find", FIND_METHOD) {
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(new JavaSymbolName("id"));
@@ -87,7 +87,7 @@ public enum RepositoryMongoLayerMethod {
 		public JavaType getReturnType(final JavaType entityType) {
 			return entityType;
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(idType);
@@ -98,9 +98,9 @@ public enum RepositoryMongoLayerMethod {
 			return "findOne(" + parameterNames.get(0).getSymbolName() + ")";
 		}
 	},
-	
+
 	FIND_ALL ("findAll", FIND_ALL_METHOD) {
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Collections.emptyList();
@@ -110,12 +110,12 @@ public enum RepositoryMongoLayerMethod {
 		public JavaType getReturnType(final JavaType entityType) {
 			return JavaType.listOf(entityType);
 		}
-		
+
 		@Override
 		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "findAll()";
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Collections.emptyList();
@@ -128,7 +128,7 @@ public enum RepositoryMongoLayerMethod {
 	 * Spring Data JPA, so we use its findAll(Pageable) API.
 	 */
 	FIND_ENTRIES ("findEntries", FIND_ENTRIES_METHOD) {
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(new JavaSymbolName("firstResult"), new JavaSymbolName("maxResults"));
@@ -152,12 +152,12 @@ public enum RepositoryMongoLayerMethod {
 			return Arrays.asList(JavaType.INT_PRIMITIVE, JavaType.INT_PRIMITIVE);
 		}
 	},
-	
+
 	/**
 	 * Spring Data JPA makes no distinction between create/persist/save/update/merge
 	 */
 	SAVE ("save", MERGE_METHOD, PERSIST_METHOD) {
-		
+
 		@Override
 		public List<JavaSymbolName> getParameterNames(final JavaType entityType, final JavaType idType) {
 			return Arrays.asList(JavaSymbolName.getReservedWordSafeName(entityType));
@@ -167,22 +167,22 @@ public enum RepositoryMongoLayerMethod {
 		public JavaType getReturnType(final JavaType entityType) {
 			return JavaType.VOID_PRIMITIVE;
 		}
-		
+
 		@Override
 		public String getCall(final List<JavaSymbolName> parameterNames) {
 			return "save(" + parameterNames.get(0).getSymbolName() + ")";
 		}
-		
+
 		@Override
 		protected List<JavaType> getParameterTypes(final JavaType targetEntity, final JavaType idType) {
 			return Arrays.asList(targetEntity);
 		}
 	};
-	
+
 	/**
 	 * Returns the {@link RepositoryMongoLayerMethod} with the given ID and parameter
 	 * types.
-	 * 
+	 *
 	 * @param methodId the ID to match upon
 	 * @param parameterTypes the parameter types to match upon
 	 * @param targetEntity the entity type being managed by the repository
@@ -197,11 +197,11 @@ public enum RepositoryMongoLayerMethod {
 		}
 		return null;
 	}
-	
+
 	// Fields
 	private final List<String> ids;
 	private final String name;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -217,19 +217,19 @@ public enum RepositoryMongoLayerMethod {
 		}
 		this.name = name;
 	}
-	
+
 	/**
 	 * Returns a Java snippet that invokes this method (minus the target)
-	 * 
+	 *
 	 * @param parameterNames the parameter names used by the caller; can be
 	 * <code>null</code>
 	 * @return a non-blank Java snippet
 	 */
 	public abstract String getCall(List<JavaSymbolName> parameterNames);
-	
+
 	/**
 	 * Returns the name of this method
-	 * 
+	 *
 	 * @return a non-blank name
 	 */
 	public String getName() {
@@ -238,24 +238,24 @@ public enum RepositoryMongoLayerMethod {
 
 	/**
 	 * Returns this method's return type
-	 * 
+	 *
 	 * @param entityType the type of entity being managed
 	 * @return a non-<code>null</code> type
 	 */
 	public abstract JavaType getReturnType(JavaType entityType);
-	
+
 	/**
 	 * Instances must return the types of parameters they take
-	 * 
+	 *
 	 * @param targetEntity the type of entity being managed (required)
 	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list
 	 */
 	protected abstract List<JavaType> getParameterTypes(JavaType targetEntity, JavaType idType);
-	
+
 	/**
 	 * Returns the names of this method's declared parameters
-	 * 
+	 *
 	 * @param entityType the type of domain entity managed by the service (required)
 	 * @param idType specifies the ID type used by the target entity (required)
 	 * @return a non-<code>null</code> list (might be empty)

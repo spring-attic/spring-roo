@@ -25,32 +25,32 @@ import org.springframework.roo.model.JavaType;
 
 /**
  * Properties used by the one side of a many-to-one relationship or an @ElementCollection of enums (called a "set").
- * 
+ *
  * <p>
  * For example, an Order-LineItem link would have the Order contain a "set" of Orders.
- *  
+ *
  * <p>
  * Limited support for collection mapping is provided. This reflects the pragmatic goals of the tool and the fact a user can
  * edit the generated files by hand anyway.
- * 
+ *
  * <p>
  * This field is intended for use with JSR 220 and will create a @OneToMany annotation or in the case of enums,
  * an @ElementCollection annotation will be created.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class SetField extends CollectionField {
-	
-	
+
+
 	// Fields
 	/** Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be added */
 	private JavaSymbolName mappedBy;
-	
-	private Cardinality cardinality;
+
+	private final Cardinality cardinality;
 	private Fetch fetch;
-	
-	public SetField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, JavaType genericParameterTypeName, Cardinality cardinality) {
+
+	public SetField(final String physicalTypeIdentifier, final JavaType fieldType, final JavaSymbolName fieldName, final JavaType genericParameterTypeName, final Cardinality cardinality) {
 		super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);
 		this.cardinality = cardinality;
 	}
@@ -59,11 +59,12 @@ public class SetField extends CollectionField {
 		return fetch;
 	}
 
-	public void setFetch(Fetch fetch) {
+	public void setFetch(final Fetch fetch) {
 		this.fetch = fetch;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
+	@Override
+	public void decorateAnnotationsList(final List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 
@@ -100,6 +101,7 @@ public class SetField extends CollectionField {
 		}
 	}
 
+	@Override
 	public JavaType getInitializer() {
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(getGenericParameterTypeName());
@@ -110,7 +112,7 @@ public class SetField extends CollectionField {
 		return mappedBy;
 	}
 
-	public void setMappedBy(JavaSymbolName mappedBy) {
+	public void setMappedBy(final JavaSymbolName mappedBy) {
 		this.mappedBy = mappedBy;
 	}
 }

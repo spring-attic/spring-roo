@@ -17,46 +17,46 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Assists in the creation of a {@link Builder} for types that eventually implement {@link IdentifiableAnnotatedJavaStructure}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extends IdentifiableAnnotatedJavaStructure> extends AbstractIdentifiableJavaStructureBuilder<T> {
 	private List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(String declaredbyMetadataId) {
+	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(final String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
 
-	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(IdentifiableAnnotatedJavaStructure existing) {
+	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(final IdentifiableAnnotatedJavaStructure existing) {
 		super(existing);
 		init(existing);
 	}
-	
-	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(String declaredbyMetadataId, IdentifiableAnnotatedJavaStructure existing) {
+
+	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(final String declaredbyMetadataId, final IdentifiableAnnotatedJavaStructure existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing);
 	}
 
-	private void init(IdentifiableAnnotatedJavaStructure existing) {
+	private void init(final IdentifiableAnnotatedJavaStructure existing) {
 		for (AnnotationMetadata element : existing.getAnnotations()) {
 			this.annotations.add(new AnnotationMetadataBuilder(element));
 		}
 	}
 
-	public final boolean addAnnotation(AnnotationMetadata annotationMetadata) {
+	public final boolean addAnnotation(final AnnotationMetadata annotationMetadata) {
 		if (annotationMetadata == null) return false;
 		return addAnnotation(new AnnotationMetadataBuilder(annotationMetadata));
 	}
 
-	public final boolean addAnnotation(AnnotationMetadataBuilder annotationMetadata) {
+	public final boolean addAnnotation(final AnnotationMetadataBuilder annotationMetadata) {
 		if (annotationMetadata == null) return false;
 		onAddAnnotation(annotationMetadata);
 		return annotations.add(annotationMetadata);
 	}
 
-	protected void onAddAnnotation(AnnotationMetadataBuilder annotationMetadata) {}
-	
+	protected void onAddAnnotation(final AnnotationMetadataBuilder annotationMetadata) {}
+
 	public final List<AnnotationMetadataBuilder> getAnnotations() {
 		return annotations;
 	}
@@ -69,11 +69,11 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		return result;
 	}
 
-	public final void setAnnotations(List<AnnotationMetadataBuilder> annotations) {
+	public final void setAnnotations(final List<AnnotationMetadataBuilder> annotations) {
 		this.annotations = annotations;
 	}
 
-	public final void setAnnotations(Collection<AnnotationMetadata> annotations) {
+	public final void setAnnotations(final Collection<AnnotationMetadata> annotations) {
 		List<AnnotationMetadataBuilder> annotationMetadataBuilders = new ArrayList<AnnotationMetadataBuilder>();
 		for (AnnotationMetadata annotationMetadata : annotations) {
 			annotationMetadataBuilders.add(new AnnotationMetadataBuilder(annotationMetadata));
@@ -81,7 +81,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		setAnnotations(annotationMetadataBuilders);
 	}
 
-	public void removeAnnotation(JavaType annotationType) {
+	public void removeAnnotation(final JavaType annotationType) {
 		for (AnnotationMetadataBuilder annotationMetadataBuilder : annotations) {
 			if (annotationMetadataBuilder.getAnnotationType().equals(annotationType)) {
 				annotations.remove(annotationMetadataBuilder);
@@ -90,15 +90,15 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		}
 	}
 
-	public boolean updateTypeAnnotation(AnnotationMetadataBuilder annotationBuilder) {
+	public boolean updateTypeAnnotation(final AnnotationMetadataBuilder annotationBuilder) {
 		return updateTypeAnnotation(annotationBuilder.build());
 	}
 
-	public boolean updateTypeAnnotation(AnnotationMetadata annotation) {
+	public boolean updateTypeAnnotation(final AnnotationMetadata annotation) {
 		return updateTypeAnnotation(annotation, null);
 	}
 
-	public boolean updateTypeAnnotation(AnnotationMetadata annotation, Set<JavaSymbolName> attributesToDeleteIfPresent) {
+	public boolean updateTypeAnnotation(final AnnotationMetadata annotation, final Set<JavaSymbolName> attributesToDeleteIfPresent) {
 		boolean hasChanged = false;
 
 		// We are going to build a replacement AnnotationMetadata.
@@ -165,7 +165,7 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 
 		return true;
 	}
-	
+
 	/**
 	 * Locates the specified type-level annotation.
 	 *

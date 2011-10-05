@@ -18,10 +18,10 @@ import org.springframework.roo.project.Path;
 @Component
 @Service
 public class ServiceAnnotationValuesFactoryImpl implements ServiceAnnotationValuesFactory {
-	
+
 	// Fields
 	@Reference private MetadataService metadataService;
-	
+
 	public ServiceAnnotationValues getInstance(final ClassOrInterfaceTypeDetails serviceInterface) {
 		final PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(serviceInterface.getName(), Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata == null) {

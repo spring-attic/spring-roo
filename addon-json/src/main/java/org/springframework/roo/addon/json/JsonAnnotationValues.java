@@ -8,12 +8,12 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooJson} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 public class JsonAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// Fields
 	@AutoPopulate String toJsonMethod = "toJson";
 	@AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
@@ -27,7 +27,7 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public JsonAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public JsonAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_JSON);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
@@ -47,11 +47,11 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 	public String getFromJsonArrayMethod() {
 		return fromJsonArrayMethod;
 	}
-	
+
 	public String getRootName() {
 		return rootName;
 	}
-	
+
 	public boolean isDeepSerialize() {
 		return deepSerialize;
 	}

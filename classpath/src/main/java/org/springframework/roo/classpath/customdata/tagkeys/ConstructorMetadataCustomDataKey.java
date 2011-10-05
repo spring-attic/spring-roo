@@ -9,12 +9,13 @@ import org.springframework.roo.classpath.details.ConstructorMetadata;
  * @since 1.1.3
  */
 public class ConstructorMetadataCustomDataKey extends InvocableMemberMetadataCustomDataKey<ConstructorMetadata> {
-	private String name;
+	private final String name;
 
-	public ConstructorMetadataCustomDataKey(String name) {
+	public ConstructorMetadataCustomDataKey(final String name) {
 		this.name = name;
 	}
 
+	@Override
 	public String toString() {
 		return name;
 	}
@@ -23,7 +24,8 @@ public class ConstructorMetadataCustomDataKey extends InvocableMemberMetadataCus
 		return name;
 	}
 
-	public boolean meets(ConstructorMetadata constructorMetadata) {
+	@Override
+	public boolean meets(final ConstructorMetadata constructorMetadata) {
 		return super.meets(constructorMetadata);
 	}
 }

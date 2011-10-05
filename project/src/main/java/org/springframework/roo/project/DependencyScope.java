@@ -5,7 +5,7 @@ import org.w3c.dom.Element;
 
 /**
  * The scope of the dependency.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -19,7 +19,7 @@ public enum DependencyScope {
 
 	/**
 	 * Parses the scope of the given dependency XML element
-	 * 
+	 *
 	 * @param dependency the element to parse (required)
 	 * @return a non-<code>null</code> scope
 	 */
@@ -36,7 +36,7 @@ public enum DependencyScope {
 				scopeString = scopeElement.getTextContent();
 			}
 		}
-		
+
 		try {
 			return valueOf(scopeString.toUpperCase().trim());
 		} catch (final IllegalArgumentException e) {

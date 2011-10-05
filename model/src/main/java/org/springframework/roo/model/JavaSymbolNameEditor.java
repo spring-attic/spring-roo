@@ -7,7 +7,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * {@link PropertyEditor} for {@link JavaSymbolName}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */

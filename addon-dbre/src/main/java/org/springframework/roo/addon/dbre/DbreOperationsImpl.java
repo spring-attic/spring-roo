@@ -29,17 +29,17 @@ import org.w3c.dom.Element;
 
 /**
  * Implementation of {@link DbreOperations}.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 @Component
 @Service
 public class DbreOperationsImpl implements DbreOperations {
-	
+
 	// Constants
 	private static final Logger logger = HandlerUtils.getLogger(DbreOperationsImpl.class);
-	
+
 	// Fields
 	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
@@ -49,7 +49,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		return projectOperations.isProjectAvailable() && (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
 	}
 
-	public void displayDatabaseMetadata(Set<Schema> schemas, File file, boolean view) {
+	public void displayDatabaseMetadata(final Set<Schema> schemas, final File file, final boolean view) {
 		Assert.notNull(schemas, "Schemas required");
 
 		// Force it to refresh the database from the actual JDBC connection
@@ -66,15 +66,15 @@ public class DbreOperationsImpl implements DbreOperations {
 		database.setIncludeNonPortableAttributes(includeNonPortableAttributes);
 		database.setTestAutomatically(testAutomatically);
 		outputSchemaXml(database, schemas, null, false);
-		
-		// Update the pom.xml to add an exclusion for the DBRE XML file in the maven-war-plugin 
+
+		// Update the pom.xml to add an exclusion for the DBRE XML file in the maven-war-plugin
 		updatePom();
-		
+
 		// Change the persistence.xml file to prevent tables being created and dropped.
 		updatePersistenceXml();
 	}
-	
-	private void outputSchemaXml(Database database, Set<Schema> schemas, File file, boolean displayOnly) {
+
+	private void outputSchemaXml(final Database database, final Set<Schema> schemas, final File file, final boolean displayOnly) {
 		if (database == null) {
 			logger.warning("Cannot obtain database information for schema(s) '" + StringUtils.collectionToCommaDelimitedString(schemas) + "'");
 		} else if (!database.hasTables()) {
@@ -94,21 +94,21 @@ public class DbreOperationsImpl implements DbreOperations {
 			}
 		}
 	}
-	
+
 	private void updatePom() {
 		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(pom));
 		Element root = document.getDocumentElement();
-		
+
 		String warPluginXPath = "/project/build/plugins/plugin[artifactId = 'maven-war-plugin']";
 		Element warPluginElement = XmlUtils.findFirstElement(warPluginXPath, root);
 		if (warPluginElement == null) {
-			// Project may not be a web project, so just exit 
+			// Project may not be a web project, so just exit
 			return;
 		}
 		Element excludeElement = XmlUtils.findFirstElement(warPluginXPath + "/configuration/webResources/resource/excludes/exclude[text() = '" + DbreModelService.DBRE_XML + "']", root);
 		if (excludeElement != null) {
-			// <exclude> element is already there, so just exit 
+			// <exclude> element is already there, so just exit
 			return;
 		}
 
@@ -126,7 +126,7 @@ public class DbreOperationsImpl implements DbreOperations {
 
 		// Clean up the XML
 		DomUtils.removeTextNodes(warPluginElement);
-		
+
 		// Write out the updated POM
 		fileManager.createOrUpdateTextFileIfRequired(pom, XmlUtils.nodeToString(document), false);
 	}
@@ -135,7 +135,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		String persistencePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		Document document = XmlUtils.readXml(fileManager.getInputStream(persistencePath));
 		Element root = document.getDocumentElement();
-		
+
 		Element providerElement = XmlUtils.findFirstElement("/persistence/persistence-unit[@transaction-type = 'RESOURCE_LOCAL']/provider", root);
 		Assert.notNull(providerElement, "/persistence/persistence-unit/provider is null");
 		String provider = providerElement.getTextContent();
@@ -164,7 +164,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 	}
 
-	private boolean setPropertyValue(Element root, Element propertyElement, String name, String value) {
+	private boolean setPropertyValue(final Element root, Element propertyElement, final String name, final String value) {
 		boolean changed = false;
 		propertyElement = XmlUtils.findFirstElement("/persistence/persistence-unit/properties/property[@name = '" + name + "']", root);
 		if (propertyElement != null && !propertyElement.getAttribute("value").equals(value)) {

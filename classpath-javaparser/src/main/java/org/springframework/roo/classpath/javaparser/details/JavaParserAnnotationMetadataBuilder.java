@@ -47,7 +47,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Java Parser implementation of {@link AnnotationMetadata}.
- * 
+ *
  * @author Ben Alex
  * @author Andrew Swan
  * @since 1.0
@@ -55,8 +55,8 @@ import org.springframework.roo.support.util.Assert;
 public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMetadata>{
 
 	// Fields
-	private JavaType annotationType;
-	private List<AnnotationAttributeValue<?>> attributeValues;
+	private final JavaType annotationType;
+	private final List<AnnotationAttributeValue<?>> attributeValues;
 
 	public static JavaParserAnnotationMetadataBuilder getInstance(final AnnotationExpr annotationExpr, final CompilationUnitServices compilationUnitServices) {
 		return new JavaParserAnnotationMetadataBuilder(annotationExpr, compilationUnitServices);
@@ -64,7 +64,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 
 	/**
 	 * Factory method
-	 * 
+	 *
 	 * @param annotationExpr
 	 * @param compilationUnitServices
 	 * @return a non-<code>null</code> instance
@@ -113,7 +113,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 		return annotationMetadataBuilder.build();
 	}
 
-	private AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, Expression expression, final CompilationUnitServices compilationUnitServices) {
+	private AnnotationAttributeValue<?> convert(JavaSymbolName annotationName, final Expression expression, final CompilationUnitServices compilationUnitServices) {
 		if (annotationName == null) {
 			annotationName = new JavaSymbolName("__ARRAY_ELEMENT__");
 		}
@@ -238,7 +238,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 			}
 			return new ArrayAttributeValue<AnnotationAttributeValue<?>>(annotationName, arrayElements);
 		}
-		
+
 		if (expression instanceof UnaryExpr) {
 			UnaryExpr castExp = (UnaryExpr) expression;
 			if (castExp.getOperator() == Operator.negative) {
@@ -256,12 +256,12 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 
 	/**
 	 * Facilitates the addition of the annotation to the presented type.
-	 * 
+	 *
 	 * @param compilationUnitServices to use (required)
 	 * @param annotations to add to the end of (required)
 	 * @param annotation to add (required)
 	 */
-	public static void addAnnotationToList(CompilationUnitServices compilationUnitServices, List<AnnotationExpr> annotations, AnnotationMetadata annotation) {
+	public static void addAnnotationToList(final CompilationUnitServices compilationUnitServices, final List<AnnotationExpr> annotations, final AnnotationMetadata annotation) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(annotations, "Annotations required");
 		Assert.notNull(annotation, "Annotation metadata required");
@@ -313,7 +313,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 			// We have a number of pairs being presented
 			annotationExpression = new NormalAnnotationExpr(nameToUse, new ArrayList<MemberValuePair>());
 		}
-		
+
 		// Add our AnnotationExpr to the actual annotations that will eventually be flushed through to the compilation unit
 		annotations.add(annotationExpression);
 
@@ -344,7 +344,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 					smae.setMemberValue(toUse);
 					return;
 				}
-				
+
 				// There is > 1 expression, or they have provided some sort of non-default value, so it's time to upgrade the expression
 				// (whilst retaining any potentially existing expression values)
 				Expression existingValue = smae.getMemberValue();
@@ -363,7 +363,7 @@ public class JavaParserAnnotationMetadataBuilder implements Builder<AnnotationMe
 	}
 
 	@SuppressWarnings("unchecked")
-	private static MemberValuePair convert(AnnotationAttributeValue<?> value) {
+	private static MemberValuePair convert(final AnnotationAttributeValue<?> value) {
 		if (value instanceof NestedAnnotationAttributeValue) {
 			NestedAnnotationAttributeValue castValue = (NestedAnnotationAttributeValue) value;
 			Assert.isInstanceOf(JavaParserAnnotationMetadataBuilder.class, castValue.getValue(), "Cannot present nested annotations unless created by this class");

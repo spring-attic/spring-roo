@@ -9,7 +9,7 @@ import org.springframework.roo.project.Path;
 
 /**
  * Provides an interface to {@link PropFileOperationsImpl}.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @author Stefan Schmidt
@@ -20,7 +20,7 @@ public interface PropFileOperations {
 
 	/**
 	 * Changes the specified property, throwing an exception if the file does not exist.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param key the property key to update (required)
@@ -31,27 +31,27 @@ public interface PropFileOperations {
 
 	/**
 	 * Changes the specified property, throwing an exception if the file does not exist.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param key the property key to update (required)
 	 * @param value the property value to set into the property key (required)
 	 */
 	void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value);
-	
+
 	/**
 	 * Adds a property only if the given key (and value) does not exist already.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param key the property key to update (required)
 	 * @param value the property value to set into the property key (required)
 	 */
 	void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value);
-	
+
 	/**
 	 * Adds the contents of the properties map to the given properties file.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param properties the map of properties to add
@@ -59,10 +59,10 @@ public interface PropFileOperations {
 	 * @param changeExisting indicates if an existing value for a given key should be replaced or not
 	 */
 	void addProperties(Path propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting);
-	
+
 	/**
 	 * Adds a property only if the given key (and value) does not exist already.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param key the property key to update (required)
@@ -73,7 +73,7 @@ public interface PropFileOperations {
 
 	/**
 	 * Removes the specified property, throwing an exception if the file does not exist.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param key the property key to remove (required)
@@ -82,7 +82,7 @@ public interface PropFileOperations {
 
 	/**
 	 * Retrieves the specified property, returning null if the property or file does not exist.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param key the property key to retrieve (required)
@@ -92,7 +92,7 @@ public interface PropFileOperations {
 
 	/**
 	 * Retrieves all property keys from the specified property, throwing an exception if the file does not exist.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @param includeValues if true, appends (" = theValue") to each returned string
@@ -102,24 +102,24 @@ public interface PropFileOperations {
 
 	/**
 	 * Retrieves all property key/value pairs from the specified property, throwing an exception if the file does not exist.
-	 * 
+	 *
 	 * @param propertyFilePath the location of the property file (required)
 	 * @param propertyFilename the name of the property file within the specified path (required)
 	 * @return the key/value pairs (may return null if the property file does not exist)
 	 */
 	Map<String, String> getProperties(Path propertyFilePath, String propertyFilename);
-	
+
 	/**
 	 * Loads the properties from the given stream, closing it on completion
-	 * 
+	 *
 	 * @param inputStream the stream from which to read (can be <code>null</code>)
 	 * @return an empty {@link Properties} if a null stream is given
 	 */
 	Properties loadProperties(InputStream inputStream);
-	
+
 	/**
 	 * Loads the properties from the given classpath resource
-	 * 
+	 *
 	 * @param filename the name of the properties file to load
 	 * @param loadingClass the class in whose package to look for the file
 	 * @return a non-<code>null</code> properties

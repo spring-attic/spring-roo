@@ -15,15 +15,15 @@ import org.w3c.dom.Element;
 
 /**
  * Provider to embed video streams via a URL or specific install method.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
 @Component(immediate = true)
 @Service
 public class VideoStreamEmbeddedProvider extends AbstractEmbeddedProvider {
-	
-	public boolean embed(String url, String viewName) {
+
+	public boolean embed(final String url, final String viewName) {
 		if (url.contains("ustream.tv")) {
 			// Expected format http://www.ustream.tv/flash/live/1/4424524
 			String[] split = url.split("/");
@@ -47,9 +47,9 @@ public class VideoStreamEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		return false;
 	}
-	
-	public boolean install(String viewName, Map<String, String> options) {
-		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.containsKey("id")) { 
+
+	public boolean install(final String viewName, final Map<String, String> options) {
+		if (options == null || options.size() != 2 || !options.containsKey("provider") || !options.containsKey("id")) {
 			return false;
 		}
 		String provider = options.get("provider");
@@ -63,11 +63,12 @@ public class VideoStreamEmbeddedProvider extends AbstractEmbeddedProvider {
 		installJspx(getViewName(viewName, provider.toLowerCase()), null, video);
 		return true;
 	}
-	
+
 	public enum VideoStreamProvider implements EmbeddedCompletor {
 		USTREAM,
 		LIVESTREAM;
-		
+
+		@Override
 		public String toString() {
 			ToStringCreator tsc = new ToStringCreator(this);
 			tsc.append("provider", name());

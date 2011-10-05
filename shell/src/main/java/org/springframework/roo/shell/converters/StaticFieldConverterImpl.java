@@ -21,9 +21,9 @@ import org.springframework.roo.support.util.Assert;
 public class StaticFieldConverterImpl implements StaticFieldConverter {
 
 	// Fields
-	private Map<Class<?>,Map<String,Field>> fields = new HashMap<Class<?>,Map<String,Field>>();
-	
-	public void add(Class<?> clazz) {
+	private final Map<Class<?>,Map<String,Field>> fields = new HashMap<Class<?>,Map<String,Field>>();
+
+	public void add(final Class<?> clazz) {
 		Assert.notNull(clazz, "A class to provide conversion services is required");
 		Assert.isNull(fields.get(clazz), "Class '" + clazz + "' is already registered for completion services");
 		Map<String,Field> ffields = new HashMap<String, Field>();
@@ -36,13 +36,13 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
 		Assert.notEmpty(ffields, "Zero public static fields accessible in '" + clazz + "'");
 		fields.put(clazz, ffields);
 	}
-	
-	public void remove(Class<?> clazz) {
+
+	public void remove(final Class<?> clazz) {
 		Assert.notNull(clazz, "A class that was providing conversion services is required");
 		fields.remove(clazz);
 	}
-	
-	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
+
+	public Object convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
@@ -71,7 +71,7 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
 		}
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		Map<String,Field> ffields = fields.get(requiredType);
 		if (ffields == null) {
 			return true;
@@ -80,7 +80,7 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
 		return true;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return fields.get(requiredType) != null;
 	}
 }

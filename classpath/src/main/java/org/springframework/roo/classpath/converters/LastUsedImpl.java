@@ -10,21 +10,21 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Records the last Java package and type used.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component
 @Service
 public class LastUsedImpl implements LastUsed {
-	
+
 	// Fields
 	@Reference private Shell shell;
 	private JavaPackage javaPackage;
 	private JavaType javaType;
 	private JavaPackage topLevelPackage;
-	
-	public void setPackage(JavaPackage javaPackage) {
+
+	public void setPackage(final JavaPackage javaPackage) {
 		Assert.notNull(javaPackage, "JavaPackage required");
 		if (javaPackage.getFullyQualifiedPackageName().startsWith("java.")) {
 			return;
@@ -33,8 +33,8 @@ public class LastUsedImpl implements LastUsed {
 		this.javaPackage = javaPackage;
 		this.shell.setPromptPath(shorten(javaPackage.getFullyQualifiedPackageName()));
 	}
-	
-	public void setType(JavaType javaType) {
+
+	public void setType(final JavaType javaType) {
 		Assert.notNull(javaType, "JavaType required");
 		if (javaType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
 			return;
@@ -43,8 +43,8 @@ public class LastUsedImpl implements LastUsed {
 		this.javaPackage = javaType.getPackage();
 		this.shell.setPromptPath(shorten(javaType.getFullyQualifiedTypeName()));
 	}
-	
-	private String shorten(String fullyQualifiedName) {
+
+	private String shorten(final String fullyQualifiedName) {
 		if (topLevelPackage == null) {
 			return fullyQualifiedName;
 		}
@@ -55,14 +55,14 @@ public class LastUsedImpl implements LastUsed {
 		return topLevelPackage;
 	}
 
-	public void setTopLevelPackage(JavaPackage topLevelPackage) {
+	public void setTopLevelPackage(final JavaPackage topLevelPackage) {
 		this.topLevelPackage = topLevelPackage;
 	}
 
 	public JavaType getJavaType() {
 		return javaType;
 	}
-	
+
 	public JavaPackage getJavaPackage() {
 		return javaPackage;
 	}

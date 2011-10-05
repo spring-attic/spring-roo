@@ -29,7 +29,7 @@ public class DomUtilsTest {
 		// Set up
 		final Node mockNode = mock(Node.class);
 		when(mockNode.getTextContent()).thenReturn(NODE_TEXT);
-		
+
 		assertEquals(NODE_TEXT, DomUtils.getTextContent(mockNode, DEFAULT_TEXT));
 	}
 }

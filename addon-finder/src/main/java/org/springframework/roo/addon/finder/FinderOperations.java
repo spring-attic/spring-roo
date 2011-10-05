@@ -6,8 +6,8 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Provides Finder add-on operations. 
- * 
+ * Provides Finder add-on operations.
+ *
  * @author Ben Alex
  * @since 1.0
  */

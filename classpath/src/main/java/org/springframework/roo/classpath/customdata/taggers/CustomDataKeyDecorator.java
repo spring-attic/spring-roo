@@ -18,19 +18,19 @@ import org.springframework.roo.model.CustomDataAccessor;
  * @since 1.1.3
  */
 public interface CustomDataKeyDecorator extends MemberDetailsDecorator {
-	
+
 	/**
 	 * Registers the given matcher on behalf of the class with the given fully-
 	 * qualified name.
-	 * 
+	 *
 	 * @param addingClass the name of the class registering the matcher (required)
 	 * @param matcher the matcher to register (required)
 	 */
 	void registerMatcher(String addingClass, Matcher<? extends CustomDataAccessor> matcher);
-	
+
 	/**
 	 * Registers the given matchers on behalf of the given class
-	 * 
+	 *
 	 * @param addingClass the class registering the matchers (can be null not to
 	 * register any matchers)
 	 * @param matchers the matchers to register (can be none)
@@ -40,16 +40,16 @@ public interface CustomDataKeyDecorator extends MemberDetailsDecorator {
 
 	/**
 	 * Unregisters any matchers registered by the given class
-	 * 
+	 *
 	 * @param addingClass the class whose matchers are to be unregistered
 	 * (required)
 	 * @since 1.2.0
 	 */
 	void unregisterMatchers(Class<?> addingClass);
-	
+
 	/**
 	 * Unregisters any matchers registered by the given class
-	 * 
+	 *
 	 * @param addingClass the fully-qualified name of the class whose matchers
 	 * are to be unregistered (required)
 	 */

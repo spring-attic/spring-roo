@@ -19,7 +19,7 @@ public interface Matcher<T extends CustomDataAccessor> {
 	/**
 	 * Returns the {@link CustomDataAccessor}s for any elements of the given
 	 * list that meet this matcher's inclusion criteria.
-	 * 
+	 *
 	 * @param memberHoldingTypeDetailsList the list to check for matches
 	 * @return a non-<code>null</code> list
 	 */
@@ -28,7 +28,7 @@ public interface Matcher<T extends CustomDataAccessor> {
 	/**
 	 * Returns a key indicating the type of custom data returned by
 	 * {@link #matches(List)}
-	 * 
+	 *
 	 * @return a non-<code>null</code> key
 	 */
 	CustomDataKey<T> getCustomDataKey();

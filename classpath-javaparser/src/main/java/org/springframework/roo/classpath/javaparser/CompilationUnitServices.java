@@ -26,7 +26,7 @@ public interface CompilationUnitServices {
 	 * @return the enclosing type (never null)
 	 */
 	JavaType getEnclosingTypeName();
-	
+
 	/**
 	 * @return the names of each inner type and the enclosing type (never null but may be empty)
 	 */

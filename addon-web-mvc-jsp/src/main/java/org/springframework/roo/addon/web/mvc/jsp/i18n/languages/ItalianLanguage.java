@@ -21,7 +21,7 @@ public class ItalianLanguage extends AbstractLanguage {
 	public Locale getLocale() {
 		return Locale.ITALIAN;
 	}
-	
+
 	public String getLanguage() {
 		return "Italiano";
 	}

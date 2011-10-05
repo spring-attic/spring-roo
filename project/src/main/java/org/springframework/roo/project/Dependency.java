@@ -15,15 +15,15 @@ import org.w3c.dom.NodeList;
 
 /**
  * Simplified immutable representation of a dependency.
- * 
+ *
  * <p>
  * Structured after the model used by Maven and Ivy. This may be replaced in a future release with a more OSGi-centric model.
- * 
+ *
  * <p>
- * According to the Maven docs, "the minimal set of information for matching a dependency reference 
+ * According to the Maven docs, "the minimal set of information for matching a dependency reference
  * against a dependencyManagement section is actually {groupId, artifactId, type, classifier}"; see
  * http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
- * 
+ *
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
@@ -46,7 +46,7 @@ public class Dependency implements Comparable<Dependency> {
 
 	/**
 	 * Creates an immutable {@link Dependency}.
-	 * 
+	 *
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version ID (required)
@@ -71,7 +71,7 @@ public class Dependency implements Comparable<Dependency> {
 
 	/**
 	 * Constructs a JAR dependency with the given scope.
-	 * 
+	 *
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version ID (required)
@@ -84,7 +84,7 @@ public class Dependency implements Comparable<Dependency> {
 
 	/**
 	 * Constructs a compile-scoped JAR dependency.
-	 * 
+	 *
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version (required)
@@ -95,7 +95,7 @@ public class Dependency implements Comparable<Dependency> {
 
 	/**
 	 * Constructs a compile-scoped JAR dependency with optional exclusions.
-	 * 
+	 *
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version ID (required)
@@ -110,7 +110,7 @@ public class Dependency implements Comparable<Dependency> {
 
 	/**
 	 * Constructs a {@link Dependency} from a Maven-style &lt;dependency&gt; element.
-	 * 
+	 *
 	 * @param dependency to parse (required)
 	 */
 	public Dependency(final Element dependency) {
@@ -141,9 +141,9 @@ public class Dependency implements Comparable<Dependency> {
 			} else {
 				this.systemPath = null;
 			}
-			
+
 			this.classifier = DomUtils.getChildTextContent(dependency, "classifier");
-			
+
 			// Parsing for exclusions
 			final List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
 			if (exclusionList.size() > 0) {
@@ -242,11 +242,11 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		return version.compareTo(o.getVersion());
 	}
-	
+
 	/**
 	 * Compares this dependency's identifying coordinates (i.e. not the version)
 	 * to those of the given dependency
-	 * 
+	 *
 	 * @param other the dependency being compared to (required)
 	 * @return see {@link Comparable#compareTo(Object)}
 	 */
@@ -288,7 +288,7 @@ public class Dependency implements Comparable<Dependency> {
 
 	/**
 	 * Adds the given exclusion to this dependency
-	 * 
+	 *
 	 * @param exclusionGroupId the groupId of the dependency to exclude (required)
 	 * @param exclusionArtifactId the artifactId of the dependency to exclude (required)
 	 */
@@ -297,10 +297,10 @@ public class Dependency implements Comparable<Dependency> {
 		Assert.hasText(exclusionArtifactId, "Excluded artifactId required");
 		this.exclusions.add(new Dependency(exclusionGroupId, exclusionArtifactId, "ignored"));
 	}
-	
+
 	/**
 	 * Returns the XML element for this dependency
-	 * 
+	 *
 	 * @param document the parent XML document
 	 * @return a non-<code>null</code> element
 	 * @since 1.2.0
@@ -338,7 +338,7 @@ public class Dependency implements Comparable<Dependency> {
 				exclusionElement.appendChild(XmlUtils.createTextElement(document, "artifactId", exclusion.getArtifactId()));
 			}
 		}
-		
+
 		return dependencyElement;
 	}
 
@@ -347,7 +347,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * coordinates as this one; this is not necessarily the same as calling
 	 * {@link #equals(Object)}, which may compare more fields beyond the basic
 	 * coordinates.
-	 * 
+	 *
 	 * @param dependency the dependency to check (can be <code>null</code>)
 	 * @return <code>false</code> if any coordinates are different
 	 */

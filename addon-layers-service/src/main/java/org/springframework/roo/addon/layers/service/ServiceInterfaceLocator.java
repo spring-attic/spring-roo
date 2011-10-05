@@ -16,7 +16,7 @@ public interface ServiceInterfaceLocator {
 	/**
 	 * Returns the details of any interfaces annotated with {@link RooService}
 	 * that claim to support the given type of entity.
-	 * 
+	 *
 	 * @param entityType can't be <code>null</code>
 	 * @return a non-<code>null</code> collection; empty if there's no such
 	 * services or the given entity is <code>null</code>

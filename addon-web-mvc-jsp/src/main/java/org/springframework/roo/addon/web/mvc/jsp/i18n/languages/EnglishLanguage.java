@@ -21,7 +21,7 @@ public class EnglishLanguage extends AbstractLanguage {
 	public Locale getLocale() {
 		return Locale.ENGLISH;
 	}
-	
+
 	public String getLanguage() {
 		return "English";
 	}

@@ -19,20 +19,20 @@ import org.springframework.roo.shell.MethodTarget;
 
 /**
  * Provides conversion to and from {@link JavaPackage}, with full support for using "~" as denoting the user's top-level package.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component
 @Service
 public class JavaPackageConverter implements Converter<JavaPackage> {
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private LastUsed lastUsed;
 	@Reference private ProjectOperations projectOperations;
-	
-	public JavaPackage convertFromText(String value, Class<?> requiredType, String optionContext) {
+
+	public JavaPackage convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
@@ -61,11 +61,11 @@ public class JavaPackageConverter implements Converter<JavaPackage> {
 		return result;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return JavaPackage.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, String existingData, final String optionContext, final MethodTarget target) {
 		if (existingData == null) {
 			existingData = "";
 		}

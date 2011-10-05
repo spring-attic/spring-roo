@@ -36,7 +36,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Java Parser implementation of {@link ConstructorMetadata}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
@@ -45,32 +45,32 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 	// TODO: Should parse the throws types from JavaParser source
 
 	// Fields
-	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
-	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
+	private final List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+	private final List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+	private final List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+	private final List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	private String body;
-	private String declaredByMetadataId;
-	private int modifier;
+	private final String declaredByMetadataId;
+	private final int modifier;
 
-	public static JavaParserConstructorMetadataBuilder getInstance(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
+	public static JavaParserConstructorMetadataBuilder getInstance(final String declaredByMetadataId, final ConstructorDeclaration constructorDeclaration, final CompilationUnitServices compilationUnitServices, final Set<JavaSymbolName> typeParameterNames) {
 		return new JavaParserConstructorMetadataBuilder(declaredByMetadataId, constructorDeclaration, compilationUnitServices, typeParameterNames);
 	}
-	
-	private JavaParserConstructorMetadataBuilder(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
+
+	private JavaParserConstructorMetadataBuilder(final String declaredByMetadataId, final ConstructorDeclaration constructorDeclaration, final CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(constructorDeclaration, "Constructor declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
-		
+
 		// Convert Java Parser modifier into JDK modifier
 		this.modifier = JavaParserUtils.getJdkModifier(constructorDeclaration.getModifiers());
-		
+
 		this.declaredByMetadataId = declaredByMetadataId;
 
         if (typeParameterNames == null) {
             typeParameterNames = new HashSet<JavaSymbolName>();
         }
-		
+
 		// Add method-declared type parameters (if any) to the list of type parameters
 		Set<JavaSymbolName> fullTypeParameters = new HashSet<JavaSymbolName>();
 		fullTypeParameters.addAll(typeParameterNames);
@@ -81,19 +81,19 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 				fullTypeParameters.add(currentTypeParam);
 			}
 		}
-		
+
 		// Get the body
 		this.body = constructorDeclaration.getBlock().toString();
 
         this.body = this.body.replaceFirst("\\{","");
         this.body = this.body.substring(0, this.body.lastIndexOf("}"));
-		
+
 		// Lookup the parameters and their names
 		if (constructorDeclaration.getParameters() != null) {
 			for (Parameter p : constructorDeclaration.getParameters()) {
 				Type pt = p.getType();
 				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices, pt, fullTypeParameters);
-				
+
 				List<AnnotationExpr> annotationsList = p.getAnnotations();
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 				if (annotationsList != null) {
@@ -102,18 +102,18 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 						annotations.add(md.build());
 					}
 				}
-				
+
 				parameterTypes.add(new AnnotatedJavaType(parameterType, annotations));
 				parameterNames.add(new JavaSymbolName(p.getId().getName()));
 			}
 		}
-		
+
 		if (constructorDeclaration.getAnnotations() != null) {
 			for (AnnotationExpr annotation : constructorDeclaration.getAnnotations()) {
 				this.annotations.add(JavaParserAnnotationMetadataBuilder.getInstance(annotation, compilationUnitServices).build());
 			}
 		}
-		
+
 	}
 
 	public ConstructorMetadata build() {
@@ -127,23 +127,23 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 		return constructorMetadataBuilder.build();
 	}
 
-	public static void addConstructor(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, ConstructorMetadata constructor, Set<JavaSymbolName> typeParameters) {
+	public static void addConstructor(final CompilationUnitServices compilationUnitServices, final List<BodyDeclaration> members, final ConstructorMetadata constructor, final Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(constructor, "Method required");
-		
+
 		// Start with the basic constructor
 		ConstructorDeclaration d = new ConstructorDeclaration();
 		d.setModifiers(JavaParserUtils.getJavaParserModifier(constructor.getModifier()));
 		d.setName(PhysicalTypeIdentifier.getJavaType(constructor.getDeclaredByMetadataId()).getSimpleTypeName());
-		
+
 		// Add any constructor-level annotations (not parameter annotations)
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		d.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : constructor.getAnnotations()) {
 			JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
-	
+
 		// Add any constructor parameters, including their individual annotations and type parameters
 		List<Parameter> parameters = new ArrayList<Parameter>();
 		d.setParameters(parameters);
@@ -153,14 +153,14 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 
 			// Add the parameter annotations applicable for this parameter type
 			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
-	
+
 			for (AnnotationMetadata parameterAnnotation : constructorParameter.getAnnotations()) {
 				JavaParserAnnotationMetadataBuilder.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
 			}
-			
+
 			// Compute the parameter name
 			String parameterName = constructor.getParameterNames().get(index).getSymbolName();
-			
+
 			// Compute the parameter type
 			Type parameterType = null;
 			if (constructorParameter.getJavaType().isPrimitive()) {
@@ -168,7 +168,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 			} else {
 				NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), constructorParameter.getJavaType());
 				ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
-				
+
 				// Add any type arguments presented for the return type
 				if (constructorParameter.getJavaType().getParameters().size() > 0) {
 					List<Type> typeArgs = new ArrayList<Type>();
@@ -178,7 +178,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 						// typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 						typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 					}
-					
+
 				}
 				parameterType = cit;
 			}
@@ -188,7 +188,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 			p.setAnnotations(parameterAnnotations);
 			parameters.add(p);
 		}
-		
+
 		// Set the body
 		if (constructor.getBody() == null || constructor.getBody().length() == 0) {
 			d.setBlock(new BlockStmt());
@@ -196,8 +196,8 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 			// There is a body.
 			// We need to make a fake constructor that we can have JavaParser parse.
 			// Easiest way to do that is to build a simple source class containing the required method and re-parse it.
-			
-			
+
+
 			StringBuilder sb = new StringBuilder();
 			sb.append("class TemporaryClass {\n");
 			sb.append("  TemporaryClass() {\n");
@@ -228,7 +228,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 			ConstructorDeclaration cd = (ConstructorDeclaration) bd;
 			d.setBlock(cd.getBlock());
 		}
-	
+
 		// Locate where to add this constructor; also verify if this method already exists
 		for (BodyDeclaration bd : members) {
 			if (bd instanceof ConstructorDeclaration) {
@@ -250,7 +250,7 @@ public class JavaParserConstructorMetadataBuilder implements Builder<Constructor
 				}
 			}
 		}
-	
+
 		// Add the constructor to the end of the compilation unit
 		members.add(d);
 	}

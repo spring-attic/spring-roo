@@ -27,17 +27,17 @@ import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * Operations for Git addon.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component 
-@Service 
+@Component
+@Service
 public class GitOperationsImpl implements GitOperations {
-	
+
 	// Constants
 	private static final Logger logger = Logger.getLogger(GitOperationsImpl.class.getName());
-	
+
 	// Fields
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
@@ -51,12 +51,12 @@ public class GitOperationsImpl implements GitOperations {
 	public boolean isSetupCommandAvailable() {
 		return !hasDotGit();
 	}
-	
+
 	public boolean isAutomaticCommit() {
 		return getRepository().getConfig().getBoolean("roo", "automaticCommit", true);
 	}
 
-	public void commitAllChanges(String message) {
+	public void commitAllChanges(final String message) {
 		Repository repository = getRepository();
 		try {
 			Git git = new Git(repository);
@@ -82,7 +82,7 @@ public class GitOperationsImpl implements GitOperations {
 		}
 	}
 
-	public void log(int maxHistory) {
+	public void log(final int maxHistory) {
 		Repository repository = getRepository();
 		Git git = new Git(repository);
 		try {
@@ -101,13 +101,13 @@ public class GitOperationsImpl implements GitOperations {
 		}
 	}
 
-	public void reset(int noOfCommitsToRevert, String message) {
+	public void reset(final int noOfCommitsToRevert, final String message) {
 		Repository repository = getRepository();
 		RevCommit commit = findCommit(Constants.HEAD + "~" + noOfCommitsToRevert, repository);
 		if (commit == null) {
 			return;
 		}
-		
+
 		try {
 			Git git = new Git(repository);
 			git.reset().setRef(commit.getName()).setMode(ResetType.HARD).call();
@@ -118,18 +118,18 @@ public class GitOperationsImpl implements GitOperations {
 			throw new IllegalStateException("Reset did not succeed.", e);
 		}
 	}
-	
-	public void revertLastCommit(String message) {
+
+	public void revertLastCommit(final String message) {
 		revertCommit(Constants.HEAD + "~0", message);
 	}
 
-	public void revertCommit(String revstr, String message) {
+	public void revertCommit(final String revstr, final String message) {
 		Repository repository = getRepository();
 		RevCommit commit = findCommit(revstr, repository);
 		if (commit == null) {
 			return;
 		}
-		
+
 		try {
 			Git git = new Git(repository);
 			git.revert().include(commit).call();
@@ -140,8 +140,8 @@ public class GitOperationsImpl implements GitOperations {
 			throw new IllegalStateException("Revert of commit " + revstr + " did not succeed.", e);
 		}
 	}
-	
-	private RevCommit findCommit(String revstr, Repository repository) {
+
+	private RevCommit findCommit(final String revstr, final Repository repository) {
 		RevWalk walk = new RevWalk(repository);
 		RevCommit commit = null;
 		try {
@@ -156,7 +156,7 @@ public class GitOperationsImpl implements GitOperations {
 		return commit;
 	}
 
-	public void setConfig(String category, String key, String value) {
+	public void setConfig(final String category, final String key, final String value) {
 		Repository repository = getRepository();
 		try {
 			repository.getConfig().setString(category, null, key, value);
@@ -186,7 +186,7 @@ public class GitOperationsImpl implements GitOperations {
 		setConfig("remote \"origin\"", "fetch", "+refs/heads/*:refs/remotes/origin/*");
 		setConfig("branch \"master\"", "remote", "origin");
 		setConfig("branch \"master\"", "merge", "refs/heads/master");
-	
+
 		String gitIgnore = pathResolver.getIdentifier(Path.ROOT, Constants.GITIGNORE_FILENAME);
 		if (!fileManager.exists(gitIgnore)) {
 			try {

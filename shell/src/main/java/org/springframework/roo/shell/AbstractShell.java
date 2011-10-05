@@ -35,11 +35,11 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
- * 
+ *
  * @author Ben Alex
  */
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
-	
+
 	// Constants
 	private static final String MY_SLOT = AbstractShell.class.getName();
 
@@ -47,31 +47,31 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	// they are part of the public API, e.g. are changed by STS.
 	public static String completionKeys = "TAB";
 	public static String shellPrompt = "roo> ";
-	
+
 	// Instance fields
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment;
     protected ExitShellRequest exitShellRequest;
-	
+
     /**
      * Returns any classpath resources with the given path
-     * 
+     *
      * @param path the path for which to search (never null)
      * @return <code>null</code> if the search can't be performed
      * @since 1.2.0
      */
 	protected abstract Collection<URL> findResources(String path);
-	
+
 	protected abstract String getHomeAsString();
-	
+
 	protected abstract ExecutionStrategy getExecutionStrategy();
-	
+
 	protected abstract Parser getParser();
 
 	@CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
 	public void script(
-		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File script, 
-		@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") boolean lineNumbers) {
+		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) final File script,
+		@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") final boolean lineNumbers) {
 
 		Assert.notNull(script, "Script file to parse is required");
 		double startedNanoseconds = System.nanoTime();
@@ -110,7 +110,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	/**
 	 * Opens the given script for reading
-	 * 
+	 *
 	 * @param script the script to read (required)
 	 * @return a non-<code>null</code> input stream
 	 */
@@ -120,10 +120,10 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		} catch (final FileNotFoundException fnfe) {
 			// Try to find the script via the classloader
 			final Collection<URL> urls = findResources(script.getName());
-			
+
 			// Handle search failure
 			Assert.notNull(urls, "Unexpected error looking for '" + script.getName() + "'");
-			
+
 			// Handle the search being OK but the file simply not being present
 			Assert.notEmpty(urls, "Script '" + script + "' not found on disk or in classpath");
 			Assert.isTrue(urls.size() == 1, "More than one '" + script + "' was found in the classpath; unable to continue");
@@ -134,16 +134,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			}
 		}
 	}
-	
+
 	/**
 	 * Execute the single line from a script.
 	 * <p>
-	 * This method can be overridden by sub-classes to pre-process script lines. 
+	 * This method can be overridden by sub-classes to pre-process script lines.
 	 */
-	protected boolean executeScriptLine(String line) {
+	protected boolean executeScriptLine(final String line) {
 		return executeCommand(line);
 	}
-	
+
 	public boolean executeCommand(String line) {
 		// Another command was attempted
     	setShellStatus(ShellStatus.Status.PARSING);
@@ -199,7 +199,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			if (parseResult == null) {
 				return false;
 			}
-			
+
 			setShellStatus(Status.EXECUTING);
 			Object result = executionStrategy.execute(parseResult);
 			setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
@@ -216,7 +216,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 					logger.info(result.toString());
 				}
 			}
-			
+
 			logCommandIfRequired(line, true);
 			setShellStatus(Status.EXECUTION_SUCCESS, line, parseResult);
 			return true;
@@ -231,32 +231,32 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			setShellStatus(Status.USER_INPUT);
 		}
 	}
-	
+
 	/**
 	 * Allows a subclass to log the execution of a well-formed command. This is invoked after a command
 	 * has completed, and indicates whether the command returned normally or returned an exception. Note
 	 * that attempted commands that are not well-formed (eg they are missing a mandatory argument) will
 	 * never be presented to this method, as the command execution is never actually attempted in those
 	 * cases. This method is only invoked if an attempt is made to execute a particular command.
-	 * 
+	 *
 	 * <p>
 	 * Implementations should consider specially handling the "script" commands, and also
 	 * indicating whether a command was successful or not. Implementations that wish to behave
 	 * consistently with other {@link AbstractShell} subclasses are encouraged to simply override
 	 * {@link #logCommandToOutput(String)} instead, and only override this method if you actually
 	 * need to fine-tune the output logic.
-	 *  
+	 *
 	 * @param line the parsed line (any comments have been removed; never null)
 	 * @param successful if the command was successful or not
 	 */
-	protected void logCommandIfRequired(String line, boolean successful) {
+	protected void logCommandIfRequired(final String line, final boolean successful) {
 		if (line.startsWith("script")) {
 			logCommandToOutput((successful ? "// " : "// [failed] ") + line);
 		} else {
 			logCommandToOutput((successful ? "" : "// [failed] ") + line);
 		}
 	}
-	
+
 	/**
 	 * Allows a subclass to actually write the resulting logged command to some form of output. This
 	 * frees subclasses from needing to implement the logic within {@link #logCommandIfRequired(String, boolean)}.
@@ -264,19 +264,19 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	 * <p>
 	 * Implementations should invoke {@link #getExitShellRequest()} to monitor any attempts to exit the shell and
 	 * release resources such as output log files.
-	 * 
+	 *
 	 * @param processedLine the line that should be appended to some type of output (excluding the \n character)
 	 */
-	protected void logCommandToOutput(String processedLine) {}
+	protected void logCommandToOutput(final String processedLine) {}
 
 	/**
 	 * Base implementation of the {@link Shell#setPromptPath(String)} method, designed for simple shell
 	 * implementations. Advanced implementations (eg those that support ANSI codes etc) will likely want
 	 * to override this method and set the {@link #shellPrompt} variable directly.
-	 * 
+	 *
 	 * @param path to set (can be null or empty; must NOT be formatted in any special way eg ANSI codes)
 	 */
-	public void setPromptPath(String path) {
+	public void setPromptPath(final String path) {
 		if ("".equals(path) || path == null) {
 			shellPrompt = "roo> ";
 		} else {
@@ -309,7 +309,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		for (final Entry<Object, Object> entry : System.getProperties().entrySet()) {
 			data.add(entry.getKey() + " = " + entry.getValue());
 		}
-		
+
 		return StringUtils.collectionToDelimitedString(data, LINE_SEPARATOR) + LINE_SEPARATOR;
 	}
 
@@ -342,11 +342,11 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		Thread.sleep(150);
 		flash(Level.FINE, "", "b");
 	}
-	
+
 	@CliCommand(value={"version"}, help="Displays shell version")
-	public String version(@CliOption(key="", help="Special version flags") String extra) {
+	public String version(@CliOption(key="", help="Special version flags") final String extra) {
     	StringBuilder sb = new StringBuilder();
-		
+
     	if ("jaime".equals(extra)) {
     		sb.append("               /\\ /l").append(LINE_SEPARATOR);
     		sb.append("               ((.Y(!").append(LINE_SEPARATOR);
@@ -371,17 +371,17 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     		sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
     		return sb.toString();
     	}
-    	
-    	sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR); 
+
+    	sb.append("    ____  ____  ____  ").append(LINE_SEPARATOR);
 		sb.append("   / __ \\/ __ \\/ __ \\ ").append(LINE_SEPARATOR);
 		sb.append("  / /_/ / / / / / / / ").append(LINE_SEPARATOR);
 		sb.append(" / _, _/ /_/ / /_/ /  ").append(LINE_SEPARATOR);
 		sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo()).append(LINE_SEPARATOR);
 		sb.append(LINE_SEPARATOR);
-		
+
 		return sb.toString();
 	}
-	
+
 	public static String versionInfo() {
 		// Try to determine the bundle version
 		String bundleVersion = null;
@@ -402,13 +402,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		} finally {
 			IOUtils.closeQuietly(jarFile);
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		if (bundleVersion != null) {
 			sb.append(bundleVersion);
 		}
-		
+
 		if (gitCommitHash != null && gitCommitHash.length() > 7) {
 			if (sb.length() > 0) {
 				sb.append(" "); // to separate from version
@@ -417,36 +417,36 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			sb.append(gitCommitHash.substring(0,7));
 			sb.append("]");
 		}
-		
+
 		if (sb.length() == 0) {
 			sb.append("UNKNOWN VERSION");
 		}
-		
+
 		return sb.toString();
 	}
 
 	public String getShellPrompt() {
 		return shellPrompt;
 	}
-	
+
 	/**
 	 * Obtains the home directory for the current shell instance.
 	 *
 	 * <p>
-	 * Note: calls the {@link #getHomeAsString()} method to allow subclasses to provide the home directory location as 
-	 * string using different environment-specific strategies. 
+	 * Note: calls the {@link #getHomeAsString()} method to allow subclasses to provide the home directory location as
+	 * string using different environment-specific strategies.
  	 *
 	 * <p>
 	 * If the path indicated by {@link #getHomeAsString()} exists and refers to a directory, that directory
 	 * is returned.
-	 * 
+	 *
 	 * <p>
 	 * If the path indicated by {@link #getHomeAsString()} exists and refers to a file, an exception is thrown.
-	 * 
+	 *
 	 * <p>
 	 * If the path indicated by {@link #getHomeAsString()} does not exist, it will be created as a directory.
 	 * If this fails, an exception will be thrown.
-	 * 
+	 *
 	 * @return the home directory for the current shell instance (which is guaranteed to exist and be a directory)
 	 */
 	public File getHome() {
@@ -464,7 +464,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	 * Simple implementation of {@link #flash(Level, String, String)} that simply displays the message via the logger. It is
 	 * strongly recommended shell implementations override this method with a more effective approach.
 	 */
-	public void flash(Level level, String message, String slot) {
+	public void flash(final Level level, final String message, final String slot) {
 		Assert.notNull(level, "Level is required for a flash message");
 		Assert.notNull(message, "Message is required for a flash message");
 		Assert.hasText(slot, "Slot name must be specified for a flash message");

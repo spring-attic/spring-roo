@@ -7,18 +7,18 @@ import java.util.List;
 import java.util.Map;
 
 public class BundleVersion {
-	private String uri;
-	private String obrUrl;
-	private String version;
-	private String presentationName;
-	private Long size;
-	private String description;
+	private final String uri;
+	private final String obrUrl;
+	private final String version;
+	private final String presentationName;
+	private final Long size;
+	private final String description;
 	private Map<String, String> commands = new HashMap<String, String>();
-	private String pgpKey;
-	private String pgpDescriptions;
-	private String rooVersion;
-	
-	public BundleVersion(String uri, String obrUrl, String version, String presentationName, Long size, String description, String pgpKey, String pgpDescriptions, String rooVersion, Map<String, String> commands) {
+	private final String pgpKey;
+	private final String pgpDescriptions;
+	private final String rooVersion;
+
+	public BundleVersion(final String uri, final String obrUrl, final String version, final String presentationName, final Long size, final String description, final String pgpKey, final String pgpDescriptions, final String rooVersion, final Map<String, String> commands) {
 		super();
 		this.uri = uri;
 		this.obrUrl = obrUrl;
@@ -51,7 +51,7 @@ public class BundleVersion {
 	public Long getSize() {
 		return size;
 	}
-	
+
 	public String getRooVersion() {
 		return rooVersion;
 	}
@@ -71,7 +71,7 @@ public class BundleVersion {
 	public String getPgpDescriptions() {
 		return pgpDescriptions;
 	}
-	
+
 	public String getSummary() {
 		return presentationName + "; " + description + "; " + pgpDescriptions + "; " + commands.toString();
 	}
@@ -86,9 +86,9 @@ public class BundleVersion {
 	 * @param versions
 	 * @return a {@link List} of {@link BundleVersion} objects in ascending order
 	 */
-	public static List<BundleVersion> orderByVersion(List<BundleVersion> versions) {
+	public static List<BundleVersion> orderByVersion(final List<BundleVersion> versions) {
 		Collections.sort(versions, new Comparator<BundleVersion> () {
-			public int compare(BundleVersion o1, BundleVersion o2) {
+			public int compare(final BundleVersion o1, final BundleVersion o2) {
 				return o1.getVersion().compareToIgnoreCase(o2.getVersion());
 			}
 		});

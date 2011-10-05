@@ -29,16 +29,16 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link DynamicFinderServices}.
- * 
+ *
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
  */
-@Component 
-@Service 
+@Component
+@Service
 public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
-	public List<JavaSymbolName> getFinders(MemberDetails memberDetails, String plural, int depth, Set<JavaSymbolName> exclusions) {
+	public List<JavaSymbolName> getFinders(final MemberDetails memberDetails, final String plural, final int depth, final Set<JavaSymbolName> exclusions) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.hasText(plural, "Plural required");
 		Assert.notNull(depth, "The depth of combinations used for finder signatures combinations required");
@@ -70,7 +70,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return Collections.unmodifiableList(new ArrayList<JavaSymbolName>(finders));
 	}
 
-	public QueryHolder getQueryHolder(MemberDetails memberDetails, JavaSymbolName finderName, String plural, String entityName) {
+	public QueryHolder getQueryHolder(final MemberDetails memberDetails, final JavaSymbolName finderName, final String plural, final String entityName) {
 		Assert.notNull(memberDetails, "Member details required");
 		Assert.notNull(finderName, "Finder name required");
 		Assert.hasText(plural, "Plural required");
@@ -91,12 +91,12 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return new QueryHolder(jpaQuery, parameterTypes, parameterNames, tokens);
 	}
 
-	private String getJpaQuery(List<Token> tokens, String simpleTypeName, JavaSymbolName finderName, String plural, String entityName) {
+	private String getJpaQuery(final List<Token> tokens, final String simpleTypeName, final JavaSymbolName finderName, final String plural, final String entityName) {
 		String typeName = StringUtils.defaultIfEmpty(entityName, simpleTypeName);
 		StringBuilder builder = new StringBuilder();
 		builder.append("SELECT o FROM ").append(typeName);
 		builder.append(" AS o WHERE ");
-		
+
 		FieldToken lastFieldToken = null;
 		boolean isNewField = true;
 		boolean isFieldApplied = false;
@@ -190,7 +190,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return builder.toString().trim();
 	}
 
-	private List<JavaSymbolName> getParameterNames(List<Token> tokens, JavaSymbolName finderName, String plural) {
+	private List<JavaSymbolName> getParameterNames(final List<Token> tokens, final JavaSymbolName finderName, final String plural) {
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 
 		for (int i = 0; i < tokens.size(); i++) {
@@ -205,7 +205,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						JavaSymbolName fieldName = parameterNames.get(parameterNames.size() - 1);
 						// Remove the last field token
 						parameterNames.remove(parameterNames.size() - 1);
-						
+
 						// Replace by a min and a max value
 						parameterNames.add(new JavaSymbolName("min" + fieldName.getSymbolNameCapitalisedFirstLetter()));
 						parameterNames.add(new JavaSymbolName("max" + fieldName.getSymbolNameCapitalisedFirstLetter()));
@@ -222,7 +222,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return parameterNames;
 	}
 
-	private List<JavaType> getParameterTypes(List<Token> tokens, JavaSymbolName finderName, String plural) {
+	private List<JavaType> getParameterTypes(final List<Token> tokens, final JavaSymbolName finderName, final String plural) {
 		List<JavaType> parameterTypes = new ArrayList<JavaType>();
 
 		for (int i = 0; i < tokens.size(); i++) {
@@ -246,7 +246,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return parameterTypes;
 	}
 
-	private List<MethodMetadata> getLocatedMutators(MemberDetails memberDetails) {
+	private List<MethodMetadata> getLocatedMutators(final MemberDetails memberDetails) {
 		List<MethodMetadata> locatedMutators = new ArrayList<MethodMetadata>();
 		for (MethodMetadata methodMetadata : memberDetails.getMethods()) {
 			if (isMethodOfInterest(methodMetadata)) {
@@ -256,37 +256,37 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return locatedMutators;
 	}
 
-	private boolean isMethodOfInterest(MethodMetadata method) {
+	private boolean isMethodOfInterest(final MethodMetadata method) {
 		return method.getMethodName().getSymbolName().startsWith("set") && method.getModifier() == Modifier.PUBLIC;
 	}
 
-	private List<Token> tokenize(MemberDetails memberDetails, JavaSymbolName finderName, String plural) {
+	private List<Token> tokenize(final MemberDetails memberDetails, final JavaSymbolName finderName, final String plural) {
 		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
 		String finder = finderName.getSymbolName();
-		
+
 		// Just in case it starts with findBy we can remove it here
 		String findBy = "find" + plural + "By";
 		if (finder.startsWith(findBy)) {
 			finder = finder.substring(findBy.length());
 		}
-		
+
 		// If finder still contains the findBy sequence it is most likely a wrong finder (ie someone pasted the finder string accidentally twice
 		if (finder.contains(findBy)) {
 			throw new InvalidFinderException("Dynamic finder definition for '" + finderName.getSymbolName() + "' in " + simpleTypeName + ".java is invalid");
 		}
-		
+
 		SortedSet<FieldToken> fieldTokens = new TreeSet<FieldToken>();
 		for (MethodMetadata methodMetadata : getLocatedMutators(memberDetails)) {
 			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, methodMetadata.getParameterNames().get(0));
-			
+
 			// If we did find a field matching the first parameter name of the mutator method we can add it to the finder ITD
 			if (fieldMetadata != null) {
 				fieldTokens.add(new FieldToken(fieldMetadata));
 			}
 		}
-		
+
 		List<Token> tokens = new ArrayList<Token>();
-		
+
 		while (finder.length() > 0) {
 			Token token = getFirstToken(fieldTokens, finder, finderName.getSymbolName(), simpleTypeName);
 			if (token != null) {
@@ -296,11 +296,11 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				finder = finder.substring(token.getValue().length());
 			}
 		}
-		
+
 		return tokens;
 	}
 
-	private Token getFirstToken(SortedSet<FieldToken> fieldTokens, String finder, String originalFinder, String simpleTypeName) {
+	private Token getFirstToken(final SortedSet<FieldToken> fieldTokens, final String finder, final String originalFinder, final String simpleTypeName) {
 		for (FieldToken fieldToken : fieldTokens) {
 			if (finder.startsWith(fieldToken.getValue())) {
 				return fieldToken;
@@ -319,7 +319,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return null; // Finder does not start with reserved or field token
 	}
 
-	private Set<JavaSymbolName> createFinders(FieldMetadata field, Set<JavaSymbolName> finders, String prepend, boolean isFirst) {
+	private Set<JavaSymbolName> createFinders(final FieldMetadata field, final Set<JavaSymbolName> finders, final String prepend, final boolean isFirst) {
 		Set<JavaSymbolName> tempFinders = new HashSet<JavaSymbolName>();
 
 		if (isNumberOrDate(field.getFieldType())) {
@@ -341,9 +341,9 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		return tempFinders;
 	}
 
-	private Set<JavaSymbolName> populateFinders(Set<JavaSymbolName> finders, FieldMetadata field, String prepend, boolean isFirst, String keyWord) {
+	private Set<JavaSymbolName> populateFinders(final Set<JavaSymbolName> finders, final FieldMetadata field, final String prepend, final boolean isFirst, final String keyWord) {
 		Set<JavaSymbolName> tempFinders = new HashSet<JavaSymbolName>();
-	
+
 		if (isTransient(field)) {
 			// No need to add transient fields
 		} else if (isFirst) {
@@ -360,12 +360,12 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 		return tempFinders;
 	}
-	
-	private boolean isTransient(FieldMetadata field) {
+
+	private boolean isTransient(final FieldMetadata field) {
 		return Modifier.isTransient(field.getModifier()) || field.getCustomData().keySet().contains(CustomDataKeys.TRANSIENT_FIELD);
 	}
 
-	private boolean isNumberOrDate(JavaType fieldType) {
+	private boolean isNumberOrDate(final JavaType fieldType) {
 		return fieldType.equals(JavaType.DOUBLE_OBJECT) ||
 				fieldType.equals(JavaType.FLOAT_OBJECT) ||
 				fieldType.equals(JavaType.INT_OBJECT) ||
@@ -374,17 +374,17 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
 				fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName());
 	}
-	
+
 	/**
 	 * Returns the {@link JavaType} from the specified {@link MemberDetails} object;
-	 * 
+	 *
 	 * <p>
 	 * If the found type is abstract the next {@link MemberHoldingTypeDetails} is searched.
-	 * 
+	 *
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return the first non-abstract JavaType, or null if not found
 	 */
-	private JavaType getConcreteJavaType(MemberDetails memberDetails) {
+	private JavaType getConcreteJavaType(final MemberDetails memberDetails) {
 		Assert.notNull(memberDetails, "Member details required");
 		JavaType javaType = null;
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {

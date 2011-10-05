@@ -15,7 +15,7 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	// Fields
 	private final MemberHoldingTypeDetails memberHoldingTypeDetails;
 	private final String physicalLocationCanonicalPath;
-	
+
 	/**
 	 * Constructor
 	 *
@@ -23,7 +23,7 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	 * @param physicalLocationCanonicalPath
 	 * @param memberHoldingTypeDetails
 	 */
-	public DefaultPhysicalTypeMetadata(String metadataIdentificationString, String physicalLocationCanonicalPath, MemberHoldingTypeDetails memberHoldingTypeDetails) {
+	public DefaultPhysicalTypeMetadata(final String metadataIdentificationString, final String physicalLocationCanonicalPath, final MemberHoldingTypeDetails memberHoldingTypeDetails) {
 		super(metadataIdentificationString);
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		Assert.hasText(physicalLocationCanonicalPath, "Physical location canonical path required");
@@ -39,8 +39,8 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	public String getPhysicalLocationCanonicalPath() {
 		return physicalLocationCanonicalPath;
 	}
-	
-	public String getItdCanoncialPath(ItdMetadataProvider metadataProvider) {
+
+	public String getItdCanoncialPath(final ItdMetadataProvider metadataProvider) {
 		Assert.notNull(metadataProvider, "Metadata provider required");
 		String governorFileIdentifier = this.getPhysicalLocationCanonicalPath();
 		Assert.notNull(governorFileIdentifier, "Unable to determine file identifier for governor");
@@ -49,7 +49,7 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 		return governorFileIdentifier.substring(0, dropFrom) + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix() + ".aj";
 	}
 
-	public JavaType getItdJavaType(ItdMetadataProvider metadataProvider) {
+	public JavaType getItdJavaType(final ItdMetadataProvider metadataProvider) {
 		Assert.notNull(metadataProvider, "Metadata provider required");
 		return new JavaType(PhysicalTypeIdentifier.getJavaType(getId()).getFullyQualifiedTypeName() + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix());
 	}

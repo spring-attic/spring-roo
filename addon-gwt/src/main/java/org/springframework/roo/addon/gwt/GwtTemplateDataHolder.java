@@ -12,14 +12,14 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
  * @since 1.1.2
  */
 public class GwtTemplateDataHolder {
-	
+
 	// Fields
 	private final Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap;
 	private final Map<GwtType, String> xmlTemplates;
 	private final List<ClassOrInterfaceTypeDetails> typeList;
 	private final Map<String, String> xmlMap;
 
-	public GwtTemplateDataHolder(Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap, Map<GwtType, String> xmlTemplates, List<ClassOrInterfaceTypeDetails> typeList, Map<String, String> xmlMap) {
+	public GwtTemplateDataHolder(final Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap, final Map<GwtType, String> xmlTemplates, final List<ClassOrInterfaceTypeDetails> typeList, final Map<String, String> xmlMap) {
 		this.templateTypeDetailsMap = templateTypeDetailsMap;
 		this.xmlTemplates = xmlTemplates;
 		this.typeList = typeList;

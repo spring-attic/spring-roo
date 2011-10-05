@@ -8,22 +8,22 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides a convenience superclass for those {@link ProcessManager}s wishing to publish status messages.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
- * 
+ *
  */
 public abstract class AbstractProcessManagerStatusPublisher implements ProcessManagerStatusProvider {
-	
+
 	protected Set<ProcessManagerStatusListener> processManagerStatusListeners = new CopyOnWriteArraySet<ProcessManagerStatusListener>();
 	protected StatusHolder processManagerStatus = new StatusHolder(ProcessManagerStatus.STARTING);
-	
-	public final void addProcessManagerStatusListener(ProcessManagerStatusListener processManagerStatusListener) {
+
+	public final void addProcessManagerStatusListener(final ProcessManagerStatusListener processManagerStatusListener) {
 		Assert.notNull(processManagerStatusListener, "Status listener required");
 		processManagerStatusListeners.add(processManagerStatusListener);
 	}
 
-	public final void removeProcessManagerStatusListener(ProcessManagerStatusListener processManagerStatusListener) {
+	public final void removeProcessManagerStatusListener(final ProcessManagerStatusListener processManagerStatusListener) {
 		Assert.notNull(processManagerStatusListener, "Status listener required");
 		processManagerStatusListeners.remove(processManagerStatusListener);
 	}
@@ -34,42 +34,42 @@ public abstract class AbstractProcessManagerStatusPublisher implements ProcessMa
 	public final ProcessManagerStatus getProcessManagerStatus() {
 		return processManagerStatus.status;
 	}
-	
+
 	/**
 	 * Set the process manager status without synchronization.
 	 */
-	protected void setProcessManagerStatus(ProcessManagerStatus processManagerStatus) {
+	protected void setProcessManagerStatus(final ProcessManagerStatus processManagerStatus) {
 		Assert.notNull(processManagerStatus, "Process manager status required");
-		
+
 		if (this.processManagerStatus.status == processManagerStatus) {
 			// No need to make a change
 			return;
 		}
-		
+
 		this.processManagerStatus.status = processManagerStatus;
 
 		for (ProcessManagerStatusListener listener : processManagerStatusListeners) {
 			listener.onProcessManagerStatusChange(this.processManagerStatus.status, processManagerStatus);
 		}
 	}
-	
+
 	/**
 	 * Used so a single object instance contains the changing {@link ProcessManagerStatus} enum. This
 	 * is needed so there is a single object instance for synchronization purposes.
 	 */
 	private static class StatusHolder {
-		
+
 		// Fields
 		private ProcessManagerStatus status;
-		
+
 		/**
 		 * Constructor
 		 *
 		 * @param initialStatus
 		 */
-		private StatusHolder(ProcessManagerStatus initialStatus) {
+		private StatusHolder(final ProcessManagerStatus initialStatus) {
 			status = initialStatus;
 		}
 	}
-	
+
 }

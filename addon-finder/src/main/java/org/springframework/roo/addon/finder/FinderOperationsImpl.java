@@ -41,7 +41,7 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link FinderOperations}.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.0
  */
@@ -61,14 +61,14 @@ public class FinderOperationsImpl implements FinderOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
-	
+
 	public boolean isFinderCommandAvailable() {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
-	
-	public SortedSet<String> listFindersFor(JavaType typeName, Integer depth) {
+
+	public SortedSet<String> listFindersFor(final JavaType typeName, final Integer depth) {
 		Assert.notNull(typeName, "Java type required");
-		
+
 		String id = typeLocationService.findIdentifier(typeName);
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
@@ -78,13 +78,13 @@ public class FinderOperationsImpl implements FinderOperations {
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
 		Path path = PhysicalTypeIdentifier.getPath(id);
 		String entityMid = EntityMetadata.createIdentifier(javaType, path);
-		
+
 		// Get the entity metadata
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
 		if (entityMetadata == null) {
 			throw new IllegalArgumentException("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not an entity");
 		}
-		
+
 		// Get the member details
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata == null) {
@@ -97,14 +97,14 @@ public class FinderOperationsImpl implements FinderOperations {
 		final MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(javaType);
 		FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
-		
+
 		// Compute the finders (excluding the ID, version, and EM fields)
 		Set<JavaSymbolName> exclusions = new HashSet<JavaSymbolName>();
 		exclusions.add(entityMetadata.getEntityManagerField().getFieldName());
 		for (final FieldMetadata idField : idFields) {
 			exclusions.add(idField.getFieldName());
 		}
-		
+
 		if (versionField != null) {
 			exclusions.add(versionField.getFieldName());
 		}
@@ -134,8 +134,8 @@ public class FinderOperationsImpl implements FinderOperations {
 		}
 		return result;
 	}
-	
-	public void installFinder(JavaType typeName, JavaSymbolName finderName) {
+
+	public void installFinder(final JavaType typeName, final JavaSymbolName finderName) {
 		Assert.notNull(typeName, "Java type required");
 		Assert.notNull(finderName, "Finer name required");
 
@@ -144,7 +144,7 @@ public class FinderOperationsImpl implements FinderOperations {
 			logger.warning("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
 		}
-		
+
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
 		Path path = PhysicalTypeIdentifier.getPath(id);

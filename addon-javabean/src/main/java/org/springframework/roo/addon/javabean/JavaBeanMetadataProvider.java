@@ -36,19 +36,19 @@ import org.springframework.roo.support.util.StringUtils;
 @Component(immediate = true)
 @Service
 public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
-	
+
 	// Fields
 	@Reference private ProjectOperations projectOperations;
 	private final Set<String> producedMids = new LinkedHashSet<String>();
 	private Boolean wasGaeEnabled;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_JAVA_BEAN);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_JAVA_BEAN);
@@ -56,7 +56,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 
 	// We need to notified when ProjectMetadata changes in order to handle JPA <-> GAE persistence changes
 	@Override
-	protected void notifyForGenericListener(String upstreamDependency) {
+	protected void notifyForGenericListener(final String upstreamDependency) {
 		// If the upstream dependency is null or invalid do not continue
 		if (!StringUtils.hasText(upstreamDependency) || !MetadataIdentificationUtils.isValid(upstreamDependency)) {
 			return;
@@ -80,7 +80,8 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 		}
 	}
 
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+	@Override
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		JavaBeanAnnotationValues annotationValues = new JavaBeanAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {
 			return null;
@@ -90,14 +91,14 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 		for (FieldMetadata field : governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getDeclaredFields()) {
 			declaredFields.put(field, getIdentifierAccessorMethodName(field, metadataIdentificationString));
 		}
-		
+
 		// In order to handle switching between GAE and JPA produced MIDs need to be remembered so they can be regenerated on JPA <-> GAE switch
 		producedMids.add(metadataIdentificationString);
-		
+
 		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, declaredFields);
 	}
 
-	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field, String metadataIdentificationString) {
+	private JavaSymbolName getIdentifierAccessorMethodName(final FieldMetadata field, final String metadataIdentificationString) {
 		if (projectOperations.getProjectMetadata() == null || !projectOperations.getProjectMetadata().isGaeEnabled()) {
 			return null;
 		}
@@ -121,7 +122,7 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 			metadataDependencyRegistry.registerDependency(identifierAccessor.getDeclaredByMetadataId(), metadataIdentificationString);
 			return identifierAccessor.getMethodName();
 		}
-		
+
 		return null;
 	}
 
@@ -129,13 +130,15 @@ public class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 		return "JavaBean";
 	}
 
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
+	@Override
+	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
 		JavaType javaType = JavaBeanMetadata.getJavaType(metadataIdentificationString);
 		Path path = JavaBeanMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
+	@Override
+	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
 		return JavaBeanMetadata.createIdentifier(javaType, path);
 	}
 

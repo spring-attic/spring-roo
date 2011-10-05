@@ -24,12 +24,12 @@ import org.springframework.roo.model.RooJavaType;
 @Component
 @Service
 public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator{
-	
+
 	// Fields
 	@Reference private TypeLocationService typeLocationService;
-	private HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>>();
+	private final HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>> cacheMap = new HashMap<JavaType, HashSet<ClassOrInterfaceTypeDetails>>();
 
-	public Collection<ClassOrInterfaceTypeDetails> getRepositories(JavaType domainType) {
+	public Collection<ClassOrInterfaceTypeDetails> getRepositories(final JavaType domainType) {
 		if (!cacheMap.containsKey(domainType)) {
 			cacheMap.put(domainType, new HashSet<ClassOrInterfaceTypeDetails>());
 		}

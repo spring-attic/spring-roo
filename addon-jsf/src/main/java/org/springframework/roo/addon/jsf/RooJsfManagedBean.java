@@ -7,15 +7,15 @@ import java.lang.annotation.Target;
 
 /**
  *  Indicates a type that requires ROO JSF managed-bean support.
- *  
+ *
  *  @author Alan Stewart
  * 	@since 1.2.0
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooJsfManagedBean {
-	
+
 	Class<?> entity();
-	
+
 	boolean includeOnMenu() default true;
 }

@@ -7,18 +7,18 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Holder for identifier and embedded identifier fields
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class IdentifierHolder {
-	
-	// Fields
-	private FieldMetadata identifierField;
-	private boolean embeddedIdField;
-	private List<FieldMetadata> embeddedIdentifierFields;
 
-	public IdentifierHolder(FieldMetadata identifierField, boolean embeddedIdField, List<FieldMetadata> embeddedIdentifierFields) {
+	// Fields
+	private final FieldMetadata identifierField;
+	private final boolean embeddedIdField;
+	private final List<FieldMetadata> embeddedIdentifierFields;
+
+	public IdentifierHolder(final FieldMetadata identifierField, final boolean embeddedIdField, final List<FieldMetadata> embeddedIdentifierFields) {
 		Assert.notNull(identifierField, "Identifier field required");
 		Assert.notNull(embeddedIdentifierFields, "Fields for " + identifierField.getFieldType().getFullyQualifiedTypeName() + " required");
 		this.identifierField = identifierField;

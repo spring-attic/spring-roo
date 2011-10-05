@@ -11,16 +11,16 @@ import org.springframework.roo.file.monitor.MonitoringRequest;
 
 /**
  * Resolves paths using the typical Maven directory conventions.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 @Component(immediate = true)
 @Service
 public class MavenPathResolver extends AbstractPathResolver {
-	private List<PathInformation> pathInformation = new ArrayList<PathInformation>();
+	private final List<PathInformation> pathInformation = new ArrayList<PathInformation>();
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		// TODO CD move constant to proper location
 		String workingDir = context.getBundleContext().getProperty("roo.working.directory");
 		File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();

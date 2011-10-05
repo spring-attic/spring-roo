@@ -18,12 +18,12 @@ import org.w3c.dom.Element;
 
 /**
  * Assists converting a {@link Database} to and from XML using DOM or SAX.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public abstract class DatabaseXmlUtils {
-	
+
 	// Constants
 	public static final String NAME = "name";
 	public static final String LOCAL = "local";
@@ -202,13 +202,13 @@ public abstract class DatabaseXmlUtils {
 		document.appendChild(databaseElement);
 
 		// ROO-2355: transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://db.apache.org/torque/dtd/database_3_3.dtd");
-		
+
 		return document;
 	}
 
 	/**
 	 * Adds an <option key="foo" value="blah"> element as a child of the given parent element
-	 * 
+	 *
 	 * @param document the XML document containing the parent and child (required)
 	 * @param parent the parent element to which to add a child (required)
 	 * @param key the option key/name (required)
@@ -225,12 +225,12 @@ public abstract class DatabaseXmlUtils {
 			foreignKeyElement.setAttribute(FOREIGN_TABLE, foreignKey.getForeignTableName());
 			foreignKeyElement.setAttribute(ON_DELETE, foreignKey.getOnDelete().getCode());
 			foreignKeyElement.setAttribute(ON_UPDATE, foreignKey.getOnUpdate().getCode());
-			
+
 			final String foreignSchemaName = foreignKey.getForeignSchemaName();
 			if (!DbreModelService.NO_SCHEMA_REQUIRED.equals(foreignSchemaName)) {
 				foreignKeyElement.appendChild(createOptionElement("foreignSchemaName", foreignSchemaName, document));
 			}
-			
+
 			foreignKeyElement.appendChild(createOptionElement("exported", String.valueOf(exported), document));
 
 			for (final Reference reference : foreignKey.getReferences()) {

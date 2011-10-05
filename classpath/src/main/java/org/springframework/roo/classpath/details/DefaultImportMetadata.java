@@ -7,27 +7,27 @@ import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default implementation of {@link ImportMetadata}.
- * 
+ *
  * @author James Tyrrell
  * @since 1.1.1
  */
 public class DefaultImportMetadata extends AbstractIdentifiableJavaStructureProvider implements ImportMetadata {
-	
+
 	// Fields
 	private boolean isStatic = false;
-	private JavaPackage importPackage;
-	private JavaType importType;
+	private final JavaPackage importPackage;
+	private final JavaType importType;
 	private boolean isAsterisk = false;
-	
+
 	// Package protected to mandate the use of ImportMetadataBuilder
-	DefaultImportMetadata(CustomData customData, String declaredByMetadataId, int modifier, JavaPackage importPackage, JavaType importType, boolean isStatic, boolean isAsterisk) {
+	DefaultImportMetadata(final CustomData customData, final String declaredByMetadataId, final int modifier, final JavaPackage importPackage, final JavaType importType, final boolean isStatic, final boolean isAsterisk) {
 		super(customData, declaredByMetadataId, modifier);
 		this.importPackage = importPackage;
 		this.importType = importType;
 		this.isStatic = isStatic;
 		this.isAsterisk = isAsterisk;
 	}
-	
+
 	public JavaPackage getImportPackage() {
 		return importPackage;
 	}
@@ -44,6 +44,7 @@ public class DefaultImportMetadata extends AbstractIdentifiableJavaStructureProv
 		return isAsterisk;
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());

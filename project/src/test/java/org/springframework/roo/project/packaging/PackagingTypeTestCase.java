@@ -16,7 +16,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.2.0
  */
 public abstract class PackagingTypeTestCase<T extends AbstractPackagingType> {
-	
+
 	// Fixture
 	private T packagingType;
 
@@ -24,7 +24,7 @@ public abstract class PackagingTypeTestCase<T extends AbstractPackagingType> {
 	public void setUp() throws Exception {
 		this.packagingType = getPackagingType();
 	}
-	
+
 	@Test
 	public void testNameIsNotBlank() {
 		assertTrue(StringUtils.hasText(packagingType.getName()));
@@ -36,10 +36,10 @@ public abstract class PackagingTypeTestCase<T extends AbstractPackagingType> {
 	public void testTemplateExists() {
 		// Set up
 		final String pomTemplate = packagingType.getPomTemplate();
-		
+
 		// Invoke
 		final URL pomTemplateUrl = packagingType.getClass().getResource(pomTemplate);
-		
+
 		// Check
 		assertNotNull("Can't find POM template '" + pomTemplate + "'", pomTemplateUrl);
 	}

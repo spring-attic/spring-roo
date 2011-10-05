@@ -6,15 +6,15 @@ import org.w3c.dom.Element;
 
 /**
  * Immutable representation of an configuration specification for a (maven) build plugin
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
 public class Configuration implements Comparable<Configuration> {
-	
+
 	/**
 	 * Factory method
-	 * 
+	 *
 	 * @param configurationElement the XML node from which to parse the instance
 	 * (can be <code>null</code>)
 	 * @return <code>null</code> if a <code>null</code> element is given
@@ -26,13 +26,13 @@ public class Configuration implements Comparable<Configuration> {
 		}
 		return new Configuration(configurationElement);
 	}
-	
+
 	// Fields
 	private final Element configuration;
 
 	/**
 	 * Constructor from an XML element.
-	 * 
+	 *
 	 * Consider using {@link #getInstance(Element)} instead for null-safety.
 	 *
 	 * @param configuration the XML element specifying the configuration (required)
@@ -44,13 +44,14 @@ public class Configuration implements Comparable<Configuration> {
 
 	/**
 	 * Returns the XML element that defines this configuration
-	 * 
+	 *
 	 * @return a non-<code>null</code> element
 	 */
 	public Element getConfiguration() {
 		return configuration;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -58,11 +59,12 @@ public class Configuration implements Comparable<Configuration> {
 		return result;
 	}
 
+	@Override
 	public boolean equals(final Object obj) {
 		return obj instanceof Configuration && this.compareTo((Configuration) obj) == 0;
 	}
 
-	public int compareTo(Configuration o) {
+	public int compareTo(final Configuration o) {
 		if (o == null) {
 			throw new NullPointerException();
 		}

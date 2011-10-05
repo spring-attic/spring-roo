@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public class ProjectPathMonitoringInitializer implements MetadataNotificationListener {
-	
+
 	// Fields
 	@Reference private FilenameResolver filenameResolver;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
@@ -31,15 +31,15 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 	@Reference private PathResolver pathResolver;
 	private boolean pathsRegistered = false;
 
-	protected void activate(ComponentContext context) {
+	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 	}
 
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
+	public void notify(final String upstreamDependency, final String downstreamDependency) {
 		if (pathsRegistered) {
 			return;
 		}

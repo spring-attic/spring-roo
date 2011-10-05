@@ -9,18 +9,18 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Holder for embedded identifier attributes
- * 
+ *
  * @author Alan Stewart
  * @author Greg Turnquist
  * @since 1.1.3
  */
 public class EmbeddedIdentifierHolder {
-	
-	// Fields
-	private FieldMetadata embeddedIdentifierField;
-	private List<FieldMetadata> identifierFields;
 
-	public EmbeddedIdentifierHolder(FieldMetadata embeddedIdentifierField, List<FieldMetadata> identifierFields) {
+	// Fields
+	private final FieldMetadata embeddedIdentifierField;
+	private final List<FieldMetadata> identifierFields;
+
+	public EmbeddedIdentifierHolder(final FieldMetadata embeddedIdentifierField, final List<FieldMetadata> identifierFields) {
 		Assert.notNull(embeddedIdentifierField, "Identifier type required");
 		Assert.notNull(identifierFields, "Fields for " + embeddedIdentifierField.getFieldType().getFullyQualifiedTypeName() + " required");
 		this.embeddedIdentifierField = embeddedIdentifierField;
@@ -34,7 +34,7 @@ public class EmbeddedIdentifierHolder {
 	public JavaSymbolName getEmbeddedIdentifierMutator() {
 		return new JavaSymbolName("set" + StringUtils.capitalize(embeddedIdentifierField.getFieldName().getSymbolName()));
 	}
-	
+
 	public List<FieldMetadata> getIdentifierFields() {
 		return identifierFields;
 	}

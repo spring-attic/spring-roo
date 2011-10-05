@@ -27,35 +27,35 @@ public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName
 	@Reference protected HttpPgpUrlStreamHandlerService handlerService;
 	@Reference private RepositoryAdmin repositoryAdmin;
 	private ComponentContext context;
-	
-	protected void activate(ComponentContext context) {
+
+	protected void activate(final ComponentContext context) {
 		this.context = context;
 	}
-	
-	protected void deactivate(ComponentContext context) {
+
+	protected void deactivate(final ComponentContext context) {
 		this.context = null;
 	}
 
-	public BundleSymbolicName convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public BundleSymbolicName convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		return new BundleSymbolicName(value.trim());
 	}
-	
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String originalUserInput, String optionContext, MethodTarget target) {
+
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
 		boolean local = false;
 		boolean obr = false;
-		
+
 		if ("".equals(optionContext)) {
 			local = true;
 		}
-		
+
 		if (optionContext.contains("local")) {
 			local = true;
 		}
-		
+
 		if (optionContext.contains("obr")) {
 			obr = true;
 		}
-		
+
 		if (local) {
 			Bundle[] bundles = this.context.getBundleContext().getBundles();
 			if (bundles != null) {
@@ -67,7 +67,7 @@ public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName
 				}
 			}
 		}
-		
+
 		if (obr) {
 			Repository[] repositories = repositoryAdmin.listRepositories();
 			if (repositories != null) {
@@ -87,7 +87,7 @@ public class BundleSymbolicNameConverter implements Converter<BundleSymbolicName
 		return false;
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return BundleSymbolicName.class.isAssignableFrom(requiredType);
 	}
 }

@@ -24,11 +24,11 @@ public class AddOnBundleSymbolicNameConverter implements Converter<AddOnBundleSy
 
 	// Fields
 	private @Reference AddOnRooBotOperations addonManagerOperations;
-	
+
 	public AddOnBundleSymbolicName convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		return new AddOnBundleSymbolicName(value.trim());
 	}
-	
+
 	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String originalUserInput, final String optionContext, final MethodTarget target) {
 		final Map<String, Bundle> bundles = addonManagerOperations.getAddOnCache(false);
 		for (final Entry<String, Bundle> entry : bundles.entrySet()) {
@@ -38,7 +38,7 @@ public class AddOnBundleSymbolicNameConverter implements Converter<AddOnBundleSy
 				for (final BundleVersion bundleVersion : bundle.getVersions()) {
 					completions.add(bsn + ";" + bundleVersion.getVersion());
 				}
-			} 
+			}
 			completions.add(bsn);
 		}
 		return false;

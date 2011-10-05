@@ -8,7 +8,7 @@ package org.springframework.roo.support.util;
  */
 public class MathUtils {
 
-	public static double round(double valueToRound, int numberOfDecimalPlaces) {
+	public static double round(final double valueToRound, final int numberOfDecimalPlaces) {
 		double multiplicationFactor = Math.pow(10, numberOfDecimalPlaces);
 		double interestedInZeroDPs = valueToRound * multiplicationFactor;
 		return Math.round(interestedInZeroDPs) / multiplicationFactor;

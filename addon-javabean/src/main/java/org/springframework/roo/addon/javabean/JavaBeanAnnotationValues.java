@@ -8,12 +8,12 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * Represents a parsed {@link RooJavaBean} annotation.
- * 
+ *
  * @author Alan Stewart
  * @since 1.2.0
  */
 public class JavaBeanAnnotationValues extends AbstractAnnotationValues {
-	
+
 	// From annotation
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault = true;
@@ -23,7 +23,7 @@ public class JavaBeanAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public JavaBeanAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public JavaBeanAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_JAVA_BEAN);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}

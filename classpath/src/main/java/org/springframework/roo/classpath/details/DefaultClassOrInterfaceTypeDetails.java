@@ -19,15 +19,15 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Default representation of a {@link ClassOrInterfaceTypeDetails}.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTypeDetails implements ClassOrInterfaceTypeDetails {
-	
+
 	// Fields
-	private ClassOrInterfaceTypeDetails superclass;
-	private JavaType name;
+	private final ClassOrInterfaceTypeDetails superclass;
+	private final JavaType name;
 	private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
@@ -36,9 +36,9 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-	private PhysicalTypeCategory physicalTypeCategory;
+	private final PhysicalTypeCategory physicalTypeCategory;
 	private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
-	
+
 	/**
 	 * Constructor is package protected to mandate the use of
 	 * {@link ClassOrInterfaceTypeDetailsBuilder}
@@ -60,23 +60,23 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 	 * @param enumConstants
 	 * @param registeredImports
 	 */
-	DefaultClassOrInterfaceTypeDetails(CustomData customData,
-		String declaredByMetadataId,
-		int modifier,
-		List<AnnotationMetadata> annotations,
-		JavaType name,
-		PhysicalTypeCategory physicalTypeCategory,
-		List<ConstructorMetadata> declaredConstructors,
-		List<FieldMetadata> declaredFields,
-		List<MethodMetadata> declaredMethods,
-		List<ClassOrInterfaceTypeDetails> declaredInnerTypes,
-		List<InitializerMetadata> declaredInitializers,
-		ClassOrInterfaceTypeDetails superclass,
-		List<JavaType> extendsTypes,
-		List<JavaType> implementsTypes,
-		List<JavaSymbolName> enumConstants,
-		Collection<ImportMetadata> registeredImports) {
-		
+	DefaultClassOrInterfaceTypeDetails(final CustomData customData,
+		final String declaredByMetadataId,
+		final int modifier,
+		final List<AnnotationMetadata> annotations,
+		final JavaType name,
+		final PhysicalTypeCategory physicalTypeCategory,
+		final List<ConstructorMetadata> declaredConstructors,
+		final List<FieldMetadata> declaredFields,
+		final List<MethodMetadata> declaredMethods,
+		final List<ClassOrInterfaceTypeDetails> declaredInnerTypes,
+		final List<InitializerMetadata> declaredInitializers,
+		final ClassOrInterfaceTypeDetails superclass,
+		final List<JavaType> extendsTypes,
+		final List<JavaType> implementsTypes,
+		final List<JavaSymbolName> enumConstants,
+		final Collection<ImportMetadata> registeredImports) {
+
 		super(customData, declaredByMetadataId, modifier, annotations);
 		Assert.notNull(name, "Name required");
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
@@ -130,11 +130,11 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 	public JavaType getName() {
 		return name;
 	}
-	
+
 	public List<? extends ConstructorMetadata> getDeclaredConstructors() {
 		return Collections.unmodifiableList(declaredConstructors);
 	}
-	
+
 	public List<JavaSymbolName> getEnumConstants() {
 		return Collections.unmodifiableList(enumConstants);
 	}
@@ -142,7 +142,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 	public List<? extends FieldMetadata> getDeclaredFields() {
 		return Collections.unmodifiableList(declaredFields);
 	}
-	
+
 	public List<? extends MethodMetadata> getDeclaredMethods() {
 		return Collections.unmodifiableList(declaredMethods);
 	}
@@ -154,15 +154,15 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 	public List<InitializerMetadata> getDeclaredInitializers() {
 		return Collections.unmodifiableList(declaredInitializers);
 	}
-	
+
 	public List<JavaType> getExtendsTypes() {
 		return Collections.unmodifiableList(extendsTypes);
 	}
-	
+
 	public List<JavaType> getImplementsTypes() {
 		return Collections.unmodifiableList(implementsTypes);
 	}
-	
+
 	public ClassOrInterfaceTypeDetails getSuperclass() {
 		return superclass;
 	}
@@ -174,7 +174,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 	public boolean extendsType(final JavaType type) {
 		return this.extendsTypes.contains(type);
 	}
-	
+
 	public boolean implementsAny(final JavaType... types) {
 		for (final JavaType type : types) {
 			if (this.implementsTypes.contains(type)) {
@@ -183,7 +183,8 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractMemberHoldingTyp
 		}
 		return false;
 	}
-	
+
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("name", name);

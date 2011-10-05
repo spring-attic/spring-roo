@@ -49,7 +49,7 @@ import org.w3c.dom.Element;
 
 /**
  * The {@link MongoOperations} implementation.
- * 
+ *
  * @author Stefan Schmidt
  * @since 1.2.0
  */
@@ -65,7 +65,7 @@ public class MongoOperationsImpl implements MongoOperations {
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
-	
+
 	public boolean isSetupCommandAvailable() {
 		return projectOperations.isProjectAvailable();
 	}
@@ -74,18 +74,18 @@ public class MongoOperationsImpl implements MongoOperations {
 		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml"));
 	}
 
-	public void setupRepository(JavaType interfaceType, JavaType classType, JavaType domainType) {
+	public void setupRepository(final JavaType interfaceType, final JavaType classType, final JavaType domainType) {
 		Assert.notNull(interfaceType, "Interface type required");
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(domainType, "Domain type required");
-		
+
 		String interfaceIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(interfaceType, Path.SRC_MAIN_JAVA);
 		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
-		
+
 		if (fileManager.exists(interfaceIdentifier) || fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
-		
+
 		// First build interface type
 		AnnotationMetadataBuilder interfaceAnnotationMetadata = new AnnotationMetadataBuilder(ROO_REPOSITORY_MONGO);
 		interfaceAnnotationMetadata.addAttribute(new ClassAttributeValue(new JavaSymbolName("domainType"), domainType));
@@ -97,40 +97,40 @@ public class MongoOperationsImpl implements MongoOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(interfaceTypeBuilder.build());
 	}
 
-	public void createType(JavaType classType, JavaType idType, boolean testAutomatically) {
+	public void createType(final JavaType classType, final JavaType idType, final boolean testAutomatically) {
 		Assert.notNull(classType, "Class type required");
 		Assert.notNull(idType, "Identifier type required");
-		
+
 		String classIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(classType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(classIdentifier)) {
 			return; // Type exists already - nothing to do
 		}
-		
+
 		String classMdId = PhysicalTypeIdentifier.createIdentifier(classType, projectOperations.getPathResolver().getPath(classIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder classTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(classMdId, Modifier.PUBLIC, classType, PhysicalTypeCategory.CLASS);
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_JAVA_BEAN));
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_TO_STRING));
-		
+
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		if (!idType.equals(new JavaType(BigInteger.class.getName()))) {
 			attributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), idType));
 		}
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_MONGO_ENTITY, attributes));
 		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
-		
+
 		if (testAutomatically) {
 			integrationTestOperations.newIntegrationTest(classType, false);
 			dataOnDemandOperations.newDod(classType, new JavaType(classType.getFullyQualifiedTypeName() + "DataOnDemand"), Path.SRC_TEST_JAVA);
 		}
 	}
 
-	public void setup(String username, String password, String name, String port, String host, boolean cloudFoundry) {
+	public void setup(final String username, final String password, final String name, final String port, final String host, final boolean cloudFoundry) {
 		writeProperties(username, password, name, port, host);
 		manageDependencies();
 		manageAppCtx(username, password, name, cloudFoundry);
 	}
 
-	private void manageAppCtx(String username, String password, String name, boolean cloudFoundry) {
+	private void manageAppCtx(final String username, final String password, final String name, final boolean cloudFoundry) {
 		String appCtxId = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-mongo.xml");
 		if (!fileManager.exists(appCtxId)) {
 			try {
@@ -186,19 +186,19 @@ public class MongoOperationsImpl implements MongoOperations {
 
 	private void manageDependencies() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
-		
+
 		List<Dependency> dependencies = new ArrayList<Dependency>();
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/repository/dependencies/dependency", configuration);
 		for (Element dependencyElement : springDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
-		
+
 		List<Repository> repositories = new ArrayList<Repository>();
 		List<Element> repositoryElements = XmlUtils.findElements("/configuration/repository/repository", configuration);
 		for (Element repositoryElement : repositoryElements) {
 			repositories.add(new Repository(repositoryElement));
 		}
-		
+
 		projectOperations.addRepositories(repositories);
 		projectOperations.addDependencies(dependencies);
 	}
@@ -209,7 +209,7 @@ public class MongoOperationsImpl implements MongoOperations {
 		if (!StringUtils.hasText(name)) name = projectOperations.getProjectMetadata().getProjectName();
 		if (!StringUtils.hasText(port)) port = "27017";
 		if (!StringUtils.hasText(host)) host = "127.0.0.1";
-		
+
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put("mongo.username", username);
 		properties.put("mongo.password", password);

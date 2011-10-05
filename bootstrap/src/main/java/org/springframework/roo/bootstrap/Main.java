@@ -18,18 +18,18 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 /**
  * Loads Roo via Felix.
- * 
+ *
  * <p>
  * This class is based on Apache Felix's org.apache.felix.main.Main class.
- * 
+ *
  * <p>
  * For maximum compatibility with Felix, this class has minimal changes from the
  * original. All changes are noted with a
  * "**** CHANGE FROM ORIGINAL FELIX VERSION ****" comment.
- * 
+ *
  * @author Ben Alex
  * @since 1.1.0
- * 
+ *
  */
 @SuppressWarnings("all")  // **** CHANGE FROM ORIGINAL FELIX VERSION ****
 public class Main {
@@ -170,14 +170,14 @@ public class Main {
 	 * that they can be processed by the launcher during the framework startup
 	 * process.
 	 * </p>
-	 * 
+	 *
 	 * @param args
 	 *            Accepts arguments to set the auto-deploy directory and/or the
 	 *            bundle cache directory.
 	 * @throws Exception
 	 *             If an error occurs.
 	 **/
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 		// Look for bundle directory and/or cache directory.
 		// We support at most one argument, which is the bundle
 		// cache directory.
@@ -277,13 +277,13 @@ public class Main {
 			System.err.println("Could not create framework: " + ex);
 			ex.printStackTrace();
 			// **** CHANGE FROM ORIGINAL FELIX VERSION ****
-			System.exit(-1); 
+			System.exit(-1);
 			// **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
 		}
 	}
 
 	// **** CHANGE FROM ORIGINAL FELIX VERSION ****
-	private static double round(double valueToRound, int numberOfDecimalPlaces) {
+	private static double round(final double valueToRound, final int numberOfDecimalPlaces) {
 		double multiplicationFactor = Math.pow(10, numberOfDecimalPlaces);
 		double interestedInZeroDPs = valueToRound * multiplicationFactor;
 		return Math.round(interestedInZeroDPs) / multiplicationFactor;
@@ -294,7 +294,7 @@ public class Main {
 	 * Simple method to parse META-INF/services file for framework factory.
 	 * Currently, it assumes the first non-commented line is the class name of
 	 * the framework factory implementation.
-	 * 
+	 *
 	 * @return The created <tt>FrameworkFactory</tt> instance.
 	 * @throws Exception
 	 *             if any errors occur.
@@ -417,7 +417,7 @@ public class Main {
 	 * initializing the "<tt>felix.config.properties</tt>" system property to an
 	 * arbitrary URL.
 	 * </p>
-	 * 
+	 *
 	 * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an
 	 *         error.
 	 **/
@@ -492,7 +492,7 @@ public class Main {
 		return props;
 	}
 
-	public static void copySystemProperties(Properties configProps) {
+	public static void copySystemProperties(final Properties configProps) {
 		for (Enumeration e = System.getProperties().propertyNames(); e.hasMoreElements();) {
 			String key = (String) e.nextElement();
 			if (key.startsWith("felix.") || key.startsWith("org.osgi.framework.")) {

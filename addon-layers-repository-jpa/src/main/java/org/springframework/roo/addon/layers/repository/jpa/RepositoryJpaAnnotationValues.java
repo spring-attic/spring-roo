@@ -9,7 +9,7 @@ import org.springframework.roo.model.RooJavaType;
 
 /**
  * The values of a {@link RooRepositoryJpa} annotation.
- * 
+ *
  * @author Stefan Schmidt
  * @author Andrew Swan
  * @since 1.2.0
@@ -18,20 +18,20 @@ public class RepositoryJpaAnnotationValues extends AbstractAnnotationValues {
 
 	// Fields
 	@AutoPopulate private JavaType domainType;
-	
+
 	/**
 	 * Constructor
 	 *
 	 * @param governorPhysicalTypeMetadata the metadata to parse (required)
 	 */
-	public RepositoryJpaAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	public RepositoryJpaAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, RooJavaType.ROO_REPOSITORY_JPA);
 		AutoPopulationUtils.populate(this, annotationMetadata);
 	}
 
 	/**
 	 * Returns the domain type managed by the annotated repository
-	 * 
+	 *
 	 * @return a non-<code>null</code> type
 	 */
 	public JavaType getDomainType() {

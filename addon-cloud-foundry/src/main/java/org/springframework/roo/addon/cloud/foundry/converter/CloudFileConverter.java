@@ -24,18 +24,18 @@ import org.springframework.roo.shell.MethodTarget;
 public class CloudFileConverter implements Converter<CloudFile> {
 	@Reference private CloudFoundrySession session;
 
-	public CloudFile convertFromText(String value, Class<?> requiredType, String optionContext) {
+	public CloudFile convertFromText(final String value, final Class<?> requiredType, final String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
 		return new CloudFile(value);
 	}
 
-	public boolean supports(Class<?> requiredType, String optionContext) {
+	public boolean supports(final Class<?> requiredType, final String optionContext) {
 		return CloudFile.class.isAssignableFrom(requiredType);
 	}
 
-	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
+	public boolean getAllPossibleValues(final List<String> completions, final Class<?> requiredType, final String existingData, final String optionContext, final MethodTarget target) {
 		final String appName = ConverterUtils.getOptionValue("appName", target.getRemainingBuffer());
 		String path = ConverterUtils.getOptionValue("path", target.getRemainingBuffer());
 		if (path != null) {
@@ -61,7 +61,7 @@ public class CloudFileConverter implements Converter<CloudFile> {
 		return false;
 	}
 
-	private List<String> getFileOptions(String files) {
+	private List<String> getFileOptions(final String files) {
 		String[] lines = files.split("\n");
 		List<String> options = new ArrayList<String>();
 		for (String line : lines) {

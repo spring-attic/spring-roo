@@ -5,7 +5,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents a reference between a column in the local table and a column in another table.
- * 
+ *
  * @author Alan Stewart
  * @since 1.1
  */
@@ -22,26 +22,26 @@ public class Reference {
 
 	/** The name of the foreign column. */
 	private String foreignColumnName;
-	
+
 	private boolean insertableOrUpdatable = true;
 
 	/**
 	 * Creates a new reference between the two given columns.
 	 */
-	Reference(String localColumnName, String foreignColumnName) {
+	Reference(final String localColumnName, final String foreignColumnName) {
 		Assert.isTrue(StringUtils.hasText(localColumnName), "Foreign key reference local column name required");
 		Assert.isTrue(StringUtils.hasText(foreignColumnName), "Foreign key reference foreign column name required");
 		this.localColumnName = localColumnName;
-		this.foreignColumnName = foreignColumnName; 
+		this.foreignColumnName = foreignColumnName;
 	}
 
 	/**
 	 * Creates a new reference between the two given columns.
-	 * 
+	 *
 	 * @param localColumn The local column
 	 * @param foreignColumn The remote column
 	 */
-	Reference(Column localColumn, Column foreignColumn) {
+	Reference(final Column localColumn, final Column foreignColumn) {
 		setLocalColumn(localColumn);
 		setForeignColumn(foreignColumn);
 	}
@@ -50,7 +50,7 @@ public class Reference {
 		return localColumn;
 	}
 
-	public void setLocalColumn(Column localColumn) {
+	public void setLocalColumn(final Column localColumn) {
 		this.localColumn = localColumn;
 	}
 
@@ -58,7 +58,7 @@ public class Reference {
 		return foreignColumn;
 	}
 
-	public void setForeignColumn(Column foreignColumn) {
+	public void setForeignColumn(final Column foreignColumn) {
 		this.foreignColumn = foreignColumn;
 	}
 
@@ -74,10 +74,11 @@ public class Reference {
 		return insertableOrUpdatable;
 	}
 
-	public void setInsertableOrUpdatable(boolean insertableOrUpdatable) {
+	public void setInsertableOrUpdatable(final boolean insertableOrUpdatable) {
 		this.insertableOrUpdatable = insertableOrUpdatable;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -86,7 +87,8 @@ public class Reference {
 		return result;
 	}
 
-	public boolean equals(Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
@@ -114,6 +116,7 @@ public class Reference {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return String.format("Reference [localColumnName=%s, foreignColumnName=%s, insertableOrUpdatable=%s]", localColumnName, foreignColumnName, insertableOrUpdatable);
 	}

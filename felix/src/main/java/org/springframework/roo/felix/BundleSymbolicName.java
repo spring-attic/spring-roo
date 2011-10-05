@@ -7,27 +7,27 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a Bundle Symbolic Name.
- * 
+ *
  * @author Ben Alex
  * @since 1.0
  */
 public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 
 	// Fields
-	private String key;
+	private final String key;
 
-	public BundleSymbolicName(String key) {
+	public BundleSymbolicName(final String key) {
 		Assert.hasText(key, "Key required");
 		this.key = key;
 	}
-	
+
 	/**
 	 * Locates the bundle ID for this BundleSymbolicName, if available.
-	 * 
+	 *
 	 * @param context to search (required)
 	 * @return the ID (or null if cannot be found)
 	 */
-	public Long findBundleIdWithoutFail(BundleContext context) {
+	public Long findBundleIdWithoutFail(final BundleContext context) {
 		Assert.notNull(context, "Bundle context is unavailable");
 		Bundle[] bundles = context.getBundles();
 		if (bundles == null) {
@@ -44,20 +44,23 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 	public String getKey() {
 		return key;
 	}
-	
+
+	@Override
 	public final int hashCode() {
 		return this.key.hashCode();
 	}
 
-	public final boolean equals(Object obj) {
+	@Override
+	public final boolean equals(final Object obj) {
 		return obj instanceof BundleSymbolicName && this.compareTo((BundleSymbolicName)obj) == 0;
 	}
 
-	public final int compareTo(BundleSymbolicName o) {
+	public final int compareTo(final BundleSymbolicName o) {
 		if (o == null) return -1;
 		return this.key.compareTo(o.key);
 	}
 
+	@Override
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("key", key);
