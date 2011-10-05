@@ -32,17 +32,18 @@ public final class DomUtils {
 	 * the given element names. Only look at the direct child level of the
 	 * given element; do not go into further depth (in contrast to the
 	 * DOM API's <code>getElementsByTagName</code> method).
-	 * @param ele the DOM element to analyze
-	 * @param childEleNames the child element names to look for
+	 * 
+	 * @param element the DOM element to analyze
+	 * @param childElementNames the child element names to look for
 	 * @return a List of child <code>org.w3c.dom.Element</code> instances
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
-	public static List<Element> getChildElementsByTagName(Element ele, String[] childEleNames) {
-		Assert.notNull(ele, "Element must not be null");
-		Assert.notNull(childEleNames, "Element names collection must not be null");
-		List<String> childEleNameList = Arrays.asList(childEleNames);
-		NodeList nl = ele.getChildNodes();
+	public static List<Element> getChildElementsByTagName(Element element, String[] childElementNames) {
+		Assert.notNull(element, "Element must not be null");
+		Assert.notNull(childElementNames, "Element names collection must not be null");
+		List<String> childEleNameList = Arrays.asList(childElementNames);
+		NodeList nl = element.getChildNodes();
 		List<Element> childEles = new ArrayList<Element>();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -58,31 +59,32 @@ public final class DomUtils {
 	 * the given element name. Only look at the direct child level of the
 	 * given element; do not go into further depth (in contrast to the
 	 * DOM API's <code>getElementsByTagName</code> method).
-	 * @param ele the DOM element to analyze
+	 * 
+	 * @param element the DOM element to analyze
 	 * @param childEleName the child element name to look for
 	 * @return a List of child <code>org.w3c.dom.Element</code> instances
 	 * @see org.w3c.dom.Element
 	 * @see org.w3c.dom.Element#getElementsByTagName
 	 */
-	public static List<Element> getChildElementsByTagName(Element ele, String childEleName) {
-		return getChildElementsByTagName(ele, new String[] {childEleName});
+	public static List<Element> getChildElementsByTagName(Element element, String childEleName) {
+		return getChildElementsByTagName(element, new String[] {childEleName});
 	}
 
 	/**
-	 * Utility method that returns the first child element
-	 * identified by its name.
-	 * @param ele the DOM element to analyze
-	 * @param childEleName the child element name to look for
+	 * Returns the first child element identified by its name.
+	 * 
+	 * @param element the DOM element to analyze
+	 * @param childElementName the child element name to look for
 	 * @return the <code>org.w3c.dom.Element</code> instance,
 	 * or <code>null</code> if none found
 	 */
-	public static Element getChildElementByTagName(Element ele, String childEleName) {
-		Assert.notNull(ele, "Element must not be null");
-		Assert.notNull(childEleName, "Element name must not be null");
-		NodeList nl = ele.getChildNodes();
+	public static Element getChildElementByTagName(Element element, String childElementName) {
+		Assert.notNull(element, "Element must not be null");
+		Assert.notNull(childElementName, "Element name must not be null");
+		NodeList nl = element.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && nodeNameMatch(node, childEleName)) {
+			if (node instanceof Element && nodeNameMatch(node, childElementName)) {
 				return (Element) node;
 			}
 		}
@@ -90,15 +92,15 @@ public final class DomUtils {
 	}
 
 	/**
-	 * Utility method that returns the first child element value
-	 * identified by its name.
-	 * @param ele the DOM element to analyze
-	 * @param childEleName the child element name to look for
+	 * Returns the first child element value identified by its name.
+	 * 
+	 * @param element the DOM element to analyze
+	 * @param childElementName the child element name to look for
 	 * @return the extracted text value,
 	 * or <code>null</code> if no child element found
 	 */
-	public static String getChildElementValueByTagName(Element ele, String childEleName) {
-		Element child = getChildElementByTagName(ele, childEleName);
+	public static String getChildElementValueByTagName(Element element, String childElementName) {
+		Element child = getChildElementByTagName(element, childElementName);
 		return (child != null ? getTextValue(child) : null);
 	}
 
@@ -106,14 +108,15 @@ public final class DomUtils {
 	 * Extract the text value from the given DOM element, ignoring XML comments.
 	 * <p>Appends all CharacterData nodes and EntityReference nodes
 	 * into a single String value, excluding Comment nodes.
+	 * 
 	 * @see CharacterData
 	 * @see EntityReference
 	 * @see Comment
 	 */
-	public static String getTextValue(Element valueEle) {
-		Assert.notNull(valueEle, "Element must not be null");
+	public static String getTextValue(Element valueElement) {
+		Assert.notNull(valueElement, "Element must not be null");
 		StringBuilder sb = new StringBuilder();
-		NodeList nl = valueEle.getChildNodes();
+		NodeList nl = valueElement.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node item = nl.item(i);
 			if ((item instanceof CharacterData && !(item instanceof Comment)) || item instanceof EntityReference) {
@@ -127,6 +130,10 @@ public final class DomUtils {
 	 * Namespace-aware equals comparison. Returns <code>true</code> if either
 	 * {@link Node#getLocalName} or {@link Node#getNodeName} equals <code>desiredName</code>,
 	 * otherwise returns <code>false</code>.
+	 * 
+	 * @param node (required)
+	 * @param desiredName (required)
+	 * @return
 	 */
 	public static boolean nodeNameEquals(Node node, String desiredName) {
 		Assert.notNull(node, "Node must not be null");
@@ -136,6 +143,10 @@ public final class DomUtils {
 
 	/**
 	 * Matches the given node's name and local name against the given desired name.
+	 * 
+	 * @param node
+	 * @param desiredName
+	 * @return
 	 */
 	private static boolean nodeNameMatch(Node node, String desiredName) {
 		return (desiredName.equals(node.getNodeName()) || desiredName.equals(node.getLocalName()));
@@ -143,13 +154,17 @@ public final class DomUtils {
 
 	/**
 	 * Matches the given node's name and local name against the given desired names.
+	 * 
+	 * @param node
+	 * @param desiredNames
+	 * @return
 	 */
 	private static boolean nodeNameMatch(Node node, Collection<?> desiredNames) {
 		return (desiredNames.contains(node.getNodeName()) || desiredNames.contains(node.getLocalName()));
 	}
 
 	/**
-	 * Removes empty text nodes from the specified node
+	 * Removes empty text nodes from the specified node.
 	 * 
 	 * @param node the element where empty text nodes will be removed
 	 */
@@ -176,7 +191,7 @@ public final class DomUtils {
 	}
 
 	/**
-	 * Returns the text content of the given {@link Node}, null safe
+	 * Returns the text content of the given {@link Node}, null safe.
 	 * 
 	 * @param node can be <code>null</code>
 	 * @param defaultValue the value to return if the node is <code>null</code>
@@ -210,7 +225,7 @@ public final class DomUtils {
 
 	/**
 	 * Returns the child node with the given tag name, creating it if it does
-	 * not exist
+	 * not exist.
 	 * 
 	 * @param tagName the child tag to look for and possibly create (required)
 	 * @param parent the parent in which to look for the child (required)
@@ -229,7 +244,7 @@ public final class DomUtils {
 
 	/**
 	 * Returns the text content of the first child of the given parent that has
-	 * the given tag name, if any
+	 * the given tag name, if any.
 	 * 
 	 * @param parent the parent in which to search (required)
 	 * @param child the child name for which to search (required)

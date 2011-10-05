@@ -805,4 +805,9 @@ public final class JavaParserUtils  {
 
 		return resolvedName;
 	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private JavaParserUtils() {}
 }
