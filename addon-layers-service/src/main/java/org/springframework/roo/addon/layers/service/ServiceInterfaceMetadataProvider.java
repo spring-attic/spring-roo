@@ -22,7 +22,6 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerTypeMatcher;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaSymbolName;
@@ -41,7 +40,6 @@ public class ServiceInterfaceMetadataProvider extends AbstractMemberDiscoveringI
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 	@Reference private TypeLocationService typeLocationService;
 	
 	private Map<JavaType, String> managedEntityTypes = new HashMap<JavaType, String>();
