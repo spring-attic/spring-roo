@@ -7,18 +7,38 @@ package org.springframework.roo.addon.web.mvc.controller.details;
  * @since 1.1.2
  */
 public class DateTimeFormatDetails {
-	public String style;
-	public String pattern;
 
-	public static DateTimeFormatDetails withStyle(String style) {
-		DateTimeFormatDetails d = new DateTimeFormatDetails();
-		d.style = style;
-		return d;
+	/**
+	 * Factory method for a {@link DateTimeFormatDetails} with the given style
+	 * 
+	 * @param style the style to set (can be <code>null</code>)
+	 * @return a non-<code>null</code> instance
+	 */
+	public static DateTimeFormatDetails withStyle(final String style) {
+		final DateTimeFormatDetails instance = new DateTimeFormatDetails();
+		instance.style = style;
+		return instance;
 	}
 
-	public static DateTimeFormatDetails withPattern(String pattern) {
-		DateTimeFormatDetails d = new DateTimeFormatDetails();
-		d.pattern = pattern;
-		return d;
+	/**
+	 * Factory method for a {@link DateTimeFormatDetails} with the given pattern
+	 * 
+	 * @param the pattern to set (can be <code>null</code>)
+	 * @return a non-<code>null</code> instance
+	 */
+	public static DateTimeFormatDetails withPattern(final String pattern) {
+		final DateTimeFormatDetails instance = new DateTimeFormatDetails();
+		instance.pattern = pattern;
+		return instance;
+	}
+	
+	// Fields
+	public String style;
+	public String pattern;
+	
+	@Override
+	public String toString() {
+		// For debugging
+		return style + ":" + pattern;
 	}
 }

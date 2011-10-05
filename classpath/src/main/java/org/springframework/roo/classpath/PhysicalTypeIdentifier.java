@@ -51,6 +51,13 @@ public final class PhysicalTypeIdentifier {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
+	/**
+	 * Indicates whether the given metadata ID identifies a physical Java type,
+	 * in other words an interface, class, annotation, or enum. 
+	 * 
+	 * @param metadataIdentificationString the metadata ID to check
+	 * @return see above
+	 */
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}

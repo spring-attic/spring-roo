@@ -7,12 +7,22 @@ import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * The default {@link PhysicalTypeMetadata} implementation.
+ */
 public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
 
 	// Fields
-	private MemberHoldingTypeDetails memberHoldingTypeDetails;
-	private String physicalLocationCanonicalPath;
+	private final MemberHoldingTypeDetails memberHoldingTypeDetails;
+	private final String physicalLocationCanonicalPath;
 	
+	/**
+	 * Constructor
+	 *
+	 * @param metadataIdentificationString
+	 * @param physicalLocationCanonicalPath
+	 * @param memberHoldingTypeDetails
+	 */
 	public DefaultPhysicalTypeMetadata(String metadataIdentificationString, String physicalLocationCanonicalPath, MemberHoldingTypeDetails memberHoldingTypeDetails) {
 		super(metadataIdentificationString);
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");

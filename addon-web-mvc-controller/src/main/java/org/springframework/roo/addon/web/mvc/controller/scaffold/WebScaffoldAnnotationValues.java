@@ -68,4 +68,19 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	public boolean isPopulateMethods() {
 		return populateMethods;
 	}
+
+	@Override
+	public String toString() {
+		// For debugging
+		return "WebScaffoldAnnotationValues [" +
+				"create=" + create +
+				", delete=" + delete +
+				", exposeFinders=" + exposeFinders +
+				", populateMethods=" + populateMethods +
+				", registerConverters=" + registerConverters +
+				", update=" + update +
+				", formBackingObject=" + formBackingObject +
+				", path=" + path +
+		"]";
+	}
 }

@@ -152,7 +152,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		Assert.isTrue(isCreateModuleAvailable(), "Cannot create modules at this time");
 		final String moduleName = StringUtils.defaultIfEmpty(name, topLevelPackage.getLastElement());
 		final GAV module = new GAV(topLevelPackage.getFullyQualifiedPackageName(), moduleName, parent.getVersion());
-		final ProjectMetadata project = getProjectMetadata();
 		// TODO create or update "modules" element of parent module's POM
 		// Create the new module's directory, named by its artifactId (Maven standard practice)
 		fileManager.createDirectory(moduleName);

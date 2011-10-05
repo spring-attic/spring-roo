@@ -6,7 +6,6 @@ import static java.lang.reflect.Modifier.PUBLIC;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -68,13 +67,13 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 		this.aspectName = aspectName;
 		this.governorPhysicalTypeMetadata = governorPhysicalTypeMetadata;
 
-		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (physicalTypeDetails == null || !(physicalTypeDetails instanceof ClassOrInterfaceTypeDetails)) {
-			// There is a problem
-			valid = false;
-		} else {
+		final Object physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		if (physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
 			// We have reliable physical type details
-			governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+			this.governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+		} else {
+			// There is a problem
+			this.valid = false;
 		}
 
 		this.destination = governorTypeDetails.getName();

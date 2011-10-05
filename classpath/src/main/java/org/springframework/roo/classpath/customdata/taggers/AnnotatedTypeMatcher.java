@@ -10,23 +10,36 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomDataKey;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 
+/**
+ * A {@link TypeMatcher} that looks for any of a given set of annotations.
+ *
+ * @author James Tyrrell
+ */
 public class AnnotatedTypeMatcher extends TypeMatcher {
 
 	// Fields
-	private List<JavaType> annotationTypesToMatchOn;
-	private CustomDataKey<MemberHoldingTypeDetails> customDataKey;
+	private final CustomDataKey<MemberHoldingTypeDetails> customDataKey;
+	private final List<JavaType> annotationTypesToMatchOn;
 
-	public AnnotatedTypeMatcher(CustomDataKey<MemberHoldingTypeDetails> customDataKey, JavaType... annotationTypeToMatchOn) {
-		this.annotationTypesToMatchOn = Arrays.asList(annotationTypeToMatchOn);
+	/**
+	 * Constructor
+	 *
+	 * @param customDataKey the {@link CustomDataKey} to apply (required)
+	 * @param annotationTypesToMatchOn
+	 */
+	public AnnotatedTypeMatcher(final CustomDataKey<MemberHoldingTypeDetails> customDataKey, final JavaType... annotationTypesToMatchOn) {
+		Assert.notNull(customDataKey, "Custom data key required");
+		this.annotationTypesToMatchOn = Arrays.asList(annotationTypesToMatchOn);
 		this.customDataKey = customDataKey;
 	}
 
-	public List<MemberHoldingTypeDetails> matches(List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
-		Map<String, MemberHoldingTypeDetails> matched = new HashMap<String, MemberHoldingTypeDetails>();
-		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
-			for (AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
-				for (JavaType annotationTypeToMatchOn : annotationTypesToMatchOn) {
+	public List<MemberHoldingTypeDetails> matches(final List<MemberHoldingTypeDetails> memberHoldingTypeDetailsList) {
+		final Map<String, MemberHoldingTypeDetails> matched = new HashMap<String, MemberHoldingTypeDetails>();
+		for (final MemberHoldingTypeDetails memberHoldingTypeDetails : memberHoldingTypeDetailsList) {
+			for (final AnnotationMetadata annotationMetadata : memberHoldingTypeDetails.getAnnotations()) {
+				for (final JavaType annotationTypeToMatchOn : annotationTypesToMatchOn) {
 					if (annotationMetadata.getAnnotationType().equals(annotationTypeToMatchOn)) {
 						matched.put(memberHoldingTypeDetails.getDeclaredByMetadataId(), memberHoldingTypeDetails);
 					}
@@ -40,7 +53,7 @@ public class AnnotatedTypeMatcher extends TypeMatcher {
 		return customDataKey;
 	}
 
-	public Object getTagValue(MemberHoldingTypeDetails key) {
+	public Object getTagValue(final MemberHoldingTypeDetails key) {
 		return null;
 	}
 }

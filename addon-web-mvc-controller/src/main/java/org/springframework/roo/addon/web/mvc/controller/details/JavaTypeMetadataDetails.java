@@ -12,12 +12,12 @@ import org.springframework.roo.support.util.Assert;
 public class JavaTypeMetadataDetails {
 
 	// Fields
-	private JavaType javaType;
-	private String plural;
-	private boolean isEnumType;
-	private boolean isApplicationType;
-	private JavaTypePersistenceMetadataDetails persistenceDetails;
-	private String controllerPath;
+	private final JavaType javaType;
+	private final String plural;
+	private final boolean isEnumType;
+	private final boolean isApplicationType;
+	private final JavaTypePersistenceMetadataDetails persistenceDetails;
+	private final String controllerPath;
 	
 	/**
 	 * Constructor for JavaTypeMetadataDetails.
@@ -29,7 +29,7 @@ public class JavaTypeMetadataDetails {
 	 * @param persistenceDetails (may be null if no persistence metadata is present for the javaType)
 	 * @param controllerPath (must contain text)
 	 */
-	public JavaTypeMetadataDetails(JavaType javaType, String plural, boolean isEnumType, boolean isApplicationType, JavaTypePersistenceMetadataDetails persistenceDetails, String controllerPath) {
+	public JavaTypeMetadataDetails(final JavaType javaType, final String plural, final boolean isEnumType, final boolean isApplicationType, final JavaTypePersistenceMetadataDetails persistenceDetails, final String controllerPath) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.hasText(plural, "Plural required");
 		Assert.hasText(controllerPath, "Controller path required");
@@ -74,19 +74,19 @@ public class JavaTypeMetadataDetails {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (!(obj instanceof JavaTypeMetadataDetails)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		JavaTypeMetadataDetails other = (JavaTypeMetadataDetails) obj;
-		if (javaType == null) {
-			if (other.javaType != null)
-				return false;
-		} else if (!javaType.equals(other.javaType))
-			return false;
-		return true;
+		}
+		return javaType.equals(((JavaTypeMetadataDetails) obj).getJavaType());
+	}
+	
+	@Override
+	public String toString() {
+		// For debugging
+		return javaType.getFullyQualifiedTypeName();
 	}
 }

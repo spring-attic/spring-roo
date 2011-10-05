@@ -33,38 +33,34 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1.1
- *
  */
 public abstract class AbstractMemberDiscoveringItdMetadataProvider extends AbstractItdMetadataProvider {
 	
 	/**
-	 * Receives generic notification events. You must still register in the activate method to receive
-	 * these events, as described in the JavaDocs for the superclass method of the same name.
+	 * Receives generic notification events arising from our calling of
+	 * MetadataDependencyRegistry.addNotificationListener(this). You must still
+	 * register in the activate method to receive these events, as described in
+	 * the JavaDocs for the superclass method of the same name.
 	 * 
 	 * @see AbstractItdMetadataProvider#notifyForGenericListener(String)
 	 */
-	protected final void notifyForGenericListener(String upstreamDependency) {
-		// Receives event arising from our MetadataDependencyRegistry.addNotificationListener(this) method.
-		// We do this to discover new ITDs that offer setter methods in the @RooDataOnDemand.entity=SomeClass.class.
-		
+	protected final void notifyForGenericListener(final String upstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(upstreamDependency)) {
-			// It's just a class-specific notification (ie no instance), so we don't care about it
+			// It's just a class-specific notification (i.e. no instance), so we don't care about it
 			return;
 		}
 		
-		// To get here we have an instance-specific identifier.
-		// Let's try to grab the metadata
-		MetadataItem metadataItem = metadataService.get(upstreamDependency);
+		// We have an instance-specific identifier; try to get its metadata
+		final MetadataItem metadata = metadataService.get(upstreamDependency);
 		
 		// We don't have to worry about physical type metadata, as we monitor the relevant .java once the DOD governor is first detected
-		if (metadataItem == null || !metadataItem.isValid() || !(metadataItem instanceof ItdTypeDetailsProvidingMetadataItem)) {
-			// There's something wrong with it or it's not for an ITD, so let's gracefully abort
+		if (!(metadata instanceof ItdTypeDetailsProvidingMetadataItem) || !metadata.isValid()) {
+			// It's not for an ITD, or there's something wrong with it 
 			return;
 		}
 		
-		// Let's ensure we have some ITD type details to actually work with
-		ItdTypeDetailsProvidingMetadataItem itdMetadata = (ItdTypeDetailsProvidingMetadataItem) metadataItem;
-		ItdTypeDetails itdTypeDetails = itdMetadata.getMemberHoldingTypeDetails();
+		// Get the details of the ITD
+		final ItdTypeDetails itdTypeDetails = ((ItdTypeDetailsProvidingMetadataItem) metadata).getMemberHoldingTypeDetails();
 		if (itdTypeDetails == null) {
 			return;
 		}
@@ -86,7 +82,7 @@ public abstract class AbstractMemberDiscoveringItdMetadataProvider extends Abstr
 	 * The requested MID will be cleared from the cache and formally requested. This process allows subclasses to
 	 * effectively discover new ITD members that appear over time without needing to process every request themselves.
 	 * 
-	 * @param itdTypeDetails a non-null, valid ITD type details from which member information is available (never null)
+	 * @param itdTypeDetails a valid {@link ItdTypeDetails} from which member information is available (never null)
 	 * @return null if the subclass is not interested in the type, or a MID if it is
 	 */
 	protected abstract String getLocalMidToRequest(ItdTypeDetails itdTypeDetails);
