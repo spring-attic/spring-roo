@@ -1,7 +1,10 @@
 package org.springframework.roo.addon.op4j;
 
+import static org.springframework.roo.model.JavaType.OBJECT;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -29,6 +32,10 @@ import org.springframework.roo.support.util.Assert;
 public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	// Constants
+	private static final JavaType KEYS = new JavaType("Keys");	// TODO should be fully-qualified?
+	private static final JavaType JAVA_RUN_TYPE_TYPES = new JavaType("org.javaruntype.type.Types");
+	private static final JavaType OP4J_GET = new JavaType("org.op4j.functions.Get");
+	
 	private static final String PROVIDES_TYPE_STRING = Op4jMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
@@ -52,20 +59,18 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		String targetName = super.destination.getSimpleTypeName();
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType("org.op4j.functions.Get"));
-		imports.addImport(new JavaType("org.javaruntype.type.Types"));
+		imports.addImport(OP4J_GET);
+		imports.addImport(JAVA_RUN_TYPE_TYPES);
 		String initializer = "Get.attrOf(Types.forClass(" + targetName + ".class),\"" + targetName.toLowerCase() + "\")";
 
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(new JavaType(Object.class.getName()));
-		parameters.add(super.destination);
+		final List<JavaType> parameters = Arrays.asList(OBJECT, this.destination);
 
 		JavaType function = new JavaType("org.op4j.functions.Function", 0, DataType.TYPE, null, parameters);
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), fieldModifier, new JavaSymbolName(targetName.toUpperCase()), function, initializer);
 		fields.add(fieldBuilder);
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, new JavaType("Keys"), PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, KEYS, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setDeclaredFields(fields);
 		return typeDetailsBuilder.build();
 	}

@@ -5,6 +5,8 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_M
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSIST_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE_METHOD;
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.HTTP_HEADERS;
 import static org.springframework.roo.model.SpringJavaType.HTTP_STATUS;
@@ -19,8 +21,6 @@ import static org.springframework.roo.model.SpringJavaType.RESPONSE_ENTITY;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -472,7 +472,7 @@ public class WebJsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem
 			}
 			AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM, attributes);
 			annotations.add(requestParamAnnotation.build());
-			if (field.getFieldType().equals(new JavaType(Date.class.getName())) || field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+			if (field.getFieldType().equals(DATE) || field.getFieldType().equals(CALENDAR)) {
 				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT);
 				if (annotation != null) {
 					annotations.add(annotation);

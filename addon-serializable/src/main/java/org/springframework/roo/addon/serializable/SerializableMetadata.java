@@ -15,6 +15,7 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -30,7 +31,6 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType SERIALIZABLE = new JavaType("java.io.Serializable");
 
 	// From annotation
 	@AutoPopulate private final String serialVersionUIDField = "serialVersionUID";
@@ -50,7 +50,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Generate "implements Serializable"
-		ensureGovernorImplements(SERIALIZABLE);
+		ensureGovernorImplements(JdkJavaType.SERIALIZABLE);
 
 		// Generate the serialVersionUID field
 		builder.addField(getSerialVersionUIDField());

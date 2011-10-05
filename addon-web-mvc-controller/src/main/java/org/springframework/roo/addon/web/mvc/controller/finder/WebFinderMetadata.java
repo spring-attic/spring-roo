@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller.finder;
 
+import static org.springframework.roo.model.JdkJavaType.CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 import static org.springframework.roo.model.SpringJavaType.MODEL;
 import static org.springframework.roo.model.SpringJavaType.REQUEST_MAPPING;
@@ -9,8 +11,6 @@ import static org.springframework.roo.model.SpringJavaType.REQUEST_PARAM;
 import java.beans.Introspector;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,7 +145,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			}
 			needmodel = true;
 		}
-		if (types.contains(new JavaType(Date.class.getName())) || types.contains(new JavaType(Calendar.class.getName()))) {
+		if (types.contains(DATE) || types.contains(CALENDAR)) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "\";");
@@ -195,7 +195,7 @@ public class WebFinderMetadata extends AbstractItdTypeDetailsProvidingMetadataIt
 			}
 			AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(REQUEST_PARAM, attributes);
 			annotations.add(requestParamAnnotation.build());
-			if (field.getFieldType().equals(new JavaType(Date.class.getName())) || field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+			if (field.getFieldType().equals(DATE) || field.getFieldType().equals(CALENDAR)) {
 				dateFieldPresent = true;
 				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), DATE_TIME_FORMAT);
 				if (annotation != null) {

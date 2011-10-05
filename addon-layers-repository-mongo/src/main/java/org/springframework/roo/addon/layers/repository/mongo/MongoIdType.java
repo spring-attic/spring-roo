@@ -9,8 +9,15 @@ import org.springframework.roo.model.JavaType;
  * @since 1.2.0
  */
 public class MongoIdType {
+	
+	// Fields
 	private final JavaType javaType;
 
+	/**
+	 * Constructor
+	 *
+	 * @param type the fully-qualified type name (required)
+	 */
 	public MongoIdType(final String type) {
 		this.javaType = new JavaType(type);
 	}

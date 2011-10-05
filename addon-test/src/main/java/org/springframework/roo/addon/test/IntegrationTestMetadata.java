@@ -46,6 +46,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = IntegrationTestMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	
+	private static final JavaType AFTER_CLASS = new JavaType("org.junit.AfterClass");
+	private static final JavaType ASSERT = new JavaType("org.junit.Assert");
+	private static final JavaType BEFORE_CLASS = new JavaType("org.junit.BeforeClass");
+	private static final JavaType RUN_WITH = new JavaType("org.junit.runner.RunWith");
 	private static final JavaType TEST = new JavaType("org.junit.Test");
 	private static final JavaType[] SETUP_PARAMETERS = {};
 	private static final JavaType[] TEARDOWN_PARAMETERS = {};
@@ -101,8 +106,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 */
 	private void addRequiredIntegrationTestClassIntroductions(final JavaType dodGovernor) {
 		// Add an @RunWith(SpringJunit4ClassRunner) annotation to the type, if the user did not define it on the governor directly
-		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.junit.runner.RunWith")) == null) {
-			AnnotationMetadataBuilder runWithBuilder = new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"));
+		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), RUN_WITH) == null) {
+			AnnotationMetadataBuilder runWithBuilder = new AnnotationMetadataBuilder(RUN_WITH);
 			runWithBuilder.addClassAttribute("value", "org.springframework.test.context.junit4.SpringJUnit4ClassRunner");
 			builder.addAnnotation(runWithBuilder);
 		}
@@ -137,7 +142,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-		imports.addImport(new JavaType("org.junit.Assert"));
+		imports.addImport(ASSERT);
 	}
 
 	private void addOptionalIntegrationTestClassIntroductions() {
@@ -157,11 +162,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaSymbolName setUpMethodName = new JavaSymbolName("setUp");
 		MethodMetadata setUpMethod = getGovernorMethod(setUpMethodName, SETUP_PARAMETERS);
 		if (setUpMethod != null) {
-			Assert.notNull(MemberFindingUtils.getAnnotationOfType(setUpMethod.getAnnotations(), new JavaType("org.junit.BeforeClass")), "Method 'setUp' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @BeforeClass");
+			Assert.notNull(MemberFindingUtils.getAnnotationOfType(setUpMethod.getAnnotations(), BEFORE_CLASS), "Method 'setUp' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @BeforeClass");
 		} else {
 			// Add the method via the ITD
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.BeforeClass")));
+			annotations.add(new AnnotationMetadataBuilder(BEFORE_CLASS));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("helper.setUp();");
@@ -175,11 +180,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		JavaSymbolName tearDownMethodName = new JavaSymbolName("tearDown");
 		MethodMetadata tearDownMethod = getGovernorMethod(tearDownMethodName, TEARDOWN_PARAMETERS);
 		if (tearDownMethod != null) {
-			Assert.notNull(MemberFindingUtils.getAnnotationOfType(tearDownMethod.getAnnotations(), new JavaType("org.junit.AfterClass")), "Method 'tearDown' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @AfterClass");
+			Assert.notNull(MemberFindingUtils.getAnnotationOfType(tearDownMethod.getAnnotations(), AFTER_CLASS), "Method 'tearDown' on '" + destination.getFullyQualifiedTypeName() + "' must be annotated with @AfterClass");
 		} else {
 			// Add the method via the ITD
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.AfterClass")));
+			annotations.add(new AnnotationMetadataBuilder(AFTER_CLASS));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("helper.tearDown();");

@@ -35,6 +35,8 @@ import org.springframework.roo.support.util.Assert;
 public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	// Constants
+	private static final JavaType JSON_DESERIALIZER = new JavaType("flexjson.JSONDeserializer");
+	private static final JavaType JSON_SERIALIZER = new JavaType("flexjson.JSONSerializer");
 	private static final String PROVIDES_TYPE_STRING = JsonMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
@@ -86,7 +88,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		String serializer = new JavaType("flexjson.JSONSerializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String serializer = JSON_SERIALIZER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\")" + (annotationValues.isDeepSerialize() ? ".deepSerialize(this)" : ".serialize(this)") + ";");
 
@@ -121,7 +123,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("collection"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		String serializer = new JavaType("flexjson.JSONSerializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String serializer = JSON_SERIALIZER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\")" + (annotationValues.isDeepSerialize() ? ".deepSerialize(collection)" : ".serialize(collection)") + ";");
 
@@ -157,7 +159,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		String bean = destination.getSimpleTypeName();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		String deserializer = new JavaType("flexjson.JSONDeserializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String deserializer = JSON_DESERIALIZER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		bodyBuilder.appendFormalLine("return new " + deserializer + "<" + list + "<" + bean + ">>().use(null, " + arrayList + ".class).use(\"values\", " + bean + ".class).deserialize(json);");
 
 		List<JavaSymbolName> parameterNames =  Arrays.asList(new JavaSymbolName("json"));
@@ -192,7 +194,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		String deserializer = new JavaType("flexjson.JSONDeserializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String deserializer = JSON_DESERIALIZER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		bodyBuilder.appendFormalLine("return new " + deserializer + "<" + destination.getSimpleTypeName() + ">().use(null, " + destination.getSimpleTypeName() + ".class).deserialize(json);");
 
 		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("json"));

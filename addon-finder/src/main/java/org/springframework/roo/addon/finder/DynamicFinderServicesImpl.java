@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.finder;
 
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
+import static org.springframework.roo.model.JdkJavaType.MAP;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -9,7 +10,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -51,7 +51,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			SortedSet<JavaSymbolName> tempFinders = new TreeSet<JavaSymbolName>();
 			for (FieldMetadata field : fields) {
 				// Ignoring java.util.Map field types (see ROO-194)
-				if (field == null || field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+				if (field == null || field.getFieldType().equals(MAP)) {
 					continue;
 				}
 				if (exclusions.contains(field.getFieldName())) {

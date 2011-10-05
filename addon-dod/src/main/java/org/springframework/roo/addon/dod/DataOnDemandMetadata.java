@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dod;
 
+import static org.springframework.roo.model.HibernateJavaType.VALIDATOR_CONSTRAINTS_EMAIL;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
@@ -7,9 +8,12 @@ import static org.springframework.roo.model.JdkJavaType.BIG_INTEGER;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.GREGORIAN_CALENDAR;
+import static org.springframework.roo.model.JdkJavaType.ITERATOR;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.RANDOM;
 import static org.springframework.roo.model.JdkJavaType.SECURE_RANDOM;
+import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION;
+import static org.springframework.roo.model.Jsr303JavaType.CONSTRAINT_VIOLATION_EXCEPTION;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MIN;
 import static org.springframework.roo.model.Jsr303JavaType.DIGITS;
@@ -860,9 +864,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create the method body
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(ARRAY_LIST);
-		imports.addImport(new JavaType("java.util.Iterator"));
-		imports.addImport(new JavaType("javax.validation.ConstraintViolationException"));
-		imports.addImport(new JavaType("javax.validation.ConstraintViolation"));
+		imports.addImport(ITERATOR);
+		imports.addImport(CONSTRAINT_VIOLATION_EXCEPTION);
+		imports.addImport(CONSTRAINT_VIOLATION);
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		final String dataField = getDataField().getFieldName().getSymbolName();
@@ -972,7 +976,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				initializer = field.getFieldName().getSymbolName();
 			}
 
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.hibernate.validator.constraints.Email")) != null) {
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), VALIDATOR_CONSTRAINTS_EMAIL) != null) {
 				initializer = "\"foo\" + index + \"@bar.com\"";
 			} else {
 				int maxLength = Integer.MAX_VALUE;

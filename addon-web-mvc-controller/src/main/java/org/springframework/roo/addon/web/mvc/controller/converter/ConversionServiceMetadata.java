@@ -42,13 +42,22 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+	// Constants
+	private static final JavaType BASE_64 = new JavaType("org.apache.commons.codec.binary.Base64");
+
+	/**
+	 * Constructor for testing
+	 *
+	 * @param identifier
+	 * @param aspectName
+	 * @param governorPhysicalTypeMetadata
+	 */
 	ConversionServiceMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		// For testing
 	}
 
 	/**
-	 * Constructor
+	 * Production constructor
 	 *
 	 * @param identifier
 	 * @param aspectName
@@ -129,7 +138,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		List<MethodMetadata> converterMethods = new ArrayList<MethodMetadata>();
 
 		JavaSymbolName methodName = new JavaSymbolName("getJsonTo" + targetType.getSimpleTypeName() + "Converter");
-		JavaType base64 = new JavaType("org.apache.commons.codec.binary.Base64");
+		JavaType base64 = BASE_64;
 		String base64Name = base64.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String typeName = targetType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 

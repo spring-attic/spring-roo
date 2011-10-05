@@ -21,6 +21,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.JdkJavaType;
 import org.springframework.roo.model.SpringJavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -57,8 +58,8 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		// Only make the ITD cause PropertyEditorSupport to be subclasses if the governor doesn't already subclass it
-		JavaType requiredSuperclass = new JavaType("java.beans.PropertyEditorSupport");
-		if (!governorTypeDetails.getExtendsTypes().contains(requiredSuperclass)) {
+		JavaType requiredSuperclass = JdkJavaType.PROPERTY_EDITOR_SUPPORT;
+		if (!governorTypeDetails.extendsType(requiredSuperclass)) {
 			builder.addImplementsType(requiredSuperclass);
 		}
 

@@ -49,6 +49,11 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class IntegrationTestOperationsImpl implements IntegrationTestOperations {
 
+	// Constants
+	private static final JavaType JUNIT_4 = new JavaType("org.junit.runners.JUnit4");
+	private static final JavaType RUN_WITH = new JavaType("org.junit.runner.RunWith");
+	private static final JavaType TEST = new JavaType("org.junit.Test");
+	
 	// Fields
 	@Reference private DataOnDemandOperations dataOnDemandOperations;
 	@Reference private MetadataService metadataService;
@@ -91,7 +96,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		methodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.Test")));
+		methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMarkerMethod"), JavaType.VOID_PRIMITIVE, new InvocableMemberBodyBuilder());
 		methodBuilder.setAnnotations(methodAnnotations);
 		methods.add(methodBuilder);
@@ -122,13 +127,13 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		// Determine if the mocking infrastructure needs installing
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
-		config.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.junit.runners.JUnit4")));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"), config));
+		config.add(new ClassAttributeValue(new JavaSymbolName("value"), JUNIT_4));
+		annotations.add(new AnnotationMetadataBuilder(RUN_WITH, config));
 		annotations.add(new AnnotationMetadataBuilder(MOCK_STATIC_ENTITY_METHODS));
 
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		methodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.Test")));
+		methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
 
 		// Get the entity so we can hopefully make a demo method that will be usable
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -174,12 +179,12 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		// Determine if the test infrastructure needs installing
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
-		config.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.junit.runners.JUnit4")));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"), config));
+		config.add(new ClassAttributeValue(new JavaSymbolName("value"), JUNIT_4));
+		annotations.add(new AnnotationMetadataBuilder(RUN_WITH, config));
 
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		methodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.Test")));
+		methodAnnotations.add(new AnnotationMetadataBuilder(TEST));
 
 		// Get the class so we can hopefully make a demo method that will be usable
 		String pid = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
