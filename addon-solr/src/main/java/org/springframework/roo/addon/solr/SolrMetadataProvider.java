@@ -21,7 +21,6 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
@@ -35,11 +34,10 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
+public class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	
 	// Fields
 	@Reference private EntityMetadataProvider entityMetadataProvider;
-	@Reference private PersistenceMemberLocator persistenceMemberLocator;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
