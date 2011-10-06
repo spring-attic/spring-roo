@@ -3,6 +3,7 @@ package org.springframework.roo.addon.entity;
 import static org.springframework.roo.model.GoogleJavaType.GAE_DATASTORE_KEY;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
 import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_NAME;
+import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
@@ -13,6 +14,7 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.equals.EqualsOperations;
 import org.springframework.roo.addon.test.IntegrationTestOperations;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -37,6 +39,7 @@ import org.springframework.roo.support.util.Assert;
 public class EntityCommands implements CommandMarker {
 
 	// Constants
+	private static final AnnotationMetadataBuilder ROO_EQUALS_BUILDER = new AnnotationMetadataBuilder(ROO_EQUALS);
 	private static final AnnotationMetadataBuilder ROO_SERIALIZABLE_BUILDER = new AnnotationMetadataBuilder(ROO_SERIALIZABLE);
 	private static final AnnotationMetadataBuilder ROO_TO_STRING_BUILDER = new AnnotationMetadataBuilder(ROO_TO_STRING);
 	private static final AnnotationMetadataBuilder ROO_JAVA_BEAN_BUILDER = new AnnotationMetadataBuilder(ROO_JAVA_BEAN);
@@ -44,6 +47,7 @@ public class EntityCommands implements CommandMarker {
 
 	// Fields
 	@Reference private EntityOperations entityOperations;
+	@Reference private EqualsOperations equalsOperations;
 	@Reference private IntegrationTestOperations integrationTestOperations;
 
 	@CliAvailabilityIndicator( { "entity", "embeddable" })
@@ -68,6 +72,7 @@ public class EntityCommands implements CommandMarker {
 		@CliOption(key = "versionType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Integer", help = "The data type that will be used for the JPA version field (defaults to java.lang.Integer)") final JavaType versionType,
 		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") final InheritanceType inheritanceType,
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") final boolean mappedSuperclass,
+		@CliOption(key = "equals", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement equals and hashCode methods") final boolean equals,
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") final boolean serializable,
 		@CliOption(key = "displayName", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should provide a pretty-print method") final boolean displayName,
 		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") final String persistenceUnit,
@@ -102,6 +107,10 @@ public class EntityCommands implements CommandMarker {
 		annotationBuilder.add(ROO_JAVA_BEAN_BUILDER);
 		annotationBuilder.add(ROO_TO_STRING_BUILDER);
 		annotationBuilder.add(getEntityAnnotationBuilder(table, schema, catalog, identifierField, identifierColumn, identifierType, versionField, versionColumn, versionType, inheritanceType, mappedSuperclass, persistenceUnit, transactionManager, entityName, activeRecord));
+		if (equals) {
+			annotationBuilder.add(ROO_EQUALS_BUILDER);
+			equalsOperations.updateConfiguration();
+		}
 		if (serializable) {
 			annotationBuilder.add(ROO_SERIALIZABLE_BUILDER);
 		}

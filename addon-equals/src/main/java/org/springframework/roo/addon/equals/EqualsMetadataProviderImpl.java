@@ -17,7 +17,8 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
@@ -31,7 +32,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public class EqualsMetadataProviderImpl extends AbstractItdMetadataProvider implements EqualsMetadataProvider {
+public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements EqualsMetadataProvider {
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
@@ -62,6 +63,11 @@ public class EqualsMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		}
 
 		return new EqualsMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedFields);
+	}
+
+	@Override
+	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+		return getLocalMid(itdTypeDetails);
 	}
 
 	private List<FieldMetadata> locateFields(final JavaType javaType, final String[] excludeFields, final MemberDetails memberDetails, final String metadataIdentificationString) {

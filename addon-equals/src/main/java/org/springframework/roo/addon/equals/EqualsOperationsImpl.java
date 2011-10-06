@@ -66,7 +66,7 @@ public class EqualsOperationsImpl implements EqualsOperations {
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
 
-	private void updateConfiguration() {
+	public void updateConfiguration() {
 		// Update pom.xml with commons-lang dependency
 		final Element configuration = XmlUtils.getConfiguration(getClass());
 		final Element dependencyElement = XmlUtils.findFirstElement("/configuration/equals/dependencies/dependency", configuration);
