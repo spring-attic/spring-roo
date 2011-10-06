@@ -117,7 +117,7 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			String accessorName = accessor.getMethodName().getSymbolName();
 			String accessorText;
 			if (accessor.getReturnType().isCommonCollectionType()) {
-				accessorText = accessorName + "() == null ? \"\" : " + accessorName + "().size()";
+				continue;
 			} else if (accessor.getReturnType().isArray()) {
 				imports.addImport(ARRAYS);
 				accessorText = "Arrays.toString(" + accessorName + "())";
