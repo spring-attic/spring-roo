@@ -14,11 +14,23 @@ import org.springframework.roo.support.util.Assert;
 public final class PhysicalTypeIdentifier {
 
 	// Constants
-	private static final String PROVIDES_TYPE_STRING = PhysicalTypeIdentifier.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final String PHYSICAL_METADATA_TYPE = PhysicalTypeIdentifier.class.getName();
+	
+	/**
+	 * The class-level ID for physical type metadata.
+	 * 
+	 * @since 1.2.0
+	 */
+	public static final String PHYSICAL_METADATA_TYPE_ID = MetadataIdentificationUtils.create(PHYSICAL_METADATA_TYPE);
 
+	/**
+	 * Returns the class-level ID for physical type metadata. Equivalent to
+	 * accessing {@link #PHYSICAL_METADATA_TYPE_ID} directly.
+	 * 
+	 * @return {@value #PHYSICAL_METADATA_TYPE_ID}
+	 */
 	public static String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
+		return PHYSICAL_METADATA_TYPE_ID;
 	}
 
 	/**
@@ -33,22 +45,34 @@ public final class PhysicalTypeIdentifier {
 	}
 
 	/**
-	 * Creates an identifier from the given arguments
+	 * Creates a physical type metadata ID for the given user project type
 	 *
-	 * @param javaType (required)
-	 * @param path (required)
+	 * @param javaType the type (required)
+	 * @param path the path in which it's located (required)
 	 * @return a non-blank ID
 	 */
 	public static String createIdentifier(final JavaType javaType, final Path path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PHYSICAL_METADATA_TYPE, javaType, path);
 	}
 
-	public static JavaType getJavaType(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	/**
+	 * Parses the given metadata ID for the user project type to which it relates.
+	 * 
+	 * @param metadataId the metadata ID to parse (must identify an instance of {@link PhysicalTypeIdentifier#PHYSICAL_METADATA_TYPE})
+	 * @return a non-<code>null</code> type
+	 */
+	public static JavaType getJavaType(final String metadataId) {
+		return PhysicalTypeIdentifierNamingUtils.getJavaType(PHYSICAL_METADATA_TYPE, metadataId);
 	}
 
-	public static Path getPath(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	/**
+	 * Parses the given metadata ID for the path of the user project type to which it relates.
+	 * 
+	 * @param metadataId the metadata ID to parse (must identify an instance of {@link PhysicalTypeIdentifier#PHYSICAL_METADATA_TYPE})
+	 * @return a non-<code>null</code> path
+	 */
+	public static Path getPath(final String metadataId) {
+		return PhysicalTypeIdentifierNamingUtils.getPath(PHYSICAL_METADATA_TYPE, metadataId);
 	}
 
 	/**
@@ -59,16 +83,18 @@ public final class PhysicalTypeIdentifier {
 	 * @return see above
 	 */
 	public static boolean isValid(final String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+		return PhysicalTypeIdentifierNamingUtils.isValid(PHYSICAL_METADATA_TYPE, metadataIdentificationString);
 	}
 
-	public static String getFriendlyName(final String metadataIdentificationString) {
-		Assert.isTrue(isValid(metadataIdentificationString), "Invalid metadata identification string '" + metadataIdentificationString + "' provided");
-		return getPath(metadataIdentificationString) + "/" + getJavaType(metadataIdentificationString);
+	public static String getFriendlyName(final String metadataId) {
+		Assert.isTrue(isValid(metadataId), "Invalid metadata id '" + metadataId + "'");
+		return getPath(metadataId) + "/" + getJavaType(metadataId);
 	}
 
 	/**
 	 * Constructor is private to prevent instantiation
+	 * 
+	 * @since 1.2.0
 	 */
 	private PhysicalTypeIdentifier() {}
 }

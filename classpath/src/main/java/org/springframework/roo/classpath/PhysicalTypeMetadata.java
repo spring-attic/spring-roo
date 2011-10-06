@@ -1,6 +1,5 @@
 package org.springframework.roo.classpath;
 
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
 import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
@@ -8,25 +7,13 @@ import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Represents metadata for a particular {@link PhysicalTypeIdentifierNamingUtils}, which is usually a class or
- * interface but may potentially represent an annotation or enum type.
- *
- * <p>
- * Note that subclasses must support class or interface declarations (ie {@link ClassOrInterfaceTypeDetails}),
- * but they may support (at their option) annotation, enumeration and empty types.
- *
- * <p>
- * {@link PhysicalTypeMetadata} may be parsed from source code, parsed from a .class bytecode,
- * or parsed from a .class bytecode from a JAR.
- *
- * <p>
- * It is important to note a {@link PhysicalTypeMetadata} will only include those members explicitly
- * declared in the relevant source or bytecode. This explicitly excludes members introduced
- * via an inter-type declaration (ITD) or other special bytecode modification techniques.
+ * The metadata for a Java type in the user's project. Excludes any members
+ * introduced via an inter-type declaration (ITD) or other bytecode modification
+ * technique.
  *
  * @author Ben Alex
  * @since 1.0
- * @see ItdMetadataProvider
+ * @see PhysicalTypeMetadataProvider
  * @see MemberDetailsScanner
  */
 public interface PhysicalTypeMetadata extends MemberHoldingTypeDetailsMetadataItem<MemberHoldingTypeDetails> {

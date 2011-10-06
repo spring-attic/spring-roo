@@ -105,7 +105,7 @@ public final class MetadataIdentificationUtils {
 	}
 
 	/**
-	 * Returns the instance key from the given metadata ID.
+	 * Returns the instance key from the given metadata instance ID.
 	 *
 	 * @param metadataId the MID to evaluate (can be blank)
 	 * @return the instance ID only, or <code>null</code> if the identification string is invalid in some way
@@ -121,7 +121,8 @@ public final class MetadataIdentificationUtils {
 	 * Creates a class-specific metadata id for the given fully qualified class name.
 	 *
 	 * <p>
-	 * A fully qualified class name should be acquired using {@link Class#getName()} or equivalent.
+	 * You can acquire a fully qualified class name using {@link Class#getName()},
+	 * although it's more typesafe to call {@link #create(Class)}.
 	 *
 	 * @param fullyQualifiedClassName to create (can be null or empty)
 	 * @return the metadata identification string (may be null if the input was invalid)
@@ -156,12 +157,27 @@ public final class MetadataIdentificationUtils {
 	/**
 	 * Returns the ID of the given metadata's class.
 	 * 
-	 * @param metadataId the metadata ID for which to return the class ID
+	 * @param metadataId the metadata ID for which to return the class ID (can be blank)
 	 * @return <code>null</code> if a blank ID is given, otherwise a valid
 	 * class-level ID
+	 * @since 1.2.0
 	 */
 	public static String getMetadataClassId(final String metadataId) {
 		return create(getMetadataClass(metadataId));
+	}
+	
+	/**
+	 * Returns the class-level ID for the given type of metadata
+	 * 
+	 * @param metadataClass the metadata class for which to create an ID (can be <code>null</code>)
+	 * @return a non-blank metadata ID, or <code>null</code> if a <code>null</code> class was given
+	 * @since 1.2.0
+	 */
+	public static String create(final Class<?> metadataClass) {
+		if (metadataClass == null) {
+			return null;
+		}
+		return create(metadataClass.getName());
 	}
 
 	/**

@@ -59,7 +59,7 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
 	 */
-	public AbstractItdTypeDetailsProvidingMetadataItem(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+	protected AbstractItdTypeDetailsProvidingMetadataItem(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier);
 		Assert.notNull(aspectName, "Aspect name required");
 		Assert.notNull(governorPhysicalTypeMetadata, "Governor physical type metadata required");

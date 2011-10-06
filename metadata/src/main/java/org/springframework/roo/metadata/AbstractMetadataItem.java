@@ -23,7 +23,7 @@ public abstract class AbstractMetadataItem implements MetadataItem {
 	 * @param id the metadata identification string for a particular instance (must return true
 	 * when presented to {@link MetadataIdentificationUtils#isIdentifyingInstance(String)})
 	 */
-	public AbstractMetadataItem(final String id) {
+	protected AbstractMetadataItem(final String id) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(id), "Metadata identification string '" + id + "' does not identify a metadata instance");
 		this.id = id;
 	}

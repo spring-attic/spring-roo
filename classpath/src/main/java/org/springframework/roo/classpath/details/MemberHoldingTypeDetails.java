@@ -7,7 +7,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Immutable representation of the members in a class, interface, enum or aspect.
+ * Immutable representation of the members of a class, interface, enum or aspect.
  *
  * @author Ben Alex
  * @since 1.0

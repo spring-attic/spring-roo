@@ -19,13 +19,13 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 	/**
 	 * Constructor
 	 *
-	 * @param metadataIdentificationString
-	 * @param physicalLocationCanonicalPath
-	 * @param memberHoldingTypeDetails
+	 * @param metadataId the ID to assign this {@link org.springframework.roo.metadata.MetadataItem} (must satisfy {@link PhysicalTypeIdentifier#isValid(String)})
+	 * @param physicalLocationCanonicalPath the canonical path of the file containing this Java type (required)
+	 * @param memberHoldingTypeDetails the members of this type (required)
 	 */
-	public DefaultPhysicalTypeMetadata(final String metadataIdentificationString, final String physicalLocationCanonicalPath, final MemberHoldingTypeDetails memberHoldingTypeDetails) {
-		super(metadataIdentificationString);
-		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
+	public DefaultPhysicalTypeMetadata(final String metadataId, final String physicalLocationCanonicalPath, final MemberHoldingTypeDetails memberHoldingTypeDetails) {
+		super(metadataId);
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataId), "Metadata id '" + metadataId + "' is not a valid physical type identifier");
 		Assert.hasText(physicalLocationCanonicalPath, "Physical location canonical path required");
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		this.memberHoldingTypeDetails = memberHoldingTypeDetails;
@@ -42,11 +42,9 @@ public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements
 
 	public String getItdCanoncialPath(final ItdMetadataProvider metadataProvider) {
 		Assert.notNull(metadataProvider, "Metadata provider required");
-		String governorFileIdentifier = this.getPhysicalLocationCanonicalPath();
-		Assert.notNull(governorFileIdentifier, "Unable to determine file identifier for governor");
-		int dropFrom = governorFileIdentifier.lastIndexOf(".java");
-		Assert.isTrue(dropFrom > -1, "Unexpected governor filename format '" + governorFileIdentifier + "'");
-		return governorFileIdentifier.substring(0, dropFrom) + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix() + ".aj";
+		final int dropFrom = this.physicalLocationCanonicalPath.lastIndexOf(".java");
+		Assert.isTrue(dropFrom > -1, "Unexpected governor filename format '" + this.physicalLocationCanonicalPath + "'");
+		return this.physicalLocationCanonicalPath.substring(0, dropFrom) + "_Roo_" + metadataProvider.getItdUniquenessFilenameSuffix() + ".aj";
 	}
 
 	public JavaType getItdJavaType(final ItdMetadataProvider metadataProvider) {

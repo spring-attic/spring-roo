@@ -56,11 +56,11 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadataProvider, FileEventListener {
 
 	// Fields
-	@Reference private TypeParsingService typeParsingService;
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TypeParsingService typeParsingService;
 	@Reference private TypeLocationService typeLocationService;
 
 	// Mutex
@@ -106,20 +106,20 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 		}
 	}
 
-	public MetadataItem get(final String metadataIdentificationString) {
-		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' is not valid for this metadata provider");
-		String fileIdentifier = typeLocationService.getPhysicalTypeCanonicalPath(metadataIdentificationString);
-		metadataDependencyRegistry.deregisterDependencies(metadataIdentificationString);
-		if (!fileManager.exists(fileIdentifier)) {
+	public MetadataItem get(final String metadataId) {
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataId), "Metadata id '" + metadataId + "' is not valid for this metadata provider");
+		final String canonicalPath = typeLocationService.getPhysicalTypeCanonicalPath(metadataId);
+		metadataDependencyRegistry.deregisterDependencies(metadataId);
+		if (!fileManager.exists(canonicalPath)) {
 			// Couldn't find the file, so return null to distinguish from a file that was found but could not be parsed
 			return null;
 		}
-		JavaType typeName = PhysicalTypeIdentifier.getJavaType(metadataIdentificationString);
-		ClassOrInterfaceTypeDetails typeDetails = typeParsingService.getTypeAtLocation(fileIdentifier, metadataIdentificationString, typeName);
+		final JavaType javaType = PhysicalTypeIdentifier.getJavaType(metadataId);
+		ClassOrInterfaceTypeDetails typeDetails = typeParsingService.getTypeAtLocation(canonicalPath, metadataId, javaType);
 		if (typeDetails == null) {
 			return null;
 		}
-		DefaultPhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataIdentificationString, fileIdentifier, typeDetails);
+		DefaultPhysicalTypeMetadata result = new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, typeDetails);
 		if (result.getMemberHoldingTypeDetails() != null && result.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) result.getMemberHoldingTypeDetails();
 			if (details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {
@@ -132,7 +132,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 					metadataDependencyRegistry.registerDependency(superclassId, result.getId());
 				} else {
 					// We have a dependency on the superclass, but no metadata is available
-					// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday (sad, isn't it? :-) )
+					// We're left with no choice but to register for every physical type change, in the hope we discover our parent later
 					for (Path sourcePath : projectOperations.getPathResolver().getSourcePaths()) {
 						String possibleSuperclass = PhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
 						metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
@@ -156,7 +156,7 @@ public class DefaultPhysicalTypeMetadataProvider implements PhysicalTypeMetadata
 			}
 		}
 
-		return new DefaultPhysicalTypeMetadata(metadataIdentificationString, fileIdentifier, memberDetails.getDetails().get(0));
+		return new DefaultPhysicalTypeMetadata(metadataId, canonicalPath, memberDetails.getDetails().get(0));
 	}
 }
 

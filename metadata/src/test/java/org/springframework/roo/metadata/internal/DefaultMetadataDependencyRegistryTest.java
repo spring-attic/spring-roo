@@ -1,4 +1,4 @@
-package org.springframework.roo.md.internal;
+package org.springframework.roo.metadata.internal;
 
 import junit.framework.Assert;
 
@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.internal.DefaultMetadataDependencyRegistry;
 
-public class DefaultMetadataDependencyRegistryTests {
+public class DefaultMetadataDependencyRegistryTest {
 
 	private static final String DISK_FILE = MetadataIdentificationUtils.create("com.Test", "disk file");
 	private static final String JAVA_TYPE_OBJECT = MetadataIdentificationUtils.create("com.Test", "object");
