@@ -43,15 +43,14 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private final EqualsAnnotationValues annotationValues;
 	private final List<FieldMetadata> locatedFields;
 
-	/**
+	/** 
 	 * Constructor
-	 *
+	 * 
 	 * @param identifier
 	 * @param aspectName
 	 * @param governorPhysicalTypeMetadata
 	 * @param annotationValues
-	 * @param locatedAccessors
-	 * @param identifierAccessor
+	 * @param locatedFields
 	 */
 	public EqualsMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final EqualsAnnotationValues annotationValues, final List<FieldMetadata> locatedFields) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);

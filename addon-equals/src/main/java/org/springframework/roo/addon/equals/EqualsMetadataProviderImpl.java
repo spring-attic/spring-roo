@@ -20,7 +20,6 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
@@ -72,16 +71,16 @@ public class EqualsMetadataProviderImpl extends AbstractItdMetadataProvider impl
 			}
 		});
 
-		final Set<JavaSymbolName> excludeFieldsSet = new HashSet<JavaSymbolName>();
+		final Set<String> excludeFieldsSet = new HashSet<String>();
 		if (excludeFields != null && excludeFields.length > 0) {
 			for (String excludeField : excludeFields) {
-				excludeFieldsSet.add(new JavaSymbolName(excludeField));
+				excludeFieldsSet.add(excludeField);
 			}
 		}
 
 		for (final FieldMetadata field : memberDetails.getFields()) {
 			if (!excludeFieldsSet.isEmpty()) {
-				if (excludeFieldsSet.contains(field.getFieldName())) {
+				if (excludeFieldsSet.contains(field.getFieldName().getSymbolName())) {
 					continue;
 				}
 			}
