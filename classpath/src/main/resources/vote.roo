@@ -8,8 +8,8 @@ field string description --sizeMax 80
 web mvc setup
 web mvc scaffold ~.web.ChoiceController
 
-entity --class Vote --testAutomatically
-field reference choice --type Choice --displayName
+entity --class Vote --testAutomatically --displayName
+field reference choice --type Choice
 field string ip --notNull --sizeMin 7 --sizeMax 15
 field date registered --type java.util.Date --notNull --past
 web mvc scaffold ~.web.VoteController
