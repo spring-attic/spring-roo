@@ -36,7 +36,7 @@ public class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * <li>Must not start or end with a period</li>
 	 * </ul>
 	 *
-	 * @param name to the package name to evaluate (required)
+	 * @param name the name to evaluate (required)
 	 */
 	public static void assertJavaNameLegal(final String name) {
 		Assert.notNull(name, "Name required");

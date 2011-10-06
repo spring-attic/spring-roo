@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 /**
- * Unit test of {@link JavaPackage}
+ * Unit test of {@link JavaPackage}.
  *
  * @author Andrew Swan
  * @since 1.2.0
@@ -27,7 +27,6 @@ public class JavaPackageTest {
 		assertEquals(Arrays.asList("com", "foo", "bar"), elements);
 		assertEquals("bar", javaPackage.getLastElement());
 	}
-
 
 	@Test
 	public void testGetElementsOfSingleLevelPackage() {
