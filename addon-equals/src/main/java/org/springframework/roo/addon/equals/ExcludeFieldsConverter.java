@@ -14,7 +14,7 @@ import org.springframework.roo.shell.MethodTarget;
  * Provides conversion between a space-separated list of field names to a set of field names.
  *
  * @author Alan Stewart
- * @since 1.1
+ * @since 1.2.0
  */
 @Component
 @Service

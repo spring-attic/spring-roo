@@ -26,7 +26,7 @@ public class EqualsCommands implements CommandMarker {
 	@CliCommand(value = "equals", help = "Add equals and hashCode methods to a class")
 	public void addEquals(
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class") JavaType javaType,
-		@CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether to call the super class equal and hashCode methods") boolean appendSuper,
+		@CliOption(key = "appendSuper", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether to call the super class equals and hashCode methods") boolean appendSuper,
 		@CliOption(key = "excludeFields", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-fields", help = "The fields to exclude in the equals and hashcode methods. Multiple field names must be a double-quoted list separated by spaces") final Set<String> excludeFields) {
 
 		equalsOperations.addEqualsAndHashCodeMethods(javaType, appendSuper, excludeFields);

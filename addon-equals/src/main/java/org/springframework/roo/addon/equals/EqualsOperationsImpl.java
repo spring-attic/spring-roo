@@ -38,16 +38,17 @@ public class EqualsOperationsImpl implements EqualsOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private TypeManagementService typeManagementService;
-	
+
 	public void addEqualsAndHashCodeMethods(final JavaType javaType, final boolean appendSuper, final Set<String> excludeFields) {
 		// Update pom.xml
 		updateConfiguration();
 
+		// Add @RooEquals annotation to class if not yet present
 		ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(javaType);
 		if (cid == null || cid.getTypeAnnotation(ROO_EQUALS) != null) {
 			return;
 		}
-		// Create @RooEquals annotation
+
 		final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_EQUALS);
 		if (appendSuper) {
 			annotationBuilder.addBooleanAttribute("appendSuper", appendSuper);
@@ -64,7 +65,7 @@ public class EqualsOperationsImpl implements EqualsOperations {
 		classOrInterfaceTypeDetailsBuilder.addAnnotation(annotationBuilder.build());
 		typeManagementService.createOrUpdateTypeOnDisk(classOrInterfaceTypeDetailsBuilder.build());
 	}
-	
+
 	private void updateConfiguration() {
 		// Update pom.xml with commons-lang dependency
 		final Element configuration = XmlUtils.getConfiguration(getClass());
@@ -74,5 +75,4 @@ public class EqualsOperationsImpl implements EqualsOperations {
 			projectOperations.addDependency(dependency);
 		}
 	}
-
 }
