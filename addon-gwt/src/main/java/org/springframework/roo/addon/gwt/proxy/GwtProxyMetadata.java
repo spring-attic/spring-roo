@@ -6,7 +6,7 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
-public class GwtProxyMetadata extends AbstractMetadataItem{
+public class GwtProxyMetadata extends AbstractMetadataItem {
 
 	// Constants
 	private static final String PROVIDES_TYPE_STRING = GwtProxyMetadata.class.getName();

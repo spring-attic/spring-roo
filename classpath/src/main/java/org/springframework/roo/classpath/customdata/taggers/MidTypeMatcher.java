@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.Assert;
  * @author James Tyrrell
  * @since 1.1.3
  */
-public class MidTypeMatcher extends TypeMatcher{
+public class MidTypeMatcher extends TypeMatcher {
 
 	// Fields
 	private final CustomDataKey<MemberHoldingTypeDetails> customDataKey;

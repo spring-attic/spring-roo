@@ -23,7 +23,7 @@ import org.springframework.roo.model.RooJavaType;
  */
 @Component
 @Service
-public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator{
+public class RepositoryMongoLocatorImpl implements RepositoryMongoLocator {
 
 	// Fields
 	@Reference private TypeLocationService typeLocationService;

@@ -24,7 +24,7 @@ import org.springframework.roo.model.RooJavaType;
  */
 @Component
 @Service
-public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator{
+public class RepositoryJpaLocatorImpl implements RepositoryJpaLocator {
 
 	// Fields
 	@Reference private TypeLocationService typeLocationService;

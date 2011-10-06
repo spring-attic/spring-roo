@@ -29,7 +29,7 @@ import org.w3c.dom.Element;
  */
 @Component
 @Service
-public class Op4jOperationsImpl implements Op4jOperations{
+public class Op4jOperationsImpl implements Op4jOperations {
 
 	// Fields
 	@Reference private ProjectOperations projectOperations;

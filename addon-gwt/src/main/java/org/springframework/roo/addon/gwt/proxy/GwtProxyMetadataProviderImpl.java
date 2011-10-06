@@ -42,7 +42,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
-public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtProxyMetadataProvider{
+public class GwtProxyMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtProxyMetadataProvider {
 
 	// Fields
 	@Reference protected GwtTypeService gwtTypeService;

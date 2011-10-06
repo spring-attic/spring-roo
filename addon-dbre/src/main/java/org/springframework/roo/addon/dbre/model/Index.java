@@ -11,11 +11,18 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Index{
+public class Index {
+	
+	// Fields
 	private String name;
 	private boolean unique;
 	private final Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();
 
+	/**
+	 * Constructor
+	 *
+	 * @param name
+	 */
 	Index(final String name) {
 		this.name = name;
 	}

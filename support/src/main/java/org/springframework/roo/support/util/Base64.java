@@ -1588,7 +1588,7 @@ public class Base64 {
                     for (i = 0; i < 4; i++) {
                         // Read four "meaningful" bytes:
                         int b = 0;
-                        do{ b = in.read(); }
+                        do { b = in.read(); }
                         while(b >= 0 && decodabet[b & 0x7f] <= WHITE_SPACE_ENC);
 
                         if (b < 0) {

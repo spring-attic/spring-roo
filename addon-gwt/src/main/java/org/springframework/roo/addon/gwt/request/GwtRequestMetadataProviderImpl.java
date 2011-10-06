@@ -46,7 +46,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 @Component(immediate = true)
 @Service
-public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtRequestMetadataProvider{
+public class GwtRequestMetadataProviderImpl extends AbstractHashCodeTrackingMetadataNotifier implements GwtRequestMetadataProvider {
 
 	// Fields
 	@Reference protected GwtTypeService gwtTypeService;
