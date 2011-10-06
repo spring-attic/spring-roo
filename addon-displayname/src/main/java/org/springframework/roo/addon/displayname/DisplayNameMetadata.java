@@ -104,13 +104,13 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return null;
 		}
 
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+
 		final Set<String> fieldsSet = new HashSet<String>();
 		String[] fields = annotationValues.getFields();
 		if (fields != null && fields.length > 0) {
 			Collections.addAll(fieldsSet, fields);
 		}
-
-		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		int methodCount = 0;
 		final List<String> displayMethods = new ArrayList<String>();
 		for (MethodMetadata accessor : locatedAccessors) {

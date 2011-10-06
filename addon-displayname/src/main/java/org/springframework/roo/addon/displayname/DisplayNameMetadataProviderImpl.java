@@ -75,11 +75,6 @@ public class DisplayNameMetadataProviderImpl extends AbstractItdMetadataProvider
 			return null;
 		}
 
-		final List<MethodMetadata> methods = memberDetails.getMethods();
-		if (methods.isEmpty()) {
-			return null;
-		}
-
 		final JavaType entity = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
 		List<MethodMetadata> locatedAccessors = locateAccessors(entity, memberDetails, metadataIdentificationString);
 		if (locatedAccessors.isEmpty()) {
