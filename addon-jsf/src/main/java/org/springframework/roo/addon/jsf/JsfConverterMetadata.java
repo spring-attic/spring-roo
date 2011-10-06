@@ -96,6 +96,8 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return null;
 		}
 
+		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
+
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(entity);
 		imports.addImport(FACES_CONTEXT);
@@ -104,7 +106,11 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		String simpleTypeName = entity.getSimpleTypeName();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		findAllMethod.copyAdditionsTo(builder, governorTypeDetails);
+		bodyBuilder.appendFormalLine("if (value == null) {");  
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("return null;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + "." + displayNameMethod + ".equals(value)) {");
@@ -137,6 +143,11 @@ public class JsfConverterMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		String simpleTypeName = entity.getSimpleTypeName();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("if (value == null) {");  
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("return \"\";");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " = (" + simpleTypeName + ") value;" );
 		bodyBuilder.appendFormalLine("return " + StringUtils.uncapitalize(simpleTypeName) + "." + displayNameMethod + ";");
 

@@ -47,7 +47,6 @@ import static org.springframework.roo.model.Jsr303JavaType.MAX;
 import static org.springframework.roo.model.Jsr303JavaType.MIN;
 import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
-import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -399,7 +398,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final String componentIdStr = fieldValueId + ".setId(\"" + fieldValueId + "\");";
 			final String requiredStr = fieldValueId + ".setRequired(" + !nullable + ");";
 			
-			if (isRooUploadFileField(field)) {
+			if (jsfFieldHolder.isRooUploadFileField()) {
 				imports.addImport(PRIMEFACES_FILE_UPLOAD);
 				imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 				imports.addImport(PRIMEFACES_UPLOADED_FILE);
@@ -870,21 +869,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private Set<FieldMetadata> getRooUploadedFileFields() {
 		final Set<FieldMetadata> rooUploadedFileFields = new LinkedHashSet<FieldMetadata>();
 		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
-			final FieldMetadata field = jsfFieldHolder.getField();
-			if (isRooUploadFileField(field)) {
-				rooUploadedFileFields.add(field);
+			if (jsfFieldHolder.isRooUploadFileField()) {
+				rooUploadedFileFields.add(jsfFieldHolder.getField());
 			}
 		}
 		return rooUploadedFileFields;
-	}
-	
-	private boolean isRooUploadFileField(final FieldMetadata rooUploadedFileField) {
-		for (final AnnotationMetadata annotation : rooUploadedFileField.getAnnotations()) {
-			if (annotation.getAnnotationType().equals(ROO_UPLOADED_FILE)) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	private String getComponentCreation(final String componentName) {

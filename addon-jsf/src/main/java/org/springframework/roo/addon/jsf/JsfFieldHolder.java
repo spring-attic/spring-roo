@@ -1,9 +1,12 @@
 package org.springframework.roo.addon.jsf;
 
+import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
+
 import java.util.Map;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
@@ -19,7 +22,7 @@ import org.springframework.roo.support.util.CollectionUtils;
 public class JsfFieldHolder {
 
 	// Fields
-	private FieldMetadata field;
+	private final FieldMetadata field;
 	private boolean enumerated;
 	private MemberDetails memberDetails;
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
@@ -27,8 +30,9 @@ public class JsfFieldHolder {
 	private String displayMethod;
 	private boolean applicationType;
 	private boolean applicationCollectionType;
+	private boolean rooUploadFileField;
 
-	public JsfFieldHolder(FieldMetadata field, boolean enumerated, MemberDetails memberDetails, Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, Map<JavaType, MemberDetails> genericTypes, String displayMethod) {
+	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final MemberDetails memberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<JavaType, MemberDetails> genericTypes, final String displayMethod) {
 		Assert.notNull(field, "Field required");
 		this.field = field;
 		this.enumerated = enumerated;
@@ -38,6 +42,13 @@ public class JsfFieldHolder {
 		this.genericTypes = genericTypes;
 		applicationType = this.memberDetails != null && this.crudAdditions != null;
 		applicationCollectionType = !CollectionUtils.isEmpty(this.genericTypes);
+		
+		for (final AnnotationMetadata annotation : field.getAnnotations()) {
+			if (annotation.getAnnotationType().equals(ROO_UPLOADED_FILE)) {
+				rooUploadFileField = true;
+				break;
+			}
+		}
 	}
 
 	public FieldMetadata getField() {
@@ -70,5 +81,9 @@ public class JsfFieldHolder {
 
 	public boolean isApplicationType() {
 		return applicationType;
+	}
+
+	public boolean isRooUploadFileField() {
+		return rooUploadFileField;
 	}
 }
