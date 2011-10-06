@@ -25,7 +25,7 @@ public class StandardMetadataTimingStatisticTest {
 	
 	@Test
 	public void testToStringForOneMillisecond() {
-		assertToString(NANOSECONDS_IN_MILLISECOND,     "     1 ms;     5 call(s): MyProcess");
+		assertToString(NANOSECONDS_IN_MILLISECOND, "     1 ms;     5 call(s): MyProcess");
 	}
 	
 	@Test
