@@ -57,7 +57,7 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 		}
 
 		final JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
-		List<FieldMetadata> locatedFields = locateFields(javaType, excludeFields, memberDetails, metadataIdentificationString);
+		final List<FieldMetadata> locatedFields = locateFields(javaType, excludeFields, memberDetails, metadataIdentificationString);
 		if (locatedFields.isEmpty()) {
 			return null;
 		}
@@ -84,6 +84,8 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 			}
 		}
 
+		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
+
 		for (final FieldMetadata field : memberDetails.getFields()) {
 			if (!excludeFieldsSet.isEmpty()) {
 				if (excludeFieldsSet.contains(field.getFieldName().getSymbolName())) {
@@ -93,12 +95,12 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 			if (Modifier.isStatic(field.getModifier()) || Modifier.isTransient(field.getModifier()) || field.getFieldType().isCommonCollectionType()) {
 				continue;
 			}
-			if (persistenceMemberLocator.getVersionField(javaType) != null && field.getFieldName().equals(persistenceMemberLocator.getVersionField(javaType).getFieldName())) {
+			if (versionField != null && field.getFieldName().equals(versionField.getFieldName())) {
 				continue;
 			}
 
-			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 			locatedFields.add(field);
+			metadataDependencyRegistry.registerDependency(field.getDeclaredByMetadataId(), metadataIdentificationString);
 		}
 
 		return new ArrayList<FieldMetadata>(locatedFields);

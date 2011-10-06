@@ -57,11 +57,21 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 			return null;
 		}
 
-		final List<MethodMetadata> methods = memberDetails.getMethods();
-		if (methods.isEmpty()) {
+		final JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
+		final List<MethodMetadata> locatedAccessors = locateAccessors(javaType, memberDetails, metadataIdentificationString);
+		if (locatedAccessors.isEmpty()) {
 			return null;
 		}
 
+		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedAccessors);
+	}
+
+	@Override
+	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+		return getLocalMid(itdTypeDetails);
+	}
+
+	private List<MethodMetadata> locateAccessors(final JavaType javaType, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		final SortedSet<MethodMetadata> locatedAccessors = new TreeSet<MethodMetadata>(new Comparator<MethodMetadata>() {
 			public int compare(final MethodMetadata l, final MethodMetadata r) {
 				return l.getMethodName().compareTo(r.getMethodName());
@@ -70,21 +80,16 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 
 		MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
 
-		for (MethodMetadata method : methods) {
+		for (MethodMetadata method : memberDetails.getMethods()) {
 			// Exclude cyclic self-references (ROO-325)
-			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName()) && !method.hasSameName(displayNameMethod)) {
+			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(javaType) && !method.hasSameName(displayNameMethod)) {
 				locatedAccessors.add(method);
 				// Track any changes to that method (eg it goes away)
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
 		}
-
-		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, new ArrayList<MethodMetadata>(locatedAccessors));
-	}
-
-	@Override
-	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
-		return getLocalMid(itdTypeDetails);
+		
+		return new ArrayList<MethodMetadata>(locatedAccessors);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
