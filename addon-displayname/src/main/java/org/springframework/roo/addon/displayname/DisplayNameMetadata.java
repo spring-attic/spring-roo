@@ -8,10 +8,7 @@ import static org.springframework.roo.model.JdkJavaType.DATE_FORMAT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -27,6 +24,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -106,11 +104,7 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 
-		final Set<String> fieldsSet = new HashSet<String>();
-		String[] fields = annotationValues.getFields();
-		if (fields != null && fields.length > 0) {
-			Collections.addAll(fieldsSet, fields);
-		}
+		final List<?> fieldsList = CollectionUtils.arrayToList(annotationValues.getFields());
 		int methodCount = 0;
 		final List<String> displayMethods = new ArrayList<String>();
 		for (MethodMetadata accessor : locatedAccessors) {
@@ -131,9 +125,9 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				accessorText = accessorName + "()";
 			}
 
-			if (!fieldsSet.isEmpty()) {
+			if (!fieldsList.isEmpty()) {
 				String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-				if (fieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
+				if (fieldsList.contains(StringUtils.uncapitalize(fieldName))) {
 					displayMethods.add(accessorText);
 				}
 				continue;

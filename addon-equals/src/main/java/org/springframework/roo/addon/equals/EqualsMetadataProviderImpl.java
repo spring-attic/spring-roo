@@ -5,9 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -23,6 +21,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.util.CollectionUtils;
 
 /**
  * Implementation of  {@link EqualsMetadataProvider}.
@@ -49,6 +48,10 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final EqualsAnnotationValues annotationValues = new EqualsAnnotationValues(governorPhysicalTypeMetadata);
+		if (!annotationValues.isAnnotationFound()) {
+			return null;
+		}
+
 		final String[] excludeFields = annotationValues.getExcludeFields();
 
 		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
@@ -77,20 +80,12 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 			}
 		});
 
-		final Set<String> excludeFieldsSet = new HashSet<String>();
-		if (excludeFields != null && excludeFields.length > 0) {
-			for (String excludeField : excludeFields) {
-				excludeFieldsSet.add(excludeField);
-			}
-		}
-
+		final List<?> excludeFieldsList = CollectionUtils.arrayToList(excludeFields);
 		final FieldMetadata versionField = persistenceMemberLocator.getVersionField(javaType);
 
 		for (final FieldMetadata field : memberDetails.getFields()) {
-			if (!excludeFieldsSet.isEmpty()) {
-				if (excludeFieldsSet.contains(field.getFieldName().getSymbolName())) {
-					continue;
-				}
+			if (excludeFieldsList.contains(field.getFieldName().getSymbolName())) {
+				continue;
 			}
 			if (Modifier.isStatic(field.getModifier()) || Modifier.isTransient(field.getModifier()) || field.getFieldType().isCommonCollectionType()) {
 				continue;

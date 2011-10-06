@@ -20,8 +20,9 @@ import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorat
 import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -36,7 +37,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public class DisplayNameMetadataProviderImpl extends AbstractItdMetadataProvider implements DisplayNameMetadataProvider {
+public class DisplayNameMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DisplayNameMetadataProvider {
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
@@ -86,6 +87,11 @@ public class DisplayNameMetadataProviderImpl extends AbstractItdMetadataProvider
 		return new DisplayNameMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedAccessors, identifierAccessor);
 	}
 
+	@Override
+	protected String getLocalMidToRequest(final ItdTypeDetails itdTypeDetails) {
+		return getLocalMid(itdTypeDetails);
+	}
+
 	private List<MethodMetadata> locateAccessors(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString) {
 		final SortedSet<MethodMetadata> locatedAccessors = new TreeSet<MethodMetadata>(new Comparator<MethodMetadata>() {
 			public int compare(final MethodMetadata l, final MethodMetadata r) {
@@ -101,10 +107,7 @@ public class DisplayNameMetadataProviderImpl extends AbstractItdMetadataProvider
 				continue;
 			}
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
-			if (field == null) {
-				continue;
-			}
-			if (isApplicationType(field.getFieldType())) {
+			if (field == null || isApplicationType(field.getFieldType())) {
 				continue;
 			}
 

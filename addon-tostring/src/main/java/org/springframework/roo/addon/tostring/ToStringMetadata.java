@@ -5,12 +5,9 @@ import static org.springframework.roo.model.JdkJavaType.ARRAYS;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 
 import java.lang.reflect.Modifier;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -26,6 +23,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -89,19 +87,14 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
-
-		final Set<String> excludeFieldsSet = new LinkedHashSet<String>();
-		String[] excludeFields = annotationValues.getExcludeFields();
-		if (excludeFields != null && excludeFields.length > 0) {
-			Collections.addAll(excludeFieldsSet, excludeFields);
-		}
-
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+
+		final List<?> excludeFieldsList = CollectionUtils.arrayToList(annotationValues.getExcludeFields());
 		final Map<String, String> map = new LinkedHashMap<String, String>();
 		for (MethodMetadata accessor : locatedAccessors) {
 			String accessorName = accessor.getMethodName().getSymbolName();
 			String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-			if (excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
+			if (excludeFieldsList.contains(StringUtils.uncapitalize(fieldName))) {
 				continue;
 			}
 
