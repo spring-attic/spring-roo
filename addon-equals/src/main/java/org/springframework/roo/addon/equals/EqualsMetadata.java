@@ -61,7 +61,7 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.annotationValues = annotationValues;
 		this.locatedFields = locatedFields;
 	
-		// Generate the display name method
+		// Generate the equals and hashCode methods
 		builder.addMethod(getEqualsMethod());
 		builder.addMethod(getHashCodeMethod());
 
