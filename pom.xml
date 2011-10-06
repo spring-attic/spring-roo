@@ -36,6 +36,7 @@
         <module>classpath</module>
         <module>classpath-javaparser</module>
         <module>addon-tostring</module>
+		<module>addon-equals</module>
         <module>addon-javabean</module>
         <module>addon-plural</module>
         <module>addon-propfiles</module>
@@ -647,7 +648,12 @@
                 <artifactId>org.springframework.roo.addon.tostring</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
+             <dependency>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.addon.equals</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+           <dependency>
                 <groupId>org.springframework.roo</groupId>
                 <artifactId>org.springframework.roo.addon.web.flow</artifactId>
                 <version>${project.version}</version>

@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.equals.EqualsMetadataProvider;
 import org.springframework.roo.addon.serializable.SerializableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -29,24 +30,27 @@ import org.springframework.roo.project.ProjectOperations;
 public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements IdentifierMetadataProvider {
 
 	// Fields
-	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+	@Reference private EqualsMetadataProvider equalsMetadataProvider;
+	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 
 	private boolean noArgConstructor = true;
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
-		serializableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
 		addMetadataTrigger(ROO_IDENTIFIER);
+		configurableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
+		equalsMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
+		serializableMetadataProvider.addMetadataTrigger(ROO_IDENTIFIER);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
-		serializableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
 		removeMetadataTrigger(ROO_IDENTIFIER);
+		configurableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
+		equalsMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
+		serializableMetadataProvider.removeMetadataTrigger(ROO_IDENTIFIER);
 	}
 
 	@Override

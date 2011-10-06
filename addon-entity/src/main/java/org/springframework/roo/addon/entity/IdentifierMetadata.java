@@ -2,7 +2,6 @@ package org.springframework.roo.addon.entity;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.IDENTIFIER_TYPE;
 import static org.springframework.roo.model.JavaType.LONG_OBJECT;
-import static org.springframework.roo.model.JavaType.OBJECT;
 import static org.springframework.roo.model.JdkJavaType.BIG_DECIMAL;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JpaJavaType.COLUMN;
@@ -15,7 +14,6 @@ import static org.springframework.roo.model.SpringJavaType.DATE_TIME_FORMAT;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,7 +25,6 @@ import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -111,10 +108,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				builder.addMethod(mutator);
 			}
 		}
-
-		// Add equals and hashCode methods
-		builder.addMethod(getEqualsMethod());
-		builder.addMethod(getHashCodeMethod());
 
 		// Add custom data tag for Roo Identifier type
 		builder.putCustomData(IDENTIFIER_TYPE, null);
@@ -377,111 +370,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(parameterTypes));
 		constructorBuilder.setBodyBuilder(bodyBuilder);
 		return constructorBuilder.build();
-	}
-
-	public MethodMetadata getEqualsMethod() {
-		Assert.notNull(fields, "Fields required");
-		// See if the user provided the equals method
-		final JavaType parameterType = OBJECT;
-		MethodMetadata equalsMethod = getGovernorMethod(new JavaSymbolName("equals"), parameterType);
-		if (equalsMethod != null) {
-			return equalsMethod;
-		}
-
-		if (fields.isEmpty()) {
-			return null;
-		}
-
-		String typeName = destination.getSimpleTypeName();
-
-		// Create the method
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (this == obj) return true;");
-		bodyBuilder.appendFormalLine("if (obj == null) return false;");
-		bodyBuilder.appendFormalLine("if (!(obj instanceof " + typeName + ")) return false;");
-		bodyBuilder.appendFormalLine(typeName + " other = (" + typeName + ") obj;");
-
-		for (FieldMetadata field : fields) {
-			String fieldName = field.getFieldName().getSymbolName();
-			JavaType fieldType = field.getFieldType();
-			if (fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.CHAR_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("if (" + fieldName + " != other." + fieldName + ") return false;");
-			} else if (fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("if (Double.doubleToLongBits(" + fieldName + ") != Double.doubleToLongBits(other." + fieldName + ")) return false;");
-			} else if (fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("if (Float.floatToIntBits(" + fieldName + ") != Float.floatToIntBits(other." + fieldName + ")) return false;");
-			} else {
-				bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
-				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine("if (other." + fieldName + " != null) return false;");
-				bodyBuilder.indentRemove();
-				bodyBuilder.appendFormalLine("} else if (!" + fieldName + ".equals(other." + fieldName + ")) return false;");
-			}
-		}
-		bodyBuilder.appendFormalLine("return true;");
-
-		List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("obj"));
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
-		return methodBuilder.build();
-	}
-
-	public MethodMetadata getHashCodeMethod() {
-		Assert.notNull(fields, "Fields required");
-		// See if the user provided the hashCode method
-		MethodMetadata hashCodeMethod = getGovernorMethod(new JavaSymbolName("hashCode"));
-		if (hashCodeMethod != null) {
-			return hashCodeMethod;
-		}
-
-		if (fields.isEmpty()) {
-			return null;
-		}
-
-		// Create the method
-		String primeStr = "prime";
-		String resultStr = "result";
-
-		// Check field names for the same variable names used in the hashCode method
-		for (FieldMetadata field : fields) {
-			if (primeStr.equals(field.getFieldName().getSymbolName())) {
-				primeStr = "_" + primeStr;
-				break;
-			}
-		}
-		for (FieldMetadata field : fields) {
-			if (resultStr.equals(field.getFieldName().getSymbolName())) {
-				resultStr = "_" + resultStr;
-				break;
-			}
-		}
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("final int " + primeStr + " = 31;");
-		bodyBuilder.appendFormalLine("int " + resultStr + " = 17;");
-
-		String header = resultStr + " = " + primeStr + " * " + resultStr + " + ";
-		for (FieldMetadata field : fields) {
-			String fieldName = field.getFieldName().getSymbolName();
-			JavaType fieldType = field.getFieldType();
-			if (fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "(" + fieldName + " ? 1231 : 1237);");
-			} else if (fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.CHAR_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + fieldName + ";");
-			} else if (fieldType.equals(JavaType.LONG_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "(int) (" + fieldName + " ^ (" + fieldName + " >>> 32));");
-			} else if (fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "(int) (Double.doubleToLongBits(" + fieldName + ") ^ (Double.doubleToLongBits(" + fieldName + ") >>> 32));");
-			} else if (fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "Float.floatToIntBits(" + fieldName + ");");
-			} else {
-				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " == null ? 0 : " + fieldName + ".hashCode());");
-			}
-		}
-		bodyBuilder.appendFormalLine("return " + resultStr + ";");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("hashCode"), JavaType.INT_PRIMITIVE, bodyBuilder);
-		return methodBuilder.build();
 	}
 
 	public static String getMetadataIdentifierType() {
