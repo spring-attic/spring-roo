@@ -69,13 +69,6 @@ public class EqualsMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 
-	/**
-	 * Obtains the display name method for this type, if available.
-	 * <p>
-	 * If the user provided a non-default name for "getEquals", that method will be returned.
-	 *
-	 * @return the display name method declared on this type or that will be introduced (or null if undeclared and not introduced)
-	 */
 	private MethodMetadata getEqualsMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("equals");
 		JavaType parameterType = OBJECT;
