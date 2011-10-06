@@ -132,7 +132,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				}
 
 				// Get the destination
-				String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString));
+				String mdClassId = MetadataIdentificationUtils.getMetadataClassId(metadataIdentificationString);
 				MetadataProvider p = providerMap.get(mdClassId);
 				Assert.notNull(p, "No metadata provider is currently registered to provide metadata for identifier '" + metadataIdentificationString + "' (class '" + mdClassId + "')");
 
@@ -225,7 +225,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 
 		synchronized (lock) {
 			// Get the destination
-			String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(downstreamDependency));
+			String mdClassId = MetadataIdentificationUtils.getMetadataClassId(downstreamDependency);
 			MetadataProvider p = providerMap.get(mdClassId);
 
 			if (p == null) {

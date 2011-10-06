@@ -173,4 +173,34 @@ public class MetadataIdentificationUtilsTest {
 	public void testGetMetadataInstanceFromInstanceMid() {
 		assertEquals(INSTANCE_CLASS, MetadataIdentificationUtils.getMetadataInstance(INSTANCE_MID));
 	}
+
+	@Test
+	public void testGetMetadataClassIdFromNullMid() {
+		assertNull(MetadataIdentificationUtils.getMetadataClassId(null));
+	}
+
+	@Test
+	public void testGetMetadataClassIdFromEmptyMid() {
+		assertNull(MetadataIdentificationUtils.getMetadataClassId(""));
+	}
+
+	@Test
+	public void testGetMetadataClassIdFromMidPrefix() {
+		assertNull(MetadataIdentificationUtils.getMetadataClassId(MID_PREFIX));
+	}
+
+	@Test
+	public void testGetMetadataClassIdFromMidPrefixPlusDelimiter() {
+		assertNull(MetadataIdentificationUtils.getMetadataClassId(MID_PREFIX + INSTANCE_DELIMITER));
+	}
+
+	@Test
+	public void testGetMetadataClassIdFromClassMid() {
+		assertEquals(MID_PREFIX + METADATA_CLASS, MetadataIdentificationUtils.getMetadataClassId(CLASS_MID));
+	}
+
+	@Test
+	public void testGetMetadataClassIdFromInstanceMid() {
+		assertEquals(MID_PREFIX + METADATA_CLASS, MetadataIdentificationUtils.getMetadataClassId(INSTANCE_MID));
+	}
 }

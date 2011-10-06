@@ -198,7 +198,7 @@ public class DefaultMetadataDependencyRegistry implements MetadataDependencyRegi
 				// Next dispatch the coarse-grained, class-specific dependencies.
 				// We only do it if the upstream is not class specific, as otherwise we'd have handled class-specific dispatch in previous loop
 				if (!MetadataIdentificationUtils.isIdentifyingClass(upstreamDependency)) {
-					String asClass = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(upstreamDependency));
+					String asClass = MetadataIdentificationUtils.getMetadataClassId(upstreamDependency);
 					for (String downstream : getDownstream(asClass)) {
 						// We don't notify a downstream if it had a direct instance-specific dependency and was already notified in previous loop
 						// We also don't notify if upstream is the same as downstream, as it doesn't make sense to notify yourself of an event

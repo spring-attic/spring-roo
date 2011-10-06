@@ -152,6 +152,17 @@ public final class MetadataIdentificationUtils {
 		mid.append(instanceIdentificationKey);
 		return mid.toString();
 	}
+	
+	/**
+	 * Returns the ID of the given metadata's class.
+	 * 
+	 * @param metadataId the metadata ID for which to return the class ID
+	 * @return <code>null</code> if a blank ID is given, otherwise a valid
+	 * class-level ID
+	 */
+	public static String getMetadataClassId(final String metadataId) {
+		return create(getMetadataClass(metadataId));
+	}
 
 	/**
 	 * Constructor is private to prevent instantiation

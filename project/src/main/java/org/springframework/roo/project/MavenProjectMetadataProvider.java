@@ -58,7 +58,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	// Constants
 	static final String POM_RELATIVE_PATH = "/pom.xml";
 
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier()));
+	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.getMetadataClassId(ProjectMetadata.getProjectIdentifier());
 
 	static final String ADDED = "added";
 	static final String CHANGED = "changed";
