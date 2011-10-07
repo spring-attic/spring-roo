@@ -125,18 +125,18 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return;
 		}
 		
-		this.locatedFields = locatedFields;
-		
+		entity = annotationValues.getEntity();
+
 		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
 		final MemberTypeAdditions mergeMethod = crudAdditions.get(MERGE_METHOD);
 		final MemberTypeAdditions persistMethod = crudAdditions.get(PERSIST_METHOD);
 		final MemberTypeAdditions removeMethod = crudAdditions.get(REMOVE_METHOD);
-		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null || this.locatedFields.isEmpty() || entity == null) {
+		if (identifierAccessor == null || findAllMethod == null || mergeMethod == null || persistMethod == null || removeMethod == null || locatedFields.isEmpty() || entity == null) {
 			valid = false;
 			return;
 		}
 		
-		entity = annotationValues.getEntity();
+		this.locatedFields = locatedFields;
 		beanName = annotationValues.getBeanName();
 		this.plural = plural;
 		entityName = JavaSymbolName.getReservedWordSafeName(entity);
@@ -209,7 +209,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getDeleteMethod(removeMethod));
 		builder.addMethod(getResetMethod());
 		builder.addMethod(getHandleDialogCloseMethod());
-
+		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
@@ -384,6 +384,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final FieldMetadata field = jsfFieldHolder.getField();
 			
 			final JavaType fieldType = field.getFieldType();
+			final String simpleTypeName = fieldType.getSimpleTypeName();
 			final String fieldName = field.getFieldName().getSymbolName();
 			final String fieldLabelId = fieldName + suffix1;
 			final boolean nullable = isNullable(field);
@@ -425,7 +426,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(PRIMEFACES_SELECT_BOOLEAN_CHECKBOX);
 					bodyBuilder.appendFormalLine("SelectBooleanCheckbox " + fieldValueId + " = " + getComponentCreation("SelectBooleanCheckbox"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 				}
 			} else if (jsfFieldHolder.isEnumerated()) {
@@ -437,7 +438,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(fieldType);
 					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreation("AutoComplete"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(getSetCompleteMethod(fieldName, fieldValueId));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
 					bodyBuilder.appendFormalLine(requiredStr);
@@ -476,7 +477,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine("Spinner " + fieldValueId + " = " + getComponentCreation("Spinner"));
 			//		bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 
 					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
@@ -514,7 +515,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 					bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 
 					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
@@ -531,7 +532,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
 					bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 					
 					Integer minValue = getSizeMinOrMax(field, "min");
@@ -545,22 +546,22 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + "." + genericType.getSimpleTypeName() + "Converter");
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 				} else {
 					imports.addImport(PRIMEFACES_SELECT_MANY_MENU);
 					imports.addImport(fieldType);
 					imports.addImport(genericType);
 					bodyBuilder.appendFormalLine("SelectManyMenu " + fieldValueId + " = " + getComponentCreation("SelectManyMenu"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
 					bodyBuilder.appendFormalLine(requiredStr);
 				}
 			} else if (jsfFieldHolder.isApplicationType()) {
-				JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + "." + fieldType.getSimpleTypeName() + "Converter");
+				JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + "." + simpleTypeName + "Converter");
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
 				} else {
 					imports.addImport(PRIMEFACES_AUTO_COMPLETE);
@@ -568,12 +569,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(new JavaType(converterName));
 					bodyBuilder.appendFormalLine("AutoComplete " + fieldValueId + " = " + getComponentCreation("AutoComplete"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(getSetCompleteMethod(fieldName, fieldValueId));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \""+ fieldName + "\", String.class));");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + ".displayName}\", String.class));");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", " + fieldType.getSimpleTypeName() + ".class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + ".displayString}\", String.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", " + simpleTypeName + ".class));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
 					bodyBuilder.appendFormalLine(requiredStr);
 					autoCompleteApplicationTypeFields.add(jsfFieldHolder);
@@ -586,7 +587,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
 					bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, fieldType.getSimpleTypeName()));
+					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 				}
 			}
@@ -763,7 +764,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("List<" + simpleTypeName + "> suggestions = new ArrayList<" + simpleTypeName + ">();");
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + "." + jsfFieldHolder.getDisplayMethod() + ".toLowerCase().startsWith(query.toLowerCase())) {");
+		bodyBuilder.appendFormalLine("if (" + StringUtils.uncapitalize(simpleTypeName) + ".getDisplayString().toLowerCase().startsWith(query.toLowerCase())) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("suggestions.add(" + StringUtils.uncapitalize(simpleTypeName) + ");");
 		bodyBuilder.indentRemove();

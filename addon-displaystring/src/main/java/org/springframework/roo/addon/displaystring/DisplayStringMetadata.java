@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.displayname;
+package org.springframework.roo.addon.displaystring;
 
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAYS;
@@ -28,20 +28,20 @@ import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Metadata for {@link RooDisplayName}.
+ * Metadata for {@link RooDisplayString}.
  *
  * @author Alan Stewart
  * @since 1.2.0
  */
-public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	// Constants
-	private static final String PROVIDES_TYPE_STRING = DisplayNameMetadata.class.getName();
+	private static final String PROVIDES_TYPE_STRING = DisplayStringMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final int MAX_LIST_VIEW_FIELDS = 4;
 
 	// Fields
-	private final DisplayNameAnnotationValues annotationValues;
+	private final DisplayStringAnnotationValues annotationValues;
 	private final List<MethodMetadata> locatedAccessors;
 	private final MethodMetadata identifierAccessor;
 	private String methodName;
@@ -56,7 +56,7 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	 * @param locatedAccessors
 	 * @param identifierAccessor
 	 */
-	public DisplayNameMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final DisplayNameAnnotationValues annotationValues, final List<MethodMetadata> locatedAccessors, final MethodMetadata identifierAccessor) {
+	public DisplayStringMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final DisplayStringAnnotationValues annotationValues, final List<MethodMetadata> locatedAccessors, final MethodMetadata identifierAccessor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -66,11 +66,11 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.locatedAccessors = locatedAccessors;
 		this.identifierAccessor = identifierAccessor;
 
-		// Generate the display name method
-		final MethodMetadata displayNameMethod = getDisplayNameMethod();
-		if (displayNameMethod != null) {
-			builder.addMethod(displayNameMethod);
-			methodName = displayNameMethod.getMethodName().getSymbolName();
+		// Generate the getDisplayString method
+		final MethodMetadata displayStringMethod = getDisplayStringMethod();
+		if (displayStringMethod != null) {
+			builder.addMethod(displayStringMethod);
+			methodName = displayStringMethod.getMethodName().getSymbolName();
 		}
 
 		// Create a representation of the desired output ITD
@@ -82,22 +82,14 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	/**
-	 * Obtains the display name method for this type, if available.
+	 * Obtains the display string method for this type, if available.
 	 * <p>
-	 * If the user provided a non-default name for "getDisplayName", that method will be returned.
+	 * If the user provided a non-default name for "getDisplayString", that method will be returned.
 	 *
 	 * @return the display name method declared on this type or that will be introduced (or null if undeclared and not introduced)
 	 */
-	private MethodMetadata getDisplayNameMethod() {
-		String displayNameMethod = annotationValues.getMethodName();
-		if (!StringUtils.hasText(displayNameMethod)) {
-			return null;
-		}
-
-		// Compute the relevant toString method name
-		JavaSymbolName methodName = new JavaSymbolName(displayNameMethod);
-
-		// See if the type itself declared the method
+	private MethodMetadata getDisplayStringMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("getDisplayString");
 		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
@@ -136,10 +128,9 @@ public class DisplayNameMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (methodCount <= MAX_LIST_VIEW_FIELDS) {
 				methodCount++;
 				if (identifierAccessor != null && accessor.hasSameName(identifierAccessor)) {
-					displayMethods.add(0, accessorText);
-				} else {
-					displayMethods.add(accessorText);
+					continue;
 				}
+				displayMethods.add(accessorText);
 			}
 		}
 

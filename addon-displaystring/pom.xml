@@ -7,9 +7,9 @@
         <version>1.2.0.BUILD-SNAPSHOT</version>
         <relativePath>../osgi-roo-bundle</relativePath>
     </parent>
-    <artifactId>org.springframework.roo.addon.displayname</artifactId>
+    <artifactId>org.springframework.roo.addon.displaystring</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Addon - Display Name</name>
+    <name>Spring Roo - Addon - Display String</name>
     <description>Provides a pretty string representation of a class for use in UIs</description>
     <dependencies>
         <!-- OSGi -->

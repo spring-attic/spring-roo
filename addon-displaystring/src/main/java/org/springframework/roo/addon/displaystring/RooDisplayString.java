@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.displayname;
+package org.springframework.roo.addon.displaystring;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,15 +13,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooDisplayName {
-
-	// Constants for the non-blank default attribute value
-	String DISPLAY_NAME_DEFAULT = "getDisplayName";
-
-	/**
-	 * @return the name of the display name method to generate (defaults to "getDisplayName"; if empty, does not create)
-	 */
-	String methodName() default DISPLAY_NAME_DEFAULT;
+public @interface RooDisplayString {
 
 	/**
 	 * @return an array of fields to use in the display name method

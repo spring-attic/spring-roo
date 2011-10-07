@@ -14,7 +14,7 @@ public final class RooJavaType {
 	public static final JavaType ROO_CONFIGURABLE = new JavaType("org.springframework.roo.addon.configurable.RooConfigurable");
 	public static final JavaType ROO_CONVERSION_SERVICE = new JavaType("org.springframework.roo.addon.web.mvc.controller.RooConversionService");
 	public static final JavaType ROO_DATA_ON_DEMAND = new JavaType("org.springframework.roo.addon.dod.RooDataOnDemand");
-	public static final JavaType ROO_DISPLAY_NAME = new JavaType("org.springframework.roo.addon.displayname.RooDisplayName");
+	public static final JavaType ROO_DISPLAY_STRING = new JavaType("org.springframework.roo.addon.displaystring.RooDisplayString");
 	public static final JavaType ROO_DB_MANAGED = new JavaType("org.springframework.roo.addon.dbre.RooDbManaged");
 	public static final JavaType ROO_EDITOR = new JavaType("org.springframework.roo.addon.property.editor.RooEditor");
 	public static final JavaType ROO_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooEntity");

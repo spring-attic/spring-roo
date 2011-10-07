@@ -1,7 +1,6 @@
-package org.springframework.roo.addon.displayname;
+package org.springframework.roo.addon.displaystring;
 
-import static org.springframework.roo.addon.displayname.RooDisplayName.DISPLAY_NAME_DEFAULT;
-import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_NAME;
+import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_STRING;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -10,14 +9,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
-import org.springframework.roo.classpath.customdata.taggers.CustomDataKeyDecorator;
-import org.springframework.roo.classpath.customdata.taggers.MethodMatcher;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -25,48 +20,34 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 /**
- * Implementation of  {@link DisplayNameMetadataProvider}.
+ * Implementation of  {@link DisplayStringMetadataProvider}.
  *
  * @author Alan Stewart
  * @since 1.2.0
  */
 @Component(immediate = true)
 @Service
-public class DisplayNameMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DisplayNameMetadataProvider {
-
-	// Fields
-	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
+public class DisplayStringMetadataProviderImpl extends AbstractMemberDiscoveringItdMetadataProvider implements DisplayStringMetadataProvider {
 
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		addMetadataTrigger(ROO_DISPLAY_NAME);
-		registerMatchers();
+		addMetadataTrigger(ROO_DISPLAY_STRING);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		removeMetadataTrigger(ROO_DISPLAY_NAME);
-		customDataKeyDecorator.unregisterMatchers(getClass());
-	}
-
-	@SuppressWarnings("unchecked")
-	private void registerMatchers() {
-		customDataKeyDecorator.registerMatchers(
-			getClass(),
-			new MethodMatcher(CustomDataKeys.DISPLAY_NAME_METHOD, ROO_DISPLAY_NAME, new JavaSymbolName("methodName"), DISPLAY_NAME_DEFAULT)
-		);
+		removeMetadataTrigger(ROO_DISPLAY_STRING);
 	}
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
-		final DisplayNameAnnotationValues annotationValues = new DisplayNameAnnotationValues(governorPhysicalTypeMetadata);
+		final DisplayStringAnnotationValues annotationValues = new DisplayStringAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {
 			return null;
 		}
@@ -84,7 +65,7 @@ public class DisplayNameMetadataProviderImpl extends AbstractMemberDiscoveringIt
 
 		final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(entity);
 
-		return new DisplayNameMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedAccessors, identifierAccessor);
+		return new DisplayStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedAccessors, identifierAccessor);
 	}
 
 	@Override
@@ -123,22 +104,22 @@ public class DisplayNameMetadataProviderImpl extends AbstractMemberDiscoveringIt
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
-		return "DisplayName";
+		return "DisplayString";
 	}
 
 	@Override
 	protected String getGovernorPhysicalTypeIdentifier(final String metadataIdentificationString) {
-		JavaType javaType = DisplayNameMetadata.getJavaType(metadataIdentificationString);
-		Path path = DisplayNameMetadata.getPath(metadataIdentificationString);
+		JavaType javaType = DisplayStringMetadata.getJavaType(metadataIdentificationString);
+		Path path = DisplayStringMetadata.getPath(metadataIdentificationString);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	@Override
 	protected String createLocalIdentifier(final JavaType javaType, final Path path) {
-		return DisplayNameMetadata.createIdentifier(javaType, path);
+		return DisplayStringMetadata.createIdentifier(javaType, path);
 	}
 
 	public String getProvidesType() {
-		return DisplayNameMetadata.getMetadataIdentiferType();
+		return DisplayStringMetadata.getMetadataIdentiferType();
 	}
 }

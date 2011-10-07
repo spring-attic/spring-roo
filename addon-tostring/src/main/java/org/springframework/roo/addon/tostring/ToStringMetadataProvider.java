@@ -78,11 +78,11 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 			}
 		});
 
-		MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
+		MethodMetadata displayStringMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
 
 		for (MethodMetadata method : memberDetails.getMethods()) {
 			// Exclude cyclic self-references (ROO-325)
-			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(javaType) && !method.hasSameName(displayNameMethod)) {
+			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(javaType) && !method.hasSameName(displayStringMethod)) {
 				locatedAccessors.add(method);
 				// Track any changes to that method (eg it goes away)
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);

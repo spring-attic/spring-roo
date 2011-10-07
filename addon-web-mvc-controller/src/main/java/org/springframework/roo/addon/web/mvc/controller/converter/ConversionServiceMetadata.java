@@ -67,7 +67,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	 * @param relevantDomainTypes the types for which to generate converters (required)
 	 * @param compositePrimaryKeyTypes (required)
 	 */
-	public ConversionServiceMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final Map<JavaType, MemberTypeAdditions> findMethods, final Map<JavaType, JavaType> idTypes, final Map<JavaType, String> relevantDomainTypes, final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes) {
+	public ConversionServiceMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final Map<JavaType, MemberTypeAdditions> findMethods, final Map<JavaType, JavaType> idTypes, final Set<JavaType> relevantDomainTypes, final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(relevantDomainTypes, "List of domain types required");
 		Assert.notNull(compositePrimaryKeyTypes, "List of PK types required");
@@ -84,16 +84,14 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		final MethodMetadataBuilder installMethodBuilder = new MethodMetadataBuilder(getInstallMethod());
 		final Set<String> methodNames = new HashSet<String>();
 
-		for (final Map.Entry<JavaType, String> entry : relevantDomainTypes.entrySet()) {
-			JavaType formBackingObject = entry.getKey();
-			String displayNameMethod = entry.getValue();
+		for (final JavaType formBackingObject : relevantDomainTypes) {
 			String simpleName = formBackingObject.getSimpleTypeName();
 			while (methodNames.contains(simpleName)) {
 				simpleName += "_";
 			}
 			methodNames.add(simpleName);
 			JavaSymbolName toIdMethodName = new JavaSymbolName("get" + simpleName + "ToStringConverter");
-			MethodMetadata toIdMethod = getToStringConverterMethod(formBackingObject, toIdMethodName, displayNameMethod);
+			MethodMetadata toIdMethod = getToStringConverterMethod(formBackingObject, toIdMethodName);
 			if (toIdMethod != null) {
 				builder.addMethod(toIdMethod);
 				installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + toIdMethodName.getSymbolName() + "());");
@@ -178,7 +176,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return converterMethods;
 	}
 
-	private MethodMetadata getToStringConverterMethod(final JavaType targetType, final JavaSymbolName methodName, final String displayNameMethod) {
+	private MethodMetadata getToStringConverterMethod(final JavaType targetType, final JavaSymbolName methodName) {
 		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
@@ -190,7 +188,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("public String convert(" + targetType.getSimpleTypeName() + " " + targetTypeName + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return " + targetTypeName + "." + displayNameMethod + ";");
+		bodyBuilder.appendFormalLine("return " + targetTypeName + ".getDisplayString();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();

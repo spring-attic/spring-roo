@@ -24,25 +24,23 @@ public class JsfFieldHolder {
 	// Fields
 	private final FieldMetadata field;
 	private boolean enumerated;
-	private MemberDetails memberDetails;
+	private MemberDetails applicationTypeMemberDetails;
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
 	private Map<JavaType, MemberDetails> genericTypes;
-	private String displayMethod;
 	private boolean applicationType;
 	private boolean applicationCollectionType;
 	private boolean rooUploadFileField;
 
-	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final MemberDetails memberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<JavaType, MemberDetails> genericTypes, final String displayMethod) {
+	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<JavaType, MemberDetails> genericTypes) {
 		Assert.notNull(field, "Field required");
 		this.field = field;
 		this.enumerated = enumerated;
-		this.memberDetails = memberDetails;
+		this.applicationTypeMemberDetails = applicationTypeMemberDetails;
 		this.crudAdditions = crudAdditions;
-		this.displayMethod = displayMethod;
 		this.genericTypes = genericTypes;
-		applicationType = this.memberDetails != null && this.crudAdditions != null;
+		applicationType = this.applicationTypeMemberDetails != null && !CollectionUtils.isEmpty(this.crudAdditions);
 		applicationCollectionType = !CollectionUtils.isEmpty(this.genericTypes);
-		
+
 		for (final AnnotationMetadata annotation : field.getAnnotations()) {
 			if (annotation.getAnnotationType().equals(ROO_UPLOADED_FILE)) {
 				rooUploadFileField = true;
@@ -58,17 +56,13 @@ public class JsfFieldHolder {
 	public boolean isEnumerated() {
 		return enumerated;
 	}
-	
-	public MemberDetails getMemberDetails() {
-		return memberDetails;
+
+	public MemberDetails getApplicationTypeMemberDetails() {
+		return applicationTypeMemberDetails;
 	}
 
 	public Map<MethodMetadataCustomDataKey, MemberTypeAdditions> getCrudAdditions() {
 		return crudAdditions;
-	}
-
-	public String getDisplayMethod() {
-		return displayMethod;
 	}
 
 	public Map<JavaType, MemberDetails> getGenericTypes() {

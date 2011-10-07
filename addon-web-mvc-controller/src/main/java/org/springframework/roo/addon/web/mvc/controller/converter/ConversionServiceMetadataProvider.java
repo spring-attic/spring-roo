@@ -5,6 +5,7 @@ import static org.springframework.roo.model.RooJavaType.ROO_WEB_SCAFFOLD;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,7 +94,7 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 		// To get here we know the governor is the ApplicationConversionServiceFactoryBean so let's go ahead and create its ITD
 		final Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(ROO_WEB_SCAFFOLD);
 		final Map<JavaType, Map<Object, JavaSymbolName>> compositePrimaryKeyTypes = findCompositePrimaryKeyTypesRequiringAConverter(controllers);
-		final Map<JavaType, String> relevantDomainTypes = new LinkedHashMap<JavaType, String>();
+		final Set<JavaType> relevantDomainTypes = new LinkedHashSet<JavaType>();
 		final Map<JavaType, MemberTypeAdditions> findMethods = new HashMap<JavaType, MemberTypeAdditions>();
 		final Map<JavaType, JavaType> idTypes = new HashMap<JavaType, JavaType>();
 
@@ -112,7 +113,7 @@ public class ConversionServiceMetadataProvider extends AbstractItdMetadataProvid
 				continue;
 			}
 
-			relevantDomainTypes.put(formBackingObject, getDisplayMethod(formBackingObject));
+			relevantDomainTypes.add(formBackingObject);
 			idTypes.put(formBackingObject, identifierType);
 			final MemberTypeAdditions findMethod = layerService.getMemberTypeAdditions(metadataIdentificationString, CustomDataKeys.FIND_METHOD.name(), formBackingObject, identifierType, LayerType.HIGHEST.getPosition(), new MethodParameter(identifierType, "id"));
 			findMethods.put(formBackingObject, findMethod);

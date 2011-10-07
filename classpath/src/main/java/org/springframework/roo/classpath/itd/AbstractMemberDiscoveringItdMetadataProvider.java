@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.itd;
 
+import org.apache.felix.scr.annotations.Component;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -34,6 +35,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.1.1
  */
+@Component(componentAbstract = true)
 public abstract class AbstractMemberDiscoveringItdMetadataProvider extends AbstractItdMetadataProvider {
 
 	/**

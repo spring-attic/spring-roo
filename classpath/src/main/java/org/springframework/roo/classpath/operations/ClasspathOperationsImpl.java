@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.operations;
 
 import static org.springframework.roo.model.JavaType.OBJECT;
+import static org.springframework.roo.model.RooJavaType.ROO_EQUALS;
 import static org.springframework.roo.model.RooJavaType.ROO_JAVA_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_SERIALIZABLE;
 import static org.springframework.roo.model.RooJavaType.ROO_TO_STRING;
@@ -89,6 +90,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 			final List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 			annotations.add(new AnnotationMetadataBuilder(ROO_JAVA_BEAN));
 			annotations.add(new AnnotationMetadataBuilder(ROO_TO_STRING));
+			annotations.add(new AnnotationMetadataBuilder(ROO_EQUALS));
 			annotations.add(new AnnotationMetadataBuilder(ROO_SERIALIZABLE));
 			typeDetailsBuilder.setAnnotations(annotations);
 		}

@@ -177,7 +177,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
 				continue;
 			}
-			if (isPersistenceIdentifierOrVersionMethod(method, identifierAccessor, versionAccessor)) {
+			if (method.hasSameName(identifierAccessor, versionAccessor)) {
 				continue;
 			}
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
@@ -210,9 +210,8 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			}
 
 			final Map<JavaType, MemberDetails> genericTypes = new LinkedHashMap<JavaType, MemberDetails>();
-			MemberDetails fieldTypeMemberDetails = null;
-			Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = null;
-			String displayMethod = null;
+			MemberDetails applicationTypeMemberDetails = null;
+			final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = new LinkedHashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
 
 			if (fieldType.isCommonCollectionType()) {
 				for (JavaType genericType : fieldType.getParameters()) {
@@ -222,19 +221,18 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 				}
 			} else {
 				if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
-					crudAdditions = getCrudAdditions(fieldType, metadataId);
-					fieldTypeMemberDetails = getMemberDetails(fieldType);
-					displayMethod = getDisplayMethod(fieldType, fieldTypeMemberDetails);
+					applicationTypeMemberDetails = getMemberDetails(fieldType);
+					crudAdditions.putAll(getCrudAdditions(fieldType, metadataId));
 				}
 			}
 
-			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, fieldTypeMemberDetails, crudAdditions, genericTypes, displayMethod);
+			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, applicationTypeMemberDetails, crudAdditions, genericTypes);
 			locatedFields.add(jsfFieldHolder);
 		}
 
 		return locatedFields;
 	}
-
+	
 	/**
 	 * Returns the additions to make to the generated ITD in order to invoke the
 	 * various CRUD methods of the given entity
@@ -275,18 +273,6 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 
 	private boolean isApplicationType(final JavaType fieldType) {
 		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType)) != null;
-	}
-
-	/**
-	 * Indicates whether the given method is the ID or version accessor
-	 *
-	 * @param method the method to check (required)
-	 * @param idMethod the ID accessor method (can be <code>null</code>)
-	 * @param versionMethod the version accessor method (can be <code>null</code>)
-	 * @return see above
-	 */
-	private boolean isPersistenceIdentifierOrVersionMethod(final MethodMetadata method, final MethodMetadata idMethod, final MethodMetadata versionMethod) {
-		return method.hasSameName(idMethod, versionMethod);
 	}
 
 	/**

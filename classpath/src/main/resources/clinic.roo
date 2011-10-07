@@ -12,11 +12,11 @@ enum constant --name Cardiology
 enum constant --name Dentistry
 enum constant --name Nutrition
 
-entity --class ~.domain.Pet --testAutomatically --displayName
-entity --class ~.domain.Visit --testAutomatically --displayName
-entity --class ~.domain.AbstractPerson --abstract --displayName
-entity --class ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically --displayName
-entity --class ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically --displayName
+entity --class ~.domain.Pet --testAutomatically
+entity --class ~.domain.Visit --testAutomatically
+entity --class ~.domain.AbstractPerson --abstract
+entity --class ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically
+entity --class ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically
 
 field string --fieldName firstName --sizeMin 3 --sizeMax 30 --class ~.domain.AbstractPerson
 field string --fieldName lastName --notNull --sizeMin 3 --sizeMax 30

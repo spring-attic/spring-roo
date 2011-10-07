@@ -10,12 +10,10 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.persistence.PersistenceMemberLocator;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
@@ -25,7 +23,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataProvider;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
@@ -493,30 +490,5 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			return null;
 		}
 		return memberDetailsScanner.getMemberDetails(getClass().getName(), classOrInterfaceTypeDetails);
-	}
-
-	protected String getDisplayMethod(final JavaType javaType) {
-		return getDisplayMethod(javaType, getMemberDetails(javaType));
-	}
-
-	protected String getDisplayMethod(final JavaType javaType, final MemberDetails memberDetails) {
-		String displayMethod = "toString()";
-
-		final MethodMetadata displayNameMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
-		if (displayNameMethod != null) {
-			displayMethod = displayNameMethod.getMethodName().getSymbolName() + "()";
-		} else {
-			final JavaSymbolName methodName = new JavaSymbolName("getDisplayName");
-			MethodMetadata method = memberDetails.getMethod(methodName);
-			if (method != null) {
-				displayMethod = methodName.getSymbolName() + "()";
-			} else {
-				final MethodMetadata identifierAccessor = persistenceMemberLocator.getIdentifierAccessor(javaType);
-				if (identifierAccessor != null) {
-					displayMethod = identifierAccessor.getMethodName().getSymbolName() + "()." + displayMethod;
-				}
-			}
-		}
-		return displayMethod;
 	}
 }

@@ -1,6 +1,6 @@
-package org.springframework.roo.addon.displayname;
+package org.springframework.roo.addon.displaystring;
 
-import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_NAME;
+import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_STRING;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
@@ -8,15 +8,14 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 
 /**
- * Represents a parsed {@link RooDisplayName} annotation.
+ * Represents a parsed {@link RooDisplayString} annotation.
  *
  * @author Alan Stewart
  * @since 1.2.0
  */
-public class DisplayNameAnnotationValues extends AbstractAnnotationValues {
+public class DisplayStringAnnotationValues extends AbstractAnnotationValues {
 
 	// From annotation
-	@AutoPopulate private String methodName = "getDisplayName";
 	@AutoPopulate private String[] fields;
 	@AutoPopulate private String separator;
 
@@ -25,13 +24,9 @@ public class DisplayNameAnnotationValues extends AbstractAnnotationValues {
 	 *
 	 * @param governorPhysicalTypeMetadata
 	 */
-	public DisplayNameAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, ROO_DISPLAY_NAME);
+	public DisplayStringAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+		super(governorPhysicalTypeMetadata, ROO_DISPLAY_STRING);
 		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
-
-	public String getMethodName() {
-		return methodName;
 	}
 
 	public String[] getFields() {

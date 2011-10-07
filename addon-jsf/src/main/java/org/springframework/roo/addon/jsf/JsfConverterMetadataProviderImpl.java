@@ -110,7 +110,7 @@ public class JsfConverterMetadataProviderImpl extends AbstractMemberDiscoveringI
 
 		final MemberTypeAdditions findAllMethod = getFindAllMethod(entity, metadataId);
 
-		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod, getDisplayMethod(entity, memberDetails));
+		return new JsfConverterMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, findAllMethod);
 	}
 
 	private MemberTypeAdditions getFindAllMethod(final JavaType entity, final String metadataId) {

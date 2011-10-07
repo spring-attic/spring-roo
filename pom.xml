@@ -73,7 +73,7 @@
         <module>addon-layers-repository-jpa</module>
 		<module>addon-layers-repository-mongo</module>
 		<module>addon-oscommands</module>
-		<module>addon-displayname</module>
+		<module>addon-displaystring</module>
         <module>annotations</module>
     </modules>
     <organization>
@@ -832,7 +832,7 @@
             </dependency>
             <dependency>
                 <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.addon.displayname</artifactId>
+                <artifactId>org.springframework.roo.addon.displaystring</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -985,31 +985,6 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>triemax</groupId>
-                        <artifactId>jalopy-maven</artifactId>
-                        <version>1.9.4-108</version>
-                        <configuration>
-                            <compile>true</compile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>process-sources</phase>
-                                <goals>
-                                    <goal>format</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     <properties>
         <powermock.version>1.4.10</powermock.version>
     </properties>
