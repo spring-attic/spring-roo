@@ -20,7 +20,7 @@ public interface JsfOperations {
 
 	void generateAll(JavaPackage destinationPackage);
 
-	void createManagedBean(JavaType managedBean, JavaType entity, boolean includeOnMenu, boolean createConverter);
+	void createManagedBean(JavaType managedBean, JavaType entity, String beanName, boolean includeOnMenu, boolean createConverter);
 
 	void addFileUploadField(JavaSymbolName fieldName, JavaType typeName, String fileName, String contentType, String column, Boolean notNull, boolean permitReservedWords);
 }

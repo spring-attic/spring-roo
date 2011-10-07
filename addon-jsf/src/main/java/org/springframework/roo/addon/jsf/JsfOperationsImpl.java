@@ -111,7 +111,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		generateManagedBeans(destinationPackage);
 	}
 
-	public void createManagedBean(final JavaType managedBean, final JavaType entity, final boolean includeOnMenu, final boolean createConverter) {
+	public void createManagedBean(final JavaType managedBean, final JavaType entity, String beanName, final boolean includeOnMenu, final boolean createConverter) {
 		installFacesConfig(managedBean.getPackage());
 		installI18n(managedBean.getPackage());
 		installBean("ApplicationBean-template.java", managedBean.getPackage());
@@ -132,9 +132,16 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		// Create type annotation for new managed bean
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_MANAGED_BEAN);
 		annotationBuilder.addClassAttribute("entity", entity);
+		
+		if (!StringUtils.hasText(beanName)) {
+			beanName = StringUtils.uncapitalize(managedBean.getSimpleTypeName());
+		}
+		annotationBuilder.addStringAttribute("beanName", beanName);
+		
 		if (!includeOnMenu) {
 			annotationBuilder.addBooleanAttribute("includeOnMenu", includeOnMenu);
 		}
+		
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(managedBean, Path.SRC_MAIN_JAVA);
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, managedBean, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.addAnnotation(annotationBuilder);
@@ -144,7 +151,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		shell.flash(Level.FINE, "Created " + managedBean.getFullyQualifiedTypeName(), JsfOperationsImpl.class.getName());
 		shell.flash(Level.FINE, "", JsfOperationsImpl.class.getName());
 
-		copyEntityTypePage(entity, pluralMetadata.getPlural());
+		copyEntityTypePage(entity, beanName, pluralMetadata.getPlural());
 
 		if (createConverter) {
 			// Create a javax.faces.convert.Converter class for the entity
@@ -199,8 +206,9 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 			}
 
 			// To get here, there is no listening managed bean, so add one
-			JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
-			createManagedBean(managedBean, entity, true, true);
+			final JavaType managedBean = new JavaType(destinationPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Bean");
+			final String beanName = StringUtils.uncapitalize(managedBean.getSimpleTypeName());
+			createManagedBean(managedBean, entity, beanName, true, true);
 		}
 	}
 
@@ -210,15 +218,15 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		copyDirectoryContents("i18n/*.properties", i18nDirectory, false);
 	}
 
-	private void copyEntityTypePage(final JavaType entity, final String plural) {
+	private void copyEntityTypePage(final JavaType entity, final String beanName, final String plural) {
 		String domainTypeFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "pages/" + StringUtils.uncapitalize(entity.getSimpleTypeName()) + ".xhtml");
 		try {
 			InputStream inputStream = TemplateUtils.getTemplate(getClass(), "pages/content-template.xhtml");
 			String input = FileCopyUtils.copyToString(new InputStreamReader(inputStream));
+			input = input.replace("__BEAN_NAME__", beanName);
 			input = input.replace("__DOMAIN_TYPE__", entity.getSimpleTypeName());
 			input = input.replace("__LC_DOMAIN_TYPE__", JavaSymbolName.getReservedWordSafeName(entity).getSymbolName());
 			input = input.replace("__DOMAIN_TYPE_PLURAL__", plural);
-			input = input.replace("__LC_DOMAIN_TYPE_PLURAL__", StringUtils.uncapitalize(plural));
 
 			fileManager.createOrUpdateTextFileIfRequired(domainTypeFile, input, false);
 		} catch (IOException e) {

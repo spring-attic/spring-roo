@@ -17,6 +17,7 @@ import org.springframework.roo.model.JavaType;
 public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
 	// From annotation
 	@AutoPopulate private JavaType entity;
+	@AutoPopulate private String beanName;
 	@AutoPopulate private boolean includeOnMenu = true;
 
 	public JsfManagedBeanAnnotationValues(final PhysicalTypeMetadata governorPhysicalTypeMetadata) {
@@ -26,6 +27,10 @@ public class JsfManagedBeanAnnotationValues extends AbstractAnnotationValues {
 
 	public JavaType getEntity() {
 		return entity;
+	}
+
+	public String getBeanName() {
+		return beanName;
 	}
 
 	public boolean isIncludeOnMenu() {

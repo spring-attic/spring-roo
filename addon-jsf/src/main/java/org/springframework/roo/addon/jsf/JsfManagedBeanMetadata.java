@@ -101,8 +101,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private static final String HTML_PANEL_GRID_ID = "htmlPanelGrid";
 	
 	// Fields
-	private JavaType entity;
 	private Set<JsfFieldHolder> locatedFields;
+	private JavaType entity;
+	private String beanName;
 	private String plural;
 	private JavaSymbolName entityName;
 	private final Set<FieldMetadata> autoCompleteEnumFields = new LinkedHashSet<FieldMetadata>();
@@ -124,8 +125,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return;
 		}
 		
-		entity = annotationValues.getEntity();
-		this.plural = plural;
 		this.locatedFields = locatedFields;
 		
 		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
@@ -137,13 +136,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			return;
 		}
 		
+		entity = annotationValues.getEntity();
+		beanName = annotationValues.getBeanName();
+		this.plural = plural;
+		entityName = JavaSymbolName.getReservedWordSafeName(entity);
+
 		final Set<FieldMetadata> rooUploadedFileFields = getRooUploadedFileFields();
 		final JavaSymbolName allEntitiesFieldName = new JavaSymbolName("all" + plural);
 		final JavaType entityListType = getListType(entity);
-		entityName = JavaSymbolName.getReservedWordSafeName(entity);
 
 		// Add @ManagedBean annotation if required
-		builder.addAnnotation(getManagedBeanAnnotation());
+		builder.addAnnotation(getManagedBeanAnnotation(annotationValues.getBeanName()));
 
 		// Add @SessionScoped annotation if required
 		builder.addAnnotation(getScopeAnnotation());
@@ -211,8 +214,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		itdTypeDetails = builder.build();
 	}
 
-	private AnnotationMetadata getManagedBeanAnnotation() {
-		return getTypeAnnotation(MANAGED_BEAN);
+	private AnnotationMetadata getManagedBeanAnnotation(String beanName) {
+		AnnotationMetadata annotation = getTypeAnnotation(MANAGED_BEAN);
+		if (annotation == null) {
+			return null;
+		}
+		final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(annotation);
+		annotationBuilder.addStringAttribute("name", beanName);
+		return annotationBuilder.build();
 	}
 
 	private AnnotationMetadata getScopeAnnotation() {
@@ -405,7 +414,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				final JavaSymbolName fileUploadMethodName = getFileUploadMethodName(field.getFieldName());
 				bodyBuilder.appendFormalLine("FileUpload " + fieldValueId + " = " + getComponentCreation("FileUpload"));
 				bodyBuilder.appendFormalLine(componentIdStr);
-				bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + entityName + "Bean." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
+				bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 				bodyBuilder.appendFormalLine(fieldValueId + ".setMode(\"advanced\");");
 				bodyBuilder.appendFormalLine(fieldValueId + ".setUpdate(\"messages\");");
 			} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
@@ -881,7 +890,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 	
 	private String getSetValueExpression(final String inputFieldVar, final String fieldName, final String className) {
-		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + entityName.getSymbolName() + "Bean." + entityName.getSymbolName() + "." + fieldName + "}\", " + className + ".class));";
+		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + className + ".class));";
 	}
 	
 	private String getSetValueExpression(final String fieldName, String fieldValueId) {
@@ -889,7 +898,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private String getSetCompleteMethod(final String fieldName, String fieldValueId) {
-		return fieldValueId + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + entityName + "Bean.complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));";
+		return fieldValueId + ".setCompleteMethod(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + ".complete" + StringUtils.capitalize(fieldName) + "}\", List.class, new Class[] { String.class }));";
 	}
 
 	public String toString() {

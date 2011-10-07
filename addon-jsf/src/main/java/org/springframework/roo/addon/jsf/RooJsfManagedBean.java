@@ -16,6 +16,8 @@ import java.lang.annotation.Target;
 public @interface RooJsfManagedBean {
 
 	Class<?> entity();
+	
+	String beanName();
 
 	boolean includeOnMenu() default true;
 }

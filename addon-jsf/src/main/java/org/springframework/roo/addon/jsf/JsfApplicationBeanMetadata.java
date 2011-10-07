@@ -140,15 +140,17 @@ public class JsfApplicationBeanMetadata extends AbstractItdTypeDetailsProvidingM
 				continue;
 			}
 
-			AnnotationAttributeValue<?> includeOnMenuValue = annotation.getAttribute(new JavaSymbolName("includeOnMenu"));
-			if (includeOnMenuValue != null && !((Boolean) includeOnMenuValue.getValue()).booleanValue()) {
+			AnnotationAttributeValue<?> includeOnMenuAttributeValue = annotation.getAttribute(new JavaSymbolName("includeOnMenu"));
+			if (includeOnMenuAttributeValue != null && !((Boolean) includeOnMenuAttributeValue.getValue()).booleanValue()) {
 				continue;
 			}
 
-			AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("entity"));
-			JavaType entity = (JavaType) value.getValue();
+			AnnotationAttributeValue<?> entityAttributeValue = annotation.getAttribute(new JavaSymbolName("entity"));
+			JavaType entity = (JavaType) entityAttributeValue.getValue();
 			String entityLabel = entity.getSimpleTypeName().length() > 26 ? entity.getSimpleTypeName().substring(0, 23) + "..." : entity.getSimpleTypeName();
-			String beanName = StringUtils.uncapitalize(managedBean.getName().getSimpleTypeName());
+			
+			AnnotationAttributeValue<?> beanNameAttributeValue = annotation.getAttribute(new JavaSymbolName("beanName"));
+			String beanName = (String) beanNameAttributeValue.getValue();
 
 			bodyBuilder.appendFormalLine("");
 			bodyBuilder.appendFormalLine("submenu = new Submenu();");
