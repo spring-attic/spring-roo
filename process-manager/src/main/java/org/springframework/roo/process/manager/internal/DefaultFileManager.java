@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 
 import org.apache.felix.scr.annotations.Component;
@@ -128,7 +129,6 @@ public class DefaultFileManager implements FileManager, UndoListener {
 			return;
 		}
 
-		// TODO Auto-generated method stub
 		final File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
 		try {
@@ -175,14 +175,13 @@ public class DefaultFileManager implements FileManager, UndoListener {
 
 	public void commit() {
 		try {
-			for (String fileIdentifier : deferredFileWrites.keySet()) {
-				String newContents = deferredFileWrites.get(fileIdentifier);
-				if (!StringUtils.hasText(newContents)) {
-					if (exists(fileIdentifier)) {
-						delete(fileIdentifier, "empty");
-					}
-				} else {
+			for (final Entry<String, String> entry : deferredFileWrites.entrySet()) {
+				final String fileIdentifier = entry.getKey();
+				final String newContents = entry.getValue();
+				if (StringUtils.hasText(newContents)) {
 					createOrUpdateTextFileIfRequired(fileIdentifier, newContents, StringUtils.trimToEmpty(deferredDescriptionOfChanges.get(fileIdentifier)));
+				} else if (exists(fileIdentifier)) {
+					delete(fileIdentifier, "empty");
 				}
 			}
 		} finally {
