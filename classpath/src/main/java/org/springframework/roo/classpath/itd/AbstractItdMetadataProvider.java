@@ -300,7 +300,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			}
 		}
 
-		// Fallback to ignoring trigger annotations
+		// Fall back to ignoring trigger annotations
 		if (ignoreTriggerAnnotations) {
 			produceMetadata = true;
 		}
@@ -317,8 +317,9 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		if (!produceMetadata && isGovernor(cid) && fileManager.exists(itdFilename)) {
 			// We don't seem to want metadata anymore, yet the ITD physically exists, so get rid of it
-			// This might be because the trigger annotation has been removed, the governor is missing a class declaration etc
-			fileManager.delete(itdFilename, "not required for governor " + cid.getName());
+			// This might be because the trigger annotation has been removed, the governor is missing a class declaration, etc.
+			deleteItd(metadataIdentificationString, itdFilename, "not required for governor " + cid.getName(), true);
+			return null;
 		}
 
 		if (produceMetadata) {
@@ -328,9 +329,9 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			// There is no requirement to register a direct connection with the physical type and this metadata because changes will
 			// trickle down via the class-level notification registered by convention by AbstractItdMetadataProvider subclasses (BPA 10 Dec 2010)
 
-			// Quit if the subclass returned null or a metadata item they're not happy with; it might have experienced issues parsing etc
 			if (metadata == null || !metadata.isValid()) {
-				fileManager.createOrUpdateTextFileIfRequired(itdFilename, "", false);
+				// The metadata couldn't be created properly
+				deleteItd(metadataIdentificationString, itdFilename, "", false);
 				return null;
 			}
 
@@ -341,11 +342,8 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			ItdTypeDetails itdTypeDetails = metadata.getMemberHoldingTypeDetails();
 
 			if (itdTypeDetails == null) {
-				// We have no members in this ITD, so its on-disk existence falls into question... :-)
-				// Exterminate it.
+				// The ITD has no members
 				deleteItdFile = true;
-				// And remove if from memberDetailsScanner
-				itdDiscoveryService.removeItdTypeDetails(metadataIdentificationString);
 			}
 
 			if (!deleteItdFile) {
@@ -365,11 +363,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			}
 
 			if (deleteItdFile) {
-				// Notice we use the createOrUpdateTextFileIfRequired method, as a zero byte payload will delete the file.
-				// This is better than calling fileManager.delete(..) in this case, as we can ensure if a subsequent update happens
-				// in the same process manager operation it will not physically delete the file or display console messages to that effect.
-				// We also need not perform an FileManager.exists(..) call, which is more efficient as it might update several times.
-				fileManager.createOrUpdateTextFileIfRequired(itdFilename, "", false);
+				deleteItd(metadataIdentificationString, itdFilename, null, false);
 			}
 
 			// Eagerly notify that the metadata has been updated; this also registers the metadata hash code in the superclass' cache to avoid
@@ -378,10 +372,31 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 			return metadata;
 		}
-
 		return null;
 	}
 
+	/**
+	 * Deletes the given ITD, either now or later.
+	 * 
+	 * @param metadataId the ITD's metadata ID
+	 * @param itdFilename the ITD's filename
+	 * @param reason the reason for deletion; ignored if now is <code>false</code>
+	 * @param now whether to delete the ITD immediately; <code>false</code>
+	 * schedules it for later deletion; this is preferable when it's possible
+	 * that the ITD might need to be re-created in the meantime (e.g. because
+	 * some ancestor metadata has changed to that effect), otherwise there will
+	 * be spurious console messages about the ITD being deleted and created
+	 */
+	private void deleteItd(final String metadataId, final String itdFilename, final String reason, final boolean now) {
+		if (now) {
+			fileManager.delete(itdFilename, reason);
+		} else {
+			fileManager.createOrUpdateTextFileIfRequired(itdFilename, "", false);
+		}
+		itdDiscoveryService.removeItdTypeDetails(metadataId);
+		// TODO do we need to notify downstream dependencies that this ITD has gone away?
+	}
+	
 	/**
 	 * Indicates whether the given type is the governor for this provider. This
 	 * implementation simply checks whether the given type is either a class or

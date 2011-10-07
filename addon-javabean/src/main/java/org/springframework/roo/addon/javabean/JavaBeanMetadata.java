@@ -59,6 +59,15 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	private JavaBeanAnnotationValues annotationValues;
 	private Map<FieldMetadata, JavaSymbolName> declaredFields;
 
+	/**
+	 * Constructor
+	 *
+	 * @param identifier the ID of the metadata to create (must be a valid ID)
+	 * @param aspectName the name of the ITD to be created (required)
+	 * @param governorPhysicalTypeMetadata the governor (required)
+	 * @param annotationValues the values of the {@link RooJavaBean} annotation (required)
+	 * @param declaredFields the fields declared in the governor (required, can be empty)
+	 */
 	public JavaBeanMetadata(final String identifier, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final JavaBeanAnnotationValues annotationValues, final Map<FieldMetadata, JavaSymbolName> declaredFields) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -69,8 +78,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			return;
 		}
 		if (declaredFields.isEmpty()) {
-			valid = false;
-			return;
+			return;	// N.B. the MD is still valid, just empty
 		}
 
 		this.annotationValues = annotationValues;
