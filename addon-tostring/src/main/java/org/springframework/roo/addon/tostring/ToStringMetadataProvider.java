@@ -13,7 +13,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.customdata.CustomDataKeys;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -78,11 +77,9 @@ public class ToStringMetadataProvider extends AbstractMemberDiscoveringItdMetada
 			}
 		});
 
-		MethodMetadata displayStringMethod = memberDetails.getMostConcreteMethodWithTag(CustomDataKeys.DISPLAY_NAME_METHOD);
-
 		for (MethodMetadata method : memberDetails.getMethods()) {
 			// Exclude cyclic self-references (ROO-325)
-			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(javaType) && !method.hasSameName(displayStringMethod)) {
+			if (BeanInfoUtils.isAccessorMethod(method) && !method.getReturnType().equals(javaType) && !method.getMethodName().getSymbolName().equals("getDisplayString")) {
 				locatedAccessors.add(method);
 				// Track any changes to that method (eg it goes away)
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);

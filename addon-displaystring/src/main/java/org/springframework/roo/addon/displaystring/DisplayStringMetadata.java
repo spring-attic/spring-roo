@@ -126,10 +126,10 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 			}
 
 			if (methodCount <= MAX_LIST_VIEW_FIELDS) {
-				methodCount++;
 				if (identifierAccessor != null && accessor.hasSameName(identifierAccessor)) {
 					continue;
 				}
+				methodCount++;
 				displayMethods.add(accessorText);
 			}
 		}
