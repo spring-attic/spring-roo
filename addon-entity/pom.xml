@@ -47,6 +47,10 @@
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.equals</artifactId>
         </dependency>
+         <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.displaystring</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>

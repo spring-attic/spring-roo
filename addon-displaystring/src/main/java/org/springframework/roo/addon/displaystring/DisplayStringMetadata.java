@@ -44,7 +44,6 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 	private final DisplayStringAnnotationValues annotationValues;
 	private final List<MethodMetadata> locatedAccessors;
 	private final MethodMetadata identifierAccessor;
-	private String methodName;
 
 	/**
 	 * Constructor
@@ -67,18 +66,10 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 		this.identifierAccessor = identifierAccessor;
 
 		// Generate the getDisplayString method
-		final MethodMetadata displayStringMethod = getDisplayStringMethod();
-		if (displayStringMethod != null) {
-			builder.addMethod(displayStringMethod);
-			methodName = displayStringMethod.getMethodName().getSymbolName();
-		}
+		builder.addMethod(getDisplayStringMethod());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
-	}
-
-	public String getMethodName() {
-		return methodName;
 	}
 
 	/**

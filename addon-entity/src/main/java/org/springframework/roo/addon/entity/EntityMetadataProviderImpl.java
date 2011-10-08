@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.displaystring.DisplayStringMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -59,6 +60,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 	// Fields
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
+	@Reference private DisplayStringMetadataProvider displayStringMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 
 	protected void activate(final ComponentContext context) {
@@ -66,6 +68,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		addMetadataTrigger(ROO_ENTITY);
 		configurableMetadataProvider.addMetadataTrigger(ROO_ENTITY);
 		pluralMetadataProvider.addMetadataTrigger(ROO_ENTITY);
+		displayStringMetadataProvider.addMetadataTrigger(ROO_ENTITY);
 		registerMatchers();
 	}
 
@@ -74,6 +77,7 @@ public class EntityMetadataProviderImpl extends AbstractItdMetadataProvider impl
 		removeMetadataTrigger(ROO_ENTITY);
 		configurableMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
 		pluralMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
+		displayStringMetadataProvider.removeMetadataTrigger(ROO_ENTITY);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 

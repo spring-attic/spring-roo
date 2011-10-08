@@ -48,9 +48,6 @@ public class DisplayStringMetadataProviderImpl extends AbstractMemberDiscovering
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final DisplayStringAnnotationValues annotationValues = new DisplayStringAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound()) {
-			return null;
-		}
 
 		final MemberDetails memberDetails = getMemberDetails(governorPhysicalTypeMetadata);
 		if (memberDetails == null) {

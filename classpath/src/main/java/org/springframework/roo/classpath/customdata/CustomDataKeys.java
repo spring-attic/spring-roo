@@ -57,9 +57,6 @@ public final class CustomDataKeys {
 	// Layer-related key
 	public static final MemberHoldingTypeDetailsCustomDataKey LAYER_TYPE = new MemberHoldingTypeDetailsCustomDataKey("LAYER_TYPE");
 
-	// Display name key
-	public static final MethodMetadataCustomDataKey DISPLAY_NAME_METHOD = new MethodMetadataCustomDataKey("DISPLAY_NAME_METHOD");
-
 	/**
 	 * Constructor is private to prevent instantiation
 	 */

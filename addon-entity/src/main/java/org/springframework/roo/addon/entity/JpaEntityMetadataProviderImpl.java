@@ -40,6 +40,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.displaystring.DisplayStringMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -99,6 +100,7 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 
 	// Fields
 	@Reference private CustomDataKeyDecorator customDataKeyDecorator;
+	@Reference private DisplayStringMetadataProvider displayStringMetadataProvider;
 
 	// ------------- Mandatory AbstractItdMetadataProvider methods -------------
 
@@ -131,12 +133,14 @@ public class JpaEntityMetadataProviderImpl extends AbstractIdentifierServiceAwar
 	protected void activate(final ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
 		addMetadataTriggers(TRIGGER_ANNOTATIONS);
+		displayStringMetadataProvider.addMetadataTrigger(ROO_JPA_ENTITY);
 		registerMatchers();
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), PROVIDES_TYPE);
 		removeMetadataTriggers(TRIGGER_ANNOTATIONS);
+		displayStringMetadataProvider.removeMetadataTrigger(ROO_JPA_ENTITY);
 		customDataKeyDecorator.unregisterMatchers(getClass());
 	}
 
