@@ -42,6 +42,8 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.layers.LayerService;
@@ -171,6 +173,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	 */
 	private Set<JsfFieldHolder> locateFields(final JavaType entity, final MemberDetails memberDetails, final String metadataId, final MethodMetadata identifierAccessor, final MethodMetadata versionAccessor) {
 		final Set<JsfFieldHolder> locatedFields = new LinkedHashSet<JsfFieldHolder>();
+		Set<ClassOrInterfaceTypeDetails> managedBeans = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(ROO_JSF_MANAGED_BEAN);
 
 		int listViewFields = 0;
 		for (final MethodMetadata method : memberDetails.getMethods()) {
@@ -209,14 +212,28 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 				}
 			}
 
-			final Map<JavaType, MemberDetails> genericTypes = new LinkedHashMap<JavaType, MemberDetails>();
+			final Map<JavaType, String> genericTypes = new LinkedHashMap<JavaType, String>();
+			String genericTypePlural = null;
 			MemberDetails applicationTypeMemberDetails = null;
 			final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = new LinkedHashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
 
 			if (fieldType.isCommonCollectionType()) {
-				for (JavaType genericType : fieldType.getParameters()) {
+				genericTypeLoop : for (JavaType genericType : fieldType.getParameters()) {
 					if (isApplicationType(genericType)) {
-						genericTypes.put(genericType, getMemberDetails(genericType));
+						for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
+							AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
+							AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
+							if (entityAttribute != null) {
+								JavaType attrValue = (JavaType) entityAttribute.getValue();
+								if (attrValue.equals(genericType)) {
+									AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
+									genericTypes.put(genericType, (String) beanNameAttribute.getValue());
+									final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType));
+									genericTypePlural = pluralMetadata.getPlural();
+									break genericTypeLoop; // Only support one generic type parameter
+								}
+							}
+						}
 					}
 				}
 			} else {
@@ -226,7 +243,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 				}
 			}
 
-			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, applicationTypeMemberDetails, crudAdditions, genericTypes);
+			final JsfFieldHolder jsfFieldHolder = new JsfFieldHolder(field, enumerated, genericTypePlural, genericTypes, applicationTypeMemberDetails, crudAdditions);
 			locatedFields.add(jsfFieldHolder);
 		}
 

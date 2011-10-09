@@ -25,11 +25,11 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_MESSAGE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_REQUEST_CONTEXT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SELECT_BOOLEAN_CHECKBOX;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SELECT_MANY_MENU;
-import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SLIDER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SPINNER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_UPLOADED_FILE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
+import static org.springframework.roo.addon.jsf.JsfJavaType.UI_SELECT_ITEMS;
 import static org.springframework.roo.addon.jsf.JsfJavaType.VIEW_SCOPED;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.MERGE_METHOD;
@@ -39,6 +39,7 @@ import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
 import static org.springframework.roo.model.JdkJavaType.DATE;
+import static org.springframework.roo.model.JdkJavaType.HASH_SET;
 import static org.springframework.roo.model.JdkJavaType.LIST;
 import static org.springframework.roo.model.JdkJavaType.POST_CONSTRUCT;
 import static org.springframework.roo.model.Jsr303JavaType.DECIMAL_MAX;
@@ -170,8 +171,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getInitMethod(findAllMethod));
 		builder.addMethod(getAccessorMethod(NAME, STRING));
 		builder.addMethod(getAccessorMethod(COLUMNS, getListType(STRING)));
-		builder.addMethod(getSelectedEntityAccessorMethod());
-		builder.addMethod(getMutatorMethod(entityName, entity));
 		builder.addMethod(getAccessorMethod(allEntitiesFieldName, entityListType));
 		builder.addMethod(getMutatorMethod(allEntitiesFieldName, entityListType));
 		builder.addMethod(getFindAllEntitiesMethod(allEntitiesFieldName, findAllMethod));
@@ -186,7 +185,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addMethod(getPopulatePanelMethod(Action.CREATE));
 		builder.addMethod(getPopulatePanelMethod(Action.EDIT)); 
 		builder.addMethod(getPopulatePanelMethod(Action.VIEW)); 
-	
+		
+		builder.addMethod(getEntityAccessorMethod());
+		builder.addMethod(getEntityMutatorMethod());
+		
+		addSelectedGenericTypeCollectionMethods();
+
 		for (final FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
 			builder.addMethod(getFileUploadListenerMethod(rooUploadedFileField));
 			builder.addMethod(getAccessorMethod(rooUploadedFileField.getFieldName(), rooUploadedFileField.getFieldType()));
@@ -212,6 +216,35 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+	}
+
+	private void addSelectedGenericTypeCollectionMethods() {
+		for (JsfFieldHolder jsfFieldHolder : this.locatedFields) {
+			if (!jsfFieldHolder.isGenericType()) {
+				continue;
+			}
+			
+			final Map<JavaType, String> genericTypes = jsfFieldHolder.getGenericTypes();
+			final JavaType genericType = genericTypes.keySet().iterator().next();
+			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
+			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedGenericTypePlural(genericTypePlural));
+			final JavaType fieldType = getListType(genericType);
+			
+			builder.addField(getField(fieldName, fieldType));
+			builder.addMethod(getAccessorMethod(fieldName, fieldType));
+			
+			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+			imports.addImport(HASH_SET);
+
+			final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+			bodyBuilder.appendFormalLine("if (" + fieldName.getSymbolName() + " != null) {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine(entityName.getSymbolName() + ".set" + genericTypePlural + "(new HashSet<" + genericType.getSimpleTypeName() + ">(" + fieldName + "));");
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("}");
+			bodyBuilder.appendFormalLine("this." + fieldName.getSymbolName() + " = " + fieldName.getSymbolName() + ";");
+			builder.addMethod(getMutatorMethod(fieldName, fieldType, bodyBuilder));
+		}
 	}
 
 	private AnnotationMetadata getManagedBeanAnnotation(String beanName) {
@@ -246,6 +279,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return getField(new JavaSymbolName(StringUtils.toLowerCase(panelType.name()) + "PanelGrid"), HTML_PANEL_GRID);
 	}
 	
+	// Methods
+
 	private MethodMetadata getInitMethod(final MemberTypeAdditions findAllAdditions) {
 		final JavaSymbolName methodName = new JavaSymbolName("init");
 		if (getGovernorMethod(methodName) != null) {
@@ -272,7 +307,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getSelectedEntityAccessorMethod() {
+	private MethodMetadata getEntityAccessorMethod() {
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " == null) {");
 		bodyBuilder.indent();
@@ -281,6 +316,29 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return " + entityName.getSymbolName() + ";");
 		return getAccessorMethod(entityName, entity, bodyBuilder);
+	}
+	
+	private MethodMetadata getEntityMutatorMethod() {
+		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		for (JsfFieldHolder jsfFieldHolder : locatedFields) {
+			if (!jsfFieldHolder.isGenericType()) {
+				continue;
+			}
+			
+			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+			imports.addImport(ARRAY_LIST);
+
+			final Map<JavaType, String> genericTypes = jsfFieldHolder.getGenericTypes();
+			final JavaType genericType = genericTypes.keySet().iterator().next();
+			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
+			bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " != null && " + entityName.getSymbolName() + ".get" + genericTypePlural + "() != null) {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine(getSelectedGenericTypePlural(genericTypePlural) + " = new ArrayList<" + genericType.getSimpleTypeName() + ">(" + entityName.getSymbolName() + ".get" + genericTypePlural + "());");
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("}");
+		}
+		bodyBuilder.appendFormalLine("this." + entityName.getSymbolName() + " = " + entityName.getSymbolName() + ";");
+		return getMutatorMethod(entityName, entity, bodyBuilder);
 	}
 	
 	private MethodMetadata getFindAllEntitiesMethod(final JavaSymbolName fieldName, final MemberTypeAdditions findAllMethod) {
@@ -469,13 +527,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldName, fieldValueId));
 				} else {
 					imports.addImport(PRIMEFACES_INPUT_TEXT);
-					imports.addImport(PRIMEFACES_SLIDER);
 					imports.addImport(PRIMEFACES_SPINNER);
 					if (fieldType.equals(JdkJavaType.BIG_INTEGER)) {
 						imports.addImport(fieldType);
 					}
 					bodyBuilder.appendFormalLine("Spinner " + fieldValueId + " = " + getComponentCreation("Spinner"));
-			//		bodyBuilder.appendFormalLine(inputTextStr);
 					bodyBuilder.appendFormalLine(componentIdStr);
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
@@ -492,16 +548,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.append(getLongRangeValdatorString(fieldValueId, minValue, maxValue));
 					}
 					bodyBuilder.appendFormalLine("");
-			//		bodyBuilder.appendFormalLine("Slider " + fieldValueId + "Slider = " + getComponentCreationStr("Slider"));
-			//		bodyBuilder.appendFormalLine(fieldValueId + "Slider.setFor(\"" + fieldValueId + "\");");
-			//		bodyBuilder.appendFormalLine(fieldValueId + "Spinner.setFor(\"" + fieldValueId + "\");");
-			//		bodyBuilder.appendFormalLine("");
-				
-			//		final String fieldPanelGrid = fieldValueId + "PanelGrid";
-			//		bodyBuilder.appendFormalLine("HtmlPanelGrid " + fieldPanelGrid + " = " + getComponentCreationStr("HtmlPanelGrid"));
-			//		bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + ");");
-			//		bodyBuilder.appendFormalLine(fieldPanelGrid + ".getChildren().add(" + fieldValueId + "Slider);");
-			//		fieldValueId = fieldPanelGrid;
 				}
 			} else if (JdkJavaType.isDecimalType(fieldType)) {
 				if (action == Action.VIEW) {
@@ -541,21 +587,36 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.append(getLengthValdatorString(fieldValueId, minValue, maxValue));
 					}
 				}
-			} else if (jsfFieldHolder.isApplicationCollectionType()) {
-				JavaType genericType = jsfFieldHolder.getGenericTypes().keySet().iterator().next();
-				JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + "." + genericType.getSimpleTypeName() + "Converter");
+			} else if (jsfFieldHolder.isGenericType()) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 				} else {
+					final Map<JavaType, String> genericTypes = jsfFieldHolder.getGenericTypes();
+					final JavaType genericType = genericTypes.keySet().iterator().next();
+					JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + "." + genericType.getSimpleTypeName() + "Converter");
+
 					imports.addImport(PRIMEFACES_SELECT_MANY_MENU);
+					imports.addImport(UI_SELECT_ITEMS);
 					imports.addImport(fieldType);
-					imports.addImport(genericType);
+					imports.addImport(converterType);
+					
+					final String genericTypeBeanName = genericTypes.get(genericType);
+					final String genericTypeFieldName = StringUtils.uncapitalize(genericType.getSimpleTypeName());
+					final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
+					
 					bodyBuilder.appendFormalLine("SelectManyMenu " + fieldValueId + " = " + getComponentCreation("SelectManyMenu"));
 					bodyBuilder.appendFormalLine(componentIdStr);
-					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + getSelectedGenericTypePlural(genericTypePlural) + "}\", List.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setStyle(\"height:100px\");");
 					bodyBuilder.appendFormalLine(requiredStr);
+					bodyBuilder.appendFormalLine("UISelectItems " + fieldValueId + "Items = (UISelectItems) facesContext.getApplication().createComponent(UISelectItems.COMPONENT_TYPE);");
+					bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + genericTypeBeanName + ".all" + StringUtils.capitalize(genericTypePlural) + "}\", List.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \"" + genericTypeFieldName + "\", String.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + genericTypeFieldName + ".displayString}\", String.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + "Items.setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + genericTypeFieldName + "}\", " + genericType.getSimpleTypeName() + ".class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".getChildren().add(" + fieldValueId + "Items);");
 				}
 			} else if (jsfFieldHolder.isApplicationType()) {
 				JavaType converterType = new JavaType(destination.getPackage().getFullyQualifiedPackageName() + "." + simpleTypeName + "Converter");
@@ -615,6 +676,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
+	}
+
+	private String getSelectedGenericTypePlural(final String genericTypePlural) {
+		return "selected" + StringUtils.capitalize(genericTypePlural);
 	}
 
 	private String getAddToPanelText(final String componentId) {
@@ -849,6 +914,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getResetMethod() {
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(entityName.getSymbolName() + " = null;");
+		for (JsfFieldHolder jsfFieldHolder : locatedFields) {
+			if (!jsfFieldHolder.isGenericType()) {
+				continue;
+			}
+			
+			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
+			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedGenericTypePlural(genericTypePlural));
+			bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = null;");
+		}
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
 		return getMethod(PUBLIC, new JavaSymbolName("reset"), JavaType.VOID_PRIMITIVE, null, null, bodyBuilder);
 	}

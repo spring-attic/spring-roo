@@ -24,22 +24,24 @@ public class JsfFieldHolder {
 	// Fields
 	private final FieldMetadata field;
 	private boolean enumerated;
+	private final String genericTypePlural;
+	private Map<JavaType, String> genericTypes;
 	private MemberDetails applicationTypeMemberDetails;
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
-	private Map<JavaType, MemberDetails> genericTypes;
 	private boolean applicationType;
-	private boolean applicationCollectionType;
+	private boolean genericType;
 	private boolean rooUploadFileField;
 
-	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions, final Map<JavaType, MemberDetails> genericTypes) {
+	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final String genericTypePlural, final Map<JavaType, String> genericTypes, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
 		Assert.notNull(field, "Field required");
 		this.field = field;
 		this.enumerated = enumerated;
-		this.applicationTypeMemberDetails = applicationTypeMemberDetails;
-		this.crudAdditions = crudAdditions;
+		this.genericTypePlural = genericTypePlural;
 		this.genericTypes = genericTypes;
+		this.crudAdditions = crudAdditions;
+		this.applicationTypeMemberDetails = applicationTypeMemberDetails;
 		applicationType = this.applicationTypeMemberDetails != null && !CollectionUtils.isEmpty(this.crudAdditions);
-		applicationCollectionType = !CollectionUtils.isEmpty(this.genericTypes);
+		genericType = !CollectionUtils.isEmpty(this.genericTypes) && this.genericTypes.size() == 1;
 
 		for (final AnnotationMetadata annotation : field.getAnnotations()) {
 			if (annotation.getAnnotationType().equals(ROO_UPLOADED_FILE)) {
@@ -52,9 +54,17 @@ public class JsfFieldHolder {
 	public FieldMetadata getField() {
 		return field;
 	}
-	
+
 	public boolean isEnumerated() {
 		return enumerated;
+	}
+
+	public String getGenericTypePlural() {
+		return genericTypePlural;
+	}
+
+	public Map<JavaType, String> getGenericTypes() {
+		return genericTypes;
 	}
 
 	public MemberDetails getApplicationTypeMemberDetails() {
@@ -65,16 +75,12 @@ public class JsfFieldHolder {
 		return crudAdditions;
 	}
 
-	public Map<JavaType, MemberDetails> getGenericTypes() {
-		return genericTypes;
-	}
-	
-	public boolean isApplicationCollectionType() {
-		return applicationCollectionType;
-	}
-
 	public boolean isApplicationType() {
 		return applicationType;
+	}
+
+	public boolean isGenericType() {
+		return genericType;
 	}
 
 	public boolean isRooUploadFileField() {

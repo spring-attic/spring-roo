@@ -35,6 +35,7 @@ public class JsfJavaType {
 	public static final JavaType REQUEST_SCOPED = new JavaType("javax.faces.bean.RequestScoped");
 	public static final JavaType SESSION_SCOPED = new JavaType("javax.faces.bean.SessionScoped");
 	public static final JavaType UI_COMPONENT = new JavaType("javax.faces.component.UIComponent");
+	public static final JavaType UI_SELECT_ITEMS = new JavaType("javax.faces.component.UISelectItems");
 	public static final JavaType VIEW_SCOPED = new JavaType("javax.faces.bean.ViewScoped");
 
 	// org.primefaces
