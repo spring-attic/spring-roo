@@ -46,7 +46,7 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 	}
 
 	@Override
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataIdentificationString, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
+	protected ItdTypeDetailsProvidingMetadataItem getMetadata(final String metadataId, final JavaType aspectName, final PhysicalTypeMetadata governorPhysicalTypeMetadata, final String itdFilename) {
 		final EqualsAnnotationValues annotationValues = new EqualsAnnotationValues(governorPhysicalTypeMetadata);
 		if (!annotationValues.isAnnotationFound()) {
 			return null;
@@ -60,12 +60,9 @@ public class EqualsMetadataProviderImpl extends AbstractMemberDiscoveringItdMeta
 		}
 
 		final JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
-		final List<FieldMetadata> locatedFields = locateFields(javaType, excludeFields, memberDetails, metadataIdentificationString);
-		if (locatedFields.isEmpty()) {
-			return null;
-		}
+		final List<FieldMetadata> equalityFields = locateFields(javaType, excludeFields, memberDetails, metadataId);
 
-		return new EqualsMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, locatedFields);
+		return new EqualsMetadata(metadataId, aspectName, governorPhysicalTypeMetadata, annotationValues, equalityFields);
 	}
 
 	@Override
