@@ -236,7 +236,12 @@ public class WebMetadataServiceImpl implements WebMetadataService {
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(pluralId);
 		if (pluralMetadata != null) {
 			registerDependency(pluralId, metadataIdentificationString);
-			return pluralMetadata.getPlural();
+			String plural = pluralMetadata.getPlural();
+			if (plural.equalsIgnoreCase(javaType.getSimpleTypeName())) {
+				return plural + "Items";
+			} else {
+				return plural;
+			}
 		}
 		return javaType.getSimpleTypeName() + "s";
 	}
