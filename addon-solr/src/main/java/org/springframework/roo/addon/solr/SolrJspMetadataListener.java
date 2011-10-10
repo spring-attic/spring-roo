@@ -134,7 +134,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		pageSearch.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
 
 		final List<FieldMetadata> idFields = persistenceMemberLocator.getIdentifierFields(formbackingObject);
-		if (!idFields.isEmpty()) {
+		if (idFields.isEmpty()) {
 			return null;
 		}
 		Element resultTable = new XmlElementBuilder("fields:table", document)
