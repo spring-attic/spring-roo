@@ -508,6 +508,31 @@ public final class XmlUtils {
 			}
 		}
 	}
+	
+	/**
+	 * Checks in under a given root element whether it can find a child element
+	 * which matches the name supplied. Returns {@link Element} if exists.
+	 * 
+	 * @param name the Element name (required)
+	 * @param root the parent DOM element (required)
+	 * @return the Element if discovered
+	 * @deprecated use {@link DomUtils#findFirstElementByName(String, Element)} instead
+	 */
+	@Deprecated
+	public static Element findFirstElementByName(final String name, final Element root) {
+		return DomUtils.findFirstElementByName(name, root);
+	}
+
+	/**
+	 * Removes empty text nodes from the specified node
+	 * 
+	 * @param node the element where empty text nodes will be removed
+	 * @deprecated use {@link DomUtils#removeTextNodes(Node)} instead
+	 */
+	@Deprecated
+	public static void removeTextNodes(final Node node) {
+		DomUtils.removeTextNodes(node);
+	}
 
 	/**
 	 * Constructor is private to prevent instantiation
