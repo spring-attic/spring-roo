@@ -211,35 +211,37 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 					enumerated = true;
 				}
 			}
-
+			
 			final Map<JavaType, String> genericTypes = new LinkedHashMap<JavaType, String>();
 			String genericTypePlural = null;
 			MemberDetails applicationTypeMemberDetails = null;
 			final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions = new LinkedHashMap<MethodMetadataCustomDataKey, MemberTypeAdditions>();
-
-			if (fieldType.isCommonCollectionType()) {
-				genericTypeLoop : for (JavaType genericType : fieldType.getParameters()) {
-					if (isApplicationType(genericType)) {
-						for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
-							AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
-							AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
-							if (entityAttribute != null) {
-								JavaType attrValue = (JavaType) entityAttribute.getValue();
-								if (attrValue.equals(genericType)) {
-									AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
-									genericTypes.put(genericType, (String) beanNameAttribute.getValue());
-									final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType));
-									genericTypePlural = pluralMetadata.getPlural();
-									break genericTypeLoop; // Only support one generic type parameter
+			
+			if (!enumerated) {
+				if (fieldType.isCommonCollectionType()) {
+					genericTypeLoop: for (JavaType genericType : fieldType.getParameters()) {
+						if (isApplicationType(genericType)) {
+							for (ClassOrInterfaceTypeDetails managedBean : managedBeans) {
+								AnnotationMetadata managedBeanAnnotation = managedBean.getAnnotation(ROO_JSF_MANAGED_BEAN);
+								AnnotationAttributeValue<?> entityAttribute = managedBeanAnnotation.getAttribute("entity");
+								if (entityAttribute != null) {
+									JavaType attrValue = (JavaType) entityAttribute.getValue();
+									if (attrValue.equals(genericType)) {
+										AnnotationAttributeValue<?> beanNameAttribute = managedBeanAnnotation.getAttribute("beanName");
+										genericTypes.put(genericType, (String) beanNameAttribute.getValue());
+										final PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(genericType));
+										genericTypePlural = pluralMetadata.getPlural();
+										break genericTypeLoop; // Only support one generic type parameter
+									}
 								}
 							}
 						}
 					}
-				}
-			} else {
-				if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
-					applicationTypeMemberDetails = getMemberDetails(fieldType);
-					crudAdditions.putAll(getCrudAdditions(fieldType, metadataId));
+				} else {
+					if (isApplicationType(fieldType) && !field.getCustomData().keySet().contains(CustomDataKeys.EMBEDDED_FIELD)) {
+						applicationTypeMemberDetails = getMemberDetails(fieldType);
+						crudAdditions.putAll(getCrudAdditions(fieldType, metadataId));
+					}
 				}
 			}
 

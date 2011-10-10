@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.roo.classpath.customdata.tagkeys.MethodMetadataCustomDataKey;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.layers.MemberTypeAdditions;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
@@ -30,7 +29,7 @@ public class JsfFieldHolder {
 	private Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions;
 	private boolean applicationType;
 	private boolean genericType;
-	private boolean rooUploadFileField;
+	private boolean uploadFileField;
 
 	public JsfFieldHolder(final FieldMetadata field, final boolean enumerated, final String genericTypePlural, final Map<JavaType, String> genericTypes, final MemberDetails applicationTypeMemberDetails, final Map<MethodMetadataCustomDataKey, MemberTypeAdditions> crudAdditions) {
 		Assert.notNull(field, "Field required");
@@ -42,13 +41,7 @@ public class JsfFieldHolder {
 		this.applicationTypeMemberDetails = applicationTypeMemberDetails;
 		applicationType = this.applicationTypeMemberDetails != null && !CollectionUtils.isEmpty(this.crudAdditions);
 		genericType = !CollectionUtils.isEmpty(this.genericTypes) && this.genericTypes.size() == 1;
-
-		for (final AnnotationMetadata annotation : field.getAnnotations()) {
-			if (annotation.getAnnotationType().equals(ROO_UPLOADED_FILE)) {
-				rooUploadFileField = true;
-				break;
-			}
-		}
+		uploadFileField = field.getAnnotation(ROO_UPLOADED_FILE) != null;
 	}
 
 	public FieldMetadata getField() {
@@ -83,7 +76,7 @@ public class JsfFieldHolder {
 		return genericType;
 	}
 
-	public boolean isRooUploadFileField() {
-		return rooUploadFileField;
+	public boolean isUploadFileField() {
+		return uploadFileField;
 	}
 }
