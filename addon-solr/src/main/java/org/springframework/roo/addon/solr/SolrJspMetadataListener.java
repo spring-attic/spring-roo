@@ -97,7 +97,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		return new SolrJspMetadata(metadataIdentificationString, webSearchMetadata);
 	}
 
-	public void installMvcArtifacts(final JavaType javaType, final Path path) {
+	private void installMvcArtifacts(final JavaType javaType, final Path path) {
 		copyArtifacts("form/search.tagx", "WEB-INF/tags/form/search.tagx");
 		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
@@ -105,7 +105,7 @@ public class SolrJspMetadataListener implements MetadataProvider, MetadataNotifi
 		xmlRoundTripFileManager.writeToDiskIfNecessary(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
 
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
-		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
+		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
 		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:");
 	}
 

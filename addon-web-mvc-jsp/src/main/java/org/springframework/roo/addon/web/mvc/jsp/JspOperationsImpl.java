@@ -190,7 +190,7 @@ public class JspOperationsImpl extends AbstractOperations implements JspOperatio
 		String lcViewName = viewName.getSymbolName().toLowerCase();
 		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties", "label" + folderName.replace("/", "_") + "_" + lcViewName, title, true);
 		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_") + lcViewName + "_id"), title, "global_generic", folderName + "/" + lcViewName, null);
-		tilesOperations.addViewDefinition(folderName, folderName + "/" + lcViewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "WEB-INF/views" + folderName + "/" + lcViewName + ".jspx");
+		tilesOperations.addViewDefinition(folderName, folderName + "/" + lcViewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName + "/" + lcViewName + ".jspx");
 
 		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		if (registerStaticController && fileManager.exists(mvcConfig)) {
