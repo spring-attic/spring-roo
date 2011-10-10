@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.displaystring;
 
 import static org.springframework.roo.model.JavaType.STRING;
-import static org.springframework.roo.model.JdkJavaType.ARRAYS;
 import static org.springframework.roo.model.JdkJavaType.CALENDAR;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.DATE_FORMAT;
@@ -93,11 +92,8 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 		for (MethodMetadata accessor : locatedAccessors) {
 			String accessorName = accessor.getMethodName().getSymbolName();
 			String accessorText;
-			if (accessor.getReturnType().isCommonCollectionType()) {
+			if (accessor.getReturnType().isCommonCollectionType() || accessor.getReturnType().isArray()) {
 				continue;
-			} else if (accessor.getReturnType().isArray()) {
-				imports.addImport(ARRAYS);
-				accessorText = "Arrays.toString(" + accessorName + "())";
 			} else if (CALENDAR.equals(accessor.getReturnType())) {
 				imports.addImport(DATE_FORMAT);
 				accessorText = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "().getTime())";

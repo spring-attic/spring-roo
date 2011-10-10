@@ -52,7 +52,6 @@ import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -107,8 +106,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private String beanName;
 	private String plural;
 	private JavaSymbolName entityName;
-	private final Set<FieldMetadata> autoCompleteEnumFields = new LinkedHashSet<FieldMetadata>();
-	private final Set<JsfFieldHolder> autoCompleteApplicationTypeFields = new LinkedHashSet<JsfFieldHolder>();
+	private final List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
+	private final List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 
 	private enum Action {
 		CREATE, EDIT, VIEW;
@@ -121,11 +120,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		Assert.isTrue(StringUtils.hasText(plural), "Plural required");
 		Assert.notNull(crudAdditions, "Crud additions map required");
 		Assert.notNull(locatedFields, "Located fields required");
-		
+
 		if (!isValid()) {
 			return;
 		}
-		
+
 		entity = annotationValues.getEntity();
 
 		final MemberTypeAdditions findAllMethod = crudAdditions.get(FIND_ALL_METHOD);
@@ -136,13 +135,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			valid = false;
 			return;
 		}
-		
+
 		this.locatedFields = locatedFields;
 		beanName = annotationValues.getBeanName();
 		this.plural = plural;
 		entityName = JavaSymbolName.getReservedWordSafeName(entity);
 
-		final Set<FieldMetadata> rooUploadedFileFields = getRooUploadedFileFields();
 		final JavaSymbolName allEntitiesFieldName = new JavaSymbolName("all" + plural);
 		final JavaType entityListType = getListType(entity);
 
@@ -153,97 +151,99 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		builder.addAnnotation(getScopeAnnotation());
 
 		// Add fields
-		builder.addField(getField(PRIVATE, NAME, STRING, "\"" + plural + "\""));
-		builder.addField(getField(entityName, entity));
-		builder.addField(getField(allEntitiesFieldName, entityListType));
-		builder.addField(getField(PRIVATE, DATA_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
-		builder.addField(getField(COLUMNS, getListType(STRING)));
-		builder.addField(getPanelGridField(Action.CREATE));
-		builder.addField(getPanelGridField(Action.EDIT));
-		builder.addField(getPanelGridField(Action.VIEW));
-		builder.addField(getField(PRIVATE, CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
-		
-		for (final FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
-			builder.addField(getField(rooUploadedFileField.getFieldName(), PRIMEFACES_UPLOADED_FILE));
-		}
+		fields.add(getField(PRIVATE, NAME, STRING, "\"" + plural + "\""));
+		fields.add(getField(entityName, entity));
+		fields.add(getField(allEntitiesFieldName, entityListType));
+		fields.add(getField(PRIVATE, DATA_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
+		fields.add(getField(COLUMNS, getListType(STRING)));
+		fields.add(getPanelGridField(Action.CREATE));
+		fields.add(getPanelGridField(Action.EDIT));
+		fields.add(getPanelGridField(Action.VIEW));
+		fields.add(getField(PRIVATE, CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE, Boolean.FALSE.toString()));
 
 		// Add methods
-		builder.addMethod(getInitMethod(findAllMethod));
-		builder.addMethod(getAccessorMethod(NAME, STRING));
-		builder.addMethod(getAccessorMethod(COLUMNS, getListType(STRING)));
-		builder.addMethod(getAccessorMethod(allEntitiesFieldName, entityListType));
-		builder.addMethod(getMutatorMethod(allEntitiesFieldName, entityListType));
-		builder.addMethod(getFindAllEntitiesMethod(allEntitiesFieldName, findAllMethod));
-		builder.addMethod(getAccessorMethod(DATA_VISIBLE, BOOLEAN_PRIMITIVE));
-		builder.addMethod(getMutatorMethod(DATA_VISIBLE, BOOLEAN_PRIMITIVE));
-		builder.addMethod(getPanelGridAccessorMethod(Action.CREATE));
-		builder.addMethod(getPanelGridMutatorMethod(Action.CREATE));
-		builder.addMethod(getPanelGridAccessorMethod(Action.EDIT));
-		builder.addMethod(getPanelGridMutatorMethod(Action.EDIT));
-		builder.addMethod(getPanelGridAccessorMethod(Action.VIEW));
-		builder.addMethod(getPanelGridMutatorMethod(Action.VIEW));
-		builder.addMethod(getPopulatePanelMethod(Action.CREATE));
-		builder.addMethod(getPopulatePanelMethod(Action.EDIT)); 
-		builder.addMethod(getPopulatePanelMethod(Action.VIEW)); 
-		
-		builder.addMethod(getEntityAccessorMethod());
-		builder.addMethod(getEntityMutatorMethod());
-		
-		addSelectedGenericTypeCollectionMethods();
+		methods.add(getInitMethod(findAllMethod));
+		methods.add(getAccessorMethod(NAME, STRING));
+		methods.add(getAccessorMethod(COLUMNS, getListType(STRING)));
+		methods.add(getAccessorMethod(allEntitiesFieldName, entityListType));
+		methods.add(getMutatorMethod(allEntitiesFieldName, entityListType));
+		methods.add(getFindAllEntitiesMethod(allEntitiesFieldName, findAllMethod));
+		methods.add(getAccessorMethod(DATA_VISIBLE, BOOLEAN_PRIMITIVE));
+		methods.add(getMutatorMethod(DATA_VISIBLE, BOOLEAN_PRIMITIVE));
+		methods.add(getPanelGridAccessorMethod(Action.CREATE));
+		methods.add(getPanelGridMutatorMethod(Action.CREATE));
+		methods.add(getPanelGridAccessorMethod(Action.EDIT));
+		methods.add(getPanelGridMutatorMethod(Action.EDIT));
+		methods.add(getPanelGridAccessorMethod(Action.VIEW));
+		methods.add(getPanelGridMutatorMethod(Action.VIEW));
+		methods.add(getPopulatePanelMethod(Action.CREATE));
+		methods.add(getPopulatePanelMethod(Action.EDIT));
+		methods.add(getPopulatePanelMethod(Action.VIEW));
 
-		for (final FieldMetadata rooUploadedFileField : rooUploadedFileFields) {
-			builder.addMethod(getFileUploadListenerMethod(rooUploadedFileField));
-			builder.addMethod(getAccessorMethod(rooUploadedFileField.getFieldName(), rooUploadedFileField.getFieldType()));
-			builder.addMethod(getMutatorMethod(rooUploadedFileField.getFieldName(), rooUploadedFileField.getFieldType()));
-		}
-		
-		for (final FieldMetadata field : autoCompleteEnumFields) {
-			builder.addMethod(getAutoCompleteEnumMethod(field));
-		}
-		
-		for (final JsfFieldHolder jsfFieldHolder : autoCompleteApplicationTypeFields) {
-			builder.addMethod(getAutoCompleteApplicationTypeMethod(jsfFieldHolder));
+		methods.add(getEntityAccessorMethod());
+		methods.add(getEntityMutatorMethod());
+
+		addMiscellaneousMethods();
+
+		for (final JsfFieldHolder jsfFieldHolder : this.locatedFields) {
+			if (jsfFieldHolder.isRooUploadFileField()) {
+				final FieldMetadata field = jsfFieldHolder.getField();
+				fields.add(getField(field.getFieldName(), PRIMEFACES_UPLOADED_FILE));
+				methods.add(getFileUploadListenerMethod(field));
+		//		methods.add(getAccessorMethod(field.getFieldName(), field.getFieldType()));
+		//		methods.add(getMutatorMethod(field.getFieldName(), field.getFieldType()));
+			}
 		}
 
-		builder.addMethod(getAccessorMethod(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE));
-		builder.addMethod(getMutatorMethod(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE));
-		builder.addMethod(getDisplayListMethod());
-		builder.addMethod(getDisplayCreateDialogMethod());
-		builder.addMethod(getPersistMethod(mergeMethod, persistMethod, identifierAccessor));
-		builder.addMethod(getDeleteMethod(removeMethod));
-		builder.addMethod(getResetMethod());
-		builder.addMethod(getHandleDialogCloseMethod());
-		
+		methods.add(getAccessorMethod(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE));
+		methods.add(getMutatorMethod(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE));
+		methods.add(getDisplayListMethod());
+		methods.add(getDisplayCreateDialogMethod());
+		methods.add(getPersistMethod(mergeMethod, persistMethod, identifierAccessor));
+		methods.add(getDeleteMethod(removeMethod));
+		methods.add(getResetMethod());
+		methods.add(getHandleDialogCloseMethod());
+
+		// Add fields first to builder followed by methods
+		for (FieldMetadata field : fields) {
+			builder.addField(field);
+		}
+		for (MethodMetadata method : methods) {
+			builder.addMethod(method);
+		}
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 
-	private void addSelectedGenericTypeCollectionMethods() {
-		for (JsfFieldHolder jsfFieldHolder : this.locatedFields) {
-			if (!jsfFieldHolder.isGenericType()) {
-				continue;
-			}
-			
-			final Map<JavaType, String> genericTypes = jsfFieldHolder.getGenericTypes();
-			final JavaType genericType = genericTypes.keySet().iterator().next();
-			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
-			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedGenericTypePlural(genericTypePlural));
-			final JavaType fieldType = getListType(genericType);
-			
-			builder.addField(getField(fieldName, fieldType));
-			builder.addMethod(getAccessorMethod(fieldName, fieldType));
-			
-			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
-			imports.addImport(HASH_SET);
+	private void addMiscellaneousMethods() {
+		for (JsfFieldHolder jsfFieldHolder : locatedFields) {
+			if (jsfFieldHolder.isApplicationType()) {
+				methods.add(getAutoCompleteApplicationTypeMethod(jsfFieldHolder));
+			} else if (jsfFieldHolder.isEnumerated()) {
+				methods.add(getAutoCompleteEnumMethod(jsfFieldHolder.getField()));
+			} else if (jsfFieldHolder.isGenericType()) {
+				final String fieldName = jsfFieldHolder.getField().getFieldName().getSymbolName();
+				final Map<JavaType, String> genericTypes = jsfFieldHolder.getGenericTypes();
+				final JavaType genericType = genericTypes.keySet().iterator().next();
+				final JavaSymbolName selectedFieldName = new JavaSymbolName(getSelectedFieldName(fieldName));
+				final JavaType listType = getListType(genericType);
 
-			final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-			bodyBuilder.appendFormalLine("if (" + fieldName.getSymbolName() + " != null) {");
-			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine(entityName.getSymbolName() + ".set" + genericTypePlural + "(new HashSet<" + genericType.getSimpleTypeName() + ">(" + fieldName + "));");
-			bodyBuilder.indentRemove();
-			bodyBuilder.appendFormalLine("}");
-			bodyBuilder.appendFormalLine("this." + fieldName.getSymbolName() + " = " + fieldName.getSymbolName() + ";");
-			builder.addMethod(getMutatorMethod(fieldName, fieldType, bodyBuilder));
+				fields.add(getField(selectedFieldName, listType));
+				methods.add(getAccessorMethod(selectedFieldName, listType));
+
+				final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
+				imports.addImport(HASH_SET);
+
+				final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+				bodyBuilder.appendFormalLine("if (" + selectedFieldName.getSymbolName() + " != null) {");
+				bodyBuilder.indent();
+				bodyBuilder.appendFormalLine(entityName.getSymbolName() + ".set" + StringUtils.capitalize(fieldName) + "(new HashSet<" + genericType.getSimpleTypeName() + ">(" + selectedFieldName + "));");
+				bodyBuilder.indentRemove();
+				bodyBuilder.appendFormalLine("}");
+				bodyBuilder.appendFormalLine("this." + selectedFieldName.getSymbolName() + " = " + selectedFieldName.getSymbolName() + ";");
+				methods.add(getMutatorMethod(selectedFieldName, listType, bodyBuilder));
+			}
 		}
 	}
 
@@ -258,27 +258,25 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private AnnotationMetadata getScopeAnnotation() {
-		if (hasScopeAnnotation()) { 
+		if (hasScopeAnnotation()) {
 			return null;
 		}
 		final AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(SESSION_SCOPED);
 		return annotationBuilder.build();
 	}
-	
+
 	private boolean hasScopeAnnotation() {
-		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null 
-			|| governorTypeDetails.getAnnotation(VIEW_SCOPED) != null 
-			|| governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null);
+		return (governorTypeDetails.getAnnotation(SESSION_SCOPED) != null || governorTypeDetails.getAnnotation(VIEW_SCOPED) != null || governorTypeDetails.getAnnotation(REQUEST_SCOPED) != null);
 	}
-	
+
 	private JavaType getListType(final JavaType parameterType) {
 		return new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(parameterType));
 	}
-	
+
 	private FieldMetadata getPanelGridField(final Action panelType) {
 		return getField(new JavaSymbolName(StringUtils.toLowerCase(panelType.name()) + "PanelGrid"), HTML_PANEL_GRID);
 	}
-	
+
 	// Methods
 
 	private MethodMetadata getInitMethod(final MemberTypeAdditions findAllAdditions) {
@@ -286,7 +284,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
-		
+
 		findAllAdditions.copyAdditionsTo(builder, governorTypeDetails);
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
@@ -301,12 +299,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				bodyBuilder.appendFormalLine("columns.add(\"" + field.getFieldName().getSymbolName() + "\");");
 			}
 		}
-		
+
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(POST_CONSTRUCT));
 		return methodBuilder.build();
 	}
-	
+
 	private MethodMetadata getEntityAccessorMethod() {
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " == null) {");
@@ -317,30 +315,31 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("return " + entityName.getSymbolName() + ";");
 		return getAccessorMethod(entityName, entity, bodyBuilder);
 	}
-	
+
 	private MethodMetadata getEntityMutatorMethod() {
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		for (JsfFieldHolder jsfFieldHolder : locatedFields) {
 			if (!jsfFieldHolder.isGenericType()) {
 				continue;
 			}
-			
+
 			final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 			imports.addImport(ARRAY_LIST);
 
+			final String fieldName = jsfFieldHolder.getField().getFieldName().getSymbolName();
 			final Map<JavaType, String> genericTypes = jsfFieldHolder.getGenericTypes();
 			final JavaType genericType = genericTypes.keySet().iterator().next();
 			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
 			bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + " != null && " + entityName.getSymbolName() + ".get" + genericTypePlural + "() != null) {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine(getSelectedGenericTypePlural(genericTypePlural) + " = new ArrayList<" + genericType.getSimpleTypeName() + ">(" + entityName.getSymbolName() + ".get" + genericTypePlural + "());");
+			bodyBuilder.appendFormalLine(getSelectedFieldName(fieldName) + " = new ArrayList<" + genericType.getSimpleTypeName() + ">(" + entityName.getSymbolName() + ".get" + StringUtils.capitalize(fieldName) + "());");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		}
 		bodyBuilder.appendFormalLine("this." + entityName.getSymbolName() + " = " + entityName.getSymbolName() + ";");
 		return getMutatorMethod(entityName, entity, bodyBuilder);
 	}
-	
+
 	private MethodMetadata getFindAllEntitiesMethod(final JavaSymbolName fieldName, final MemberTypeAdditions findAllMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("findAll" + plural);
 		if (getGovernorMethod(methodName) != null) {
@@ -357,7 +356,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	private MethodMetadata getPanelGridAccessorMethod(final Action action) {
 		final String fieldName = StringUtils.toLowerCase(action.name()) + "PanelGrid";
 		final JavaSymbolName methodName = BeanInfoUtils.getAccessorMethodName(new JavaSymbolName(fieldName), false);
@@ -385,15 +384,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return " + fieldName + ";");
-		
+
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	private MethodMetadata getPanelGridMutatorMethod(final Action action) {
 		return getMutatorMethod(new JavaSymbolName(StringUtils.toLowerCase(action.name()) + "PanelGrid"), HTML_PANEL_GRID);
 	}
-	
+
 	private MethodMetadata getPopulatePanelMethod(final Action action) {
 		JavaSymbolName methodName;
 		String suffix1;
@@ -415,11 +414,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				methodName = new JavaSymbolName("populateViewPanel");
 				break;
 		}
-		
+
 		if (getGovernorMethod(methodName) != null) {
 			return null;
 		}
-		
+
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(EL_CONTEXT);
 		imports.addImport(EXPRESSION_FACTORY);
@@ -440,14 +439,13 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
 			final FieldMetadata field = jsfFieldHolder.getField();
-			
 			final JavaType fieldType = field.getFieldType();
 			final String simpleTypeName = fieldType.getSimpleTypeName();
 			final String fieldName = field.getFieldName().getSymbolName();
 			final String fieldLabelId = fieldName + suffix1;
 			final boolean nullable = isNullable(field);
 			final String requiredFlag = action != Action.VIEW && !nullable ? " * " : "   ";
-			
+
 			// Field label
 			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId + " = " + getComponentCreation("HtmlOutputText"));
 			bodyBuilder.appendFormalLine(fieldLabelId + ".setId(\"" + fieldLabelId + "\");");
@@ -465,16 +463,16 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final String inputTextStr = "InputText " + fieldValueId + " = " + getComponentCreation("InputText");
 			final String componentIdStr = fieldValueId + ".setId(\"" + fieldValueId + "\");";
 			final String requiredStr = fieldValueId + ".setRequired(" + !nullable + ");";
-			
+
 			if (jsfFieldHolder.isRooUploadFileField()) {
 				imports.addImport(PRIMEFACES_FILE_UPLOAD);
 				imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 				imports.addImport(PRIMEFACES_UPLOADED_FILE);
-				final JavaSymbolName fileUploadMethodName = getFileUploadMethodName(field.getFieldName());
 				bodyBuilder.appendFormalLine("FileUpload " + fieldValueId + " = " + getComponentCreation("FileUpload"));
 				bodyBuilder.appendFormalLine(componentIdStr);
-				bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + fileUploadMethodName + "}\", void.class, new Class[] { FileUploadEvent.class }));");
+				bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + getFileUploadMethodName(fieldName) + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 				bodyBuilder.appendFormalLine(fieldValueId + ".setMode(\"advanced\");");
+				bodyBuilder.appendFormalLine(fieldValueId + ".setAuto(true);");
 				bodyBuilder.appendFormalLine(fieldValueId + ".setUpdate(\"messages\");");
 			} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
 				if (action == Action.VIEW) {
@@ -500,7 +498,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(getSetCompleteMethod(fieldName, fieldValueId));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
 					bodyBuilder.appendFormalLine(requiredStr);
-					autoCompleteEnumFields.add(field);
 				}
 			} else if (JdkJavaType.isDateField(fieldType)) {
 				if (action == Action.VIEW) {
@@ -570,7 +567,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 						bodyBuilder.append(getDoubleRangeValdatorString(fieldValueId, minValue, maxValue));
 					}
 				}
-			} else if (fieldType.equals(STRING)){
+			} else if (fieldType.equals(STRING)) {
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldName, fieldValueId));
@@ -580,7 +577,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(componentIdStr);
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
-					
+
 					Integer minValue = getSizeMinOrMax(field, "min");
 					BigDecimal maxValue = NumberUtils.min(getSizeMinOrMax(field, "max"), getColumnLength(field));
 					if (minValue != null || maxValue != null) {
@@ -600,15 +597,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					imports.addImport(UI_SELECT_ITEMS);
 					imports.addImport(fieldType);
 					imports.addImport(converterType);
-					
+
 					final String genericTypeBeanName = genericTypes.get(genericType);
 					final String genericTypeFieldName = StringUtils.uncapitalize(genericType.getSimpleTypeName());
 					final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
-					
+
 					bodyBuilder.appendFormalLine("SelectManyMenu " + fieldValueId + " = " + getComponentCreation("SelectManyMenu"));
 					bodyBuilder.appendFormalLine(componentIdStr);
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + getSelectedGenericTypePlural(genericTypePlural) + "}\", List.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + getSelectedFieldName(fieldName) + "}\", List.class));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setStyle(\"height:100px\");");
 					bodyBuilder.appendFormalLine(requiredStr);
 					bodyBuilder.appendFormalLine("UISelectItems " + fieldValueId + "Items = (UISelectItems) facesContext.getApplication().createComponent(UISelectItems.COMPONENT_TYPE);");
@@ -633,12 +630,11 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(getSetCompleteMethod(fieldName, fieldValueId));
 					bodyBuilder.appendFormalLine(fieldValueId + ".setDropdown(true);");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \""+ fieldName + "\", String.class));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"var\", expressionFactory.createValueExpression(elContext, \"" + fieldName + "\", String.class));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemLabel\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + ".displayString}\", String.class));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"itemValue\", expressionFactory.createValueExpression(elContext, \"#{" + fieldName + "}\", " + simpleTypeName + ".class));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setConverter(new " + converterType.getSimpleTypeName() + "());");
 					bodyBuilder.appendFormalLine(requiredStr);
-					autoCompleteApplicationTypeFields.add(jsfFieldHolder);
 				}
 			} else {
 				if (action == Action.VIEW) {
@@ -671,15 +667,15 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 			bodyBuilder.appendFormalLine("");
 		}
-		
+
 		bodyBuilder.appendFormalLine("return " + HTML_PANEL_GRID_ID + ";");
-		
+
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
 
-	private String getSelectedGenericTypePlural(final String genericTypePlural) {
-		return "selected" + StringUtils.capitalize(genericTypePlural);
+	private String getSelectedFieldName(final String fieldName) {
+		return "selected" + StringUtils.capitalize(fieldName);
 	}
 
 	private String getAddToPanelText(final String componentId) {
@@ -689,7 +685,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private boolean isNullable(final FieldMetadata field) {
 		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null;
 	}
-	
+
 	private BigDecimal getMinOrMax(final FieldMetadata field, JavaType annotationType) {
 		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), annotationType);
 		if (annotation != null && annotation.getAttribute(new JavaSymbolName("value")) != null) {
@@ -697,7 +693,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		}
 		return null;
 	}
-	
+
 	private Integer getSizeMinOrMax(final FieldMetadata field, String attrName) {
 		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 		if (annotation != null && annotation.getAttribute(new JavaSymbolName(attrName)) != null) {
@@ -707,7 +703,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private Integer getColumnLength(final FieldMetadata field) {
-		@SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataKeys.COLUMN_FIELD);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> values = (Map<String, Object>) field.getCustomData().get(CustomDataKeys.COLUMN_FIELD);
 		if (values != null && values.containsKey("length")) {
 			return (Integer) values.get("length");
 		}
@@ -729,7 +726,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine(fieldValueId + ".addValidator(" + fieldValueId + "Validator);");
 		return bodyBuilder.getOutput();
 	}
-	
+
 	public String getDoubleRangeValdatorString(String fieldValueId, BigDecimal minValue, BigDecimal maxValue) {
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(DOUBLE_RANGE_VALIDATOR);
@@ -762,8 +759,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		return bodyBuilder.getOutput();
 	}
 
-	private MethodMetadata getFileUploadListenerMethod(final FieldMetadata rooUploadedFileField) {
-		final JavaSymbolName methodName = getFileUploadMethodName(rooUploadedFileField.getFieldName());
+	private MethodMetadata getFileUploadListenerMethod(final FieldMetadata field) {
+		final String fieldName = field.getFieldName().getSymbolName();
+		final JavaSymbolName methodName = getFileUploadMethodName(fieldName);
 		final JavaType parameterType = PRIMEFACES_FILE_UPLOAD_EVENT;
 		if (getGovernorMethod(methodName, parameterType) != null) {
 			return null;
@@ -773,17 +771,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		imports.addImport(FACES_MESSAGE);
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("event"));
-		
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("set" + StringUtils.capitalize(rooUploadedFileField.getFieldName().getSymbolName()) + "(event.getFile());");
+		bodyBuilder.appendFormalLine(entityName + ".set" + StringUtils.capitalize(fieldName) + "(event.getFile().getContents());");
 		bodyBuilder.appendFormalLine("FacesContext facesContext = FacesContext.getCurrentInstance();");
-		bodyBuilder.appendFormalLine("FacesMessage msg = new FacesMessage(\"Successful\", event.getFile().getFileName() + \" is uploaded.\");"); 
+		bodyBuilder.appendFormalLine("FacesMessage msg = new FacesMessage(\"Successful\", event.getFile().getFileName() + \" is uploaded.\");");
 		bodyBuilder.appendFormalLine("facesContext.addMessage(null, msg);");
-		
+
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	private MethodMetadata getAutoCompleteEnumMethod(final FieldMetadata autoCompleteField) {
 		final JavaSymbolName methodName = new JavaSymbolName("complete" + StringUtils.capitalize(autoCompleteField.getFieldName().getSymbolName()));
 		final JavaType parameterType = STRING;
@@ -792,6 +790,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		}
 
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("query"));
+		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(autoCompleteField.getFieldType()));
 
 		final String simpleTypeName = autoCompleteField.getFieldType().getSimpleTypeName();
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -807,12 +806,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return suggestions;");
 
-		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(autoCompleteField.getFieldType()));
-		
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	private MethodMetadata getAutoCompleteApplicationTypeMethod(final JsfFieldHolder jsfFieldHolder) {
 		final FieldMetadata field = jsfFieldHolder.getField();
 		final JavaSymbolName methodName = new JavaSymbolName("complete" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
@@ -824,7 +821,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("query"));
 		final MemberTypeAdditions findAllMethod = jsfFieldHolder.getCrudAdditions().get(FIND_ALL_METHOD);
 		final String simpleTypeName = field.getFieldType().getSimpleTypeName();
-		
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("List<" + simpleTypeName + "> suggestions = new ArrayList<" + simpleTypeName + ">();");
 		bodyBuilder.appendFormalLine("for (" + simpleTypeName + " " + StringUtils.uncapitalize(simpleTypeName) + " : " + findAllMethod.getMethodCall() + ") {");
@@ -839,17 +836,23 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		bodyBuilder.appendFormalLine("return suggestions;");
 
 		final JavaType returnType = new JavaType(LIST.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(field.getFieldType()));
-		
+
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	private MethodMetadata getDisplayCreateDialogMethod() {
+		final JavaSymbolName methodName = new JavaSymbolName(DISPLAY_CREATE_DIALOG);
+		final MethodMetadata method = getGovernorMethod(methodName);
+		if (method != null) {
+			return method;
+		}
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(entityName.getSymbolName() + " = new " + entity.getSimpleTypeName() + "();");
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = true;");
 		bodyBuilder.appendFormalLine("return \"" + entityName.getSymbolName() + "\";");
-		return getMethod(PUBLIC, new JavaSymbolName(DISPLAY_CREATE_DIALOG), STRING, null, null, bodyBuilder);
+		return getMethod(PUBLIC, methodName, STRING, null, null, bodyBuilder);
 	}
 
 	private MethodMetadata getDisplayListMethod() {
@@ -859,7 +862,9 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	private MethodMetadata getPersistMethod(final MemberTypeAdditions mergeMethod, final MemberTypeAdditions persistMethod, final MethodMetadata identifierAccessor) {
 		final JavaSymbolName methodName = new JavaSymbolName("persist");
 		final MethodMetadata method = getGovernorMethod(methodName);
-		if (method != null) return method;
+		if (method != null) {
+			return method;
+		}
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(FACES_MESSAGE);
@@ -867,7 +872,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("String message = \"\";");
-		bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + "." +  identifierAccessor.getMethodName().getSymbolName() + "() != null) {");
+		bodyBuilder.appendFormalLine("if (" + entityName.getSymbolName() + "." + identifierAccessor.getMethodName().getSymbolName() + "() != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(mergeMethod.getMethodCall() + ";");
 		mergeMethod.copyAdditionsTo(builder, governorTypeDetails);
@@ -892,7 +897,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, STRING, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
 	}
-	
+
 	private MethodMetadata getDeleteMethod(final MemberTypeAdditions removeMethod) {
 		final JavaSymbolName methodName = new JavaSymbolName("delete");
 		if (getGovernorMethod(methodName) != null) {
@@ -912,19 +917,24 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	}
 
 	private MethodMetadata getResetMethod() {
+		final JavaSymbolName methodName = new JavaSymbolName("reset");
+		if (getGovernorMethod(methodName) != null) {
+			return null;
+		}
+
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(entityName.getSymbolName() + " = null;");
 		for (JsfFieldHolder jsfFieldHolder : locatedFields) {
 			if (!jsfFieldHolder.isGenericType()) {
 				continue;
 			}
-			
+
 			final String genericTypePlural = jsfFieldHolder.getGenericTypePlural();
-			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedGenericTypePlural(genericTypePlural));
+			final JavaSymbolName fieldName = new JavaSymbolName(getSelectedFieldName(genericTypePlural));
 			bodyBuilder.appendFormalLine(fieldName.getSymbolName() + " = null;");
 		}
 		bodyBuilder.appendFormalLine(CREATE_DIALOG_VISIBLE + " = false;");
-		return getMethod(PUBLIC, new JavaSymbolName("reset"), JavaType.VOID_PRIMITIVE, null, null, bodyBuilder);
+		return getMethod(PUBLIC, methodName, JavaType.VOID_PRIMITIVE, null, null, bodyBuilder);
 	}
 
 	private MethodMetadata getHandleDialogCloseMethod() {
@@ -936,38 +946,28 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(PRIMEFACES_CLOSE_EVENT);
-		
+
 		final List<JavaSymbolName> parameterNames = Arrays.asList(new JavaSymbolName("event"));
 
 		final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("reset();");
-		
+
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameterType), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
-	private JavaSymbolName getFileUploadMethodName(final JavaSymbolName fieldName) {
-		return new JavaSymbolName("handleFileUploadFor" + StringUtils.capitalize(fieldName.getSymbolName()));
+	private JavaSymbolName getFileUploadMethodName(final String fieldName) {
+		return new JavaSymbolName("handleFileUploadFor" + StringUtils.capitalize(fieldName));
 	}
 
-	private Set<FieldMetadata> getRooUploadedFileFields() {
-		final Set<FieldMetadata> rooUploadedFileFields = new LinkedHashSet<FieldMetadata>();
-		for (final JsfFieldHolder jsfFieldHolder : locatedFields) {
-			if (jsfFieldHolder.isRooUploadFileField()) {
-				rooUploadedFileFields.add(jsfFieldHolder.getField());
-			}
-		}
-		return rooUploadedFileFields;
-	}
-	
 	private String getComponentCreation(final String componentName) {
 		return new StringBuilder().append("(").append(componentName).append(") facesContext.getApplication().createComponent(").append(componentName).append(".COMPONENT_TYPE);").toString();
 	}
-	
+
 	private String getSetValueExpression(final String inputFieldVar, final String fieldName, final String className) {
 		return inputFieldVar + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + entityName.getSymbolName() + "." + fieldName + "}\", " + className + ".class));";
 	}
-	
+
 	private String getSetValueExpression(final String fieldName, String fieldValueId) {
 		return getSetValueExpression(fieldValueId, fieldName, "String");
 	}
@@ -990,7 +990,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 	public static String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static String createIdentifier(final JavaType javaType, final Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}

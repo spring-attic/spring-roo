@@ -3,10 +3,7 @@ package org.springframework.roo.addon.displaystring;
 import static org.springframework.roo.model.RooJavaType.ROO_DISPLAY_STRING;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -71,11 +68,7 @@ public class DisplayStringMetadataProviderImpl extends AbstractMemberDiscovering
 	}
 
 	private List<MethodMetadata> locateAccessors(final JavaType entity, final MemberDetails memberDetails, final String metadataIdentificationString) {
-		final SortedSet<MethodMetadata> locatedAccessors = new TreeSet<MethodMetadata>(new Comparator<MethodMetadata>() {
-			public int compare(final MethodMetadata l, final MethodMetadata r) {
-				return l.getMethodName().compareTo(r.getMethodName());
-			}
-		});
+		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
 
 		for (final MethodMetadata method : memberDetails.getMethods()) {
 			if (!BeanInfoUtils.isAccessorMethod(method)) {
@@ -93,7 +86,7 @@ public class DisplayStringMetadataProviderImpl extends AbstractMemberDiscovering
 			locatedAccessors.add(method);
 		}
 
-		return new ArrayList<MethodMetadata>(locatedAccessors);
+		return locatedAccessors;
 	}
 
 	private boolean isApplicationType(final JavaType javaType) {
