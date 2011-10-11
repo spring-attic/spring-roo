@@ -70,6 +70,10 @@ a:visited {
     height: 100px !important;
 }
 
+.dialog {
+    width: auto;
+}
+
 .col1 {
     vertical-align: top;
     font-weight: bold;

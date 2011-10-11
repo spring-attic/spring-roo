@@ -18,4 +18,6 @@ public @interface RooUploadedFile {
 	String fileName();
 
 	String contentType();
+	
+	boolean autoUpload() default false;
 }

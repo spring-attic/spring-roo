@@ -66,6 +66,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -442,13 +443,17 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final String simpleTypeName = fieldType.getSimpleTypeName();
 			final String fieldName = field.getFieldName().getSymbolName();
 			final String fieldLabelId = fieldName + suffix1;
-			final boolean nullable = isNullable(field);
-			final String requiredFlag = action != Action.VIEW && !nullable ? " * " : "   ";
+			
+			final BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
+			final BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
+			final Integer sizeMinValue = getSizeMinOrMax(field, "min");
+			final BigDecimal sizeMaxValue = NumberUtils.min(getSizeMinOrMax(field, "max"), getColumnLength(field));
+			final boolean required = action != Action.VIEW && (!isNullable(field) || minValue != null || maxValue != null || sizeMinValue != null || sizeMaxValue != null);
 
 			// Field label
 			bodyBuilder.appendFormalLine("HtmlOutputText " + fieldLabelId + " = " + getComponentCreation("HtmlOutputText"));
 			bodyBuilder.appendFormalLine(fieldLabelId + ".setId(\"" + fieldLabelId + "\");");
-			bodyBuilder.appendFormalLine(fieldLabelId + ".setValue(\"" + fieldName + ":" + requiredFlag + "\");");
+			bodyBuilder.appendFormalLine(fieldLabelId + ".setValue(\"" + fieldName + ": " + (required ? "* " : "  ") + "\");");
 			bodyBuilder.appendFormalLine(getAddToPanelText(fieldLabelId));
 			bodyBuilder.appendFormalLine("");
 
@@ -458,11 +463,12 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 			final String htmlOutputTextStr = "HtmlOutputText " + fieldValueId + " = " + getComponentCreation("HtmlOutputText");
 			final String inputTextStr = "InputText " + fieldValueId + " = " + getComponentCreation("InputText");
 			final String componentIdStr = fieldValueId + ".setId(\"" + fieldValueId + "\");";
-			final String requiredStr = fieldValueId + ".setRequired(" + !nullable + ");";
+			String requiredStr = fieldValueId + ".setRequired(" + required + ");";
 
 			if (jsfFieldHolder.isUploadFileField()) {
 				AnnotationMetadata annotation = field.getAnnotation(ROO_UPLOADED_FILE);
 				String allowedType = UploadedFileContentType.getFileExtension((String) annotation.getAttribute("contentType").getValue());
+				AnnotationAttributeValue<?> autoUploadAttr = annotation.getAttribute("autoUpload");
 				if (action == Action.VIEW) {
 					bodyBuilder.appendFormalLine(htmlOutputTextStr);
 					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"" + allowedType + "\", String.class));");
@@ -473,8 +479,10 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(componentIdStr);
 					bodyBuilder.appendFormalLine(fieldValueId + ".setFileUploadListener(expressionFactory.createMethodExpression(elContext, \"#{" + beanName + "." + getFileUploadMethodName(fieldName) + "}\", void.class, new Class[] { FileUploadEvent.class }));");
 					bodyBuilder.appendFormalLine(fieldValueId + ".setMode(\"advanced\");");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setAuto(true);");
-					bodyBuilder.appendFormalLine(fieldValueId + ".setAllowTypes(\"/(\\\\.|\\\\/)(" + allowedType + ")$/\");");
+					if (autoUploadAttr != null && (Boolean) autoUploadAttr.getValue()) {
+						bodyBuilder.appendFormalLine(fieldValueId + ".setAuto(true);");
+					}
+					bodyBuilder.appendFormalLine(fieldValueId + ".setAllowTypes(\"/(\\\\.|\\\\/)(" + getAllowTypeRegex(allowedType)  + ")$/\");");
 				}
 			} else if (fieldType.equals(JavaType.BOOLEAN_OBJECT) || fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
 				if (action == Action.VIEW) {
@@ -535,8 +543,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 
-					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
-					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
 					if (minValue != null || maxValue != null) {
 						if (minValue != null) {
 							bodyBuilder.appendFormalLine(fieldValueId + ".setMin(" + minValue.doubleValue() + ");");
@@ -563,8 +569,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 
-					BigDecimal minValue = NumberUtils.max(getMinOrMax(field, MIN), getMinOrMax(field, DECIMAL_MIN));
-					BigDecimal maxValue = NumberUtils.min(getMinOrMax(field, MAX), getMinOrMax(field, DECIMAL_MAX));
 					if (minValue != null || maxValue != null) {
 						bodyBuilder.append(getDoubleRangeValdatorString(fieldValueId, minValue, maxValue));
 					}
@@ -580,10 +584,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 					bodyBuilder.appendFormalLine(getSetValueExpression(fieldValueId, fieldName, simpleTypeName));
 					bodyBuilder.appendFormalLine(requiredStr);
 
-					Integer minValue = getSizeMinOrMax(field, "min");
-					BigDecimal maxValue = NumberUtils.min(getSizeMinOrMax(field, "max"), getColumnLength(field));
-					if (minValue != null || maxValue != null) {
-						bodyBuilder.append(getLengthValdatorString(fieldValueId, minValue, maxValue));
+					if (sizeMinValue != null || sizeMaxValue != null) {
+						bodyBuilder.append(getLengthValdatorString(fieldValueId, sizeMinValue, sizeMaxValue));
 					}
 				}
 			} else if (jsfFieldHolder.isGenericType()) {
@@ -674,6 +676,18 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 
 		final MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), PUBLIC, methodName, HTML_PANEL_GRID, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
 		return methodBuilder.build();
+	}
+
+	private String getAllowTypeRegex(String allowedType) {
+		StringBuilder builder = new StringBuilder();
+		char[] value = allowedType.toCharArray();
+		for (int i = 0; i < value.length; i++) {
+			builder.append("[").append(Character.toLowerCase(value[i])).append(Character.toUpperCase(value[i])).append("]");
+		}
+		if (allowedType.equals(UploadedFileContentType.JPG.name())) {
+			builder.append("|[jJ][pP][eE][gG]");
+		}
+		return builder.toString();
 	}
 
 	private String getSelectedFieldName(final String fieldName) {

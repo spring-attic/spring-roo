@@ -1,9 +1,11 @@
 package org.springframework.roo.addon.jsf;
 
-import org.springframework.roo.support.util.StringUtils;
 
 /**
- * The Internet media type or content-type of an uploaded file
+ * The Internet media type or content-type of an uploaded file. 
+ * 
+ * <p>
+ * Only common content types are included.
  * 
  * @author Alan Stewart
  * @since 1.2.0
@@ -11,10 +13,20 @@ import org.springframework.roo.support.util.StringUtils;
 public enum UploadedFileContentType {
 	ZIP("application/zip"),
 	PDF("application/pdf"),
+	JSON("application/json"),
+	DOC("application/msword"),
+	XLS("application/vnd.ms-excel"),
 	JPG("image/jpeg"),
 	GIF("image/gif"),
 	PNG("image/png"),
 	MP3("audio/mpeg"),
+	MP4("audio/mp4"),
+	CSV("text/csv"),
+	CSS("text/css"),
+	HTML("text/html"),
+	JAVASCRIPT("text/javascript"),
+	TXT("text/plain"),
+	XML("text/xml"),
 	MPEG("video/mpeg");
 	
 	private String contentType;
@@ -30,7 +42,7 @@ public enum UploadedFileContentType {
 	public static String getFileExtension(String contentType) {
 		for (UploadedFileContentType uploadedFileContentType : UploadedFileContentType.values()) {
 			if (uploadedFileContentType.getContentType().equals(contentType)) {
-				return StringUtils.toLowerCase(uploadedFileContentType.name());
+				return uploadedFileContentType.name();
 			}
 		}
 		throw new IllegalStateException("Unknown content type '" + contentType + "'");
