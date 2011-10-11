@@ -109,4 +109,124 @@ public class StringUtilsTest {
 	public void testPrefixNonEmptyWithExistingPrefix() {
 		assertEquals("pre-old", StringUtils.prefix("pre-old", "pre-"));
 	}
+	
+	@Test
+	public void testRemoveNullSuffixFromNullString() {
+		assertNull(StringUtils.removeSuffix(null, null));
+	}
+	
+	@Test
+	public void testRemoveEmptySuffixFromNullString() {
+		assertNull(StringUtils.removeSuffix(null, ""));
+	}
+	
+	@Test
+	public void testRemoveNonEmptySuffixFromNullString() {
+		assertNull(StringUtils.removeSuffix(null, "anything"));
+	}
+	
+	@Test
+	public void testRemoveNullSuffixFromEmptyString() {
+		assertEquals("", StringUtils.removeSuffix("", null));
+	}
+	
+	@Test
+	public void testRemoveEmptySuffixFromEmptyString() {
+		assertEquals("", StringUtils.removeSuffix("", ""));
+	}
+	
+	@Test
+	public void testRemoveNonEmptySuffixFromEmptyString() {
+		assertEquals("", StringUtils.removeSuffix("", "anything"));
+	}
+	
+	@Test
+	public void testRemoveMatchingSuffixFromString() {
+		assertEquals("a", StringUtils.removeSuffix("abc", "bc"));
+	}	
+	
+	@Test
+	public void testRemoveNonMatchingSuffixFromString() {
+		assertEquals("abc", StringUtils.removeSuffix("abc", "BC"));
+	}
+	
+	@Test
+	public void testRemoveNullPrefixFromNullString() {
+		assertNull(StringUtils.removePrefix(null, null));
+	}
+	
+	@Test
+	public void testRemoveEmptyPrefixFromNullString() {
+		assertNull(StringUtils.removePrefix(null, ""));
+	}
+	
+	@Test
+	public void testRemoveNonEmptyPrefixFromNullString() {
+		assertNull(StringUtils.removePrefix(null, "anything"));
+	}
+	
+	@Test
+	public void testRemoveNullPrefixFromEmptyString() {
+		assertEquals("", StringUtils.removePrefix("", null));
+	}
+	
+	@Test
+	public void testRemoveEmptyPrefixFromEmptyString() {
+		assertEquals("", StringUtils.removePrefix("", ""));
+	}
+	
+	@Test
+	public void testRemoveNonEmptyPrefixFromEmptyString() {
+		assertEquals("", StringUtils.removePrefix("", "anything"));
+	}
+	
+	@Test
+	public void testRemoveMatchingPrefixFromString() {
+		assertEquals("c", StringUtils.removePrefix("abc", "ab"));
+	}	
+	
+	@Test
+	public void testRemoveNonMatchingPrefixFromString() {
+		assertEquals("abc", StringUtils.removePrefix("abc", "AB"));
+	}
+
+	@Test
+	public void testSuffixNullWithNull() {
+		assertNull(StringUtils.suffix(null, null));
+	}
+	
+	@Test
+	public void testSuffixNullWithEmpty() {
+		assertNull(StringUtils.suffix(null, ""));
+	}
+	
+	@Test
+	public void testSuffixNullWithNonEmpty() {
+		assertNull(StringUtils.suffix(null, "anything"));
+	}
+	
+	@Test
+	public void testSuffixEmptyWithNull() {
+		assertEquals("", StringUtils.suffix("", null));
+	}
+	
+	@Test
+	public void testSuffixEmptyWithEmpty() {
+		assertEquals("", StringUtils.suffix("", ""));
+	}
+	
+	@Test
+	public void testSuffixEmptyWithNonEmpty() {
+		assertEquals("x", StringUtils.suffix("", "x"));
+	}
+	
+	@Test
+	public void testSuffixNonEmptyWithNewSuffix() {
+		assertEquals("old-suf", StringUtils.suffix("old", "-suf"));
+	}
+	
+	@Test
+	public void testSuffixNonEmptyWithExistingSuffix() {
+		assertEquals("old-suf", StringUtils.suffix("old-suf", "-suf"));
+	}
 }

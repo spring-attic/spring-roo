@@ -1249,6 +1249,51 @@ public final class StringUtils {
 		}
 		return prefix + string;
 	}
+	
+	/**
+	 * Removes the given prefix from the given string, if it exists
+	 * 
+	 * @param string the string to modify (can be blank to do nothing)
+	 * @param prefix the prefix to remove (can be blank to do nothing)
+	 * @return <code>null</code> if a <code>null</code> string was given
+	 * @since 1.2.0
+	 */
+	public static String removePrefix(final String string, final String prefix) {
+		if (!hasText(string) || !hasText(prefix) || !string.startsWith(prefix)) {
+			return string;
+		}
+		return string.substring(prefix.length());
+	}
+	
+	/**
+	 * Removes the given suffix from the given string, if it exists
+	 * 
+	 * @param string the string to modify (can be blank to do nothing)
+	 * @param suffix the suffix to remove (can be blank to do nothing)
+	 * @return <code>null</code> if a <code>null</code> string was given
+	 * @since 1.2.0
+	 */
+	public static String removeSuffix(final String string, final String suffix) {
+		if (!hasText(string) || !hasText(suffix) || !string.endsWith(suffix)) {
+			return string;
+		}
+		return string.substring(0, string.length() - suffix.length());
+	}
+
+	/**
+	 * Appends the given suffix to the given string, if not already present
+	 * 
+	 * @param string the string to modify (can be blank to do nothing)
+	 * @param suffix the suffix to append (can be blank to do nothing)
+	 * @return <code>null</code> if a <code>null</code> string was given
+	 * @since 1.2.0
+	 */
+	public static String suffix(final String string, final String suffix) {
+		if (string == null || suffix == null || string.endsWith(suffix)) {
+			return string;
+		}
+		return string + suffix;
+	}
 
 	/**
 	 * Constructor is private to prevent instantiation
