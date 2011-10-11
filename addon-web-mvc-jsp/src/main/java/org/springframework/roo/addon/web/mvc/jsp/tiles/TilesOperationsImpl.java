@@ -18,6 +18,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -75,16 +76,20 @@ public class TilesOperationsImpl implements TilesOperations {
 
 		// Find menu item under this category if exists
 		Element element = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + name + "']", root);
-		if (element == null) {
-			return;
+		if (element != null) {
+			element.getParentNode().removeChild(element);
+			writeToDiskIfNecessary(folderName, root);
 		}
-		element.getParentNode().removeChild(element);
-
-		writeToDiskIfNecessary(folderName, root);
 	}
 
+	/**
+	 * 
+	 * @param folderName should not start with a slash
+	 * @param body the element whose parent document is to be written
+	 * @return
+	 */
 	private boolean writeToDiskIfNecessary(final String folderName, final Element body) {
-		// Build a string representation of the JSP
+		// Build a string representation of the Tiles config file
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		Transformer transformer = XmlUtils.createIndentingTransformer();
 		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://tiles.apache.org/dtds/tiles-config_2_1.dtd");
@@ -126,22 +131,31 @@ public class TilesOperationsImpl implements TilesOperations {
 		return false;
 	}
 
+	/**
+	 * Returns the root element of the <code>views.xml</code> file in the given
+	 * folder
+	 * 
+	 * @param folderName the sub-directory of <code>WEB-INF/views</code> from
+	 * which to load the file (leading slash is optional)
+	 * @return the root of a new XML document if that file does not exist
+	 */
 	private Element getRootElement(final String folderName) {
-		Document tilesView;
-		String viewFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views" + folderName + "/views.xml");
-		if (!fileManager.exists(viewFile)) {
-			tilesView = XmlUtils.getDocumentBuilder().newDocument();
-			tilesView.appendChild(tilesView.createElement("tiles-definitions"));
-		} else {
-			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		final Document tilesView;
+		final String prefixedFolder = StringUtils.prefix(folderName, "/");
+		final String viewsFile = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views" + prefixedFolder + "/views.xml");
+		if (fileManager.exists(viewsFile)) {
+			final DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new TilesDtdResolver());
 			try {
-				tilesView = builder.parse(fileManager.getInputStream(viewFile));
+				tilesView = builder.parse(fileManager.getInputStream(viewsFile));
 			} catch (SAXException se) {
-				throw new IllegalStateException("Unable to parse the tiles " + viewFile + " file", se);
+				throw new IllegalStateException("Unable to parse the tiles " + viewsFile + " file", se);
 			} catch (IOException ioe) {
-				throw new IllegalStateException("Unable to read the tiles " + viewFile + " file (reason: " + ioe.getMessage() + ")", ioe);
+				throw new IllegalStateException("Unable to read the tiles " + viewsFile + " file (reason: " + ioe.getMessage() + ")", ioe);
 			}
+		} else {
+			tilesView = XmlUtils.getDocumentBuilder().newDocument();
+			tilesView.appendChild(tilesView.createElement("tiles-definitions"));
 		}
 		return tilesView.getDocumentElement();
 	}

@@ -69,4 +69,44 @@ public class StringUtilsTest {
 	public void testRepeatMultipleCharacters() {
 		assertEquals("xyzxyzxyzxyz", StringUtils.repeat("xyz", 4));
 	}
+	
+	@Test
+	public void testPrefixNullWithNull() {
+		assertNull(StringUtils.prefix(null, null));
+	}
+	
+	@Test
+	public void testPrefixNullWithEmpty() {
+		assertNull(StringUtils.prefix(null, ""));
+	}
+	
+	@Test
+	public void testPrefixNullWithNonEmpty() {
+		assertNull(StringUtils.prefix(null, "anything"));
+	}
+	
+	@Test
+	public void testPrefixEmptyWithNull() {
+		assertEquals("", StringUtils.prefix("", null));
+	}
+	
+	@Test
+	public void testPrefixEmptyWithEmpty() {
+		assertEquals("", StringUtils.prefix("", ""));
+	}
+	
+	@Test
+	public void testPrefixEmptyWithNonEmpty() {
+		assertEquals("x", StringUtils.prefix("", "x"));
+	}
+	
+	@Test
+	public void testPrefixNonEmptyWithNewPrefix() {
+		assertEquals("pre-old", StringUtils.prefix("old", "pre-"));
+	}
+	
+	@Test
+	public void testPrefixNonEmptyWithExistingPrefix() {
+		assertEquals("pre-old", StringUtils.prefix("pre-old", "pre-"));
+	}
 }

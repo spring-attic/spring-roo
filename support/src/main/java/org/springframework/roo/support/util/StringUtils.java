@@ -1233,6 +1233,22 @@ public final class StringUtils {
 		}
 		return new String(buf);
 	}
+	
+	/**
+	 * Prefixes the given string with the given prefix, if it's not already.
+	 * 
+	 * @param string the string to prefix (can be blank)
+	 * @param prefix the prefix to apply (can be blank to do nothing)
+	 * @return <code>null</code> if a <code>null</code> string was given,
+	 * otherwise the prefixed string
+	 * @since 1.2.0
+	 */
+	public static String prefix(final String string, final String prefix) {
+		if (string == null || prefix == null || string.startsWith(prefix)) {
+			return string;
+		}
+		return prefix + string;
+	}
 
 	/**
 	 * Constructor is private to prevent instantiation

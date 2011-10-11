@@ -62,6 +62,27 @@ a:visited {
 
 .action-column {
     text-align: center;
-    width:120px;
+    width: 120px !important;
 }
 
+.ui-selectmanymenu {
+    width: 155px !important;
+    height: 100px !important;
+}
+
+.dialog {
+    width: auto;
+}
+
+.col1 {
+    vertical-align: top;
+    font-weight: bold;
+}
+
+.col2 {
+    vertical-align: top;
+}
+
+.col3 {
+    vertical-align: top;
+}
