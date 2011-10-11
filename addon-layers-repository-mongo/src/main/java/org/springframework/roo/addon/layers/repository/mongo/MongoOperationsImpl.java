@@ -116,6 +116,7 @@ public class MongoOperationsImpl implements MongoOperations {
 			attributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), idType));
 		}
 		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_MONGO_ENTITY, attributes));
+		classTypeBuilder.addAnnotation(new AnnotationMetadataBuilder(RooJavaType.ROO_DISPLAY_STRING));
 		typeManagementService.createOrUpdateTypeOnDisk(classTypeBuilder.build());
 
 		if (testAutomatically) {

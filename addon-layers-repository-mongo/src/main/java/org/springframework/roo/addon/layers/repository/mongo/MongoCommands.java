@@ -60,7 +60,7 @@ public class MongoCommands implements CommandMarker {
 
 	@CliCommand(value = "entity mongo", help = "Creates a domain entity which can be backed by a MongoDB repository")
 	public void type(
-		@CliOption(key = "class", mandatory = true, help = "Implementation class for the specified interface") final JavaType classType,
+		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "Implementation class for the specified interface") final JavaType classType,
 		@CliOption(key = "identifierType", mandatory = false, help = "The ID type to be used for this domain type (defaults to BigInteger)") MongoIdType idType,
 		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") final boolean testAutomatically) {
 

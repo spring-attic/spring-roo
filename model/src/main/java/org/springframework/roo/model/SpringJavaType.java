@@ -37,6 +37,7 @@ public final class SpringJavaType {
 	public static final JavaType MODEL_MAP = new JavaType("org.springframework.ui.ModelMap");
 	public static final JavaType NUMBER_FORMAT = new JavaType("org.springframework.format.annotation.NumberFormat");
 	public static final JavaType PATH_VARIABLE = new JavaType("org.springframework.web.bind.annotation.PathVariable");
+	public static final JavaType PERSISTENT = new JavaType("org.springframework.data.annotation.Persistent");
 	public static final JavaType PROPAGATION = new JavaType("org.springframework.transaction.annotation.Propagation");
 	public static final JavaType REPOSITORY = new JavaType("org.springframework.stereotype.Repository");
 	public static final JavaType REQUEST_BODY = new JavaType("org.springframework.web.bind.annotation.RequestBody");

@@ -486,10 +486,15 @@ public class JpaOperationsImpl implements JpaOperations {
 			userName = StringUtils.defaultIfEmpty(userName, "sa");
 		}
 
-		boolean hasChanged = !props.get(DATABASE_DRIVER).equals(jdbcDatabase.getDriverClassName());
-		hasChanged |= !props.get(DATABASE_URL).equals(connectionString);
-		hasChanged |= !props.get(DATABASE_USERNAME).equals(StringUtils.trimToEmpty(userName));
-		hasChanged |= !props.get(DATABASE_PASSWORD).equals(StringUtils.trimToEmpty(password));
+		String driver = props.getProperty(DATABASE_DRIVER);
+		String url = props.getProperty(DATABASE_URL);
+		String uname = props.getProperty(DATABASE_USERNAME);
+		String pwd = props.getProperty(DATABASE_PASSWORD);
+		
+		boolean hasChanged = (driver == null || !driver.equals(jdbcDatabase.getDriverClassName()));
+		hasChanged |= (url == null || !url.equals(connectionString));
+		hasChanged |= (uname == null || !uname.equals(StringUtils.trimToEmpty(userName)));
+		hasChanged |= (pwd == null || !pwd.equals(StringUtils.trimToEmpty(password)));
 		if (!hasChanged) {
 			// No changes from existing database configuration so exit now
 			return;
