@@ -43,7 +43,10 @@ public class JsfJavaType {
 	public static final JavaType PRIMEFACES_AUTO_COMPLETE = new JavaType("org.primefaces.component.autocomplete.AutoComplete");
 	public static final JavaType PRIMEFACES_CALENDAR = new JavaType("org.primefaces.component.calendar.Calendar");
 	public static final JavaType PRIMEFACES_CLOSE_EVENT = new JavaType("org.primefaces.event.CloseEvent");
+	public static final JavaType PRIMEFACES_COMMAND_BUTTON = new JavaType("org.primefaces.component.commandbutton.CommandButton");
 	public static final JavaType PRIMEFACES_DEFAULT_MENU_MODEL = new JavaType("org.primefaces.model.DefaultMenuModel");
+	public static final JavaType PRIMEFACES_DEFAULT_STREAMED_CONTENT = new JavaType("org.primefaces.model.DefaultStreamedContent");
+	public static final JavaType PRIMEFACES_FILE_DOWNLOAD_ACTION_LISTENER = new JavaType("org.primefaces.component.filedownload.FileDownloadActionListener");
 	public static final JavaType PRIMEFACES_FILE_UPLOAD = new JavaType("org.primefaces.component.fileupload.FileUpload");
 	public static final JavaType PRIMEFACES_FILE_UPLOAD_EVENT = new JavaType("org.primefaces.event.FileUploadEvent");
 	public static final JavaType PRIMEFACES_INPUT_TEXT = new JavaType("org.primefaces.component.inputtext.InputText");
@@ -56,6 +59,7 @@ public class JsfJavaType {
 	public static final JavaType PRIMEFACES_SELECT_ONE_LISTBOX = new JavaType("org.primefaces.component.selectonelistbox.SelectOneListbox");
 	public static final JavaType PRIMEFACES_SLIDER = new JavaType("org.primefaces.component.slider.Slider");
 	public static final JavaType PRIMEFACES_SPINNER = new JavaType("org.primefaces.component.spinner.Spinner");
+	public static final JavaType PRIMEFACES_STREAMED_CONTENT = new JavaType("org.primefaces.model.StreamedContent");
 	public static final JavaType PRIMEFACES_SUB_MENU = new JavaType("org.primefaces.component.submenu.Submenu");
 	public static final JavaType PRIMEFACES_UPLOADED_FILE = new JavaType("org.primefaces.model.UploadedFile");
 

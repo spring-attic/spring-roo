@@ -12,6 +12,7 @@ import static org.springframework.roo.model.JavaType.SHORT_OBJECT;
 import static org.springframework.roo.model.JavaType.SHORT_PRIMITIVE;
 
 import java.beans.PropertyEditorSupport;
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -51,6 +52,7 @@ public final class JdkJavaType {
 	public static final JavaType PROPERTY_EDITOR_SUPPORT = new JavaType(PropertyEditorSupport.class);
 	
 	// java.io
+	public static final JavaType BYTE_ARRAY_INPUT_STREAM = new JavaType(ByteArrayInputStream.class);
 	public static final JavaType SERIALIZABLE = new JavaType(Serializable.class);
 
 	// java.lang

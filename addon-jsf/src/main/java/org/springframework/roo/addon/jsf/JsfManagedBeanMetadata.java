@@ -18,6 +18,9 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.MANAGED_BEAN;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_AUTO_COMPLETE;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_CALENDAR;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_CLOSE_EVENT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_COMMAND_BUTTON;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_DEFAULT_STREAMED_CONTENT;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_DOWNLOAD_ACTION_LISTENER;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_FILE_UPLOAD_EVENT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_INPUT_TEXT;
@@ -26,6 +29,7 @@ import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_REQUEST_C
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SELECT_BOOLEAN_CHECKBOX;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SELECT_MANY_MENU;
 import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_SPINNER;
+import static org.springframework.roo.addon.jsf.JsfJavaType.PRIMEFACES_STREAMED_CONTENT;
 import static org.springframework.roo.addon.jsf.JsfJavaType.REQUEST_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.SESSION_SCOPED;
 import static org.springframework.roo.addon.jsf.JsfJavaType.UI_SELECT_ITEM;
@@ -38,6 +42,7 @@ import static org.springframework.roo.classpath.customdata.CustomDataKeys.REMOVE
 import static org.springframework.roo.model.JavaType.BOOLEAN_PRIMITIVE;
 import static org.springframework.roo.model.JavaType.STRING;
 import static org.springframework.roo.model.JdkJavaType.ARRAY_LIST;
+import static org.springframework.roo.model.JdkJavaType.BYTE_ARRAY_INPUT_STREAM;
 import static org.springframework.roo.model.JdkJavaType.DATE;
 import static org.springframework.roo.model.JdkJavaType.HASH_SET;
 import static org.springframework.roo.model.JdkJavaType.LIST;
@@ -50,6 +55,7 @@ import static org.springframework.roo.model.Jsr303JavaType.NOT_NULL;
 import static org.springframework.roo.model.Jsr303JavaType.SIZE;
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -185,15 +191,7 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		methods.add(getEntityAccessorMethod());
 		methods.add(getEntityMutatorMethod());
 
-		addMiscellaneousMethods();
-
-		for (final JsfFieldHolder jsfFieldHolder : this.locatedFields) {
-			if (jsfFieldHolder.isUploadFileField()) {
-				final FieldMetadata field = jsfFieldHolder.getField();
-				// fields.add(getField(field.getFieldName(), PRIMEFACES_UPLOADED_FILE));
-				methods.add(getFileUploadListenerMethod(field));
-			}
-		}
+		addOtherFieldsAndMethods();
 
 		methods.add(getAccessorMethod(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE));
 		methods.add(getMutatorMethod(CREATE_DIALOG_VISIBLE, BOOLEAN_PRIMITIVE));
@@ -216,7 +214,8 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 		itdTypeDetails = builder.build();
 	}
 
-	private void addMiscellaneousMethods() {
+	private void addOtherFieldsAndMethods() {
+		final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		for (JsfFieldHolder jsfFieldHolder : locatedFields) {
 			if (jsfFieldHolder.isApplicationType()) {
 				methods.add(getAutoCompleteApplicationTypeMethod(jsfFieldHolder));
@@ -232,7 +231,6 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				fields.add(getField(selectedFieldName, listType));
 				methods.add(getAccessorMethod(selectedFieldName, listType));
 
-				final ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 				imports.addImport(HASH_SET);
 
 				final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -243,6 +241,29 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				bodyBuilder.appendFormalLine("}");
 				bodyBuilder.appendFormalLine("this." + selectedFieldName.getSymbolName() + " = " + selectedFieldName.getSymbolName() + ";");
 				methods.add(getMutatorMethod(selectedFieldName, listType, bodyBuilder));
+			} else if (jsfFieldHolder.isUploadFileField()) {
+				imports.addImport(PRIMEFACES_STREAMED_CONTENT);
+				imports.addImport(PRIMEFACES_DEFAULT_STREAMED_CONTENT);
+				imports.addImport(BYTE_ARRAY_INPUT_STREAM);
+
+				final FieldMetadata field = jsfFieldHolder.getField();
+				final String fieldName = field.getFieldName().getSymbolName();
+				final JavaSymbolName streamedContentFieldName = new JavaSymbolName(fieldName + "StreamedContent");
+
+				fields.add(getField(streamedContentFieldName, PRIMEFACES_STREAMED_CONTENT));
+				methods.add(getFileUploadListenerMethod(field));
+
+				final InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+				final AnnotationMetadata annotation = field.getAnnotation(ROO_UPLOADED_FILE);
+				final String contentType = (String) annotation.getAttribute("contentType").getValue();
+				String fileName = (String) annotation.getAttribute("fileName").getValue();
+				fileName.replace('/', File.separatorChar);
+				fileName.replace('\\', File.separatorChar);
+
+				bodyBuilder.appendFormalLine("return new DefaultStreamedContent(new ByteArrayInputStream(" + entityName.getSymbolName() + ".get" + StringUtils.capitalize(fieldName) + "()), \"" + contentType + "\", \"" + fileName + "\");");
+				methods.add(getAccessorMethod(streamedContentFieldName, PRIMEFACES_STREAMED_CONTENT, bodyBuilder));
+
+				methods.add(getMutatorMethod(streamedContentFieldName, PRIMEFACES_STREAMED_CONTENT));
 			}
 		}
 	}
@@ -474,9 +495,14 @@ public class JsfManagedBeanMetadata extends AbstractItdTypeDetailsProvidingMetad
 				final String allowedType = UploadedFileContentType.getFileExtension(contentType);
 				final AnnotationAttributeValue<?> autoUploadAttr = annotation.getAttribute("autoUpload");
 				if (action == Action.VIEW) {
-					bodyBuilder.appendFormalLine(htmlOutputTextStr);
-					bodyBuilder.appendFormalLine(fieldValueId + ".setValueExpression(\"value\", expressionFactory.createValueExpression(elContext, \"" + contentType + "\", String.class));");
-				} else {
+					imports.addImport(PRIMEFACES_FILE_DOWNLOAD_ACTION_LISTENER);
+					imports.addImport(PRIMEFACES_COMMAND_BUTTON);
+					imports.addImport(PRIMEFACES_STREAMED_CONTENT);
+					bodyBuilder.appendFormalLine("CommandButton " + fieldValueId + " = " + getComponentCreation("CommandButton"));
+					bodyBuilder.appendFormalLine(fieldValueId + ".addActionListener(new FileDownloadActionListener(expressionFactory.createValueExpression(elContext, \"#{" + beanName + "." + fieldName + "StreamedContent}\", StreamedContent.class), null));");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setValue(\"Download\");");
+					bodyBuilder.appendFormalLine(fieldValueId + ".setAjax(false);");
+			} else {
 					imports.addImport(PRIMEFACES_FILE_UPLOAD);
 					imports.addImport(PRIMEFACES_FILE_UPLOAD_EVENT);
 					bodyBuilder.appendFormalLine("FileUpload " + fieldValueId + " = " + getComponentCreation("FileUpload"));
