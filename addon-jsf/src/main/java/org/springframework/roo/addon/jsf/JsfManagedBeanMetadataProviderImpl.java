@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.jsf;
 
-import static org.springframework.roo.classpath.PhysicalTypeCategory.ENUMERATION;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
@@ -29,6 +28,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
@@ -200,18 +200,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 			}
 
 			final JavaType fieldType = field.getFieldType();
-
-			// Check field is an enum type
-			boolean enumerated = false;
-			if (field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD)) {
-				enumerated = true;
-			} else {
-				final ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(fieldType);
-				if (cid != null && ENUMERATION.equals(cid.getPhysicalTypeCategory())) {
-					enumerated = true;
-				}
-			}
-			
+			final boolean enumerated = field.getCustomData().keySet().contains(CustomDataKeys.ENUMERATED_FIELD) || isEnum(fieldType);
 			final Map<JavaType, String> genericTypes = new LinkedHashMap<JavaType, String>();
 			String genericTypePlural = null;
 			MemberDetails applicationTypeMemberDetails = null;
@@ -234,6 +223,10 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 										break genericTypeLoop; // Only support one generic type parameter
 									}
 								}
+							}
+							// Generic type is not an entity - test for an enum
+							if (isEnum(genericType)) {
+								genericTypes.put(genericType, "");
 							}
 						}
 					}
@@ -292,6 +285,11 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 
 	private boolean isApplicationType(final JavaType fieldType) {
 		return metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType)) != null;
+	}
+	
+	private boolean isEnum(final JavaType fieldType) {
+		ClassOrInterfaceTypeDetails cid = typeLocationService.findClassOrInterface(fieldType);
+		return cid != null && cid.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 	}
 
 	/**
