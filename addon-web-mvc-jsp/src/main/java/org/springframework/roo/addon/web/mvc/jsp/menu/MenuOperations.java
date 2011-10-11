@@ -24,7 +24,6 @@ public interface MenuOperations {
 	 * Addons can determine their own category and menu item identifiers so that there are no clashes
 	 * with other addons.
 	 *
-	 *
 	 * @param menuCategoryName the identifier for the menu category (required)
 	 * @param menuItemId the menu item identifier (required)
 	 * @param globalMessageCode message code for the menu item (required)
@@ -56,6 +55,7 @@ public interface MenuOperations {
 	 * @param idPrefix
 	 */
 	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix);
+	
 	/**
 	 * Attempts to locate a unused finder menu items and remove them.
 	 *
