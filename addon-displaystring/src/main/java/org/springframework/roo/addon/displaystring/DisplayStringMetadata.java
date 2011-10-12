@@ -121,8 +121,8 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 			}
 		}
 
-		if (displayMethods.isEmpty()) {
-			return null;
+		if (displayMethods.isEmpty() && identifierAccessor != null) {
+			displayMethods.add(identifierAccessor.getMethodName().getSymbolName() + "()");
 		}
 
 		String separator = StringUtils.defaultIfEmpty(annotationValues.getSeparator(), " ");
