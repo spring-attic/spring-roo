@@ -31,7 +31,7 @@ import com.vmware.appcloud.client.ServiceConfiguration;
 public class CloudFoundryCommands implements CommandMarker {
 
 	// Fields
-	@Reference private CloudFoundryOperations cloudFoundryOperations;
+	@Reference CloudFoundryOperations cloudFoundryOperations;
 
 	@CliAvailabilityIndicator({
 		"cloud foundry list apps", "cloud foundry bind service", "cloud foundry view crash logs", "cloud foundry view crashes", "cloud foundry create service", "cloud foundry delete app",
