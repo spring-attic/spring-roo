@@ -67,7 +67,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		// No valid version given; detect the major Java version to use
 		final String ver = System.getProperty("java.version");
 		if (ver.contains("1.7.")) {
-			return "1.7";
+			return "1.6"; // This is a workaround for ROO-2824
 		}
 		if (ver.contains("1.6.")) {
 			return "1.6";
