@@ -159,14 +159,13 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 		}
 	}
 
-	public void addFileUploadField(final JavaSymbolName fieldName, final JavaType typeName, final String fileName, final UploadedFileContentType contentType, final Boolean autoUpload, final String column, final Boolean notNull, final boolean permitReservedWords) {
+	public void addFileUploadField(final JavaSymbolName fieldName, final JavaType typeName, final UploadedFileContentType contentType, final Boolean autoUpload, final String column, final Boolean notNull, final boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		JavaType fieldType = JavaType.BYTE_ARRAY_PRIMITIVE;
 		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, fieldType, fieldName);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_UPLOADED_FILE);
-		annotationBuilder.addStringAttribute("fileName", fileName);
 		annotationBuilder.addStringAttribute("contentType", contentType.getContentType());
 		if (autoUpload != null && autoUpload) {
 			annotationBuilder.addBooleanAttribute("autoUpload", autoUpload);

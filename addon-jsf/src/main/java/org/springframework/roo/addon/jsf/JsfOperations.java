@@ -22,5 +22,5 @@ public interface JsfOperations {
 
 	void createManagedBean(JavaType managedBean, JavaType entity, String beanName, boolean includeOnMenu, boolean createConverter);
 
-	void addFileUploadField(JavaSymbolName fieldName, JavaType typeName, String fileName, UploadedFileContentType contentType, Boolean autoUpload, String column, Boolean notNull, boolean permitReservedWords);
+	void addFileUploadField(JavaSymbolName fieldName, JavaType typeName, UploadedFileContentType contentType, Boolean autoUpload, String column, Boolean notNull, boolean permitReservedWords);
 }

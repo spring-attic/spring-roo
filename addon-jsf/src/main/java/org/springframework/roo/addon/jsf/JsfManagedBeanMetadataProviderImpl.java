@@ -27,6 +27,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -73,6 +74,7 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 	private static final int MAX_LIST_VIEW_FIELDS = 4;
 
 	// Fields
+	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private LayerService layerService;
 	@Reference private TypeLocationService typeLocationService;
 	private final Map<JavaType, String> entityToManagedBeanMidMap = new LinkedHashMap<JavaType, String>();
@@ -82,12 +84,14 @@ public class JsfManagedBeanMetadataProviderImpl extends AbstractMemberDiscoverin
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
+		configurableMetadataProvider.addMetadataTrigger(ROO_JSF_MANAGED_BEAN);
 	}
 
 	protected void deactivate(final ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
+		configurableMetadataProvider.removeMetadataTrigger(ROO_JSF_MANAGED_BEAN);
 	}
 
 	@Override

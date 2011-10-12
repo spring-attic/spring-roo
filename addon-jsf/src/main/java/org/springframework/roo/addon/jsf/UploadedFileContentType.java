@@ -39,10 +39,10 @@ public enum UploadedFileContentType {
 		return contentType;
 	}
 	
-	public static String getFileExtension(String contentType) {
+	public static UploadedFileContentType getFileExtension(String contentType) {
 		for (UploadedFileContentType uploadedFileContentType : UploadedFileContentType.values()) {
 			if (uploadedFileContentType.getContentType().equals(contentType)) {
-				return uploadedFileContentType.name();
+				return uploadedFileContentType;
 			}
 		}
 		throw new IllegalStateException("Unknown content type '" + contentType + "'");

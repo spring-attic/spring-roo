@@ -62,13 +62,12 @@ public class JsfCommands implements CommandMarker {
 	public void addFileUploadField(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the file upload field to add") final JavaSymbolName fieldName,
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") final JavaType typeName,
-		@CliOption(key = "fileName", mandatory = true, help = "The file name") final String fileName,
 		@CliOption(key = "autoUpload", mandatory = false, specifiedDefaultValue = "true", help = "Whether the file is uploaded automatically when selected") final Boolean autoUpload,
 		@CliOption(key = "contentType", mandatory = true, help = "The content type of the file") final UploadedFileContentType contentType,
 		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") final String column,
 		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") final Boolean notNull,
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") final boolean permitReservedWords) {
 
-		jsfOperations.addFileUploadField(fieldName, typeName, fileName, contentType, autoUpload, column, notNull, permitReservedWords);
+		jsfOperations.addFileUploadField(fieldName, typeName, contentType, autoUpload, column, notNull, permitReservedWords);
 	}
 }
