@@ -16,11 +16,13 @@ import java.util.TreeMap;
 
 import org.json.simple.JSONObject;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.roo.support.util.ObjectUtils;
 import org.springframework.uaa.client.TransmissionEventListener;
 import org.springframework.uaa.client.UaaService;
 import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.protobuf.UaaClient.FeatureUse;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
+import org.springframework.uaa.client.util.Assert;
 import org.springframework.uaa.client.util.HexUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -39,31 +41,37 @@ import com.vmware.appcloud.client.UploadStatusCallback;
 public class UaaAwareAppCloudClient extends AppCloudClient implements TransmissionEventListener {
 
 	// Constants
-	public final static String CLOUD_FOUNDRY_URL = "http://api.cloudfoundry.com";
-	private final static int HTTP_SUCCESS_CODE = 200;
+	public static final String CLOUD_FOUNDRY_URL = "http://api.cloudfoundry.com";
+	
+	private static final Product DEFAULT_PRODUCT = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
+	
+	private static final int CLOUD_MAJOR_VERSION = 0;
+	private static final int CLOUD_MINOR_VERSION = 0;
+	private static final int CLOUD_PATCH_VERSION = 0;
+	private static final int HTTP_SUCCESS_CODE = 200;
 
 	// Fields
+	private final Product product;
+	private final Set<String> discoveredAppNames;
 	private final UaaService uaaService;
-	private final Set<String> discoveredAppNames = new HashSet<String>();
-	private final URL cloudControllerUrl;
 
-	/**
-	 * key: method name, value: sorted map of HTTP response code keys to count of that response code
-	 */
+	// key = method name; value = sorted map of HTTP response code keys to count of that response code
 	private final Map<String, SortedMap<Integer, Integer>> methodToResponses = new HashMap<String, SortedMap<Integer, Integer>>();
 
-	private Product product = VersionHelper.getProduct("Cloud Foundry Java API", "0.0.0.RELEASE");
-	private final int cloudMajorVersion = 0;
-	private final int cloudMinorVersion = 0;
-	private final int cloudPatchVersion = 0;
-
-	public UaaAwareAppCloudClient(final Product product, final UaaService _uaaService, final String email, final String password, final String token, final URL cloudControllerUrl, final ClientHttpRequestFactory requestFactory) {
-		super(email, password, token, cloudControllerUrl, requestFactory);
-		this.uaaService = _uaaService;
-		this.cloudControllerUrl = cloudControllerUrl;
-		if (product != null) {
-			this.product = product;
-		}
+	/**
+	 * Constructor; consider using {@link AppCloudClientFactory#getUaaAwareInstance(CloudCredentials)} instead.
+	 *
+	 * @param product can be <code>null</code> to use the default {@link Product}
+	 * @param uaaService the UAA service (required)
+	 * @param credentials the cloud login credentials (required)
+	 * @param requestFactory
+	 */
+	public UaaAwareAppCloudClient(final Product product, final UaaService uaaService, final CloudCredentials credentials, final ClientHttpRequestFactory requestFactory) {
+		super(credentials.getEmail(), credentials.getPassword(), null, credentials.getUrlObject(), requestFactory);
+		Assert.notNull(uaaService, "UAA Service required");
+		this.discoveredAppNames = new HashSet<String>();
+		this.product = ObjectUtils.defaultIfNull(product, DEFAULT_PRODUCT);
+		this.uaaService = uaaService;
 	}
 
 	public void deactivate() {
@@ -91,15 +99,16 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 
 		// Store the cloud controller URL being used
 		String ccType = "Cloud Controller: Custom";
-		if (CLOUD_FOUNDRY_URL.equals(cloudControllerUrl.toExternalForm())) {
+		final String cloudHost = getCloudControllerUrl().getHost();
+		if (CLOUD_FOUNDRY_URL.equals(getCloudControllerUrl().toExternalForm())) {
 			ccType = "Cloud Controller: Public Cloud";
-		} else if (cloudControllerUrl.getHost().equals("localhost")) {
+		} else if (cloudHost.equals("localhost")) {
 			ccType = "Cloud Controller: Localhost";
-		} else if (cloudControllerUrl.getHost().equals("127.0.0.1")) {
+		} else if (cloudHost.equals("127.0.0.1")) {
 			ccType = "Cloud Controller: Localhost";
 		}
 		// Store the cloud controller hostname SHA 256
-		String ccUrlHashed = sha256(cloudControllerUrl.getHost());
+		String ccUrlHashed = sha256(cloudHost);
 
 		// Create a feature use record for the cloud controller
 		Map<String, Object> ccJson = new HashMap<String, Object>();
@@ -121,7 +130,7 @@ public class UaaAwareAppCloudClient extends AppCloudClient implements Transmissi
 	private void registerFeatureUse(final String featureName, final Map<String, Object> jsonPayload) {
 		jsonPayload.put("version", product.getMajorVersion() + "." + product.getMinorVersion() + "." + product.getPatchVersion());
 		String jsonAsString = JSONObject.toJSONString(jsonPayload);
-		FeatureUse featureToRegister = FeatureUse.newBuilder().setName(featureName).setDateLastUsed(System.currentTimeMillis()).setMajorVersion(cloudMajorVersion).setMinorVersion(cloudMinorVersion).setPatchVersion(cloudPatchVersion).build();
+		FeatureUse featureToRegister = FeatureUse.newBuilder().setName(featureName).setDateLastUsed(System.currentTimeMillis()).setMajorVersion(CLOUD_MAJOR_VERSION).setMinorVersion(CLOUD_MINOR_VERSION).setPatchVersion(CLOUD_PATCH_VERSION).build();
 		try {
 			uaaService.registerFeatureUsage(product, featureToRegister, jsonAsString.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException ignore) {}

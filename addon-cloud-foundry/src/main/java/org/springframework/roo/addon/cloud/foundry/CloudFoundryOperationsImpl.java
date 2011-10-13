@@ -82,12 +82,10 @@ public class CloudFoundryOperationsImpl extends AbstractFlashingObject implement
 	}
 
 	public void login(final String email, final String password, final String cloudControllerUrl) {
-		final String finalEmail = email;
-		final String finalPassword = password;
 		executeCommand(new CloudCommand("Login failed") {
 			@Override
-			public void execute() throws Exception {
-				session.login(finalEmail, finalPassword, cloudControllerUrl);
+			public void execute() {
+				session.login(email, password, cloudControllerUrl);
 				client = session.getClient();
 			}
 		});
