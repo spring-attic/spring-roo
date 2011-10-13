@@ -14,7 +14,6 @@ public interface BundleCallback {
 	 * Executes this callback on the given OSGi bundle
 	 *
 	 * @param bundle the bundle to operate upon
-	 * @return the result, if any
 	 */
 	void execute(Bundle bundle);
 }

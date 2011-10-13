@@ -1037,7 +1037,7 @@ public final class StringUtils {
 	 * @param delim the delimiter to use (probably a ",")
 	 * @param prefix the String to start each element with
 	 * @param suffix the String to end each element with
-	 * @return the delimited String
+	 * @return the delimited String (never <code>null</code>)
 	 */
 	public static String collectionToDelimitedString(final Collection<?> coll, final String delim, final String prefix, final String suffix) {
 		if (CollectionUtils.isEmpty(coll)) {
@@ -1047,7 +1047,7 @@ public final class StringUtils {
 		Iterator<?> it = coll.iterator();
 		while (it.hasNext()) {
 			sb.append(prefix).append(it.next()).append(suffix);
-			if (it.hasNext()) {
+			if (it.hasNext() && delim != null) {
 				sb.append(delim);
 			}
 		}
@@ -1055,11 +1055,11 @@ public final class StringUtils {
 	}
 
 	/**
-	 * Convenience method to return a Collection as a delimited (e.g. CSV)
-	 * String. E.g. useful for <code>toString()</code> implementations.
-	 * @param coll the Collection to display
-	 * @param delim the delimiter to use (probably a ",")
-	 * @return the delimited String
+	 * Concatenates the given collection using the given delimiter between each item.
+	 * 
+	 * @param coll the collection to display (can be null or empty)
+	 * @param delim the delimiter to use (can be null or empty for none)
+	 * @return the delimited String (never <code>null</code>)
 	 */
 	public static String collectionToDelimitedString(final Collection<?> coll, final String delim) {
 		return collectionToDelimitedString(coll, delim, "", "");
@@ -1178,7 +1178,12 @@ public final class StringUtils {
 	 * </ul>
 	 *
 	 * @param str the String to check, may be null
-	 * @param defaultStr the default String to return if the input is empty ("") or null, may be null
+	 * @param defaultStr the default String to return if the input is empty ("")
+	 * or null, may be null; note that if this is an expression, it will be
+	 * evaluated before this method is called regardless of whether the first
+	 * string is empty, so if this evaluation is expensive and performance is
+	 * critical, check the first string for emptiness yourself rather than using
+	 * this method
 	 * @return the passed in String, or the default
 	 */
 	public static String defaultIfEmpty(final String str, final String defaultStr) {
@@ -1293,6 +1298,22 @@ public final class StringUtils {
 			return string;
 		}
 		return string + suffix;
+	}
+	
+	/**
+	 * Indicates whether the two given strings are equal, including case, where
+	 * <code>null</code> is (only) equal to <code>null</code>.
+	 * 
+	 * @param string1 the first string to compare (can be <code>null</code>)
+	 * @param string2 the second string to compare (can be <code>null</code>)
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public static boolean equals(final String string1, final String string2) {
+		if (string1 == null) {
+			return string2 == null;
+		}
+		return string1.equals(string2);
 	}
 
 	/**

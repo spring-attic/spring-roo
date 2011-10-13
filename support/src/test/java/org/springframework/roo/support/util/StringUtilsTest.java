@@ -5,6 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.junit.Test;
 
 /**
@@ -228,5 +231,50 @@ public class StringUtilsTest {
 	@Test
 	public void testSuffixNonEmptyWithExistingSuffix() {
 		assertEquals("old-suf", StringUtils.suffix("old-suf", "-suf"));
+	}
+	
+	@Test
+	public void testNullEqualsNull() {
+		assertTrue(StringUtils.equals(null, null));
+	}
+	
+	@Test
+	public void testEmptyDoesNotEqualNull() {
+		assertFalse(StringUtils.equals("", null));
+	}
+	
+	@Test
+	public void testNullDoesNotEqualEmpty() {
+		assertFalse(StringUtils.equals(null, ""));
+	}
+	
+	@Test
+	public void testUpperDoesNotEqualLower() {
+		assertFalse(StringUtils.equals("E", "e"));
+	}
+	
+	@Test
+	public void testStringEqualsItself() {
+		assertTrue(StringUtils.equals("a", "a"));
+	}
+	
+	@Test
+	public void testNullCollectionToDelimitedString() {
+		assertEquals("", StringUtils.collectionToDelimitedString(null, "anything"));
+	}
+	
+	@Test
+	public void testEmptyCollectionToDelimitedString() {
+		assertEquals("", StringUtils.collectionToDelimitedString(Collections.emptySet(), "anything"));
+	}
+	
+	@Test
+	public void testSingletonCollectionToDelimitedString() {
+		assertEquals("foo", StringUtils.collectionToDelimitedString(Collections.singleton("foo"), "anything"));
+	}
+	
+	@Test
+	public void testDoubletonCollectionToDelimitedString() {
+		assertEquals("foo:bar", StringUtils.collectionToDelimitedString(Arrays.asList("foo", "bar"), ":"));
 	}
 }

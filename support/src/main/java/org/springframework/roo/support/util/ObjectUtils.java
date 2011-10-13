@@ -16,7 +16,7 @@ import java.util.Arrays;
  * @since 19.03.2004
  * @see org.apache.commons.lang.ObjectUtils
  */
-public abstract class ObjectUtils {
+public final class ObjectUtils {
 
 	// Constants
 	private static final int INITIAL_HASH = 7;
@@ -841,4 +841,42 @@ public abstract class ObjectUtils {
 		}
 		return one.compareTo(other);
 	}
+	
+	/**
+	 * Returns the String representation of the given object, or if it's
+	 * <code>null</code>, the given default string
+	 * 
+	 * @param object the object to represent as a String (can be <code>null</code>)
+	 * @param defaultValue the value to return if the given object is <code>null</code> (can itself be blank)
+	 * @return see above
+	 * @since 1.2.0
+	 */
+	public static String toString(final Object object, final String defaultValue) {
+		if (object == null) {
+			return defaultValue;
+		}
+		return object.toString();
+	}
+	
+	/**
+	 * Returns the given object if not <code>null</code>, otherwise the given
+	 * default value
+	 * 
+	 * @param <T> the type of object being defaulted
+	 * @param object the object to check (can be <code>null</code>)
+	 * @param defaultValue the default value (can be <code>null</code>)
+	 * @return <code>null</code> iff both values are <code>null</code>
+	 * @since 1.2.0
+	 */
+	public static <T> T defaultIfNull(final T object, final T defaultValue) {
+		if (object == null) {
+			return defaultValue;
+		}
+		return object;
+	}
+	
+	/**
+	 * Constructor is private to prevent instantiation
+	 */
+	private ObjectUtils() {}
 }
