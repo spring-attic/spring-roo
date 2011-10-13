@@ -129,6 +129,17 @@ public abstract class AbstractItdTypeDetailsProvidingMetadataItem extends Abstra
 	protected MethodMetadata getGovernorMethod(final JavaSymbolName methodName, final JavaType... parameterTypes) {
 		return getGovernorMethod(methodName, Arrays.asList(parameterTypes));
 	}
+	
+	/**
+	 * Indicates whether the governor has a method with the given signature.
+	 * 
+	 * @param methodName the name of the method for which to search
+	 * @param parameterTypes the method's parameter types
+	 * @return see above
+	 */
+	protected boolean governorHasMethod(final JavaSymbolName methodName, final JavaType... parameterTypes) {
+		return getGovernorMethod(methodName, parameterTypes) != null;
+	}
 
 	/**
 	 * Returns the given method of the governor.
