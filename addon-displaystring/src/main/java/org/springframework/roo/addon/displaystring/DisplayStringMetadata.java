@@ -95,10 +95,8 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 			if (accessor.getReturnType().isCommonCollectionType() || accessor.getReturnType().isArray()) {
 				continue;
 			} else if (CALENDAR.equals(accessor.getReturnType())) {
-				imports.addImport(DATE_FORMAT);
 				accessorText = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "().getTime())";
 			} else if (DATE.equals(accessor.getReturnType())) {
-				imports.addImport(DATE_FORMAT);
 				accessorText = accessorName + "() == null ? \"\" : DateFormat.getDateInstance(DateFormat.LONG).format(" + accessorName + "())";
 			} else {
 				accessorText = accessorName + "()";
@@ -107,6 +105,7 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 			if (!fieldsList.isEmpty()) {
 				String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 				if (fieldsList.contains(StringUtils.uncapitalize(fieldName))) {
+					addDateFormatImport(imports, accessor);
 					displayMethods.add(accessorText);
 				}
 				continue;
@@ -117,6 +116,7 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 					continue;
 				}
 				methodCount++;
+				addDateFormatImport(imports, accessor);
 				displayMethods.add(accessorText);
 			}
 		}
@@ -140,6 +140,12 @@ public class DisplayStringMetadata extends AbstractItdTypeDetailsProvidingMetada
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, STRING, bodyBuilder);
 		return methodBuilder.build();
+	}
+
+	private void addDateFormatImport(final ImportRegistrationResolver imports, final MethodMetadata accessor) {
+		if (CALENDAR.equals(accessor.getReturnType()) || DATE.equals(accessor.getReturnType())) {
+			imports.addImport(DATE_FORMAT);
+		}
 	}
 
 	@Override
