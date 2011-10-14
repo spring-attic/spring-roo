@@ -3,6 +3,8 @@ package org.springframework.roo.addon.jsf;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.jsf.model.Theme;
+import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;

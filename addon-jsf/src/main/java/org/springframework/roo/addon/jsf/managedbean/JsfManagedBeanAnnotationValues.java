@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.managedbean;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
 

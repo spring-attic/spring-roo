@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.converter;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.FIND_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.PERSISTENT_TYPE;

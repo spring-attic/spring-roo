@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.model;
 
 import static org.springframework.roo.model.RooJavaType.ROO_UPLOADED_FILE;
 

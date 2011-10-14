@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.jsf;
 
+import org.springframework.roo.addon.jsf.model.Theme;
+import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;

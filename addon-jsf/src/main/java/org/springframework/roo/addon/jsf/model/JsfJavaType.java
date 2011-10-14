@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.model;
 
 import org.springframework.roo.model.JavaType;
 

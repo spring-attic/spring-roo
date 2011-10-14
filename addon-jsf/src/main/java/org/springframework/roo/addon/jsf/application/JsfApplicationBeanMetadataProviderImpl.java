@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.application;
 
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_APPLICATION_BEAN;
 import static org.springframework.roo.model.RooJavaType.ROO_JSF_MANAGED_BEAN;
@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;

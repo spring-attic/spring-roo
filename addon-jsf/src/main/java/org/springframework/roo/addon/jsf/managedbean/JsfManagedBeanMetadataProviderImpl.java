@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.managedbean;
 
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.COUNT_ALL_METHOD;
 import static org.springframework.roo.classpath.customdata.CustomDataKeys.EMBEDDED_FIELD;
@@ -28,6 +28,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.jsf.model.JsfFieldHolder;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;

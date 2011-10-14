@@ -18,6 +18,9 @@ import java.util.logging.Level;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.jsf.managedbean.JsfManagedBeanMetadata;
+import org.springframework.roo.addon.jsf.model.Theme;
+import org.springframework.roo.addon.jsf.model.UploadedFileContentType;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -234,7 +237,7 @@ public class JsfOperationsImpl extends AbstractOperations implements JsfOperatio
 
 	private void createConverter(final JavaPackage javaPackage, final JavaType entity) {
 		// Create type annotation for new converter class
-		JavaType converterType = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Converter");
+		JavaType converterType = new JavaType(javaPackage.getFullyQualifiedPackageName() + ".converter." + entity.getSimpleTypeName() + "Converter");
 		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(ROO_JSF_CONVERTER);
 		annotationBuilder.addClassAttribute("entity", entity);
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(converterType, Path.SRC_MAIN_JAVA);

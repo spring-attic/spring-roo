@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.model;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,18 +6,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *  Indicates a type that requires ROO JSF managed-bean support.
+ *  Indicates a field is used for storing uploaded file contents.
  *
  *  @author Alan Stewart
  * 	@since 1.2.0
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooJsfManagedBean {
+public @interface RooUploadedFile {
 
-	Class<?> entity();
+	String contentType();
 	
-	String beanName();
-
-	boolean includeOnMenu() default true;
+	boolean autoUpload() default false;
 }

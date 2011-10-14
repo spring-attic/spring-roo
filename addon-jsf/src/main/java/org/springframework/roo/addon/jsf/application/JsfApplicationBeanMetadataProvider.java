@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.jsf;
+package org.springframework.roo.addon.jsf.application;
 
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
