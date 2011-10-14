@@ -27,9 +27,9 @@ public final class RooJavaType {
 	public static final JavaType ROO_INTEGRATION_TEST = new JavaType("org.springframework.roo.addon.test.RooIntegrationTest");
 	public static final JavaType ROO_JAVA_BEAN = new JavaType("org.springframework.roo.addon.javabean.RooJavaBean");
 	public static final JavaType ROO_JPA_ENTITY = new JavaType("org.springframework.roo.addon.entity.RooJpaEntity");
-	public static final JavaType ROO_JSF_APPLICATION_BEAN = new JavaType("org.springframework.roo.addon.jsf.RooJsfApplicationBean");
-	public static final JavaType ROO_JSF_CONVERTER = new JavaType("org.springframework.roo.addon.jsf.RooJsfConverter");
-	public static final JavaType ROO_JSF_MANAGED_BEAN = new JavaType("org.springframework.roo.addon.jsf.RooJsfManagedBean");
+	public static final JavaType ROO_JSF_APPLICATION_BEAN = new JavaType("org.springframework.roo.addon.jsf.application.RooJsfApplicationBean");
+	public static final JavaType ROO_JSF_CONVERTER = new JavaType("org.springframework.roo.addon.jsf.converter.RooJsfConverter");
+	public static final JavaType ROO_JSF_MANAGED_BEAN = new JavaType("org.springframework.roo.addon.jsf.managedbean.RooJsfManagedBean");
 	public static final JavaType ROO_JSON = new JavaType("org.springframework.roo.addon.json.RooJson");
 	public static final JavaType ROO_MONGO_ENTITY = new JavaType("org.springframework.roo.addon.layers.repository.mongo.RooMongoEntity");
 	public static final JavaType ROO_OP4J = new JavaType("org.springframework.roo.addon.op4j.RooOp4j");
@@ -41,7 +41,7 @@ public final class RooJavaType {
 	public static final JavaType ROO_SOLR_SEARCHABLE = new JavaType("org.springframework.roo.addon.solr.RooSolrSearchable");
 	public static final JavaType ROO_SOLR_WEB_SEARCHABLE = new JavaType("org.springframework.roo.addon.solr.RooSolrWebSearchable");
 	public static final JavaType ROO_TO_STRING = new JavaType("org.springframework.roo.addon.tostring.RooToString");
-	public static final JavaType ROO_UPLOADED_FILE = new JavaType("org.springframework.roo.addon.jsf.RooUploadedFile");
+	public static final JavaType ROO_UPLOADED_FILE = new JavaType("org.springframework.roo.addon.jsf.model.RooUploadedFile");
 	public static final JavaType ROO_WEB_FINDER = new JavaType("org.springframework.roo.addon.web.mvc.controller.finder.RooWebFinder");
 	public static final JavaType ROO_WEB_JSON = new JavaType("org.springframework.roo.addon.web.mvc.controller.json.RooWebJson");
 	public static final JavaType ROO_WEB_SCAFFOLD = new JavaType("org.springframework.roo.addon.web.mvc.controller.RooWebScaffold");
